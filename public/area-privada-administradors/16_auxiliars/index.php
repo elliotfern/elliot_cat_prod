@@ -6,7 +6,7 @@
         <div class="container contingut">
             <h1>Taules auxiliars</h1>
             <div id="isAdminButton" style="display: none;">
-                <?php if (isset($_COOKIE['user_id']) && $_COOKIE['user_id'] === '1') : ?>
+                <?php if (isUserAdmin()) : ?>
                     <p>
                         <button onclick="window.location.href='<?php echo APP_INTRANET . $url['auxiliars']; ?>/nova-imatge/'" class="button btn-gran btn-secondari">Afegir imatge</button>
                     </p>

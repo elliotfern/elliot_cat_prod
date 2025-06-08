@@ -55,7 +55,8 @@ $allowed_types = [
     14 => 'cinema-director',
     15 => 'historia-infografia',
     16 => 'historia-cronologia',
-    16 => 'viatge-espai',
+    17 => 'viatge-espai',
+    18 => 'usuaris-avatar',
 ];
 $typeName = $allowed_types[$type] ?? 'elliotfern';
 

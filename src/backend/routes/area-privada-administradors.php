@@ -4,8 +4,9 @@
 $defaultProtectedConfig = [
     'needs_session' => true,
     'header_footer' => false,
-    'header_menu_footer' => true,
-    'apiSenseHTML' => false
+    'header_menu_footer' => false,
+    'apiSenseHTML' => false,
+    'menu_intranet' => true
 ];
 
 // Función que verifica si el usuario es Admin
@@ -829,6 +830,16 @@ $routes = [
         'apiSenseHTML' => false,
         'menu_intranet' => true
     ],
+
+    APP_GESTIO . $url['radio'] . '/catmusica' => [
+        'view' => APP_INTRANET_DIR . APP_RADIO_DIR . 'catmusica.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
 
 
 ];

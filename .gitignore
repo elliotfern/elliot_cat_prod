@@ -4,20 +4,18 @@ Thumbs.db
 /.vscode/
 .gitignore
 error_log
-/public/00_inc/img/
+/dist/
+
+# Ignorar directoris imatges
+/public/img/
 
 # Ignorar logs y archivos temporales
 /logs/
 /temp/
-/_old/
-/img/
 
 # Ignorar directorio de dependencias (ejemplo para PHP y Composer)
 /vendor/
 /node_modules/
-/public/img/
 
 # Ignorar archivos de configuración local (ejemplo para PHP)
 .env
-elliotfern.code-workspace
-contra.php

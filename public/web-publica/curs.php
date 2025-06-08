@@ -19,7 +19,7 @@ $slug = $routeParams[0];
     async function obtenerCursos(nameCourse, lang) {
         try {
             // Realiza la solicitud fetch a la API
-            const response = await fetch(`https://api.elliotfern.com/blog.php?type=curso&paramName=${nameCourse}&langCurso=${lang}`);
+            const response = await fetch(`https://elliot.cat/api/historia/get/?type=curso&paramName=${nameCourse}&langCurso=${lang}`);
 
             // Verifica si la respuesta es exitosa
             if (!response.ok) {

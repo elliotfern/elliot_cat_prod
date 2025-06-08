@@ -1,6 +1,6 @@
 // Definir los tipos de los parámetros
 type CallbackFunction = (fila: any, columna: string) => string;
-
+ 
 // Función para construir una tabla a partir de datos de una API
 export function construirTaula(taulaId: string, apiUrl: string, id: string, columnas: string[], callback: CallbackFunction): void {
   // Construir la URL completa con el ID

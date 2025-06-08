@@ -43,6 +43,7 @@
         <option value="11">Viatges: viatge</option>
         <option value="17">Viatges: espai</option>
         <option value="13">Blog</option>
+        <option value="18">Usuaris: avatars</option>
       </select>
     </div>
 

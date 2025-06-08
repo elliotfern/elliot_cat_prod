@@ -92,7 +92,7 @@
             const getCoursesList = async (lang = 'es') => {
                 try {
                     // Realiza la solicitud a la API
-                    const response = await fetch(`https://api.elliotfern.com/blog.php?type=llistatCursos&langCurso=${lang}`);
+                    const response = await fetch(`https://elliot.cat/api/historia/get/?type=llistatCursos&langCurso=${lang}`);
                     const courses = await response.json(); // Parseamos la respuesta como JSON
 
                     // Llama a la función para mostrar los cursos

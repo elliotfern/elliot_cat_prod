@@ -64,7 +64,7 @@ $slug = $routeParams[0];
 
         try {
             // Realiza la solicitud a la API
-            const response = await fetch(`https://api.elliotfern.com/blog.php?type=articleName&paramName=${nameArticle}`);
+            const response = await fetch(`https://elliot.cat/api/historia/get/?type=articleName&paramName=${nameArticle}`);
             const data = await response.json();
 
             // Verifica si los datos son correctos y contiene el contenido del artículo

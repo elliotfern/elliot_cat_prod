@@ -361,6 +361,14 @@ $routes = [
         'header_menu_footer' => false,
         'apiSenseHTML' => true
     ],
+
+    '/api/radio/get' => [
+        'view' => 'src/backend/api/19_radio/get-radio.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
 ];
 
 return $routes;

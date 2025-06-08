@@ -19,7 +19,7 @@ class DatabaseAuthRepository implements AuthRepositoryInterface
     public function loginAuth(string $email, string $password): array
     {
         try {
-            $sql = "SELECT id, email, userType, password, nom, cognom FROM db_users WHERE email = :email";
+            $sql = "SELECT email, userType, password, nom, cognom FROM db_users WHERE email = :email";
             $stmt = $this->conn->prepare($sql);
             $stmt->bindParam(':email', $email, PDO::PARAM_STR);
             $stmt->execute();
@@ -33,7 +33,7 @@ class DatabaseAuthRepository implements AuthRepositoryInterface
             if (password_verify($password, $user['password'])) {
                 // Crear el payload para el JWT
                 $payload = [
-                    'user_id' => $user['id'],
+                    'user_id' => '1',
                     'email' => $user['email'],
                     'nom' => $user['nom'] . ' ' . $user['cognom'],
                     'user_type' => $user['userType'],
