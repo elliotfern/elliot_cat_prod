@@ -1,48 +1,49 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { formatData } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
-
-// Definir la interfaz del tipo de dato que esperamos de la API
-interface PasswordRecord {
-  servei: string;
-  usuari: string;
-  password: string;
-  tipus: string;
-  dateModified: string;
-  web: string;
-  id: number;
-}
+import { Vault, TwoFACodeResponse } from '../../types/Vault';
+import { TaulaDinamica } from '../../types/TaulaDinamica';
 
 export async function serveisVaultApi() {
-  const isAdmin = await getIsAdmin(); // Comprovar si és admin
+  const isAdmin = await getIsAdmin(); // Comprobar si es admin
   let gestioUrl: string = '';
 
   if (isAdmin) {
     gestioUrl = '/gestio';
   }
 
-  const columns = [
+  const columns: TaulaDinamica<Vault>[] = [
     {
       header: 'Servei',
       field: 'servei',
-      render: (_: unknown, row: PasswordRecord) => `<a id="${row.id}" href="${row.web}" target="_blank">${row.servei}</a>`,
+      render: (_: unknown, row: Vault) => `<a id="${row.id}" href="${row.web}" target="_blank">${row.servei}</a>`,
     },
     { header: 'Usuari', field: 'usuari' },
     {
       header: 'Contrasenya',
       field: 'id',
-      render: (_: unknown, row: PasswordRecord) => `
+      render: (_: unknown, row: Vault) => `
         <div class="input-group">
           <input class="form-control input-petit" type="password" name="role" id="passw-${row.id}" value="*******" readonly>
-         <button type="button" class="btn-petit btn-primari show-pass-btn" data-id="${row.id}">Show</button>
+         <button type="button" class="btn-petit btn-primari show-pass-btn" data-id="${row.id}">Mostrar</button>
+        </div>
+      `,
+    },
+    {
+      header: 'Clau 2F',
+      field: 'id',
+      render: (_: unknown, row: Vault) => `
+        <div class="input-group">
+          <input class="form-control input-petit" type="password" name="role" id="clau2f-${row.id}" value="*******" readonly>
+         <button type="button" class="btn-petit btn-primari show-clau2f-btn" data-id="${row.id}">Mostrar</button>
         </div>
       `,
     },
     { header: 'Tipus', field: 'tipus' },
     {
       header: 'Data modificació',
-      field: 'dataVisita',
-      render: (_: unknown, row: PasswordRecord) => {
+      field: 'dateModified',
+      render: (_: unknown, row: Vault) => {
         const inici = formatData(row.dateModified);
         return `${inici}`;
       },
@@ -53,7 +54,7 @@ export async function serveisVaultApi() {
     columns.push({
       header: '',
       field: 'id',
-      render: (_: unknown, row: PasswordRecord) => `
+      render: (_: unknown, row: Vault) => `
         <a href="https://${window.location.host}${gestioUrl}/claus-privades/modifica-vault/${row.id}">
            <button type="button" class="button btn-petit">Modifica</button></a>`,
     });
@@ -61,7 +62,7 @@ export async function serveisVaultApi() {
     columns.push({
       header: '',
       field: 'id',
-      render: (_: unknown, row: PasswordRecord) => `
+      render: (_: unknown, row: Vault) => `
         <a href="https://${window.location.host}${gestioUrl}/claus-privades/modifica-vault/${row.id}">
            <button type="button" class="btn-petit btn-secondari">Elimina</button></a>`,
     });
@@ -85,56 +86,84 @@ export async function serveisVaultApi() {
         showPass(id);
       }
     }
+
+    // Busca si se ha hecho clic en un botón con clase `.show-clau2f-btn`
+    if (target.classList.contains('show-clau2f-btn')) {
+      const id = parseInt(target.getAttribute('data-id') || '', 10);
+      if (!isNaN(id)) {
+        show2FACode(id);
+      }
+    }
   });
 }
 
 // Función para mostrar/ocultar la contraseña
 function showPass(id: number): void {
-  // Selecciona el campo de entrada de contraseña por su ID
   const inputField = document.getElementById(`passw-${id}`) as HTMLInputElement;
-
-  // Define la URL para la solicitud AJAX
   const urlAjax = `/api/vault/get/?id=${id}`;
 
-  // Verifica si el campo de entrada está ocultando la contraseña (type="password")
   if (inputField.type === 'password') {
-    fetch(urlAjax, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Error en la solicitud AJAX');
-        }
-        return response.json();
-      })
+    fetch(urlAjax, { method: 'GET', headers: { Accept: 'application/json' } })
+      .then((response) => (response.ok ? response.json() : Promise.reject('Error en la solicitud AJAX')))
       .then((data: { password?: string; error?: string }) => {
         if (data.password) {
-          // Si la contraseña está disponible, la muestra
           inputField.value = data.password;
           inputField.type = 'text';
+          navigator.clipboard.writeText(data.password).catch(console.error);
 
-          // Copiar la contraseña al portapapeles
-          navigator.clipboard.writeText(data.password).catch((err) => {
-            console.error('Error al copiar al portapapeles: ', err);
-          });
-
-          // Ocultar la contraseña después de 5 segundos
           setTimeout(() => {
-            inputField.value = '**********'; // Volver al placeholder
+            inputField.value = '**********';
             inputField.type = 'password';
           }, 5000);
         } else {
-          // Si no se encuentra la contraseña, muestra el error
           inputField.value = data.error || 'Error desconocido';
           inputField.type = 'text';
         }
       })
       .catch((error) => {
-        console.error('Error en la solicitud AJAX:', error);
+        console.error(error);
         alert('Hubo un problema al intentar obtener la contraseña.');
+      });
+  }
+}
+
+// Función para mostrar/ocultar el código 2FA
+function show2FACode(id: number): void {
+  const inputField = document.getElementById(`clau2f-${id}`) as HTMLInputElement;
+  const urlAjax = `/api/vault/get/?type=codigo2f&id2F=${id}`;
+
+  // Comprobamos si el campo de entrada existe y es de tipo "password"
+  if (!inputField) {
+    console.error(`Input field with id "clau2f-${id}" not found`);
+    return;
+  }
+
+  if (inputField.type === 'password') {
+    fetch(urlAjax, { method: 'GET', headers: { Accept: 'application/json' } })
+      .then((response) => response.json())
+      .then((data: TwoFACodeResponse) => {
+        if (data.code) {
+          // Mostrar el código 2FA en el campo correspondiente
+          inputField.value = data.code;
+          inputField.type = 'text'; // Mostrar el código
+
+          // Copiar al portapapeles si es necesario
+          navigator.clipboard.writeText(data.code).catch((error) => {
+            console.error('Error al copiar el código 2FA al portapapeles:', error);
+          });
+
+          // Ocultar el código después de 5 segundos
+          setTimeout(() => {
+            inputField.value = '*******'; // Volver al placeholder
+            inputField.type = 'password';
+          }, 5000);
+        } else {
+          alert('Error al obtener el código 2FA');
+        }
+      })
+      .catch((error) => {
+        console.error('Error al obtener el código 2FA:', error);
+        alert('Hubo un problema al intentar obtener el código 2FA.');
       });
   }
 }

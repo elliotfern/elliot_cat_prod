@@ -44,6 +44,21 @@ class VaultController
         return $passwords;
     }
 
+    // Método para obtener las contraseñas de un "vault" (bóveda)
+    public function getClau2FDesencrypt(int $serviceId)
+    {
+        // Llamamos al servicio VaultService para obtener las contraseñas
+        $passwords = $this->vaultService->getClau2FDesencrypt($serviceId);
+
+        // Verificar que estamos recibiendo un array
+        if (!is_array($passwords)) {
+            // Si no es un array, devolver un array vacío
+            return [];
+        }
+
+        return $passwords;
+    }
+
     // Método para guardar una nueva contraseña en la bóveda
     public function savePassword(int $userId, string $serviceName, string $password, string $type, string $url)
     {

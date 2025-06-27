@@ -1,28 +1,22 @@
-type Column = {
-  header: string;
-  field: string;
-  render?: (value: any, row: any) => string;
-};
+import { RenderTableOptions } from '../../types/TaulaDinamica';
 
-type RenderTableOptions = {
-  url: string;
-  columns: Column[];
-  containerId: string;
-  rowsPerPage?: number;
-  filterKeys?: string[];
-  filterByField?: string;
-};
-
-export async function renderDynamicTable({ url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField }: RenderTableOptions) {
+export async function renderDynamicTable<T>({ url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField }: RenderTableOptions<T>) {
   const container = document.getElementById(containerId);
   if (!container) return console.error(`Contenedor #${containerId} no encontrado`);
 
   const response = await fetch(url);
-  const data: Record<string, any>[] = await response.json();
+  const result = await response.json();
+
+  if (result.status === 'error') {
+    container.innerHTML = `<div class="alert alert-info">${result.message || 'No hi ha dades.'}</div>`;
+    return;
+  }
+
+  const data: T[] = Array.isArray(result.data) ? result.data : result;
 
   let currentPage = 1;
   let filteredData = [...data];
-  let activeButtonFilter: string | null = null;
+  let activeButtonFilter: T[keyof T] | null = null;
 
   // Crear input de búsqueda
   const searchInput = document.createElement('input');
@@ -68,10 +62,11 @@ export async function renderDynamicTable({ url, columns, containerId, rowsPerPag
   function renderFilterButtons() {
     if (!filterByField) return;
 
-    let uniqueValues = Array.from(new Set(data.map((row) => row[filterByField]))).filter(Boolean);
+    let uniqueValues = Array.from(new Set(data.map((row) => row[filterByField]))).filter(Boolean) as T[keyof T][];
 
-    // Ordenar alfabéticamente los valores únicos
-    uniqueValues = uniqueValues.sort((a, b) => a.localeCompare(b, 'ca', { sensitivity: 'base' }));
+    uniqueValues = uniqueValues.sort((a, b) => {
+      return String(a).localeCompare(String(b), 'ca', { sensitivity: 'base' });
+    });
 
     buttonContainer.innerHTML = '';
 
@@ -87,7 +82,7 @@ export async function renderDynamicTable({ url, columns, containerId, rowsPerPag
 
     uniqueValues.forEach((value) => {
       const button = document.createElement('button');
-      button.textContent = value;
+      button.textContent = String(value);
       button.className = 'filter-btn';
       button.onclick = () => {
         activeButtonFilter = value;
@@ -97,7 +92,6 @@ export async function renderDynamicTable({ url, columns, containerId, rowsPerPag
       buttonContainer.appendChild(button);
     });
 
-    // Establecer el botón "Tots" como activo por defecto
     updateActiveButton(allButton);
   }
 

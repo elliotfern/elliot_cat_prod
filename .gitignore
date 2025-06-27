@@ -1,13 +1,13 @@
 # Ignorar archivos y directorios generados por el sistema operativo
 .DS_Store
 Thumbs.db
-/.vscode/
+/.vscode
 .gitignore
 error_log
-/dist/
+/dist
 
 # Ignorar directoris imatges
-/public/img/
+/public/img
 
 # Ignorar logs y archivos temporales
 /logs/
@@ -19,3 +19,4 @@ error_log
 
 # Ignorar archivos de configuración local (ejemplo para PHP)
 .env
+contra.php

@@ -86,6 +86,16 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    APP_GESTIO . $url['persones'] . '/fitxa-persona/{slug}' => [
+        'view' =>  APP_INTRANET_DIR . APP_PERSONES_DIR . 'fitxa-persona.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+
     APP_GESTIO . $url['persones'] . '/modifica-persona/{slug}' => [
         'view' =>  APP_INTRANET_DIR . APP_PERSONES_DIR . 'form-operacions-persona.php',
         'needs_session' => true,

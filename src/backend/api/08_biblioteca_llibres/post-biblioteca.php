@@ -1,26 +1,18 @@
 <?php
-/*
- * BACKEND LIBRARY
- * FUNCIONS INSERT BOOK
- * @update_book_ajax
- */
 
+use Ramsey\Uuid\Uuid;
+
+// Definir el dominio permitido
+$allowedOrigin = APP_DOMAIN;
+
+// Llamar a la función para verificar el referer
+checkReferer($allowedOrigin);
 
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   header('HTTP/1.1 405 Method Not Allowed');
   echo json_encode(['error' => 'Method not allowed']);
   exit();
-}
-
-$allowed_origins = ['https://elliot.cat'];
-
-if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins)) {
-  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-} else {
-  http_response_code(403);
-  echo json_encode(['error' => 'Acceso no permitido']);
-  exit;
 }
 
 // a) Inserir autor
@@ -40,6 +32,9 @@ if (isset($_GET['autor'])) {
     exit();
   }
 
+  // Generar UUID v7 (requiere PHP >= 8.1)
+  $id = Uuid::uuid7()->getBytes(); // BINARY(16) para MySQL
+
   // Ahora puedes acceder a los datos como un array asociativo
   $hasError = false;
 
@@ -53,7 +48,6 @@ if (isset($_GET['autor'])) {
   $paisAutor = !empty($data['paisAutor']) ? data_input($data['paisAutor']) : ($hasError = true);
   $img = !empty($data['img']) ? data_input($data['img']) : ($hasError = true);
   $web = !empty($data['web']) ? data_input($data['web']) : ($hasError = false);
-
 
   $sexe = !empty($data['sexe']) ? data_input($data['sexe']) : ($hasError = true);
   $mesNaixement = !empty($data['mesNaixement']) ? data_input($data['mesNaixement']) : ($hasError = false);
@@ -75,9 +69,9 @@ if (isset($_GET['autor'])) {
     try {
       global $conn;
       $sql = "INSERT INTO db_persones 
-      (nom, cognoms, anyNaixement, anyDefuncio, paisAutor, img, web, descripcio, ocupacio, dateModified, dateCreated, slug, grup, sexe, mesNaixement, diaNaixement, mesDefuncio, diaDefuncio, ciutatNaixement, ciutatDefuncio, descripcioCast, descripcioEng, descripcioIt) 
+      (id, nom, cognoms, anyNaixement, anyDefuncio, paisAutor, img, web, descripcio, ocupacio, dateModified, dateCreated, slug, grup, sexe, mesNaixement, diaNaixement, mesDefuncio, diaDefuncio, ciutatNaixement, ciutatDefuncio, descripcioCast, descripcioEng, descripcioIt) 
       VALUES 
-      (:nom, :cognoms, :anyNaixement, :anyDefuncio, :paisAutor, :img, :web, :descripcio, :ocupacio, :dateModified, :dateCreated, :slug, :grup, :sexe, :mesNaixement, :diaNaixement, :mesDefuncio, :diaDefuncio, :ciutatNaixement, :ciutatDefuncio, :descripcioCast, :descripcioEng, :descripcioIt)";
+      (:id, :nom, :cognoms, :anyNaixement, :anyDefuncio, :paisAutor, :img, :web, :descripcio, :ocupacio, :dateModified, :dateCreated, :slug, :grup, :sexe, :mesNaixement, :diaNaixement, :mesDefuncio, :diaDefuncio, :ciutatNaixement, :ciutatDefuncio, :descripcioCast, :descripcioEng, :descripcioIt)";
       $stmt = $conn->prepare($sql);
 
       $stmt->bindParam(":nom", $nom, PDO::PARAM_STR);
@@ -103,6 +97,7 @@ if (isset($_GET['autor'])) {
       $stmt->bindParam(":descripcioCast", $descripcioCast, PDO::PARAM_STR);
       $stmt->bindParam(":descripcioEng", $descripcioEng, PDO::PARAM_STR);
       $stmt->bindParam(":descripcioIt", $descripcioIt, PDO::PARAM_STR);
+      $stmt->bindParam(":id", $id, PDO::PARAM_INT);
 
       if ($stmt->execute()) {
         $response['status'] = 'success';

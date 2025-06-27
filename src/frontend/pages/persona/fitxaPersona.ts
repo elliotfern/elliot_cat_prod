@@ -1,4 +1,5 @@
 interface PersonaData {
+  id2: string;
   anyNaixement: string;
   anyDefuncio: string | null;
   sexe: string;
@@ -176,7 +177,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
         value: data.idSexe === 1 ? 'Home' : data.idSexe === 2 ? 'Dona' : 'Desconegut',
       },
       { label: 'Pais: ', value: data.pais_cat },
-      { label: 'Professió: ', value: data.professio_ca },
+      { label: 'Professió: ', value: data.grup },
       { label: 'Pàgina Viquipèdia: ', value: `<a href="${data.web}" target="_blank" title="Web">Enllaç extern</a>` },
       { label: 'Biografia: ', value: data.descripcio || 'No disponible' }
     );

@@ -2,13 +2,8 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { formatDataCatala } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { getPageType } from '../../utils/urlPath';
-
-interface ViatgeRow {
-  slug: string;
-  nom: string;
-  any1: string;
-  id: number;
-}
+import { TaulaDinamica } from '../../types/TaulaDinamica';
+import { Viatge, VisitaEspai } from '../../types/Viatge';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -25,16 +20,16 @@ export async function taulaLlistatVisitesEspais() {
     slug = pageType[2];
   }
 
-  const columns = [
+  const columns: TaulaDinamica<VisitaEspai>[] = [
     {
       header: 'Viatge',
       field: 'nom',
-      render: (_: unknown, row: ViatgeRow) => `<a href="${window.location.origin}${gestioUrl}/viatges/fitxa-viatge/${row.slug}">${row.nom}</a>`,
+      render: (_: unknown, row: VisitaEspai) => `<a href="${window.location.origin}${gestioUrl}/viatges/fitxa-viatge/${row.slug}">${row.nom}</a>`,
     },
     {
       header: 'Data',
-      field: 'any1	',
-      render: (_: unknown, row: ViatgeRow) => {
+      field: 'any1',
+      render: (_: unknown, row: VisitaEspai) => {
         const inici = formatDataCatala(row.any1);
         return `${inici}`;
       },
@@ -45,7 +40,7 @@ export async function taulaLlistatVisitesEspais() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: ViatgeRow) => `
+      render: (_: unknown, row: VisitaEspai) => `
         <a href="https://${window.location.host}/gestio/viatges/modifica-viatge/${row.id}">
             <button class="btn-petit">Modifica</button>
         </a>`,

@@ -1,17 +1,8 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { formatData } from '../../utils/formataData';
+// import { formatData } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
-
-interface ViatgeRow {
-  slug: string;
-  AutNom: string;
-  AutCognom1: string;
-  pais_cat: string;
-  country: string;
-  yearDie: string;
-  yearBorn: string;
-  id: number;
-}
+import { Persona } from '../../types/Persona';
+import { TaulaDinamica } from '../../types/TaulaDinamica';
 
 export async function taulaLlistatAutors() {
   const isAdmin = await getIsAdmin(); // Comprovar si és admin
@@ -21,18 +12,18 @@ export async function taulaLlistatAutors() {
     gestioUrl = '/gestio';
   }
 
-  const columns = [
+  const columns: TaulaDinamica<Persona>[] = [
     {
       header: 'Autor/a',
-      field: 'viatge',
-      render: (_: unknown, row: ViatgeRow) => `<a href="https://${window.location.host}${gestioUrl}/biblioteca/fitxa-autor/${row.slug}">${row.AutNom} ${row.AutCognom1}</a>`,
+      field: 'id',
+      render: (_: unknown, row: Persona) => `<a href="https://${window.location.host}${gestioUrl}/biblioteca/fitxa-autor/${row.slug}">${row.AutNom} ${row.AutCognom1}</a>`,
     },
     { header: 'País', field: 'country' },
-    { header: 'Professió', field: 'profession' },
+    { header: 'Professió', field: 'grup' },
     {
       header: 'Dates',
       field: 'yearDie',
-      render: (_: unknown, row: ViatgeRow) => {
+      render: (_: unknown, row: Persona) => {
         return `${!row.yearDie ? row.yearBorn : `${row.yearBorn} - ${row.yearDie}`}`;
       },
     },
@@ -42,7 +33,7 @@ export async function taulaLlistatAutors() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: ViatgeRow) => `
+      render: (_: unknown, row: Persona) => `
         <a href="https://${window.location.host}/gestio/base-dades-persones/modifica-persona/${row.slug}">
            <button type="button" class="button btn-petit">Modifica</button></a>`,
     });
@@ -52,7 +43,7 @@ export async function taulaLlistatAutors() {
     url: `https://${window.location.host}/api/biblioteca/get/?type=totsAutors`,
     containerId: 'taulaLlistatAutors',
     columns,
-    filterKeys: ['author', 'AutCognom1'],
+    filterKeys: ['AutCognom1'],
     filterByField: 'profession',
   });
 }

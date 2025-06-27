@@ -23,9 +23,8 @@ if ($modificaBtn === 1) {
   <script type="module">
     // Llenar selects con opciones
     selectOmplirDades("/api/biblioteca/get/?type=auxiliarImatgesAutor", "", "img", "alt");
-    selectOmplirDades("/api/biblioteca/get/?type=professio", "", "ocupacio", "professio_ca");
     selectOmplirDades("/api/biblioteca/get/?type=pais", "", "paisAutor", "pais_cat");
-    selectOmplirDades("/api/biblioteca/get/?type=grup", "", "grup", "grup_ca");
+    selectOmplirDades("/api/biblioteca/get/?type=grup", "", "grups", "grup_ca");
     selectOmplirDades("/api/biblioteca/get/?type=sexe", "", "sexe", "genereCa");
     selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatNaixement", "city");
     selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatDefuncio", "city");
@@ -141,12 +140,6 @@ if ($modificaBtn === 1) {
     </div>
 
     <div class="col-md-4">
-      <label>Professió</label>
-      <select class="form-select" name="ocupacio" id="ocupacio">
-      </select>
-    </div>
-
-    <div class="col-md-4">
       <label>País:</label>
       <select class="form-select" name="paisAutor" id="paisAutor">
       </select>
@@ -159,8 +152,8 @@ if ($modificaBtn === 1) {
     </div>
 
     <div class="col-md-4">
-      <label>Classificació grup persona:</label>
-      <select class="form-select" name="grup" id="grup">
+      <label for="grups">Classificació grups (professió):</label>
+      <select name="grups[]" id="grups" multiple required>
       </select>
     </div>
 
@@ -241,22 +234,13 @@ if ($modificaBtn === 1) {
         document.getElementById("anyNaixement").value = data.anyNaixement;
         document.getElementById("anyDefuncio").value = data.anyDefuncio;
 
-        document.getElementById("descripcio").value = decodeURIComponent(data.descripcio);
-        document.getElementById("descripcioCast").value = decodeURIComponent(data.descripcioCast);
-        document.getElementById("descripcioEng").value = decodeURIComponent(data.descripcioEng);
-        document.getElementById("descripcioIt").value = decodeURIComponent(data.descripcioIt);
-
-        // Luego, aseguramos que Trix cargue el contenido en los editores correspondientes
-        const trixEditor1 = document.querySelector('trix-editor[input="descripcio"]');
-        const trixEditor2 = document.querySelector('trix-editor[input="descripcioCast"]');
-        const trixEditor3 = document.querySelector('trix-editor[input="descripcioEng"]');
-        const trixEditor4 = document.querySelector('trix-editor[input="descripcioIt"]');
 
         // Cargar el contenido en los editores
-        trixEditor1.editor.loadHTML(decodeURIComponent(data.descripcio));
-        trixEditor2.editor.loadHTML(decodeURIComponent(data.descripcioCast));
-        trixEditor3.editor.loadHTML(decodeURIComponent(data.descripcioEng));
-        trixEditor4.editor.loadHTML(decodeURIComponent(data.descripcioIt));
+
+        setTrixContent("descripcio", decodeURIComponent(data.descripcio));
+        setTrixContent("descripcioCast", decodeURIComponent(data.descripcioCast));
+        setTrixContent("descripcioEng", decodeURIComponent(data.descripcioEng));
+        setTrixContent("descripcioIt", decodeURIComponent(data.descripcioIt));
 
         document.getElementById("id").value = data.id;
 
@@ -265,9 +249,10 @@ if ($modificaBtn === 1) {
 
         // Llenar selects con opciones
         selectOmplirDades("/api/biblioteca/get/?type=auxiliarImatgesAutor", data.idImg, "img", "alt");
-        selectOmplirDades("/api/biblioteca/get/?type=professio", data.idOcupacio, "ocupacio", "professio_ca");
         selectOmplirDades("/api/biblioteca/get/?type=pais", data.idPais, "paisAutor", "pais_cat");
-        selectOmplirDades("/api/biblioteca/get/?type=grup", data.idGrup, "grup", "grup_ca");
+
+        const grupsSeleccionats = data.grup_ids || [];
+        selectOmplirDades("/api/biblioteca/get/?type=grup", grupsSeleccionats, "grups", "grup_ca");
         selectOmplirDades("/api/biblioteca/get/?type=sexe", data.idSexe, "sexe", "genereCa");
         selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutatNaixement, "ciutatNaixement", "city");
         selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutatDefuncio, "ciutatDefuncio", "city");
@@ -279,7 +264,7 @@ if ($modificaBtn === 1) {
       .catch(error => console.error("Error al obtener los datos:", error));
   }
 
-  async function selectOmplirDades(url, selectedValue, selectId, textField) {
+  async function selectOmplirDades(url, selectedValues, selectId, textField) {
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -293,27 +278,65 @@ if ($modificaBtn === 1) {
         return;
       }
 
-      // Netejar les opcions actuals
       selectElement.innerHTML = '';
 
-      // Afegir la opció predeterminada "Selecciona un gènere"
-      const defaultOption = document.createElement('option');
-      defaultOption.value = ''; // El valor predeterminat es un string vacío
-      defaultOption.textContent = 'Selecciona una opció';
-      selectElement.appendChild(defaultOption);
+      // Añadir opción por defecto para selects simples (no múltiple)
+      if (!selectElement.multiple) {
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Selecciona una opció';
+        // Si no hay valor seleccionado o es vacío, seleccionar esta opción
+        if (
+          selectedValues === null ||
+          selectedValues === undefined ||
+          selectedValues === ''
+        ) {
+          defaultOption.selected = true;
+        }
+        selectElement.appendChild(defaultOption);
+      }
 
-      // Afegir les noves opcions
       data.forEach((item) => {
         const option = document.createElement('option');
         option.value = item.id;
         option.text = item[textField];
-        if (item.id === selectedValue) {
-          option.selected = true;
+
+        if (selectElement.multiple) {
+          // En multiselección, selectedValues es array
+          if (Array.isArray(selectedValues) && selectedValues.includes(item.id)) {
+            option.selected = true;
+          }
+        } else {
+          // En selección simple, selectedValues es string
+          if (selectedValues === item.id) {
+            option.selected = true;
+          }
         }
+
         selectElement.appendChild(option);
       });
     } catch (error) {
       console.error('Error:', error);
+    }
+  }
+
+  function setTrixContent(inputId, htmlContent) {
+    const trixEditor = document.querySelector(`trix-editor[input="${inputId}"]`);
+    if (!trixEditor) {
+      console.error(`Trix editor for input ${inputId} not found`);
+      return;
+    }
+
+    function onInitialize() {
+      trixEditor.editor.loadHTML(htmlContent);
+      trixEditor.removeEventListener('trix-initialize', onInitialize);
+    }
+
+    // Si el editor ya está listo, carga directamente, sino espera el evento
+    if (trixEditor.editor) {
+      trixEditor.editor.loadHTML(htmlContent);
+    } else {
+      trixEditor.addEventListener('trix-initialize', onInitialize);
     }
   }
 </script>

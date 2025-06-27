@@ -77,7 +77,6 @@ function checkReferer($allowedOrigin)
     } else {
         // Si la cabecera 'Referer' no es válida, denegar el acceso
         header("HTTP/1.1 403 Forbidden");
-        header("Content-Type: application/json");
         echo json_encode(['error' => 'Accés no permés']);
         exit();
     }

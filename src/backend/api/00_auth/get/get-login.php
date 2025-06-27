@@ -3,7 +3,7 @@
 use App\Auth\Adapters\Inbound\AuthController;
 use App\Auth\Core\Services\AuthService;
 use App\Auth\Adapters\Outbound\DatabaseAuthRepository;
-use App\Config\Database;
+use App\Config\DatabaseConnection;
 
 // Configuración de cabeceras para aceptar JSON y responder JSON
 header("Content-Type: application/json");
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         // Conectar a la base de datos
-        $conn = Database::getConnection();
+        $conn = DatabaseConnection::getConnection();
 
         // Crear el repositorio
         $passwordRepository = new DatabaseAuthRepository($conn);

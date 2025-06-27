@@ -1,16 +1,8 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { formatData } from '../../utils/formataData';
+// import { formatData } from '../../utils/formataData';
 import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
-
-interface EspaiRow {
-  slug: string;
-  pelicula: string;
-  dataVisita: string;
-  id: number;
-  cognoms: string;
-  nom: string;
-}
+import { TaulaDinamica } from '../../types/TaulaDinamica';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -27,17 +19,17 @@ export async function taulaLlistatPelicules() {
     slug = pageType[2];
   }
 
-  const columns = [
+  const columns: TaulaDinamica<Pelicula>[] = [
     {
       header: 'Pel·lícula',
       field: 'pelicula',
-      render: (_: unknown, row: EspaiRow) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/fitxa-pelicula/${row.slug}">${row.pelicula}</a>`,
+      render: (_: unknown, row: Pelicula) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/fitxa-pelicula/${row.slug}">${row.pelicula}</a>`,
     },
     { header: 'Any', field: 'any' },
     {
       header: 'Director/a',
       field: 'cognoms',
-      render: (_: unknown, row: EspaiRow) => {
+      render: (_: unknown, row: Pelicula) => {
         return `${row.nom} ${row.cognoms}`;
       },
     },
@@ -49,7 +41,7 @@ export async function taulaLlistatPelicules() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: EspaiRow) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/modifica-pelicula/${row.slug}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Pelicula) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/modifica-pelicula/${row.slug}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 

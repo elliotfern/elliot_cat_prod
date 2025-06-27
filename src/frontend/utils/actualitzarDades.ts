@@ -8,10 +8,21 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
     return;
   }
 
-  // Crear un objeto para almacenar los datos del formulario
-  const formData: { [key: string]: FormDataEntryValue } = {};
+  const rawFormData = new FormData(form);
+  const formData: { [key: string]: FormDataEntryValue | FormDataEntryValue[] } = {};
+
   new FormData(form).forEach((value, key) => {
-    formData[key] = value; // Agregar cada campo al objeto formData
+    const cleanKey = key.endsWith('[]') ? key.slice(0, -2) : key;
+
+    if (formData[cleanKey]) {
+      if (Array.isArray(formData[cleanKey])) {
+        (formData[cleanKey] as FormDataEntryValue[]).push(value);
+      } else {
+        formData[cleanKey] = [formData[cleanKey], value];
+      }
+    } else {
+      formData[cleanKey] = value;
+    }
   });
 
   const jsonData = JSON.stringify(formData);
@@ -21,16 +32,12 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
       method: tipus,
       headers: {
         Accept: 'application/json',
+        'Content-Type': 'application/json', // Añadir Content-Type aquí
       },
       body: jsonData,
     });
 
-    if (!response.ok) {
-      throw new Error('Error en la sol·licitud AJAX');
-    }
-
     const data = await response.json();
-    // Aquí pots afegir el codi per gestionar la resposta
 
     const missatgeOk = document.getElementById('missatgeOk');
     const missatgeErr = document.getElementById('missatgeErr');
@@ -39,12 +46,8 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
       if (missatgeOk && missatgeErr) {
         missatgeOk.style.display = 'block';
         missatgeErr.style.display = 'none';
-        // Agregar texto dinámicamente al div de éxito
         missatgeOk.textContent = "L'operació s'ha realizat correctament a la base de dades.";
-
         limpiarFormulario(formId);
-
-        // Eliminar el mensaje de éxito después de 5 segundos
         setTimeout(() => {
           missatgeOk.style.display = 'none';
         }, 5000);

@@ -2,22 +2,8 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { formatNaixementEdat } from '../../utils/formataData';
 import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
-
-interface EspaiRow {
-  slug: string;
-  url: string;
-  idTema: number;
-  nom: string;
-  cognoms: string;
-  linkId: number;
-  data_naixement: string;
-  tema: string;
-  email: string;
-  tel_1: string;
-  tel_2: string;
-  tel_3: string;
-  id: number;
-}
+import { TaulaDinamica } from '../../types/TaulaDinamica';
+import { Contacte } from '../../types/Contacte';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -34,16 +20,16 @@ export async function taulaLlistatContactes() {
     slug = pageType[2];
   }
 
-  const columns = [
+  const columns: TaulaDinamica<Contacte>[] = [
     {
       header: 'Nom i cognoms',
       field: 'cognoms',
-      render: (_: unknown, row: EspaiRow) => `${row.nom} ${row.cognoms}`,
+      render: (_: unknown, row: Contacte) => `${row.nom} ${row.cognoms}`,
     },
     {
       header: 'Dades contacte',
       field: 'cognoms',
-      render: (_: unknown, row: EspaiRow) => {
+      render: (_: unknown, row: Contacte) => {
         // Inicializamos un array para almacenar los elementos válidos
         const contactLinks = [];
 
@@ -80,7 +66,7 @@ export async function taulaLlistatContactes() {
     {
       header: 'Data naixement',
       field: 'tema',
-      render: (_: unknown, row: EspaiRow) => {
+      render: (_: unknown, row: Contacte) => {
         // Verificamos si data_naixement tiene un valor válido (no null, no vacío)
         if (row.data_naixement && row.data_naixement !== null && row.data_naixement !== '') {
           return formatNaixementEdat(row.data_naixement); // Si es válido, mostramos la fecha formateada
@@ -95,7 +81,7 @@ export async function taulaLlistatContactes() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: EspaiRow) => `<a id="${row.idTema}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/agenda-contactes/modifica-contacte/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Contacte) => `<a id="${row.idTema}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/agenda-contactes/modifica-contacte/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 

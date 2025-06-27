@@ -90,6 +90,17 @@ if (isset($_GET['clau'])) {
         $params[':iv'] = $iv;
     }
 
+    if (!empty($data['clau2f'])) {
+        $clau2f = $data['clau2f'];
+        $result2 = generateEncryptedPassword($clau2f, $token);
+        $hashedclau2f = $result2['encryptedPassword'];
+        $iv2f = $result2['iv'];
+        $query .= ", clau2f = :clau2f";
+        $query .= ", iv2f = :iv2f";
+        $params[':clau2f'] = $hashedclau2f;
+        $params[':iv2f'] = $iv2f;
+    }
+
     $query .= " WHERE id = :id";
     $params[':id'] = $id;
 

@@ -73,6 +73,11 @@ if ($modificaBtn === 1) {
         </div>
 
         <div class="col-md-4">
+            <label>Clau 2Factor:</label>
+            <input class="form-control" type="password" name="clau2f" id="clau2f" value="">
+        </div>
+
+        <div class="col-md-4">
             <label>Pàgina web:</label>
             <input class="form-control" type="text" name="web" id="web" value="">
         </div>

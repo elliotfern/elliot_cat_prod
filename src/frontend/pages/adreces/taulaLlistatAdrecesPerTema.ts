@@ -2,16 +2,8 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { formatData } from '../../utils/formataData';
 import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
-
-interface EspaiRow {
-  slug: string;
-  url: string;
-  idTema: number;
-  nom: string;
-  linkId: number;
-  dateCreated: string;
-  tema: string;
-}
+import { Link } from '../../types/Link';
+import { TaulaDinamica } from '../../types/TaulaDinamica';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -28,11 +20,11 @@ export async function taulaLlistatAdrecesPerTema() {
     slug = pageType[2];
   }
 
-  const columns = [
+  const columns: TaulaDinamica<Link>[] = [
     {
       header: 'Enllaç',
       field: 'tema',
-      render: (_: unknown, row: EspaiRow) => {
+      render: (_: unknown, row: Link) => {
         // Verificamos si `row.tema` tiene un valor
         if (row.tema) {
           const nomTema = document.getElementById('nomTema');
@@ -50,7 +42,7 @@ export async function taulaLlistatAdrecesPerTema() {
     {
       header: 'Data creació',
       field: 'tema',
-      render: (_: unknown, row: EspaiRow) => `${formatData(row.dateCreated)}`,
+      render: (_: unknown, row: Link) => `${formatData(row.dateCreated)}`,
     },
   ];
 
@@ -58,7 +50,7 @@ export async function taulaLlistatAdrecesPerTema() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: EspaiRow) => `<a id="${row.idTema}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/adreces/modifica-link/${row.linkId}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Link) => `<a id="${row.idTema}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/adreces/modifica-link/${row.linkId}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 

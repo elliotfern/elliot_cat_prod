@@ -58,22 +58,31 @@ if (isset($_GET['clau'])) {
     $web          = !empty($data['web']) ? data_input($data['web']) : ($hasError = false);
     $notes          = !empty($data['notes']) ? data_input($data['notes']) : ($hasError = false);
     $password          = !empty($data['password']) ? data_input($data['password']) : ($hasError = true);
-
+    $clau2f = !empty($data['clau2f']) ? data_input($data['clau2f']) : NULL;
 
     if (!$hasError) {
         $result = generateEncryptedPassword($password, $token);
         $hashedPassword = $result['encryptedPassword'];
         $iv = $result['iv'];
 
+        if ($clau2f !== NULL) {
+            $result2 = generateEncryptedPassword($clau2f, $token);
+            $hashedclau2f = $result2['encryptedPassword'];
+            $iv2f = $result2['iv'];
+        } else {
+            $hashedclau2f = NULL;
+            $iv2f = NULL;
+        }
+
+
         // Asignar valores adicionales
         $timestamp = date('Y-m-d');
         $dateCreated = $timestamp;
 
-
         global $conn;
         /** @var PDO $conn */
         // Construcción dinámica del query dependiendo de si se actualiza la contraseña o no
-        $query = "INSERT INTO db_vault SET servei = :servei, usuari = :usuari, tipus = :tipus, web = :web, notes = :notes, dateCreated = :dateCreated, password = :password, iv = :iv";
+        $query = "INSERT INTO db_vault SET servei = :servei, usuari = :usuari, tipus = :tipus, web = :web, notes = :notes, dateCreated = :dateCreated, password = :password, iv = :iv, clau2f = :clau2f, iv2f = :iv2f";
         $params = [
             ':servei' => $servei,
             ':usuari' => $usuari,
@@ -83,6 +92,8 @@ if (isset($_GET['clau'])) {
             ':dateCreated' => $dateCreated,
             ':password' => $hashedPassword,
             ':iv' => $iv,
+            ':clau2f' => $hashedclau2f,
+            ':iv2f' => $iv2f,
         ];
 
         try {

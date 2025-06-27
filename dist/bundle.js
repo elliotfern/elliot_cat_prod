@@ -18327,7 +18327,12 @@ function renderDynamicTable(_a) {
         if (!container)
             return console.error(`Contenedor #${containerId} no encontrado`);
         const response = yield fetch(url);
-        const data = yield response.json();
+        const result = yield response.json();
+        if (result.status === 'error') {
+            container.innerHTML = `<div class="alert alert-info">${result.message || 'No hi ha dades.'}</div>`;
+            return;
+        }
+        const data = Array.isArray(result.data) ? result.data : result;
         let currentPage = 1;
         let filteredData = [...data];
         let activeButtonFilter = null;
@@ -18367,8 +18372,9 @@ function renderDynamicTable(_a) {
             if (!filterByField)
                 return;
             let uniqueValues = Array.from(new Set(data.map((row) => row[filterByField]))).filter(Boolean);
-            // Ordenar alfabéticamente los valores únicos
-            uniqueValues = uniqueValues.sort((a, b) => a.localeCompare(b, 'ca', { sensitivity: 'base' }));
+            uniqueValues = uniqueValues.sort((a, b) => {
+                return String(a).localeCompare(String(b), 'ca', { sensitivity: 'base' });
+            });
             buttonContainer.innerHTML = '';
             const allButton = document.createElement('button');
             allButton.textContent = 'Tots';
@@ -18381,7 +18387,7 @@ function renderDynamicTable(_a) {
             buttonContainer.appendChild(allButton);
             uniqueValues.forEach((value) => {
                 const button = document.createElement('button');
-                button.textContent = value;
+                button.textContent = String(value);
                 button.className = 'filter-btn';
                 button.onclick = () => {
                     activeButtonFilter = value;
@@ -18390,7 +18396,6 @@ function renderDynamicTable(_a) {
                 };
                 buttonContainer.appendChild(button);
             });
-            // Establecer el botón "Tots" como activo por defecto
             updateActiveButton(allButton);
         }
         function updateActiveButton(activeButton) {
@@ -18477,7 +18482,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 function serveisVaultApi() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
-        const isAdmin = yield (0,_services_auth_isAdmin__WEBPACK_IMPORTED_MODULE_2__.getIsAdmin)(); // Comprovar si és admin
+        const isAdmin = yield (0,_services_auth_isAdmin__WEBPACK_IMPORTED_MODULE_2__.getIsAdmin)(); // Comprobar si es admin
         let gestioUrl = '';
         if (isAdmin) {
             gestioUrl = '/gestio';
@@ -18495,14 +18500,24 @@ function serveisVaultApi() {
                 render: (_, row) => `
         <div class="input-group">
           <input class="form-control input-petit" type="password" name="role" id="passw-${row.id}" value="*******" readonly>
-         <button type="button" class="btn-petit btn-primari show-pass-btn" data-id="${row.id}">Show</button>
+         <button type="button" class="btn-petit btn-primari show-pass-btn" data-id="${row.id}">Mostrar</button>
+        </div>
+      `,
+            },
+            {
+                header: 'Clau 2F',
+                field: 'id',
+                render: (_, row) => `
+        <div class="input-group">
+          <input class="form-control input-petit" type="password" name="role" id="clau2f-${row.id}" value="*******" readonly>
+         <button type="button" class="btn-petit btn-primari show-clau2f-btn" data-id="${row.id}">Mostrar</button>
         </div>
       `,
             },
             { header: 'Tipus', field: 'tipus' },
             {
                 header: 'Data modificació',
-                field: 'dataVisita',
+                field: 'dateModified',
                 render: (_, row) => {
                     const inici = (0,_utils_formataData__WEBPACK_IMPORTED_MODULE_1__.formatData)(row.dateModified);
                     return `${inici}`;
@@ -18541,53 +18556,78 @@ function serveisVaultApi() {
                     showPass(id);
                 }
             }
+            // Busca si se ha hecho clic en un botón con clase `.show-clau2f-btn`
+            if (target.classList.contains('show-clau2f-btn')) {
+                const id = parseInt(target.getAttribute('data-id') || '', 10);
+                if (!isNaN(id)) {
+                    show2FACode(id);
+                }
+            }
         });
     });
 }
 // Función para mostrar/ocultar la contraseña
 function showPass(id) {
-    // Selecciona el campo de entrada de contraseña por su ID
     const inputField = document.getElementById(`passw-${id}`);
-    // Define la URL para la solicitud AJAX
     const urlAjax = `/api/vault/get/?id=${id}`;
-    // Verifica si el campo de entrada está ocultando la contraseña (type="password")
     if (inputField.type === 'password') {
-        fetch(urlAjax, {
-            method: 'GET',
-            headers: {
-                Accept: 'application/json',
-            },
-        })
-            .then((response) => {
-            if (!response.ok) {
-                throw new Error('Error en la solicitud AJAX');
-            }
-            return response.json();
-        })
+        fetch(urlAjax, { method: 'GET', headers: { Accept: 'application/json' } })
+            .then((response) => (response.ok ? response.json() : Promise.reject('Error en la solicitud AJAX')))
             .then((data) => {
             if (data.password) {
-                // Si la contraseña está disponible, la muestra
                 inputField.value = data.password;
                 inputField.type = 'text';
-                // Copiar la contraseña al portapapeles
-                navigator.clipboard.writeText(data.password).catch((err) => {
-                    console.error('Error al copiar al portapapeles: ', err);
-                });
-                // Ocultar la contraseña después de 5 segundos
+                navigator.clipboard.writeText(data.password).catch(console.error);
                 setTimeout(() => {
-                    inputField.value = '**********'; // Volver al placeholder
+                    inputField.value = '**********';
                     inputField.type = 'password';
                 }, 5000);
             }
             else {
-                // Si no se encuentra la contraseña, muestra el error
                 inputField.value = data.error || 'Error desconocido';
                 inputField.type = 'text';
             }
         })
             .catch((error) => {
-            console.error('Error en la solicitud AJAX:', error);
+            console.error(error);
             alert('Hubo un problema al intentar obtener la contraseña.');
+        });
+    }
+}
+// Función para mostrar/ocultar el código 2FA
+function show2FACode(id) {
+    const inputField = document.getElementById(`clau2f-${id}`);
+    const urlAjax = `/api/vault/get/?type=codigo2f&id2F=${id}`;
+    // Comprobamos si el campo de entrada existe y es de tipo "password"
+    if (!inputField) {
+        console.error(`Input field with id "clau2f-${id}" not found`);
+        return;
+    }
+    if (inputField.type === 'password') {
+        fetch(urlAjax, { method: 'GET', headers: { Accept: 'application/json' } })
+            .then((response) => response.json())
+            .then((data) => {
+            if (data.code) {
+                // Mostrar el código 2FA en el campo correspondiente
+                inputField.value = data.code;
+                inputField.type = 'text'; // Mostrar el código
+                // Copiar al portapapeles si es necesario
+                navigator.clipboard.writeText(data.code).catch((error) => {
+                    console.error('Error al copiar el código 2FA al portapapeles:', error);
+                });
+                // Ocultar el código después de 5 segundos
+                setTimeout(() => {
+                    inputField.value = '*******'; // Volver al placeholder
+                    inputField.type = 'password';
+                }, 5000);
+            }
+            else {
+                alert('Error al obtener el código 2FA');
+            }
+        })
+            .catch((error) => {
+            console.error('Error al obtener el código 2FA:', error);
+            alert('Hubo un problema al intentar obtener el código 2FA.');
         });
     }
 }
@@ -18809,6 +18849,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
     });
 };
 
+// import { formatData } from '../../utils/formataData';
 
 
 const url = window.location.href;
@@ -19150,6 +19191,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
     });
 };
 
+// import { formatData } from '../../utils/formataData';
 
 function taulaLlistatAutors() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -19161,11 +19203,11 @@ function taulaLlistatAutors() {
         const columns = [
             {
                 header: 'Autor/a',
-                field: 'viatge',
+                field: 'id',
                 render: (_, row) => `<a href="https://${window.location.host}${gestioUrl}/biblioteca/fitxa-autor/${row.slug}">${row.AutNom} ${row.AutCognom1}</a>`,
             },
             { header: 'País', field: 'country' },
-            { header: 'Professió', field: 'profession' },
+            { header: 'Professió', field: 'grup' },
             {
                 header: 'Dates',
                 field: 'yearDie',
@@ -19187,7 +19229,7 @@ function taulaLlistatAutors() {
             url: `https://${window.location.host}/api/biblioteca/get/?type=totsAutors`,
             containerId: 'taulaLlistatAutors',
             columns,
-            filterKeys: ['author', 'AutCognom1'],
+            filterKeys: ['AutCognom1'],
             filterByField: 'profession',
         });
     });
@@ -19219,6 +19261,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
     });
 };
 
+// import { formatData } from '../../utils/formataData';
 
 function taulaLlistatLlibres() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -19264,7 +19307,7 @@ function taulaLlistatLlibres() {
             url: `https://${window.location.host}/api/biblioteca/get/?type=totsLlibres`,
             containerId: 'taulaLlistatLlibres',
             columns,
-            filterKeys: ['titol', 'titolEng'],
+            filterKeys: ['titol'],
             filterByField: 'nomGenCat',
         });
     });
@@ -19533,6 +19576,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
     });
 };
 
+// import { formatData } from '../../utils/formataData';
 
 
 const url = window.location.href;
@@ -19626,13 +19670,36 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _components_renderTaula_taulaRender__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../components/renderTaula/taulaRender */ "./src/frontend/components/renderTaula/taulaRender.ts");
 /* harmony import */ var _utils_formataData__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/formataData */ "./src/frontend/utils/formataData.ts");
+/* harmony import */ var _utils_urlPath__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/urlPath */ "./src/frontend/utils/urlPath.ts");
+/* harmony import */ var _services_auth_isAdmin__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../services/auth/isAdmin */ "./src/frontend/services/auth/isAdmin.ts");
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 
 
+
+
+const url = window.location.href;
+const pageType = (0,_utils_urlPath__WEBPACK_IMPORTED_MODULE_2__.getPageType)(url);
 function taulaFacturacioClients() {
-    (0,_components_renderTaula_taulaRender__WEBPACK_IMPORTED_MODULE_0__.renderDynamicTable)({
-        url: `https://${window.location.host}/api/accounting/get/?type=accounting-elliotfernandez-customers-invoices`,
-        containerId: 'taulaLlistatFactures',
-        columns: [
+    return __awaiter(this, void 0, void 0, function* () {
+        const isAdmin = yield (0,_services_auth_isAdmin__WEBPACK_IMPORTED_MODULE_3__.getIsAdmin)();
+        let slug = '';
+        let gestioUrl = '';
+        if (isAdmin) {
+            slug = pageType[3];
+            gestioUrl = '/gestio';
+        }
+        else {
+            slug = pageType[2];
+        }
+        const columns = [
             {
                 header: 'Num',
                 field: 'yearInvoice',
@@ -19645,13 +19712,16 @@ function taulaFacturacioClients() {
             },
             {
                 header: 'Data factura',
-                field: 'dataVisita',
+                field: 'facData',
                 render: (_, row) => {
                     const inici = (0,_utils_formataData__WEBPACK_IMPORTED_MODULE_1__.formatData)(row.facData);
                     return `${inici}`;
                 },
             },
-            { header: 'Concepte', field: 'facConcepte' },
+            {
+                header: 'Concepte',
+                field: 'facConcepte',
+            },
             {
                 header: 'Total',
                 field: 'facTotal',
@@ -19664,19 +19734,32 @@ function taulaFacturacioClients() {
             },
             {
                 header: 'PDF',
-                field: 'city',
-                render: (_, row) => ` <button type="button" class="btn-petit btn-secondari" onclick="generatePDF(${row.id})" id="pdfButton${row.id}">PDF</button>`,
+                field: 'id',
+                render: (_, row) => `<button type="button" class="btn-petit btn-secondari" onclick="generatePDF(${row.id})" id="pdfButton${row.id}">PDF</button>`,
             },
             {
                 header: 'Accions',
                 field: 'id',
                 render: (_, row) => `
-                    <a href="https://${window.location.host}/gestio/viatges/modifica-viatge/${row.id}">
-                        <button class="btn-petit">Modifica</button></a>`,
+    <a href="https://${window.location.hostname}/gestio/viatges/modifica-viatge/${row.id}">
+      <button class="btn-petit">Modifica</button>
+    </a>`,
             },
-        ],
-        filterKeys: ['clientEmpresa', 'clientCognoms'],
-        filterByField: 'any',
+        ];
+        if (isAdmin) {
+            columns.push({
+                header: 'Accions',
+                field: 'id',
+                render: (_, row) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/modifica-pelicula/${row.slug}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+            });
+        }
+        (0,_components_renderTaula_taulaRender__WEBPACK_IMPORTED_MODULE_0__.renderDynamicTable)({
+            url: `https://${window.location.host}/api/accounting/get/?type=accounting-elliotfernandez-customers-invoices`,
+            containerId: 'taulaLlistatFactures',
+            columns,
+            filterKeys: ['clientEmpresa', 'clientCognoms'],
+            filterByField: 'any',
+        });
     });
 }
 
@@ -20427,7 +20510,7 @@ function fitxaPersona(url, id, tipus, callback) {
             parrafosHTML.push({
                 label: 'Gènere: ',
                 value: data.idSexe === 1 ? 'Home' : data.idSexe === 2 ? 'Dona' : 'Desconegut',
-            }, { label: 'Pais: ', value: data.pais_cat }, { label: 'Professió: ', value: data.professio_ca }, { label: 'Pàgina Viquipèdia: ', value: `<a href="${data.web}" target="_blank" title="Web">Enllaç extern</a>` }, { label: 'Biografia: ', value: data.descripcio || 'No disponible' });
+            }, { label: 'Pais: ', value: data.pais_cat }, { label: 'Professió: ', value: data.grup }, { label: 'Pàgina Viquipèdia: ', value: `<a href="${data.web}" target="_blank" title="Web">Enllaç extern</a>` }, { label: 'Biografia: ', value: data.descripcio || 'No disponible' });
             // Recorremos el array y agregamos cada párrafo al div
             parrafosHTML.forEach((item) => {
                 const p = document.createElement('p');
@@ -20463,6 +20546,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_urlPath__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/urlPath */ "./src/frontend/utils/urlPath.ts");
 /* harmony import */ var _utils_actualitzarDades__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/actualitzarDades */ "./src/frontend/utils/actualitzarDades.ts");
 /* harmony import */ var _taulaLlistatPersones__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./taulaLlistatPersones */ "./src/frontend/pages/persona/taulaLlistatPersones.ts");
+/* harmony import */ var _fitxaPersona__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./fitxaPersona */ "./src/frontend/pages/persona/fitxaPersona.ts");
+
 
 
 
@@ -20477,6 +20562,23 @@ function persona() {
                 (0,_utils_actualitzarDades__WEBPACK_IMPORTED_MODULE_1__.transmissioDadesDB)(event, 'PUT', 'modificaAutor', '/api/biblioteca/put/?autor');
             });
         }
+    }
+    else if (pageType[2] === 'fitxa-persona') {
+        (0,_fitxaPersona__WEBPACK_IMPORTED_MODULE_3__.fitxaPersona)('/api/persones/get/?persona=', pageType[3], 'persona', function (data) {
+            /* construirTaula('taula1', '/api/cinema/get/actor-pelicules?slug=', data.slug, ['Titol', 'Any', 'Rol'], function (fila, columna) {
+                 if (columna.toLowerCase() === 'titol') {
+                   // Manejar el caso del título
+                   return `<a href="https://${window.location.host}/gestio/cinema/fitxa-pelicula/${fila['slug']}">${fila['titol']}</a>`;
+                 } else if (columna.toLowerCase() === 'any') {
+                   return `${fila['anyInici']}${fila['anyFi'] ? ' - ' + fila['anyFi'] : ''}`;
+                 } else if (columna.toLowerCase() === 'rol') {
+                   // Manejar otros casos
+                   return `${fila['role']}`;
+                 } else {
+                   // Manejar otros casos
+                   return fila[columna.toLowerCase()];
+                 }*/
+        });
     }
     else if (pageType[2] === 'nova-persona') {
         const autor = document.getElementById('modificaAutor');
@@ -20523,36 +20625,6 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 const url = window.location.href;
 const pageType = (0,_utils_urlPath__WEBPACK_IMPORTED_MODULE_1__.getPageType)(url);
-function getDirInfoByGroup(grup) {
-    let dirImg = '';
-    let dirUrl = '';
-    switch (grup) {
-        case 1:
-            dirImg = 'biblioteca-autor';
-            dirUrl = 'biblioteca/fitxa-autor';
-            break;
-        case 2:
-            dirImg = 'cinema-director';
-            dirUrl = 'cinema/fitxa-director';
-            break;
-        case 3:
-            dirImg = 'cinema-actor';
-            dirUrl = 'cinema/fitxa-actor';
-            break;
-        case 4:
-            dirImg = 'historia-persona';
-            dirUrl = 'historia/fitxa-persona';
-            break;
-        case 5:
-            dirImg = 'politic';
-            dirUrl = 'historia/fitxa-politic';
-            break;
-        default:
-            dirImg = 'default';
-            dirUrl = 'default/fitxa';
-    }
-    return { dirImg, dirUrl };
-}
 function taulaLlistatPersones() {
     return __awaiter(this, void 0, void 0, function* () {
         const isAdmin = yield (0,_services_auth_isAdmin__WEBPACK_IMPORTED_MODULE_2__.getIsAdmin)();
@@ -20570,9 +20642,8 @@ function taulaLlistatPersones() {
                 header: '',
                 field: 'nameImg',
                 render: (_, row) => {
-                    const { dirImg, dirUrl } = getDirInfoByGroup(row.grup);
-                    const detailUrl = `https://${window.location.host}${gestioUrl}/${dirUrl}/${row.slug}`;
-                    const fullImgUrl = `https://media.elliot.cat/img/${dirImg}/${row.nameImg}.jpg`;
+                    const detailUrl = `https://${window.location.host}${gestioUrl}/base-dades-persones/fitxa-persona/${row.slug}`;
+                    const fullImgUrl = `https://media.elliot.cat/img/persona/${row.nameImg}.jpg`;
                     // Genera el enlace dinámico con la imagen
                     return `<a id="${row.id}" title="Persona" href="${detailUrl}">
               <img src="${fullImgUrl}" style="height:70px">
@@ -20583,16 +20654,15 @@ function taulaLlistatPersones() {
                 header: 'Nom i cognoms',
                 field: 'nom',
                 render: (_, row) => {
-                    const { dirImg, dirUrl } = getDirInfoByGroup(row.grup);
                     // Genera el enlace dinámico sin la imagen
                     return `<a id="${row.id}" title="${row.nom} ${row.cognoms}" 
-               href="https://${window.location.hostname}${gestioUrl}/${dirUrl}/${row.slug}">
+               href="https://${window.location.hostname}${gestioUrl}/base-dades-persones/fitxa-persona/${row.slug}">
                ${row.nom} ${row.cognoms}
             </a>`;
                 },
             },
             { header: 'País', field: 'pais_cat' },
-            { header: 'Professió', field: 'professio_ca' },
+            { header: 'Grup', field: 'grup' },
             {
                 header: 'Anys',
                 field: 'yearBorn',
@@ -21031,7 +21101,7 @@ function taulaLlistatVisitesEspais() {
             },
             {
                 header: 'Data',
-                field: 'any1	',
+                field: 'any1',
                 render: (_, row) => {
                     const inici = (0,_utils_formataData__WEBPACK_IMPORTED_MODULE_1__.formatDataCatala)(row.any1);
                     return `${inici}`;
@@ -21444,10 +21514,21 @@ function transmissioDadesDB(event, tipus, formId, urlAjax) {
             console.error(`Form with id ${formId} not found`);
             return;
         }
-        // Crear un objeto para almacenar los datos del formulario
+        const rawFormData = new FormData(form);
         const formData = {};
         new FormData(form).forEach((value, key) => {
-            formData[key] = value; // Agregar cada campo al objeto formData
+            const cleanKey = key.endsWith('[]') ? key.slice(0, -2) : key;
+            if (formData[cleanKey]) {
+                if (Array.isArray(formData[cleanKey])) {
+                    formData[cleanKey].push(value);
+                }
+                else {
+                    formData[cleanKey] = [formData[cleanKey], value];
+                }
+            }
+            else {
+                formData[cleanKey] = value;
+            }
         });
         const jsonData = JSON.stringify(formData);
         try {
@@ -21455,24 +21536,19 @@ function transmissioDadesDB(event, tipus, formId, urlAjax) {
                 method: tipus,
                 headers: {
                     Accept: 'application/json',
+                    'Content-Type': 'application/json', // Añadir Content-Type aquí
                 },
                 body: jsonData,
             });
-            if (!response.ok) {
-                throw new Error('Error en la sol·licitud AJAX');
-            }
             const data = yield response.json();
-            // Aquí pots afegir el codi per gestionar la resposta
             const missatgeOk = document.getElementById('missatgeOk');
             const missatgeErr = document.getElementById('missatgeErr');
             if (data.status === 'success') {
                 if (missatgeOk && missatgeErr) {
                     missatgeOk.style.display = 'block';
                     missatgeErr.style.display = 'none';
-                    // Agregar texto dinámicamente al div de éxito
                     missatgeOk.textContent = "L'operació s'ha realizat correctament a la base de dades.";
                     limpiarFormulario(formId);
-                    // Eliminar el mensaje de éxito después de 5 segundos
                     setTimeout(() => {
                         missatgeOk.style.display = 'none';
                     }, 5000);
