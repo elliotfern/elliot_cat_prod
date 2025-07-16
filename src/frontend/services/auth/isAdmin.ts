@@ -1,27 +1,19 @@
+import { setWithExpiry, getWithExpiry } from '../localStorage/localStorage';
+
 // Función para obtener el estado de admin, usando localStorage para evitar llamadas repetidas
 export async function getIsAdmin() {
-  // Comprobamos si ya hemos guardado el valor en localStorage
-  const isAdmin = localStorage.getItem('isAdmin');
+  const isAdmin = getWithExpiry('isAdmin');
+  if (isAdmin !== null) return isAdmin;
 
-  if (isAdmin !== null) {
-    // Si ya tenemos el valor, lo retornamos
-    return JSON.parse(isAdmin); // Devolvemos el valor guardado como un booleano
-  }
-
-  // Si no lo tenemos, hacemos la llamada a la API
   const isAdminFromApi = await isAdminUser();
-
-  // Guardamos el valor en localStorage para futuras consultas
-  localStorage.setItem('isAdmin', JSON.stringify(isAdminFromApi));
-
-  // Retornamos el valor obtenido
+  setWithExpiry('isAdmin', isAdminFromApi, 1800); // 30 minutos de duración
   return isAdminFromApi;
 }
- 
+
 export async function isAdminUser(): Promise<boolean> {
   try {
     // Cridem a l'endpoint que verifica si l'usuari és admin
-    const url = `https://${window.location.host}/api/auth/get/?isAdmin`;
+    const url = `https://api.elliot.cat/api/auth/get`;
     const response = await fetch(url, {
       credentials: 'include', // Necessari per enviar les cookies amb la petició
     });
