@@ -32,6 +32,10 @@ jobs:
           cd ${{ github.workspace }}  # Cambia a la carpeta del repositorio
           npm install  # O "yarn install" si usas Yarn
 
+      # 5. Actualizar el numero de version del bundle.js
+      - name: Bump bundle version
+        run: node bump-version.js
+
       # 5. Ejecutar Webpack para construir los assets
       - name: Build assets with Webpack
         run: |
