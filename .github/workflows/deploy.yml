@@ -34,7 +34,7 @@ jobs:
 
       # 5. Actualizar el numero de version del bundle.js
       - name: Bump bundle version
-        run: node bump-version.js
+        run: node bump-version.cjs
 
       # 5. Ejecutar Webpack para construir los assets
       - name: Build assets with Webpack
