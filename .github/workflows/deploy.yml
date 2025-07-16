@@ -63,7 +63,7 @@ jobs:
             git stash || echo "No hay cambios locales para guardar"
 
             # Borrar archivos sin seguimiento que bloquean el pull
-            git clean -f -d -x
+            git clean -f -d
 
             # Limpiar stash para evitar conflictos
             git stash drop || echo "No stash para borrar"
