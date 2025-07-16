@@ -1,4 +1,4 @@
-name: Deploy Elliot.cat web
+name: Deploy Elliot.cat frontend
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout del código
+      # 1. Checkout del código fuente actualizado
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -20,51 +20,36 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # 3. Configurar Node.js (para construir assets)
+      # 3. Configurar Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      # 4. Instalar dependencias de Node.js
-      - name: Install dependencies (npm)
-        run: |
-          cd ${{ github.workspace }}
-          npm install
+      # 4. Instalar dependencias
+      - name: Install npm dependencies
+        run: npm install
 
-      # 5. Actualizar el número de versión en footer-end.php
-      - name: Bump bundle version
+      # 5. Actualizar el número de versión en el bundle
+      - name: Bump version in footer-end.php
         run: node bump-version.cjs
 
-      # 6. Construir los assets con Webpack
-      - name: Build assets with Webpack
-        run: |
-          cd ${{ github.workspace }}
-          npm run build
+      # 6. Construir el frontend
+      - name: Build frontend assets
+        run: npm run build
 
-      # 7. Agregar la clave del servidor remoto a known_hosts
+      # 7. Agregar el servidor a known_hosts
       - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H 87.98.230.129 >> ~/.ssh/known_hosts
 
-      # 8. Subir los archivos generados y el footer-end.php modificado al servidor
-      - name: Upload built assets and footer to server
+      # 8. Subir `dist/` al servidor
+      - name: Upload built dist/ assets
         run: |
-          scp -r ${{ github.workspace }}/dist/* epgylzqu@87.98.230.129:/home/epgylzqu/elliotfern.com/dist
-          scp ${{ github.workspace }}/public/includes/footer-end.php epgylzqu@87.98.230.129:/home/epgylzqu/elliotfern.com/public/includes/
+          scp -r dist/* epgylzqu@87.98.230.129:/home/epgylzqu/elliotfern.com/dist/
 
-      # 9. Actualizar el código en el servidor vía SSH
-      - name: Deploy to server via SSH
+      # 9. Subir `footer-end.php` actualizado
+      - name: Upload updated footer-end.php
         run: |
-          ssh -o StrictHostKeyChecking=no epgylzqu@87.98.230.129 << 'EOF'
-            cd /home/epgylzqu/elliotfern.com
-
-            git stash || echo "No hay cambios locales para guardar"
-            git clean -f -d
-            git stash drop || echo "No stash para borrar"
-
-            git pull origin main
-
-            # Aquí puedes añadir más comandos, como composer install si es necesario
-          EOF
+          scp public/includes/footer-end.php epgylzqu@87.98.230.129:/home/epgylzqu/elliotfern.com/public/includes/footer-end.php
