@@ -7,70 +7,61 @@ function handleLogin() {
   }
 }
 
-export async function loginApi(event: any) {
-  event.preventDefault(); // Evitar el envío del formulario por defecto
+export async function loginApi(event: Event) {
+  event.preventDefault();
 
-  // Obtener los valores del formulario
-  const usernameInput = document.getElementById('email') as HTMLInputElement;
+  const emailInput = document.getElementById('email') as HTMLInputElement;
   const passwordInput = document.getElementById('password') as HTMLInputElement;
 
   const loginMessageOk = document.getElementById('loginMessageOk');
   const loginMessageErr = document.getElementById('loginMessageErr');
 
-  if (usernameInput && passwordInput) {
-    const username = usernameInput.value;
+  if (emailInput && passwordInput) {
+    const email = emailInput.value;
     const password = passwordInput.value;
+
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('https://api.elliot.cat/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
+        credentials: 'include', // 👈 Necesario para que la cookie JWT se guarde
+        body: JSON.stringify({ email, password }), // ✅ Campo correcto
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        if (data.success) {
-          handleLogin();
-          getIsAdmin();
+      if (response.ok && data.success) {
+        handleLogin();
 
-          if (loginMessageOk && loginMessageErr) {
-            // Mostrar mensaje de éxito
-            loginMessageOk.style.display = 'block';
-            loginMessageOk.innerHTML = data.message;
-            loginMessageErr.style.display = 'none';
-          }
-
-          if (data.user_type === 1) {
-            setTimeout(() => {
-              window.location.href = '/gestio/admin';
-            }, 3000);
-          } else {
-            setTimeout(() => {
-              window.location.href = '/usuaris';
-            }, 3000);
-          }
+        // Aquí podrías guardar datos si los necesitas
+        if (data.user_type === 1) {
+          localStorage.setItem('isAdmin', 'true');
         } else {
-          if (loginMessageOk && loginMessageErr) {
-            // Mostrar mensaje de éxito
-            loginMessageErr.style.display = 'block';
-            loginMessageErr.innerHTML = data.message;
-            loginMessageOk.style.display = 'none';
-          }
+          localStorage.setItem('isAdmin', 'false');
         }
+
+        if (loginMessageOk && loginMessageErr) {
+          loginMessageOk.style.display = 'block';
+          loginMessageOk.innerHTML = data.message;
+          loginMessageErr.style.display = 'none';
+        }
+
+        setTimeout(() => {
+          window.location.href = data.user_type === 1 ? '/gestio/admin' : '/usuaris';
+        }, 2000);
       } else {
-        throw new Error(data.message || 'Error en la sol·licitud');
+        if (loginMessageOk && loginMessageErr) {
+          loginMessageErr.style.display = 'block';
+          loginMessageErr.innerHTML = data.message || "Error d'autenticació";
+          loginMessageOk.style.display = 'none';
+        }
       }
     } catch (error) {
-      // Mostrar mensaje de error
-      if (loginMessageOk && loginMessageErr) {
-        // Mostrar mensaje de éxito
+      if (loginMessageErr && loginMessageOk) {
         loginMessageErr.style.display = 'block';
+        loginMessageErr.innerHTML = 'Error del servidor';
         loginMessageOk.style.display = 'none';
       }
     }

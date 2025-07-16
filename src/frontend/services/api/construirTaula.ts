@@ -1,72 +1,75 @@
 // Definir los tipos de los parámetros
 type CallbackFunction = (fila: any, columna: string) => string;
- 
+
 // Función para construir una tabla a partir de datos de una API
-export function construirTaula(taulaId: string, apiUrl: string, id: string, columnas: string[], callback: CallbackFunction): void {
-  // Construir la URL completa con el ID
-  const url = apiUrl + id;
+export async function construirTaula(taulaId: string, apiUrl: string, id: string, columnas: string[], callback: CallbackFunction): Promise<void> {
+  try {
+    // Construir la URL completa con el ID
+    const url = apiUrl + id;
 
-  // Realizar la solicitud a la API
-  fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // Comprobar si no hay datos o si el array está vacío "No rows"
-      if (data.status === 'error') {
-        // Si no hay datos, mostrar el mensaje
-        const tablaContainer = document.getElementById(taulaId);
-        if (tablaContainer) {
-          tablaContainer.innerHTML = '<p>No hi ha cap informació disponible.</p>';
-        }
-        return; // Salir de la función
-      }
+    // Realizar la solicitud a la API
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      // Crear la tabla y su encabezado
-      const table = document.createElement('table');
-      table.classList.add('table', 'table-striped');
+    // Verificar si la respuesta fue correcta
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
 
-      const thead = document.createElement('thead');
-      thead.classList.add('table-primary');
-      const trHead = document.createElement('tr');
-      columnas.forEach((columna) => {
-        const th = document.createElement('th');
-        th.textContent = columna;
-        trHead.appendChild(th);
-      });
-      thead.appendChild(trHead);
-      table.appendChild(thead);
+    // Parsear la respuesta a JSON
+    const data = await response.json();
 
-      // Crear el cuerpo de la tabla
-      const tbody = document.createElement('tbody');
-      data.forEach((fila: any) => {
-        // Definir el tipo 'any' para 'fila' ya que no sabemos la estructura exacta
-        const trBody = document.createElement('tr');
-        columnas.forEach((columna) => {
-          const td = document.createElement('td');
-          td.innerHTML = callback(fila, columna);
-          trBody.appendChild(td);
-        });
-        tbody.appendChild(trBody);
-      });
-      table.appendChild(tbody);
+    // Accede a la propiedad 'data' que contiene los resultados
+    const books = data.data;
 
-      // Agregar la tabla al contenedor deseado
+    // Comprobar si no hay datos o si el array está vacío
+    if (data.status === 'error' || books.length === 0) {
       const tablaContainer = document.getElementById(taulaId);
       if (tablaContainer) {
-        tablaContainer.innerHTML = '';
-        tablaContainer.appendChild(table);
+        tablaContainer.innerHTML = '<p>No hi ha cap informació disponible.</p>';
       }
-    })
-    .catch((error) => {
-      console.error('Error en la solicitud:', error);
+      return; // Salir de la función
+    }
+
+    // Crear la tabla y su encabezado
+    const table = document.createElement('table');
+    table.classList.add('table', 'table-striped');
+
+    const thead = document.createElement('thead');
+    thead.classList.add('table-primary');
+    const trHead = document.createElement('tr');
+    columnas.forEach((columna) => {
+      const th = document.createElement('th');
+      th.textContent = columna;
+      trHead.appendChild(th);
     });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+
+    // Crear el cuerpo de la tabla
+    const tbody = document.createElement('tbody');
+    books.forEach((fila: any) => {
+      const trBody = document.createElement('tr');
+      columnas.forEach((columna) => {
+        const td = document.createElement('td');
+        td.innerHTML = callback(fila, columna);
+        trBody.appendChild(td);
+      });
+      tbody.appendChild(trBody);
+    });
+    table.appendChild(tbody);
+
+    // Agregar la tabla al contenedor deseado
+    const tablaContainer = document.getElementById(taulaId);
+    if (tablaContainer) {
+      tablaContainer.innerHTML = ''; // Limpiar el contenido anterior
+      tablaContainer.appendChild(table); // Añadir la nueva tabla
+    }
+  } catch (error) {
+    console.error('Error en la solicitud:', error);
+  }
 }

@@ -20547,6 +20547,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_actualitzarDades__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/actualitzarDades */ "./src/frontend/utils/actualitzarDades.ts");
 /* harmony import */ var _taulaLlistatPersones__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./taulaLlistatPersones */ "./src/frontend/pages/persona/taulaLlistatPersones.ts");
 /* harmony import */ var _fitxaPersona__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./fitxaPersona */ "./src/frontend/pages/persona/fitxaPersona.ts");
+/* harmony import */ var _services_api_construirTaula__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../services/api/construirTaula */ "./src/frontend/services/api/construirTaula.ts");
+
 
 
 
@@ -20565,6 +20567,21 @@ function persona() {
     }
     else if (pageType[2] === 'fitxa-persona') {
         (0,_fitxaPersona__WEBPACK_IMPORTED_MODULE_3__.fitxaPersona)('/api/persones/get/?persona=', pageType[3], 'persona', function (data) {
+            if (data.grup_ids.includes('0197b088-1a25-72c4-8b5b-d7e2ee27de7c')) {
+                (0,_services_api_construirTaula__WEBPACK_IMPORTED_MODULE_4__.construirTaula)('taula1', '/api/biblioteca/get/?type=autorLlibres&id=', data.id, ['Titol', 'Any', 'Accions'], function (fila, columna) {
+                    if (columna.toLowerCase() === 'titol') {
+                        // Manejar el caso del título
+                        return '<a href="' + window.location.origin + '/gestio/biblioteca/fitxa-llibre/' + fila['slug'] + '">' + fila['titol'] + '</a>';
+                    }
+                    else if (columna.toLowerCase() === 'accions') {
+                        return `<button onclick="window.location.href='${window.location.origin}/gestio/biblioteca/modifica-llibre/${fila['slug']}'" class="button btn-petit">Modificar</button>`;
+                    }
+                    else {
+                        // Manejar otros casos
+                        return fila[columna.toLowerCase()];
+                    }
+                });
+            }
             /* construirTaula('taula1', '/api/cinema/get/actor-pelicules?slug=', data.slug, ['Titol', 'Any', 'Rol'], function (fila, columna) {
                  if (columna.toLowerCase() === 'titol') {
                    // Manejar el caso del título
@@ -20681,7 +20698,7 @@ function taulaLlistatPersones() {
             containerId: 'taulaLlistatPersones',
             columns,
             filterKeys: ['nom', 'cognoms'],
-            filterByField: 'grup_ca',
+            filterByField: 'grup',
         });
     });
 }
@@ -21203,68 +21220,79 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   construirTaula: () => (/* binding */ construirTaula)
 /* harmony export */ });
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 // Función para construir una tabla a partir de datos de una API
 function construirTaula(taulaId, apiUrl, id, columnas, callback) {
-    // Construir la URL completa con el ID
-    const url = apiUrl + id;
-    // Realizar la solicitud a la API
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-        .then((response) => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-        .then((data) => {
-        // Comprobar si no hay datos o si el array está vacío "No rows"
-        if (data.status === 'error') {
-            // Si no hay datos, mostrar el mensaje
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // Construir la URL completa con el ID
+            const url = apiUrl + id;
+            // Realizar la solicitud a la API
+            const response = yield fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            // Verificar si la respuesta fue correcta
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            // Parsear la respuesta a JSON
+            const data = yield response.json();
+            // Accede a la propiedad 'data' que contiene los resultados
+            const books = data.data;
+            // Comprobar si no hay datos o si el array está vacío
+            if (data.status === 'error' || books.length === 0) {
+                const tablaContainer = document.getElementById(taulaId);
+                if (tablaContainer) {
+                    tablaContainer.innerHTML = '<p>No hi ha cap informació disponible.</p>';
+                }
+                return; // Salir de la función
+            }
+            // Crear la tabla y su encabezado
+            const table = document.createElement('table');
+            table.classList.add('table', 'table-striped');
+            const thead = document.createElement('thead');
+            thead.classList.add('table-primary');
+            const trHead = document.createElement('tr');
+            columnas.forEach((columna) => {
+                const th = document.createElement('th');
+                th.textContent = columna;
+                trHead.appendChild(th);
+            });
+            thead.appendChild(trHead);
+            table.appendChild(thead);
+            // Crear el cuerpo de la tabla
+            const tbody = document.createElement('tbody');
+            books.forEach((fila) => {
+                const trBody = document.createElement('tr');
+                columnas.forEach((columna) => {
+                    const td = document.createElement('td');
+                    td.innerHTML = callback(fila, columna);
+                    trBody.appendChild(td);
+                });
+                tbody.appendChild(trBody);
+            });
+            table.appendChild(tbody);
+            // Agregar la tabla al contenedor deseado
             const tablaContainer = document.getElementById(taulaId);
             if (tablaContainer) {
-                tablaContainer.innerHTML = '<p>No hi ha cap informació disponible.</p>';
+                tablaContainer.innerHTML = ''; // Limpiar el contenido anterior
+                tablaContainer.appendChild(table); // Añadir la nueva tabla
             }
-            return; // Salir de la función
         }
-        // Crear la tabla y su encabezado
-        const table = document.createElement('table');
-        table.classList.add('table', 'table-striped');
-        const thead = document.createElement('thead');
-        thead.classList.add('table-primary');
-        const trHead = document.createElement('tr');
-        columnas.forEach((columna) => {
-            const th = document.createElement('th');
-            th.textContent = columna;
-            trHead.appendChild(th);
-        });
-        thead.appendChild(trHead);
-        table.appendChild(thead);
-        // Crear el cuerpo de la tabla
-        const tbody = document.createElement('tbody');
-        data.forEach((fila) => {
-            // Definir el tipo 'any' para 'fila' ya que no sabemos la estructura exacta
-            const trBody = document.createElement('tr');
-            columnas.forEach((columna) => {
-                const td = document.createElement('td');
-                td.innerHTML = callback(fila, columna);
-                trBody.appendChild(td);
-            });
-            tbody.appendChild(trBody);
-        });
-        table.appendChild(tbody);
-        // Agregar la tabla al contenedor deseado
-        const tablaContainer = document.getElementById(taulaId);
-        if (tablaContainer) {
-            tablaContainer.innerHTML = '';
-            tablaContainer.appendChild(table);
+        catch (error) {
+            console.error('Error en la solicitud:', error);
         }
-    })
-        .catch((error) => {
-        console.error('Error en la solicitud:', error);
     });
 }
 

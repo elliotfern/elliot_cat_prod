@@ -1,11 +1,9 @@
 <div class="container">
-    <div class="barraNavegacio">
-        <h6><a href="<?php echo APP_INTRANET; ?>">Intranet</a> > <a href="<?php echo APP_INTRANET . $url['historia']; ?>">Història</a> > <a href="<?php echo APP_INTRANET . $url['historia']; ?>/llistat-personatges">LListat personatges històrics</a> </h6>
-    </div>
-
+    <div id="barraNavegacioContenidor"></div>
     <main>
         <div class="container contingut">
-            <h1>Història: <span id="nom"></span></h1>
+            <h1>Base de dades persones</h1>
+            <h2><span id="nom"></span></h2>
 
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['persona']; ?>/modifica-persona/<?php echo $slug; ?>'" class="button btn-gran btn-secondari">Modifica fitxa</button>
 
@@ -26,13 +24,12 @@
             </div>
 
             <hr>
-            <h4>Càrrecs/responsabilitats:</h4>
-
             <div class="table-responsive">
-                <table id="taula1" class="table table-striped"></table>
+                <h4><span id="subTaula"></span></h4>
+                <div class="table-responsive">
+                    <table id="taula1" class="table table-striped"></table>
+                </div>
             </div>
-
         </div>
-
     </main>
 </div>

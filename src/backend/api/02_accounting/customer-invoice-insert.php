@@ -99,7 +99,7 @@ if (empty($data["facPaymentType"])) {
 }
 
 if (!isset($hasError)) {
-  $sql = "INSERT INTO epgylzqu_elliotfern_intranet.db_accounting_soletrade_invoices_customers SET idUser=:idUser, facConcepte=:facConcepte, facData=:facData, facDueDate=:facDueDate, facSubtotal=:facSubtotal, facFees=:facFees, facTotal=:facTotal, facVAT=:facVAT, facIva=:facIva, facEstat=:facEstat, facPaymentType=:facPaymentType";
+  $sql = "INSERT INTO db_accounting_soletrade_invoices_customers SET idUser=:idUser, facConcepte=:facConcepte, facData=:facData, facDueDate=:facDueDate, facSubtotal=:facSubtotal, facFees=:facFees, facTotal=:facTotal, facVAT=:facVAT, facIva=:facIva, facEstat=:facEstat, facPaymentType=:facPaymentType";
 
 
   global $conn;

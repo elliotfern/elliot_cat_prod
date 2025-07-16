@@ -67,6 +67,6 @@ export async function taulaLlistatPersones() {
     containerId: 'taulaLlistatPersones',
     columns,
     filterKeys: ['nom', 'cognoms'],
-    filterByField: 'grup_ca',
+    filterByField: 'grup',
   });
 }

@@ -1,0 +1,65 @@
+name: Deploy Elliot.cat web
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout del código
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Configurar la clave SSH para el servidor
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # 3. Configurar Node.js (para construir assets)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16' # Usa la versión que necesita tu proyecto
+
+      # 4. Instalar dependencias de Node.js
+      - name: Install dependencies (npm)
+        run: |
+          cd ${{ github.workspace }}  # Cambia a la carpeta del repositorio
+          npm install  # O "yarn install" si usas Yarn
+
+      # 5. Ejecutar Webpack para construir los assets
+      - name: Build assets with Webpack
+        run: |
+          cd ${{ github.workspace }}  # Cambia a la carpeta del repositorio
+          npm run build  # O "npm run dev" según necesites
+
+      # 6. Agregar la clave del servidor remoto a known_hosts
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 87.98.230.129 >> ~/.ssh/known_hosts
+
+      # 6. Subir los archivos generados al servidor
+      - name: Upload built assets to server
+        run: |
+          scp -r ${{ github.workspace }}/dist/* epgylzqu@87.98.230.129:/home/epgylzqu/elliotfern.com/dist
+
+      # 7. Desplegar en el servidor via SSH
+      - name: Deploy to server via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no epgylzqu@87.98.230.129 << 'EOF'
+            cd /home/epgylzqu/elliotfern.com
+
+            # Verificar si hay cambios locales y guardarlos
+            git stash || echo "No hay cambios locales para guardar"
+
+            git pull origin main
+
+            # Otros comandos de deploy si es necesario
+            # composer install --no-dev --optimize-autoloader
+          EOF

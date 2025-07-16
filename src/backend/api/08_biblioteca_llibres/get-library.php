@@ -153,22 +153,42 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
     // 4) Authors page > list of books
     // ruta GET => "https://control.elliotfern/api/library/authors/books/9"
 } elseif ((isset($_GET['type']) && $_GET['type'] == 'autorLlibres') && (isset($_GET['id']))) {
-    $id = $_GET['id'];
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT b.id, b.any, b.titol, b.slug
-                FROM 08_db_biblioteca_llibres AS b
-                WHERE b.autor = UNHEX(REPLACE(:id, '-', ''))
-                ORDER BY b.any ASC"
-    );
-    $stmt->execute(['id' => $id]);
+    $db = new Database();
 
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+    // Quitar guiones del UUID
+    $id = str_replace('-', '', $_GET['id']);
+
+    $query = "SELECT b.any, b.titol, b.slug
+                FROM db_llibres AS b
+                LEFT JOIN db_llibres_autors AS la ON b.id = la.llibre_id
+                WHERE la.autor_id = UNHEX(:id)
+                ORDER BY b.any ASC";
+
+    try {
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, false);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-    echo json_encode($data);
 
 
     // 5) Authors page
@@ -225,41 +245,6 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         echo json_encode($row);  // Codifica la fila como un objeto JSON
     }
 
-    // ruta GET => "/api/biblioteca/get/?colleccio=123"
-} elseif (isset($_GET['colleccio']) && is_numeric($_GET['colleccio'])) {
-    $id = $_GET['colleccio'];
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT bc.nomCollection AS Nom, bookc.ordre AS Ordre
-                FROM 08_db_biblioteca_llibres AS book
-                INNER JOIN 08_aux_biblioteca_colleccions_llibres AS bookc ON book.id = bookc.idBook
-                INNER JOIN 08_aux_biblioteca_colleccions AS bc ON bookc.idCollection = bc.id
-                WHERE book.id = :id");
-    $stmt->execute(['id' => $id]);
-
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
-
-    // 7) Profession author
-    // ruta GET => "/api/library/professio"
-} elseif (isset($_GET['professio'])) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT r.id, r.professio_ca AS professio_ca
-                FROM aux_professions AS r
-                ORDER BY r.professio_ca"
-    );
-    $stmt->execute();
-
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
 
     // 8) Movement author
     // ruta GET => "/api/library/moviment"
@@ -335,23 +320,6 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
     }
     echo json_encode($data);
 
-    // 10) Llistat autors
-    // ruta GET => "/api/biblioteca/auxiliars/?type=autors"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'autors')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT a.id, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet
-                FROM db_persones AS a
-                WHERE a.grup = 1
-                ORDER BY a.cognoms"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
 
     // 11) Llibre imatge
     // ruta GET => "/api/biblioteca/auxiliars/?type=oficis"
@@ -380,40 +348,6 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         "SELECT e.id, e.editorial
                 FROM 08_aux_biblioteca_editorials AS e
                 ORDER BY e.editorial ASC"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
-
-    // 11) Gèneres
-    // ruta GET => "/api/biblioteca/auxiliars/?type=generes"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'generes')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT g.id, g.genere_cat
-                    FROM 08_aux_biblioteca_generes_literaris AS g
-                    ORDER BY g.genere_cat ASC"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
-
-    // 11) Gèneres
-    // ruta GET => "/api/biblioteca/auxiliars/?type=subgeneres"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'subgeneres')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT g.id, g.sub_genere_cat
-                    FROM 08_aux_biblioteca_sub_generes_literaris AS g
-                    ORDER BY g.sub_genere_cat ASC"
     );
     $stmt->execute();
     if ($stmt->rowCount() === 0) echo ('No rows');

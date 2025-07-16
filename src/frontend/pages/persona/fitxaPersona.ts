@@ -11,6 +11,7 @@ interface PersonaData {
   descripcio: string;
   id: string;
   slug: string;
+  grup_ids: string;
 }
 
 // Función para realizar la solicitud Axios a la API
