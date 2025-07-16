@@ -24,52 +24,47 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16' # Usa la versión que necesita tu proyecto
+          node-version: '16'
 
       # 4. Instalar dependencias de Node.js
       - name: Install dependencies (npm)
         run: |
-          cd ${{ github.workspace }}  # Cambia a la carpeta del repositorio
-          npm install  # O "yarn install" si usas Yarn
+          cd ${{ github.workspace }}
+          npm install
 
-      # 5. Actualizar el numero de version del bundle.js
+      # 5. Actualizar el número de versión en footer-end.php
       - name: Bump bundle version
         run: node bump-version.cjs
 
-      # 5. Ejecutar Webpack para construir los assets
+      # 6. Construir los assets con Webpack
       - name: Build assets with Webpack
         run: |
-          cd ${{ github.workspace }}  # Cambia a la carpeta del repositorio
-          npm run build  # O "npm run dev" según necesites
+          cd ${{ github.workspace }}
+          npm run build
 
-      # 6. Agregar la clave del servidor remoto a known_hosts
+      # 7. Agregar la clave del servidor remoto a known_hosts
       - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H 87.98.230.129 >> ~/.ssh/known_hosts
 
-      # 6. Subir los archivos generados al servidor
-      - name: Upload built assets to server
+      # 8. Subir los archivos generados y el footer-end.php modificado al servidor
+      - name: Upload built assets and footer to server
         run: |
           scp -r ${{ github.workspace }}/dist/* epgylzqu@87.98.230.129:/home/epgylzqu/elliotfern.com/dist
+          scp ${{ github.workspace }}/public/includes/footer-end.php epgylzqu@87.98.230.129:/home/epgylzqu/elliotfern.com/public/includes/
 
-      # 7. Desplegar en el servidor via SSH
+      # 9. Actualizar el código en el servidor vía SSH
       - name: Deploy to server via SSH
         run: |
           ssh -o StrictHostKeyChecking=no epgylzqu@87.98.230.129 << 'EOF'
             cd /home/epgylzqu/elliotfern.com
 
-            # Verificar si hay cambios locales y guardarlos
             git stash || echo "No hay cambios locales para guardar"
-
-            # Borrar archivos sin seguimiento que bloquean el pull
             git clean -f -d
-
-            # Limpiar stash para evitar conflictos
             git stash drop || echo "No stash para borrar"
 
             git pull origin main
 
-            # Otros comandos de deploy si es necesario
-            # composer install --no-dev --optimize-autoloader
+            # Aquí puedes añadir más comandos, como composer install si es necesario
           EOF
