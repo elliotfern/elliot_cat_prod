@@ -62,6 +62,12 @@ jobs:
             # Verificar si hay cambios locales y guardarlos
             git stash || echo "No hay cambios locales para guardar"
 
+            # Borrar archivos sin seguimiento que bloquean el pull
+            git clean -f -d -x
+
+            # Limpiar stash para evitar conflictos
+            git stash drop || echo "No stash para borrar"
+
             git pull origin main
 
             # Otros comandos de deploy si es necesario
