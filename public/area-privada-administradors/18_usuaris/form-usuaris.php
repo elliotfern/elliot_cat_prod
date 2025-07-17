@@ -131,21 +131,24 @@ if ($modificaBtn === 1) {
                 throw new Error(`Error: ${response.statusText}`);
             }
 
-            const data = await response.json();
+            const result = await response.json();
 
-            const newContent = `Usuari: ${data.nom} ${data.cognom}`;
+            // Acceder a los datos dentro de result.data
+            const user = result.data;
+
+            const newContent = `Usuari: ${user.nom} ${user.cognom}`;
             const h2Element = document.getElementById('nomEspai');
             h2Element.innerHTML = newContent;
 
-            document.getElementById("id").value = data.id;
-            document.getElementById('nom').value = data.nom;
-            document.getElementById('email').value = data.email;
-            document.getElementById('cognom').value = data.cognom;
+            document.getElementById("id").value = user.id;
+            document.getElementById('nom').value = user.nom;
+            document.getElementById('email').value = user.email;
+            document.getElementById('cognom').value = user.cognom;
 
             // Asignar el valor al campo select según el tipo de usuario
             const userTypeSelect = document.getElementById('userType');
             if (userTypeSelect) {
-                userTypeSelect.value = data.userType; // Esto selecciona el valor adecuado (1 o 2)
+                userTypeSelect.value = user.userType; // Esto selecciona el valor adecuado (1 o 2)
             }
 
         } catch (error) {
