@@ -1,8 +1,7 @@
 export interface Usuari {
-  nom: string;
-  cognom: string;
-  dateCreated: string;
+  name: string;
+  createdAt: string;
   id: number;
   email: string;
-  tipus: string;
+  type: string;
 }

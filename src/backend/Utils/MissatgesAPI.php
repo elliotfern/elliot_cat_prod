@@ -32,3 +32,4 @@ class MissatgesAPI
         return $messages[$key] ?? $messages['default'];
     }
 }
+ 

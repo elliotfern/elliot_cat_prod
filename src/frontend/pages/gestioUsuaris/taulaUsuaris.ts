@@ -10,16 +10,16 @@ export async function taulaUsuaris() {
   const columns: TaulaDinamica<Usuari>[] = [
     {
       header: 'Nom i cognoms',
-      field: 'nom',
-      render: (_: unknown, row: Usuari) => `${row.nom} ${row.cognom}`,
+      field: 'name',
+      render: (_: unknown, row: Usuari) => `${row.name}`,
     },
     { header: 'Email', field: 'email' },
-    { header: 'Tipus', field: 'tipus' },
+    { header: 'Tipus', field: 'type' },
     {
       header: 'Data alta',
-      field: 'dateCreated',
+      field: 'createdAt',
       render: (_: unknown, row: Usuari) => {
-        const inici = formatData(row.dateCreated);
+        const inici = formatData(row.createdAt);
         return `${inici}`;
       },
     },
@@ -38,7 +38,7 @@ export async function taulaUsuaris() {
     url: `https://api.elliot.cat/api/users`,
     containerId: 'taulaUsuaris',
     columns,
-    filterKeys: ['nom', 'cognom'],
-    filterByField: 'tipus',
+    filterKeys: ['name'],
+    filterByField: 'type',
   });
 }
