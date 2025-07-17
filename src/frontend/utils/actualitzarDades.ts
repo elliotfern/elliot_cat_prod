@@ -8,20 +8,34 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
     return;
   }
 
-  const rawFormData = new FormData(form);
-  const formData: { [key: string]: FormDataEntryValue | FormDataEntryValue[] } = {};
+  // Detectar todos los campos con data-type="number"
+  const numericFields = new Set<string>();
+  form.querySelectorAll('[data-type="number"]').forEach((el) => {
+    if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
+      if (el.name) numericFields.add(el.name);
+    }
+  });
 
-  new FormData(form).forEach((value, key) => {
+  const formDataRaw = new FormData(form);
+  const formData: { [key: string]: FormDataEntryValue | FormDataEntryValue[] | number } = {};
+
+  formDataRaw.forEach((value, key) => {
     const cleanKey = key.endsWith('[]') ? key.slice(0, -2) : key;
+
+    let processedValue: FormDataEntryValue | number = value;
+    if (numericFields.has(cleanKey)) {
+      const n = parseInt(value.toString(), 10);
+      processedValue = isNaN(n) ? value : n;
+    }
 
     if (formData[cleanKey]) {
       if (Array.isArray(formData[cleanKey])) {
-        (formData[cleanKey] as FormDataEntryValue[]).push(value);
+        (formData[cleanKey] as FormDataEntryValue[]).push(processedValue as FormDataEntryValue);
       } else {
-        formData[cleanKey] = [formData[cleanKey], value];
+        formData[cleanKey] = [formData[cleanKey] as FormDataEntryValue, processedValue as FormDataEntryValue];
       }
     } else {
-      formData[cleanKey] = value;
+      formData[cleanKey] = processedValue;
     }
   });
 

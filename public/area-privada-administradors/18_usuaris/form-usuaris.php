@@ -55,10 +55,12 @@ if ($modificaBtn === 1) {
         <?php
         if ($modificaBtn === 1) {
         ?>
-            <input type="hidden" id="id" name="id" value="">
+            <input type="hidden" data-type="number" id="id" name="id" value="">
         <?php
         }
         ?>
+
+        <input type="hidden" data-type="number" id="avatar" name="avatar" value="1">
 
         <div class="col-md-4">
             <label>Email</label>
@@ -75,17 +77,17 @@ if ($modificaBtn === 1) {
 
         <div class="col-md-4">
             <label>Nom:</label>
-            <input class="form-control" type="text" name="nom" id="nom" value="">
+            <input class="form-control" type="text" name="firstName" id="firstName" value="">
         </div>
 
         <div class="col-md-4">
             <label>Cognom:</label>
-            <input class="form-control" type="text" name="cognom" id="cognom" value="">
+            <input class="form-control" type="text" name="lastName" id="lastName" value="">
         </div>
 
         <div class="col-md-4">
             <label for="userType">Tipus d'usuari:</label>
-            <select id="userType" name="userType" class="form-control">
+            <select id="userType" data-type="number" name="userType" class="form-control">
                 <option value="1">Administrador</option>
                 <option value="2">Usuari</option>
             </select>
