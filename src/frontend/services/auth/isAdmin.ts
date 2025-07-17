@@ -1,12 +1,31 @@
-import { setWithExpiry, getWithExpiry } from '../localStorage/localStorage';
-
-// Función para obtener el estado de admin, usando localStorage para evitar llamadas repetidas
 export async function getIsAdmin() {
-  const isAdmin = getWithExpiry('isAdmin');
-  if (isAdmin !== null) return isAdmin;
+  const item = localStorage.getItem('isAdmin');
 
+  if (item) {
+    try {
+      const parsed = JSON.parse(item);
+      const now = Date.now();
+
+      if (parsed.expiry > now) {
+        return parsed.value; // válido
+      } else {
+        localStorage.removeItem('isAdmin'); // expirado
+      }
+    } catch (e) {
+      console.error('Valor de isAdmin corrupto:', e);
+      localStorage.removeItem('isAdmin');
+    }
+  }
+
+  // Si no hay valor o está expirado, pedir a la API
   const isAdminFromApi = await isAdminUser();
-  setWithExpiry('isAdmin', isAdminFromApi, 1800); // 30 minutos de duración
+  localStorage.setItem(
+    'isAdmin',
+    JSON.stringify({
+      value: isAdminFromApi,
+      expiry: Date.now() + 30 * 60 * 1000, // 30 minutos
+    })
+  );
   return isAdminFromApi;
 }
 

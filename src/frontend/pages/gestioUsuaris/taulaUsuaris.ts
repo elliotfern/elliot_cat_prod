@@ -35,7 +35,7 @@ export async function taulaUsuaris() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/auth/get/usuaris`,
+    url: `https://api.elliot.cat/api/users`,
     containerId: 'taulaUsuaris',
     columns,
     filterKeys: ['nom', 'cognom'],
