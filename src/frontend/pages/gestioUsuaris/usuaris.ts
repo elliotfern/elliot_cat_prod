@@ -21,7 +21,7 @@ export function usuaris() {
     if (autor) {
       // Lanzar actualizador de datos
       autor.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'formUsuari', '/api/auth/post/usuari');
+        transmissioDadesDB(event, 'POST', 'formUsuari', 'https://api.elliot.cat/api/users');
       });
     }
   }
