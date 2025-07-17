@@ -10,10 +10,11 @@ export function usuaris() {
     taulaUsuaris();
   } else if (pageType[2] === 'modifica-usuari') {
     const autor = document.getElementById('formUsuari');
+    const id = pageType[3];
     if (autor) {
       // Lanzar actualizador de datos
       autor.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'PUT', 'formUsuari', '/api/auth/put/usuari');
+        transmissioDadesDB(event, 'PUT', 'formUsuari', 'https://api.elliot.cat/api/users/' + id);
       });
     }
   } else if (pageType[2] === 'nou-usuari') {

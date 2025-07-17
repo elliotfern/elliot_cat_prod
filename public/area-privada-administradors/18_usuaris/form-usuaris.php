@@ -120,7 +120,7 @@ if ($modificaBtn === 1) {
 
 <script>
     async function formUpdateLlibre(id) {
-        const urlAjax = "/api/auth/get/usuari/" + id;
+        const urlAjax = "https://api.elliot.cat/api/users/" + id;
 
         try {
             const response = await fetch(urlAjax, {
