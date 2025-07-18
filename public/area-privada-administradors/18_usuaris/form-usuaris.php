@@ -55,7 +55,7 @@ if ($modificaBtn === 1) {
         <?php
         if ($modificaBtn === 1) {
         ?>
-            <input type="hidden" data-type="number" id="id" name="id" value="">
+            <input type="hidden" id="id" name="id" value="">
         <?php
         }
         ?>
@@ -136,14 +136,14 @@ if ($modificaBtn === 1) {
             // Acceder a los datos dentro de result.data
             const user = result.data;
 
-            const newContent = `Usuari: ${user.nom} ${user.cognom}`;
+            const newContent = `Usuari: ${user.firstName} ${user.lastName}`;
             const h2Element = document.getElementById('nomEspai');
             h2Element.innerHTML = newContent;
 
             document.getElementById("id").value = user.id;
-            document.getElementById('nom').value = user.nom;
+            document.getElementById('firstName').value = user.firstName;
             document.getElementById('email').value = user.email;
-            document.getElementById('cognom').value = user.cognom;
+            document.getElementById('lastName').value = user.lastName;
 
             // Asignar el valor al campo select según el tipo de usuario
             const userTypeSelect = document.getElementById('userType');

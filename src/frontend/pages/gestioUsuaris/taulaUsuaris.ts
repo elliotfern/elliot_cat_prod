@@ -1,4 +1,5 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
+import { registerDeleteCallback, initDeleteHandlers } from '../../components/renderTaula/handleDelete';
 import { formatData } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
@@ -6,6 +7,7 @@ import { Usuari } from '../../types/Usuari';
 
 export async function taulaUsuaris() {
   const isAdmin = await getIsAdmin();
+  const reloadKey = 'reload-taula-usuaris';
 
   const columns: TaulaDinamica<Usuari>[] = [
     {
@@ -34,6 +36,23 @@ export async function taulaUsuaris() {
     });
   }
 
+  if (isAdmin) {
+    columns.push({
+      header: '',
+      field: 'id',
+      render: (_: unknown, row: Usuari) => `
+    <button 
+      type="button"
+      class="btn btn-danger btn-sm delete-button"
+      data-id="${row.id}" 
+      data-url="https://api.elliot.cat/api/users/${row.id}"
+      data-reload-callback="${reloadKey}"
+    >
+      Elimina
+    </button>`,
+    });
+  }
+
   renderDynamicTable({
     url: `https://api.elliot.cat/api/users`,
     containerId: 'taulaUsuaris',
@@ -41,4 +60,10 @@ export async function taulaUsuaris() {
     filterKeys: ['name'],
     filterByField: 'type',
   });
+
+  // Registra el callback con una clave única
+  registerDeleteCallback(reloadKey, () => taulaUsuaris());
+
+  // Inicia el listener una sola vez
+  initDeleteHandlers();
 }
