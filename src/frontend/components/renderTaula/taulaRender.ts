@@ -16,7 +16,7 @@ export async function renderDynamicTable<T>({ url, columns, containerId, rowsPer
 
   let currentPage = 1;
   let filteredData = [...data];
-  let activeButtonFilter: T[keyof T] | null = null;
+  let activeButtonFilter: string | null = null;
 
   // Crear input de búsqueda
   const searchInput = document.createElement('input');
@@ -53,7 +53,14 @@ export async function renderDynamicTable<T>({ url, columns, containerId, rowsPer
 
   function applyFilters() {
     const search = normalizeText(searchInput.value);
-    filteredData = data.filter((row) => !activeButtonFilter || row[filterByField!] === activeButtonFilter).filter((row) => (search.length === 0 ? true : filterKeys.some((key) => normalizeText(String(row[key])).includes(search))));
+    filteredData = data
+      .filter(
+        (row) =>
+          !activeButtonFilter ||
+          // Si el filtro es sobre un array (como grups), mira si incluye el filtro
+          (Array.isArray(row[filterByField!]) ? (row[filterByField!] as unknown as string[]).includes(activeButtonFilter!) : row[filterByField!] === activeButtonFilter)
+      )
+      .filter((row) => (search.length === 0 ? true : filterKeys.some((key) => normalizeText(String(row[key])).includes(search))));
 
     currentPage = 1;
     renderTable();
@@ -62,7 +69,14 @@ export async function renderDynamicTable<T>({ url, columns, containerId, rowsPer
   function renderFilterButtons() {
     if (!filterByField) return;
 
-    let uniqueValues = Array.from(new Set(data.map((row) => row[filterByField]))).filter(Boolean) as T[keyof T][];
+    let uniqueValues: string[] = [];
+
+    if (data.length > 0 && Array.isArray(data[0][filterByField!])) {
+      // Si el campo es un array (como grups)
+      uniqueValues = Array.from(new Set(data.flatMap((row) => row[filterByField!] as unknown as string[]))).filter(Boolean);
+    } else {
+      uniqueValues = Array.from(new Set(data.map((row) => row[filterByField!]))).filter(Boolean) as string[];
+    }
 
     uniqueValues = uniqueValues.sort((a, b) => {
       return String(a).localeCompare(String(b), 'ca', { sensitivity: 'base' });

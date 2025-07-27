@@ -45,7 +45,7 @@ export async function taulaLlistatPersones() {
             </a>`;
       },
     },
-    { header: 'País', field: 'pais_cat' },
+    { header: 'País', field: 'paisAutor' },
 
     { header: 'Grup', field: 'grup', render: (_: unknown, row: Persona) => `${row.grups.join(', ')}` },
     {

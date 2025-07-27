@@ -2,7 +2,7 @@ export interface Persona {
   slug: string;
   AutNom: string;
   AutCognom1: string;
-  pais_cat: string;
+  paisAutor: string;
   country: string;
   yearDie: string;
   yearBorn: string;
