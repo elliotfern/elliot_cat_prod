@@ -43,7 +43,7 @@ export async function taulaUsuaris() {
       render: (_: unknown, row: Usuari) => `
     <button 
       type="button"
-      class="btn btn-danger btn-sm delete-button"
+      class="btn-petit"
       data-id="${row.id}" 
       data-url="https://api.elliot.cat/api/users/${row.id}"
       data-reload-callback="${reloadKey}"

@@ -13,5 +13,7 @@ export interface Persona {
   grup: number;
   nameImg: string;
   professio_ca: string;
-  grup_ca: string;
+  grups: string[];
+  nomComplet: string;
+  anys: string;
 }

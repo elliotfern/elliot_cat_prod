@@ -21,7 +21,7 @@ export async function taulaLlistatPersones() {
   }
 
   const columns: TaulaDinamica<Persona>[] = [
-    {
+    /*{
       header: '',
       field: 'nameImg',
       render: (_: unknown, row: Persona) => {
@@ -33,24 +33,25 @@ export async function taulaLlistatPersones() {
               <img src="${fullImgUrl}" style="height:70px">
             </a>`;
       },
-    },
+    },*/
     {
       header: 'Nom i cognoms',
       field: 'nom',
       render: (_: unknown, row: Persona) => {
         // Genera el enlace dinámico sin la imagen
-        return `<a id="${row.id}" title="${row.nom} ${row.cognoms}" 
+        return `<a id="${row.id}" title="${row.nomComplet}" 
                href="https://${window.location.hostname}${gestioUrl}/base-dades-persones/fitxa-persona/${row.slug}">
-               ${row.nom} ${row.cognoms}
+               ${row.nomComplet}
             </a>`;
       },
     },
     { header: 'País', field: 'pais_cat' },
-    { header: 'Grup', field: 'grup' },
+
+    { header: 'Grup', field: 'grup', render: (_: unknown, row: Persona) => `${row.grups.join(', ')}` },
     {
       header: 'Anys',
       field: 'yearBorn',
-      render: (_: unknown, row: Persona) => `${row.yearDie ? `${row.yearBorn} - ${row.yearDie}` : row.yearBorn}`,
+      render: (_: unknown, row: Persona) => `${row.anys}`,
     },
   ];
 
@@ -63,10 +64,10 @@ export async function taulaLlistatPersones() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/persones/get/?type=llistatPersones`,
+    url: `https://api.elliot.cat/api/persones`,
     containerId: 'taulaLlistatPersones',
     columns,
-    filterKeys: ['nom', 'cognoms'],
-    filterByField: 'grup',
+    filterKeys: ['nomComplet'],
+    filterByField: 'grups',
   });
 }
