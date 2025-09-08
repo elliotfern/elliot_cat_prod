@@ -44,7 +44,7 @@ const qsId = (): number => {
 const fmtDT = (iso?: string) => {
   if (!iso) return '—';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleString('ca-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleString('ca-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
 };
 
 const esc = (s: unknown) =>
@@ -76,20 +76,18 @@ function renderCard(d: PerfilCV): string {
           <div class="col">
             <h2 class="h4 mb-1">${esc(d.nom_complet)}</h2>
             <div class="text-muted small">
-            <span><strong>Adreça:</strong> ${esc(d.adreca ?? '—')} (${esc(d.city ?? '—')} - ${esc(d.pais_cat ?? '—')} )</span>
-              · <span><strong>Disponibilitat:</strong> ${esc(dispoTxt)}</span>
+            <p><span><strong>Adreça:</strong> ${esc(d.adreca ?? '—')} (${esc(d.city ?? '—')} - ${esc(d.pais_cat ?? '—')} )</span></p>
             </div>
             <div class="mt-2">
-              <a href="mailto:${esc(d.email)}" class="me-3">${esc(d.email)}</a>
-              ${d.tel ? `<span class="me-3">📞 ${esc(d.tel)}</span>` : ''}
-              ${d.web ? `<a href="${/^https?:\/\//i.test(d.web) ? esc(d.web) : `https://${esc(d.web)}`}" target="_blank" rel="noopener">🌐 ${esc(d.web)}</a>` : ''}
+              <p><a href="mailto:${esc(d.email)}" class="me-3">${esc(d.email)}</a></p>
+              <p>${d.tel ? `<span class="me-3">📞 ${esc(d.tel)}</span>` : ''}</p>
+              <p>${d.web ? `<a href="${/^https?:\/\//i.test(d.web) ? esc(d.web) : `https://${esc(d.web)}`}" target="_blank" rel="noopener">🌐 ${esc(d.web)}</a>` : ''}</p>
             </div>
           </div>
         </div>
         <hr>
         <div class="text-muted small">
-          <span><strong>Creat:</strong> ${esc(fmtDT(d.created_at))}</span>
-          <span><strong>Actualitzat:</strong> ${esc(fmtDT(d.updated_at))}</span>
+          <span><strong>Darrera actualització:</strong> ${esc(fmtDT(d.updated_at))}</span>
         </div>
     </div>
   `;
