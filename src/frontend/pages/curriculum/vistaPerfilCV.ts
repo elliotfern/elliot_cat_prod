@@ -16,6 +16,8 @@ interface PerfilCV {
   visibilitat: Vis;
   created_at: string; // ISO
   updated_at: string; // ISO
+  adreca: string;
+  pais_cat: string;
 }
 
 interface ApiResponse<T> {
@@ -66,8 +68,7 @@ function renderCard(d: PerfilCV): string {
   const visTxt = d.visibilitat === 1 || d.visibilitat === true ? 'Sí' : 'No';
 
   return `
-    <div class="card shadow-sm mb-3">
-      <div class="card-body">
+    <div class="container-fluid form">
         <div class="row g-3 align-items-center">
           <div class="col-auto">
             ${imgUrl ? `<img src="${esc(imgUrl)}" alt="Foto perfil" class="rounded" style="width:130px;height:130px;object-fit:cover;padding:15px">` : `<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:130px;height:130px;">—</div>`}
@@ -75,7 +76,7 @@ function renderCard(d: PerfilCV): string {
           <div class="col">
             <h2 class="h4 mb-1">${esc(d.nom_complet)}</h2>
             <div class="text-muted small">
-              <span><strong>Ciutat:</strong> ${esc(d.city ?? '—')}</span>
+            <span><strong>Adreça:</strong> ${esc(d.adreca ?? '—')} (${esc(d.city ?? '—')} - ${esc(d.pais_cat ?? '—')} )</span>
               · <span><strong>Disponibilitat:</strong> ${esc(dispoTxt)}</span>
             </div>
             <div class="mt-2">
@@ -88,10 +89,8 @@ function renderCard(d: PerfilCV): string {
         <hr>
         <div class="text-muted small">
           <span><strong>Creat:</strong> ${esc(fmtDT(d.created_at))}</span>
-          · <span><strong>Actualitzat:</strong> ${esc(fmtDT(d.updated_at))}</span>
-          · <span><strong>ID:</strong> ${d.id}</span>
+          <span><strong>Actualitzat:</strong> ${esc(fmtDT(d.updated_at))}</span>
         </div>
-      </div>
     </div>
   `;
 }
