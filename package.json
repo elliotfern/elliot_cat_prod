@@ -38,6 +38,7 @@
   "dependencies": {
     "bootstrap": "^5.3.3",
     "buffer": "^6.0.3",
+    "choices.js": "^11.1.0",
     "crypto-browserify": "^3.12.1",
     "leaflet": "^1.9.4",
     "process": "^0.11.10",

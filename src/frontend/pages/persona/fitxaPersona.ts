@@ -29,31 +29,32 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
       throw new Error('Error en la sol·licitud AJAX');
     }
 
-    const data = await response.json();
-    callback(data);
+    const json = await response.json();
 
-    // Asegúrate de que data sea un objeto o array adecuado
-    const data2 = Array.isArray(data) ? data[0] : data;
+    callback(json);
+
+    // aquí accedes directamente a la data de la persona
+    const persona = json.data;
 
     // Transformació de les dades
     // 1. Imatge
     const imgElement = document.getElementById('nameImg');
     const altElement = document.getElementById('alt');
     if (imgElement && altElement) {
-      (imgElement as HTMLImageElement).src = `https://media.elliot.cat/img/${tipus}/${data.nameImg}.jpg`;
-      altElement.innerHTML = `${data.alt}`;
+      (imgElement as HTMLImageElement).src = `https://media.elliot.cat/img/persona/${persona.img}.jpg`;
+      altElement.innerHTML = `${persona.img}`;
     }
 
     const nomElement = document.getElementById('nom');
     if (nomElement) {
-      (nomElement as HTMLElement).innerHTML = `${data.nom} ${data.cognoms}`;
+      (nomElement as HTMLElement).innerHTML = `${persona.nom} ${persona.cognoms}`;
     }
 
     // 2. Data creacio fitxa i actualitzacio
     const dateElement = document.getElementById('dateCreated');
     const dateElement2 = document.getElementById('dateModified');
     if (dateElement) {
-      const dateObj = new Date(data.dateCreated);
+      const dateObj = new Date(persona.dateCreated);
       const day = dateObj.getDate();
       const month = dateObj.getMonth() + 1; // Los meses van de 0 a 11
       const year = dateObj.getFullYear();
@@ -61,11 +62,11 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     }
 
     if (dateElement2) {
-      const dateObj = new Date(data.dateModified);
+      const dateObj = new Date(persona.dateModified);
       // Verifica si la fecha es válida
-      if (data2['dateModified'] == '0000-00-00') {
+      if (persona['dateModified'] == '0000-00-00') {
         dateElement2.textContent = '';
-      } else if (data2['dateModified'] == data2['dateCreated']) {
+      } else if (persona['dateModified'] == persona['dateCreated']) {
         dateElement2.textContent = '';
       } else {
         const day = dateObj.getDate();
@@ -76,13 +77,13 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     }
 
     // 3. Naixement
-    const anyNaixement = parseInt(data.anyNaixement, 10);
-    const diaNaixement = parseInt(data.diaNaixement);
-    const mesNaixement = parseInt(data.mesNaixement);
+    const anyNaixement = parseInt(persona.anyNaixement, 10);
+    const diaNaixement = parseInt(persona.diaNaixement);
+    const mesNaixement = parseInt(persona.mesNaixement);
 
-    const anyDefuncio2 = data.anyDefuncio ? parseInt(data.anyDefuncio, 10) : null;
-    const diaDefuncio = parseInt(data.diaDefuncio);
-    const mesDefuncio = parseInt(data.mesDefuncio);
+    const anyDefuncio2 = persona.anyDefuncio ? parseInt(persona.anyDefuncio, 10) : null;
+    const diaDefuncio = parseInt(persona.diaDefuncio);
+    const mesDefuncio = parseInt(persona.mesDefuncio);
 
     // Verificamos si el día o el mes son 0 o null, y en ese caso asignamos un string vacío ""
     const diaMostrar = isNaN(diaNaixement) || diaNaixement === 0 || diaNaixement === null ? '' : diaNaixement.toString();
@@ -95,7 +96,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
       dataNaixement = `${diaMostrar} ${mesosCatala[parseInt(mesMostrar) - 1]} ${anyNaixement}`;
     }
 
-    const anyDefuncio = parseInt(data.anyDefuncio, 10);
+    const anyDefuncio = parseInt(persona.anyDefuncio, 10);
     const anyActual = new Date().getFullYear();
 
     // calcul de l'edat
@@ -143,8 +144,8 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     }
 
     // 5. Ciutats
-    const ciutatNaixement = data.ciutatNaixement ? ` (${data.ciutatNaixement})` : '';
-    const ciutatDefuncio = data.ciutatDefuncio ? ` (${data.ciutatDefuncio})` : '';
+    const ciutatNaixement = persona.ciutatNaixement ? ` (${persona.ciutatNaixement})` : '';
+    const ciutatDefuncio = persona.ciutatDefuncio ? ` (${persona.ciutatDefuncio})` : '';
 
     // Ara injectem tota la informació al div "quadre-detalls"
     const quadreDetalls = document.querySelector('.quadre-detalls') as HTMLElement;
@@ -175,12 +176,11 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     parrafosHTML.push(
       {
         label: 'Gènere: ',
-        value: data.idSexe === 1 ? 'Home' : data.idSexe === 2 ? 'Dona' : 'Desconegut',
+        value: persona.genere,
       },
-      { label: 'Pais: ', value: data.pais_cat },
-      { label: 'Professió: ', value: data.grup },
-      { label: 'Pàgina Viquipèdia: ', value: `<a href="${data.web}" target="_blank" title="Web">Enllaç extern</a>` },
-      { label: 'Biografia: ', value: data.descripcio || 'No disponible' }
+      { label: 'Pais: ', value: persona.paisAutor },
+      { label: 'Pàgina Viquipèdia: ', value: `<a href="${persona.web}" target="_blank" title="Web">Enllaç extern</a>` },
+      { label: 'Biografia: ', value: persona.descripcio || 'No disponible' }
     );
 
     // Recorremos el array y agregamos cada párrafo al div

@@ -20,3 +20,4 @@ error_log
 # Ignorar archivos de configuración local (ejemplo para PHP)
 .env
 contra.php
+/src/backend/api/01_curriculum/definicio_taules.sql

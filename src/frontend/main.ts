@@ -21,6 +21,7 @@ import { lectorRss } from './pages/lectorRss/lectorRss';
 import { usuaris } from './pages/gestioUsuaris/usuaris';
 import { areaPrivadaUsuaris } from './pages/areaPrivadaUsuaris/funcions';
 import { transmissioDadesDB } from './utils/actualitzarDades';
+import { curriculum } from './pages/curriculum/curriculum';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -53,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
     auxiliars();
   } else if (pageType[1] === 'agenda-contactes') {
     contactes();
+  } else if (pageType[1] === 'curriculum') {
+    curriculum();
 
     // Part accessible tant a usuaris com a visitants
   } else if (pageType[1] === 'lector-rss' || pageType[0] === 'lector-rss') {

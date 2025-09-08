@@ -40,6 +40,8 @@
 
       <a href="<?php echo APP_INTRANET . $url['radio']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">19. Ràdio</a>
 
+      <a href="<?php echo APP_INTRANET . $url['curriculum']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">20. Currículum</a>
+
     </div>
   </div>
 </div>

@@ -17,8 +17,8 @@ export function persona() {
       });
     }
   } else if (pageType[2] === 'fitxa-persona') {
-    fitxaPersona('/api/persones/get/?persona=', pageType[3], 'persona', function (data) {
-      if (data.grup_ids.includes('0197b088-1a25-72c4-8b5b-d7e2ee27de7c')) {
+    fitxaPersona('https://api.elliot.cat/api/persona/', pageType[3], 'persona', function (data) {
+      /* if (data.grups.includes('0197b088-1a25-72c4-8b5b-d7e2ee27de7c')) {
         construirTaula('taula1', '/api/biblioteca/get/?type=autorLlibres&id=', data.id, ['Titol', 'Any', 'Accions'], function (fila, columna) {
           if (columna.toLowerCase() === 'titol') {
             // Manejar el caso del título
@@ -31,7 +31,7 @@ export function persona() {
           }
         });
       }
-      /* construirTaula('taula1', '/api/cinema/get/actor-pelicules?slug=', data.slug, ['Titol', 'Any', 'Rol'], function (fila, columna) {
+       construirTaula('taula1', '/api/cinema/get/actor-pelicules?slug=', data.slug, ['Titol', 'Any', 'Rol'], function (fila, columna) {
            if (columna.toLowerCase() === 'titol') {
              // Manejar el caso del título
              return `<a href="https://${window.location.host}/gestio/cinema/fitxa-pelicula/${fila['slug']}">${fila['titol']}</a>`;

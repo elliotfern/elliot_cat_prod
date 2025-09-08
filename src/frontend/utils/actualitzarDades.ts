@@ -1,5 +1,18 @@
-// AJAX PROCESS > PHP API : PER ACTUALIZAR FORMULARIS A LA BD
-export async function transmissioDadesDB(event: Event, tipus: string, formId: string, urlAjax: string): Promise<void> {
+import { Missatges } from './locales/missatges';
+import { missatgesBackend } from './missatgesBackend';
+import { resetForm } from './resetForm';
+
+// Comportamiento genérico en éxito
+type SuccessBehavior = 'none' | 'hide' | 'disable';
+
+export async function transmissioDadesDB(
+  event: Event,
+  tipus: string,
+  formId: string,
+  urlAjax: string,
+  neteja?: boolean, // mantiene compatibilidad
+  successBehavior: SuccessBehavior = 'none' // NUEVO: 'none' | 'hide' | 'disable'
+): Promise<void> {
   event.preventDefault();
 
   const form = document.getElementById(formId) as HTMLFormElement;
@@ -8,35 +21,12 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
     return;
   }
 
-  // Detectar todos los campos con data-type="number"
-  const numericFields = new Set<string>();
-  form.querySelectorAll('[data-type="number"]').forEach((el) => {
-    if (el instanceof HTMLInputElement || el instanceof HTMLSelectElement || el instanceof HTMLTextAreaElement) {
-      if (el.name) numericFields.add(el.name);
-    }
-  });
-
+  // Crear un objeto para almacenar los datos del formulario
   const formDataRaw = new FormData(form);
-  const formData: { [key: string]: FormDataEntryValue | FormDataEntryValue[] | number } = {};
+  const formData: { [key: string]: FormDataEntryValue } = {};
 
   formDataRaw.forEach((value, key) => {
-    const cleanKey = key.endsWith('[]') ? key.slice(0, -2) : key;
-
-    let processedValue: FormDataEntryValue | number = value;
-    if (numericFields.has(cleanKey)) {
-      const n = parseInt(value.toString(), 10);
-      processedValue = isNaN(n) ? value : n;
-    }
-
-    if (formData[cleanKey]) {
-      if (Array.isArray(formData[cleanKey])) {
-        (formData[cleanKey] as FormDataEntryValue[]).push(processedValue as FormDataEntryValue);
-      } else {
-        formData[cleanKey] = [formData[cleanKey] as FormDataEntryValue, processedValue as FormDataEntryValue];
-      }
-    } else {
-      formData[cleanKey] = processedValue;
-    }
+    formData[key] = value;
   });
 
   const jsonData = JSON.stringify(formData);
@@ -45,67 +35,86 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
     const response = await fetch(urlAjax, {
       method: tipus,
       headers: {
+        'Content-Type': 'application/json',
         Accept: 'application/json',
-        'Content-Type': 'application/json', // Añadir Content-Type aquí
       },
       body: jsonData,
     });
 
     const data = await response.json();
 
-    const missatgeOk = document.getElementById('missatgeOk');
-    const missatgeErr = document.getElementById('missatgeErr');
+    const okMessageDiv = document.getElementById('okMessage');
+    const okTextDiv = document.getElementById('okText');
+    const errMessageDiv = document.getElementById('errMessage');
+    const errTextDiv = document.getElementById('errText');
 
-    if (data.status === 'success') {
-      if (missatgeOk && missatgeErr) {
-        missatgeOk.style.display = 'block';
-        missatgeErr.style.display = 'none';
-        missatgeOk.textContent = "L'operació s'ha realizat correctament a la base de dades.";
-        limpiarFormulario(formId);
-        setTimeout(() => {
-          missatgeOk.style.display = 'none';
-        }, 5000);
+    if (!okMessageDiv || !okTextDiv || !errMessageDiv || !errTextDiv) return;
+    if (response.ok) {
+      if (data.status === 'success') {
+        missatgesBackend({
+          tipus: 'success',
+          missatge: data.message || Missatges.success.default,
+          contenidor: okMessageDiv,
+          text: okTextDiv,
+          altreContenidor: errMessageDiv,
+        });
+
+        // === NUEVO: comportamiento genérico en éxito ===
+        if (successBehavior === 'hide') {
+          form.hidden = true; // oculta el formulario
+          history.replaceState({}, document.title, window.location.pathname);
+        } else if (successBehavior === 'disable') {
+          form.querySelectorAll<HTMLElement>('input,select,textarea,button,[contenteditable],trix-editor').forEach((el) => el.setAttribute('disabled', 'true')); // lo deja visible pero inerte
+          history.replaceState({}, document.title, window.location.pathname);
+        } else if (neteja) {
+          // Comportamiento anterior (limpiar) si así lo pides
+          resetForm(formId);
+        }
+
+        // Dispara un evento genérico para que cada página haga lo suyo (enlaces, navegación, etc.)
+        const ev = new CustomEvent('form:success', { detail: data });
+        form.dispatchEvent(ev);
+      } else {
+        const missatge = `
+          ${data.message ? `<p>${data.message}</p>` : ''}
+          ${data.errors && data.errors.length > 0 ? `<ul>${data.errors.map((e: string) => `<li>${e}</li>`).join('')}</ul>` : `<p>${Missatges.error.default}</p>`}
+        `;
+
+        missatgesBackend({
+          tipus: 'error',
+          missatge,
+          contenidor: errMessageDiv,
+          text: errTextDiv,
+          altreContenidor: okMessageDiv,
+        });
       }
     } else {
-      if (missatgeOk && missatgeErr) {
-        missatgeErr.style.display = 'block';
-        missatgeOk.style.display = 'none';
-        missatgeErr.textContent = "L'operació no s'ha pogut realizar correctament a la base de dades.";
-      }
+      const missatge = `
+          ${data.message ? `<p>${data.message}</p>` : ''}
+          ${data.errors && data.errors.length > 0 ? `<ul>${data.errors.map((e: string) => `<li>${e}</li>`).join('')}</ul>` : ``}
+        `;
+
+      missatgesBackend({
+        tipus: 'error',
+        missatge,
+        contenidor: errMessageDiv,
+        text: errTextDiv,
+        altreContenidor: okMessageDiv,
+      });
     }
   } catch (error) {
-    const missatgeOk = document.getElementById('missatgeOk');
-    const missatgeErr = document.getElementById('missatgeErr');
-    if (missatgeOk && missatgeErr) {
-      console.error('Error:', error);
-      missatgeErr.style.display = 'block';
-      missatgeOk.style.display = 'none';
-    }
+    const errMessageDiv = document.getElementById('errMessage');
+    const errTextDiv = document.getElementById('errText');
+
+    if (!errMessageDiv || !errTextDiv) return;
+
+    const errorMessage = typeof error === 'object' && error && 'message' in error ? String((error as { message: string }).message) : Missatges.error.xarxa;
+
+    missatgesBackend({
+      tipus: 'error',
+      missatge: errorMessage,
+      contenidor: errMessageDiv,
+      text: errTextDiv,
+    });
   }
-}
-
-function limpiarFormulario(formId: string) {
-  const formulario = document.getElementById(formId) as HTMLFormElement;
-  const inputs = formulario.querySelectorAll('input, textarea, select, trix-editor');
-
-  inputs.forEach((input) => {
-    if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
-      input.value = ''; // Limpiar el valor del campo
-    }
-    if (input instanceof HTMLSelectElement) {
-      input.selectedIndex = 0; // Limpiar el select (poner el primer valor por defecto)
-    }
-    if (input instanceof HTMLElement && input.tagName === 'TRIX-EDITOR') {
-      // Limpiar el editor Trix (Type Assertion)
-      const trixEditor = input as HTMLTrixEditorElement;
-      trixEditor.editor.loadHTML(''); // Limpiar el contenido del editor Trix
-    }
-  });
-}
-
-// Declara el tipo extendido para TrixEditor
-interface HTMLTrixEditorElement extends HTMLElement {
-  editor: {
-    loadHTML: (html: string) => void;
-  };
 }
