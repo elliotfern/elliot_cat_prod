@@ -369,6 +369,34 @@ $routes = [
         'header_menu_footer' => false,
         'apiSenseHTML' => true
     ],
+
+    // Curriculum
+    '/api/curriculum/get' => [
+        'view' => 'src/backend/api/20_curriculum/get-cv.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    // Curriculum
+    '/api/curriculum/post' => [
+        'view' => 'src/backend/api/20_curriculum/post-cv.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    // Curriculum
+    '/api/curriculum/put' => [
+        'view' => 'src/backend/api/20_curriculum/put-cv.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 ];
 
 return $routes;

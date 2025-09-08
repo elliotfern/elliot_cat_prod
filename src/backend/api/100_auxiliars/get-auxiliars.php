@@ -1,28 +1,34 @@
 <?php
+
+use App\Config\Database;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+
+$slug = $routeParams[0];
+
 /*
  * BACKEND DB AUXILIARS
- * FUNCIONES 
+ * FUNCIONS
  * @
  */
 
-// Check if the request method is POST
+// Configuración de cabeceras para aceptar JSON y responder JSON
+header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: GET");
+
+// Definir el dominio permitido
+$allowedOrigin = APP_DOMAIN;
+
+// Llamar a la función para verificar el referer
+checkReferer($allowedOrigin);
+
+// Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
     exit();
 }
 
-// Dominio permitido (modifica con tu dominio)
-$allowed_origin = "https://elliot.cat";
-
-// Verificar el encabezado 'Origin'
-if (isset($_SERVER['HTTP_ORIGIN'])) {
-    if ($_SERVER['HTTP_ORIGIN'] !== $allowed_origin) {
-        http_response_code(403); // Respuesta 403 Forbidden
-        echo json_encode(["error" => "Acceso denegado. Origen no permitido."]);
-        exit;
-    }
-}
 
 // 1) AUXILIARS
 // Llistat directors
@@ -159,6 +165,79 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 
     // Devolver los datos en formato JSON
     echo json_encode($data);
+
+    // GET : llistat imatges usuaris
+    // URL: https://elliot.cat/api/auxiliars/get/imatgesUsuaris
+} else if ($slug === "imatgesUsuaris") {
+
+    $db = new Database();
+    $query = "SELECT 
+	      	i.id, i.nameImg, i.nom
+            FROM db_img AS i
+            WHERE i.typeImg = 18
+            ORDER BY i.nom ASC";
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : llistat ciutats
+    // URL: https://elliot.cat/api/auxiliars/get/ciutats
+} else if ($slug === "ciutats") {
+
+    $db = new Database();
+    $query = "SELECT 
+	      	c.id, c.city
+            FROM db_cities AS c
+            ORDER BY c.city ASC";
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

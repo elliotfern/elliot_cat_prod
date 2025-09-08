@@ -15,8 +15,8 @@ interface Fitxa {
   provincia: number;
   comunitat: number;
   estat: number;
-  tipus: number;
-  nom: string;
+  localitzacio_ciutat: number;
+  img_perfil: number;
 }
 
 interface ApiResponse<T> {
@@ -63,6 +63,6 @@ export async function formPerfil(isUpdate: boolean, id?: number) {
     });
   }
 
-  await auxiliarSelect(data.municipi ?? 0, 'municipis', 'municipi', 'ciutat');
-  await auxiliarSelect(data.tipus ?? 0, 'tipus_presons', 'tipus', 'tipus_preso_ca');
+  await auxiliarSelect(data.img_perfil ?? 0, 'imatgesUsuaris', 'img_perfil', 'nom');
+  await auxiliarSelect(data.localitzacio_ciutat ?? 0, 'ciutats', 'localitzacio_ciutat', 'city');
 }
