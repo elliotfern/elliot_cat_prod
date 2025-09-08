@@ -1,5 +1,6 @@
 import { fetchDataGet } from '../../services/api/fetchData';
 import { API_URLS } from '../../utils/apiUrls';
+import { DOMAIN_IMG } from '../../utils/urls';
 
 type Vis = 0 | 1 | boolean;
 
@@ -56,7 +57,7 @@ function resolveImg(nameImg?: string | null): string | null {
   if (!nameImg) return null;
   if (/^https?:\/\//i.test(nameImg)) return nameImg; // ja és URL
   // si només és el nom de fitxer, adapta la base a la teva ruta pública
-  return `/public/img/${nameImg}`;
+  return `${DOMAIN_IMG}/img/usuaris-avatar/${nameImg}.jpg`;
 }
 
 function renderCard(d: PerfilCV): string {
@@ -76,7 +77,6 @@ function renderCard(d: PerfilCV): string {
             <div class="text-muted small">
               <span><strong>Ciutat:</strong> ${esc(d.city ?? '—')}</span>
               · <span><strong>Disponibilitat:</strong> ${esc(dispoTxt)}</span>
-              · <span><strong>Visible:</strong> ${visTxt}</span>
             </div>
             <div class="mt-2">
               <a href="mailto:${esc(d.email)}" class="me-3">${esc(d.email)}</a>

@@ -42,8 +42,7 @@ if ($slug === "perfilCV") {
             FROM db_curriculum_perfil AS c
             INNER JOIN db_img AS i ON c.img_perfil = i.id
             INNER JOIN db_cities AS ci ON c.localitzacio_ciutat = ci.id
-            WHERE c.id = :id
-            ORDER BY c.city ASC";
+            WHERE c.id = :id";
 
     try {
 
