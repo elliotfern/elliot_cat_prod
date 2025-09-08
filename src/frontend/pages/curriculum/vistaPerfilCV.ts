@@ -70,7 +70,7 @@ function renderCard(d: PerfilCV): string {
       <div class="card-body">
         <div class="row g-3 align-items-center">
           <div class="col-auto">
-            ${imgUrl ? `<img src="${esc(imgUrl)}" alt="Foto perfil" class="rounded" style="width:80px;height:80px;object-fit:cover;">` : `<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:80px;height:80px;">—</div>`}
+            ${imgUrl ? `<img src="${esc(imgUrl)}" alt="Foto perfil" class="rounded" style="width:130px;height:130px;object-fit:cover;padding:15px">` : `<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:130px;height:130px;">—</div>`}
           </div>
           <div class="col">
             <h2 class="h4 mb-1">${esc(d.nom_complet)}</h2>
