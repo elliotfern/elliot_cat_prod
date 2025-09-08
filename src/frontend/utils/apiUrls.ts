@@ -22,7 +22,7 @@ const TIPUS = {
 
 export const API_URLS: ApiUrls = {
   GET: {
-    PERFIL_CV_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.PERFIL_CV_ID}&id=${id}`,
+    PERFIL_CV_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.PERFIL_CV_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
