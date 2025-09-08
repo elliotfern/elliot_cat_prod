@@ -123,6 +123,67 @@ function verificaTipusUsuari()
     }
 }
 
+
+/**
+ * Devuelve info básica del token.
+ * - is_admin: true si user_type === 1 (o "1")
+ * - user_id:  int|null si viene en el token (user_id/sub/uid)
+ */
+
+
+function getAuthFromToken(): array
+{
+    $jwtSecret  = $_ENV['TOKEN'] ?? null;
+    $cookieName = 'token';
+
+    if (!$jwtSecret || empty($_COOKIE[$cookieName])) {
+        return ['is_admin' => false, 'user_id_uuid' => null];
+    }
+
+    try {
+        $decoded = JWT::decode($_COOKIE[$cookieName], new Key($jwtSecret, 'HS256'));
+        $isAdmin = (int)($decoded->user_type ?? 0) === 1;
+        $uid     = $decoded->user_id ?? null; // UUID (string) del token
+        $uuid    = (is_string($uid) && strlen($uid) <= 64) ? $uid : null;
+
+        return ['is_admin' => $isAdmin, 'user_id_uuid' => $uuid];
+    } catch (\Throwable $e) {
+        return ['is_admin' => false, 'user_id_uuid' => null];
+    }
+}
+
+/** Admin = user_type === 1 */
+function isAuthenticatedAdmin(): bool
+{
+    return getAuthFromToken()['is_admin'] === true;
+}
+
+/** Nuevo: devuelve el UUID del usuario (string) o null */
+function getAuthenticatedUserUuid(): ?string
+{
+    return getAuthFromToken()['user_id_uuid'];
+}
+
+/** Conserva tu función original por compatibilidad (ahora puede devolver null) */
+function getAuthenticatedUserId(): ?int
+{
+    return getAuthFromToken()['user_id_uuid'];
+}
+
+function uuidToBin(?string $uuid): ?string
+{
+    if ($uuid === null || $uuid === '') return null;
+    $hex = str_replace('-', '', $uuid);
+    return hex2bin($hex);
+}
+
+function binToUuid(?string $bin): ?string
+{
+    if ($bin === null) return null;
+    $hex = bin2hex($bin);
+    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split($hex, 4));
+}
+
 function getData($query, $params = [], $single = false)
 {
     global $conn;

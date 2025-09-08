@@ -185,6 +185,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/auxiliars/get/{slug}' => [
+        'view' => 'src/backend/api/100_auxiliars/get-auxiliars.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     // XARXES SOCIALS
     '/api/xarxes-socials/post/bluesky' => [
         'view' => 'src/backend/api/12_xarxes_socials/post-bluesky.php',
@@ -371,7 +379,7 @@ $routes = [
     ],
 
     // Curriculum
-    '/api/curriculum/get' => [
+    '/api/curriculum/get/{slug}' => [
         'view' => 'src/backend/api/20_curriculum/get-cv.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -379,8 +387,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    // Curriculum
-    '/api/curriculum/post' => [
+    '/api/curriculum/post/{slug}' => [
         'view' => 'src/backend/api/20_curriculum/post-cv.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -388,8 +395,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    // Curriculum
-    '/api/curriculum/put' => [
+    '/api/curriculum/put/{slug}' => [
         'view' => 'src/backend/api/20_curriculum/put-cv.php',
         'needs_session' => false,
         'header_footer' => false,

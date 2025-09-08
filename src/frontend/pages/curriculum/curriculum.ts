@@ -1,5 +1,6 @@
 import { getPageType } from '../../utils/urlPath';
 import { formPerfil } from './formPerfil';
+import { vistaPerfilCV } from './vistaPerfilCV';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -10,5 +11,7 @@ export function curriculum() {
   } else if (pageType[2] === 'modifica-perfil') {
     const id = parseInt(pageType[3], 10);
     formPerfil(true, id);
+  } else if (pageType[2] === 'perfil-cv') {
+    vistaPerfilCV();
   }
 }
