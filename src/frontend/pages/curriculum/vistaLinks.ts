@@ -30,23 +30,27 @@ const spinner = () => `<div class="d-flex align-items-center"><div class="spinne
 const errorBox = (msg: string) => `<div class="alert alert-danger" role="alert">${esc(msg)}</div>`;
 const emptyBox = (msg = 'No hi ha enllaços per a aquest perfil.') => `<div class="alert alert-secondary" role="alert">${esc(msg)}</div>`;
 
-const qsPerfilId = (): number => {
-  const v = new URLSearchParams(window.location.search).get('perfil_id');
-  const n = v ? Number(v) : NaN;
-  return Number.isFinite(n) && n > 0 ? n : 1;
-};
-
 function renderTable(items: LinkItem[]): string {
   if (!items.length) return emptyBox();
 
-  // ordenar por posicio ASC, luego id
   items.sort((a, b) => a.posicio - b.posicio || a.id - b.id);
 
   const rows = items
     .map((it) => {
       const vis = it.visible === 1 || it.visible === true;
-      const label = it.label && it.label.trim() !== '' ? it.label : new URL(it.url).hostname;
+      const label =
+        it.label && it.label.trim() !== ''
+          ? it.label
+          : (() => {
+              try {
+                return new URL(it.url).hostname;
+              } catch {
+                return it.url;
+              }
+            })();
       const urlDisplay = it.url.length > 70 ? it.url.slice(0, 67) + '…' : it.url;
+
+      const editHref = `https://elliot.cat/gestio/curriculum/modifica-link/${it.id}`;
 
       return `
       <tr>
@@ -57,6 +61,9 @@ function renderTable(items: LinkItem[]): string {
         </td>
         <td>
           <span class="badge ${vis ? 'bg-success' : 'bg-secondary'}">${vis ? 'Visible' : 'Ocult'}</span>
+        </td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-primary" href="${esc(editHref)}">Modifica</a>
         </td>
       </tr>
     `;
@@ -72,6 +79,7 @@ function renderTable(items: LinkItem[]): string {
             <th>Etiqueta</th>
             <th>URL</th>
             <th style="width:8rem">Estat</th>
+            <th style="width:8rem" class="text-end">Accions</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -80,7 +88,7 @@ function renderTable(items: LinkItem[]): string {
   `;
 }
 
-export async function vistaLinks(perfilId = qsPerfilId()): Promise<void> {
+export async function vistaLinks(): Promise<void> {
   const root = document.getElementById('apiResults');
   if (!root) return;
   root.innerHTML = spinner();
