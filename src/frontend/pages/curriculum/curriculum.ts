@@ -1,4 +1,5 @@
 import { getPageType } from '../../utils/urlPath';
+import { formHabilitats } from './formHabilitats';
 import { formLink } from './formLink';
 import { formPerfil } from './formPerfil';
 import { formPerfilI18n } from './formPerfilI18n';
@@ -31,5 +32,9 @@ export function curriculum() {
     formLink(true, id);
   } else if (pageType[2] === 'perfil-links') {
     vistaLinks();
+  } else if (pageType[2] === 'nova-habilitat') {
+    formHabilitats(false);
+  } else if (pageType[2] === 'modifica-habilitat') {
+    formHabilitats(true, id);
   }
 }

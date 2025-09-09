@@ -89,6 +89,7 @@ function renderTable(items: LinkItem[]): string {
       <table class="table align-middle">
         <thead>
           <tr>
+            <th style="width:3rem" class="text-center">Icona</th>
             <th style="width:6rem">Pos.</th>
             <th>Etiqueta</th>
             <th>URL</th>

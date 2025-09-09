@@ -224,6 +224,43 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
         );
     }
 
+    // GET : llistat imatges icones
+    // URL: https://elliot.cat/api/auxiliars/get/imatgesIcones
+} else if ($slug === "imatgesIcones") {
+
+    $db = new Database();
+    $query = "SELECT 
+	      	i.id, i.nameImg, i.nom
+            FROM db_img AS i
+            WHERE i.typeImg = 19
+            ORDER BY i.nom ASC";
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // GET : llistat ciutats
     // URL: https://elliot.cat/api/auxiliars/get/ciutats
 } else if ($slug === "ciutats") {
