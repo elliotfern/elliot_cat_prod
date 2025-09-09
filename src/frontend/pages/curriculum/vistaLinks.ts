@@ -1,6 +1,7 @@
 // src/pages/curriculum/vistaLinks.ts
 import { fetchDataGet } from '../../services/api/fetchData';
 import { API_URLS } from '../../utils/apiUrls';
+import { DOMAIN_IMG } from '../../utils/urls';
 
 interface LinkItem {
   id: number;
@@ -9,6 +10,7 @@ interface LinkItem {
   url: string;
   posicio: number;
   visible: 0 | 1 | boolean;
+  nameImg: string;
 }
 
 interface ApiResponse<T> {
@@ -30,6 +32,14 @@ const spinner = () => `<div class="d-flex align-items-center"><div class="spinne
 const errorBox = (msg: string) => `<div class="alert alert-danger" role="alert">${esc(msg)}</div>`;
 const emptyBox = (msg = 'No hi ha enllaços per a aquest perfil.') => `<div class="alert alert-secondary" role="alert">${esc(msg)}</div>`;
 
+// Helper de iconos (corrige la extensión a .png, acepta URLs absolutas o nombres ya con extensión)
+function resolveImg(nameImg?: string | null): string | null {
+  if (!nameImg) return null;
+  if (/^https?:\/\//i.test(nameImg)) return nameImg; // ya es URL
+  const withExt = /\.\w{3,4}$/.test(nameImg) ? nameImg : `${nameImg}.png`;
+  return `${DOMAIN_IMG}/img/web-icones/${withExt}`;
+}
+
 function renderTable(items: LinkItem[]): string {
   if (!items.length) return emptyBox();
 
@@ -50,10 +60,14 @@ function renderTable(items: LinkItem[]): string {
             })();
       const urlDisplay = it.url.length > 70 ? it.url.slice(0, 67) + '…' : it.url;
 
+      const iconUrl = resolveImg(it.nameImg);
+      const iconHTML = iconUrl ? `<img src="${esc(iconUrl)}" alt="" width="18" height="18" style="object-fit:contain;vertical-align:-3px">` : `<span class="text-muted">—</span>`;
+
       const editHref = `https://elliot.cat/gestio/curriculum/modifica-link/${it.id}`;
 
       return `
       <tr>
+      <td class="text-center" style="width:3rem">${iconHTML}</td>
         <td class="text-nowrap">${esc(it.posicio)}</td>
         <td class="fw-semibold">${esc(label)}</td>
         <td>

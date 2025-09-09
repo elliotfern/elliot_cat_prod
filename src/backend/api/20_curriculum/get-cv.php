@@ -131,8 +131,9 @@ if ($slug === "perfilCV") {
 } else if ($slug === "linksCV") {
 
     $db = new Database();
-    $query = "SELECT l.id, l.perfil_id, l.label, l.url, l.posicio, l.visible 	
+    $query = "SELECT l.id, l.perfil_id, l.label, l.url, l.posicio, l.visible, l.icon_id, i.nameImg
               FROM db_curriculum_links AS l
+              LEFT JOIN db_img AS i ON l.icon_id = i.id
               ORDER BY l.posicio";
 
     try {
