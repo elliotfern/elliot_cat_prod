@@ -1,6 +1,6 @@
 import { fetchDataGet } from '../../services/api/fetchData';
 import { API_URLS } from '../../utils/apiUrls';
-import { DOMAIN_IMG } from '../../utils/urls';
+import { DOMAIN_IMG, DOMAIN_WEB } from '../../utils/urls';
 
 type Vis = 0 | 1 | boolean;
 
@@ -66,6 +66,7 @@ function renderCard(d: PerfilCV): string {
   const imgUrl = resolveImg(d.nameImg);
   const dispoTxt = d.disponibilitat && DISPON[d.disponibilitat] ? DISPON[d.disponibilitat] : '—';
   const visTxt = d.visibilitat === 1 || d.visibilitat === true ? 'Sí' : 'No';
+  const urlEdit = editUrl(d.id);
 
   return `
     <div class="container-fluid form">
@@ -89,6 +90,12 @@ function renderCard(d: PerfilCV): string {
         <div class="text-muted small">
           <span><strong>Darrera actualització:</strong> ${esc(fmtDT(d.updated_at))}</span>
         </div>
+        <div class="mt-3 text-end">
+        <a class="btn btn-sm btn-outline-primary" href="${esc(urlEdit)}"
+           aria-label="Editar">
+          ✏️ Edita
+        </a>
+      </div>
     </div>
   `;
 }
@@ -104,6 +111,9 @@ function spinner(): string {
 function errorBox(msg: string): string {
   return `<div class="alert alert-danger" role="alert">${esc(msg)}</div>`;
 }
+
+// URL del botón de edición
+const editUrl = (id: number) => `${DOMAIN_WEB}/gestio/curriculum/modifica-perfil/${id}`;
 
 export async function vistaPerfilCV(): Promise<void> {
   const container = document.getElementById('apiResults');
