@@ -9,6 +9,7 @@ const pageType = getPageType(url);
 
 export function curriculum() {
   const id = parseInt(pageType[3], 10);
+  const idLocale = parseInt(pageType[4], 10);
 
   if (pageType[2] === 'nou-perfil') {
     formPerfil(false);
@@ -19,7 +20,7 @@ export function curriculum() {
   } else if (pageType[2] === 'nou-perfil-i18n') {
     formPerfilI18n(false);
   } else if (pageType[2] === 'modifica-perfil-i18n') {
-    formPerfilI18n(true, id);
+    formPerfilI18n(true, idLocale);
   } else if (pageType[2] === 'perfil-cv-i18n') {
     vistaPerfilCVi18n();
   }
