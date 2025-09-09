@@ -25,7 +25,8 @@ const TIPUS = {
 export const API_URLS: ApiUrls = {
   GET: {
     PERFIL_CV_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.PERFIL_CV_ID}?id=${encodeURIComponent(id)}`,
-    PERFIL_CV_I18N_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.PERFIL_CV_I18N_ID}?id=${encodeURIComponent(id)}`,
+    PERFIL_CV_I18N_ID: (perfilId: number, locale: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.PERFIL_CV_I18N_ID}?perfil_id=${encodeURIComponent(perfilId)}&locale=${encodeURIComponent(locale)}`,
+    // ...lo que ya tienes
   },
 
   POST: {

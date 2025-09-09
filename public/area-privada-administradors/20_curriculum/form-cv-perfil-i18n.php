@@ -2,9 +2,12 @@
 
     <div id="titolForm"></div>
 
-    <div class="alert alert-success" id="missatgeOk" style="display:none"></div>
-    <div class="alert alert-danger" id="missatgeErr" style="display:none"></div>
-
+    <div class="alert alert-success" id="okMessage" style="display:none">
+        <div id="okText"></div>
+    </div>
+    <div class="alert alert-danger" id="errMessage" style="display:none">
+        <div id="errText"></div>
+    </div>
 
     <form method="POST" action="" id="formCVPerfilI18n" class="row g-3">
 

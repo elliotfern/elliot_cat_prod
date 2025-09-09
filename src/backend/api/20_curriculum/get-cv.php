@@ -71,6 +71,33 @@ if ($slug === "perfilCV") {
             500
         );
     }
+
+    // GET : Perfil CV i18n ID
+    // URL: https://elliot.cat/api/curriculum/get/perfilCVI18n?perfil_id=1&locale=1
+} else if ($slug === "perfilCVi18n") {
+
+    $perfilId = isset($_GET['perfil_id']) ? (int)$_GET['perfil_id'] : null;
+    $locale   = isset($_GET['locale']) ? (int)$_GET['locale'] : null;
+
+    $db = new Database();
+    $query = "SELECT id, perfil_id, locale, titular, sumari
+              FROM db_curriculum_perfil_i18n
+              WHERE perfil_id = :perfil_id AND locale = :locale
+              LIMIT 1";
+
+    try {
+        $params = [':perfil_id' => $perfilId, ':locale' => $locale];
+        $row = $db->getData($query, $params, true);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

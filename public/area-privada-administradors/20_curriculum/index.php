@@ -19,7 +19,8 @@
 
             <div class="alert alert-success quadre">
                 <ul class="llistat">
-                    <li> <a href="<?php echo APP_INTRANET . $url['curriculum']; ?>/perfil-cv">Gestió perfil CV</a></li>
+                    <li> <a href="<?php echo APP_INTRANET . $url['curriculum']; ?>/perfil-cv">Veure perfil CV</a></li>
+                    <li> <a href="<?php echo APP_INTRANET . $url['curriculum']; ?>/perfil-cv-i18n">Veure perfil CV i18n</a></li>
                 </ul>
 
                 db_curriculum_certificacions

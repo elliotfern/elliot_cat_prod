@@ -40,7 +40,8 @@ export async function formPerfilI18n(isUpdate: boolean, id?: number) {
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PERFIL_CV_I18N_ID(id), true);
+    const locale = 1;
+    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PERFIL_CV_I18N_ID(id, locale), true);
 
     if (!response || !response.data) return;
     data = response.data;

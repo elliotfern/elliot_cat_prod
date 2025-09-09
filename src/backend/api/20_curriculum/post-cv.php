@@ -168,6 +168,117 @@ if ($slug === "perfilCV") {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+
+    // POST : Perfil i18n curriculum
+    // URL: https://elliot.cat/api/curriculum/post/perfilCVi18n
+} else if ($slug === "perfilCVi18n") {
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // —— Normalización
+    $trimOrNull = static function ($v): ?string {
+        if ($v === null || $v === '' || (is_string($v) && trim($v) === '')) return null;
+        return is_string($v) ? trim($v) : (string)$v;
+    };
+    $toInt = static function ($v): ?int {
+        if ($v === null || $v === '' || $v === false) return null;
+        if (is_numeric($v)) return (int)$v;
+        return null;
+    };
+
+    // Datos
+    $perfil_id = $toInt($data['perfil_id'] ?? 1) ?? 1;      // tu perfil suele ser 1
+    $locale    = $toInt($data['locale'] ?? null);           // INT (p. ej. 1=ca,2=es,3=en)
+    $titular   = $trimOrNull($data['titular'] ?? null);     // VARCHAR(200) NULL
+    $sumari    = $trimOrNull($data['sumari'] ?? null);      // MEDIUMTEXT NULL
+
+    // —— Validación
+    $errors = [];
+    if (!$perfil_id || $perfil_id < 1) {
+        $errors[] = ValidacioErrors::requerit('perfil_id');
+    }
+    if ($locale === null) {
+        $errors[] = ValidacioErrors::requerit('locale');
+    } elseif ($locale < 1) {
+        $errors[] = ValidacioErrors::invalid('locale');
+    }
+
+    if ($titular === null)                    $errors[] = ValidacioErrors::requerit('titular');
+    elseif (mb_strlen($titular) > 200)        $errors[] = ValidacioErrors::massaLlarg('titular', 200);
+
+    if ($sumari === null)                     $errors[] = ValidacioErrors::requerit('sumari');
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        /** @var PDO $conn */
+        $conn->beginTransaction();
+
+        // Duplicado lógico: perfil + locale
+        $sqlChk = "SELECT id FROM db_curriculum_perfil_i18n WHERE perfil_id = :perfil_id AND locale = :locale LIMIT 1";
+        $stChk = $conn->prepare($sqlChk);
+        $stChk->bindValue(':perfil_id', $perfil_id, PDO::PARAM_INT);
+        $stChk->bindValue(':locale', $locale, PDO::PARAM_INT);
+        $stChk->execute();
+        $existsId = $stChk->fetchColumn();
+
+        if ($existsId) {
+            $conn->rollBack();
+            Response::error(MissatgesAPI::error('duplicat'), ['perfil_id' => $perfil_id, 'locale' => $locale], 409);
+        }
+
+        // INSERT (sin FKs, solo valores)
+        $sql = "INSERT INTO db_curriculum_perfil_i18n
+                    (perfil_id, locale, titular, sumari)
+                VALUES
+                    (:perfil_id, :locale, :titular, :sumari)";
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bindValue(':perfil_id', $perfil_id, PDO::PARAM_INT);
+        $stmt->bindValue(':locale', $locale, PDO::PARAM_INT);
+
+        if ($titular === null) $stmt->bindValue(':titular', null, PDO::PARAM_NULL);
+        else                   $stmt->bindValue(':titular', $titular, PDO::PARAM_STR);
+
+        if ($sumari === null)  $stmt->bindValue(':sumari', null, PDO::PARAM_NULL);
+        else                   $stmt->bindValue(':sumari', $sumari, PDO::PARAM_STR);
+
+        $stmt->execute();
+        $newId = $conn->lastInsertId();
+
+
+        // Auditoría
+        $detalls = sprintf("Creació perfil_i18n perfil_id=%d, locale=%d, titular=%s", $perfil_id, $locale, (string)($titular ?? ''));
+        Audit::registrarCanvi(
+            $conn,
+            $userUuid,                        // UUID textual; tu Audit lo convierte a BINARY(16)
+            "INSERT",
+            $detalls,
+            'db_curriculum_perfil_i18n',      // nombre tabla directo
+            $newId
+        );
+
+        $conn->commit();
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            ['id' => $newId, 'perfil_id' => $perfil_id, 'locale' => $locale],
+            200
+        );
+    } catch (PDOException $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
