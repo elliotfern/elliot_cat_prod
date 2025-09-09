@@ -37,6 +37,11 @@ const spinner = () => `<div class="d-flex align-items-center"><div class="spinne
 
 const errorBox = (msg: string) => `<div class="alert alert-danger" role="alert">${esc(msg)}</div>`;
 
+const localeLabel = (loc: number) => LOCALES.find((l) => l.id === loc)?.label ?? `Locale ${loc}`;
+
+// URL del botón de edición
+const editUrl = (locale: number, id: number) => `${window.location.origin}/gestio/curriculum/modifica-perfil-i18n/${locale}/${id}`;
+
 function layoutHTML(perfilId: number) {
   const tabs = LOCALES.map(
     (l, i) =>
@@ -81,9 +86,17 @@ export async function vistaPerfilCVi18n(perfilId = 1): Promise<void> {
   };
 
   const render = (d: PerfilCVI18n) => {
+    const urlEdit = editUrl(d.locale, d.id);
     content.innerHTML = `
       <h2 class="h4 mb-2">${esc(d.titular)}</h2>
       <div class="text-body">${nl2br(d.sumari)}</div>
+
+      <div class="mt-3 text-end">
+        <a class="btn btn-sm btn-outline-primary" href="${esc(urlEdit)}"
+           aria-label="Editar ${esc(localeLabel(d.locale))}">
+          ✏️ Edita (${esc(localeLabel(d.locale))})
+        </a>
+      </div>
       <hr>
       <div class="text-muted small">Registre ID: ${d.id}</div>
     `;

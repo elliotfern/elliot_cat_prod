@@ -888,7 +888,7 @@ $routes = [
     ],
 
 
-    APP_GESTIO . $url['curriculum'] . "/modifica-perfil-i18n/{id}" => [
+    APP_GESTIO . $url['curriculum'] . "/modifica-perfil-i18n/{locale}/{id}" => [
         'view' => APP_INTRANET_DIR . APP_CV_DIR . 'form-cv-perfil-i18n.php',
         'needs_session' => true,
         'header_footer' => false,
