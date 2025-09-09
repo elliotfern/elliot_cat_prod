@@ -25,7 +25,7 @@ interface ApiResponse<T> {
   data: T;
 }
 
-export async function formPerfilI18n(isUpdate: boolean, id?: number) {
+export async function formPerfilI18n(isUpdate: boolean, idLocale?: number) {
   const form = document.getElementById('formCVPerfilI18n');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnCVPerfili18n') as HTMLButtonElement;
@@ -39,9 +39,9 @@ export async function formPerfilI18n(isUpdate: boolean, id?: number) {
 
   if (!divTitol || !btnSubmit || !form) return;
 
-  if (id && isUpdate) {
-    const locale = 1;
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PERFIL_CV_I18N_ID(id, locale), true);
+  if (idLocale && isUpdate) {
+    const id = 1;
+    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PERFIL_CV_I18N_ID(id, idLocale), true);
 
     if (!response || !response.data) return;
     data = response.data;
