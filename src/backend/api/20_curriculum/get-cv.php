@@ -76,7 +76,7 @@ if ($slug === "perfilCV") {
     // URL: https://elliot.cat/api/curriculum/get/perfilCVI18n?perfil_id=1&locale=1
 } else if ($slug === "perfilCVi18n") {
 
-    $perfilId = isset($_GET['perfil_id']) ? (int)$_GET['perfil_id'] : null;
+    $perfilId = 1;
     $locale   = isset($_GET['locale']) ? (int)$_GET['locale'] : null;
 
     $db = new Database();
