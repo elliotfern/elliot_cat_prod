@@ -13,6 +13,8 @@
 
                         <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nou-perfil-i18n'" class="button btn-gran btn-secondari">Nou perfil i18n</button>
 
+                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nou-link'" class="button btn-gran btn-secondari">Nou link</button>
+
                     </p>
                 <?php endif; ?>
             </div>
@@ -23,21 +25,21 @@
                     <li> <a href="<?php echo APP_INTRANET . $url['curriculum']; ?>/perfil-cv-i18n">Veure perfil CV i18n</a></li>
                 </ul>
 
-                db_curriculum_certificacions
-                db_curriculum_certificacions_i18n
-                db_curriculum_educacio
-                db_curriculum_educacio_i18n
-                db_curriculum_experiencia_professional
-                db_curriculum_experiencia_professional_i18n
-                db_curriculum_habilitats
-                db_curriculum_habilitats_experiencia
-                db_curriculum_idiomes
-                db_curriculum_links
-                * db_curriculum_perfil
-                * db_curriculum_perfil_i18n
-                db_curriculum_projectes
-                db_curriculum_projectes_i18n
-                db_curriculum_projectes_links
+                <p>db_curriculum_certificacions</p>
+                <p>db_curriculum_certificacions_i18n</p>
+                <p>db_curriculum_educacio</p>
+                <p>db_curriculum_educacio_i18n</p>
+                <p>db_curriculum_experiencia_professional</p>
+                <p>db_curriculum_experiencia_professional_i18n</p>
+                <p>db_curriculum_habilitats</p>
+                <p>db_curriculum_habilitats_experiencia</p>
+                <p>db_curriculum_idiomes</p>
+                <p> db_curriculum_links</p>
+                <p> * db_curriculum_perfil</p>
+                <p> * db_curriculum_perfil_i18n</p>
+                <p> db_curriculum_projectes</p>
+                <p> db_curriculum_projectes_i18n</p>
+                <p> db_curriculum_projectes_links</p>
             </div>
 
         </div>

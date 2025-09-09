@@ -7,6 +7,8 @@ export const ENDPOINTS = {
   PERFIL_CV: 'perfilCV',
   PERFIL_CV_I18N_ID: 'perfilCVi18n',
   PERFIL_CV_I18N: 'perfilCVi18n',
+  LINK_CV_ID: 'linkCV',
+  LINK_CV: 'linkCV',
 } as const;
 
 // Mapa de recursos disponibles
@@ -26,16 +28,19 @@ export const API_URLS: ApiUrls = {
   GET: {
     PERFIL_CV_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.PERFIL_CV_ID}?id=${encodeURIComponent(id)}`,
     PERFIL_CV_I18N_ID: (perfilId: number, locale: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.PERFIL_CV_I18N_ID}?perfil_id=${encodeURIComponent(perfilId)}&locale=${encodeURIComponent(locale)}`,
+    LINK_CV_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.LINK_CV_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
     PERFIL_CV: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.POST}/${ENDPOINTS.PERFIL_CV}`,
     PERFIL_CV_I18N: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.POST}/${ENDPOINTS.PERFIL_CV_I18N}`,
+    LINK_CV: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.POST}/${ENDPOINTS.LINK_CV}`,
   },
 
   PUT: {
     PERFIL_CV: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.PUT}/${ENDPOINTS.PERFIL_CV}`,
     PERFIL_CV_I18N: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.PUT}/${ENDPOINTS.PERFIL_CV_I18N}`,
+    LINK_CV: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.PUT}/${ENDPOINTS.LINK_CV}`,
   },
 
   DELETE: {},

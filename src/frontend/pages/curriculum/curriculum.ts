@@ -1,4 +1,5 @@
 import { getPageType } from '../../utils/urlPath';
+import { formLink } from './formLink';
 import { formPerfil } from './formPerfil';
 import { formPerfilI18n } from './formPerfilI18n';
 import { vistaPerfilCV } from './vistaPerfilCV';
@@ -23,5 +24,9 @@ export function curriculum() {
     formPerfilI18n(true, idLocale);
   } else if (pageType[2] === 'perfil-cv-i18n') {
     vistaPerfilCVi18n();
+  } else if (pageType[2] === 'nou-link') {
+    formLink(false);
+  } else if (pageType[2] === 'modifica-link') {
+    formLink(true, id);
   }
 }

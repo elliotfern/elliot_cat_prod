@@ -38,7 +38,7 @@ if ($slug === "perfilCV") {
 
     $db = new Database();
     $query = "SELECT 
-	        c.id, c.email, c.nom_complet, c.tel, c.web, c.adreca, ci.city, i.nameImg, c.disponibilitat, c.visibilitat, c.created_at, c.updated_at, co.pais_cat
+	        c.id, c.email, c.nom_complet, c.tel, c.web, c.adreca, ci.city, i.nameImg, c.disponibilitat, c.visibilitat, c.created_at, c.updated_at, co.pais_cat, c.img_perfil, c.localitzacio_ciutat
             FROM db_curriculum_perfil AS c
             INNER JOIN db_img AS i ON c.img_perfil = i.id
             INNER JOIN db_cities AS ci ON c.localitzacio_ciutat = ci.id
