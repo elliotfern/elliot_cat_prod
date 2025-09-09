@@ -3,6 +3,7 @@ export type ApiUrls = {
     PERFIL_CV_ID: (id: number) => string;
     PERFIL_CV_I18N_ID: (id: number, locale: number) => string;
     LINK_CV_ID: (id: number) => string;
+    LINKS_CV: string;
   };
   POST: {
     PERFIL_CV: string;

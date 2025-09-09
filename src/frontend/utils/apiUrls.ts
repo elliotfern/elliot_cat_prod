@@ -9,6 +9,7 @@ export const ENDPOINTS = {
   PERFIL_CV_I18N: 'perfilCVi18n',
   LINK_CV_ID: 'linkCV',
   LINK_CV: 'linkCV',
+  LINKS_CV: 'linksCV',
 } as const;
 
 // Mapa de recursos disponibles
@@ -29,6 +30,7 @@ export const API_URLS: ApiUrls = {
     PERFIL_CV_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.PERFIL_CV_ID}?id=${encodeURIComponent(id)}`,
     PERFIL_CV_I18N_ID: (perfilId: number, locale: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.PERFIL_CV_I18N_ID}?perfil_id=${encodeURIComponent(perfilId)}&locale=${encodeURIComponent(locale)}`,
     LINK_CV_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.LINK_CV_ID}?id=${encodeURIComponent(id)}`,
+    LINKS_CV: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.LINKS_CV}`,
   },
 
   POST: {

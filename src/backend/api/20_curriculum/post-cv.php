@@ -279,6 +279,120 @@ if ($slug === "perfilCV") {
             500
         );
     }
+    // POST :links curriculum
+    // URL: https://elliot.cat/api/curriculum/post/linkCV
+} else if ($slug === "linkCV") {
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // Normalizadores
+    $trimOrNull = static function ($v): ?string {
+        if ($v === null) return null;
+        if (is_string($v) && trim($v) === '') return null;
+        if ($v === '') return null;
+        return is_string($v) ? trim($v) : (string)$v;
+    };
+    $toIntOrNull = static function ($v): ?int {
+        if ($v === null || $v === '' || $v === false) return null;
+        if (is_numeric($v)) return (int)$v;
+        return null;
+    };
+    $toBoolInt = static function ($v): int {
+        return ($v === true || $v === 1 || $v === '1' || $v === 'on' || $v === 'true') ? 1 : 0;
+    };
+
+    // Datos
+    $perfil_id = $toIntOrNull($data['perfil_id'] ?? 1) ?? 1; // tu perfil suele ser 1
+    $label     = $trimOrNull($data['label'] ?? null);        // VARCHAR(120) NULL
+    $url       = $trimOrNull($data['url'] ?? null);          // VARCHAR(512) NOT NULL
+    $posicio   = $toIntOrNull($data['posicio'] ?? 0) ?? 0;   // INT (orden)
+    $visible   = $toBoolInt($data['visible'] ?? 1);          // 0/1
+
+    // Validaciones
+    $errors = [];
+    if (!$perfil_id || $perfil_id < 1)                $errors[] = ValidacioErrors::requerit('perfil_id');
+
+    if ($label !== null && mb_strlen($label) > 120)   $errors[] = ValidacioErrors::massaLlarg('label', 120);
+
+    if ($url === null) {
+        $errors[] = ValidacioErrors::requerit('url');
+    } else {
+        // si falta esquema, añade https://
+        if (!preg_match('~^https?://~i', $url)) {
+            $url = 'https://' . $url;
+        }
+        if (mb_strlen($url) > 512) {
+            $errors[] = ValidacioErrors::massaLlarg('url', 512);
+        } elseif (!filter_var($url, FILTER_VALIDATE_URL)) {
+            $errors[] = ValidacioErrors::invalid('url');
+        }
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        /** @var PDO $conn */
+        $conn->beginTransaction();
+
+        // Evitar duplicados por perfil + url (ajusta si prefieres (perfil,label,url))
+        $sqlChk = "SELECT id FROM db_curriculum_links WHERE perfil_id = :perfil_id AND url = :url LIMIT 1";
+        $stChk  = $conn->prepare($sqlChk);
+        $stChk->bindValue(':perfil_id', $perfil_id, PDO::PARAM_INT);
+        $stChk->bindValue(':url',       $url,       PDO::PARAM_STR);
+        $stChk->execute();
+        if ($stChk->fetchColumn()) {
+            $conn->rollBack();
+            Response::error(MissatgesAPI::error('duplicat'), ['perfil_id' => $perfil_id, 'url' => $url], 409);
+        }
+
+        // INSERT
+        $sql = "INSERT INTO db_curriculum_links
+                    (perfil_id, label, url, posicio, visible)
+                VALUES
+                    (:perfil_id, :label, :url, :posicio, :visible)";
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bindValue(':perfil_id', $perfil_id, PDO::PARAM_INT);
+
+        if ($label === null) $stmt->bindValue(':label', null, PDO::PARAM_NULL);
+        else                 $stmt->bindValue(':label', $label, PDO::PARAM_STR);
+
+        $stmt->bindValue(':url',     $url,     PDO::PARAM_STR);
+        $stmt->bindValue(':posicio', $posicio, PDO::PARAM_INT);
+        $stmt->bindValue(':visible', $visible, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        $newId = (int)$conn->lastInsertId();
+
+        // Auditoría
+        $detalls = sprintf("Creació link perfil_id=%d, label=%s, url=%s", $perfil_id, (string)($label ?? ''), $url);
+        Audit::registrarCanvi(
+            $conn,
+            $userUuid,                  // UUID textual → Audit lo convierte a BINARY(16)
+            "INSERT",
+            $detalls,
+            'db_curriculum_links',
+            $newId
+        );
+
+        $conn->commit();
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            ['id' => $newId],
+            200
+        );
+    } catch (PDOException $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

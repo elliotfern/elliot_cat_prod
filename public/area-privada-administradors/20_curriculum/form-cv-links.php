@@ -1,5 +1,5 @@
 <div class="container-fluid form">
-    <div id="formTitle"></div>
+    <div id="titolForm"></div>
 
     <div class="alert alert-success" id="okMessage" style="display:none">
         <div id="okText"></div>

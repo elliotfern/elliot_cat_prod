@@ -2,6 +2,7 @@ import { getPageType } from '../../utils/urlPath';
 import { formLink } from './formLink';
 import { formPerfil } from './formPerfil';
 import { formPerfilI18n } from './formPerfilI18n';
+import { vistaLinks } from './vistaLinks';
 import { vistaPerfilCV } from './vistaPerfilCV';
 import { vistaPerfilCVi18n } from './vistaPerfilCVi18n';
 
@@ -28,5 +29,7 @@ export function curriculum() {
     formLink(false);
   } else if (pageType[2] === 'modifica-link') {
     formLink(true, id);
+  } else if (pageType[2] === 'perfil-links') {
+    vistaLinks();
   }
 }
