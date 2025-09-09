@@ -5,6 +5,7 @@ export type ApiUrls = {
     LINK_CV_ID: (id: number) => string;
     LINKS_CV: string;
     HABILITAT_ID: (id: number) => string;
+    HABILITATS: string;
   };
   POST: {
     PERFIL_CV: string;

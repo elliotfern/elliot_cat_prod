@@ -3,6 +3,7 @@ import { formHabilitats } from './formHabilitats';
 import { formLink } from './formLink';
 import { formPerfil } from './formPerfil';
 import { formPerfilI18n } from './formPerfilI18n';
+import { vistaHabilitats } from './vistaHabilitats';
 import { vistaLinks } from './vistaLinks';
 import { vistaPerfilCV } from './vistaPerfilCV';
 import { vistaPerfilCVi18n } from './vistaPerfilCVi18n';
@@ -36,5 +37,7 @@ export function curriculum() {
     formHabilitats(false);
   } else if (pageType[2] === 'modifica-habilitat') {
     formHabilitats(true, id);
+  } else if (pageType[2] === 'perfil-habilitats') {
+    vistaHabilitats();
   }
 }

@@ -393,6 +393,91 @@ if ($slug === "perfilCV") {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+
+
+    // POST : habilitats cv
+    // URL: https://elliot.cat/api/curriculum/post/habilitat
+} else if ($slug === "habilitat") {
+
+
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // Normalizadores
+    $trimOrNull = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
+    $toIntOrNull = static fn($v): ?int => (is_numeric($v) ? (int)$v : null);
+
+    // Datos
+    $nom       = $trimOrNull($data['nom'] ?? null);
+    $imatge_id = $toIntOrNull($data['imatge_id'] ?? null);
+    $posicio   = $toIntOrNull($data['posicio'] ?? 0) ?? 0;
+
+    // Validaciones
+    $errors = [];
+    if ($nom === null) {
+        $errors[] = ValidacioErrors::requerit('nom');
+    } elseif (mb_strlen($nom) > 100) {
+        $errors[] = ValidacioErrors::massaLlarg('nom', 100);
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        /** @var PDO $conn */
+        $conn->beginTransaction();
+
+        // Evitar duplicado por nombre
+        $sqlChk = "SELECT id FROM db_curriculum_habilitats WHERE nom = :nom LIMIT 1";
+        $stChk  = $conn->prepare($sqlChk);
+        $stChk->bindValue(':nom', $nom, PDO::PARAM_STR);
+        $stChk->execute();
+        if ($stChk->fetchColumn()) {
+            $conn->rollBack();
+            Response::error(MissatgesAPI::error('duplicat'), ["habilitat ja existent: $nom"], 409);
+        }
+
+        // INSERT
+        $sql = "INSERT INTO db_curriculum_habilitats
+                    (nom, imatge_id, posicio)
+                VALUES
+                    (:nom, :imatge_id, :posicio)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
+        if ($imatge_id === null) $stmt->bindValue(':imatge_id', null, PDO::PARAM_NULL);
+        else $stmt->bindValue(':imatge_id', $imatge_id, PDO::PARAM_INT);
+        $stmt->bindValue(':posicio', $posicio, PDO::PARAM_INT);
+
+        $stmt->execute();
+        $newId = (int)$conn->lastInsertId();
+
+        // Auditoría
+        $detalls = sprintf("Creació habilitat nom=%s, posicio=%d", $nom, $posicio);
+        Audit::registrarCanvi(
+            $conn,
+            $userUuid,
+            "INSERT",
+            $detalls,
+            'db_curriculum_habilitats',
+            $newId
+        );
+
+        $conn->commit();
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            ['id' => $newId],
+            200
+        );
+    } catch (PDOException $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

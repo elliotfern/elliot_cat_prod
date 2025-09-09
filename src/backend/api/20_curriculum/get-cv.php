@@ -174,6 +174,28 @@ if ($slug === "perfilCV") {
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+
+    // GET : Habilitats
+    // URL: https://elliot.cat/api/curriculum/get/habilitats
+} else if ($slug === "habilitats") {
+
+    $db = new Database();
+    $query = "SELECT id, perfil_id, label, url, posicio, visible 	
+              FROM db_curriculum_links
+              ORDER BY posicio";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
