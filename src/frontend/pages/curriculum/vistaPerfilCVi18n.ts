@@ -47,12 +47,9 @@ function layoutHTML(perfilId: number) {
 
   return `
     <ul class="nav nav-tabs mb-3" role="tablist">${tabs}</ul>
-    <div id="tabContent" class="card">
+    <div id="tabContent">
       <div class="card-body">
         <div id="localeContent">${spinner()}</div>
-      </div>
-      <div class="card-footer text-muted small">
-        Perfil ID: ${perfilId}
       </div>
     </div>
   `;
@@ -88,7 +85,7 @@ export async function vistaPerfilCVi18n(perfilId = 1): Promise<void> {
       <h2 class="h4 mb-2">${esc(d.titular)}</h2>
       <div class="text-body">${nl2br(d.sumari)}</div>
       <hr>
-      <div class="text-muted small">Locale: ${d.locale} · Registre ID: ${d.id}</div>
+      <div class="text-muted small">Registre ID: ${d.id}</div>
     `;
   };
 
@@ -105,7 +102,7 @@ export async function vistaPerfilCVi18n(perfilId = 1): Promise<void> {
       const res = await fetchDataGet<ApiResponse<PerfilCVI18n>>(url, true);
       if (res) {
         if (res.status !== 'success' || !res.data) {
-          content.innerHTML = errorBox(res.message || 'No s\'han trobat dades per a aquest idioma.');
+          content.innerHTML = errorBox(res.message || "No s'han trobat dades per a aquest idioma.");
           return;
         }
         cache.set(locale, res.data);
