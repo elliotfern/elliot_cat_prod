@@ -28,7 +28,7 @@ interface ApiResponse<T> {
 export async function formHabilitats(isUpdate: boolean, id?: number) {
   const form = document.getElementById('formCVHabilitats');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
-  const btnSubmit = document.getElementById('btnCVPerfili18n') as HTMLButtonElement;
+  const btnSubmit = document.getElementById('btnHabilitat') as HTMLButtonElement;
 
   let data: Partial<Fitxa> = {
     comarca: 0,
