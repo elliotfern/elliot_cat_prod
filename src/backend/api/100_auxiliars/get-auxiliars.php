@@ -110,18 +110,39 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 
     // Llistat idiomes pelicules
     // ruta GET => "/api/cinema/get/auxiliars/?type=llengues"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'llengues') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT i.id, i.idioma_ca
+} else if ($slug === "llengues") {
+
+    $db = new Database();
+    $query = "SELECT i.id, i.idioma_ca
             FROM aux_idiomes AS i
-            ORDER BY i.idioma_ca ASC");
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+            ORDER BY i.idioma_ca ASC";
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-    echo json_encode($data);
+
 
     // Llistat paisos
     // ruta GET => "/api/cinema/get/auxiliars/?type=paisos"
@@ -212,6 +233,41 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 	      	c.id, c.city
             FROM db_cities AS c
             ORDER BY c.city ASC";
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : llistat perfils cv
+    // URL: https://elliot.cat/api/auxiliars/get/perfilsCV
+} else if ($slug === "perfilsCV") {
+
+    $db = new Database();
+    $query = "SELECT p.id, p.nom_complet
+            FROM db_curriculum_perfil AS p
+            ORDER BY p.nom_complet ASC";
 
     try {
 

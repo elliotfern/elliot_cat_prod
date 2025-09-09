@@ -11,6 +11,8 @@
                     <p>
                         <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nou-perfil'" class="button btn-gran btn-secondari">Nou perfil</button>
 
+                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nou-perfil-i18n'" class="button btn-gran btn-secondari">Nou perfil i18n</button>
+
                     </p>
                 <?php endif; ?>
             </div>
@@ -31,7 +33,7 @@
                 db_curriculum_idiomes
                 db_curriculum_links
                 * db_curriculum_perfil
-                db_curriculum_perfil_i18n
+                * db_curriculum_perfil_i18n
                 db_curriculum_projectes
                 db_curriculum_projectes_i18n
                 db_curriculum_projectes_links
