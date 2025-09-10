@@ -53,11 +53,22 @@ const LOCALES: Record<number, string> = {
 };
 
 const LOCALE_CODES: Record<number, string> = {
-  1: 'ca-ES', // Català
-  2: 'en-US', // English
-  3: 'es-ES', // Castellano
-  4: 'it-IT', // Italiano
+  1: 'ca-ES',
+  2: 'en-US',
+  3: 'es-ES',
+  4: 'it-IT',
 };
+
+const CURRENT_LABEL: Record<number, string> = {
+  1: 'actualitat',
+  2: 'current',
+  3: 'actualidad',
+  4: 'attuale',
+};
+
+function capitalizeFirst(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 function fmtDateLocale(dateStr?: string | null, locale: number = 1): string {
   if (!dateStr) return '';
@@ -65,7 +76,18 @@ function fmtDateLocale(dateStr?: string | null, locale: number = 1): string {
   if (isNaN(d.getTime())) return dateStr ?? '';
 
   const lang = LOCALE_CODES[locale] ?? 'ca-ES';
-  return d.toLocaleDateString(lang, { month: 'long', year: 'numeric' });
+  const mes = d.toLocaleDateString(lang, { month: 'long' });
+  const any = d.toLocaleDateString(lang, { year: 'numeric' });
+
+  return `${capitalizeFirst(mes)} ${any}`;
+}
+
+// 🔑 Helper para generar el período en el idioma correcto
+function fmtPeriode(exp: Experiencia, locale: number): string {
+  if (exp.is_current === 1 || exp.is_current === true) {
+    return `${fmtDateLocale(exp.data_inici, locale)} - ${CURRENT_LABEL[locale] ?? 'actual'}`;
+  }
+  return `${fmtDateLocale(exp.data_inici, locale)} - ${fmtDateLocale(exp.data_fi, locale)}`;
 }
 
 function renderTabs(exp: Experiencia): string {
@@ -87,10 +109,11 @@ function renderTabs(exp: Experiencia): string {
 
   const panes = exp.i18n
     .map((t, idx) => {
-      const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia-i18n/${exp.id}`;
+      const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia-i18n/${t.locale}/${exp.id}`;
       return `
         <div class="tab-pane fade ${idx === 0 ? 'show active' : ''}" id="pane-${t.locale}" role="tabpanel">
           <h3>${esc(t.rol_titol)}</h3>
+          <p class="text-muted mb-2">${fmtPeriode(exp, t.locale)}</p>
           ${t.sumari ? `<p>${esc(t.sumari)}</p>` : ''}
           ${t.fites ? `<div>${t.fites}</div>` : ''}
           <div class="text-end mt-3">
@@ -108,8 +131,6 @@ function renderTabs(exp: Experiencia): string {
 }
 
 function renderExperiencia(exp: Experiencia): string {
-  const periode = exp.is_current === 1 || exp.is_current === true ? `${fmtDateLocale(exp.data_inici)} - actual` : `${fmtDateLocale(exp.data_inici)} - ${fmtDateLocale(exp.data_fi)}`;
-
   const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}.png` : null;
 
   const localitzacio = [exp.city, exp.pais_cat].filter(Boolean).join(', ');
@@ -123,7 +144,6 @@ function renderExperiencia(exp: Experiencia): string {
             ${exp.empresa_url ? `<a href="${esc(exp.empresa_url)}" target="_blank">${esc(exp.empresa_url)}</a>` : ''}
           </div>
         </div>
-        <p class="text-muted mb-2">${periode}</p>
         ${localitzacio ? `<p class="text-muted mb-2">${esc(localitzacio)}</p>` : ''}
         ${renderTabs(exp)}
     </div>
