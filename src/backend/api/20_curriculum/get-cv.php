@@ -208,7 +208,7 @@ if ($slug === "perfilCV") {
     $query = "SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.city, co.pais_cat
               FROM db_curriculum_experiencia_professional AS e
               LEFT JOIN db_img AS i ON e.logo_empresa = i.id
-              LEFT JOIN db_cities AS c ON c.empresa_localitzacio = c.id
+              LEFT JOIN db_cities AS c ON e.empresa_localitzacio = c.id
               INNER JOIN db_countries AS co ON c.country = co.id
               WHERE e.id = :id
               LIMIT 1";
@@ -235,7 +235,7 @@ if ($slug === "perfilCV") {
     $query = "SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.city, co.pais_cat
               FROM db_curriculum_experiencia_professional AS e
               LEFT JOIN db_img AS i ON e.logo_empresa = i.id
-              LEFT JOIN db_cities AS c ON c.empresa_localitzacio = c.id
+              LEFT JOIN db_cities AS c ON e.empresa_localitzacio = c.id
               INNER JOIN db_countries AS co ON c.country = co.id
               ORDER BY e.posicio ASC";
 

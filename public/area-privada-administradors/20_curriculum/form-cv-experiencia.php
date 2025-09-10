@@ -75,7 +75,7 @@
         <!-- Visible -->
         <div class="col-md-4">
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="visible" name="visible" value="1" checked>
+                <input class="form-check-input" type="checkbox" id="visible" name="visible" value="1">
                 <label class="form-check-label" for="visible">Visible públicament</label>
             </div>
         </div>
