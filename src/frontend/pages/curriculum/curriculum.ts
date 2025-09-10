@@ -1,5 +1,6 @@
 import { getPageType } from '../../utils/urlPath';
 import { formExperiencies } from './formExperiencies';
+import { formExperienciesI18n } from './formExperienciesI18n';
 import { formHabilitats } from './formHabilitats';
 import { formLink } from './formLink';
 import { formPerfil } from './formPerfil';
@@ -49,5 +50,9 @@ export function curriculum() {
     formExperiencies(true, id);
   } else if (pageType[2] === 'perfil-experiencies') {
     vistaExperiencia();
+  } else if (pageType[2] === 'nova-experiencia-i18n') {
+    formExperienciesI18n(false);
+  } else if (pageType[2] === 'modifica-experiencia-i18n') {
+    formExperienciesI18n(true, id);
   }
 }

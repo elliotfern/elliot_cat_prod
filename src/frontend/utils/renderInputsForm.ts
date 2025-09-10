@@ -20,6 +20,14 @@ export function renderFormInputs<T extends Record<string, unknown>>(data: T): vo
       continue;
     }
 
+    // --- CASE: TRIX hidden input ---
+    if (input instanceof HTMLInputElement && input.getAttribute('type') === 'hidden' && input.nextElementSibling?.tagName === 'TRIX-EDITOR') {
+      input.value = value ? String(value) : '';
+      // avisar al editor que el contenido ha cambiado
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      continue;
+    }
+
     // --- CASE: null / undefined ---
     if (value === null || value === undefined) {
       input.value = '';

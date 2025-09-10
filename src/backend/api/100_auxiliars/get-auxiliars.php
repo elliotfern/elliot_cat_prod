@@ -368,6 +368,28 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             500
         );
     }
+
+    // GET : llistat Experiencies
+    // URL: https://elliot.cat/api/auxiliars/get/experiencies
+} else if ($slug === "experiencies") {
+
+    $db = new Database();
+    $query = "SELECT e.id, e.empresa
+              FROM db_curriculum_experiencia_professional AS e
+              ORDER BY e.empresa ASC";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

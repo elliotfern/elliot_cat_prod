@@ -8,6 +8,7 @@ export type ApiUrls = {
     HABILITATS: string;
     EXPERIENCIA_ID: (id: number) => string;
     EXPERIENCIES: string;
+    EXPERIENCIA_I18N_ID: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -15,6 +16,7 @@ export type ApiUrls = {
     LINK_CV: string;
     HABILITAT: string;
     EXPERIENCIA: string;
+    EXPERIENCIA_I18N: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -22,6 +24,7 @@ export type ApiUrls = {
     LINK_CV: string;
     HABILITAT: string;
     EXPERIENCIA: string;
+    EXPERIENCIA_I18N: string;
   };
   DELETE: {};
 };
