@@ -25,12 +25,14 @@ export function renderFormInputs<T extends Record<string, unknown>>(data: T): vo
       const html = value ? String(value) : '';
       input.value = html;
 
-      // Notificar a Trix que ha cambiado el valor
+      // Notificar a Trix
       input.dispatchEvent(new Event('input', { bubbles: true }));
 
-      // Extra: asegurar que el editor también se refresca
-      const editor = input.nextElementSibling as HTMLElement;
-      editor.dispatchEvent(new Event('trix-change', { bubbles: true }));
+      // Seguridad extra: forzar actualización solo si el editor ya está listo
+      setTimeout(() => {
+        const editor = input.nextElementSibling as HTMLElement;
+        editor.dispatchEvent(new Event('trix-change', { bubbles: true }));
+      }, 0);
 
       continue;
     }
