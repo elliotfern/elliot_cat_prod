@@ -11,10 +11,12 @@ export function renderFormInputs<T extends Record<string, unknown>>(data: T): vo
       continue;
     }
 
-    // --- CASE: date string (YYYY-MM-DD) ---
-    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-      const formatted = formatDatesForm(value);
-      input.value = formatted ?? '';
+    // Inputs de tipo "date"
+    if (input instanceof HTMLInputElement && input.type === 'date') {
+      input.value =
+        typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+          ? value // usar directamente YYYY-MM-DD
+          : '';
       continue;
     }
 
