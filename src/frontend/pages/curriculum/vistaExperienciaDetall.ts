@@ -37,13 +37,6 @@ interface ApiResponse<T> {
   data: T;
 }
 
-const LOCALES: Record<number, string> = {
-  1: 'Català',
-  2: 'English',
-  3: 'Castellano',
-  4: 'Italiano',
-};
-
 const esc = (s: unknown) =>
   String(s ?? '')
     .replace(/&/g, '&amp;')
@@ -52,11 +45,27 @@ const esc = (s: unknown) =>
 
 const spinner = () => `<div class="d-flex align-items-center"><div class="spinner-border me-2" role="status"></div> Carregant…</div>`;
 
-function fmtDate(dateStr?: string | null): string {
+const LOCALES: Record<number, string> = {
+  1: 'Català',
+  2: 'English',
+  3: 'Castellano',
+  4: 'Italiano',
+};
+
+const LOCALE_CODES: Record<number, string> = {
+  1: 'ca-ES', // Català
+  2: 'en-US', // English
+  3: 'es-ES', // Castellano
+  4: 'it-IT', // Italiano
+};
+
+function fmtDateLocale(dateStr?: string | null, locale: number = 1): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr ?? '';
-  return `${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
+
+  const lang = LOCALE_CODES[locale] ?? 'ca-ES';
+  return d.toLocaleDateString(lang, { month: 'long', year: 'numeric' });
 }
 
 function renderTabs(exp: Experiencia): string {
@@ -99,7 +108,7 @@ function renderTabs(exp: Experiencia): string {
 }
 
 function renderExperiencia(exp: Experiencia): string {
-  const periode = exp.is_current === 1 || exp.is_current === true ? `${fmtDate(exp.data_inici)} - actual` : `${fmtDate(exp.data_inici)} - ${fmtDate(exp.data_fi)}`;
+  const periode = exp.is_current === 1 || exp.is_current === true ? `${fmtDateLocale(exp.data_inici)} - actual` : `${fmtDateLocale(exp.data_inici)} - ${fmtDateLocale(exp.data_fi)}`;
 
   const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}.png` : null;
 
