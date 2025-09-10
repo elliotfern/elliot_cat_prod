@@ -101,7 +101,7 @@ function renderTabs(exp: Experiencia): string {
 function renderExperiencia(exp: Experiencia): string {
   const periode = exp.is_current === 1 || exp.is_current === true ? `${fmtDate(exp.data_inici)} - actual` : `${fmtDate(exp.data_inici)} - ${fmtDate(exp.data_fi)}`;
 
-  const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}` : null;
+  const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}.png` : null;
 
   const localitzacio = [exp.city, exp.pais_cat].filter(Boolean).join(', ');
 
