@@ -101,13 +101,12 @@ function renderTabs(exp: Experiencia): string {
 function renderExperiencia(exp: Experiencia): string {
   const periode = exp.is_current === 1 || exp.is_current === true ? `${fmtDate(exp.data_inici)} - actual` : `${fmtDate(exp.data_inici)} - ${fmtDate(exp.data_fi)}`;
 
-  const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/empreses/${exp.nameImg}` : null;
+  const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}` : null;
 
   const localitzacio = [exp.city, exp.pais_cat].filter(Boolean).join(', ');
 
   return `
-    <div class="card mb-3">
-      <div class="card-body">
+    <div class="mb-3">
         <div class="d-flex align-items-center mb-3">
           ${logoUrl ? `<img src="${esc(logoUrl)}" alt="" style="height:40px" class="me-3">` : ''}
           <div>
@@ -118,7 +117,6 @@ function renderExperiencia(exp: Experiencia): string {
         <p class="text-muted mb-2">${periode}</p>
         ${localitzacio ? `<p class="text-muted mb-2">${esc(localitzacio)}</p>` : ''}
         ${renderTabs(exp)}
-      </div>
     </div>
   `;
 }
