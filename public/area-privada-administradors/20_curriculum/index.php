@@ -17,6 +17,8 @@
 
                         <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nova-habilitat'" class="button btn-gran btn-secondari">Nou habilitat</button>
 
+                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nova-experiencia'" class="button btn-gran btn-secondari">Nova experiència professional</button>
+
                     </p>
                 <?php endif; ?>
             </div>

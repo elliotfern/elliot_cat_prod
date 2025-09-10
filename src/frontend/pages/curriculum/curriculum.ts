@@ -1,4 +1,5 @@
 import { getPageType } from '../../utils/urlPath';
+import { formExperiencies } from './formExperiencies';
 import { formHabilitats } from './formHabilitats';
 import { formLink } from './formLink';
 import { formPerfil } from './formPerfil';
@@ -39,5 +40,7 @@ export function curriculum() {
     formHabilitats(true, id);
   } else if (pageType[2] === 'perfil-habilitats') {
     vistaHabilitats();
+  } else if (pageType[2] === 'nova-experiencia') {
+    formExperiencies(false);
   }
 }

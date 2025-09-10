@@ -15,8 +15,8 @@ interface Fitxa {
   provincia: number;
   comunitat: number;
   estat: number;
-  imatge_id: number;
-  locale: number;
+  logo_empresa: number;
+  empresa_localitzacio: number;
 }
 
 interface ApiResponse<T> {
@@ -25,10 +25,10 @@ interface ApiResponse<T> {
   data: T;
 }
 
-export async function formHabilitats(isUpdate: boolean, id?: number) {
-  const form = document.getElementById('formCVHabilitats');
+export async function formExperiencies(isUpdate: boolean, id?: number) {
+  const form = document.getElementById('formCVExperiencia');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
-  const btnSubmit = document.getElementById('btnHabilitat') as HTMLButtonElement;
+  const btnSubmit = document.getElementById('btnExperiencia') as HTMLButtonElement;
 
   let data: Partial<Fitxa> = {
     comarca: 0,
@@ -40,28 +40,29 @@ export async function formHabilitats(isUpdate: boolean, id?: number) {
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.HABILITAT_ID(id), true);
+    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.EXPERIENCIA_ID(id), true);
 
     if (!response || !response.data) return;
     data = response.data;
 
-    divTitol.innerHTML = `<h2>Modificació habilitats currículum</h2>`;
+    divTitol.innerHTML = `<h2>Modificació experiència professional del currículum</h2>`;
 
     renderFormInputs(data);
 
     btnSubmit.textContent = 'Modificar dades';
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formCVHabilitats', API_URLS.PUT.HABILITAT);
+      transmissioDadesDB(event, 'PUT', 'formCVExperiencia', API_URLS.PUT.EXPERIENCIA);
     });
   } else {
-    divTitol.innerHTML = `<h2>Creació de nova habilitat del currículum</h2>`;
+    divTitol.innerHTML = `<h2>Creació de nova experiència professional del currículum</h2>`;
     btnSubmit.textContent = 'Inserir dades';
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formCVHabilitats', API_URLS.POST.HABILITAT, true);
+      transmissioDadesDB(event, 'POST', 'formCVExperiencia', API_URLS.POST.EXPERIENCIA, true);
     });
   }
 
-  await auxiliarSelect(data.imatge_id ?? 0, 'imatgesIcones', 'imatge_id', 'nom');
+  await auxiliarSelect(data.logo_empresa ?? 0, 'imatgesEmpreses', 'logo_empresa', 'nom');
+  await auxiliarSelect(data.empresa_localitzacio ?? 0, 'ciutats', 'empresa_localitzacio', 'city');
 }

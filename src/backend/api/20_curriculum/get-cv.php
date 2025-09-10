@@ -156,8 +156,8 @@ if ($slug === "perfilCV") {
     $id   = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
     $db = new Database();
-    $query = "SELECT id, perfil_id, label, url, posicio, visible 	
-              FROM db_curriculum_links
+    $query = "SELECT id, nom, imatge_id, posicio 	
+              FROM db_curriculum_habilitats
               WHERE id = :id
               LIMIT 1";
 
@@ -180,9 +180,10 @@ if ($slug === "perfilCV") {
 } else if ($slug === "habilitats") {
 
     $db = new Database();
-    $query = "SELECT id, perfil_id, label, url, posicio, visible 	
-              FROM db_curriculum_links
-              ORDER BY posicio";
+    $query = "SELECT h.id, h.nom, h.imatge_id, h.posicio, i.nameImg
+              FROM db_curriculum_habilitats AS h
+              LEFT JOIN db_img AS i ON h.imatge_id = i.id
+              ORDER BY h.posicio";
 
     try {
         $row = $db->getData($query);
