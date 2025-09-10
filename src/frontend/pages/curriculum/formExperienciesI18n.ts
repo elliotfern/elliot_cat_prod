@@ -3,6 +3,7 @@ import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
+import { setTrixHTML } from '../../utils/setTrix';
 
 interface Fitxa {
   [key: string]: unknown;
@@ -17,6 +18,7 @@ interface Fitxa {
   estat: number;
   experiencia_id: number;
   locale: number;
+  fites: string;
 }
 
 interface ApiResponse<T> {
@@ -48,6 +50,9 @@ export async function formExperienciesI18n(isUpdate: boolean, id?: number) {
     divTitol.innerHTML = `<h2>Modificació experiència professional i18n del currículum</h2>`;
 
     renderFormInputs(data);
+
+    // Carga robusta en Trix (después de que Trix se haya inicializado)
+    await setTrixHTML('fites', data.fites);
 
     btnSubmit.textContent = 'Modificar dades';
 
