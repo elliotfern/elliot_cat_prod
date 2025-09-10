@@ -9,6 +9,7 @@ export type ApiUrls = {
     EXPERIENCIA_ID: (id: number) => string;
     EXPERIENCIES: string;
     EXPERIENCIA_I18N_ID: (id: number) => string;
+    EXPERIENCIA_I18N_DETALL_ID: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;

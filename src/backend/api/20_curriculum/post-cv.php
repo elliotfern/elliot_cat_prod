@@ -582,6 +582,84 @@ if ($slug === "perfilCV") {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === "experienciaI18n") {
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // Helpers
+    $trimOrNull = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
+    $toIntOrNull = static fn($v): ?int => (is_numeric($v) ? (int)$v : null);
+
+    // Datos
+    $experiencia_id = $toIntOrNull($data['experiencia_id'] ?? null);
+    $locale         = $toIntOrNull($data['locale'] ?? null);
+    $rol_titol      = $trimOrNull($data['rol_titol'] ?? null);
+    $sumari         = $trimOrNull($data['sumari'] ?? null);
+    $fites          = $trimOrNull($data['fites'] ?? null);
+
+    // Validaciones
+    $errors = [];
+    if ($experiencia_id === null) {
+        $errors[] = ValidacioErrors::requerit('experiencia_id');
+    }
+    if ($locale === null) {
+        $errors[] = ValidacioErrors::requerit('locale');
+    }
+    if ($rol_titol === null) {
+        $errors[] = ValidacioErrors::requerit('rol_titol');
+    } elseif (mb_strlen($rol_titol) > 190) {
+        $errors[] = ValidacioErrors::massaLlarg('rol_titol', 190);
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        /** @var PDO $conn */
+        $sql = "INSERT INTO db_curriculum_experiencia_professional_i18n
+                    (experiencia_id, locale, rol_titol, sumari, fites)
+                VALUES
+                    (:experiencia_id, :locale, :rol_titol, :sumari, :fites)";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':experiencia_id', $experiencia_id, PDO::PARAM_INT);
+        $stmt->bindValue(':locale', $locale, PDO::PARAM_INT);
+        $stmt->bindValue(':rol_titol', $rol_titol, PDO::PARAM_STR);
+        $stmt->bindValue(':sumari', $sumari, $sumari !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':fites', $fites, $fites !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+
+        $stmt->execute();
+        $newId = (int) $conn->lastInsertId();
+
+        // Auditoría
+        $detalls = sprintf(
+            "Creació experiència_i18n per experiencia_id=%d, locale=%d, rol=%s",
+            $experiencia_id,
+            $locale,
+            $rol_titol
+        );
+        Audit::registrarCanvi(
+            $conn,
+            $userUuid,
+            "INSERT",
+            $detalls,
+            'db_curriculum_experiencia_professional_i18n',
+            $newId
+        );
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            ['id' => $newId],
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

@@ -251,6 +251,74 @@ if ($slug === "perfilCV") {
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === "experienciaDetall") {
+    $id = $_GET['id'] ?? null;
+    if (!$id || !is_numeric($id)) {
+        Response::error(MissatgesAPI::error('validacio'), ['id requerit'], 400);
+    }
+
+    try {
+        /** @var PDO $conn */
+        // 1. Datos principales
+        $sqlMain = "SELECT 
+                        e.id,
+                        e.empresa,
+                        e.empresa_url,
+                        e.empresa_localitzacio,
+                        e.data_inici,
+                        e.data_fi,
+                        e.is_current,
+                        e.logo_empresa,
+                        e.posicio,
+                        e.visible,
+                        e.created_at,
+                        e.updated_at,
+                        i.nameImg, 
+                        c.city, 
+                        co.pais_cat
+                    FROM db_curriculum_experiencia_professional e
+                    LEFT JOIN db_img AS i ON e.logo_empresa = i.id
+                    LEFT JOIN db_cities AS c ON e.empresa_localitzacio = c.id
+                    LEFT JOIN db_countries AS co ON c.country = co.id
+                    WHERE e.id = :id
+                    LIMIT 1";
+        $stmtMain = $conn->prepare($sqlMain);
+        $stmtMain->bindValue(':id', (int)$id, PDO::PARAM_INT);
+        $stmtMain->execute();
+        $main = $stmtMain->fetch(PDO::FETCH_ASSOC);
+
+        if (!$main) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+        }
+
+        // 2. Traducciones (i18n)
+        $sqlI18n = "SELECT 
+                        i.id,
+                        i.experiencia_id,
+                        i.locale,
+                        i.rol_titol,
+                        i.sumari,
+                        i.fites
+                    FROM db_curriculum_experiencia_professional_i18n i
+                    WHERE i.experiencia_id = :id
+                    ORDER BY i.locale ASC";
+        $stmtI18n = $conn->prepare($sqlI18n);
+        $stmtI18n->bindValue(':id', (int)$id, PDO::PARAM_INT);
+        $stmtI18n->execute();
+        $i18nRows = $stmtI18n->fetchAll(PDO::FETCH_ASSOC);
+
+        // 3. Combinamos
+        $result = $main;
+        $result['i18n'] = $i18nRows;
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
