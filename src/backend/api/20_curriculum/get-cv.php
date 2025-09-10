@@ -319,6 +319,34 @@ if ($slug === "perfilCV") {
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === "experienciaIdi18n") {
+    $id = $_GET['id'] ?? null;
+    $db = new Database();
+
+    try {
+        $query = "SELECT 
+                        i.id,
+                        i.experiencia_id,
+                        i.locale,
+                        i.rol_titol,
+                        i.sumari,
+                        i.fites
+                    FROM db_curriculum_experiencia_professional_i18n i
+                    WHERE i.experiencia_id = :id
+                    LIMIT 1";
+
+        $params = [':id' => $id, ':id' => $id];
+        $row = $db->getData($query, $params, true);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

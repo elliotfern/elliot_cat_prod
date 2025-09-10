@@ -21,10 +21,17 @@ export function renderFormInputs<T extends Record<string, unknown>>(data: T): vo
     }
 
     // --- CASE: TRIX hidden input ---
-    if (input instanceof HTMLInputElement && input.getAttribute('type') === 'hidden' && input.nextElementSibling?.tagName === 'TRIX-EDITOR') {
-      input.value = value ? String(value) : '';
-      // avisar al editor que el contenido ha cambiado
+    if (input instanceof HTMLInputElement && input.type === 'hidden' && input.nextElementSibling?.tagName === 'TRIX-EDITOR') {
+      const html = value ? String(value) : '';
+      input.value = html;
+
+      // Notificar a Trix que ha cambiado el valor
       input.dispatchEvent(new Event('input', { bubbles: true }));
+
+      // Extra: asegurar que el editor también se refresca
+      const editor = input.nextElementSibling as HTMLElement;
+      editor.dispatchEvent(new Event('trix-change', { bubbles: true }));
+
       continue;
     }
 
