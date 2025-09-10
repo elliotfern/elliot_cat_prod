@@ -129,7 +129,8 @@ export async function vistaExperienciaDetall(id: number): Promise<void> {
   root.innerHTML = spinner();
 
   try {
-    const res = await fetchDataGet<ApiResponse<Experiencia>>(API_URLS.GET.EXPERIENCIA_I18N_DETALL_ID(id));
+    const url = API_URLS.GET.EXPERIENCIA_I18N_DETALL_ID(id);
+    const res = await fetchDataGet<ApiResponse<Experiencia>>(url, true);
 
     if (res) {
       if (res.status !== 'success') {
