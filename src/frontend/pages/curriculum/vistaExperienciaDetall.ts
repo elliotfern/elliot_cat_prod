@@ -109,7 +109,7 @@ function renderTabs(exp: Experiencia): string {
 
   const panes = exp.i18n
     .map((t, idx) => {
-      const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia-i18n/${t.locale}/${exp.id}`;
+      const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia-i18n/${exp.id}`;
       return `
         <div class="tab-pane fade ${idx === 0 ? 'show active' : ''}" id="pane-${t.locale}" role="tabpanel">
           <h3>${esc(t.rol_titol)}</h3>
