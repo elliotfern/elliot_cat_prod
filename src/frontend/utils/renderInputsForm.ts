@@ -2,13 +2,30 @@ import { formatDatesForm } from './dates';
 
 async function setTrixHTML(inputId: string, html: string | undefined | null) {
   const safe = html ?? '';
+
   const hidden = document.getElementById(inputId) as HTMLInputElement | null;
   if (hidden) hidden.value = safe;
 
   const editorEl = document.querySelector(`trix-editor[input="${inputId}"]`) as any;
-  if (editorEl && editorEl.editor) {
+  if (!editorEl) return;
+
+  // Si ya existe el editor, cargar directamente
+  if (editorEl.editor) {
     editorEl.editor.loadHTML(safe);
+    return;
   }
+
+  // Si todavía no existe -> esperar a trix-initialize
+  await new Promise<void>((resolve) => {
+    editorEl.addEventListener(
+      'trix-initialize',
+      () => {
+        editorEl.editor.loadHTML(safe);
+        resolve();
+      },
+      { once: true }
+    );
+  });
 }
 
 export async function renderFormInputs<T extends Record<string, unknown>>(data: T): Promise<void> {

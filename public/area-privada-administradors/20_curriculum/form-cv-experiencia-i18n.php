@@ -42,6 +42,7 @@
         <!-- Fites (TRIX editor) -->
         <div class="col-complet">
             <label for="fites" class="form-label">Fites / Responsabilitats</label>
+
             <input id="fites" type="hidden" name="fites">
             <trix-editor input="fites" class="trix-content" style="min-height:200px"></trix-editor>
             <div class="form-text">Pots afegir llistes, negreta, enllaços...</div>
