@@ -1,6 +1,17 @@
 import { formatDatesForm } from './dates';
 
-export function renderFormInputs<T extends Record<string, unknown>>(data: T): void {
+async function setTrixHTML(inputId: string, html: string | undefined | null) {
+  const safe = html ?? '';
+  const hidden = document.getElementById(inputId) as HTMLInputElement | null;
+  if (hidden) hidden.value = safe;
+
+  const editorEl = document.querySelector(`trix-editor[input="${inputId}"]`) as any;
+  if (editorEl && editorEl.editor) {
+    editorEl.editor.loadHTML(safe);
+  }
+}
+
+export async function renderFormInputs<T extends Record<string, unknown>>(data: T): Promise<void> {
   for (const [key, value] of Object.entries(data)) {
     const input = document.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`#${key}`);
     if (!input) continue;
@@ -22,18 +33,7 @@ export function renderFormInputs<T extends Record<string, unknown>>(data: T): vo
 
     // --- CASE: TRIX hidden input ---
     if (input instanceof HTMLInputElement && input.type === 'hidden' && input.nextElementSibling?.tagName === 'TRIX-EDITOR') {
-      const html = value ? String(value) : '';
-      input.value = html;
-
-      // Notificar a Trix
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-
-      // Seguridad extra: forzar actualización solo si el editor ya está listo
-      setTimeout(() => {
-        const editor = input.nextElementSibling as HTMLElement;
-        editor.dispatchEvent(new Event('trix-change', { bubbles: true }));
-      }, 0);
-
+      await setTrixHTML(input.id, value ? String(value) : '');
       continue;
     }
 
