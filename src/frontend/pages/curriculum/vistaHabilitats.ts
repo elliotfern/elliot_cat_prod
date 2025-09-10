@@ -92,21 +92,15 @@ export async function vistaHabilitats(): Promise<void> {
     const res = await fetchDataGet<ApiResponse<HabilitatItem[]>>(url, true);
 
     if (res) {
-       if (res.status !== 'success') {
-      root.innerHTML = errorBox(res.message || 'Error desconegut');
-      return;
-    }
+      if (res.status !== 'success') {
+        root.innerHTML = errorBox(res.message || 'Error desconegut');
+        return;
+      }
 
-    const items = Array.isArray(res.data) ? res.data : [];
-    root.innerHTML = renderTable(items); 
+      const items = Array.isArray(res.data) ? res.data : [];
+      root.innerHTML = renderTable(items);
     }
-    
   } catch (e: any) {
     root.innerHTML = errorBox(e?.message ?? 'Error carregant les dades');
   }
 }
-
-// auto-init
-document.addEventListener('DOMContentLoaded', () => {
-  vistaHabilitats();
-});

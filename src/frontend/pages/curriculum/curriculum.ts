@@ -4,6 +4,7 @@ import { formHabilitats } from './formHabilitats';
 import { formLink } from './formLink';
 import { formPerfil } from './formPerfil';
 import { formPerfilI18n } from './formPerfilI18n';
+import { vistaExperiencia } from './vistaExperiencies';
 import { vistaHabilitats } from './vistaHabilitats';
 import { vistaLinks } from './vistaLinks';
 import { vistaPerfilCV } from './vistaPerfilCV';
@@ -42,5 +43,11 @@ export function curriculum() {
     vistaHabilitats();
   } else if (pageType[2] === 'nova-experiencia') {
     formExperiencies(false);
+  } else if (pageType[2] === 'modifica-experiencia') {
+    formExperiencies(true, id);
+  } else if (pageType[2] === 'modifica-experiencia') {
+    formExperiencies(true, id);
+  } else if (pageType[2] === 'perfil-experiencies') {
+    vistaExperiencia();
   }
 }

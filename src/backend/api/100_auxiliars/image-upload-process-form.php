@@ -58,6 +58,7 @@ $allowed_types = [
     17 => 'viatge-espai',
     18 => 'usuaris-avatar',
     19 => 'web-icones',
+    20 => 'logos-empreses',
 ];
 $typeName = $allowed_types[$type] ?? 'elliotfern';
 

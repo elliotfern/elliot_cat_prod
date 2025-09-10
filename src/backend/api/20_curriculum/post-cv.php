@@ -478,6 +478,110 @@ if ($slug === "perfilCV") {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === "experiencia") {
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // Normalizadores
+    $trimOrNull = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
+    $toIntOrNull = static fn($v): ?int => (is_numeric($v) ? (int)$v : null);
+    $toBoolInt = static fn($v): int => ($v === true || $v === 1 || $v === '1' || $v === 'on' || $v === 'true') ? 1 : 0;
+
+    // Datos
+    $empresa              = $trimOrNull($data['empresa'] ?? null);
+    $empresa_url          = $trimOrNull($data['empresa_url'] ?? null);
+    $empresa_localitzacio = $toIntOrNull($data['empresa_localitzacio'] ?? null);
+    $data_inici           = $trimOrNull($data['data_inici'] ?? null);
+    $data_fi              = $trimOrNull($data['data_fi'] ?? null);
+    $is_current           = $toBoolInt($data['is_current'] ?? 0);
+    $logo_empresa         = $toIntOrNull($data['logo_empresa'] ?? null);
+    $posicio              = $toIntOrNull($data['posicio'] ?? 0) ?? 0;
+    $visible              = $toBoolInt($data['visible'] ?? 1);
+
+    // Validaciones
+    $errors = [];
+    if ($empresa === null) {
+        $errors[] = ValidacioErrors::requerit('empresa');
+    } elseif (mb_strlen($empresa) > 190) {
+        $errors[] = ValidacioErrors::massaLlarg('empresa', 190);
+    }
+
+    if ($empresa_url !== null && mb_strlen($empresa_url) > 255) {
+        $errors[] = ValidacioErrors::massaLlarg('empresa_url', 255);
+    } elseif ($empresa_url !== null && !filter_var($empresa_url, FILTER_VALIDATE_URL)) {
+        $errors[] = ValidacioErrors::invalid('empresa_url');
+    }
+
+    if ($data_inici === null) {
+        $errors[] = ValidacioErrors::requerit('data_inici');
+    } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $data_inici)) {
+        $errors[] = ValidacioErrors::dataNoValida('data_inici');
+    }
+
+    if ($data_fi !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data_fi)) {
+        $errors[] = ValidacioErrors::dataNoValida('data_fi');
+    }
+
+    if ($data_inici && $data_fi) {
+        if (strtotime($data_fi) < strtotime($data_inici)) {
+            $errors[] = "La data de fi no pot ser anterior a la data d'inici.";
+        }
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        /** @var PDO $conn */
+        $conn->beginTransaction();
+
+        $sql = "INSERT INTO db_curriculum_experiencia_professional
+                    (empresa, empresa_url, empresa_localitzacio, data_inici, data_fi, is_current, logo_empresa, posicio, visible)
+                VALUES
+                    (:empresa, :empresa_url, :empresa_localitzacio, :data_inici, :data_fi, :is_current, :logo_empresa, :posicio, :visible)";
+
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bindValue(':empresa', $empresa, PDO::PARAM_STR);
+        $stmt->bindValue(':empresa_url', $empresa_url, $empresa_url !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':empresa_localitzacio', $empresa_localitzacio, $empresa_localitzacio !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+        $stmt->bindValue(':data_inici', $data_inici, PDO::PARAM_STR);
+        $stmt->bindValue(':data_fi', $data_fi, $data_fi !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':is_current', $is_current, PDO::PARAM_INT);
+        $stmt->bindValue(':logo_empresa', $logo_empresa, $logo_empresa !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+        $stmt->bindValue(':posicio', $posicio, PDO::PARAM_INT);
+        $stmt->bindValue(':visible', $visible, PDO::PARAM_INT);
+
+        $stmt->execute();
+        $newId = (int) $conn->lastInsertId();
+
+        // Auditoría
+        $detalls = sprintf("Creació experiència empresa=%s, data_inici=%s", $empresa, $data_inici);
+        Audit::registrarCanvi(
+            $conn,
+            $userUuid,
+            "INSERT",
+            $detalls,
+            'db_curriculum_experiencia_professional',
+            $newId
+        );
+
+        $conn->commit();
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            ['id' => $newId],
+            200
+        );
+    } catch (PDOException $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
