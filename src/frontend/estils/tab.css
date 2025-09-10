@@ -1,0 +1,31 @@
+.tabs-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tab-btn {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #f8f9fa;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+}
+
+.tab-btn.active {
+  background: #fff;
+  border-bottom: 1px solid #fff;
+  font-weight: bold;
+}
+
+.tab-pane {
+  display: none;
+  border: 1px solid #ccc;
+  border-top: none;
+  padding: 12px;
+  background: #fff;
+}
+
+.tab-pane.active {
+  display: block;
+}

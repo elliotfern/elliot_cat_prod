@@ -21,6 +21,7 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 @import './cards.css';
 @import './fitxa_dades.css';
 @import './paginacio.css';
+@import './tab.css';
 @import url('https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css');
 
 body {

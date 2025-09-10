@@ -23,7 +23,6 @@ interface Experiencia {
   created_at: string;
   updated_at: string;
 
-  // Nuevos campos de la API
   nameImg?: string | null;
   city?: string | null;
   pais_cat?: string | null;
@@ -82,7 +81,6 @@ function fmtDateLocale(dateStr?: string | null, locale: number = 1): string {
   return `${capitalizeFirst(mes)} ${any}`;
 }
 
-// 🔑 Helper para generar el período en el idioma correcto
 function fmtPeriode(exp: Experiencia, locale: number): string {
   if (exp.is_current === 1 || exp.is_current === true) {
     return `${fmtDateLocale(exp.data_inici, locale)} - ${CURRENT_LABEL[locale] ?? 'actual'}`;
@@ -98,11 +96,9 @@ function renderTabs(exp: Experiencia): string {
   const tabs = exp.i18n
     .map(
       (t, idx) => `
-      <li class="nav-item" role="presentation">
-        <button class="nav-link ${idx === 0 ? 'active' : ''}" id="tab-${t.locale}" data-bs-toggle="tab" data-bs-target="#pane-${t.locale}" type="button" role="tab">
-          ${LOCALES[t.locale] ?? 'Idioma ' + t.locale}
-        </button>
-      </li>
+      <button class="tab-btn ${idx === 0 ? 'active' : ''}" data-target="pane-${t.locale}">
+        ${LOCALES[t.locale] ?? 'Idioma ' + t.locale}
+      </button>
     `
     )
     .join('');
@@ -111,7 +107,7 @@ function renderTabs(exp: Experiencia): string {
     .map((t, idx) => {
       const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia-i18n/${exp.id}`;
       return `
-        <div class="tab-pane fade ${idx === 0 ? 'show active' : ''}" id="pane-${t.locale}" role="tabpanel">
+        <div class="tab-pane ${idx === 0 ? 'active' : ''}" id="pane-${t.locale}">
           <h3>${esc(t.rol_titol)}</h3>
           <p class="text-muted mb-2">${fmtPeriode(exp, t.locale)}</p>
           ${t.sumari ? `<p>${esc(t.sumari)}</p>` : ''}
@@ -125,29 +121,55 @@ function renderTabs(exp: Experiencia): string {
     .join('');
 
   return `
-    <ul class="nav nav-tabs" role="tablist">${tabs}</ul>
-    <div class="tab-content border border-top-0 p-3">${panes}</div>
+    <div class="tabs-container">
+      <div class="tabs-header">${tabs}</div>
+      <div class="tabs-body">${panes}</div>
+    </div>
   `;
 }
 
 function renderExperiencia(exp: Experiencia): string {
   const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}.png` : null;
-
   const localitzacio = [exp.city, exp.pais_cat].filter(Boolean).join(', ');
 
   return `
     <div class="mb-3">
-        <div class="d-flex align-items-center mb-3">
-          ${logoUrl ? `<img src="${esc(logoUrl)}" alt="" style="height:40px" class="me-3">` : ''}
-          <div>
-            <h2 class="h5 mb-0">${esc(exp.empresa)}</h2>
-            ${exp.empresa_url ? `<a href="${esc(exp.empresa_url)}" target="_blank">${esc(exp.empresa_url)}</a>` : ''}
-          </div>
+      <div class="d-flex align-items-center mb-3">
+        ${logoUrl ? `<img src="${esc(logoUrl)}" alt="" style="height:40px" class="me-3">` : ''}
+        <div>
+          <h2 class="h5 mb-0">${esc(exp.empresa)}</h2>
+          ${exp.empresa_url ? `<a href="${esc(exp.empresa_url)}" target="_blank">${esc(exp.empresa_url)}</a>` : ''}
         </div>
-        ${localitzacio ? `<p class="text-muted mb-2">${esc(localitzacio)}</p>` : ''}
-        ${renderTabs(exp)}
+      </div>
+      ${localitzacio ? `<p class="text-muted mb-2">${esc(localitzacio)}</p>` : ''}
+      ${renderTabs(exp)}
     </div>
   `;
+}
+
+/** Inicializa el comportamiento de pestañas sin Bootstrap */
+function initTabs(root: HTMLElement) {
+  const buttons = root.querySelectorAll<HTMLButtonElement>('.tab-btn');
+  const panes = root.querySelectorAll<HTMLElement>('.tab-pane');
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      if (!targetId) return;
+
+      // desactivar todo
+      buttons.forEach((b) => b.classList.remove('active'));
+      panes.forEach((p) => p.classList.remove('active'));
+
+      // activar botón
+      btn.classList.add('active');
+      // activar panel correspondiente
+      const pane = root.querySelector<HTMLElement>(`#${targetId}`);
+      if (pane) {
+        pane.classList.add('active');
+      }
+    });
+  });
 }
 
 export async function vistaExperienciaDetall(id: number): Promise<void> {
@@ -166,6 +188,7 @@ export async function vistaExperienciaDetall(id: number): Promise<void> {
       }
 
       root.innerHTML = renderExperiencia(res.data);
+      initTabs(root); // 👉 inicializar las pestañas
     }
   } catch (e: any) {
     root.innerHTML = `<div class="alert alert-danger">${esc(e?.message ?? 'Error carregant dades')}</div>`;
