@@ -293,7 +293,7 @@ if ($slug === "perfilCV") {
 
         // 2. Traducciones (i18n)
         $sqlI18n = "SELECT 
-                        i.id,
+                        i.id AS idi18n,
                         i.experiencia_id,
                         i.locale,
                         i.rol_titol,
@@ -325,7 +325,7 @@ if ($slug === "perfilCV") {
 
     try {
         $query = "SELECT 
-                        i.id AS idi18n,
+                        i.id
                         i.experiencia_id,
                         i.locale,
                         i.rol_titol,

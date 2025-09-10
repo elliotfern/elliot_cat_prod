@@ -7,6 +7,7 @@ interface ExperienciaI18n {
   rol_titol: string;
   sumari?: string | null;
   fites?: string | null;
+  idi18n: number;
 }
 
 interface Experiencia {
@@ -106,7 +107,7 @@ function renderTabs(exp: Experiencia): string {
 
   const panes = exp.i18n
     .map((t, idx) => {
-      const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia-i18n/${exp.idi18n}`;
+      const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia-i18n/${t.idi18n}`;
       return `
         <div class="tab-pane ${idx === 0 ? 'active' : ''}" id="pane-${t.locale}">
           <h3>${esc(t.rol_titol)}</h3>
