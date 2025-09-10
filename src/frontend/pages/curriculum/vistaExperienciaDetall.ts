@@ -22,6 +22,7 @@ interface Experiencia {
   visible: number | boolean;
   created_at: string;
   updated_at: string;
+  idi18n: number;
 
   nameImg?: string | null;
   city?: string | null;
@@ -105,7 +106,7 @@ function renderTabs(exp: Experiencia): string {
 
   const panes = exp.i18n
     .map((t, idx) => {
-      const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia-i18n/${exp.id}`;
+      const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia-i18n/${exp.idi18n}`;
       return `
         <div class="tab-pane ${idx === 0 ? 'active' : ''}" id="pane-${t.locale}">
           <h3>${esc(t.rol_titol)}</h3>

@@ -325,7 +325,7 @@ if ($slug === "perfilCV") {
 
     try {
         $query = "SELECT 
-                        i.id,
+                        i.id AS idi18n,
                         i.experiencia_id,
                         i.locale,
                         i.rol_titol,
