@@ -23,6 +23,8 @@
 
                         <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nou-educacio'" class="button btn-gran btn-secondari">Nou educació</button>
 
+                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nou-educacio-i18n'" class="button btn-gran btn-secondari">Nou educació i18n</button>
+
                     </p>
                 <?php endif; ?>
             </div>

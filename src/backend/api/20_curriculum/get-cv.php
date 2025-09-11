@@ -358,7 +358,7 @@ if ($slug === "perfilCV") {
                     LEFT JOIN db_img AS i ON e.logo_id = i.id
                     LEFT JOIN db_cities AS c ON e.institucio_localitzacio = c.id
                     LEFT JOIN db_countries AS co ON c.country = co.id
-                    WHERE i.id = :id
+                    WHERE e.id = :id
                     LIMIT 1";
 
         $params = [':id' => $id, ':id' => $id];
@@ -387,6 +387,29 @@ if ($slug === "perfilCV") {
                     ORDER BY e.posicio ASC";
 
         $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+} else if ($slug === "educacioI18nId") {
+    $id = $_GET['id'] ?? null;
+    $db = new Database();
+
+    try {
+        $query = "SELECT 
+                    id, educacio_id, locale, grau, notes
+                    FROM  db_curriculum_educacio_i18n  AS e
+                    WHERE e.id = :id
+                    LIMIT 1";
+
+        $params = [':id' => $id, ':id' => $id];
+        $row = $db->getData($query, $params, true);
 
         if (empty($row)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
