@@ -325,14 +325,40 @@ if ($slug === "perfilCV") {
 
     try {
         $query = "SELECT 
-                        i.id
+                        i.id,
                         i.experiencia_id,
                         i.locale,
                         i.rol_titol,
                         i.sumari,
                         i.fites
-                    FROM db_curriculum_experiencia_professional_i18n i
-                    WHERE i.experiencia_id = :id
+                    FROM db_curriculum_experiencia_professional_i18n AS i
+                    WHERE i.id = :id
+                    LIMIT 1";
+
+        $params = [':id' => $id, ':id' => $id];
+        $row = $db->getData($query, $params, true);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+} else if ($slug === "educacioId") {
+    $id = $_GET['id'] ?? null;
+    $db = new Database();
+
+    try {
+        $query = "SELECT 
+                    e.id, e.institucio, e.institucio_url, e.institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.city, co.pais_cat
+                    FROM db_curriculum_educacio AS e
+                    LEFT JOIN db_img AS i ON e.logo_id = i.id
+                    LEFT JOIN db_cities AS c ON e.institucio_localitzacio = c.id
+                    LEFT JOIN db_countries AS co ON c.country = co.id
+                    WHERE i.id = :id
                     LIMIT 1";
 
         $params = [':id' => $id, ':id' => $id];

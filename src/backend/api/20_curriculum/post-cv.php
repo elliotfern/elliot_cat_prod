@@ -660,6 +660,84 @@ if ($slug === "perfilCV") {
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === "educacio") {
+     $inputData = file_get_contents('php://input');
+    $data = json_decode($inputData, true);
+
+    $errors = [];
+
+    // 🔎 Validacions bàsiques
+    if (empty($data['institucio'])) {
+        $errors[] = ValidacioErrors::requerit('institucio');
+    }
+    if (!empty($data['institucio_url']) && !filter_var($data['institucio_url'], FILTER_VALIDATE_URL)) {
+        $errors[] = ValidacioErrors::invalid('institucio_url');
+    }
+
+    if (!empty($errors)) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            $errors,
+            400
+        );
+    }
+
+    // 📌 Assignació de valors
+    $institucio = $data['institucio'];
+    $institucio_url = $data['institucio_url'] ?? null;
+    $institucio_localitzacio = !empty($data['institucio_localitzacio']) ? (int)$data['institucio_localitzacio'] : null;
+    $data_inici = !empty($data['data_inici']) ? $data['data_inici'] : null;
+    $data_fi = !empty($data['data_fi']) ? $data['data_fi'] : null;
+    $logo_id = !empty($data['logo_id']) ? (int)$data['logo_id'] : null;
+    $posicio = isset($data['posicio']) ? (int)$data['posicio'] : 0;
+    $visible = isset($data['visible']) ? (int)!!$data['visible'] : 1;
+
+    try {
+        $sql = "INSERT INTO db_curriculum_educacio (
+                    institucio, institucio_url, institucio_localitzacio,
+                    data_inici, data_fi, logo_id, posicio, visible
+                ) VALUES (
+                    :institucio, :institucio_url, :institucio_localitzacio,
+                    :data_inici, :data_fi, :logo_id, :posicio, :visible
+                )";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':institucio', $institucio, PDO::PARAM_STR);
+        $stmt->bindParam(':institucio_url', $institucio_url, PDO::PARAM_STR);
+        $stmt->bindParam(':institucio_localitzacio', $institucio_localitzacio, PDO::PARAM_INT);
+        $stmt->bindParam(':data_inici', $data_inici, PDO::PARAM_STR);
+        $stmt->bindParam(':data_fi', $data_fi, PDO::PARAM_STR);
+        $stmt->bindParam(':logo_id', $logo_id, PDO::PARAM_INT);
+        $stmt->bindParam(':posicio', $posicio, PDO::PARAM_INT);
+        $stmt->bindParam(':visible', $visible, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        $id = (int)$conn->lastInsertId();
+        $tipusOperacio = "INSERT";
+        $detalls = "Creació nova educació: " . $institucio;
+
+        Audit::registrarCanvi(
+            $conn,
+            $userId,
+            $tipusOperacio,
+            $detalls,
+            Tables::CURRICULUM_EDUCACIO,
+            $id
+        );
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            ['id' => $id],
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

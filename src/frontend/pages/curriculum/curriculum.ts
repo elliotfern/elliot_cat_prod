@@ -1,4 +1,5 @@
 import { getPageType } from '../../utils/urlPath';
+import { formEducacio } from './formEducacio';
 import { formExperiencies } from './formExperiencies';
 import { formExperienciesI18n } from './formExperienciesI18n';
 import { formHabilitats } from './formHabilitats';
@@ -57,5 +58,7 @@ export function curriculum() {
     formExperienciesI18n(true, id);
   } else if (pageType[2] === 'perfil-experiencia-professional') {
     vistaExperienciaDetall(id);
+  } else if (pageType[2] === 'nou-educacio') {
+    formEducacio(true, id);
   }
 }

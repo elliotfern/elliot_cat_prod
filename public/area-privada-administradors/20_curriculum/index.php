@@ -21,6 +21,8 @@
 
                         <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nova-experiencia-i18n'" class="button btn-gran btn-secondari">Nova experiència professional i18n</button>
 
+                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['curriculum']; ?>/nou-educacio'" class="button btn-gran btn-secondari">Nou educació</button>
+
                     </p>
                 <?php endif; ?>
             </div>
@@ -32,6 +34,7 @@
                     <li><a href="<?php echo APP_INTRANET . $url['curriculum']; ?>/perfil-links">Veure links CV</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['curriculum']; ?>/perfil-habilitats">Veure habilitats CV</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['curriculum']; ?>/perfil-experiencies">Veure experiències professionals CV</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['curriculum']; ?>/perfil-educacio">Veure títols educatius CV</a></li>
                 </ul>
 
                 <p>db_curriculum_certificacions</p>
