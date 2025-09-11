@@ -50,7 +50,7 @@ function renderTable(rows: Educacio[]): string {
 
   const body = rows
     .map((r) => {
-      const logoUrl = r.nameImg ? `${DOMAIN_IMG}/img/logos-institucions/${r.nameImg}.png` : null;
+      const logoUrl = r.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${r.nameImg}.png` : null;
       const localitzacio = [r.city, r.pais_cat].filter(Boolean).join(', ');
       const periode = `${fmtDate(r.data_inici)} - ${fmtDate(r.data_fi) || 'actualitat'}`;
 

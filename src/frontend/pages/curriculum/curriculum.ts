@@ -60,6 +60,8 @@ export function curriculum() {
   } else if (pageType[2] === 'perfil-experiencia-professional') {
     vistaExperienciaDetall(id);
   } else if (pageType[2] === 'nou-educacio') {
+    formEducacio(false);
+  } else if (pageType[2] === 'modifica-educacio') {
     formEducacio(true, id);
   } else if (pageType[2] === 'perfil-educacio') {
     vistaEducacio();
