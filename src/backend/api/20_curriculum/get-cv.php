@@ -443,8 +443,6 @@ if ($slug === "perfilCV") {
                         e.logo_id,
                         e.posicio,
                         e.visible,
-                        e.created_at,
-                        e.updated_at,
                         i.nameImg,
                         c.city,
                         co.pais_cat

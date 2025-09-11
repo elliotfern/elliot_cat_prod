@@ -403,6 +403,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-];
+    // Generador PDF Curriculum
+    '/api/curriculum/pdf' => [
+        'view' => 'src/backend/api/20_curriculum/pdf-cv.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
 
+];
 return $routes;

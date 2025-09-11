@@ -39,6 +39,13 @@
                     <li><a href="<?php echo APP_INTRANET . $url['curriculum']; ?>/perfil-educacio">Veure títols educatius CV</a></li>
                 </ul>
 
+                <ul class="llistat">
+                    <li><a class="button btn-gran btn-secondari" href="https://elliot.cat/api/curriculum/pdf?id=1&locale=1" target="_blank">PDF Català</a></li>
+                    <li><a class="button btn-gran btn-secondari" href="https://elliot.cat/api/curriculum/pdf?id=1&locale=3" target="_blank">PDF Castellano</a></li>
+                    <li><a class="button btn-gran btn-secondari" href="https://elliot.cat/api/curriculum/pdf?id=1&locale=2" target="_blank">PDF English</a></li>
+                    <li><a class="button btn-gran btn-secondari" href="https://elliot.cat/api/curriculum/pdf?id=1&locale=4" target="_blank">PDF Italiano</a></li>
+                </ul>
+
                 <p>db_curriculum_certificacions</p>
                 <p>db_curriculum_certificacions_i18n</p>
                 <p>db_curriculum_educacio</p>

@@ -399,7 +399,6 @@ if ($slug === "perfilCV") {
     // URL: https://elliot.cat/api/curriculum/post/habilitat
 } else if ($slug === "habilitat") {
 
-
     $raw  = file_get_contents('php://input');
     $data = json_decode($raw, true);
 

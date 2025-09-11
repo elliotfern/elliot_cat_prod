@@ -13,6 +13,8 @@ define('BASE_URL', $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']);
 define('APP_ROOT', $_SERVER['DOCUMENT_ROOT']);
 
 define('APP_DOMAIN', 'https://elliot.cat');
+define('APP_MEDIA', 'https://media.elliot.cat');
+define('IMG_ROOT', '/home/epgylzqu/media.elliotfern.com/img');
 
 define('APP_GESTIO',  "/gestio");
 define('APP_AREA_USUARIS',  "/usuaris");
