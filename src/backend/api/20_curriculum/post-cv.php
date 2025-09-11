@@ -722,7 +722,7 @@ if ($slug === "perfilCV") {
 
         Audit::registrarCanvi(
             $conn,
-            $userId,
+            $userUuid,
             $tipusOperacio,
             $detalls,
             Tables::CURRICULUM_EDUCACIO,

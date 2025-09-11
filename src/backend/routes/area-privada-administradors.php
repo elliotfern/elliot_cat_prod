@@ -1042,6 +1042,15 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    APP_GESTIO . $url['curriculum'] . "/perfil-educacio" => [
+        'view' => APP_INTRANET_DIR . APP_CV_DIR . 'vista-perfil-educacio.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
 ];
 
 // Verificar si el usuario es admin antes de procesar las rutas privadas (admin)

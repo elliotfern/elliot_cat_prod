@@ -20,7 +20,7 @@ export const ENDPOINTS = {
   EXPERIENCIA_I18N: 'experienciaI18n',
   EXPERIENCIA_I18N_DETALL_ID: 'experienciaDetall',
   EDUCACIO_ID: 'educacioId',
-  EDUCACIO_CV: 'educacio',
+  EDUCACIO_CV: 'llistatEducacio',
 } as const;
 
 // Mapa de recursos disponibles
@@ -49,6 +49,7 @@ export const API_URLS: ApiUrls = {
     EXPERIENCIA_I18N_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.EXPERIENCIA_I18N_ID}?id=${encodeURIComponent(id)}`,
     EXPERIENCIA_I18N_DETALL_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.EXPERIENCIA_I18N_DETALL_ID}?id=${encodeURIComponent(id)}`,
     EDUCACIO_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.EDUCACIO_ID}?id=${encodeURIComponent(id)}`,
+    EDUCACIO_CV: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.EDUCACIO_CV}`,
   },
 
   POST: {

@@ -373,6 +373,30 @@ if ($slug === "perfilCV") {
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === "llistatEducacio") {
+
+    $db = new Database();
+
+    try {
+        $query = "SELECT 
+                    e.id, e.institucio, e.institucio_url, e.institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.city, co.pais_cat
+                    FROM db_curriculum_educacio AS e
+                    LEFT JOIN db_img AS i ON e.logo_id = i.id
+                    LEFT JOIN db_cities AS c ON e.institucio_localitzacio = c.id
+                    LEFT JOIN db_countries AS co ON c.country = co.id
+                    ORDER BY e.posicio ASC";
+
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

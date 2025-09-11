@@ -6,6 +6,7 @@ import { formHabilitats } from './formHabilitats';
 import { formLink } from './formLink';
 import { formPerfil } from './formPerfil';
 import { formPerfilI18n } from './formPerfilI18n';
+import { vistaEducacio } from './vistaEducacio';
 import { vistaExperienciaDetall } from './vistaExperienciaDetall';
 import { vistaExperiencia } from './vistaExperiencies';
 import { vistaHabilitats } from './vistaHabilitats';
@@ -60,5 +61,7 @@ export function curriculum() {
     vistaExperienciaDetall(id);
   } else if (pageType[2] === 'nou-educacio') {
     formEducacio(true, id);
+  } else if (pageType[2] === 'perfil-educacio') {
+    vistaEducacio();
   }
 }
