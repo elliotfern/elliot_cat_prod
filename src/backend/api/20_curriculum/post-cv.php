@@ -661,7 +661,7 @@ if ($slug === "perfilCV") {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 } else if ($slug === "educacio") {
-     $inputData = file_get_contents('php://input');
+    $inputData = file_get_contents('php://input');
     $data = json_decode($inputData, true);
 
     $errors = [];
@@ -670,7 +670,10 @@ if ($slug === "perfilCV") {
     if (empty($data['institucio'])) {
         $errors[] = ValidacioErrors::requerit('institucio');
     }
-    if (!empty($data['institucio_url']) && !filter_var($data['institucio_url'], FILTER_VALIDATE_URL)) {
+    // Institucio_url és obligatori
+    if (empty($data['institucio_url'])) {
+        $errors[] = ValidacioErrors::requerit('institucio_url');
+    } elseif (!filter_var($data['institucio_url'], FILTER_VALIDATE_URL)) {
         $errors[] = ValidacioErrors::invalid('institucio_url');
     }
 
@@ -684,7 +687,7 @@ if ($slug === "perfilCV") {
 
     // 📌 Assignació de valors
     $institucio = $data['institucio'];
-    $institucio_url = $data['institucio_url'] ?? null;
+    $institucio_url = $data['institucio_url'];
     $institucio_localitzacio = !empty($data['institucio_localitzacio']) ? (int)$data['institucio_localitzacio'] : null;
     $data_inici = !empty($data['data_inici']) ? $data['data_inici'] : null;
     $data_fi = !empty($data['data_fi']) ? $data['data_fi'] : null;

@@ -17,8 +17,8 @@ interface Fitxa {
   comunitat: number;
   estat: number;
   experiencia_id: number;
-  locale: number;
-  fites: string;
+  institucio_localitzacio: number;
+  logo_id: number;
 }
 
 interface ApiResponse<T> {
@@ -51,9 +51,6 @@ export async function formEducacio(isUpdate: boolean, id?: number) {
 
     renderFormInputs(data);
 
-    // Carga robusta en Trix (después de que Trix se haya inicializado)
-    await setTrixHTML('fites', data.fites);
-
     btnSubmit.textContent = 'Modificar dades';
 
     form.addEventListener('submit', function (event) {
@@ -68,6 +65,6 @@ export async function formEducacio(isUpdate: boolean, id?: number) {
     });
   }
 
-  await auxiliarSelect(data.experiencia_id ?? 0, 'experiencies', 'experiencia_id', 'empresa');
-  await auxiliarSelect(data.locale ?? 0, 'llengues', 'locale', 'idioma_ca');
+  await auxiliarSelect(data.logo_id ?? 0, 'imatgesEmpreses', 'logo_id', 'nom');
+  await auxiliarSelect(data.institucio_localitzacio ?? 0, 'ciutats', 'institucio_localitzacio', 'city');
 }
