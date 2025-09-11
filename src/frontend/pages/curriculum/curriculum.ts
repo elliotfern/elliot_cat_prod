@@ -8,6 +8,7 @@ import { formLink } from './formLink';
 import { formPerfil } from './formPerfil';
 import { formPerfilI18n } from './formPerfilI18n';
 import { vistaEducacio } from './vistaEducacio';
+import { vistaEducacioDetall } from './vistaEducacioDetall';
 import { vistaExperienciaDetall } from './vistaExperienciaDetall';
 import { vistaExperiencia } from './vistaExperiencies';
 import { vistaHabilitats } from './vistaHabilitats';
@@ -70,5 +71,7 @@ export function curriculum() {
     formEducacioi18(false);
   } else if (pageType[2] === 'modifica-educacio-i18n') {
     formEducacioi18(true, id);
+  } else if (pageType[2] === 'perfil-educacio-i18n') {
+    vistaEducacioDetall(id);
   }
 }

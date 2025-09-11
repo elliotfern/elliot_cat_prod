@@ -55,7 +55,7 @@ function renderTable(rows: Educacio[]): string {
       const periode = `${fmtDate(r.data_inici)} - ${fmtDate(r.data_fi) || 'actualitat'}`;
 
       const editHref = `https://elliot.cat/gestio/curriculum/modifica-educacio/${r.id}`;
-      const detailHref = `https://elliot.cat/gestio/curriculum/perfil-educacio/${r.id}`;
+      const detailHref = `https://elliot.cat/gestio/curriculum/perfil-educacio-i18n/${r.id}`;
 
       return `
         <tr>

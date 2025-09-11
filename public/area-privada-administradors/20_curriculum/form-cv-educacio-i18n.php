@@ -12,7 +12,12 @@
     <form method="POST" action="" id="formEducacioI18n" class="row g-3">
 
         <input type="hidden" id="id" name="id" value="">
-        <input type="hidden" id="educacio_id" name="educacio_id" value="">
+
+        <div class="col-md-4">
+            <label for="educacio_id" class="form-label">Títol educatiu *</label>
+            <select class="form-select" id="educacio_id" name="educacio_id" required>
+            </select>
+        </div>
 
         <!-- Idioma -->
         <div class="col-md-4">

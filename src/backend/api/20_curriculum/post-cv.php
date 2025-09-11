@@ -741,6 +741,79 @@ if ($slug === "perfilCV") {
             500
         );
     }
+} else if ($slug === 'educacioI18') {
+    $inputData = file_get_contents('php://input');
+    $data = json_decode($inputData, true);
+
+    $errors = [];
+
+    // 🔎 Validacions bàsiques
+    if (empty($data['educacio_id'])) {
+        $errors[] = ValidacioErrors::requerit('educacio_id');
+    }
+    if (empty($data['locale'])) {
+        $errors[] = ValidacioErrors::requerit('locale');
+    }
+    if (empty($data['grau'])) {
+        $errors[] = ValidacioErrors::requerit('grau');
+    } elseif (strlen($data['grau']) > 190) {
+        $errors[] = ValidacioErrors::massaLlarg('grau', 190);
+    }
+
+    if (!empty($errors)) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            $errors,
+            400
+        );
+    }
+
+    // 📌 Assignació de valors
+    $educacio_id = (int)$data['educacio_id'];
+    $locale = (int)$data['locale'];
+    $grau = $data['grau'];
+    $notes = !empty($data['notes']) ? $data['notes'] : null;
+
+    try {
+        $sql = "INSERT INTO db_curriculum_educacio_i18n (
+                    educacio_id, locale, grau, notes
+                ) VALUES (
+                    :educacio_id, :locale, :grau, :notes
+                )";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':educacio_id', $educacio_id, PDO::PARAM_INT);
+        $stmt->bindParam(':locale', $locale, PDO::PARAM_INT);
+        $stmt->bindParam(':grau', $grau, PDO::PARAM_STR);
+        $stmt->bindParam(':notes', $notes, PDO::PARAM_STR);
+
+        $stmt->execute();
+
+        $id = (int)$conn->lastInsertId();
+        $tipusOperacio = "INSERT";
+        $detalls = "Creació nova traducció educació (grau: $grau)";
+
+        Audit::registrarCanvi(
+            $conn,
+            $userUuid,
+            $tipusOperacio,
+            $detalls,
+            Tables::CURRICULUM_EDUCACIO_I18N,
+            $id
+        );
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            ['id' => $id],
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

@@ -420,6 +420,85 @@ if ($slug === "perfilCV") {
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === "educacioI18nDetallId") {
+    $id = $_GET['id'] ?? null;
+    if (!$id) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['Falta el paràmetre id'],
+            400
+        );
+        exit();
+    }
+
+    try {
+        // --- 1. Dades principals ---
+        $sqlMain = "SELECT 
+                        e.id,
+                        e.institucio,
+                        e.institucio_url,
+                        e.institucio_localitzacio,
+                        e.data_inici,
+                        e.data_fi,
+                        e.logo_id,
+                        e.posicio,
+                        e.visible,
+                        e.created_at,
+                        e.updated_at,
+                        i.nameImg,
+                        c.city,
+                        co.pais_cat
+                    FROM db_curriculum_educacio e
+                    LEFT JOIN db_img AS i ON e.logo_id = i.id
+                    LEFT JOIN db_cities AS c ON e.institucio_localitzacio = c.id
+                    LEFT JOIN db_countries AS co ON c.country = co.id
+                    WHERE e.id = :id
+                    LIMIT 1";
+
+        $stmt = $conn->prepare($sqlMain);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $main = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$main) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            exit();
+        }
+
+        // --- 2. Traduccions ---
+        $sqlI18n = "SELECT 
+                        id,
+                        educacio_id,
+                        locale,
+                        grau,
+                        notes
+                    FROM db_curriculum_educacio_i18n
+                    WHERE educacio_id = :id
+                    ORDER BY locale ASC";
+
+        $stmt2 = $conn->prepare($sqlI18n);
+        $stmt2->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt2->execute();
+        $i18n = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+        $main['i18n'] = $i18n;
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $main,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

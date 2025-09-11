@@ -9,4 +9,5 @@ final class Tables
     public const AUTH_USERS_PASSWORD_RESETS = 'auth_users_password_resets';
     public const AUTH_USERS_TIPUS = 'auth_users_tipus';
     public const CURRICULUM_EDUCACIO = 'db_curriculum_educacio';
+    public const CURRICULUM_EDUCACIO_I18N = 'db_curriculum_educacio_i18n';
 }
