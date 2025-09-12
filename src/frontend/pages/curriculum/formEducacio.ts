@@ -54,14 +54,14 @@ export async function formEducacio(isUpdate: boolean, id?: number) {
     btnSubmit.textContent = 'Modificar dades';
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formEducacio', API_URLS.PUT.EDUCACIO_CV);
+      transmissioDadesDB(event, 'PUT', 'formEducacio', API_URLS.PUT.EDUCACIO_CV_POST);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nou títol educatiu del currículum</h2>`;
     btnSubmit.textContent = 'Inserir dades';
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formEducacio', API_URLS.POST.EDUCACIO_CV, true);
+      transmissioDadesDB(event, 'POST', 'formEducacio', API_URLS.POST.EDUCACIO_CV_POST, true);
     });
   }
 
