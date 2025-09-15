@@ -14,6 +14,7 @@ export type ApiUrls = {
     EDUCACIO_CV: string;
     EDUCACIO_I18N_ID: (id: number) => string;
     EDUCACIO_I18N_DETALL_ID: (id: number) => string;
+    PERSONA_DETALL_SLUG: (slug: string) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -24,6 +25,7 @@ export type ApiUrls = {
     EXPERIENCIA_I18N: string;
     EDUCACIO_I18N: string;
     EDUCACIO_CV_POST: string;
+    PERSONA: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -34,6 +36,7 @@ export type ApiUrls = {
     EXPERIENCIA_I18N: string;
     EDUCACIO_I18N: string;
     EDUCACIO_CV_POST: string;
+    PERSONA: string;
   };
   DELETE: {};
 };

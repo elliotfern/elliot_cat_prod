@@ -1,59 +1,10 @@
-<?php
-// Obtener la URL completa
-$url2 = $_SERVER['REQUEST_URI'];
-$parsedUrl = parse_url($url2);
-$path = $parsedUrl['path'];
-$segments = explode("/", trim($path, "/"));
-
-if ($segments[2] === "modifica-persona") {
-  $modificaBtn = 1;
-  $autorSlug = $routeParams[0];
-} else {
-  $modificaBtn = 2;
-}
-
-if ($modificaBtn === 1) {
-?>
-  <script type="module">
-    formUpdateAuthor("<?php echo $autorSlug; ?>");
-  </script>
-<?php
-} else {
-?>
-  <script type="module">
-    // Llenar selects con opciones
-    selectOmplirDades("/api/biblioteca/get/?type=auxiliarImatgesAutor", "", "imgId", "alt");
-    selectOmplirDades("/api/biblioteca/get/?type=pais", "", "paisAutorId", "pais_cat");
-    selectOmplirDades("/api/biblioteca/get/?type=grup", "", "grups", "grup_ca"); // multi-select, se mantiene
-    selectOmplirDades("/api/biblioteca/get/?type=sexe", "", "sexeId", "genereCa");
-    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatNaixementId", "city");
-    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatDefuncioId", "city");
-    selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "diaNaixement", "dia");
-    selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "diaDefuncio", "dia");
-    selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", "", "mesNaixement", "mes");
-    selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", "", "mesDefuncio", "mes");
-  </script>
-<?php
-}
-?>
-
 <div class="barraNavegacio">
-  <h6><a href="<?php echo APP_INTRANET; ?>">Intranet</a> > <a href="<?php echo APP_INTRANET . $url['persona']; ?>">Base de dades Persones</a></h6>
 </div>
 
 <div class="container-fluid form">
-  <?php
-  if ($modificaBtn === 1) {
-  ?>
-    <h2>Base de dades de persones: modificació de dades</h2>
-    <h4 id="authorUpdateTitle"></h4>
-  <?php
-  } else {
-  ?>
-    <h2>Base de dades de persones: creació d'un nou registre</h2>
-  <?php
-  }
-  ?>
+
+  <h2>Base de dades de persones</h2>
+  <div id="titolForm"></div>
 
   <div class="alert alert-success" id="okMessage" style="display:none" role="alert">
     <div id="okText"></div>
@@ -64,7 +15,8 @@ if ($modificaBtn === 1) {
 
   </div>
 
-  <form method="POST" action="" class="row g-3" id="modificaAutor" data-success-redirect-template="<?php echo APP_URL; ?>/gestio/base-dades-persones/fitxa-persona/{slug}">>
+  <form method="POST" action="" class="row g-3" id="formPersona" data-success-redirect-template="<?php echo APP_URL; ?>/gestio/base-dades-persones/fitxa-persona/{slug}">
+
     <input type="hidden" name="id" id="id" value="">
 
     <div class="col-md-4">
@@ -161,20 +113,11 @@ if ($modificaBtn === 1) {
     <div class="container">
       <div class="row">
         <div class="col-6 text-left">
-          <a href="#" onclick="window.history.back()" class="btn btn-secondary">Tornar enrere</a>
+
         </div>
         <div class="col-6 text-right derecha">
-          <?php
-          if ($modificaBtn === 1) {
-          ?>
-            <button type="submit" class="btn btn-primary">Actualitza persona</button>
-          <?php
-          } else {
-          ?>
-            <button type="submit" class="btn btn-primary">Crea nou persona</button>
-          <?php
-          }
-          ?>
+
+          <button type="submit" id="btnPersona" class="btn btn-primary">Actualitza persona</button>
 
         </div>
       </div>
@@ -183,129 +126,3 @@ if ($modificaBtn === 1) {
 
   </form>
 </div>
-
-<script>
-  function formUpdateAuthor(id) {
-    let urlAjax = "/api/persones/get/?persona=" + id;
-
-    fetch(urlAjax, {
-        method: "GET",
-      })
-      .then(response => response.json())
-      .then(data => {
-        // Establecer valores en los campos del formulario
-
-        // sexe, ciutatNaixement, ciutatDefuncio,
-        document.getElementById("nom").value = data.nom;
-        document.getElementById("cognoms").value = data.cognoms;
-        document.getElementById("slug").value = data.slug;
-        document.getElementById("web").value = data.web;
-        document.getElementById("anyNaixement").value = data.anyNaixement;
-        document.getElementById("anyDefuncio").value = data.anyDefuncio;
-
-
-        // Cargar el contenido en los editores
-
-        setTrixContent("descripcio", decodeURIComponent(data.descripcio));
-        setTrixContent("descripcioCast", decodeURIComponent(data.descripcioCast));
-        setTrixContent("descripcioEng", decodeURIComponent(data.descripcioEng));
-        setTrixContent("descripcioIt", decodeURIComponent(data.descripcioIt));
-
-        document.getElementById("id").value = data.id;
-
-        const h2Element = document.getElementById("authorUpdateTitle");
-        h2Element.innerHTML = `Autor: ${data.nom} ${data.cognoms}`;
-
-        // Llenar selects con opciones
-        selectOmplirDades("/api/biblioteca/get/?type=auxiliarImatgesAutor", data.idImg, "img", "alt");
-        selectOmplirDades("/api/biblioteca/get/?type=pais", data.idPais, "paisAutor", "pais_cat");
-
-        const grupsSeleccionats = data.grup_ids || [];
-        selectOmplirDades("/api/biblioteca/get/?type=grup", grupsSeleccionats, "grups", "grup_ca");
-        selectOmplirDades("/api/biblioteca/get/?type=sexe", data.idSexe, "sexe", "genereCa");
-        selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutatNaixement, "ciutatNaixement", "city");
-        selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutatDefuncio, "ciutatDefuncio", "city");
-        selectOmplirDades("/api/biblioteca/get/?type=calendariDies", data.diaNaixement, "diaNaixement", "dia");
-        selectOmplirDades("/api/biblioteca/get/?type=calendariDies", data.diaDefuncio, "diaDefuncio", "dia");
-        selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", data.mesNaixement, "mesNaixement", "mes");
-        selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", data.mesDefuncio, "mesDefuncio", "mes");
-      })
-      .catch(error => console.error("Error al obtener los datos:", error));
-  }
-
-  async function selectOmplirDades(url, selectedValues, selectId, textField) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Error en la sol·licitud AJAX');
-      }
-
-      const data = await response.json();
-      const selectElement = document.getElementById(selectId);
-      if (!selectElement) {
-        console.error(`Select element with id ${selectId} not found`);
-        return;
-      }
-
-      selectElement.innerHTML = '';
-
-      // Añadir opción por defecto para selects simples (no múltiple)
-      if (!selectElement.multiple) {
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'Selecciona una opció';
-        // Si no hay valor seleccionado o es vacío, seleccionar esta opción
-        if (
-          selectedValues === null ||
-          selectedValues === undefined ||
-          selectedValues === ''
-        ) {
-          defaultOption.selected = true;
-        }
-        selectElement.appendChild(defaultOption);
-      }
-
-      data.forEach((item) => {
-        const option = document.createElement('option');
-        option.value = item.id;
-        option.text = item[textField];
-
-        if (selectElement.multiple) {
-          // En multiselección, selectedValues es array
-          if (Array.isArray(selectedValues) && selectedValues.includes(item.id)) {
-            option.selected = true;
-          }
-        } else {
-          // En selección simple, selectedValues es string
-          if (selectedValues === item.id) {
-            option.selected = true;
-          }
-        }
-
-        selectElement.appendChild(option);
-      });
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
-
-  function setTrixContent(inputId, htmlContent) {
-    const trixEditor = document.querySelector(`trix-editor[input="${inputId}"]`);
-    if (!trixEditor) {
-      console.error(`Trix editor for input ${inputId} not found`);
-      return;
-    }
-
-    function onInitialize() {
-      trixEditor.editor.loadHTML(htmlContent);
-      trixEditor.removeEventListener('trix-initialize', onInitialize);
-    }
-
-    // Si el editor ya está listo, carga directamente, sino espera el evento
-    if (trixEditor.editor) {
-      trixEditor.editor.loadHTML(htmlContent);
-    } else {
-      trixEditor.addEventListener('trix-initialize', onInitialize);
-    }
-  }
-</script>
