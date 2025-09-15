@@ -60,15 +60,37 @@ export async function transmissioDadesDB(
         });
 
         // === NUEVO: comportamiento genérico en éxito ===
+        const method = tipus.toUpperCase();
+        const shouldReset = neteja ?? method === 'POST'; // si no pasas 'neteja', por defecto resetea en POST
+
         if (successBehavior === 'hide') {
-          form.hidden = true; // oculta el formulario
+          form.hidden = true;
           history.replaceState({}, document.title, window.location.pathname);
         } else if (successBehavior === 'disable') {
-          form.querySelectorAll<HTMLElement>('input,select,textarea,button,[contenteditable],trix-editor').forEach((el) => el.setAttribute('disabled', 'true')); // lo deja visible pero inerte
+          form.querySelectorAll<HTMLElement>('input,select,textarea,button,[contenteditable],trix-editor').forEach((el) => el.setAttribute('disabled', 'true'));
           history.replaceState({}, document.title, window.location.pathname);
-        } else if (neteja) {
-          // Comportamiento anterior (limpiar) si así lo pides
-          resetForm(formId);
+        } else if (shouldReset) {
+          resetForm(formId); // ← asegura que tu resetForm vacía también los trix y multi-selects
+        }
+
+        // === NUEVO: CTA genérico "ver ficha" usando plantilla del form ===
+        const template = (form.dataset as any).successRedirectTemplate as string | undefined;
+        if (template && typeof data?.slug === 'string' && data.slug.length > 0) {
+          const href = template.replace('{slug}', encodeURIComponent(data.slug));
+          const actions = document.getElementById('successActions') || okMessageDiv;
+
+          // evita duplicados
+          let btn = document.getElementById('createdViewBtn') as HTMLAnchorElement | null;
+          if (!btn) {
+            btn = document.createElement('a');
+            btn.id = 'createdViewBtn';
+            btn.className = 'btn btn-primary mt-2';
+            btn.target = '_self';
+            btn.rel = 'noopener';
+            btn.textContent = 'Veure fitxa';
+            actions.appendChild(btn);
+          }
+          btn.href = href;
         }
 
         // Dispara un evento genérico para que cada página haga lo suyo (enlaces, navegación, etc.)

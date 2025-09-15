@@ -64,7 +64,7 @@ if ($modificaBtn === 1) {
 
   </div>
 
-  <form method="POST" action="" class="row g-3" id="modificaAutor">
+  <form method="POST" action="" class="row g-3" id="modificaAutor" data-success-redirect-template="<?php echo APP_URL; ?>/gestio/base-dades-persones/fitxa-persona/{slug}">>
     <input type="hidden" name="id" id="id" value="">
 
     <div class="col-md-4">
