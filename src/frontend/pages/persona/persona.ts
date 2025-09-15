@@ -13,7 +13,7 @@ export function persona() {
     if (autor) {
       // Lanzar actualizador de datos
       autor.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'PUT', 'modificaAutor', 'https://api.elliot.cat/api/persona/');
+        transmissioDadesDB(event, 'PUT', 'modificaAutor', 'https://api.elliot.cat/api/persona');
       });
     }
   } else if (pageType[2] === 'fitxa-persona') {
@@ -50,7 +50,7 @@ export function persona() {
     if (autor) {
       // Lanzar actualizador de datos
       autor.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'modificaAutor', 'https://api.elliot.cat/api/persona/');
+        transmissioDadesDB(event, 'POST', 'modificaAutor', 'https://api.elliot.cat/api/persona');
       });
     }
   } else if ([pageType[1], pageType[0]].includes('base-dades-persones')) {

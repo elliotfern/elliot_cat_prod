@@ -22,12 +22,12 @@ if ($modificaBtn === 1) {
 ?>
   <script type="module">
     // Llenar selects con opciones
-    selectOmplirDades("/api/biblioteca/get/?type=auxiliarImatgesAutor", "", "img", "alt");
-    selectOmplirDades("/api/biblioteca/get/?type=pais", "", "paisAutor", "pais_cat");
-    selectOmplirDades("/api/biblioteca/get/?type=grup", "", "grups", "grup_ca");
-    selectOmplirDades("/api/biblioteca/get/?type=sexe", "", "sexe", "genereCa");
-    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatNaixement", "city");
-    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatDefuncio", "city");
+    selectOmplirDades("/api/biblioteca/get/?type=auxiliarImatgesAutor", "", "imgId", "alt");
+    selectOmplirDades("/api/biblioteca/get/?type=pais", "", "paisAutorId", "pais_cat");
+    selectOmplirDades("/api/biblioteca/get/?type=grup", "", "grups", "grup_ca"); // multi-select, se mantiene
+    selectOmplirDades("/api/biblioteca/get/?type=sexe", "", "sexeId", "genereCa");
+    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatNaixementId", "city");
+    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatDefuncioId", "city");
     selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "diaNaixement", "dia");
     selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "diaDefuncio", "dia");
     selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", "", "mesNaixement", "mes");
@@ -55,10 +55,13 @@ if ($modificaBtn === 1) {
   }
   ?>
 
-  <div class="alert alert-success" id="missatgeOk" style="display:none" role="alert">
+  <div class="alert alert-success" id="okMessage" style="display:none" role="alert">
+    <div id="okText"></div>
   </div>
 
-  <div class="alert alert-danger" id="missatgeErr" style="display:none" role="alert">
+  <div class="alert alert-danger" id="errMessage" style="display:none" role="alert">
+    <div id="errText"></div>
+
   </div>
 
   <form method="POST" action="" class="row g-3" id="modificaAutor">
@@ -81,8 +84,7 @@ if ($modificaBtn === 1) {
 
     <div class="col-md-4">
       <label>Gènere:</label>
-      <select class="form-select" name="sexe" id="sexe">
-      </select>
+      <select class="form-select" name="sexeId" id="sexeId"></select>
     </div>
 
     <div class="col-md-4">
@@ -90,19 +92,16 @@ if ($modificaBtn === 1) {
       <input class="form-control" type="url" name="web" id="web" value="">
     </div>
 
-    <div class="col-md-4">
-    </div>
+    <div class="col-md-4"></div>
 
     <div class="col-md-4">
       <label>Dia de naixement:</label>
-      <select class="form-select" name="diaNaixement" id="diaNaixement">
-      </select>
+      <select class="form-select" name="diaNaixement" id="diaNaixement"></select>
     </div>
 
     <div class="col-md-4">
       <label>Mes de naixement:</label>
-      <select class="form-select" name="mesNaixement" id="mesNaixement">
-      </select>
+      <select class="form-select" name="mesNaixement" id="mesNaixement"></select>
     </div>
 
     <div class="col-md-4">
@@ -112,14 +111,12 @@ if ($modificaBtn === 1) {
 
     <div class="col-md-4">
       <label>Dia de defunció:</label>
-      <select class="form-select" name="diaDefuncio" id="diaDefuncio">
-      </select>
+      <select class="form-select" name="diaDefuncio" id="diaDefuncio"></select>
     </div>
 
     <div class="col-md-4">
       <label>Mes de defunció:</label>
-      <select class="form-select" name="mesDefuncio" id="mesDefuncio">
-      </select>
+      <select class="form-select" name="mesDefuncio" id="mesDefuncio"></select>
     </div>
 
     <div class="col-md-4">
@@ -129,64 +126,36 @@ if ($modificaBtn === 1) {
 
     <div class="col-md-4">
       <label>Ciutat naixement:</label>
-      <select class="form-select" name="ciutatNaixement" id="ciutatNaixement">
-      </select>
+      <select class="form-select" name="ciutatNaixementId" id="ciutatNaixementId"></select>
     </div>
 
     <div class="col-md-4">
       <label>Ciutat defunció:</label>
-      <select class="form-select" name="ciutatDefuncio" id="ciutatDefuncio">
-      </select>
+      <select class="form-select" name="ciutatDefuncioId" id="ciutatDefuncioId"></select>
     </div>
 
     <div class="col-md-4">
       <label>País:</label>
-      <select class="form-select" name="paisAutor" id="paisAutor">
-      </select>
+      <select class="form-select" name="paisAutorId" id="paisAutorId"></select>
     </div>
 
     <div class="col-md-4">
       <label>Imatge:</label>
-      <select class="form-select" name="img" id="img">
-      </select>
+      <select class="form-select" name="imgId" id="imgId"></select>
     </div>
 
     <div class="col-md-4">
       <label for="grups">Classificació grups (professió):</label>
-      <select name="grups[]" id="grups" multiple required>
-      </select>
+      <select name="grups[]" id="grups" multiple required></select>
     </div>
 
-    <div class="col-md-4">
-    </div>
-
-    <div class="col-md-4">
-    </div>
+    <div class="col-md-4"></div>
+    <div class="col-md-4"></div>
 
     <div class="col-complet">
-      <label for="descripcio" class="form-label">Descripció (català):</label>
+      <label for="descripcio" class="form-label">Descripció:</label>
       <input id="descripcio" name="descripcio" type="hidden">
       <trix-editor input="descripcio" class="trix-editor"></trix-editor>
-    </div>
-
-    <div class="col-complet">
-      <label for="AutDescrip" class="form-label">Descripció (castellà):</label>
-      <input id="descripcioCast" name="descripcioCast" type="hidden">
-      <trix-editor input="descripcioCast" class="trix-editor"></trix-editor>
-    </div>
-
-
-    <div class="col-complet">
-      <label for="AutDescrip" class="form-label">Descripció (anglès):</label>
-      <input id="descripcioEng" name="descripcioEng" type="hidden">
-      <trix-editor input="descripcioEng" class="trix-editor"></trix-editor>
-    </div>
-
-
-    <div class="col-complet">
-      <label for="AutDescrip" class="form-label">Descripció (italià):</label>
-      <input id="descripcioIt" name="descripcioIt" type="hidden">
-      <trix-editor input="descripcioIt" class="trix-editor"></trix-editor>
     </div>
 
     <div class="container">
