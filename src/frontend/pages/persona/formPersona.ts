@@ -65,7 +65,7 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
     renderFormInputs(data);
 
     // Carga robusta en Trix (después de que Trix se haya inicializado)
-    await setTrixHTML('fites', data.descripcio);
+    await setTrixHTML('descripcio', data.descripcio);
 
     btnSubmit.textContent = 'Modificar dades';
 
@@ -80,10 +80,9 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
       transmissioDadesDB(event, 'POST', 'formPersona', API_URLS.POST.PERSONA, true);
     });
   }
-  const grupsSeleccionats = data.grup_ids || [];
 
   await auxiliarSelect(data.img_id ?? 0, 'auxiliarImatgesAutor', 'imgId', 'alt');
-  await auxiliarSelect(data.pais_autor_id ?? 0, 'pais', 'paisAutorId', 'pais_cat');
+  await auxiliarSelect(data.pais_autor_id ?? 0, 'paisos', 'paisAutorId', 'pais_cat');
   await auxiliarSelect(data.grup_ids ?? 0, 'grup', 'grups', 'grup_ca');
   await auxiliarSelect(data.sexe_id ?? 0, 'sexe', 'sexeId', 'genereCa');
   await auxiliarSelect(data.ciutat_naixement_id ?? 0, 'ciutat', 'ciutatNaixementId', 'city');

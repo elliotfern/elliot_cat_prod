@@ -15,7 +15,7 @@
 
   </div>
 
-  <form method="POST" action="" class="row g-3" id="formPersona" data-success-redirect-template="<?php echo APP_URL; ?>/gestio/base-dades-persones/fitxa-persona/{slug}">
+  <form method="POST" action="" class="row g-3" id="formPersona" data-success-redirect-template="/gestio/base-dades-persones/fitxa-persona/{slug}">
 
     <input type="hidden" name="id" id="id" value="">
 

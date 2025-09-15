@@ -143,21 +143,40 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
         );
     }
 
-
     // Llistat paisos
-    // ruta GET => "/api/cinema/get/auxiliars/?type=paisos"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'paisos') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT p.id, p.pais_cat
+    // ruta GET => "/api/cinema/get/auxiliars/paisos"
+} else if ($slug === "pais" || $slug === "paisos") {
+    $db = new Database();
+    $query = "SELECT p.id, p.pais_cat
             FROM db_countries AS p
-            ORDER BY p.pais_cat ASC");
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+            ORDER BY p.pais_cat ASC";
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-    echo json_encode($data);
+
 
 
     // Llistat complet imatges
@@ -399,6 +418,30 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     $query = "SELECT e.id, CONCAT(institucio, ' · ', data_inici) AS institucio_periode
               FROM db_curriculum_educacio AS e
               ORDER BY e.id ASC";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    // GET : llistat Educacions
+    // URL: https://elliot.cat/api/auxiliars/get/auxiliarImatgesAutor
+} else if ($slug === "auxiliarImatgesAutor") {
+
+    $db = new Database();
+    $query = "SELECT 
+	      	i.id, i.nom AS alt
+            FROM db_img AS i
+            WHERE i.typeImg = 1
+            ORDER BY i.nom ASC";
 
     try {
         $row = $db->getData($query);
