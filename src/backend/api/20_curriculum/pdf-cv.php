@@ -300,51 +300,64 @@ foreach ($experiencies as $exp) {
     hrLine($pdf);
 }
 
-
 // --- Educació ---
 $pdf->SetFont('helvetica', 'B', 12);
 $pdf->Cell(0, 8, $HEADINGS['educacio'][$locale] ?? 'Education', 0, 1);
 $pdf->Ln(3);
 
 foreach ($educacions as $edu) {
+    $xStart     = $pdf->GetX();
+    $yStart     = $pdf->GetY();
+    $textX      = $xStart + 16;
+    $logoHeight = 12; // altura mínima del logo
+
     $periode = fmtDateLocale($edu['data_inici'], $locale) . " - " . fmtDateLocale($edu['data_fi'], $locale);
 
-    $xStart = $pdf->GetX();
-    $yStart = $pdf->GetY();
+    // --- Calcular altura necesaria ---
+    $blockText  = $edu['institucio'] . " · " . ($edu['i18n']['grau'] ?? '') . "\n";
+    $blockText .= $periode . "\n";
+    if (!empty($edu['i18n']['notes'])) {
+        $blockText .= $edu['i18n']['notes'];
+    }
 
-    $logoHeight = 0;
+    $textHeight   = $pdf->getStringHeight(180, $blockText, false, true, '', 1);
+    $neededHeight = max($textHeight, $logoHeight) + 5;
+
+    // --- Si no cabe en la página, salto ---
+    if ($yStart + $neededHeight > ($pdf->getPageHeight() - $pdf->getBreakMargin())) {
+        $pdf->AddPage();
+        $yStart = $pdf->GetY();
+    }
+
+    // --- Render real ---
     if (!empty($edu['nameImg'])) {
         $logoUrl = IMG_ROOT . "/logos-empreses/{$edu['nameImg']}.png";
         if (is_file($logoUrl)) {
             $pdf->Image($logoUrl, $xStart, $yStart, 12, 12, 'PNG');
-            $logoHeight = 12;
         }
     }
 
-    // Texto a la derecha del logo
-    $pdf->SetXY($xStart + 16, $yStart);
+    // Título
+    $pdf->SetXY($textX, $yStart);
     $pdf->SetFont('helvetica', 'B', 11);
     $pdf->MultiCell(0, 6, $edu['institucio'] . " · " . ($edu['i18n']['grau'] ?? ''), 0, 'L');
 
-    // Fecha justo debajo del título
-    $pdf->SetX($xStart + 16);
+    // Período
     $pdf->SetFont('helvetica', 'I', 9);
+    $pdf->SetX($textX);
     $pdf->MultiCell(0, 5, $periode, 0, 'L');
 
     // Notas
-    $pdf->SetFont('helvetica', '', 10);
     if (!empty($edu['i18n']['notes'])) {
-        $pdf->SetX($xStart + 16);
+        $pdf->SetFont('helvetica', '', 10);
+        $pdf->SetX($textX);
         $pdf->MultiCell(0, 5, $edu['i18n']['notes'], 0, 'L');
     }
 
-    // Asegurar salto suficiente
     $pdf->Ln(5);
-    $currentY = $pdf->GetY();
-    $pdf->SetY(max($currentY, $yStart + $logoHeight + 2));
-
     hrLine($pdf);
 }
+
 
 // --- Idiomes ---
 $pdf->SetFont('helvetica', 'B', 12);
@@ -381,5 +394,49 @@ $footerText = match ($locale) {
 };
 $pdf->MultiCell(0, 6, $footerText, 0, 'C');
 
+
+// --- Data d'actualització ---
+$today = new DateTime('now');
+$langs = [
+    1 => 'ca-ES',
+    2 => 'en-US',
+    3 => 'es-ES',
+    4 => 'it-IT'
+];
+$lang = $langs[$locale] ?? 'ca-ES';
+
+$formatter = new IntlDateFormatter(
+    $lang,
+    IntlDateFormatter::LONG,
+    IntlDateFormatter::NONE,
+    'UTC',
+    IntlDateFormatter::GREGORIAN
+);
+$formattedDate = $formatter->format($today);
+
+$lastUpdateLabel = match ($locale) {
+    1 => 'Darrera actualització:',
+    2 => 'Last updated:',
+    3 => 'Última actualización:',
+    4 => 'Ultimo aggiornamento:',
+    default => 'Last updated:'
+};
+
+$pdf->Ln(5);
+$pdf->SetFont('helvetica', 'I', 9);
+$pdf->MultiCell(0, 6, $lastUpdateLabel . ' ' . $formattedDate, 0, 'C');
+
+
 // --- Output ---
-$pdf->Output("cv_{$id}_{$locale}.pdf", "I");
+$localeMap = [
+    1 => 'ca',
+    2 => 'en',
+    3 => 'es',
+    4 => 'it'
+];
+
+$langCode = $localeMap[$locale] ?? 'ca';
+$filename = "cv_elliot_fernandez_{$langCode}.pdf";
+
+// "D" -> descarga directa, "I" -> inline (en navegador)
+$pdf->Output($filename, "D");
