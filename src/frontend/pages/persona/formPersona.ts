@@ -25,14 +25,16 @@ interface Fitxa {
   ciutatNaixementId: number;
   ciutatDefuncioId: number;
   descripcio: string;
-  grup_ids: number;
   any_naixement: number;
   mes_naixement: number;
   dia_naixement: number;
   any_defuncio: number;
   mes_defuncio: number;
   dia_defuncio: number;
+  grups: GrupDTO[];
 }
+
+type GrupDTO = { id: string; nom: string };
 
 interface ApiResponse<T> {
   status: string;
@@ -81,9 +83,11 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
     });
   }
 
+  const grupIds = data.grups?.map((g: { id: string; nom: string }) => g.id) ?? [];
+  await auxiliarSelect(grupIds, 'grups', 'grups', 'grup_ca');
+
   await auxiliarSelect(data.imgId ?? 0, 'auxiliarImatgesAutor', 'imgId', 'alt');
   await auxiliarSelect(data.paisAutorId ?? 0, 'paisos', 'paisAutorId', 'pais_cat');
-  await auxiliarSelect(data.grup_ids ?? 0, 'grups', 'grups', 'grup_ca');
   await auxiliarSelect(data.genereId ?? 0, 'sexes', 'sexeId', 'nom');
   await auxiliarSelect(data.ciutatNaixementId ?? 0, 'ciutats', 'ciutatNaixementId', 'city');
   await auxiliarSelect(data.ciutatDefuncioId ?? 0, 'ciutats', 'ciutatDefuncioId', 'city');

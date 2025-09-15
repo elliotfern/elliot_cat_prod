@@ -3,10 +3,10 @@ import Choices from 'choices.js';
 import 'choices.js/public/assets/styles/choices.min.css';
 import { API_BASE } from './urls';
 
-type Item = { id: number; [key: string]: unknown };
+type Item = { id: number | string; [key: string]: unknown };
 const choicesRegistry = new Map<string, Choices>();
 
-export async function auxiliarSelect(idAux: number | null | undefined, api: string, elementId: string, valorText: string, fallbackValue?: string, config?: Partial<Choices['config']>): Promise<Choices | void> {
+export async function auxiliarSelect(selected: number | string | Array<number | string> | null | undefined, api: string, elementId: string, valorText: string, fallbackValue?: string, config?: Partial<Choices['config']>): Promise<Choices | void> {
   const urlAjax = `${API_BASE}/auxiliars/get/${api}`;
 
   try {
@@ -26,55 +26,58 @@ export async function auxiliarSelect(idAux: number | null | undefined, api: stri
       choicesRegistry.delete(elementId);
     }
 
-    // limpiar y añadir placeholder (NO disabled, y como primera opción)
+    // limpiar y añadir placeholder
     selectElement.innerHTML = '';
     const placeholder = document.createElement('option');
     placeholder.value = '';
     placeholder.text = 'Selecciona una opció:';
     placeholder.setAttribute('selected', '');
-    // importante: no disabled / no hidden → se puede volver a "vaciar"
     selectElement.appendChild(placeholder);
 
-    // calcular selección inicial
-    const initial = idAux !== null && idAux !== undefined && idAux !== 0 ? String(idAux) : fallbackValue !== undefined ? String(fallbackValue) : '';
+    // normalizar valores seleccionados a array de strings
+    let selectedValues: string[] = [];
+    if (Array.isArray(selected)) {
+      selectedValues = selected.map((v) => String(v));
+    } else if (selected !== null && selected !== undefined && selected !== 0) {
+      selectedValues = [String(selected)];
+    } else if (fallbackValue !== undefined) {
+      selectedValues = [String(fallbackValue)];
+    }
 
-    // crear Choices: sin orden alfabético y con botón de eliminar
+    // inicializar Choices
     const choices = new Choices(selectElement, {
       searchEnabled: true,
       allowHTML: false,
-      shouldSort: false, // mantiene el placeholder primero
+      shouldSort: false,
       placeholder: true,
       placeholderValue: 'Selecciona una opció:',
-      removeItemButton: true, // recupera la “x” para limpiar
+      removeItemButton: true,
       itemSelectText: '',
       noResultsText: 'Sense resultats',
       ...config,
     });
 
-    // construir opciones (respetando orden recibido)
+    // construir opciones
     const options = data.map((item) => {
       const raw = item[valorText];
       const label = typeof raw === 'string' ? raw : String(raw ?? '');
       return { value: String(item.id), label };
     });
 
-    // IMPORTANTE: no reemplazar para conservar el placeholder que ya existe
     choices.setChoices(options, 'value', 'label', false);
 
-    // seleccionar inicial si corresponde
-    if (initial) {
-      choices.setChoiceByValue(initial);
+    // aplicar selección inicial
+    if (selectedValues.length > 0) {
+      choices.setChoiceByValue(selectedValues);
     } else {
-      // mantener vacío/placeholder visible
       selectElement.value = '';
       choices.removeActiveItems();
     }
 
-    // al pulsar la “x”, dejar el select en vacío y notificar cambio
+    // manejar “x” → limpiar select
     selectElement.addEventListener('removeItem', () => {
       choices.removeActiveItems();
       selectElement.value = '';
-      // notifica a listeners (por si guardas/validas en 'change')
       selectElement.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
