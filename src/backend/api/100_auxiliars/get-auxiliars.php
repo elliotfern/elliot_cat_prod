@@ -177,8 +177,6 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
         );
     }
 
-
-
     // Llistat complet imatges
     // ruta GET => "/api/auxiliars/get/?llistatCompletImatges"
 } else if (isset($_GET['llistatCompletImatges'])) {
@@ -450,6 +448,46 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
             return;
         }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    // GET : llistat Educacions
+    // URL: https://elliot.cat/api/auxiliars/get/grups
+} else if ($slug === "grups") {
+
+    $db = new Database();
+    $query = "SELECT 
+	        id, grup_ca
+            FROM db_persones_grups
+            ORDER BY grup_ca ASC";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    // GET : llistat sexes
+    // URL: https://elliot.cat/api/auxiliars/get/sexes
+} else if ($slug === "sexes") {
+
+    $query = [
+        ["id" => 1, "nom" => "Home"],
+        ["id" => 2, "nom" => "Dona"],
+    ];
+
+    try {
+        $row = $query;
 
         Response::success(MissatgesAPI::success('get'), $row, 200);
     } catch (PDOException $e) {
