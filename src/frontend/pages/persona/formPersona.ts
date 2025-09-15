@@ -9,7 +9,7 @@ interface Fitxa {
   [key: string]: unknown;
   status: string;
   message: string;
-  id: number;
+  id: string;
   espai_cat: string;
   municipi: number;
   comarca: number;
@@ -52,6 +52,7 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
     provincia: 0,
     comunitat: 0,
     estat: 0,
+    id: '',
   };
 
   if (!divTitol || !btnSubmit || !form) return;
@@ -70,9 +71,15 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
     await setTrixHTML('descripcio', data.descripcio);
 
     btnSubmit.textContent = 'Modificar dades';
+    const id = (data.id ?? '').toString();
+
+    if (!id) {
+      console.error('ID de persona no disponible');
+      return;
+    }
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formPersona', API_URLS.PUT.PERSONA);
+      transmissioDadesDB(event, 'PUT', 'formPersona', API_URLS.PUT.PERSONA(id));
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nova Persona</h2>`;

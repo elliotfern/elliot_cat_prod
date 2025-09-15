@@ -36,7 +36,7 @@ export type ApiUrls = {
     EXPERIENCIA_I18N: string;
     EDUCACIO_I18N: string;
     EDUCACIO_CV_POST: string;
-    PERSONA: string;
+    PERSONA: (id: string) => string;
   };
   DELETE: {};
 };
