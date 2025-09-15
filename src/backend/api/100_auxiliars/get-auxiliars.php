@@ -454,13 +454,19 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
-    // GET : llistat Educacions
+    // GET : llistat grups persones
     // URL: https://elliot.cat/api/auxiliars/get/grups
 } else if ($slug === "grups") {
 
     $db = new Database();
     $query = "SELECT 
-	        id, grup_ca
+	        LOWER(CONCAT_WS('-',
+            HEX(SUBSTR(id, 1, 4)),
+            HEX(SUBSTR(id, 5, 2)),
+            HEX(SUBSTR(id, 7, 2)),
+            HEX(SUBSTR(id, 9, 2)),
+            HEX(SUBSTR(id, 11, 6))
+            )) AS id, grup_ca
             FROM db_persones_grups
             ORDER BY grup_ca ASC";
 
@@ -473,6 +479,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
         }
 
         Response::success(MissatgesAPI::success('get'), $row, 200);
+        return;
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -490,6 +497,52 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
         $row = $query;
 
         Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    // GET : llistat mesos
+    // URL: https://elliot.cat/api/auxiliars/get/calendariDies
+} else if ($slug === "calendariDies") {
+
+    try {
+
+        $rows = array_map(
+            fn(int $d) => ["id" => $d, "dia" => $d],
+            range(1, 31)
+        );
+
+        Response::success(MissatgesAPI::success('get'), $rows, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    // GET : llistat dies
+    // URL: https://elliot.cat/api/auxiliars/get/calendariMesos
+} else if ($slug === "calendariMesos") {
+
+    try {
+        $noms = [
+            'Gener',
+            'Febrer',
+            'Març',
+            'Abril',
+            'Maig',
+            'Juny',
+            'Juliol',
+            'Agost',
+            'Setembre',
+            'Octubre',
+            'Novembre',
+            'Desembre'
+        ];
+
+        $rows = [];
+        foreach ($noms as $i => $nom) {
+            $rows[] = ["id" => $i + 1, "mes" => $nom];
+        }
+
+        Response::success(MissatgesAPI::success('get'), $rows, 200);
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }

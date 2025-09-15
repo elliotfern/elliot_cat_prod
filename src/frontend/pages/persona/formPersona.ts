@@ -19,11 +19,11 @@ interface Fitxa {
   experiencia_id: number;
   institucio_localitzacio: number;
   logo_id: number;
-  sexe_id: number;
-  pais_autor_id: number;
-  img_id: number;
-  ciutat_naixement_id: number;
-  ciutat_defuncio_id: number;
+  genereId: number;
+  paisAutorId: number;
+  imgId: number;
+  ciutatNaixementId: number;
+  ciutatDefuncioId: number;
   descripcio: string;
   grup_ids: number;
   any_naixement: number;
@@ -81,12 +81,12 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
     });
   }
 
-  await auxiliarSelect(data.img_id ?? 0, 'auxiliarImatgesAutor', 'imgId', 'alt');
-  await auxiliarSelect(data.pais_autor_id ?? 0, 'paisos', 'paisAutorId', 'pais_cat');
+  await auxiliarSelect(data.imgId ?? 0, 'auxiliarImatgesAutor', 'imgId', 'alt');
+  await auxiliarSelect(data.paisAutorId ?? 0, 'paisos', 'paisAutorId', 'pais_cat');
   await auxiliarSelect(data.grup_ids ?? 0, 'grups', 'grups', 'grup_ca');
-  await auxiliarSelect(data.sexe_id ?? 0, 'sexes', 'sexeId', 'nom');
-  await auxiliarSelect(data.ciutat_naixement_id ?? 0, 'ciutats', 'ciutatNaixementId', 'city');
-  await auxiliarSelect(data.ciutat_defuncio_id ?? 0, 'ciutats', 'ciutatDefuncioId', 'city');
+  await auxiliarSelect(data.genereId ?? 0, 'sexes', 'sexeId', 'nom');
+  await auxiliarSelect(data.ciutatNaixementId ?? 0, 'ciutats', 'ciutatNaixementId', 'city');
+  await auxiliarSelect(data.ciutatDefuncioId ?? 0, 'ciutats', 'ciutatDefuncioId', 'city');
   await auxiliarSelect(data.dia_naixement ?? 0, 'calendariDies', 'diaNaixement', 'dia');
   await auxiliarSelect(data.dia_defuncio ?? 0, 'calendariDies', 'diaDefuncio', 'dia');
   await auxiliarSelect(data.mes_naixement ?? 0, 'calendariMesos', 'mesNaixement', 'mes');
