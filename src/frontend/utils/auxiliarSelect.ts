@@ -26,29 +26,29 @@ export async function auxiliarSelect(selected: number | string | Array<number | 
       choicesRegistry.delete(elementId);
     }
 
-    // limpiar y añadir placeholder
+    // limpiar y añadir placeholder (NO selected)
     selectElement.innerHTML = '';
     const placeholder = document.createElement('option');
     placeholder.value = '';
     placeholder.text = 'Selecciona una opció:';
-    placeholder.setAttribute('selected', '');
+    // NO marcarlo como selected para que no aparezca como elegido
     selectElement.appendChild(placeholder);
 
-    // normalizar valores seleccionados a array de strings
+    // normalizar seleccionados -> array de strings
     let selectedValues: string[] = [];
     if (Array.isArray(selected)) {
       selectedValues = selected.map((v) => String(v));
-    } else if (selected !== null && selected !== undefined && selected !== 0) {
+    } else if (selected !== null && selected !== undefined && selected !== 0 && selected !== '') {
       selectedValues = [String(selected)];
-    } else if (fallbackValue !== undefined) {
+    } else if (fallbackValue !== undefined && fallbackValue !== '') {
       selectedValues = [String(fallbackValue)];
     }
 
-    // inicializar Choices
+    // init Choices
     const choices = new Choices(selectElement, {
       searchEnabled: true,
       allowHTML: false,
-      shouldSort: false,
+      shouldSort: false, // conserva placeholder primero
       placeholder: true,
       placeholderValue: 'Selecciona una opció:',
       removeItemButton: true,
@@ -64,20 +64,21 @@ export async function auxiliarSelect(selected: number | string | Array<number | 
       return { value: String(item.id), label };
     });
 
+    // setear opciones (no borrar placeholder)
     choices.setChoices(options, 'value', 'label', false);
 
-    // aplicar selección inicial
+    // aplicar selección inicial (single o múltiple)
     if (selectedValues.length > 0) {
-      choices.setChoiceByValue(selectedValues);
+      choices.setChoiceByValue(selectedValues); // <- AQUI preselecciona múltiples
     } else {
+      // mantener en vacío
       selectElement.value = '';
       choices.removeActiveItems();
     }
 
-    // manejar “x” → limpiar select
+    // al quitar un item, NO borres todos (solo propaga)
     selectElement.addEventListener('removeItem', () => {
-      choices.removeActiveItems();
-      selectElement.value = '';
+      // Choices ya elimina el item correspondiente
       selectElement.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
