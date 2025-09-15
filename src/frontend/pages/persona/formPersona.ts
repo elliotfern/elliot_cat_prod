@@ -25,12 +25,12 @@ interface Fitxa {
   ciutatNaixementId: number;
   ciutatDefuncioId: number;
   descripcio: string;
-  any_naixement: number;
-  mes_naixement: number;
-  dia_naixement: number;
-  any_defuncio: number;
-  mes_defuncio: number;
-  dia_defuncio: number;
+  anyNaixement: number;
+  mesNaixement: number;
+  diaNaixement: number;
+  anyDefuncio: number;
+  mesDefuncio: number;
+  diaDefuncio: number;
   grups: GrupDTO[];
 }
 
@@ -98,8 +98,8 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
   await auxiliarSelect(data.genereId ?? 0, 'sexes', 'sexeId', 'nom');
   await auxiliarSelect(data.ciutatNaixementId ?? 0, 'ciutats', 'ciutatNaixementId', 'city');
   await auxiliarSelect(data.ciutatDefuncioId ?? 0, 'ciutats', 'ciutatDefuncioId', 'city');
-  await auxiliarSelect(data.dia_naixement ?? 0, 'calendariDies', 'diaNaixement', 'dia');
-  await auxiliarSelect(data.dia_defuncio ?? 0, 'calendariDies', 'diaDefuncio', 'dia');
-  await auxiliarSelect(data.mes_naixement ?? 0, 'calendariMesos', 'mesNaixement', 'mes');
-  await auxiliarSelect(data.mes_defuncio ?? 0, 'calendariMesos', 'mesDefuncio', 'mes');
+  await auxiliarSelect(data.diaNaixement ?? 0, 'calendariDies', 'diaNaixement', 'dia');
+  await auxiliarSelect(data.diaDefuncio ?? 0, 'calendariDies', 'diaDefuncio', 'dia');
+  await auxiliarSelect(data.mesNaixement ?? 0, 'calendariMesos', 'mesNaixement', 'mes');
+  await auxiliarSelect(data.mesDefuncio ?? 0, 'calendariMesos', 'mesDefuncio', 'mes');
 }
