@@ -423,7 +423,7 @@ $routes = [
 
     // Ciutats
     '/api/ciutats/get/{slug}' => [
-        'view' => 'src/backend/api/100_auxiliars/get-ciutat.php',
+        'view' => 'src/backend/api/100_auxiliars/ciutats/get-ciutats.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -431,7 +431,7 @@ $routes = [
     ],
 
     '/api/ciutats/post' => [
-        'view' => 'src/backend/api/100_auxiliars/post-ciutat.php',
+        'view' => 'src/backend/api/100_auxiliars/ciutats/post-ciutats.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -439,7 +439,7 @@ $routes = [
     ],
 
     '/api/ciutats/put' => [
-        'view' => 'src/backend/api/100_auxiliars/put-ciutat.php',
+        'view' => 'src/backend/api/100_auxiliars/ciutats/put-ciutats.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,

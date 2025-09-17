@@ -7,8 +7,6 @@ use App\Config\Audit;
 use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
 
-$slug = $routeParams[0];
-
 /*
  * BACKEND DB CURRICULUM
  * FUNCIONS
@@ -107,7 +105,8 @@ try {
                SET ciutat_ca  = :ciutat_ca,
                    ciutat_en  = :ciutat_en,
                    descripcio = :descripcio,
-                   pais_id    = uuid_text_to_bin(NULLIF(:pais_id, ''))
+                   pais_id    = uuid_text_to_bin(NULLIF(:pais_id, '')),
+                   updated_at = UTC_TIMESTAMP()
              WHERE id = uuid_text_to_bin(:id)";
     $stmt = $conn->prepare($sql);
 
@@ -130,19 +129,6 @@ try {
     else                   $stmt->bindValue(':pais_id', $pais_id, PDO::PARAM_STR);
 
     $stmt->execute();
-
-    // Auditoría (ajusta $userUuid según tu auth)
-    $tipusOperacio = 'UPDATE';
-    $detalls       = "Actualització ciutat: {$ciutat_ca} (id {$id})";
-    $userUuid = $GLOBALS['userUuid'] ?? null; // adapta a tu sistema d'usuari/autenticació
-    Audit::registrarCanvi(
-        $conn,
-        $userUuid,
-        $tipusOperacio,
-        $detalls,
-        Tables::DB_CIUTATS,
-        $id // guarda'l com a UUID text (si la teva taula d'auditoria és varchar) o adapta si és binari
-    );
 
     $conn->commit();
 

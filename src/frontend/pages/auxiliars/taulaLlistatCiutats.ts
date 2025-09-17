@@ -25,7 +25,19 @@ export async function taulaLlistatCiutats() {
     {
       header: 'Ciutat',
       field: 'city',
-      render: (_: unknown, row: Ciutat) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.city}">${row.city}</a>`,
+      render: (_: unknown, row: Ciutat) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.city}</a>`,
+    },
+
+    {
+      header: 'Ciutat (anglès)',
+      field: 'ciutat_en',
+      render: (_: unknown, row: Ciutat) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.ciutat_en}</a>`,
+    },
+
+    {
+      header: 'Última actualització',
+      field: 'updated_at',
+      render: (_: unknown, row: Ciutat) => `${row.updated_at}`,
     },
   ];
 

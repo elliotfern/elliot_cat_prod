@@ -294,7 +294,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "ciutats") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca AS city
+            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca AS city, updated_at, created_at
             FROM %s AS c
             ORDER BY c.ciutat_ca ASC
             SQL;
@@ -337,35 +337,38 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 
     $id = $_GET['id'] ?? null;
 
+    // Validación rápida del UUID texto
+    if (!$id || !preg_match('~^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$~i', $id)) {
+        Response::error(MissatgesAPI::error('validacio'), ['Parametre "id" no és un UUID vàlid'], 400);
+        return;
+    }
+
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca, c.ciutat_en, uuid_bin_to_text(c.pais_id) AS pais_id
-            FROM %s AS c
-            WHERE id = uuid_text_to_bin(:id)
-            SQL;
+        SELECT
+          uuid_bin_to_text(c.id)     AS id,
+          c.ciutat_ca,
+          c.ciutat_en,
+          c.descripcio,
+          uuid_bin_to_text(c.pais_id) AS pais_id
+        FROM %s AS c
+        WHERE c.id = uuid_text_to_bin(:id)
+        LIMIT 1
+        SQL;
 
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_CIUTATS, $pdo),
-
-    );
+    $query = sprintf($sql, qi(Tables::DB_CIUTATS, $pdo));
 
     try {
+        $params = [':id' => $id];
+        $row = $db->getData($query, $params, true); // true => una sola fila
 
-        $params = [':id' => $id, ':id' => $id];
-        $row = $db->getData($query, $params, true);
-
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
+        if (!$row) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
             return;
         }
 
         Response::success(
             MissatgesAPI::success('get'),
-            $result,
+            $row,
             200
         );
     } catch (PDOException $e) {
