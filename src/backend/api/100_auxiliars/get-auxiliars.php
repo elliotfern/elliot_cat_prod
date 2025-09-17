@@ -149,10 +149,18 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     // Llistat paisos
     // ruta GET => "/api/cinema/get/auxiliars/paisos"
 } else if ($slug === "pais" || $slug === "paisos") {
-    $db = new Database();
-    $query = "SELECT p.id, p.pais_cat
-            FROM db_countries AS p
-            ORDER BY p.pais_cat ASC";
+
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(p.id) AS id, p.pais_ca
+            FROM %s AS p
+            ORDER BY p.pais_ca ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_PAISOS, $pdo),
+
+    );
 
     try {
 
@@ -300,6 +308,51 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     try {
 
         $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : llistat ciutats
+    // URL: https://elliot.cat/api/auxiliars/get/ciutatId?id=33
+} else if ($slug === "ciutatId") {
+
+    $id = $_GET['id'] ?? null;
+
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca, c.ciutat_en, uuid_bin_to_text(c.pais_id) AS pais_id
+            FROM %s AS c
+            WHERE id = uuid_text_to_bin(:id)
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_CIUTATS, $pdo),
+
+    );
+
+    try {
+
+        $params = [':id' => $id, ':id' => $id];
+        $row = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(

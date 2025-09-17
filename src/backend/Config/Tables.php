@@ -12,6 +12,7 @@ final class Tables
     public const CURRICULUM_LINKS = 'db_curriculum_links';
     public const CURRICULUN_HABILITATS = 'db_curriculum_habilitats';
     public const CURRICULUM_EXPERIENCIA_PROFESSIONAL_I18N = 'db_curriculum_experiencia_professional_i18n';
+    public const CURRICULUM_EXPERIENCIA_PROFESSIONAL = 'db_curriculum_experiencia_professional';
 
     // Usuaris
     public const AUTH_USERS_CONTROL_ACCES = 'auth_users_control_acces';

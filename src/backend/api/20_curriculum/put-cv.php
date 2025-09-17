@@ -741,7 +741,7 @@ if ($slug === "perfilCV") {
     // 📌 Assignació de valors
     $institucio              = $data['institucio'];
     $institucio_url          = $data['institucio_url'];
-    $institucio_localitzacio = !empty($data['institucio_localitzacio']) ? (int)$data['institucio_localitzacio'] : null;
+    $institucio_localitzacio = isset($data['institucio_localitzacio']) ? trim((string)$data['institucio_localitzacio']) : null;
     $data_inici              = !empty($data['data_inici']) ? $data['data_inici'] : null;
     $data_fi                 = !empty($data['data_fi']) ? $data['data_fi'] : null;
     $logo_id                 = !empty($data['logo_id']) ? (int)$data['logo_id'] : null;
@@ -764,7 +764,7 @@ if ($slug === "perfilCV") {
         $sql = "UPDATE db_curriculum_educacio
                    SET institucio = :institucio,
                        institucio_url = :institucio_url,
-                       institucio_localitzacio = :institucio_localitzacio,
+                       institucio_localitzacio = uuid_text_to_bin(NULLIF(:institucio_localitzacio, '')),
                        data_inici = :data_inici,
                        data_fi = :data_fi,
                        logo_id = :logo_id,
@@ -777,8 +777,12 @@ if ($slug === "perfilCV") {
         $stmt->bindValue(':institucio', $institucio, PDO::PARAM_STR);
         $stmt->bindValue(':institucio_url', $institucio_url, PDO::PARAM_STR);
 
-        if ($institucio_localitzacio === null) $stmt->bindValue(':institucio_localitzacio', null, PDO::PARAM_NULL);
-        else                                   $stmt->bindValue(':institucio_localitzacio', $institucio_localitzacio, PDO::PARAM_INT);
+        if ($institucio_localitzacio === null || $institucio_localitzacio === '') {
+            $stmt->bindValue(':institucio_localitzacio', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':institucio_localitzacio', $institucio_localitzacio, PDO::PARAM_STR);
+        }
+
 
         if ($data_inici === null) $stmt->bindValue(':data_inici', null, PDO::PARAM_NULL);
         else                      $stmt->bindValue(':data_inici', $data_inici, PDO::PARAM_STR);

@@ -687,7 +687,7 @@ if ($slug === "perfilCV") {
     // 📌 Assignació de valors
     $institucio = $data['institucio'];
     $institucio_url = $data['institucio_url'];
-    $institucio_localitzacio = !empty($data['institucio_localitzacio']) ? (int)$data['institucio_localitzacio'] : null;
+    $institucio_localitzacio = isset($data['institucio_localitzacio']) ? trim((string)$data['institucio_localitzacio']) : null;
     $data_inici = !empty($data['data_inici']) ? $data['data_inici'] : null;
     $data_fi = !empty($data['data_fi']) ? $data['data_fi'] : null;
     $logo_id = !empty($data['logo_id']) ? (int)$data['logo_id'] : null;
@@ -699,14 +699,14 @@ if ($slug === "perfilCV") {
                     institucio, institucio_url, institucio_localitzacio,
                     data_inici, data_fi, logo_id, posicio, visible
                 ) VALUES (
-                    :institucio, :institucio_url, :institucio_localitzacio,
+                    :institucio, :institucio_url, uuid_text_to_bin(NULLIF(:institucio_localitzacio, '')),
                     :data_inici, :data_fi, :logo_id, :posicio, :visible
                 )";
 
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(':institucio', $institucio, PDO::PARAM_STR);
         $stmt->bindParam(':institucio_url', $institucio_url, PDO::PARAM_STR);
-        $stmt->bindParam(':institucio_localitzacio', $institucio_localitzacio, PDO::PARAM_INT);
+        $stmt->bindParam(':institucio_localitzacio', $institucio_localitzacio, PDO::PARAM_STR);
         $stmt->bindParam(':data_inici', $data_inici, PDO::PARAM_STR);
         $stmt->bindParam(':data_fi', $data_fi, PDO::PARAM_STR);
         $stmt->bindParam(':logo_id', $logo_id, PDO::PARAM_INT);

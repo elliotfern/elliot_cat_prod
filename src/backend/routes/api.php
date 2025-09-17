@@ -421,5 +421,30 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    // Ciutats
+    '/api/ciutats/get/{slug}' => [
+        'view' => 'src/backend/api/100_auxiliars/get-ciutat.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/ciutats/post' => [
+        'view' => 'src/backend/api/100_auxiliars/post-ciutat.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/ciutats/put' => [
+        'view' => 'src/backend/api/100_auxiliars/put-ciutat.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 ];
 return $routes;

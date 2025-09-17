@@ -738,6 +738,34 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    // Auxiliars > ciutats
+    APP_GESTIO . $url['auxiliars'] . '/nova-ciutat' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'ciutats/form-ciutat.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/modifica-ciutat/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'ciutats/form-ciutat.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/llistat-ciutats' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'ciutats/llistat-ciutats.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     // 17. Viatges
     APP_GESTIO . $url['viatges'] => [
         'view' => APP_INTRANET_DIR . APP_VIATGES_DIR . 'index.php',

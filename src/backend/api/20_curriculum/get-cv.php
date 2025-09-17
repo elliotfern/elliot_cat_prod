@@ -253,24 +253,22 @@ if ($slug === "perfilCV") {
     $id   = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
     $sql = <<<SQL
-              SELECT id, nom, imatge_id, posicio 	
-              FROM %s
-              WHERE id = :id
+              SELECT e.id, e.empresa, e.empresa_url, uuid_bin_to_text(e.empresa_localitzacio) AS empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat_ca AS city, co.pais_ca AS pais_cat
+              FROM %s AS e
+              LEFT JOIN %s AS i ON e.logo_empresa = i.id
+              LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id
+              LEFT JOIN %s AS co ON c.pais_id = co.id
+              WHERE e.id = :id
               LIMIT 1
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::CURRICULUN_HABILITATS, $pdo)
+        qi(Tables::CURRICULUM_EXPERIENCIA_PROFESSIONAL, $pdo),
+        qi(Tables::DB_IMATGES, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo),
+        qi(Tables::DB_PAISOS, $pdo)
     );
-
-    $query = "SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.city, co.pais_cat
-              FROM db_curriculum_experiencia_professional AS e
-              LEFT JOIN db_img AS i ON e.logo_empresa = i.id
-              LEFT JOIN db_cities AS c ON e.empresa_localitzacio = c.id
-              INNER JOIN db_countries AS co ON c.country = co.id
-              WHERE e.id = :id
-              LIMIT 1";
 
     try {
         $params = [':id' => $id, ':id' => $id];
@@ -291,23 +289,21 @@ if ($slug === "perfilCV") {
 } else if ($slug === "experiencies") {
 
     $sql = <<<SQL
-              SELECT id, nom, imatge_id, posicio 	
-              FROM %s
-              WHERE id = :id
-              LIMIT 1
+              SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat_ca AS city, co.pais_ca AS pais_cat
+              FROM %s AS e
+              LEFT JOIN %s AS i ON e.logo_empresa = i.id
+              LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id
+              LEFT JOIN %s AS co ON c.pais_id = co.id
+              ORDER BY e.posicio ASC
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::CURRICULUN_HABILITATS, $pdo)
+        qi(Tables::CURRICULUM_EXPERIENCIA_PROFESSIONAL, $pdo),
+        qi(Tables::DB_IMATGES, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo),
+        qi(Tables::DB_PAISOS, $pdo)
     );
-
-    $query = "SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.city, co.pais_cat
-              FROM db_curriculum_experiencia_professional AS e
-              LEFT JOIN db_img AS i ON e.logo_empresa = i.id
-              LEFT JOIN db_cities AS c ON e.empresa_localitzacio = c.id
-              INNER JOIN db_countries AS co ON c.country = co.id
-              ORDER BY e.posicio ASC";
 
     try {
         $row = $db->getData($query);
@@ -332,41 +328,24 @@ if ($slug === "perfilCV") {
         // 1. Datos principales
 
         $sql = <<<SQL
-              SELECT id, nom, imatge_id, posicio 	
-              FROM %s
-              WHERE id = :id
-              LIMIT 1
+             SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat_ca AS city, co.pais_ca AS pais_cat
+                    FROM %s e
+                    LEFT JOIN %s AS i ON e.logo_empresa = i.id
+                    LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id
+                    LEFT JOIN %s AS co ON c.pais_id = co.id
+                    WHERE e.id = :id
+                    LIMIT 1
             SQL;
 
         $query = sprintf(
             $sql,
-            qi(Tables::CURRICULUN_HABILITATS, $pdo)
+            qi(Tables::CURRICULUM_EXPERIENCIA_PROFESSIONAL, $pdo),
+            qi(Tables::DB_IMATGES, $pdo),
+            qi(Tables::DB_CIUTATS, $pdo),
+            qi(Tables::DB_PAISOS, $pdo)
         );
 
-
-        $sqlMain = "SELECT 
-                        e.id,
-                        e.empresa,
-                        e.empresa_url,
-                        e.empresa_localitzacio,
-                        e.data_inici,
-                        e.data_fi,
-                        e.is_current,
-                        e.logo_empresa,
-                        e.posicio,
-                        e.visible,
-                        e.created_at,
-                        e.updated_at,
-                        i.nameImg, 
-                        c.city, 
-                        co.pais_cat
-                    FROM db_curriculum_experiencia_professional e
-                    LEFT JOIN db_img AS i ON e.logo_empresa = i.id
-                    LEFT JOIN db_cities AS c ON e.empresa_localitzacio = c.id
-                    LEFT JOIN db_countries AS co ON c.country = co.id
-                    WHERE e.id = :id
-                    LIMIT 1";
-        $stmtMain = $conn->prepare($sqlMain);
+        $stmtMain = $conn->prepare($query);
         $stmtMain->bindValue(':id', (int)$id, PDO::PARAM_INT);
         $stmtMain->execute();
         $main = $stmtMain->fetch(PDO::FETCH_ASSOC);
@@ -378,27 +357,18 @@ if ($slug === "perfilCV") {
         // 2. Traducciones (i18n)
 
         $sql = <<<SQL
-              SELECT id, nom, imatge_id, posicio 	
-              FROM %s
-              WHERE id = :id
-              LIMIT 1
+                SELECT i.id AS idi18n, i.experiencia_id, i.locale, i.rol_titol, i.sumari, i.fites
+                FROM %s i
+                WHERE i.experiencia_id = :id
+                ORDER BY i.locale ASC
             SQL;
 
         $query = sprintf(
             $sql,
-            qi(Tables::CURRICULUN_HABILITATS, $pdo)
+            qi(Tables::CURRICULUM_EXPERIENCIA_PROFESSIONAL_I18N, $pdo)
         );
-        $sqlI18n = "SELECT 
-                        i.id AS idi18n,
-                        i.experiencia_id,
-                        i.locale,
-                        i.rol_titol,
-                        i.sumari,
-                        i.fites
-                    FROM db_curriculum_experiencia_professional_i18n i
-                    WHERE i.experiencia_id = :id
-                    ORDER BY i.locale ASC";
-        $stmtI18n = $conn->prepare($sqlI18n);
+
+        $stmtI18n = $conn->prepare($query);
         $stmtI18n->bindValue(':id', (int)$id, PDO::PARAM_INT);
         $stmtI18n->execute();
         $i18nRows = $stmtI18n->fetchAll(PDO::FETCH_ASSOC);
@@ -420,7 +390,7 @@ if ($slug === "perfilCV") {
 
     $sql = <<<SQL
                 SELECT i.id, i.experiencia_id, i.locale, i.rol_titol, i.sumari, i.fites
-                FROM %S AS i
+                FROM %s AS i
                 WHERE i.id = :id
                 LIMIT 1
             SQL;
@@ -482,7 +452,7 @@ if ($slug === "perfilCV") {
 } else if ($slug === "llistatEducacio") {
 
     $sql = <<<SQL
-            SELECT e.id, e.institucio, e.institucio_url, e.institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.ciutat_ca, co.pais_ca
+            SELECT e.id, e.institucio, e.institucio_url, uuid_bin_to_text(e.institucio_localitzacio) AS institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.ciutat_ca, co.pais_ca
             FROM %s AS e
             LEFT JOIN %s AS i ON e.logo_id = i.id
             LEFT JOIN %s AS c ON e.institucio_localitzacio = c.id

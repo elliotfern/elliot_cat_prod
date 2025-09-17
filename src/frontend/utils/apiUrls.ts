@@ -26,12 +26,15 @@ export const ENDPOINTS = {
   EDUCACIO_I18N: 'educacioI18',
   EDUCACIO_I18N_DETALL_ID: 'educacioI18nDetallId',
   PERSONA_DETALL_SLUG: 'persona',
+  CIUTAT_ID: 'ciutatId',
+  CIUTAT: 'ciutat',
 } as const;
 
 // Mapa de recursos disponibles
 const RESOURCES = {
   CURRICULUM: 'curriculum',
   AUXILIARS: 'auxiliars',
+  CIUTATS: 'ciutats',
 } as const;
 
 const TIPUS = {
@@ -58,6 +61,7 @@ export const API_URLS: ApiUrls = {
     EDUCACIO_I18N_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.EDUCACIO_I18N_ID}?id=${encodeURIComponent(id)}`,
     EDUCACIO_I18N_DETALL_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.EDUCACIO_I18N_DETALL_ID}?id=${encodeURIComponent(id)}`,
     PERSONA_DETALL_SLUG: (slug: string) => `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}/${slug}`,
+    CIUTAT_ID: (id: number) => `${API_WEB}/${RESOURCES.AUXILIARS}/${ENDPOINTS.CIUTAT_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -70,6 +74,7 @@ export const API_URLS: ApiUrls = {
     EDUCACIO_CV_POST: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.POST}/${ENDPOINTS.EDUCACIO_CV_POST}`,
     EDUCACIO_I18N: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.POST}/${ENDPOINTS.EDUCACIO_I18N}`,
     PERSONA: `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}`,
+    CIUTAT: `${API_BASE}/${RESOURCES.CIUTATS}/${TIPUS.POST}`,
   },
 
   PUT: {
@@ -82,6 +87,7 @@ export const API_URLS: ApiUrls = {
     EDUCACIO_CV_POST: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.PUT}/${ENDPOINTS.EDUCACIO_CV_POST}`,
     EDUCACIO_I18N: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.PUT}/${ENDPOINTS.EDUCACIO_I18N}`,
     PERSONA: (id: string) => `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}/${encodeURIComponent(id)}`,
+    CIUTAT: `${API_BASE}/${RESOURCES.CIUTATS}/${TIPUS.PUT}`,
   },
 
   DELETE: {},
