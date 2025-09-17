@@ -177,7 +177,7 @@ $routes = [
     ],
 
     // BD AUXILIARS
-    '/api/auxiliars/get' => [
+    '/api/auxiliars/get/' => [
         'view' => 'src/backend/api/100_auxiliars/get-auxiliars.php',
         'needs_session' => false,
         'header_footer' => false,
