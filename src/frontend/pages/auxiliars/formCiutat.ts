@@ -27,7 +27,7 @@ interface ApiResponse<T> {
   data: T;
 }
 
-export async function formCiutat(isUpdate: boolean, id?: number) {
+export async function formCiutat(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formCiutat');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnCiutat') as HTMLButtonElement;

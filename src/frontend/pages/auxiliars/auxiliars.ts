@@ -7,7 +7,7 @@ const url = window.location.href;
 const pageType = getPageType(url);
 
 export function auxiliars() {
-  const id = parseInt(pageType[3], 10);
+  const id = pageType[3];
   if ([pageType[2]].includes('llistat-imatges')) {
     taulaLlistatImatges();
   } else if ([pageType[2]].includes('nova-ciutat')) {

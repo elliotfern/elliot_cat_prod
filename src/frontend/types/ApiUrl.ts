@@ -15,7 +15,7 @@ export type ApiUrls = {
     EDUCACIO_I18N_ID: (id: number) => string;
     EDUCACIO_I18N_DETALL_ID: (id: number) => string;
     PERSONA_DETALL_SLUG: (slug: string) => string;
-    CIUTAT_ID: (id: number) => string;
+    CIUTAT_ID: (id: string) => string;
   };
   POST: {
     PERFIL_CV: string;
