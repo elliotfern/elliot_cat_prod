@@ -1,5 +1,6 @@
 import { getPageType } from '../../utils/urlPath';
 import { formCiutat } from './formCiutat';
+import { taulaLlistatCiutats } from './taulaLlistatCiutats';
 import { taulaLlistatImatges } from './taulaLlistatImatges';
 
 const url = window.location.href;
@@ -13,5 +14,7 @@ export function auxiliars() {
     formCiutat(false);
   } else if ([pageType[2]].includes('modifica-ciutat')) {
     formCiutat(true, id);
+  } else if ([pageType[2]].includes('llistat-ciutats')) {
+    taulaLlistatCiutats();
   }
 }
