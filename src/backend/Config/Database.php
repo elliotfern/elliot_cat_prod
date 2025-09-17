@@ -13,6 +13,7 @@ class Database
     public function __construct()
     {
         $conn = DatabaseConnection::getConnection();
+
         if ($conn === null) {
             throw new \Exception("No s'ha pogut establir la connexió amb la base de dades.");
         }
@@ -45,6 +46,14 @@ class Database
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return empty($result) ? null : $result;
         }
+    }
+
+    /**
+     * Retorna la connexió PDO interna.
+     */
+    public function getPdo(): PDO
+    {
+        return $this->conn;
     }
 
     /**

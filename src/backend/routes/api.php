@@ -412,5 +412,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    // Generador UUID V7
+    '/api/uuid' => [
+        'view' => 'src/backend/api/100_auxiliars/crear-uuid.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 ];
 return $routes;

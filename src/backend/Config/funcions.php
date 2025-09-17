@@ -262,3 +262,26 @@ function sanitizeSlug($slug, $fieldName = 'slug')
         exit;
     }
 }
+
+/**
+ * Quote seguro para identificadores (tabla, esquema, columna, alias).
+ * Soporta "schema.table AS t". No usar para valores.
+ */
+function qi(string $identifier, PDO $pdo): string
+{
+    $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+    $parts = preg_split('/\s+AS\s+|\s+as\s+/', $identifier, -1, PREG_SPLIT_NO_EMPTY);
+    $main  = $parts[0];
+    $alias = $parts[1] ?? null;
+
+    $quote = fn(string $id) => match ($driver) {
+        'mysql' => '`' . str_replace('`', '``', $id) . '`',
+        'pgsql' => '"' . str_replace('"', '""', $id) . '"',
+        default => $id, // fallback
+    };
+
+    // Soporta schema.table o table.column si alguna vez lo usas en SELECT
+    $dotQuoted = implode('.', array_map($quote, explode('.', $main)));
+
+    return $alias ? $dotQuoted . ' AS ' . $quote($alias) : $dotQuoted;
+}

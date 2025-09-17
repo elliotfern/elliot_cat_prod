@@ -3,7 +3,10 @@
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
+use App\Config\Tables;
 
+$db = new Database();
+$pdo = $db->getPdo();
 $slug = $routeParams[0];
 
 /*
@@ -282,11 +285,17 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     // URL: https://elliot.cat/api/auxiliars/get/ciutats
 } else if ($slug === "ciutats") {
 
-    $db = new Database();
-    $query = "SELECT 
-	      	c.id, c.city
-            FROM db_cities AS c
-            ORDER BY c.city ASC";
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca AS city
+            FROM %s AS c
+            ORDER BY c.ciutat_ca ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_CIUTATS, $pdo),
+
+    );
 
     try {
 
