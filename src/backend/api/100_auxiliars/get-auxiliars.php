@@ -294,7 +294,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "ciutats") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca AS city, updated_at, created_at
+            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca AS city, c.updated_at, c.created_at, c.ciutat_en
             FROM %s AS c
             ORDER BY c.ciutat_ca ASC
             SQL;

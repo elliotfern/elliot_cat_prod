@@ -766,6 +766,34 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    // Auxiliars > paisos
+    APP_GESTIO . $url['auxiliars'] . '/nou-pais' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'paisos/form-pais.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/modifica-pais/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'paisos/form-pais.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/llistat-paisos' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'paisos/llistat-paisos.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     // 17. Viatges
     APP_GESTIO . $url['viatges'] => [
         'view' => APP_INTRANET_DIR . APP_VIATGES_DIR . 'index.php',

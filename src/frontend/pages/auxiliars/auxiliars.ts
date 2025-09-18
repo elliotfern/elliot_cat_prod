@@ -1,7 +1,9 @@
 import { getPageType } from '../../utils/urlPath';
 import { formCiutat } from './formCiutat';
+import { formPais } from './formPais';
 import { taulaLlistatCiutats } from './taulaLlistatCiutats';
 import { taulaLlistatImatges } from './taulaLlistatImatges';
+import { taulaLlistatPaisos } from './taulaLlistatPaisos';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -16,5 +18,11 @@ export function auxiliars() {
     formCiutat(true, id);
   } else if ([pageType[2]].includes('llistat-ciutats')) {
     taulaLlistatCiutats();
+  } else if ([pageType[2]].includes('llistat-paisos')) {
+    taulaLlistatPaisos();
+  } else if ([pageType[2]].includes('nou-pais')) {
+    formPais(false);
+  } else if ([pageType[2]].includes('modifica-pais')) {
+    formPais(true, id);
   }
 }
