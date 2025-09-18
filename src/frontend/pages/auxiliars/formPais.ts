@@ -28,9 +28,9 @@ interface ApiResponse<T> {
 }
 
 export async function formPais(isUpdate: boolean, id?: string) {
-  const form = document.getElementById('formCiutat');
+  const form = document.getElementById('formPais');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
-  const btnSubmit = document.getElementById('btnCiutat') as HTMLButtonElement;
+  const btnSubmit = document.getElementById('btnPais') as HTMLButtonElement;
 
   let data: Partial<Fitxa> = {
     comarca: 0,
@@ -42,26 +42,26 @@ export async function formPais(isUpdate: boolean, id?: string) {
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.CIUTAT_ID(id), true);
+    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PAIS_ID(id), true);
 
     if (!response || !response.data) return;
     data = response.data;
 
-    divTitol.innerHTML = `<h2>Modificació dades ciutat</h2>`;
+    divTitol.innerHTML = `<h2>Modificació dades País</h2>`;
 
     renderFormInputs(data);
 
     btnSubmit.textContent = 'Modificar dades';
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formCiutat', API_URLS.PUT.CIUTAT);
+      transmissioDadesDB(event, 'PUT', 'formPais', API_URLS.PUT.PAIS(id));
     });
   } else {
-    divTitol.innerHTML = `<h2>Creació de nova ciutat</h2>`;
+    divTitol.innerHTML = `<h2>Creació de nou País</h2>`;
     btnSubmit.textContent = 'Inserir dades';
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formCiutat', API_URLS.POST.CIUTAT, true);
+      transmissioDadesDB(event, 'POST', 'formPais', API_URLS.POST.PAIS, true);
     });
   }
 

@@ -43,7 +43,7 @@
 
                 </div>
                 <div class="col-6 text-right derecha">
-                    <button type="submit" class="btn btn-primary" id="btnCiutat">Introduir dades</button>
+                    <button type="submit" class="btn btn-primary" id="btnPais">Introduir dades</button>
                 </div>
             </div>
         </div>

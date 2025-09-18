@@ -29,8 +29,8 @@ export async function taulaLlistatPaisos() {
 
     {
       header: 'País (anglès)',
-      field: 'pais_ca',
-      render: (_: unknown, row: Pais) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.pais_ca}</a>`,
+      field: 'pais_en',
+      render: (_: unknown, row: Pais) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.pais_en}</a>`,
     },
 
     {

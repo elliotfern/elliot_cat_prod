@@ -28,6 +28,7 @@ export const ENDPOINTS = {
   PERSONA_DETALL_SLUG: 'persona',
   CIUTAT_ID: 'ciutatId',
   CIUTAT: 'ciutat',
+  PAISOS: 'paisos',
 } as const;
 
 // Mapa de recursos disponibles
@@ -62,6 +63,7 @@ export const API_URLS: ApiUrls = {
     EDUCACIO_I18N_DETALL_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.EDUCACIO_I18N_DETALL_ID}?id=${encodeURIComponent(id)}`,
     PERSONA_DETALL_SLUG: (slug: string) => `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}/${slug}`,
     CIUTAT_ID: (id: string) => `${API_BASE}/${RESOURCES.AUXILIARS}/${TIPUS.GET}/${ENDPOINTS.CIUTAT_ID}?id=${encodeURIComponent(id)}`,
+    PAIS_ID: (id: string) => `${API_WEB}/${ENDPOINTS.PAISOS}/${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -75,6 +77,7 @@ export const API_URLS: ApiUrls = {
     EDUCACIO_I18N: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.POST}/${ENDPOINTS.EDUCACIO_I18N}`,
     PERSONA: `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}`,
     CIUTAT: `${API_BASE}/${RESOURCES.CIUTATS}/${TIPUS.POST}`,
+    PAIS: `${API_WEB}/${ENDPOINTS.PAISOS}`,
   },
 
   PUT: {
@@ -88,6 +91,7 @@ export const API_URLS: ApiUrls = {
     EDUCACIO_I18N: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.PUT}/${ENDPOINTS.EDUCACIO_I18N}`,
     PERSONA: (id: string) => `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}/${encodeURIComponent(id)}`,
     CIUTAT: `${API_BASE}/${RESOURCES.CIUTATS}/${TIPUS.PUT}`,
+    PAIS: (id: string) => `${API_WEB}/${ENDPOINTS.PAISOS}/${encodeURIComponent(id)}`,
   },
 
   DELETE: {},
