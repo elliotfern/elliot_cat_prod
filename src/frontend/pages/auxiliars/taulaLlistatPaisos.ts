@@ -36,7 +36,7 @@ export async function taulaLlistatPaisos() {
     {
       header: 'Última actualització',
       field: 'updated_at',
-      render: (_: unknown, row: Pais) => `${row.updated_at}`,
+      render: (_: unknown, row: Pais) => `${formatData(row.updated_at)}`,
     },
   ];
 

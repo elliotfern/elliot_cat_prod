@@ -37,7 +37,7 @@ export async function taulaLlistatCiutats() {
     {
       header: 'Última actualització',
       field: 'updated_at',
-      render: (_: unknown, row: Ciutat) => `${row.updated_at}`,
+      render: (_: unknown, row: Ciutat) => `${formatData(row.updated_at)}`,
     },
   ];
 
