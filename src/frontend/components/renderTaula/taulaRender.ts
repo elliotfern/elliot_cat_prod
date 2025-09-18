@@ -12,7 +12,27 @@ export async function renderDynamicTable<T>({ url, columns, containerId, rowsPer
     return;
   }
 
-  const data: T[] = Array.isArray(result.data) ? result.data : result;
+  // Después:
+  type ApiResult<T> = {
+    status?: string;
+    data?: { items?: T[] } | T[];
+    items?: T[];
+  };
+
+  function pluckItems<T>(r: ApiResult<T>): T[] {
+    if (Array.isArray(r?.data && (r.data as any).items)) return (r.data as any).items as T[];
+    if (Array.isArray(r?.data as any)) return r.data as T[];
+    if (Array.isArray(r?.items)) return r.items as T[];
+    if (Array.isArray(r as any)) return r as any as T[];
+    return [];
+  }
+
+  const data: T[] = pluckItems<T>(result);
+
+  if (!data.length) {
+    container.innerHTML = `<div class="alert alert-info">${result.message ?? 'No hi ha dades.'}</div>`;
+    return;
+  }
 
   let currentPage = 1;
   let filteredData = [...data];
