@@ -118,7 +118,7 @@ if ($slug === "perfilCV") {
                        email = :email,
                        tel = :tel,
                        web = :web,
-                       localitzacio_ciutat = :localitzacio_ciutat,
+                       localitzacio_ciutat    = uuid_text_to_bin(NULLIF(:localitzacio_ciutat, '')),
                        img_perfil = :img_perfil,
                        disponibilitat = :disponibilitat,
                        visibilitat = :visibilitat

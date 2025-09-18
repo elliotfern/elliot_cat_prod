@@ -10,14 +10,14 @@ interface PerfilCV {
   nom_complet: string;
   tel: string | null;
   web: string | null;
-  city: string | null; // ci.city
+  ciutat_ca: string | null; // ci.city
   nameImg: string | null; // i.nameImg
   disponibilitat: number | null;
   visibilitat: Vis;
   created_at: string; // ISO
   updated_at: string; // ISO
   adreca: string;
-  pais_cat: string;
+  pais_ca: string;
 }
 
 interface ApiResponse<T> {
@@ -77,7 +77,7 @@ function renderCard(d: PerfilCV): string {
           <div class="col">
             <h2 class="h4 mb-1">${esc(d.nom_complet)}</h2>
             <div class="text-muted small">
-            <p><span><strong>Adreça:</strong> ${esc(d.adreca ?? '—')} (${esc(d.city ?? '—')} - ${esc(d.pais_cat ?? '—')} )</span></p>
+            <p><span><strong>Adreça:</strong> ${esc(d.adreca ?? '—')} (${esc(d.ciutat_ca ?? '—')} - ${esc(d.pais_ca ?? '—')} )</span></p>
             </div>
             <div class="mt-2">
               <p><a href="mailto:${esc(d.email)}" class="me-3">${esc(d.email)}</a></p>
