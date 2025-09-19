@@ -15,9 +15,14 @@ interface Fitxa {
   provincia: number;
   comunitat: number;
   clientStatus: number;
-  ciutat_id: number;
-  provincia_id: number;
-  pais_id: number;
+  pais_id: string | null;
+  provincia_id: string | null;
+  ciutat_id: string | null;
+
+  ciutat_ca?: string | null;
+  pais_ca?: string | null;
+  provincia_ca?: string | null;
+  estatNom?: string | null;
 }
 
 interface ApiResponse<T> {
