@@ -1,8 +1,13 @@
 <?php
 
 use App\Config\DatabaseConnection;
+use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
+use App\Config\Tables;
+
+$db = new Database();
+$pdo = $db->getPdo();
 
 // --- Clase extendida para footer ---
 class CVPDF extends TCPDF
@@ -80,18 +85,40 @@ function hrLine($pdf)
 // ==========================
 
 // Perfil
-$sqlPerfil = "SELECT c.nom_complet, c.email, c.tel, c.web, ci.city, i.nameImg
-              FROM db_curriculum_perfil c
-              LEFT JOIN db_img i ON c.img_perfil = i.id
-              LEFT JOIN db_cities ci ON c.localitzacio_ciutat = ci.id
-              WHERE c.id = :id LIMIT 1";
+
+$sql = <<<SQL
+                SELECT c.nom_complet, c.email, c.tel, c.web, ci.ciutat_ca AS city, i.nameImg
+                FROM %s c
+                LEFT JOIN %s i ON c.img_perfil = i.id
+                LEFT JOIN %s ci ON c.localitzacio_ciutat = ci.id
+                WHERE c.id = :id LIMIT 1
+            SQL;
+
+$sqlPerfil = sprintf(
+    $sql,
+    qi(Tables::CURRICULUM_PERFIL, $pdo),
+    qi(Tables::DB_IMATGES, $pdo),
+    qi(Tables::DB_CIUTATS, $pdo)
+);
+
 $stmt = $conn->prepare($sqlPerfil);
 $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 $stmt->execute();
 $perfil = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Perfil traduït
-$sqlPerfilI18n = "SELECT titular, sumari FROM db_curriculum_perfil_i18n WHERE perfil_id = :id AND locale = :locale LIMIT 1";
+$sql = <<<SQL
+                SELECT titular, sumari 
+                FROM %s
+                WHERE perfil_id = :id AND locale = :locale
+                LIMIT 1
+            SQL;
+
+$sqlPerfilI18n = sprintf(
+    $sql,
+    qi(Tables::CURRICULUM_PERFIL_I18N, $pdo)
+);
+
 $stmt = $conn->prepare($sqlPerfilI18n);
 $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 $stmt->bindParam(':locale', $locale, PDO::PARAM_INT);
@@ -99,38 +126,76 @@ $stmt->execute();
 $perfilI18n = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Links
-$sqlLinks = "SELECT l.label, l.url, i.nameImg
-             FROM db_curriculum_links AS l
-             LEFT JOIN db_img i ON l.icon_id = i.id
-             WHERE l.perfil_id = :id AND l.visible = 1 ORDER BY l.posicio ASC";
+$sql = <<<SQL
+             SELECT l.label, l.url, i.nameImg
+             FROM %s AS l
+             LEFT JOIN %s i ON l.icon_id = i.id
+             WHERE l.perfil_id = :id AND l.visible = 1
+             ORDER BY l.posicio ASC
+            SQL;
+
+$sqlLinks = sprintf(
+    $sql,
+    qi(Tables::CURRICULUM_LINKS, $pdo),
+    qi(Tables::DB_IMATGES, $pdo),
+);
+
 $stmt = $conn->prepare($sqlLinks);
 $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 $stmt->execute();
 $links = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Habilitats
-$sqlHabilitats = "SELECT h.nom, i.nameImg
-                  FROM db_curriculum_habilitats h
-                  LEFT JOIN db_img i ON h.imatge_id = i.id
-                  ORDER BY h.posicio ASC";
+$sql = <<<SQL
+            SELECT h.nom, i.nameImg
+            FROM %s AS h
+            LEFT JOIN %s AS i ON h.imatge_id = i.id
+            ORDER BY h.posicio ASC
+            SQL;
+
+$sqlHabilitats = sprintf(
+    $sql,
+    qi(Tables::CURRICULUN_HABILITATS, $pdo),
+    qi(Tables::DB_IMATGES, $pdo),
+);
+
 $stmt = $conn->query($sqlHabilitats);
 $habilitats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Experiència professional
-$sqlExp = "SELECT e.id, e.empresa, e.empresa_url, e.data_inici, e.data_fi, e.is_current, i.nameImg, c.city, co.pais_cat
-           FROM db_curriculum_experiencia_professional e
-           INNER JOIN db_img i ON e.logo_empresa = i.id
-           INNER JOIN db_cities c ON e.empresa_localitzacio = c.id
-           INNER JOIN db_countries co ON c.country = co.id
-           ORDER BY e.posicio DESC";
+$sql = <<<SQL
+            SELECT e.id, e.empresa, e.empresa_url, e.data_inici, e.data_fi, e.is_current, i.nameImg, c.ciutat_ca AS city, co.pais_en AS pais_cat
+            FROM %s AS e
+            LEFT JOIN %s i ON e.logo_empresa = i.id
+            LEFT JOIN %s c ON e.empresa_localitzacio = c.id
+            LEFT JOIN %s co ON c.pais_id = co.id
+            ORDER BY e.posicio DESC
+        SQL;
+
+$sqlExp = sprintf(
+    $sql,
+    qi(Tables::CURRICULUM_EXPERIENCIA_PROFESSIONAL, $pdo),
+    qi(Tables::DB_IMATGES, $pdo),
+    qi(Tables::DB_CIUTATS, $pdo),
+    qi(Tables::DB_PAISOS, $pdo),
+);
+
 $stmt = $conn->query($sqlExp);
 $experiencies = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($experiencies as $index => $exp) {
-    $sqlExpI18n = "SELECT rol_titol, sumari, fites
-                   FROM db_curriculum_experiencia_professional_i18n
-                   WHERE experiencia_id = :id AND locale = :locale
-                   LIMIT 1";
+    $sql = <<<SQL
+                SELECT rol_titol, sumari, fites
+                FROM %s
+                WHERE experiencia_id = :id AND locale = :locale
+                LIMIT 1
+        SQL;
+
+    $sqlExpI18n = sprintf(
+        $sql,
+        qi(Tables::CURRICULUM_EXPERIENCIA_PROFESSIONAL_I18N, $pdo)
+    );
+
     $stmt = $conn->prepare($sqlExpI18n);
     $stmt->bindParam(':id', $exp['id'], PDO::PARAM_INT);
     $stmt->bindParam(':locale', $locale, PDO::PARAM_INT);
@@ -139,23 +204,43 @@ foreach ($experiencies as $index => $exp) {
 }
 
 // Educació
-$sqlEdu = "SELECT e.id, e.institucio, e.institucio_url, e.data_inici, e.data_fi,
-                  (SELECT nameImg FROM db_img WHERE id = e.logo_id LIMIT 1) AS nameImg,
-                  (SELECT city FROM db_cities WHERE id = e.institucio_localitzacio LIMIT 1) AS city,
-                  (SELECT pais_cat FROM db_countries WHERE id = 
-                       (SELECT country FROM db_cities WHERE id = e.institucio_localitzacio LIMIT 1)
-                   LIMIT 1) AS pais_cat
-           FROM db_curriculum_educacio e
-           ORDER BY e.posicio DESC";
+$sql = <<<SQL
+            SELECT e.id, e.institucio, e.institucio_url, e.data_inici, e.data_fi,
+                (SELECT nameImg FROM %s WHERE id = e.logo_id LIMIT 1) AS nameImg,
+                (SELECT ciutat_ca FROM %s WHERE id = e.institucio_localitzacio LIMIT 1) AS city,
+                (SELECT pais_ca FROM %s WHERE id = 
+                (SELECT pais_ca FROM %s WHERE id = e.institucio_localitzacio LIMIT 1)
+                LIMIT 1) AS pais_cat
+            FROM %s e
+            ORDER BY e.posicio DESC
+        SQL;
+
+$sqlEdu = sprintf(
+    $sql,
+    qi(Tables::DB_IMATGES, $pdo),
+    qi(Tables::DB_CIUTATS, $pdo),
+    qi(Tables::DB_PAISOS, $pdo),
+    qi(Tables::DB_CIUTATS, $pdo),
+    qi(Tables::CURRICULUM_EDUCACIO, $pdo),
+);
 
 $stmt = $conn->query($sqlEdu);
 $educacions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 foreach ($educacions as $index => $edu) {
-    $sqlEduI18n = "SELECT grau, notes 
-                   FROM db_curriculum_educacio_i18n 
-                   WHERE educacio_id = :id AND locale = :locale 
-                   LIMIT 1";
+
+    $sql = <<<SQL
+                SELECT grau, notes 
+                FROM %s 
+                WHERE educacio_id = :id AND locale = :locale 
+                LIMIT 1
+            SQL;
+
+    $sqlEduI18n = sprintf(
+        $sql,
+        qi(Tables::CURRICULUM_EDUCACIO_I18N, $pdo)
+    );
+
     $stmt = $conn->prepare($sqlEduI18n);
     $stmt->bindParam(':id', $edu['id'], PDO::PARAM_INT);
     $stmt->bindParam(':locale', $locale, PDO::PARAM_INT);

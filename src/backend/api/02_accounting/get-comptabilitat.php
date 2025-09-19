@@ -1,34 +1,62 @@
 <?php
 
-// Informacion usuario
-// ruta => api/auth/?type=user&id=1&token="
+use App\Config\Database;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Config\Tables;
 
-if (isset($_GET['type']) && $_GET['type'] == 'accounting-customers') {
-    global $conn;
-    $query = "SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCiutat, c.clientCP, c.clientProvincia, c.clientPais, c.clientTelefon, c.clientRegistre, ci.city, co.country, cou.county, c.clientStatus, s.estatNom
-        FROM db_accounting_hispantic_costumers AS c
-        INNER JOIN db_cities AS ci ON c.clientCiutat = ci.id
-        INNER JOIN db_countries AS co ON c.clientPais = co.id
-        INNER JOIN db_countries_counties AS cou ON c.clientProvincia = cou.id
-        INNER JOIN  db_accounting_hispantic_costumers_status AS s ON c.clientStatus = s.id
-        ORDER BY c.clientRegistre DESC";
+$slug = $routeParams[0];
+$db = new Database();
+$pdo = $db->getPdo();
 
-    $stmt = $conn->prepare($query);
+// GET : Llistat clients
+// ruta => "https://elliot.cat/api/comptabilitat/get/clients"
+if ($slug === 'clients') {
 
-    // Ejecutar la consulta
-    $stmt->execute();
+    $sql = <<<SQL
+            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, uuid_bin_to_text(c.ciutat_id) AS ciutat_id, uuid_bin_to_text(c.provincia_id,) AS provincia_id, uuid_bin_to_text(c.pais_id,) AS pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.clientStatus, s.estatNom
+            FROM %s AS c
+            LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
+            LEFT JOIN %s AS co ON c.pais_id = co.id
+            LEFT JOIN %s AS cou ON c.provincia_id = cou.id
+            LEFT OIN %s AS s ON c.clientStatus = s.id
+            ORDER BY c.clientRegistre DESC
+            SQL;
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit();
+    $sqlPerfil = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo),
+        qi(Tables::DB_PROVINCIES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo)
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    header('Content-Type: application/json');
-    echo json_encode($data);
 } elseif (isset($_GET['type']) && $_GET['type'] == 'accounting-customers-invoices') {
     global $conn;
 

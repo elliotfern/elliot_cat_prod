@@ -118,7 +118,7 @@ if ($slug === "perfilCV") {
                        email = :email,
                        tel = :tel,
                        web = :web,
-                       localitzacio_ciutat    = uuid_text_to_bin(NULLIF(:localitzacio_ciutat, '')),
+                       localitzacio_ciutat = uuid_text_to_bin(NULLIF(:localitzacio_ciutat, '')),
                        img_perfil = :img_perfil,
                        disponibilitat = :disponibilitat,
                        visibilitat = :visibilitat
@@ -503,20 +503,21 @@ if ($slug === "perfilCV") {
     }
 
     // Normalizadores
-    $trimOrNull = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
-    $toIntOrNull = static fn($v): ?int => (is_numeric($v) ? (int)$v : null);
-    $toBoolInt = static fn($v): int => ($v === true || $v === 1 || $v === '1' || $v === 'on' || $v === 'true') ? 1 : 0;
+    $trimOrNull  = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
+    $toIntOrNull = static fn($v): ?int    => (is_numeric($v) ? (int)$v : null);
+    $toBoolInt   = static fn($v): int     => ($v === true || $v === 1 || $v === '1' || $v === 'on' || $v === 'true') ? 1 : 0;
 
     // Datos
     $empresa              = $trimOrNull($data['empresa'] ?? null);
     $empresa_url          = $trimOrNull($data['empresa_url'] ?? null);
-    $empresa_localitzacio = $toIntOrNull($data['empresa_localitzacio'] ?? null);
+    $empresa_localitzacio = $trimOrNull($data['empresa_localitzacio'] ?? null); // UUID texto o ''/null
     $data_inici           = $trimOrNull($data['data_inici'] ?? null);
     $data_fi              = $trimOrNull($data['data_fi'] ?? null);
     $is_current           = $toBoolInt($data['is_current'] ?? 0);
     $logo_empresa         = $toIntOrNull($data['logo_empresa'] ?? null);
     $posicio              = $toIntOrNull($data['posicio'] ?? 0) ?? 0;
     $visible              = $toBoolInt($data['visible'] ?? 1);
+    $id                   = (int)($data['id'] ?? 0);
 
     // Validaciones
     $errors = [];
@@ -526,10 +527,13 @@ if ($slug === "perfilCV") {
         $errors[] = ValidacioErrors::massaLlarg('empresa', 190);
     }
 
-    if ($empresa_url !== null && mb_strlen($empresa_url) > 255) {
-        $errors[] = ValidacioErrors::massaLlarg('empresa_url', 255);
-    } elseif ($empresa_url !== null && !filter_var($empresa_url, FILTER_VALIDATE_URL)) {
-        $errors[] = ValidacioErrors::invalid('empresa_url');
+    if ($empresa_url !== null) {
+        if (mb_strlen($empresa_url) > 255) {
+            $errors[] = ValidacioErrors::massaLlarg('empresa_url', 255);
+        } elseif (!preg_match('~^https?://~i', $empresa_url)) {
+            // opcional: autocompletar esquema
+            $empresa_url = 'https://' . $empresa_url;
+        }
     }
 
     if ($data_inici === null) {
@@ -542,10 +546,8 @@ if ($slug === "perfilCV") {
         $errors[] = ValidacioErrors::dataNoValida('data_fi');
     }
 
-    if ($data_inici && $data_fi) {
-        if (strtotime($data_fi) < strtotime($data_inici)) {
-            $errors[] = "La data de fi no pot ser anterior a la data d'inici.";
-        }
+    if ($data_inici && $data_fi && strtotime($data_fi) < strtotime($data_inici)) {
+        $errors[] = "La data de fi no pot ser anterior a la data d'inici.";
     }
 
     if (!empty($errors)) {
@@ -553,45 +555,78 @@ if ($slug === "perfilCV") {
     }
 
     try {
+        global $conn;
         /** @var PDO $conn */
         $conn->beginTransaction();
 
-        $sql = "INSERT INTO db_curriculum_experiencia_professional
-                    (empresa, empresa_url, empresa_localitzacio, data_inici, data_fi, is_current, logo_empresa, posicio, visible)
-                VALUES
-                    (:empresa, :empresa_url, :empresa_localitzacio, :data_inici, :data_fi, :is_current, :logo_empresa, :posicio, :visible)";
+        // (Opcional pero recomendable) Comprobar existencia
+        $chk = $conn->prepare("SELECT 1 FROM db_curriculum_experiencia_professional WHERE id = :id");
+        $chk->bindValue(':id', $id, PDO::PARAM_INT);
+        $chk->execute();
+        if (!$chk->fetchColumn()) {
+            $conn->rollBack();
+            Response::error(MissatgesAPI::error('not_found'), ["Experiència id {$id} no existeix"], 404);
+        }
+
+        // UPDATE (incluye updated_at si lo tienes en la tabla)
+        $sql = "UPDATE db_curriculum_experiencia_professional
+                   SET empresa = :empresa,
+                       empresa_url = :empresa_url,
+                       empresa_localitzacio = uuid_text_to_bin(NULLIF(:empresa_localitzacio, '')),
+                       data_inici = :data_inici,
+                       data_fi = :data_fi,
+                       is_current = :is_current,
+                       logo_empresa = :logo_empresa,
+                       posicio = :posicio,
+                       visible = :visible,
+                       updated_at = UTC_TIMESTAMP()
+                 WHERE id = :id";
 
         $stmt = $conn->prepare($sql);
 
         $stmt->bindValue(':empresa', $empresa, PDO::PARAM_STR);
-        $stmt->bindValue(':empresa_url', $empresa_url, $empresa_url !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':empresa_localitzacio', $empresa_localitzacio, $empresa_localitzacio !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+
+        if ($empresa_url === null) $stmt->bindValue(':empresa_url', null, PDO::PARAM_NULL);
+        else                       $stmt->bindValue(':empresa_url', $empresa_url, PDO::PARAM_STR);
+
+        if ($empresa_localitzacio === null || $empresa_localitzacio === '') {
+            $stmt->bindValue(':empresa_localitzacio', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':empresa_localitzacio', $empresa_localitzacio, PDO::PARAM_STR); // "0199...."
+        }
+
         $stmt->bindValue(':data_inici', $data_inici, PDO::PARAM_STR);
-        $stmt->bindValue(':data_fi', $data_fi, $data_fi !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+
+        if ($data_fi === null) $stmt->bindValue(':data_fi', null, PDO::PARAM_NULL);
+        else                   $stmt->bindValue(':data_fi', $data_fi, PDO::PARAM_STR);
+
         $stmt->bindValue(':is_current', $is_current, PDO::PARAM_INT);
-        $stmt->bindValue(':logo_empresa', $logo_empresa, $logo_empresa !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+
+        if ($logo_empresa === null) $stmt->bindValue(':logo_empresa', null, PDO::PARAM_NULL);
+        else                        $stmt->bindValue(':logo_empresa', $logo_empresa, PDO::PARAM_INT);
+
         $stmt->bindValue(':posicio', $posicio, PDO::PARAM_INT);
         $stmt->bindValue(':visible', $visible, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
         $stmt->execute();
-        $newId = (int) $conn->lastInsertId();
 
         // Auditoría
-        $detalls = sprintf("Creació experiència empresa=%s, data_inici=%s", $empresa, $data_inici);
+        $detalls = sprintf("Actualització experiència empresa=%s, data_inici=%s", $empresa, $data_inici);
         Audit::registrarCanvi(
             $conn,
             $userUuid,
-            "INSERT",
+            "UPDATE",
             $detalls,
             'db_curriculum_experiencia_professional',
-            $newId
+            $id
         );
 
         $conn->commit();
 
         Response::success(
-            MissatgesAPI::success('create'),
-            ['id' => $newId],
+            MissatgesAPI::success('update'),
+            ['id' => $id],
             200
         );
     } catch (PDOException $e) {

@@ -21,6 +21,7 @@ function checkIfAdmin()
 
 $routes = [
 
+    // 01. Homepage
     APP_GESTIO => array_merge($defaultProtectedConfig, [
         'view' => APP_INTRANET_DIR . APP_HOMEPAGE_DIR . '/admin.php'
     ]),
@@ -39,6 +40,34 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    // 02.1 Clients
+    APP_GESTIO . $url['comptabilitat'] . '/llistat-clients' => [
+        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-clients.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['comptabilitat'] . '/nou-client' => [
+        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-client.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['comptabilitat'] . '/modifica-client/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-client.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients' => [
         'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'erp-invoices-customers.php',
         'needs_session' => true,
@@ -50,16 +79,6 @@ $routes = [
 
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients/nova-factura' => [
         'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'erp-invoices-customers-new.php',
-        'needs_session' => true,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => false,
-        'menu_intranet' => true
-    ],
-
-    // 03. Clients
-    APP_GESTIO . $url['clients'] => [
-        'view' => APP_INTRANET_DIR . APP_CLIENTS_DIR . 'index.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,

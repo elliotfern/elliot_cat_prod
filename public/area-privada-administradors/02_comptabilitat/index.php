@@ -4,11 +4,11 @@
 
   <main>
     <div class="container contingut">
-      <h1>Comptabilitat</h1>
+      <h1>Gestió Comptabilitat i Clients</h1>
       <div id="isAdminButton" style="display: none;">
         <?php if (isUserAdmin()) { ?>
           <p>
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['clients']; ?>/nou-client/'" class="button btn-gran btn-secondari">Afegir client</button>
+            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nou-client/'" class="button btn-gran btn-secondari">Afegir client</button>
 
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nou-pressupost/'" class="button btn-gran btn-secondari">Crear pressupost</button>
 
@@ -18,8 +18,13 @@
           </p>
 
           <div class="alert alert-success quadre">
+            <h4 style="text-align: left;">Clients:</h4>
             <ul class="llistat">
-              <li><a href="<?php echo APP_INTRANET . $url['clients']; ?>/llistat-clients">Llistat de clients</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-clients">Llistat de clients</a></li>
+            </ul>
+
+            <h4 style="text-align: left;">Comptabilitat:</h4>
+            <ul class="llistat">
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de pressupostos</a></li>
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients">Llistat de factures enviades a clients</a></li>
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors">Llistat de factures rebudes</a></li>

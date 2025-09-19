@@ -188,6 +188,48 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
         );
     }
 
+    // Llistat provincies
+    // ruta GET => "/api/cinema/get/auxiliars/provincies"
+} else if ($slug === "provincies") {
+
+    $sql = <<<SQL
+            SELECT p.id, p.provincia_ca
+            FROM %s AS p
+            ORDER BY p.provincia_ca ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_PROVINCIES, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // Llistat complet imatges
     // ruta GET => "/api/auxiliars/get/?llistatCompletImatges"
 } else if (isset($_GET['llistatCompletImatges'])) {

@@ -1,6 +1,5 @@
 <?php
 
-
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
@@ -289,7 +288,7 @@ if ($slug === "perfilCV") {
 } else if ($slug === "experiencies") {
 
     $sql = <<<SQL
-              SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat_ca AS city, co.pais_ca AS pais_cat
+              SELECT e.id, e.empresa, e.empresa_url, uuid_bin_to_text(e.empresa_localitzacio) AS empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat_ca AS city, co.pais_ca AS pais_cat
               FROM %s AS e
               LEFT JOIN %s AS i ON e.logo_empresa = i.id
               LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id
@@ -418,7 +417,7 @@ if ($slug === "perfilCV") {
     $id = $_GET['id'] ?? null;
 
     $sql = <<<SQL
-                SELECT e.id, e.institucio, e.institucio_url, e.institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.ciutat_ca, co.pais_ca
+                SELECT e.id, e.institucio, e.institucio_url, uuid_bin_to_text(e.institucio_localitzacio) AS institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.ciutat_ca, co.pais_ca
                 FROM %s AS e
                 LEFT JOIN %s AS i ON e.logo_id = i.id
                 LEFT JOIN %s AS c ON e.institucio_localitzacio = c.id

@@ -17,6 +17,8 @@ export type ApiUrls = {
     PERSONA_DETALL_SLUG: (slug: string) => string;
     CIUTAT_ID: (id: string) => string;
     PAIS_ID: (slug: string) => string;
+    CLIENTS: string;
+    CLIENT_ID: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -30,6 +32,7 @@ export type ApiUrls = {
     PERSONA: string;
     CIUTAT: string;
     PAIS: string;
+    CLIENT: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -43,6 +46,7 @@ export type ApiUrls = {
     PERSONA: (id: string) => string;
     CIUTAT: string;
     PAIS: (id: string) => string;
+    CLIENT: string;
   };
   DELETE: {};
 };

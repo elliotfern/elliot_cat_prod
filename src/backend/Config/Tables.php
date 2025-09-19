@@ -27,4 +27,8 @@ final class Tables
     public const DB_CIUTATS = 'db_geo_ciutats';
     public const DB_PROVINCIES = 'db_geo_provincies';
     public const DB_PAISOS = 'db_geo_paisos';
+
+    // Comptabilitat
+    public const DB_COMPTABILITAT_CLIENTS = 'db_comptabilitat_clients';
+    public const DB_COMPTABILITAT_CLIENTS_ESTAT = 'db_comptabilitat_clients_estat';
 }

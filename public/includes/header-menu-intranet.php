@@ -4,9 +4,7 @@
     <div class="col-12 col-md-12 d-flex flex-column flex-md-row justify-content-md-between gap-3">
       <a href="<?php echo APP_INTRANET; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">01. Inici</a>
 
-      <a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">02. Comptabilitat</a>
-
-      <a href="<?php echo APP_INTRANET . $url['clients']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">03. Clients</a>
+      <a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">02. Gestió Comptabilitat i clients</a>
 
       <a href="<?php echo APP_INTRANET . $url['persones']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">04. Persones</a>
 

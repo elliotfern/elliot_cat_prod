@@ -85,23 +85,31 @@ $routes = [
     ],
 
     // API COMPTABILITAT ERP
-    '/api/accounting/proxy' => [
-        'view' => 'src/backend/api/02_accounting/proxy.php',
+    '/api/comptabilitat/get/{slug}' => [
+        'view' => 'src/backend/api/02_accounting/get-comptabilitat.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true
     ],
 
-    '/api/accounting/get' => [
-        'view' => 'src/backend/api/02_accounting/accounting.php',
+    '/api/comptabilitat/post/{slug}' => [
+        'view' => 'src/backend/api/02_accounting/post-comptabilitat.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true
     ],
 
-    '/api/accounting/post/invoice' => [
+    '/api/comptabilitat/put/{slug}' => [
+        'view' => 'src/backend/api/02_accounting/put-comptabilitat.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/comptabilitat/post/invoice' => [
         'view' => 'src/backend/api/02_accounting/customer-invoice-insert.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -109,7 +117,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/accounting/get/invoice-pdf/{id}' => [
+    '/api/comptabilitat/get/invoice-pdf/{id}' => [
         'view' => 'src/backend/api/02_accounting/generate_pdf.php',
         'needs_session' => false,
         'header_footer' => false,

@@ -29,6 +29,8 @@ export const ENDPOINTS = {
   CIUTAT_ID: 'ciutatId',
   CIUTAT: 'ciutat',
   PAISOS: 'paisos',
+  CLIENTS: 'clients',
+  CLIENT: 'clientId',
 } as const;
 
 // Mapa de recursos disponibles
@@ -36,6 +38,7 @@ const RESOURCES = {
   CURRICULUM: 'curriculum',
   AUXILIARS: 'auxiliars',
   CIUTATS: 'ciutats',
+  COMPTABILITAT: 'comptabilitat',
 } as const;
 
 const TIPUS = {
@@ -64,6 +67,8 @@ export const API_URLS: ApiUrls = {
     PERSONA_DETALL_SLUG: (slug: string) => `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}/${slug}`,
     CIUTAT_ID: (id: string) => `${API_BASE}/${RESOURCES.AUXILIARS}/${TIPUS.GET}/${ENDPOINTS.CIUTAT_ID}?id=${encodeURIComponent(id)}`,
     PAIS_ID: (id: string) => `${API_WEB}/${ENDPOINTS.PAISOS}/${encodeURIComponent(id)}`,
+    CLIENTS: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENTS}`,
+    CLIENT_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENT}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -78,6 +83,7 @@ export const API_URLS: ApiUrls = {
     PERSONA: `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}`,
     CIUTAT: `${API_BASE}/${RESOURCES.CIUTATS}/${TIPUS.POST}`,
     PAIS: `${API_WEB}/${ENDPOINTS.PAISOS}`,
+    CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.CLIENTS}`,
   },
 
   PUT: {
@@ -92,6 +98,7 @@ export const API_URLS: ApiUrls = {
     PERSONA: (id: string) => `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}/${encodeURIComponent(id)}`,
     CIUTAT: `${API_BASE}/${RESOURCES.CIUTATS}/${TIPUS.PUT}`,
     PAIS: (id: string) => `${API_WEB}/${ENDPOINTS.PAISOS}/${encodeURIComponent(id)}`,
+    CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PUT}/${ENDPOINTS.CLIENTS}`,
   },
 
   DELETE: {},
