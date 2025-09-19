@@ -109,14 +109,6 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/comptabilitat/post/invoice' => [
-        'view' => 'src/backend/api/02_accounting/customer-invoice-insert.php',
-        'needs_session' => false,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => true
-    ],
-
     '/api/comptabilitat/pdf/invoice-pdf/{id}' => [
         'view' => 'src/backend/api/02_accounting/generate_pdf.php',
         'needs_session' => false,

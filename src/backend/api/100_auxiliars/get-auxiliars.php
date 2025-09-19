@@ -694,6 +694,174 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             500
         );
     }
+
+    // Llistat clients empresa
+    // ruta GET => "/api/cinema/get/auxiliars/clients"
+} else if ($slug === "clients") {
+
+    $sql = <<<SQL
+            SELECT c.id, c.clientEmpresa
+            FROM %s AS c
+            ORDER BY c.clientEmpresa ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat tipus IVA
+    // ruta GET => "/api/cinema/get/auxiliars/tipusIVA"
+} else if ($slug === "tipusIVA") {
+
+    $sql = <<<SQL
+            SELECT c.id, c.ivaPercen
+            FROM %s AS c
+            ORDER BY c.ivaPercen ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat estat facturació
+    // ruta GET => "/api/cinema/get/auxiliars/estatFacturacio"
+} else if ($slug === "estatFacturacio") {
+
+    $sql = <<<SQL
+            SELECT c.id, c.estat
+            FROM %s AS c
+            ORDER BY c.estat ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat tipus pagament
+    // ruta GET => "/api/cinema/get/auxiliars/tipusPagament"
+} else if ($slug === "tipusPagament") {
+
+    $sql = <<<SQL
+            SELECT c.id, c.tipusNom
+            FROM %s AS c
+            ORDER BY c.tipusNom ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

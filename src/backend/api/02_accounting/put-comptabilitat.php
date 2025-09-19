@@ -174,6 +174,147 @@ if ($slug === 'clients') {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === 'facturaClient') {
+
+    $inputData = file_get_contents('php://input');
+    $data = json_decode($inputData, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // Helpers
+    $trimOrNull = static function ($v): ?string {
+        if ($v === null) return null;
+        if (is_string($v)) {
+            $s = trim($v);
+            return ($s === '') ? null : $s;
+        }
+        $s = trim((string)$v);
+        return ($s === '') ? null : $s;
+    };
+    $toIntOrNull = static function ($v): ?int {
+        return (is_numeric($v) ? (int)$v : null);
+    };
+    $dateOrNull = static function ($v): ?string {
+        if (!is_string($v)) return null;
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null; // YYYY-MM-DD
+    };
+    // Normaliza cantidades: "1.234,56" o "1234.56" -> "1234.56"
+    $toDecimal = static function ($v): ?string {
+        if ($v === null) return null;
+        $s = is_string($v) ? trim($v) : trim((string)$v);
+        if ($s === '') return null;
+        $s = str_replace([' ', "\u{00A0}"], '', $s);
+        $s = str_replace(',', '.', $s);
+        if (!preg_match('/^-?\d+(\.\d{1,4})?$/', $s)) return null; // ajusta decimales si necesitas
+        return $s;
+    };
+
+    // Datos (id requerido)
+    $id              = $toIntOrNull($data['id'] ?? null);
+    $idUser          = $toIntOrNull($data['idUser'] ?? null);
+    $facConcepte     = $trimOrNull($data['facConcepte'] ?? null);
+    $facData         = $dateOrNull($data['facData'] ?? null);
+    $facDueDate      = $dateOrNull($data['facDueDate'] ?? null);
+    $facSubtotal     = $toDecimal($data['facSubtotal'] ?? null);
+    $facFees         = $toDecimal($data['facFees'] ?? null);
+    $facTotal        = $toDecimal($data['facTotal'] ?? null);
+    $facVAT          = $toDecimal($data['facVAT'] ?? null);
+    $facIva          = $toIntOrNull($data['facIva'] ?? null);
+    $facEstat        = $toIntOrNull($data['facEstat'] ?? null);
+    $facPaymentType  = $toIntOrNull($data['facPaymentType'] ?? null);
+
+    // Validación
+    $errors = [];
+    if ($id === null || $id <= 0)      $errors[] = ValidacioErrors::requerit('id');
+    if ($idUser === null)              $errors[] = ValidacioErrors::requerit('idUser');
+
+    if ($facConcepte === null)         $errors[] = ValidacioErrors::requerit('facConcepte');
+    elseif (mb_strlen($facConcepte) > 255) $errors[] = ValidacioErrors::massaLlarg('facConcepte', 255);
+
+    if ($facData === null)             $errors[] = ValidacioErrors::dataNoValida('facData');
+    if ($facDueDate === null)          $errors[] = ValidacioErrors::dataNoValida('facDueDate');
+
+    if ($facSubtotal === null)         $errors[] = ValidacioErrors::requerit('facSubtotal');
+    if ($facFees === null)             $errors[] = ValidacioErrors::requerit('facFees');
+    if ($facTotal === null)            $errors[] = ValidacioErrors::requerit('facTotal');
+    if ($facVAT === null)              $errors[] = ValidacioErrors::requerit('facVAT');
+
+    if ($facIva === null)              $errors[] = ValidacioErrors::requerit('facIva');
+    if ($facEstat === null)            $errors[] = ValidacioErrors::requerit('facEstat');
+    if ($facPaymentType === null)      $errors[] = ValidacioErrors::requerit('facPaymentType');
+
+    // Coherencia de fechas
+    if ($facData !== null && $facDueDate !== null) {
+        if (strtotime($facDueDate) < strtotime($facData)) {
+            $errors[] = "La data de venciment (facDueDate) no pot ser anterior a la data de factura (facData).";
+        }
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        global $conn, $userUuid;
+        /** @var PDO $conn */
+        $conn->beginTransaction();
+
+        // Comprobar existencia
+        $chk = $conn->prepare("SELECT 1 FROM db_comptabilitat_facturacio_clients WHERE id = :id");
+        $chk->bindValue(':id', $id, PDO::PARAM_INT);
+        $chk->execute();
+        if (!$chk->fetchColumn()) {
+            $conn->rollBack();
+            Response::error(MissatgesAPI::error('not_found'), ["Factura id {$id} no existeix"], 404);
+        }
+
+        $sql = "UPDATE db_comptabilitat_facturacio_clients
+               SET idUser = :idUser,
+                   facConcepte = :facConcepte,
+                   facData = :facData,
+                   facDueDate = :facDueDate,
+                   facSubtotal = :facSubtotal,
+                   facFees = :facFees,
+                   facTotal = :facTotal,
+                   facVAT = :facVAT,
+                   facIva = :facIva,
+                   facEstat = :facEstat,
+                   facPaymentType = :facPaymentType
+             WHERE id = :id";
+
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bindValue(':id',            $id,           PDO::PARAM_INT);
+        $stmt->bindValue(':idUser',        $idUser,       PDO::PARAM_INT);
+        $stmt->bindValue(':facConcepte',   $facConcepte,  PDO::PARAM_STR);
+        $stmt->bindValue(':facData',       $facData,      PDO::PARAM_STR);
+        $stmt->bindValue(':facDueDate',    $facDueDate,   PDO::PARAM_STR);
+
+        // DECIMAL como string para no perder precisión
+        $stmt->bindValue(':facSubtotal',   $facSubtotal,  PDO::PARAM_STR);
+        $stmt->bindValue(':facFees',       $facFees,      PDO::PARAM_STR);
+        $stmt->bindValue(':facTotal',      $facTotal,     PDO::PARAM_STR);
+        $stmt->bindValue(':facVAT',        $facVAT,       PDO::PARAM_STR);
+
+        $stmt->bindValue(':facIva',        $facIva,       PDO::PARAM_INT);
+        $stmt->bindValue(':facEstat',      $facEstat,     PDO::PARAM_INT);
+        $stmt->bindValue(':facPaymentType', $facPaymentType, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        // Auditoría
+        $detalls = sprintf("Actualització factura id=%d client=%d concepte=%s data=%s", $id, $idUser, $facConcepte, $facData);
+        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_facturacio_clients', $id);
+
+        $conn->commit();
+
+        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
+    } catch (Throwable $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

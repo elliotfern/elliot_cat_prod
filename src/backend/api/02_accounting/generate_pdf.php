@@ -10,10 +10,10 @@ header('Accept-Ranges: bytes');
 // Dades d'entrada
 $idInvoice = $routeParams[0];
 
-$url = "https://elliot.cat/api/accounting/get/?type=customers-invoices&id={$idInvoice}";
+$url = "https://elliot.cat/api/comptabilitat/get/facturaClientsPDF?id={$idInvoice}";
 
 // segona crida a l'API
-$url2 = "https://elliot.cat/api/accounting/get/?type=invoice-products&id={$idInvoice}";
+$url2 = "https://elliot.cat/api/comptabilitat/get/facturaProductesPDF?id={$idInvoice}";
 
 // Crida a l'API passant el token i l'ID de la factura
 $invoiceData = hacerLlamadaAPI($url);

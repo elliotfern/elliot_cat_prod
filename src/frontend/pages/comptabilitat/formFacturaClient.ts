@@ -14,10 +14,10 @@ interface Fitxa {
   comarca: number;
   provincia: number;
   comunitat: number;
-  estat: number;
-  experiencia_id: number;
-  educacio_id: number;
-  pais_id: number;
+  idUser: number;
+  facIva: number;
+  facEstat: number;
+  facPaymentType: number;
 }
 
 interface ApiResponse<T> {
@@ -64,5 +64,8 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
     });
   }
 
-  await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais_ca');
+  await auxiliarSelect(data.idUser ?? 0, 'clients', 'idUser', 'clientEmpresa');
+  await auxiliarSelect(data.facIva ?? 0, 'tipusIVA', 'facIva', 'ivaPercen');
+  await auxiliarSelect(data.facEstat ?? 0, 'estatFacturacio', 'facEstat', 'estat');
+  await auxiliarSelect(data.facPaymentType ?? 0, 'tipusPagament', 'facPaymentType', 'tipusNom');
 }

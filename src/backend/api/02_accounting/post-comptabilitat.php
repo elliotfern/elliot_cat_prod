@@ -154,6 +154,120 @@ if ($slug === 'clients') {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === 'facturaClient') {
+    $inputData = file_get_contents('php://input');
+    $data = json_decode($inputData, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // Helpers
+    $trimOrNull = static function ($v): ?string {
+        if ($v === null) return null;
+        if (is_string($v)) {
+            $s = trim($v);
+            return ($s === '') ? null : $s;
+        }
+        $s = trim((string)$v);
+        return ($s === '') ? null : $s;
+    };
+    $toIntOrNull = static function ($v): ?int {
+        return (is_numeric($v) && (string)(int)$v === (string)$v) ? (int)$v : (is_numeric($v) ? (int)$v : null);
+    };
+    $dateOrNull = static function ($v): ?string {
+        if (!is_string($v)) return null;
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null; // YYYY-MM-DD
+    };
+    // Normaliza cantidades: admite "1.234,56" o "1234.56" -> "1234.56"
+    $toDecimal = static function ($v): ?string {
+        if ($v === null) return null;
+        $s = is_string($v) ? trim($v) : trim((string)$v);
+        if ($s === '') return null;
+        // quita espacios, convierte coma decimal a punto y elimina separadores de miles comunes
+        $s = str_replace([' ', "\u{00A0}"], '', $s);
+        $s = str_replace(',', '.', $s);
+        // opcional: elimina puntos de miles si vienen como "1.234.56" -> trata sólo el primer punto desde la derecha
+        // aquí asumimos que ya quedó "1234.56" tras el replace anterior
+        if (!preg_match('/^-?\d+(\.\d{1,4})?$/', $s)) return null; // hasta 4 decimales
+        return $s;
+    };
+
+    // Datos (requeridos)
+    $idUser        = $toIntOrNull($data['idUser']        ?? null);
+    $facConcepte   = $trimOrNull($data['facConcepte']    ?? null);
+    $facData       = $dateOrNull($data['facData']        ?? null);
+    $facDueDate    = $dateOrNull($data['facDueDate']     ?? null);
+    $facSubtotal   = $toDecimal($data['facSubtotal']    ?? null);
+    $facFees       = $toDecimal($data['facFees']        ?? null);
+    $facTotal      = $toDecimal($data['facTotal']       ?? null);
+    $facVAT        = $toDecimal($data['facVAT']         ?? null);
+    $facIva        = $toIntOrNull($data['facIva']        ?? null);
+    $facEstat      = $toIntOrNull($data['facEstat']      ?? null);
+    $facPaymentType = $toIntOrNull($data['facPaymentType'] ?? null);
+
+    // Validación
+    $errors = [];
+    if ($idUser === null)           $errors[] = ValidacioErrors::requerit('idUser');
+    if ($facConcepte === null)      $errors[] = ValidacioErrors::requerit('facConcepte');
+    elseif (mb_strlen($facConcepte) > 255) $errors[] = ValidacioErrors::massaLlarg('facConcepte', 255);
+
+    if ($facData === null)          $errors[] = ValidacioErrors::dataNoValida('facData');
+    if ($facDueDate === null)       $errors[] = ValidacioErrors::dataNoValida('facDueDate');
+
+    if ($facSubtotal === null)      $errors[] = ValidacioErrors::requerit('facSubtotal');
+    if ($facFees === null)          $errors[] = ValidacioErrors::requerit('facFees');
+    if ($facTotal === null)         $errors[] = ValidacioErrors::requerit('facTotal');
+    if ($facVAT === null)           $errors[] = ValidacioErrors::requerit('facVAT');
+
+    if ($facIva === null)           $errors[] = ValidacioErrors::requerit('facIva');
+    if ($facEstat === null)         $errors[] = ValidacioErrors::requerit('facEstat');
+    if ($facPaymentType === null)   $errors[] = ValidacioErrors::requerit('facPaymentType');
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        global $conn, $userUuid;
+        /** @var PDO $conn */
+        $conn->beginTransaction();
+
+        $sql = "INSERT INTO db_comptabilitat_facturacio_clients
+              (idUser, facConcepte, facData, facDueDate, facSubtotal, facFees, facTotal, facVAT, facIva, facEstat, facPaymentType)
+            VALUES
+              (:idUser, :facConcepte, :facData, :facDueDate, :facSubtotal, :facFees, :facTotal, :facVAT, :facIva, :facEstat, :facPaymentType)";
+
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bindValue(':idUser',        $idUser,        PDO::PARAM_INT);
+        $stmt->bindValue(':facConcepte',   $facConcepte,   PDO::PARAM_STR);
+        $stmt->bindValue(':facData',       $facData,       PDO::PARAM_STR);
+        $stmt->bindValue(':facDueDate',    $facDueDate,    PDO::PARAM_STR);
+        // DECIMAL: bindea como string para no perder precisión
+        $stmt->bindValue(':facSubtotal',   $facSubtotal,   PDO::PARAM_STR);
+        $stmt->bindValue(':facFees',       $facFees,       PDO::PARAM_STR);
+        $stmt->bindValue(':facTotal',      $facTotal,      PDO::PARAM_STR);
+        $stmt->bindValue(':facVAT',        $facVAT,        PDO::PARAM_STR);
+
+        $stmt->bindValue(':facIva',        $facIva,        PDO::PARAM_INT);
+        $stmt->bindValue(':facEstat',      $facEstat,      PDO::PARAM_INT);
+        $stmt->bindValue(':facPaymentType', $facPaymentType, PDO::PARAM_INT);
+
+        $stmt->execute();
+        $newId = (int)$conn->lastInsertId();
+
+        // Auditoría
+        $detalls = sprintf("Creació factura client=%d concepte=%s data=%s", $idUser, $facConcepte, $facData);
+        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_facturacio_clients', $newId);
+
+        $conn->commit();
+
+        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+    } catch (Throwable $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

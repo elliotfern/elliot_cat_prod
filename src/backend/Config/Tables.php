@@ -32,7 +32,9 @@ final class Tables
     public const DB_COMPTABILITAT_CLIENTS = 'db_comptabilitat_clients';
     public const DB_COMPTABILITAT_CLIENTS_ESTAT = 'db_comptabilitat_clients_estat';
     public const DB_COMPTABILITAT_FACTURACIO_CLIENTS = 'db_comptabilitat_facturacio_clients';
+    public const DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES = 'db_comptabilitat_facturacio_clients_productes';
     public const DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA = 'db_comptabilitat_facturacio_tipus_iva';
     public const DB_COMPTABILITAT_FACTURACIO_ESTAT = 'db_comptabilitat_facturacio_estat';
     public const DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT = 'db_comptabilitat_facturacio_tipus_pagament';
+    public const DB_COMPTABILITAT_CATALEG_PRODUCTES = 'db_comptabilitat_cataleg_productes';
 }

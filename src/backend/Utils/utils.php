@@ -42,48 +42,44 @@ function generateLanguageRoutes(array $base_routes, bool $use_languages = true):
 
 
 // Llamada a la API con token en los encabezados
-function hacerLlamadaAPI($url)
+function hacerLlamadaAPI(string $url)
 {
-    $token = $_COOKIE['token'];
+    $token = $_COOKIE['token'] ?? '';
 
-    // Inicializa cURL
     $ch = curl_init($url);
-
-    // Configura los encabezados de la solicitud, incluyendo el token en el encabezado Authorization
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTPHEADER => [
             "Authorization: Bearer {$token}",
+            "Accept: application/json",
             "Content-Type: application/json",
-
+            // 👇 para que supere checkReferer($allowedOrigin)
+            "Referer: https://elliot.cat",
+            "Origin: https://elliot.cat",
         ],
+        CURLOPT_TIMEOUT => 15,
     ]);
 
-    // Ejecutar la solicitud
     $response = curl_exec($ch);
-    $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlErr  = curl_error($ch);
+    $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    // Verifica si hay errores en la solicitud
-    if (curl_errno($ch)) {
-        die("Error en cURL: " . curl_error($ch));
+    if ($response === false) {
+        die("Error en cURL: {$curlErr}");
+    }
+    if ($status !== 200) {
+        die("Error al obtener los datos de la API. HTTP Status Code: {$status}");
     }
 
-    // Verifica el código de estado HTTP
-    $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($httpStatusCode !== 200) {
-        die("Error al obtener los datos de la API. HTTP Status Code: {$httpStatusCode}");
-    }
-
-    // Decodifica la respuesta
     $data = json_decode($response, true);
-
     if ($data === null) {
         die("Error al decodificar los datos de la API.");
     }
 
-    // Retorna los datos de la factura
-    return $data;
+    // acepta payloads con envoltorio {status,message,data} o datos directos
+    $payload = $data['data'] ?? $data;
+
+    return $payload;
 }
