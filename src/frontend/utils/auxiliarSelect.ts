@@ -4,82 +4,100 @@ import 'choices.js/public/assets/styles/choices.min.css';
 import { API_BASE } from './urls';
 
 type Item = { id: number | string; [key: string]: unknown };
-const choicesRegistry = new Map<string, Choices>();
 
-export async function auxiliarSelect(selected: number | string | Array<number | string> | null | undefined, api: string, elementId: string, valorText: string, fallbackValue?: string, config?: Partial<Choices['config']>): Promise<Choices | void> {
+const choicesRegistry = new Map<string, Choices>();
+const ZERO_UUID = /^0{8}-0{4}-0{4}-0{4}-0{12}$/i;
+
+const isEmptySel = (v: unknown): boolean => v === null || v === undefined || v === '' || v === 0 || v === '0' || (typeof v === 'string' && ZERO_UUID.test(v));
+
+function pluckItems(json: any): Item[] {
+  if (Array.isArray(json?.data?.items)) return json.data.items;
+  if (Array.isArray(json?.items)) return json.items;
+  if (Array.isArray(json?.data)) return json.data;
+  if (Array.isArray(json)) return json;
+  return [];
+}
+
+/**
+ * Rellena un <select> con datos remotos y preselecciona valores.
+ * @param selected valor/es seleccionados (string|number|array) o null/undefined si no hay
+ * @param api      nombre de recurso auxiliar (se concatena a /auxiliars/get/{api})
+ * @param elementId id del <select>
+ * @param valorText campo del item que se mostrará como etiqueta (p.ej. 'pais_ca')
+ * @param fallbackValue valor a usar si selected es vacío
+ * @param config   opciones extra para Choices
+ */
+export async function auxiliarSelect(selected: number | string | Array<number | string> | null | undefined, api: string, elementId: string, valorText: string, fallbackValue?: number | string, config?: any): Promise<Choices | void> {
   const urlAjax = `${API_BASE}/auxiliars/get/${api}`;
 
   try {
-    const response = await fetch(urlAjax, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-    if (!response.ok) throw new Error('Error en la solicitud');
+    const response = await fetch(urlAjax, { method: 'GET', credentials: 'include' });
+    if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
 
     const jsonResponse = await response.json();
-    const data: Item[] = Array.isArray(jsonResponse?.data) ? jsonResponse.data : jsonResponse;
+    const data: Item[] = pluckItems(jsonResponse);
 
     const selectElement = document.getElementById(elementId) as HTMLSelectElement | null;
     if (!selectElement) return;
 
-    // destruir instancia anterior
+    // Destruir instancia anterior de Choices si existía
     const prev = choicesRegistry.get(elementId);
     if (prev) {
       prev.destroy();
       choicesRegistry.delete(elementId);
     }
 
-    // limpiar y añadir placeholder (NO selected)
+    // Limpiar y añadir placeholder
     selectElement.innerHTML = '';
     const placeholder = document.createElement('option');
     placeholder.value = '';
     placeholder.text = 'Selecciona una opció:';
-    // NO marcarlo como selected para que no aparezca como elegido
     selectElement.appendChild(placeholder);
 
-    // normalizar seleccionados -> array de strings
+    // Normalizar selección inicial -> array<string> sin vacíos/UUID cero
     let selectedValues: string[] = [];
     if (Array.isArray(selected)) {
-      selectedValues = selected.map((v) => String(v));
-    } else if (selected !== null && selected !== undefined && selected !== 0 && selected !== '') {
+      selectedValues = selected.map(String).filter((v) => !isEmptySel(v));
+    } else if (!isEmptySel(selected)) {
       selectedValues = [String(selected)];
-    } else if (fallbackValue !== undefined && fallbackValue !== '') {
-      selectedValues = [String(fallbackValue)];
+    } else if (!isEmptySel(fallbackValue)) {
+      selectedValues = [String(fallbackValue!)];
     }
 
-    // init Choices
+    // Instanciar Choices
     const choices = new Choices(selectElement, {
       searchEnabled: true,
       allowHTML: false,
       shouldSort: false, // conserva placeholder primero
       placeholder: true,
       placeholderValue: 'Selecciona una opció:',
-      removeItemButton: true,
+      removeItemButton: !!selectElement.multiple, // botón de quitar solo en múltiple
       itemSelectText: '',
       noResultsText: 'Sense resultats',
       ...config,
     });
 
-    // construir opciones
+    // Construir opciones
     const options = data.map((item) => {
       const raw = item[valorText];
-      const label = typeof raw === 'string' ? raw : String(raw ?? '');
+      const label = typeof raw === 'string' ? raw : String(raw ?? item['nom'] ?? item['name'] ?? item['label'] ?? item['title'] ?? item.id ?? '');
       return { value: String(item.id), label };
     });
 
-    // setear opciones (no borrar placeholder)
+    // Inyectar opciones sin resetear selección
     choices.setChoices(options, 'value', 'label', false);
 
-    // aplicar selección inicial (single o múltiple)
+    // Preselección segura (sin querySelector '#...')
     if (selectedValues.length > 0) {
-      choices.setChoiceByValue(selectedValues); // <- AQUI preselecciona múltiples
+      choices.setChoiceByValue(selectedValues);
     } else {
-      // mantener en vacío
       selectElement.value = '';
       choices.removeActiveItems();
     }
 
-    // al quitar un item, NO borres todos (solo propaga)
-    selectElement.addEventListener('removeItem', () => {
-      // Choices ya elimina el item correspondiente
-      selectElement.dispatchEvent(new Event('change', { bubbles: true }));
+    // Propagar cambios al DOM/otros listeners
+    selectElement.addEventListener('change', () => {
+      // nada extra; este evento permite reaccionar fuera
     });
 
     choicesRegistry.set(elementId, choices);
