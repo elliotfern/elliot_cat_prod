@@ -31,6 +31,18 @@ interface ApiResponse<T> {
   data: T;
 }
 
+const ZERO_UUID = /^0{8}-0{4}-0{4}-0{4}-0{12}$/i;
+
+function first<T>(d: T | T[] | null | undefined): T | null {
+  if (!d) return null;
+  return Array.isArray(d) ? d[0] ?? null : d;
+}
+
+function nilUuidToNull(u: string | null | undefined): string | null {
+  if (!u) return null;
+  return ZERO_UUID.test(u) ? null : u;
+}
+
 export async function formClient(isUpdate: boolean, id?: number) {
   const form = document.getElementById('formClient');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
@@ -53,6 +65,11 @@ export async function formClient(isUpdate: boolean, id?: number) {
 
     divTitol.innerHTML = `<h2>Modificació dades Client</h2>`;
 
+    // Normaliza UUIDs "cero" a null
+    data.pais_id = nilUuidToNull(data.pais_id);
+    data.provincia_id = nilUuidToNull(data.provincia_id);
+    data.ciutat_id = nilUuidToNull(data.ciutat_id);
+
     renderFormInputs(data);
 
     btnSubmit.textContent = 'Modificar dades';
@@ -69,8 +86,8 @@ export async function formClient(isUpdate: boolean, id?: number) {
     });
   }
 
-  await auxiliarSelect(data.pais_id, 'paisos', 'pais_id', 'pais_ca');
-  await auxiliarSelect(data.ciutat_id, 'ciutats', 'ciutat_id', 'ciutat_ca');
-  await auxiliarSelect(data.provincia_id, 'provincies', 'provincia_id', 'provincia_ca');
-  await auxiliarSelect(data.clientStatus, 'estatsClients', 'clientStatus', 'estat_ca');
+  await auxiliarSelect(data.pais_id ?? null, 'paisos', 'pais_id', 'pais_ca');
+  await auxiliarSelect(data.ciutat_id ?? null, 'ciutats', 'ciutat_id', 'ciutat_ca');
+  await auxiliarSelect(data.provincia_id ?? null, 'provincies', 'provincia_id', 'provincia_ca');
+  await auxiliarSelect(data.clientStatus ?? 0, 'estatsClients', 'clientStatus', 'estat_ca');
 }
