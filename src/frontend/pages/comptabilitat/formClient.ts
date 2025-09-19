@@ -14,7 +14,7 @@ interface Fitxa {
   comarca: number;
   provincia: number;
   comunitat: number;
-  estat: number;
+  clientStatus: number;
   ciutat_id: number;
   provincia_id: number;
   pais_id: number;
@@ -67,4 +67,5 @@ export async function formClient(isUpdate: boolean, id?: number) {
   await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais_ca');
   await auxiliarSelect(data.ciutat_id ?? 0, 'ciutats', 'ciutat_id', 'ciutat_ca');
   await auxiliarSelect(data.provincia_id ?? 0, 'provincies', 'provincia_id', 'provincia_ca');
+  await auxiliarSelect(data.clientStatus ?? 0, 'estatsClients', 'clientStatus', 'estat_ca');
 }

@@ -14,27 +14,78 @@ $pdo = $db->getPdo();
 if ($slug === 'clients') {
 
     $sql = <<<SQL
-            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, uuid_bin_to_text(c.ciutat_id) AS ciutat_id, uuid_bin_to_text(c.provincia_id,) AS provincia_id, uuid_bin_to_text(c.pais_id,) AS pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.clientStatus, s.estatNom
+            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, uuid_bin_to_text(c.ciutat_id) AS ciutat_id, uuid_bin_to_text(c.provincia_id) AS provincia_id, uuid_bin_to_text(c.pais_id) AS pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.clientStatus, s.estatNom
             FROM %s AS c
             LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
             LEFT JOIN %s AS co ON c.pais_id = co.id
             LEFT JOIN %s AS cou ON c.provincia_id = cou.id
-            LEFT OIN %s AS s ON c.clientStatus = s.id
-            ORDER BY c.clientRegistre DESC
+            LEFT JOIN %s AS s ON c.clientStatus = s.id
+            ORDER BY c.clientCognoms ASC
             SQL;
 
-    $sqlPerfil = sprintf(
+    $query = sprintf(
         $sql,
         qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
         qi(Tables::DB_CIUTATS, $pdo),
-        qi(Tables::DB_PROVINCIES, $pdo),
         qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_PROVINCIES, $pdo),
         qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo)
     );
 
     try {
 
         $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : Detalls client ID
+    // ruta => "https://elliot.cat/api/comptabilitat/get/clientId"
+} else if ($slug === 'clientId') {
+
+    $id = $_GET['id'];
+    $sql = <<<SQL
+            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, uuid_bin_to_text(c.ciutat_id) AS ciutat_id, uuid_bin_to_text(c.provincia_id) AS provincia_id, uuid_bin_to_text(c.pais_id) AS pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.clientStatus, s.estatNom
+            FROM %s AS c
+            LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
+            LEFT JOIN %s AS co ON c.pais_id = co.id
+            LEFT JOIN %s AS cou ON c.provincia_id = cou.id
+            LEFT JOIN %s AS s ON c.clientStatus = s.id
+            WHERE c.id = :id
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_PROVINCIES, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo)
+    );
+
+    try {
+
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, false);
 
         if (empty($result)) {
             Response::error(
