@@ -69,8 +69,8 @@ export async function formClient(isUpdate: boolean, id?: number) {
     });
   }
 
-  await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais_ca');
-  await auxiliarSelect(data.ciutat_id ?? 0, 'ciutats', 'ciutat_id', 'ciutat_ca');
-  await auxiliarSelect(data.provincia_id ?? 0, 'provincies', 'provincia_id', 'provincia_ca');
-  await auxiliarSelect(data.clientStatus ?? 0, 'estatsClients', 'clientStatus', 'estat_ca');
+  await auxiliarSelect(data.pais_id, 'paisos', 'pais_id', 'pais_ca');
+  await auxiliarSelect(data.ciutat_id, 'ciutats', 'ciutat_id', 'ciutat_ca');
+  await auxiliarSelect(data.provincia_id, 'provincies', 'provincia_id', 'provincia_ca');
+  await auxiliarSelect(data.clientStatus, 'estatsClients', 'clientStatus', 'estat_ca');
 }
