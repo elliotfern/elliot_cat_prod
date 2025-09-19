@@ -31,6 +31,10 @@ export const ENDPOINTS = {
   PAISOS: 'paisos',
   CLIENTS: 'clients',
   CLIENT: 'clientId',
+  FACTURACIO_CLIENTS: 'facturacioClients',
+  PDF_FACTURA: 'invoice-pdf',
+  FACTURA_CLIENT_ID: 'facturaId',
+  FACTURA_CLIENT: 'facturaClient',
 } as const;
 
 // Mapa de recursos disponibles
@@ -46,6 +50,7 @@ const TIPUS = {
   POST: 'post',
   PUT: 'put',
   DELETE: 'delete',
+  PDF: 'pdf',
 } as const;
 
 export const API_URLS: ApiUrls = {
@@ -69,6 +74,9 @@ export const API_URLS: ApiUrls = {
     PAIS_ID: (id: string) => `${API_WEB}/${ENDPOINTS.PAISOS}/${encodeURIComponent(id)}`,
     CLIENTS: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENTS}`,
     CLIENT_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENT}?id=${encodeURIComponent(id)}`,
+    FACTURACIO_CLIENTS: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURACIO_CLIENTS}`,
+    INVOICE_PDF: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PDF}/${ENDPOINTS.PDF_FACTURA}/${encodeURIComponent(id)}`,
+    FACTURA_CLIENT_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -84,6 +92,7 @@ export const API_URLS: ApiUrls = {
     CIUTAT: `${API_BASE}/${RESOURCES.CIUTATS}/${TIPUS.POST}`,
     PAIS: `${API_WEB}/${ENDPOINTS.PAISOS}`,
     CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.CLIENTS}`,
+    FACTURA_CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.FACTURA_CLIENT}`,
   },
 
   PUT: {
@@ -99,6 +108,7 @@ export const API_URLS: ApiUrls = {
     CIUTAT: `${API_BASE}/${RESOURCES.CIUTATS}/${TIPUS.PUT}`,
     PAIS: (id: string) => `${API_WEB}/${ENDPOINTS.PAISOS}/${encodeURIComponent(id)}`,
     CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PUT}/${ENDPOINTS.CLIENTS}`,
+    FACTURA_CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PUT}/${ENDPOINTS.FACTURA_CLIENT}`,
   },
 
   DELETE: {},

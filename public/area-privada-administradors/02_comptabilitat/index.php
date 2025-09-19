@@ -12,7 +12,7 @@
 
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nou-pressupost/'" class="button btn-gran btn-secondari">Crear pressupost</button>
 
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients/nova-factura/'" class="button btn-gran btn-secondari">Crear factura clients</button>
+            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nova-factura/'" class="button btn-gran btn-secondari">Crear factura clients</button>
 
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors/nova-factura/'" class="button btn-gran btn-secondari">Registrar factura proveidor</button>
           </p>

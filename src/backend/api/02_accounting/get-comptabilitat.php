@@ -108,33 +108,54 @@ if ($slug === 'clients') {
             500
         );
     }
-} elseif (isset($_GET['type']) && $_GET['type'] == 'accounting-customers-invoices') {
-    global $conn;
 
-    $query = "SELECT ic.id, ic.idUser, ic.facConcepte, ic.facData, YEAR(ic.facData) AS yearInvoice,  ic.facDueDate, ic.facSubtotal, ic.facFees, ic.facTotal, ic.facVAT, ic.facIva, ic.facEstat, ic.facPaymentType, vt.ivaPercen, ist.estat, pt.tipusNom, c.clientNom, c.clientCognoms, c.clientEmpresa
-            FROM db_accounting_hispantic_invoices_customers  AS ic
-            INNER JOIN db_accounting_hispantic_vat_type AS vt ON ic.facIva = vt.id
-            INNER JOIN  db_accounting_hispantic_invoices_status AS ist ON ist.id = ic.facEstat
-            INNER JOIN db_accounting_hispantic_payment_type AS pt ON ic.facPaymentType = pt.id
-            INNER JOIN db_accounting_hispantic_costumers AS c ON ic.idUser = c.id
-            ORDER BY ic.id DESC";
+    // GET : Llistat factures clients
+    // ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients"
+} else if ($slug === 'facturacioClients') {
 
-    $stmt = $conn->prepare($query);
+    $sql = <<<SQL
+                SELECT ic.id, ic.idUser, ic.facConcepte, ic.facData, YEAR(ic.facData) AS yearInvoice, CONCAT('Any ', YEAR(ic.facData)) AS any, ic.facDueDate, ic.facSubtotal, ic.facFees, ic.facTotal, ic.facVAT, ic.facIva, ic.facEstat, ic.facPaymentType, vt.ivaPercen, ist.estat, pt.tipusNom, c.clientNom, c.clientCognoms, c.clientEmpresa
+                FROM %s AS ic
+                LEFT JOIN %s AS vt ON ic.facIva = vt.id
+                LEFT JOIN %s AS ist ON ist.id = ic.facEstat
+                LEFT JOIN %s AS pt ON ic.facPaymentType = pt.id
+                LEFT JOIN %s AS c ON ic.idUser = c.id
+                ORDER BY ic.id DESC
+            SQL;
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo)
+    );
 
-    // Ejecutar la consulta
-    $stmt->execute();
+    try {
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit();
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    header('Content-Type: application/json');
-    echo json_encode($data);
 } elseif (isset($_GET['type']) && $_GET['type'] == 'accounting-elliotfernandez-customers-invoices') {
     global $conn;
     $query = "SELECT ic.id, ic.idUser, ic.facConcepte, ic.facData, YEAR(ic.facData) AS yearInvoice, CONCAT('Any ', YEAR(ic.facData)) AS any, ic.facDueDate, ic.facSubtotal, ic.facFees, ic.facTotal, ic.facVAT, ic.facIva, ic.facEstat, ic.facPaymentType, vt.ivaPercen, ist.estat, pt.tipusNom, c.clientNom, c.clientCognoms, c.clientEmpresa

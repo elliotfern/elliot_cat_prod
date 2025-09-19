@@ -19,6 +19,9 @@ export type ApiUrls = {
     PAIS_ID: (slug: string) => string;
     CLIENTS: string;
     CLIENT_ID: (id: number) => string;
+    FACTURACIO_CLIENTS: string;
+    INVOICE_PDF: (id: number) => string;
+    FACTURA_CLIENT_ID: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -33,6 +36,7 @@ export type ApiUrls = {
     CIUTAT: string;
     PAIS: string;
     CLIENT: string;
+    FACTURA_CLIENT: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -47,6 +51,7 @@ export type ApiUrls = {
     CIUTAT: string;
     PAIS: (id: string) => string;
     CLIENT: string;
+    FACTURA_CLIENT: string;
   };
   DELETE: {};
 };

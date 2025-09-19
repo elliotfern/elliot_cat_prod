@@ -117,7 +117,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/comptabilitat/get/invoice-pdf/{id}' => [
+    '/api/comptabilitat/pdf/invoice-pdf/{id}' => [
         'view' => 'src/backend/api/02_accounting/generate_pdf.php',
         'needs_session' => false,
         'header_footer' => false,

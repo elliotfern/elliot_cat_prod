@@ -193,7 +193,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "provincies") {
 
     $sql = <<<SQL
-            SELECT p.id, p.provincia_ca
+            SELECT uuid_bin_to_text(p.id) AS id, p.provincia_ca
             FROM %s AS p
             ORDER BY p.provincia_ca ASC
             SQL;
@@ -336,7 +336,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "ciutats") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca AS city, c.updated_at, c.created_at, c.ciutat_en
+            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca AS city, c.ciutat_ca, c.updated_at, c.created_at, c.ciutat_en
             FROM %s AS c
             ORDER BY c.ciutat_ca ASC
             SQL;

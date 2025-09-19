@@ -69,7 +69,7 @@ $routes = [
     ],
 
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients' => [
-        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'erp-invoices-customers.php',
+        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-clients.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -77,8 +77,17 @@ $routes = [
         'menu_intranet' => true
     ],
 
-    APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients/nova-factura' => [
-        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'erp-invoices-customers-new.php',
+    APP_GESTIO . $url['comptabilitat'] . '/nova-factura' => [
+        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-client.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['comptabilitat'] . '/modifica-factura/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-client.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,

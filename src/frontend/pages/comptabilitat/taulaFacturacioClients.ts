@@ -4,9 +4,46 @@ import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Factura } from '../../types/Factura';
+import { API_URLS } from '../../utils/apiUrls';
 
 const url = window.location.href;
 const pageType = getPageType(url);
+
+// 👉 Generador PDF (tipado y con estados de botón)
+async function generatePDF(invoiceId: number, fileName?: string) {
+  const btn = document.querySelector<HTMLButtonElement>(`.js-pdf[data-invoice-id="${CSS?.escape ? CSS.escape(String(invoiceId)) : String(invoiceId)}"]`);
+  const prevLabel = btn?.textContent;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Generant...';
+  }
+
+  try {
+    const endpoint = API_URLS.GET.INVOICE_PDF(invoiceId);
+
+    const res = await fetch(endpoint, { credentials: 'include' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const blob = await res.blob();
+    // (no siempre viene type correcto, así que no lo validamos estrictamente)
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName || `invoice_${invoiceId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.error('Error al generar el PDF:', e);
+    alert("No s'ha pogut generar el PDF.");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = prevLabel || 'PDF';
+    }
+  }
+}
 
 export async function taulaFacturacioClients() {
   const isAdmin = await getIsAdmin();
@@ -56,15 +93,13 @@ export async function taulaFacturacioClients() {
     {
       header: 'PDF',
       field: 'id',
-      render: (_: unknown, row: Factura) => `<button type="button" class="btn-petit btn-secondari" onclick="generatePDF(${row.id})" id="pdfButton${row.id}">PDF</button>`,
-    },
-    {
-      header: 'Accions',
-      field: 'id',
-      render: (_: unknown, row: Factura) => `
-    <a href="https://${window.location.hostname}/gestio/viatges/modifica-viatge/${row.id}">
-      <button class="btn-petit">Modifica</button>
-    </a>`,
+      render: (_: unknown, row: Factura) =>
+        `<button type="button"
+                  class="btn-petit btn-secondari js-pdf"
+                  data-invoice-id="${row.id}"
+                  data-file-name="invoice_${row.id}-${row.yearInvoice}.pdf">
+            PDF
+         </button>`,
     },
   ];
 
@@ -72,15 +107,37 @@ export async function taulaFacturacioClients() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Factura) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/modifica-pelicula/${row.slug}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Factura) => `
+    <a href="https://${window.location.hostname}/gestio/comptabilitat/modifica-factura/${row.id}">
+      <button class="btn-petit">Modifica</button>
+    </a>`,
     });
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/accounting/get/?type=accounting-elliotfernandez-customers-invoices`,
+    url: API_URLS.GET.FACTURACIO_CLIENTS,
     containerId: 'taulaLlistatFactures',
     columns,
     filterKeys: ['clientEmpresa', 'clientCognoms'],
     filterByField: 'any',
+  });
+
+  const container = document.getElementById('taulaLlistatFactures');
+  container?.addEventListener('click', (ev) => {
+    const target = ev.target as HTMLElement;
+    const btn = target.closest<HTMLButtonElement>('.js-pdf');
+    if (!btn) return;
+
+    const idStr = btn.dataset.invoiceId;
+    const fname = btn.dataset.fileName || undefined;
+    if (!idStr) return;
+
+    const idNum = Number(idStr);
+    if (!Number.isInteger(idNum) || idNum <= 0) {
+      console.warn('Id de factura no vàlid:', idStr);
+      return;
+    }
+
+    generatePDF(idNum, fname);
   });
 }

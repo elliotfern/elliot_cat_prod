@@ -1,5 +1,6 @@
 import { getPageType } from '../../utils/urlPath';
 import { formClient } from './formClient';
+import { formFacturaClient } from './formFacturaClient';
 import { taulaFacturacioClients } from './taulaFacturacioClients';
 import { taulaLlistatClients } from './taulaLlistatClients';
 
@@ -10,6 +11,10 @@ export function comptabilitat() {
 
   if (pageType[2] === 'facturacio-clients') {
     taulaFacturacioClients();
+  } else if (pageType[2] === 'nova-factura') {
+    formFacturaClient(false);
+  } else if (pageType[2] === 'modifica-factura') {
+    formFacturaClient(true, id);
   } else if (pageType[2] === 'llistat-clients') {
     taulaLlistatClients();
   } else if (pageType[2] === 'nou-client') {
