@@ -5,8 +5,8 @@ use PHPMailer\PHPMailer\Exception as MailException;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 
-$slug = isset($routeParams[0]) ? (int)$routeParams[0] : 0;
-$idInvoice = isset($routeParams[1]) ? (int)$routeParams[0] : 0;
+$slug =  isset($routeParams[0]) ? (string)$routeParams[0] : '';
+$idInvoice = isset($routeParams[1]) && ctype_digit((string)$routeParams[1]) ? (int)$routeParams[1] : 0;
 $lang = strtolower($routeParams[2] ?? 'ca');
 
 /* -----------------------------------------------------------
@@ -323,8 +323,6 @@ function generateInvoicePdfBinary(array $obj, array $arr2, array $T): string
 
 // /api/comptabilitat/pdf/invoice-pdf/{id}/{lang}
 if ($slug === 'invoice-pdf') {
-  $idInvoice = isset($routeParams[0]) ? (int)$routeParams[0] : 0;
-  $lang = strtolower($routeParams[1] ?? 'ca');
 
   try {
     $T = i18nInvoice($lang);
@@ -346,8 +344,6 @@ if ($slug === 'invoice-pdf') {
 
 // /api/comptabilitat/send/invoice-email/{id}/{lang}
 if ($slug === 'invoice-email') {
-  $idInvoice = isset($routeParams[0]) ? (int)$routeParams[0] : 0;
-  $lang = strtolower($routeParams[1] ?? 'ca');
 
   try {
     $T = i18nInvoice($lang);
@@ -431,20 +427,11 @@ if ($slug === 'invoice-email') {
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Habilitar encriptación TLS
     $mail->Port       = 587; // Puerto SMTP para TLS
 
-    // Config SMTP si procede:
-    // $mail->isSMTP();
-    // $mail->Host = 'smtp.tu-dominio.com';
-    // $mail->SMTPAuth = true;
-    // $mail->Username = 'user';
-    // $mail->Password = 'pass';
-    // $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    // $mail->Port = 587;
-
-    $mail->setFrom('invoices@elliot.cat', 'HispanTIC');
-    $mail->addAddress($clientEmail, $nomClient ?: $empresa);
-    // $mail->addBCC('admin@elliot.cat'); // opcional
-    $mail->setFrom('invoices@elliot.cat', 'HispanTIC');
-    $mail->addAddress($clientEmail, $nomClient ?: $empresa);
+    $mail->setFrom('elliot@hispantic.com', 'Elliot Fernandez - HispanTIC');
+    //$mail->addAddress($clientEmail, $nomClient ?: $empresa);
+    $mail->addAddress('elliot@hispantic.com');
+    $mail->addReplyTo('elliot@hispantic.com', 'Elliot Fernandez - HispanTIC');
+    $mail->addBCC('elliot@hispantic.com', 'Arxiu Factures');
 
     $mail->isHTML(true);
     $mail->Subject = $subject;

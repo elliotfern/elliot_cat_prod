@@ -150,7 +150,7 @@ export async function taulaFacturacioClients() {
       header: 'Enviar email',
       field: 'id',
       render: (_: unknown, row: Factura) =>
-        `<div class="d-flex flex-wrap gap-2" aria-label="Enviar factura per email">
+        `<div class="btn-group separat" role="group" aria-label="Enviar factura per email">
       <button type="button" class="btn-petit btn-secondari js-send"
               data-invoice-id="${row.id}" data-lang="ca">Enviar (català)</button>
       <button type="button" class="btn-petit btn-secondari js-send"
