@@ -6,9 +6,9 @@ type JSONObject = Record<string, unknown>;
 
 // === Config ===
 const API_URLS = {
-  INVOICE_BY_ID: (id: string | number) => `${API_BASE}/api/comptabilitat/get/facturaId?id=${id}`, // GET
-  INVOICE_LINES: (id: string | number) => `${API_BASE}/api/comptabilitat/get/detallsFacturaClientId=${id}`, // GET
-  DELETE_LINE: (id: string | number) => `${API_BASE}/api/comptabilitat/${id}`, // DELETE
+  INVOICE_BY_ID: (id: string | number) => `${API_BASE}/comptabilitat/get/facturaId?id=${id}`, // GET
+  INVOICE_LINES: (id: string | number) => `${API_BASE}/comptabilitat/get/detallsFacturaClientId=${id}`, // GET
+  DELETE_LINE: (id: string | number) => `${API_BASE}/comptabilitat/${id}`, // DELETE
 };
 
 // URL para editar línea (ajusta a tu patrón real)
