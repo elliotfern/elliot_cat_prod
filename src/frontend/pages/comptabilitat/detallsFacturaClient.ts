@@ -13,7 +13,7 @@ const API_URLS = {
 
 // URL para editar línea (ajusta a tu patrón real)
 const MOD_URLS = {
-  EDIT_LINE: (invoiceId: string | number, lineId: string | number) => `${DOMAIN_WEB}/gestio/comptabilitat/modifica-factura-productes/${lineId}`,
+  EDIT_LINE: (invoiceId: string | number, lineId: string | number) => `${DOMAIN_WEB}/gestio/comptabilitat/modifica-producte-factura/${lineId}`,
 };
 
 // URL alta de producto (ajusta si prefieres path param)

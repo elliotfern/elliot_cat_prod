@@ -248,7 +248,7 @@ if ($slug === 'clients') {
     try {
 
         $params = [':id' => $id];
-        $result = $db->getData($query, $params, true);
+        $result = $db->getData($query, $params, false);
 
         if (empty($result)) {
             Response::error(

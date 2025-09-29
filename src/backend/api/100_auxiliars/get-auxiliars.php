@@ -868,7 +868,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "facturesClients") {
 
     $sql = <<<SQL
-            SELECT c.id, c.facConcepte
+            SELECT c.id, CONCAT(c.id, ' - ', c.facConcepte) AS facConcepte
             FROM %s AS c
             ORDER BY c.id DESC
             SQL;
