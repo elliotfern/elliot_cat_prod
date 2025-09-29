@@ -2,6 +2,7 @@ import { getPageType } from '../../utils/urlPath';
 import { detallsFacturaClients } from './detallsFacturaClient';
 import { formClient } from './formClient';
 import { formFacturaClient } from './formFacturaClient';
+import { formFacturaProducte } from './formFacturaProducte';
 import { taulaFacturacioClients } from './taulaFacturacioClients';
 import { taulaLlistatClients } from './taulaLlistatClients';
 
@@ -18,6 +19,10 @@ export function comptabilitat() {
     formFacturaClient(true, id);
   } else if (pageType[2] === 'fitxa-factura-client') {
     detallsFacturaClients();
+  } else if (pageType[2] === 'nova-factura-producte') {
+    formFacturaProducte(false);
+  } else if (pageType[2] === 'modifica-factura-producte') {
+    formFacturaProducte(true, id);
   } else if (pageType[2] === 'llistat-clients') {
     taulaLlistatClients();
   } else if (pageType[2] === 'nou-client') {

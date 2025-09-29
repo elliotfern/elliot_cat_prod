@@ -17,7 +17,7 @@ const MOD_URLS = {
 };
 
 // URL alta de producto (ajusta si prefieres path param)
-const NEW_PRODUCT_URL = `${API_BASE}/gestio/comptabilitat/nou-producte-factura`;
+const NEW_PRODUCT_URL = `${DOMAIN_WEB}/gestio/comptabilitat/nou-producte-factura`;
 
 // === Tipos ===
 interface ApiResponse<T> {

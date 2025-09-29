@@ -18,13 +18,41 @@
         <div class="row g-3">
             <input type="hidden" id="id" name="id" />
 
+            <div class="col-md-4">
+                <label for="idUser">Factura:</label>
+                <select class="form-select" name="factura_id" id="factura_id">
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="idUser">Producte:</label>
+                <select class="form-select" name="producte_id" id="producte_id">
+                </select>
+            </div>
+
+            <div class="col-md-4">
+            </div>
+
+            <div class="col-md-4">
+                <label for="facConcepte">Notes</label>
+                <input class="form-control" type="text" name="notes" id="notes" />
+            </div>
+
+            <div class="col-md-4">
+                <label for="facConcepte">Preu</label>
+                <input class="form-control" type="text" name="preu" id="preu" />
+            </div>
+
+            <div class="col-md-4">
+            </div>
+
             <div class="container" style="margin-top:25px">
                 <div class="row">
                     <div class="col-6 text-left">
 
                     </div>
                     <div class="col-6 text-right derecha">
-                        <button type="submit" class="btn btn-primary" id="btnFactura">Introduir dades</button>
+                        <button type="submit" class="btn btn-primary" id="btnFacturaProducte">Introduir dades</button>
                     </div>
                 </div>
             </div>

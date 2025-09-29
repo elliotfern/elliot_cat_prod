@@ -862,6 +862,90 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             500
         );
     }
+
+    // Llistat Factures clients
+    // ruta GET => "/api/cinema/get/auxiliars/facturesClients"
+} else if ($slug === "facturesClients") {
+
+    $sql = <<<SQL
+            SELECT c.id, c.facConcepte
+            FROM %s AS c
+            ORDER BY c.id DESC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat Factures productes
+    // ruta GET => "/api/cinema/get/auxiliars/productes"
+} else if ($slug === "productes") {
+
+    $sql = <<<SQL
+            SELECT c.id, c.producte
+            FROM %s AS c
+            ORDER BY c.producte ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
