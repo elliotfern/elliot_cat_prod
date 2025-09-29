@@ -271,6 +271,53 @@ if ($slug === 'clients') {
             500
         );
     }
+
+    // GET : Llistat productes associats a factura
+    // ruta => "https://elliot.cat/api/comptabilitat/get/detallsFacturaProducteId?id=1"
+} else if ($slug === 'detallsFacturaProducteId') {
+    $id = $_GET['id'];
+
+    $sql = <<<SQL
+                SELECT p.id, p.factura_id, pd.producte, p.notes, p.preu
+                        FROM %s AS p
+                        LEFT JOIN %s AS pd ON pd.id = p.producte_id
+                        WHERE p.id = :id
+                        GROUP BY p.id
+                        ORDER BY p.preu DESC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
+    );
+
+    try {
+
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, false);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else if (isset($_GET['type']) && $_GET['type'] == 'accounting-elliotfernandez-supplies-invoices') {
     global $conn;
     $data = array();

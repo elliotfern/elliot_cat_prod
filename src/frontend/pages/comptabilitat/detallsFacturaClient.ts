@@ -186,7 +186,7 @@ function renderProducts(container: HTMLElement, invoiceId: number, lines: Invoic
       <td class="align-middle text-end">
         <a class="btn btn-sm btn-outline-primary me-2 js-edit"
            href="${escHtml(MOD_URLS.EDIT_LINE(invoiceId, l.id))}"
-           target="_blank" rel="noopener">Modifica</a>
+           rel="noopener">Modifica</a>
         <button class="btn btn-sm btn-outline-danger js-delete" type="button">Eliminar</button>
       </td>
     </tr>
