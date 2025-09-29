@@ -17,7 +17,7 @@ const MOD_URLS = {
 };
 
 // URL alta de producto (ajusta si prefieres path param)
-const NEW_PRODUCT_URL = (invoiceId: number | string) => `${API_BASE}/gestio/comptabilitat/nou-producte-factura`;
+const NEW_PRODUCT_URL = `${API_BASE}/gestio/comptabilitat/nou-producte-factura`;
 
 // === Tipos ===
 interface ApiResponse<T> {
@@ -160,9 +160,10 @@ function renderInvoiceAmounts(container: HTMLElement, inv: Invoice): void {
 // === Render: Taula de productes ===
 function renderProducts(container: HTMLElement, invoiceId: number, lines: InvoiceLine[]): void {
   const addBtnHTML = `
-    <div class="mb-3">
+    <hr>
+    <div class="mb-3" style="margin-top:35px">
       <a class="button btn-gran btn-secondari"
-         href="${escHtml(NEW_PRODUCT_URL)}">Afegir producte</a>
+         href="${NEW_PRODUCT_URL}">Afegir producte</a>
     </div>
   `;
 
