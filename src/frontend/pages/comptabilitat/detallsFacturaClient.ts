@@ -16,36 +16,43 @@ const MOD_URLS = {
   EDIT_LINE: (invoiceId: string | number, lineId: string | number) => `${DOMAIN_WEB}/gestio/comptabilitat/modifica-factura-productes/${lineId}`,
 };
 
-// === Tipos (basados en tu payload) ===
+// === Tipos ===
+interface ApiResponse<T> {
+  status: 'success' | 'error' | string;
+  message?: string;
+  errors?: unknown[];
+  data: T;
+}
+
 interface Invoice {
-  id: number; // ic.id
-  idUser: number; // ic.idUser
-  facConcepte: string; // ic.facConcepte
-  facData: string; // ic.facData
-  yearInvoice: number; // YEAR(ic.facData)
-  any: string; // "Any 2025"
-  facDueDate: string | null; // ic.facDueDate
-  facSubtotal: number; // ic.facSubtotal
-  facFees: number; // ic.facFees
-  facTotal: number; // ic.facTotal
-  facVAT: number; // ic.facVAT
-  facIva: number; // ic.facIva
-  facEstat: string; // ic.facEstat
-  facPaymentType: string; // ic.facPaymentType
-  ivaPercen: number; // vt.ivaPercen
-  estat: string; // ist.estat
-  tipusNom: string; // pt.tipusNom
-  clientNom: string | null; // c.clientNom
-  clientCognoms: string | null; // c.clientCognoms
-  clientEmpresa: string | null; // c.clientEmpresa
+  id: number;
+  idUser: number;
+  facConcepte: string;
+  facData: string;
+  yearInvoice: number;
+  any: string;
+  facDueDate: string | null;
+  facSubtotal: number;
+  facFees: number;
+  facTotal: number;
+  facVAT: number; // importe del IVA (en tu ejemplo: 0)
+  facIva: number; // no lo uso para importe
+  facEstat: number | string;
+  facPaymentType: number | string;
+  ivaPercen: number; // porcentaje %
+  estat?: string; // “Completed” en tu ejemplo
+  tipusNom?: string; // nombre del método de pago
+  clientNom: string | null;
+  clientCognoms: string | null;
+  clientEmpresa: string | null;
 }
 
 interface InvoiceLine {
-  id: number; // p.id
-  factura_id: number; // p.factura_id
-  producte: string; // pd.producte
-  notes: string | null; // p.notes
-  preu: number; // p.preu
+  id: number;
+  factura_id: number;
+  producte: string;
+  notes: string | null;
+  preu: number;
 }
 
 // === Helpers ===
@@ -84,7 +91,16 @@ async function fetchJSON<T = JSONObject>(url: string, init?: RequestInit): Promi
   return res.json() as Promise<T>;
 }
 
-// === Render: Cabecera y montos ===
+// Desenvuelve {status, data}
+async function fetchApiData<T>(url: string, init?: RequestInit): Promise<T> {
+  const json = await fetchJSON<ApiResponse<T>>(url, init);
+  if (json.status !== 'success') {
+    throw new Error(json.message || 'Error API');
+  }
+  return json.data;
+}
+
+// === Render: Capçalera i imports ===
 function renderInvoiceHeader(container: HTMLElement, inv: Invoice): void {
   const client = inv.clientEmpresa && inv.clientEmpresa.trim() ? `<strong>${escHtml(inv.clientEmpresa)}</strong>` : [inv.clientNom, inv.clientCognoms].filter(Boolean).map(escHtml).join(' ') || '—';
 
@@ -99,12 +115,11 @@ function renderInvoiceHeader(container: HTMLElement, inv: Invoice): void {
           <span class="d-block"><strong>Venciment:</strong> ${formatDate(inv.facDueDate)}</span>
         </div>
         <div class="col">
-          <span class="d-block"><strong>Estat:</strong> ${escHtml(inv.estat || inv.facEstat || '—')}</span>
-          <span class="d-block"><strong>Pagament:</strong> ${escHtml(inv.facPaymentType || '—')}</span>
+          <span class="d-block"><strong>Estat:</strong> ${escHtml(inv.estat || String(inv.facEstat) || '—')}</span>
+          <span class="d-block"><strong>Pagament:</strong> ${escHtml(inv.tipusNom || String(inv.facPaymentType) || '—')}</span>
         </div>
         <div class="col">
-          <span class="d-block"><strong>Tipus:</strong> ${escHtml(inv.tipusNom || '—')}</span>
-          <span class="d-block"><strong>IVA:</strong> ${escHtml(String(inv.ivaPercen ?? '—'))}%</span>
+          <span class="d-block"><strong>IVA %:</strong> ${escHtml(String(inv.ivaPercen ?? '—'))}%</span>
         </div>
       </div>
     </div>
@@ -112,6 +127,9 @@ function renderInvoiceHeader(container: HTMLElement, inv: Invoice): void {
 }
 
 function renderInvoiceAmounts(container: HTMLElement, inv: Invoice): void {
+  // Usa facVAT si está; si no, calcula por porcentaje
+  const vatAmount = typeof inv.facVAT === 'number' && !Number.isNaN(inv.facVAT) ? inv.facVAT : typeof inv.ivaPercen === 'number' && !Number.isNaN(inv.ivaPercen) ? inv.facSubtotal * (inv.ivaPercen / 100) : 0;
+
   container.innerHTML = `
     <div class="card p-3 shadow-sm">
       <div class="row">
@@ -125,7 +143,7 @@ function renderInvoiceAmounts(container: HTMLElement, inv: Invoice): void {
         </div>
         <div class="col">
           <div><strong>IVA</strong></div>
-          <div>${formatEUR(inv.facIva ?? inv.facVAT ?? 0)}</div>
+          <div>${formatEUR(vatAmount)}</div>
         </div>
         <div class="col">
           <div><strong>Total</strong></div>
@@ -136,7 +154,7 @@ function renderInvoiceAmounts(container: HTMLElement, inv: Invoice): void {
   `;
 }
 
-// === Render: Tabla de productos ===
+// === Render: Taula de productes ===
 function renderProducts(container: HTMLElement, invoiceId: number, lines: InvoiceLine[]): void {
   if (!lines.length) {
     container.innerHTML = `
@@ -182,7 +200,6 @@ function renderProducts(container: HTMLElement, invoiceId: number, lines: Invoic
     </div>
   `;
 
-  // Delegación para eliminar
   const tbody = container.querySelector('tbody');
   if (!tbody) return;
 
@@ -211,7 +228,6 @@ function renderProducts(container: HTMLElement, invoiceId: number, lines: Invoic
       }
     } catch (e) {
       window.alert('No s’ha pogut eliminar la línia. Torna-ho a intentar.');
-      // eslint-disable-next-line no-console
       console.error(e);
       btn.disabled = false;
       btn.textContent = 'Eliminar';
@@ -219,31 +235,30 @@ function renderProducts(container: HTMLElement, invoiceId: number, lines: Invoic
   });
 }
 
-// === API calls específicas ===
+// === API calls ===
 async function getInvoice(id: string | number): Promise<Invoice> {
-  return fetchJSON<Invoice>(API_URLS.INVOICE_BY_ID(id));
+  return fetchApiData<Invoice>(API_URLS.INVOICE_BY_ID(id));
 }
 
 async function getInvoiceLines(id: string | number): Promise<InvoiceLine[]> {
-  return fetchJSON<InvoiceLine[]>(API_URLS.INVOICE_LINES(id));
+  const data = await fetchApiData<InvoiceLine | InvoiceLine[]>(API_URLS.INVOICE_LINES(id));
+  return Array.isArray(data) ? data : data ? [data] : [];
 }
 
 async function deleteLine(lineId: string | number): Promise<void> {
-  await fetchJSON<void>(API_URLS.DELETE_LINE(lineId), { method: 'DELETE' });
+  await fetchApiData<unknown>(API_URLS.DELETE_LINE(lineId), { method: 'DELETE' });
 }
 
-// === Init principal ===
+// === Init ===
 export async function detallsFacturaClients(rootSelector = '#invoiceRoot'): Promise<void> {
   const root = document.querySelector<HTMLElement>(rootSelector);
   if (!root) {
-    // eslint-disable-next-line no-console
     console.warn(`[detallsFacturaClients] No existe ${rootSelector}`);
     return;
   }
 
   const invoiceId = root.dataset.invoiceId;
   if (!invoiceId) {
-    // eslint-disable-next-line no-console
     console.error('[detallsFacturaClients] Falta data-invoice-id en #invoiceRoot');
     return;
   }
@@ -253,12 +268,10 @@ export async function detallsFacturaClients(rootSelector = '#invoiceRoot'): Prom
   const productsEl = document.getElementById('invoiceProducts');
 
   if (!headerEl || !amountsEl || !productsEl) {
-    // eslint-disable-next-line no-console
-    console.error('[detallsFacturaClients] Faltan contenedores #invoiceHeader/#invoiceAmounts/#invoiceProducts');
+    console.error('[detallsFacturaClients] Falten contenedors #invoiceHeader/#invoiceAmounts/#invoiceProducts');
     return;
   }
 
-  // Loading states:
   headerEl.innerHTML = `<div class="placeholder-glow"><span class="placeholder col-6"></span></div>`;
   amountsEl.innerHTML = `<div class="placeholder-glow"><span class="placeholder col-3"></span></div>`;
   productsEl.innerHTML = `<div class="placeholder-glow"><span class="placeholder col-12"></span></div>`;
@@ -270,7 +283,6 @@ export async function detallsFacturaClients(rootSelector = '#invoiceRoot'): Prom
     renderInvoiceAmounts(amountsEl, invoice);
     renderProducts(productsEl, invoice.id, lines);
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     headerEl.innerHTML = '';
     amountsEl.innerHTML = '';
@@ -281,9 +293,3 @@ export async function detallsFacturaClients(rootSelector = '#invoiceRoot'): Prom
     `;
   }
 }
-
-// Auto-init (opcional)
-document.addEventListener('DOMContentLoaded', () => {
-  const root = document.querySelector('#invoiceRoot');
-  if (root) void detallsFacturaClients('#invoiceRoot');
-});
