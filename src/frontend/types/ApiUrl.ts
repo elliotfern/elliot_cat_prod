@@ -39,6 +39,7 @@ export type ApiUrls = {
     CLIENT: string;
     FACTURA_CLIENT: string;
     FACTURA_CLIENT_PRODUCTE: string;
+    ENVIAR_FACTURA_EMAIL: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => string;
   };
   PUT: {
     PERFIL_CV: string;

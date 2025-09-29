@@ -19,6 +19,7 @@
         margin-left: 0 !important;
         /* anula el -1px típico */
         margin-right: .5rem;
+        margin-bottom: 0.3rem;
     }
 
     .btn-group.separat>.btn-petit:last-child {

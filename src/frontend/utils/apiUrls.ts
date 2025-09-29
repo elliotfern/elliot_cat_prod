@@ -37,6 +37,8 @@ export const ENDPOINTS = {
   FACTURA_CLIENT: 'facturaClient',
   FACTURA_CLIENT_PRODUCTE_ID: 'detallsFacturaProducteId',
   FACTURA_CLIENT_PRODUCTE: 'detallsFacturaClientProducte',
+  ENVIAR_FACTURA_EMAIL: 'enviarFacturaEmail',
+  ENVIAR_FACTURA: 'invoice-email',
 } as const;
 
 // Mapa de recursos disponibles
@@ -97,6 +99,7 @@ export const API_URLS: ApiUrls = {
     CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.CLIENTS}`,
     FACTURA_CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.FACTURA_CLIENT}`,
     FACTURA_CLIENT_PRODUCTE: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE}`,
+    ENVIAR_FACTURA_EMAIL: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PDF}/${ENDPOINTS.ENVIAR_FACTURA}/${encodeURIComponent(id)}/${encodeURIComponent(lang)}`,
   },
 
   PUT: {

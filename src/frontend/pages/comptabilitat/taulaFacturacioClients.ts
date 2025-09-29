@@ -43,6 +43,36 @@ async function generatePDF(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'it', f
   }
 }
 
+async function sendInvoiceEmail(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'it', btn?: HTMLButtonElement | null) {
+  const prev = btn?.textContent;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Enviant…';
+  }
+
+  try {
+    const endpoint = API_URLS.POST.ENVIAR_FACTURA_EMAIL(invoiceId, lang);
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (json?.status !== 'success') throw new Error(json?.message || 'Error API');
+
+    alert('Enviat correctament ✅');
+  } catch (e) {
+    console.error('Error enviant el correu:', e);
+    alert("No s'ha pogut enviar el correu.");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = prev || 'Enviar';
+    }
+  }
+}
+
 export async function taulaFacturacioClients() {
   const isAdmin = await getIsAdmin();
 
@@ -115,6 +145,23 @@ export async function taulaFacturacioClients() {
     </div>
   `,
     },
+
+    {
+      header: 'Enviar email',
+      field: 'id',
+      render: (_: unknown, row: Factura) =>
+        `<div class="d-flex flex-wrap gap-2" aria-label="Enviar factura per email">
+      <button type="button" class="btn-petit btn-secondari js-send"
+              data-invoice-id="${row.id}" data-lang="ca">Enviar (català)</button>
+      <button type="button" class="btn-petit btn-secondari js-send"
+              data-invoice-id="${row.id}" data-lang="es">Enviar (castellà)</button>
+      <button type="button" class="btn-petit btn-secondari js-send"
+              data-invoice-id="${row.id}" data-lang="en">Enviar (anglès)</button>
+      <button type="button" class="btn-petit btn-secondari js-send"
+              data-invoice-id="${row.id}" data-lang="it">Enviar (italià)</button>
+    </div>
+  `,
+    },
   ];
 
   if (isAdmin) {
@@ -139,20 +186,29 @@ export async function taulaFacturacioClients() {
   const container = document.getElementById('taulaLlistatFactures');
   container?.addEventListener('click', (ev) => {
     const target = ev.target as HTMLElement;
-    const btn = target.closest<HTMLButtonElement>('.js-pdf');
-    if (!btn) return;
-
-    const idStr = btn.dataset.invoiceId;
-    const lang = (btn.dataset.lang || '').toLowerCase() as 'ca' | 'es' | 'en' | 'it';
-    const fname = btn.dataset.fileName || undefined;
-    if (!idStr || !lang || !['ca', 'es', 'en', 'it'].includes(lang)) return;
-
-    const idNum = Number(idStr);
-    if (!Number.isInteger(idNum) || idNum <= 0) {
-      console.warn('Id de factura no vàlid:', idStr);
+    // Descargar PDF
+    const btnPdf = target.closest<HTMLButtonElement>('.js-pdf');
+    if (btnPdf) {
+      const idStr = btnPdf.dataset.invoiceId;
+      const lang = (btnPdf.dataset.lang || '').toLowerCase() as 'ca' | 'es' | 'en' | 'it';
+      const fname = btnPdf.dataset.fileName || undefined;
+      if (!idStr || !['ca', 'es', 'en', 'it'].includes(lang)) return;
+      const idNum = Number(idStr);
+      if (!Number.isInteger(idNum) || idNum <= 0) return;
+      void generatePDF(idNum, lang, fname, btnPdf);
       return;
     }
 
-    void generatePDF(idNum, lang, fname, btn);
+    // Enviar por email
+    const btnSend = target.closest<HTMLButtonElement>('.js-send');
+    if (btnSend) {
+      const idStr = btnSend.dataset.invoiceId;
+      const lang = (btnSend.dataset.lang || '').toLowerCase() as 'ca' | 'es' | 'en' | 'it';
+      if (!idStr || !['ca', 'es', 'en', 'it'].includes(lang)) return;
+      const idNum = Number(idStr);
+      if (!Number.isInteger(idNum) || idNum <= 0) return;
+      void sendInvoiceEmail(idNum, lang, btnSend);
+      return;
+    }
   });
 }
