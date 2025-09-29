@@ -19,9 +19,9 @@ export function comptabilitat() {
     formFacturaClient(true, id);
   } else if (pageType[2] === 'fitxa-factura-client') {
     detallsFacturaClients();
-  } else if (pageType[2] === 'nova-factura-producte') {
+  } else if (pageType[2] === 'nou-producte-factura') {
     formFacturaProducte(false);
-  } else if (pageType[2] === 'modifica-factura-producte') {
+  } else if (pageType[2] === 'modifica-producte-factura') {
     formFacturaProducte(true, id);
   } else if (pageType[2] === 'llistat-clients') {
     taulaLlistatClients();
