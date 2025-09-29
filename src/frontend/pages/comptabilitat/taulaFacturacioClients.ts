@@ -83,7 +83,7 @@ export async function taulaFacturacioClients() {
       header: 'PDF',
       field: 'id',
       render: (_: unknown, row: Factura) =>
-        `<div class="btn-group" role="group" aria-label="Descarregar PDF">
+        `<div class="btn-group separat" role="group" aria-label="Descarregar PDF">
       <button type="button"
               class="btn-petit btn-secondari js-pdf"
               data-invoice-id="${row.id}"

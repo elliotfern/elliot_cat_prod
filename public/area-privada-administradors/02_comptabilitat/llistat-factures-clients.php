@@ -12,3 +12,16 @@
         </div>
     </main>
 </div>
+
+<style>
+    /* separa los botones dentro del btn-group */
+    .btn-group.separat>.btn-petit {
+        margin-left: 0 !important;
+        /* anula el -1px típico */
+        margin-right: .5rem;
+    }
+
+    .btn-group.separat>.btn-petit:last-child {
+        margin-right: 0;
+    }
+</style>
