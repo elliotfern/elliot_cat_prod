@@ -10,9 +10,8 @@ import { DOMAIN_WEB } from '../../utils/urls';
 const url = window.location.href;
 const pageType = getPageType(url);
 
-// 👉 Generador PDF (tipado y con estados de botón)
-async function generatePDF(invoiceId: number, fileName?: string) {
-  const btn = document.querySelector<HTMLButtonElement>(`.js-pdf[data-invoice-id="${CSS?.escape ? CSS.escape(String(invoiceId)) : String(invoiceId)}"]`);
+// 👉 Generador PDF por idioma
+async function generatePDF(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'it', fileName?: string, btn?: HTMLButtonElement | null) {
   const prevLabel = btn?.textContent;
   if (btn) {
     btn.disabled = true;
@@ -20,17 +19,15 @@ async function generatePDF(invoiceId: number, fileName?: string) {
   }
 
   try {
-    const endpoint = API_URLS.GET.INVOICE_PDF(invoiceId);
-
+    const endpoint = API_URLS.GET.INVOICE_PDF(invoiceId, lang);
     const res = await fetch(endpoint, { credentials: 'include' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const blob = await res.blob();
-    // (no siempre viene type correcto, así que no lo validamos estrictamente)
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = fileName || `invoice_${invoiceId}.pdf`;
+    a.download = fileName || `invoice_${invoiceId}_${lang}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -86,12 +83,37 @@ export async function taulaFacturacioClients() {
       header: 'PDF',
       field: 'id',
       render: (_: unknown, row: Factura) =>
-        `<button type="button"
-                  class="btn-petit btn-secondari js-pdf"
-                  data-invoice-id="${row.id}"
-                  data-file-name="invoice_${row.id}-${row.yearInvoice}.pdf">
-            PDF
-         </button>`,
+        `<div class="btn-group" role="group" aria-label="Descarregar PDF">
+      <button type="button"
+              class="btn-petit btn-secondari js-pdf"
+              data-invoice-id="${row.id}"
+              data-lang="ca"
+              data-file-name="invoice_${row.id}-${row.yearInvoice}_ca.pdf">
+        PDF (català)
+      </button>
+      <button type="button"
+              class="btn-petit btn-secondari js-pdf"
+              data-invoice-id="${row.id}"
+              data-lang="es"
+              data-file-name="invoice_${row.id}-${row.yearInvoice}_es.pdf">
+        PDF (castellà)
+      </button>
+      <button type="button"
+              class="btn-petit btn-secondari js-pdf"
+              data-invoice-id="${row.id}"
+              data-lang="en"
+              data-file-name="invoice_${row.id}-${row.yearInvoice}_en.pdf">
+        PDF (anglès)
+      </button>
+      <button type="button"
+              class="btn-petit btn-secondari js-pdf"
+              data-invoice-id="${row.id}"
+              data-lang="it"
+              data-file-name="invoice_${row.id}-${row.yearInvoice}_it.pdf">
+        PDF (italià)
+      </button>
+    </div>
+  `,
     },
   ];
 
@@ -121,8 +143,9 @@ export async function taulaFacturacioClients() {
     if (!btn) return;
 
     const idStr = btn.dataset.invoiceId;
+    const lang = (btn.dataset.lang || '').toLowerCase() as 'ca' | 'es' | 'en' | 'it';
     const fname = btn.dataset.fileName || undefined;
-    if (!idStr) return;
+    if (!idStr || !lang || !['ca', 'es', 'en', 'it'].includes(lang)) return;
 
     const idNum = Number(idStr);
     if (!Number.isInteger(idNum) || idNum <= 0) {
@@ -130,6 +153,6 @@ export async function taulaFacturacioClients() {
       return;
     }
 
-    generatePDF(idNum, fname);
+    void generatePDF(idNum, lang, fname, btn);
   });
 }
