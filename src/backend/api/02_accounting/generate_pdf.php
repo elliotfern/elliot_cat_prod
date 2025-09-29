@@ -174,12 +174,12 @@ $arr2 = is_array($arr2) ? $arr2 : [$arr2]; // Si no és un array, es converteix 
 
 foreach ($arr2 as $obj2) {
   $html .= '<tr>
-                    <td style="padding: 5px; border: 1px solid black;">' . $obj2['product'] . ' ';
+                    <td style="padding: 5px; border: 1px solid black;">' . $obj2['producte'] . ' ';
   if (!empty($obj2['notes'])) {
     $html .= '(' . $obj2['notes'] . ')';
   }
   $html .= '</td>
-                    <td style="padding: 5px; border: 1px solid black;">€' . number_format($obj2['price'], 2, '.', ',') . '</td>
+                    <td style="padding: 5px; border: 1px solid black;">€' . number_format($obj2['preu'], 2, '.', ',') . '</td>
                </tr>';
 }
 

@@ -104,6 +104,24 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    APP_GESTIO . $url['comptabilitat'] . '/nou-producte-factura' => [
+        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-producte.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['comptabilitat'] . '/modifica-producte-factura/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-producte.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     // 04. Base de dades persones
     APP_GESTIO . $url['persones'] => [
         'view' =>  APP_INTRANET_DIR . APP_PERSONES_DIR . 'index.php',

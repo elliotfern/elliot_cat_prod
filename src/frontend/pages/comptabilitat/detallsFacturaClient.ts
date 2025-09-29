@@ -16,6 +16,9 @@ const MOD_URLS = {
   EDIT_LINE: (invoiceId: string | number, lineId: string | number) => `${DOMAIN_WEB}/gestio/comptabilitat/modifica-factura-productes/${lineId}`,
 };
 
+// URL alta de producto (ajusta si prefieres path param)
+const NEW_PRODUCT_URL = (invoiceId: number | string) => `${API_BASE}/gestio/comptabilitat/nou-producte-factura`;
+
 // === Tipos ===
 interface ApiResponse<T> {
   status: 'success' | 'error' | string;
@@ -156,8 +159,16 @@ function renderInvoiceAmounts(container: HTMLElement, inv: Invoice): void {
 
 // === Render: Taula de productes ===
 function renderProducts(container: HTMLElement, invoiceId: number, lines: InvoiceLine[]): void {
+  const addBtnHTML = `
+    <div class="mb-3">
+      <a class="button btn-gran btn-secondari"
+         href="${escHtml(NEW_PRODUCT_URL)}">Afegir producte</a>
+    </div>
+  `;
+
   if (!lines.length) {
     container.innerHTML = `
+      ${addBtnHTML}
       <div class="alert alert-info">Aquesta factura no té línies de producte.</div>
       <div class="table-responsive"></div>
     `;
@@ -183,6 +194,7 @@ function renderProducts(container: HTMLElement, invoiceId: number, lines: Invoic
     .join('');
 
   container.innerHTML = `
+    ${addBtnHTML}
     <div class="table-responsive">
       <table class="table table-sm table-striped align-middle">
         <thead>
@@ -221,7 +233,9 @@ function renderProducts(container: HTMLElement, invoiceId: number, lines: Invoic
       tr?.remove();
 
       if (!container.querySelector('tbody tr')) {
+        // si se borran todas, mostramos estado vacío con el botón
         container.innerHTML = `
+          ${addBtnHTML}
           <div class="alert alert-info">Aquesta factura no té línies de producte.</div>
           <div class="table-responsive"></div>
         `;
