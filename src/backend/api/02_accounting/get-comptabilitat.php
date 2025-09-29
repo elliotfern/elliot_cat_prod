@@ -224,32 +224,53 @@ if ($slug === 'clients') {
             500
         );
     }
-} else if (isset($_GET['type']) && $_GET['type'] == 'accounting-elliotfernandez-customers-invoices') {
-    global $conn;
-    $query = "SELECT ic.id, ic.idUser, ic.facConcepte, ic.facData, YEAR(ic.facData) AS yearInvoice, CONCAT('Any ', YEAR(ic.facData)) AS any, ic.facDueDate, ic.facSubtotal, ic.facFees, ic.facTotal, ic.facVAT, ic.facIva, ic.facEstat, ic.facPaymentType, vt.ivaPercen, ist.estat, pt.tipusNom, c.clientNom, c.clientCognoms, c.clientEmpresa
-                FROM db_accounting_soletrade_invoices_customers  AS ic
-                LEFT JOIN db_accounting_hispantic_vat_type AS vt ON ic.facIva = vt.id
-                LEFT JOIN db_accounting_hispantic_invoices_status AS ist ON ist.id = ic.facEstat
-                LEFT JOIN db_accounting_hispantic_payment_type AS pt ON ic.facPaymentType = pt.id
-                LEFT JOIN db_accounting_hispantic_costumers AS c ON ic.idUser = c.id
-                ORDER BY ic.id DESC";
 
-    $stmt = $conn->prepare($query);
+    // GET : Llistat productes associats client
+    // ruta => "https://elliot.cat/api/comptabilitat/get/detallsFacturaClientId?id=1"
+} else if ($slug === 'detallsFacturaClientId') {
+    $id = $_GET['id'];
 
-    // Ejecutar la consulta
-    $stmt->execute();
+    $sql = <<<SQL
+                SELECT p.id, p.factura_id, pd.producte, p.notes, p.preu
+                        FROM %s AS p
+                        LEFT JOIN %s AS pd ON pd.id = p.producte_id
+                        WHERE p.factura_id = :id
+                        GROUP BY p.id
+                        ORDER BY p.preu DESC
+            SQL;
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit();
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
+    );
+
+    try {
+
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    header('Content-Type: application/json');
-    echo json_encode($data);
 } else if (isset($_GET['type']) && $_GET['type'] == 'accounting-elliotfernandez-supplies-invoices') {
     global $conn;
     $data = array();
@@ -328,12 +349,12 @@ if ($slug === 'clients') {
     global $conn;
 
     $sql = <<<SQL
-                SELECT p.id, p.invoice, pd.product, p.notes, p.price
+                SELECT p.id, p.factura_id, pd.producte, p.notes, p.preu
                         FROM %s AS p
-                        LEFT JOIN %s AS pd ON pd.id = p.product
-                        WHERE p.invoice = :id
+                        LEFT JOIN %s AS pd ON pd.id = p.producte_id
+                        WHERE p.factura_id = :id
                         GROUP BY p.id
-                        ORDER BY p.price desc
+                        ORDER BY p.preu DESC
             SQL;
 
     $query = sprintf(

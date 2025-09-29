@@ -44,25 +44,25 @@
 
             <div class="col-md-4">
                 <label for="facSubtotal">Invoice Subtotal (without VAT):</label>
-                <input class="form-control" type="url" name="facSubtotal" id="facSubtotal" />
+                <input class="form-control" type="text" name="facSubtotal" id="facSubtotal" />
                 <label style="color:#dc3545;display:none" id="AutWikipediaCheck">* Missing data</label>
             </div>
 
             <div class="col-md-4">
                 <label for="facFees">Fees (STRIPE):</label>
-                <input class="form-control" type="url" name="facFees" id="facFees" />
+                <input class="form-control" type="text" name="facFees" id="facFees" />
                 <label style="color:#dc3545;display:none" id="AutWikipediaCheck">* Missing data</label>
             </div>
 
             <div class="col-md-4">
                 <label for="facTotal">Invoice total:</label>
-                <input class="form-control" type="url" name="facTotal" id="facTotal" />
+                <input class="form-control" type="text" name="facTotal" id="facTotal" />
                 <label style="color:#dc3545;display:none" id="AutWikipediaCheck">* Missing data</label>
             </div>
 
             <div class="col-md-4">
                 <label for="facVAT">VAT amount:</label>
-                <input class="form-control" type="url" name="facVAT" id="facVAT" />
+                <input class="form-control" type="text" name="facVAT" id="facVAT" />
                 <label style="color:#dc3545;display:none" id="AutWikipediaCheck">* Missing data</label>
             </div>
 

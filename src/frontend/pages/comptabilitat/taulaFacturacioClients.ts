@@ -5,6 +5,7 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Factura } from '../../types/Factura';
 import { API_URLS } from '../../utils/apiUrls';
+import { DOMAIN_WEB } from '../../utils/urls';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -47,21 +48,12 @@ async function generatePDF(invoiceId: number, fileName?: string) {
 
 export async function taulaFacturacioClients() {
   const isAdmin = await getIsAdmin();
-  let slug: string = '';
-  let gestioUrl: string = '';
-
-  if (isAdmin) {
-    slug = pageType[3];
-    gestioUrl = '/gestio';
-  } else {
-    slug = pageType[2];
-  }
 
   const columns: TaulaDinamica<Factura>[] = [
     {
       header: 'Num',
       field: 'yearInvoice',
-      render: (_: unknown, row: Factura) => `<a id="${row.id}" href="#">${row.id}/${row.yearInvoice}</a>`,
+      render: (_: unknown, row: Factura) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/comptabilitat/fitxa-factura-client/${row.id}">${row.id}/${row.yearInvoice}</a>`,
     },
     {
       header: 'Empresa',
