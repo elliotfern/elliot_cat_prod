@@ -268,6 +268,119 @@ if ($slug === 'clients') {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === 'detallsFacturaClientProducte') {
+
+    $inputData = file_get_contents('php://input');
+    $data = json_decode($inputData, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // Helpers
+    $trimOrNull = static function ($v): ?string {
+        if ($v === null) return null;
+        if (is_string($v)) {
+            $s = trim($v);
+            return ($s === '') ? null : $s;
+        }
+        $s = trim((string)$v);
+        return ($s === '') ? null : $s;
+    };
+    $toIntOrNull = static function ($v): ?int {
+        // acepta "106" o 106
+        if ($v === null) return null;
+        if (is_int($v)) return $v;
+        if (is_string($v) && preg_match('/^-?\d+$/', $v)) return (int)$v;
+        if (is_numeric($v)) return (int)$v;
+        return null;
+    };
+    // Normaliza precios: "1.234,56" o "1234.56" -> "1234.56"
+    $toDecimal = static function ($v): ?string {
+        if ($v === null) return null;
+        $s = is_string($v) ? trim($v) : trim((string)$v);
+        if ($s === '') return null;
+        $s = str_replace(["\u{00A0}", ' '], '', $s); // quita espacios y no-break space
+        // Si hay . y , suponemos . miles y , decimal
+        if (strpos($s, '.') !== false && strpos($s, ',') !== false) {
+            $s = str_replace('.', '', $s);
+            $s = str_replace(',', '.', $s);
+        } else {
+            // Solo comas -> decimal
+            if (strpos($s, ',') !== false && strpos($s, '.') === false) {
+                $s = str_replace(',', '.', $s);
+            }
+            // Solo puntos -> ya es decimal o entero
+        }
+        // admite hasta 4 decimales (ajusta si quieres 2 estrictos)
+        if (!preg_match('/^-?\d+(\.\d{1,4})?$/', $s)) return null;
+        return $s;
+    };
+
+    // Datos entrada
+    $facturaId  = $toIntOrNull($data['factura_id']  ?? null);
+    $producteId = $toIntOrNull($data['producte_id'] ?? null);
+    $notes      = $trimOrNull($data['notes']        ?? null);
+    $preuStr    = $trimOrNull($data['preu']         ?? null);
+    $preuNorm   = $toDecimal($data['preu']          ?? null); // guardaremos el normalizado
+
+    // Validación
+    $errors = [];
+    if ($facturaId === null)         $errors[] = ValidacioErrors::requerit('factura_id');
+    if ($producteId === null)        $errors[] = ValidacioErrors::requerit('producte_id');
+    if ($preuStr === null)           $errors[] = ValidacioErrors::requerit('preu');
+    elseif ($preuNorm === null)      $errors[] = ValidacioErrors::requerit('preu');
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        global $conn, $userUuid;
+        /** @var PDO $conn */
+        $conn->beginTransaction();
+
+        // (Opcional pero recomendable) Verificar que existe la factura
+        $check = $conn->prepare("SELECT id FROM db_comptabilitat_facturacio_clients WHERE id = :id LIMIT 1");
+        $check->bindValue(':id', $facturaId, PDO::PARAM_INT);
+        $check->execute();
+        if (!$check->fetchColumn()) {
+            $conn->rollBack();
+            Response::error(MissatgesAPI::error('validacio'), ['La factura indicada no existeix'], 404);
+        }
+
+        $sql = "INSERT INTO db_comptabilitat_facturacio_clients_productes
+                    (factura_id, producte_id, notes, preu)
+                VALUES
+                    (:factura_id, :producte_id, :notes, :preu)";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':factura_id',  $facturaId,  PDO::PARAM_INT);
+        $stmt->bindValue(':producte_id', $producteId, PDO::PARAM_INT);
+        // TEXT puede recibir null
+        $stmt->bindValue(':notes',       $notes,      $notes === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        // Guardamos el precio normalizado como texto (p.ej. "1234.56")
+        $stmt->bindValue(':preu',        $preuNorm,   PDO::PARAM_STR);
+
+        $stmt->execute();
+        $newId = (int)$conn->lastInsertId();
+
+        // Auditoría
+        $detalls = sprintf(
+            "Afegit producte a factura=%d producte_id=%d preu=%s",
+            $facturaId,
+            $producteId,
+            $preuNorm
+        );
+        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_facturacio_clients_productes', $newId);
+
+        $conn->commit();
+
+        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+    } catch (Throwable $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

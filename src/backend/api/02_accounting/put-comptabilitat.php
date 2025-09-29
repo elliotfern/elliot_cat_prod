@@ -315,6 +315,201 @@ if ($slug === 'clients') {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === 'detallsFacturaClientProducte') {
+
+    $inputData = file_get_contents('php://input');
+    $data = json_decode($inputData, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // ------- Helpers (mismos criterios que en el POST) -------
+    $trimOrNull = static function ($v): ?string {
+        if ($v === null) return null;
+        if (is_string($v)) {
+            $s = trim($v);
+            return ($s === '') ? null : $s;
+        }
+        $s = trim((string)$v);
+        return ($s === '') ? null : $s;
+    };
+    $toIntOrNull = static function ($v): ?int {
+        if ($v === null) return null;
+        if (is_int($v)) return $v;
+        if (is_string($v) && preg_match('/^-?\d+$/', $v)) return (int)$v;
+        if (is_numeric($v)) return (int)$v;
+        return null;
+    };
+    // Normaliza "1.234,56" o "1234.56" -> "1234.56"
+    $toDecimal = static function ($v): ?string {
+        if ($v === null) return null;
+        $s = is_string($v) ? trim($v) : trim((string)$v);
+        if ($s === '') return null;
+        $s = str_replace(["\u{00A0}", ' '], '', $s);
+        if (strpos($s, '.') !== false && strpos($s, ',') !== false) {
+            $s = str_replace('.', '', $s);
+            $s = str_replace(',', '.', $s);
+        } else {
+            if (strpos($s, ',') !== false && strpos($s, '.') === false) {
+                $s = str_replace(',', '.', $s);
+            }
+        }
+        if (!preg_match('/^-?\d+(\.\d{1,4})?$/', $s)) return null;
+        return $s;
+    };
+
+    // ------- ID de la línea a actualizar -------
+    // Prioriza id en ruta (p.ej. /api/invoice-lines/{id}); si no, toma ?id=...
+    $id = null;
+    if (isset($routeParams[0]) && ctype_digit((string)$routeParams[0])) {
+        $id = (int)$routeParams[0];
+    } else {
+        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    }
+    if (!$id) {
+        Response::error(MissatgesAPI::error('validacio'), [ValidacioErrors::requerit('id')], 400);
+    }
+
+    // ------- Campos opcionales a actualizar (parciales) -------
+    $hasFacturaId  = array_key_exists('factura_id',  $data);
+    $hasProducteId = array_key_exists('producte_id', $data);
+    $hasNotes      = array_key_exists('notes',       $data);
+    $hasPreu       = array_key_exists('preu',        $data);
+
+    if (!$hasFacturaId && !$hasProducteId && !$hasNotes && !$hasPreu) {
+        Response::error(MissatgesAPI::error('validacio'), ['No hi ha cap camp per actualitzar'], 400);
+    }
+
+    $facturaId  = $hasFacturaId  ? $toIntOrNull($data['factura_id'])   : null;
+    $producteId = $hasProducteId ? $toIntOrNull($data['producte_id'])  : null;
+    $notesIn    = $hasNotes      ? $data['notes']                      : null;
+    $preuIn     = $hasPreu       ? $data['preu']                       : null;
+
+    $notes = $hasNotes ? $trimOrNull($notesIn) : null;
+
+    // preu: si viene clave con vacío -> NULL; si viene con contenido inválido -> error
+    $preuStr  = $hasPreu ? $trimOrNull($preuIn) : null;
+    $preuNorm = null;
+    if ($hasPreu) {
+        if ($preuStr !== null) {
+            $preuNorm = $toDecimal($preuStr);
+            if ($preuNorm === null) {
+                Response::error(MissatgesAPI::error('validacio'), [ValidacioErrors::formatNoValid('preu')], 400);
+            }
+        } // si $preuStr === null => se actualizará a NULL
+    }
+
+    // Validación básica de ids
+    $errors = [];
+    if ($hasFacturaId && $facturaId === null)   $errors[] = ValidacioErrors::formatNoValid('factura_id');
+    if ($hasProducteId && $producteId === null) $errors[] = ValidacioErrors::formatNoValid('producte_id');
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        global $conn, $userUuid;
+        /** @var PDO $conn */
+        $conn->beginTransaction();
+
+        // 1) Verifica que la línea exista (y bloquea fila)
+        $chk = $conn->prepare("SELECT id, factura_id FROM db_comptabilitat_facturacio_clients_productes WHERE id = :id FOR UPDATE");
+        $chk->bindValue(':id', $id, PDO::PARAM_INT);
+        $chk->execute();
+        $row = $chk->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            $conn->rollBack();
+            Response::error(MissatgesAPI::error('noTrobat'), ['La línia de factura no existeix'], 404);
+        }
+
+        // 2) (Opcional) verificar factura si se cambia
+        if ($hasFacturaId && $facturaId !== null) {
+            $checkInv = $conn->prepare("SELECT id FROM db_comptabilitat_facturacio_clients WHERE id = :id LIMIT 1");
+            $checkInv->bindValue(':id', $facturaId, PDO::PARAM_INT);
+            $checkInv->execute();
+            if (!$checkInv->fetchColumn()) {
+                $conn->rollBack();
+                Response::error(MissatgesAPI::error('validacio'), ['La factura indicada no existeix'], 404);
+            }
+        }
+
+        // 3) Construcción dinámica del UPDATE
+        $sets = [];
+        $params = [];
+
+        if ($hasFacturaId) {
+            $sets[] = 'factura_id = :factura_id';
+            if ($facturaId === null) {
+                $params[':factura_id'] = [null, PDO::PARAM_NULL];
+            } else {
+                $params[':factura_id'] = [$facturaId, PDO::PARAM_INT];
+            }
+        }
+
+        if ($hasProducteId) {
+            $sets[] = 'producte_id = :producte_id';
+            if ($producteId === null) {
+                $params[':producte_id'] = [null, PDO::PARAM_NULL];
+            } else {
+                $params[':producte_id'] = [$producteId, PDO::PARAM_INT];
+            }
+        }
+
+        if ($hasNotes) {
+            $sets[] = 'notes = :notes';
+            if ($notes === null) {
+                $params[':notes'] = [null, PDO::PARAM_NULL];
+            } else {
+                $params[':notes'] = [$notes, PDO::PARAM_STR];
+            }
+        }
+
+        if ($hasPreu) {
+            $sets[] = 'preu = :preu';
+            if ($preuStr === null) {
+                $params[':preu'] = [null, PDO::PARAM_NULL];
+            } else {
+                // guardamos el valor normalizado como texto
+                $params[':preu'] = [$preuNorm, PDO::PARAM_STR];
+            }
+        }
+
+        if (empty($sets)) {
+            // teóricamente no debería pasar
+            $conn->rollBack();
+            Response::error(MissatgesAPI::error('validacio'), ['No hi ha cap camp per actualitzar'], 400);
+        }
+
+        $sql = "UPDATE db_comptabilitat_facturacio_clients_productes
+                   SET " . implode(', ', $sets) . "
+                 WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+
+        foreach ($params as $k => [$v, $type]) {
+            $stmt->bindValue($k, $v, $type);
+        }
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        // 4) Auditoría
+        $detalls = sprintf(
+            "Actualització línia id=%d%s%s%s%s",
+            $id,
+            $hasFacturaId  ? " factura_id=" . var_export($facturaId, true)  : "",
+            $hasProducteId ? " producte_id=" . var_export($producteId, true) : "",
+            $hasNotes      ? " notes=" . var_export($notes, true)          : "",
+            $hasPreu       ? " preu=" . var_export($preuStr, true)         : ""
+        );
+        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_facturacio_clients_productes', $id);
+
+        $conn->commit();
+        Response::success(MissatgesAPI::success('update'), ['id' => (int)$id], 200);
+    } catch (Throwable $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

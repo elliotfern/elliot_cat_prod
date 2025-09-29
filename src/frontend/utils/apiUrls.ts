@@ -36,7 +36,7 @@ export const ENDPOINTS = {
   FACTURA_CLIENT_ID: 'facturaId',
   FACTURA_CLIENT: 'facturaClient',
   FACTURA_CLIENT_PRODUCTE_ID: 'detallsFacturaClientId',
-  FACTURA_CLIENT_PRODUCTE: 'detallsFacturaClient',
+  FACTURA_CLIENT_PRODUCTE: 'detallsFacturaClientProducte',
 } as const;
 
 // Mapa de recursos disponibles
