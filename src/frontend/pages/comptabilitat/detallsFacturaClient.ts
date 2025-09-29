@@ -250,6 +250,18 @@ function renderProducts(container: HTMLElement, invoiceId: number, lines: Invoic
   });
 }
 
+function renderProductsLoadError(container: HTMLElement, invoiceId: number | string): void {
+  container.innerHTML = `
+    <hr>
+    <div class="mb-3" style="margin-top:35px">
+      <a class="button btn-gran btn-secondari" href="${NEW_PRODUCT_URL}">Afegir producte</a>
+    </div>
+    <div class="alert alert-warning">
+      No s'han pogut carregar les línies de producte en aquest moment.
+    </div>
+  `;
+}
+
 // === API calls ===
 async function getInvoice(id: string | number): Promise<Invoice> {
   return fetchApiData<Invoice>(API_URLS.INVOICE_BY_ID(id));
@@ -287,16 +299,28 @@ export async function detallsFacturaClients(rootSelector = '#invoiceRoot'): Prom
     return;
   }
 
+  // Loading states:
   headerEl.innerHTML = `<div class="placeholder-glow"><span class="placeholder col-6"></span></div>`;
   amountsEl.innerHTML = `<div class="placeholder-glow"><span class="placeholder col-3"></span></div>`;
   productsEl.innerHTML = `<div class="placeholder-glow"><span class="placeholder col-12"></span></div>`;
 
   try {
-    const [invoice, lines] = await Promise.all([getInvoice(invoiceId), getInvoiceLines(invoiceId)]);
+    // 1) Cargar la factura (si falla, sí bloqueamos porque no hay datos base)
+    const invoice = await getInvoice(invoiceId);
 
+    // Pintar cabecera y totales independientemente de líneas
     renderInvoiceHeader(headerEl, invoice);
     renderInvoiceAmounts(amountsEl, invoice);
-    renderProducts(productsEl, invoice.id, lines);
+
+    // 2) Cargar líneas SIN bloquear la vista si falla
+    try {
+      const lines = await getInvoiceLines(invoiceId);
+      // Si no hay datos, renderProducts ya muestra el aviso con el botón
+      renderProducts(productsEl, invoice.id, lines);
+    } catch (linesErr) {
+      console.warn('[detallsFacturaClients] Error carregant línies:', linesErr);
+      renderProductsLoadError(productsEl, invoice.id);
+    }
   } catch (err) {
     console.error(err);
     headerEl.innerHTML = '';

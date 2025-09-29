@@ -34,16 +34,21 @@
             </div>
 
             <div class="col-md-4">
-                <label for="facConcepte">Notes</label>
-                <input class="form-control" type="text" name="notes" id="notes" />
-            </div>
-
-            <div class="col-md-4">
                 <label for="facConcepte">Preu</label>
                 <input class="form-control" type="text" name="preu" id="preu" />
             </div>
 
             <div class="col-md-4">
+            </div>
+
+            <div class="col-md-4">
+            </div>
+
+
+
+            <div class="col-complet">
+                <label for="facConcepte">Notes</label>
+                <input class="form-control" type="text" name="notes" id="notes" />
             </div>
 
             <div class="container" style="margin-top:25px">

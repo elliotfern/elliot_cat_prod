@@ -278,24 +278,20 @@ if ($slug === 'clients') {
     $id = $_GET['id'];
 
     $sql = <<<SQL
-                SELECT p.id, p.factura_id, pd.producte, p.notes, p.preu
+                SELECT p.id, p.factura_id, p.producte_id, p.notes, p.preu
                         FROM %s AS p
-                        LEFT JOIN %s AS pd ON pd.id = p.producte_id
                         WHERE p.id = :id
-                        GROUP BY p.id
-                        ORDER BY p.preu DESC
             SQL;
 
     $query = sprintf(
         $sql,
         qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
     );
 
     try {
 
         $params = [':id' => $id];
-        $result = $db->getData($query, $params, false);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(
