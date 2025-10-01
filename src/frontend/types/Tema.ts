@@ -1,7 +1,8 @@
-export interface Categoria {
+export interface Tema {
   slug: string;
   tema: string;
   idTema: number;
   genre: string;
-  id: number;
+  id: string;
+  tema_ca: string;
 }
