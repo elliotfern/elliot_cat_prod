@@ -15,6 +15,7 @@
                 <ul class="llistat">
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-links">Llistat enllaços</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-temes">Llistat de temes</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtemes">Llistat de subtemes</a></li>
                 </ul>
 
                 <hr>

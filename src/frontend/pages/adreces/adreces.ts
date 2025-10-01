@@ -12,26 +12,12 @@ export function adreces() {
   const id = parseInt(pageType[3], 10);
   const uuid = pageType[3];
   if (pageType[2] === 'modifica-link') {
-    const autor = document.getElementById('modificalink');
-    if (autor) {
-      // Lanzar actualizador de datos
-      autor.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'PUT', 'modificalink', '/api/adreces/put/?link');
-      });
-    }
   } else if (pageType[2] === 'nou-link') {
-    const llibre = document.getElementById('modificalink');
-    if (llibre) {
-      // Lanzar actualizador de datos
-      llibre.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'modificalink', '/api/adreces/post/?link');
-      });
-    }
-  } else if ([pageType[1], pageType[2]].includes('llistat-temes')) {
+  } else if (pageType[2] === 'llistat-temes') {
     taulaLlistatTemes();
-  } else if ([pageType[1], pageType[2]].includes('llistat-links')) {
+  } else if (pageType[2] === 'llistat-links') {
     taulaLlistatLinks();
-  } else if ([pageType[1], pageType[2]].includes('llistat-subtemes')) {
+  } else if (pageType[2] === 'llistat-subtemes') {
     taulaLlistatSubTemes();
   } else if (pageType[2] === 'modifica-tema') {
     formTema(true, uuid);
