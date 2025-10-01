@@ -1,8 +1,8 @@
 import { getPageType } from '../../utils/urlPath';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
-import { taulaLlistatTemes } from './taulaLlistatCategories';
-import { taulaLlistatAdrecesPerTema } from './taulaLlistatAdrecesPerTema';
 import { taulaLlistatLinks } from './taulaLlistatLinks';
+import { taulaLlistatSubTemes } from './taulaLlistatSubTemes';
+import { taulaLlistatTemes } from './taulaLlistatTemes';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -28,7 +28,7 @@ export function adreces() {
     taulaLlistatTemes();
   } else if ([pageType[1], pageType[2]].includes('llistat-links')) {
     taulaLlistatLinks();
-  } else if ([pageType[1], pageType[2]].includes('tema')) {
-    taulaLlistatAdrecesPerTema();
+  } else if ([pageType[1], pageType[2]].includes('llistat-subtemes')) {
+    taulaLlistatSubTemes();
   }
 }

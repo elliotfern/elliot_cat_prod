@@ -29,16 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 
 // 1) Llistat categories enllaços
-// ruta GET => "/api/links/?type=categories"
-if ($slug === 'categories') {
+// ruta GET => "/api/links/llistatTemes"
+if ($slug === 'llistatTemes') {
 
     $sql = <<<SQL
-            SELECT g.id, g.categoria_ca AS genre
-            FROM %s AS g
-            INNER JOIN aux_temes AS t ON g.id = t.idGenere
-            INNER JOIN db_links AS l ON l.cat = t.id
-            GROUP BY g.id
-            ORDER BY g.categoria_ca ASC
+            SELECT uuid_bin_to_text(t.id) AS id, tema_ca
+            FROM %s AS t
+            ORDER BY t.tema_ca ASC
             SQL;
 
     $query = sprintf(

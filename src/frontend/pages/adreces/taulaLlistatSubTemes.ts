@@ -8,7 +8,7 @@ import { TaulaDinamica } from '../../types/TaulaDinamica';
 const url = window.location.href;
 const pageType = getPageType(url);
 
-export async function taulaLlistatTemes() {
+export async function taulaLlistatSubTemes() {
   const isAdmin = await getIsAdmin();
   let slug: string = '';
   let gestioUrl: string = '';

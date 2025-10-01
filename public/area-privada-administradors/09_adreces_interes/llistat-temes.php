@@ -7,11 +7,11 @@
             <h1>Adreces d'interés: llistat temes</h1>
             <?php if (isUserAdmin()) : ?>
                 <p>
-                    <button onclick="window.location.href='<?php echo APP_INTRANET . $url['adreces']; ?>/nou-link/'" class="button btn-gran btn-secondari">Afegir enllaç</button>
+                    <button onclick="window.location.href='<?php echo APP_INTRANET . $url['adreces']; ?>/nou-tema/'" class="button btn-gran btn-secondari">Afegir tema</button>
                 </p>
             <?php endif; ?>
 
-            <div id="taulaLlistatCategories"></div>
+            <div id="taulaLlistatTemes"></div>
 
         </div>
     </main>
