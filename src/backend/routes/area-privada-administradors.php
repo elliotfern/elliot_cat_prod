@@ -336,6 +336,15 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    APP_GESTIO . $url['adreces'] . '/llistat-subtema/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-subtema-id.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     APP_GESTIO . $url['adreces'] . '/nou-subtema' => [
         'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-subtema.php',
         'needs_session' => true,

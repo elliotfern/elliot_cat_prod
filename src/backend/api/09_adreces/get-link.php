@@ -291,6 +291,49 @@ if ($slug === 'llistatTemes') {
             500
         );
     }
+
+    // 5) Ruta per treure els enllaços d'un subtema
+    // ruta GET => "/api/adreces/subTemaId=11"
+} elseif ($slug === 'subTemaId') {
+    $id = $_GET['id'];
+
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(l.id) AS id, uuid_bin_to_text(l.sub_tema_id) AS sub_tema_id, l.web, l.nom, l.tipus, l.lang, l.dateCreated, l.dateModified
+            FROM db_links AS l
+            WHERE l.sub_tema_id = uuid_text_to_bin(:id)
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_SUBTEMES, $pdo),
+    );
+
+    try {
+
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

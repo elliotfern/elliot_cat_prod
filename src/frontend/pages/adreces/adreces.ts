@@ -5,6 +5,7 @@ import { taulaLlistatTemes } from './taulaLlistatTemes';
 import { formTema } from './formTema';
 import { formSubTema } from './formSubTema';
 import { formLink } from './formLink';
+import { taulaLlistatSubTemaId } from './taulaLlistatSubTemaId';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -22,6 +23,8 @@ export function adreces() {
     taulaLlistatLinks();
   } else if (pageType[2] === 'llistat-subtemes') {
     taulaLlistatSubTemes();
+  } else if (pageType[2] === 'llistat-subtema') {
+    taulaLlistatSubTemaId(uuid);
   } else if (pageType[2] === 'modifica-tema') {
     formTema(true, uuid);
   } else if (pageType[2] === 'nou-tema') {

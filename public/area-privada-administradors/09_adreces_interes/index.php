@@ -18,6 +18,19 @@
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtemes">Llistat de subtemes</a></li>
                 </ul>
 
+                <hr>
+                <h4>Marcadors:</h4>
+                <ul class="llistat">
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Elliot.cat</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">MemòriaTerrassa.cat</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Finguer.com</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Programació web</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Cinema</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Música</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Televisió</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Altres</a></li>
+                </ul>
+
             </div>
         </div>
     </main>

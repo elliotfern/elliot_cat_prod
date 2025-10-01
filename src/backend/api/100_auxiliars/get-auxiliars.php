@@ -1036,7 +1036,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "tipusLinks") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(s.id) AS id, s.tipus_ca
+            SELECT s.id, s.tipus_ca
             FROM %s AS s
             ORDER BY s.tipus_ca ASC
             SQL;
