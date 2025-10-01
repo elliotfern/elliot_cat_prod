@@ -9,10 +9,21 @@ final class ValidacioErrors
         return "El camp <strong>$camp</strong> és obligatori.";
     }
 
+    public static function noExisteix(string $camp): string
+    {
+        return "El ID <strong>$camp</strong> no existeix.";
+    }
+
     public static function invalid(string $camp): string
     {
         return "El camp <strong>$camp</strong> no és vàlid.";
     }
+
+    public static function format(string $camp): string
+    {
+        return "El camp <strong>$camp</strong> no és vàlid.";
+    }
+
 
     /**
      * Alias més específic per indicar “format” incorrecte.

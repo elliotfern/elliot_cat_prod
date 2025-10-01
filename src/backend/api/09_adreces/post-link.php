@@ -151,6 +151,130 @@ if ($slug === 'link') {
     }
     Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
   }
+} else if ($slug === 'subtema') {
+  // 📨 Entrada JSON
+  $inputData = file_get_contents('php://input');
+  $data = json_decode($inputData, true) ?: [];
+
+  $errors = [];
+
+  // ✅ Generar ID (UUIDv7) en el servidor
+  try {
+    $idText = Uuid::uuid7()->toString();
+  } catch (Throwable $t) {
+    Response::error(MissatgesAPI::error('errorServidor'), ['No s’ha pogut generar l’UUID'], 500);
+  }
+
+  // 🔎 Validacions
+  // tema_id: requerit + format UUID (acceptem qualsevol versió canònica)
+  if (empty($data['tema_id'])) {
+    $errors[] = ValidacioErrors::requerit('tema_id');
+  } else {
+    $temaIdText = (string)$data['tema_id'];
+  }
+
+  // Sub-temes (permès null; cal com a mínim un idioma amb text)
+  $sub_ca = isset($data['sub_tema_ca']) ? trim((string)$data['sub_tema_ca']) : null;
+  $sub_en = isset($data['sub_tema_en']) ? trim((string)$data['sub_tema_en']) : null;
+  $sub_es = isset($data['sub_tema_es']) ? trim((string)$data['sub_tema_es']) : null;
+  $sub_it = isset($data['sub_tema_it']) ? trim((string)$data['sub_tema_it']) : null;
+  $sub_fr = isset($data['sub_tema_fr']) ? trim((string)$data['sub_tema_fr']) : null;
+
+  if (
+    ($sub_ca === null || $sub_ca === '') &&
+    ($sub_en === null || $sub_en === '') &&
+    ($sub_es === null || $sub_es === '') &&
+    ($sub_it === null || $sub_it === '') &&
+    ($sub_fr === null || $sub_fr === '')
+  ) {
+    $errors[] = ValidacioErrors::requerit('almenys_un_idioma');
+  }
+
+  // (Opcional) límit de longitud
+  $maxLen = 5000;
+  $checkLen = function (?string $val, string $field) use (&$errors, $maxLen) {
+    if ($val !== null && $val !== '' && mb_strlen($val) > $maxLen) {
+      $errors[] = ValidacioErrors::massaLlarg($field, $maxLen);
+    }
+  };
+  $checkLen($sub_ca, 'sub_tema_ca');
+  $checkLen($sub_en, 'sub_tema_en');
+  $checkLen($sub_es, 'sub_tema_es');
+  $checkLen($sub_it, 'sub_tema_it');
+  $checkLen($sub_fr, 'sub_tema_fr');
+
+  if (!empty($errors)) {
+    Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+  }
+
+
+  try {
+    // ✅ Comprovem que el tema pare existeix
+    $check = $conn->prepare("SELECT 1 FROM aux_temes WHERE id = uuid_text_to_bin(:tema_id) LIMIT 1");
+    $check->bindValue(':tema_id', $temaIdText, PDO::PARAM_STR);
+    $check->execute();
+    if (!$check->fetchColumn()) {
+      Response::error(
+        MissatgesAPI::error('validacio'),
+        [ValidacioErrors::noExisteix('tema_id')],
+        404
+      );
+    }
+
+    // INSERT
+    $sql = "INSERT INTO aux_sub_temes (
+                id, tema_id, sub_tema_ca, sub_tema_en, sub_tema_es, sub_tema_it, sub_tema_fr
+            ) VALUES (
+                uuid_text_to_bin(:id),
+                uuid_text_to_bin(:tema_id),
+                :sub_tema_ca, :sub_tema_en, :sub_tema_es, :sub_tema_it, :sub_tema_fr
+            )";
+
+    $stmt = $conn->prepare($sql);
+
+    $stmt->bindValue(':id', $idText, PDO::PARAM_STR);
+    $stmt->bindValue(':tema_id', $temaIdText, PDO::PARAM_STR);
+
+    $stmt->bindValue(':sub_tema_ca', ($sub_ca === '' ? null : $sub_ca), $sub_ca === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':sub_tema_en', ($sub_en === '' ? null : $sub_en), $sub_en === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':sub_tema_es', ($sub_es === '' ? null : $sub_es), $sub_es === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':sub_tema_it', ($sub_it === '' ? null : $sub_it), $sub_it === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':sub_tema_fr', ($sub_fr === '' ? null : $sub_fr), $sub_fr === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+
+    $stmt->execute();
+
+    // 📝 Audit
+    Audit::registrarCanvi(
+      $conn,
+      $userUuid,
+      'INSERT',
+      "Creació nou sub-tema ($idText) per tema $temaIdText",
+      Tables::DB_SUBTEMES,
+      $idText // si Audit espera binari, adapta-ho
+    );
+
+    Response::success(
+      MissatgesAPI::success('create'),
+      [
+        'id' => $idText,
+        'tema_id' => $temaIdText,
+        'sub_tema' => [
+          'ca' => $sub_ca,
+          'en' => $sub_en,
+          'es' => $sub_es,
+          'it' => $sub_it,
+          'fr' => $sub_fr,
+        ],
+      ],
+      201
+    );
+  } catch (PDOException $e) {
+    // Duplicats (si hi ha restriccions úniques específiques)
+    if ((int)$e->errorInfo[1] === 1062) {
+      Response::error(MissatgesAPI::error('duplicat'), ['Registre duplicat'], 409);
+    }
+    Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+  }
 } else {
   // response output - data error
   $response['status'] = 'error';

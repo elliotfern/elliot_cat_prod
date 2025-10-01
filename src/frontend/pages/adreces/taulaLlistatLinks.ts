@@ -25,7 +25,7 @@ export async function taulaLlistatLinks() {
     {
       header: 'Enllaç',
       field: 'nom',
-      render: (_: unknown, row: Link) => `<a id="${row.id}" href="${row.web}">${row.nom}</a>`,
+      render: (_: unknown, row: Link) => `<a id="${row.id}" href="${row.web}" target="_blank">${row.nom}</a>`,
     },
     { header: 'Categoría', field: 'tema_ca' },
 

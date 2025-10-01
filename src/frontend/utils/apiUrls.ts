@@ -43,6 +43,8 @@ export const ENDPOINTS = {
   TEMA: 'tema',
   SUBTEMA_ID: 'subTemaId',
   SUBTEMA: 'subtema',
+  LINK_ID: 'linkId',
+  LINK: 'link',
 } as const;
 
 // Mapa de recursos disponibles
@@ -90,6 +92,7 @@ export const API_URLS: ApiUrls = {
     {encodeURIComponent(id)}`,
     TEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.TEMA_ID}?id=${encodeURIComponent(id)}`,
     SUBTEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.SUBTEMA_ID}?id=${encodeURIComponent(id)}`,
+    LINK_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.LINK_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -110,6 +113,7 @@ export const API_URLS: ApiUrls = {
     ENVIAR_FACTURA_EMAIL: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PDF}/${ENDPOINTS.ENVIAR_FACTURA}/${encodeURIComponent(id)}/${encodeURIComponent(lang)}`,
     TEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.POST}/${ENDPOINTS.TEMA}`,
     SUBTEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.POST}/${ENDPOINTS.SUBTEMA}`,
+    LINK: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.POST}/${ENDPOINTS.LINK}`,
   },
 
   PUT: {
@@ -129,6 +133,7 @@ export const API_URLS: ApiUrls = {
     FACTURA_CLIENT_PRODUCTE: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PUT}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE}`,
     TEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.PUT}/${ENDPOINTS.TEMA}`,
     SUBTEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.PUT}/${ENDPOINTS.SUBTEMA}`,
+    LINK: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.PUT}/${ENDPOINTS.LINK}`,
   },
 
   DELETE: {},

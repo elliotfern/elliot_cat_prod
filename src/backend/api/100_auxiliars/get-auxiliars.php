@@ -121,7 +121,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             ORDER BY i.idioma_ca ASC";
 
     try {
-
+tipus
         $result = $db->getData($query);
 
         if (empty($result)) {
@@ -1002,6 +1002,48 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     $query = sprintf(
         $sql,
         qi(Tables::DB_TEMES, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+     // GET : llistat tipus links
+    // URL: https://elliot.cat/api/auxiliars/get/tipusLinks
+} else if ($slug === "tipusLinks") {
+
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(s.id) AS id, s.tipus_ca
+            FROM %s AS s
+            ORDER BY s.tipus_ca ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_LINKS_TIPUS, $pdo),
 
     );
 

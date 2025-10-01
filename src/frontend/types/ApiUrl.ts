@@ -25,6 +25,7 @@ export type ApiUrls = {
     FACTURA_CLIENT_PRODUCTE_ID: (id: number) => string;
     TEMA_ID: (id: string) => string;
     SUBTEMA_ID: (id: string) => string;
+    LINK_ID: (id: string) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -44,6 +45,7 @@ export type ApiUrls = {
     ENVIAR_FACTURA_EMAIL: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => string;
     TEMA: string;
     SUBTEMA: string;
+    LINK: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -62,6 +64,7 @@ export type ApiUrls = {
     FACTURA_CLIENT_PRODUCTE: string;
     TEMA: string;
     SUBTEMA: string;
+    LINK: string;
   };
   DELETE: {};
 };

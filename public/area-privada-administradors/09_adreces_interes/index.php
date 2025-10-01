@@ -18,21 +18,6 @@
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtemes">Llistat de subtemes</a></li>
                 </ul>
 
-                <hr>
-
-                <h4>Mitjans de comunicació:</h4>
-                <ul class="llistat">
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/tema/88">Mitjans d'economia</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/tema/64">Mitjans progressistes</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/tema/19">Mitjans de Catalunya</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/tema/57">Mitjans de tecnologia</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/tema/9">Ràdios públiques</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/tema/21">Mitjans d'Espanya</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/tema/47">Mitjans d'Irlanda</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/tema/13">Mitjans dels Estats Units</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/tema/20">Mitjans d'Itàlia</a></li>
-                </ul>
-
             </div>
         </div>
     </main>
