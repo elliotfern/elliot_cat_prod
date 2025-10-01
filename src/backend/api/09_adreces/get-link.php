@@ -162,56 +162,56 @@ if ($slug === 'llistatTemes') {
         );
     }
 
-    // 3) Llistat enllaços segons un topic concret
-    // ruta GET => "/api/links/?type=topic$id=11"
-} else if ($slug === 'temaId') {
-
-    $id = $_GET['id'];
-
-    $stmt = "SELECT l.web AS url, l.nom, t.id AS idTema, t.tema_ca AS tema, l.id AS linkId, l.lang, i.idioma_ca, ty.id AS idType, ty.type_ca, g.categoria_ca AS genre, g.id AS idCategoria, l.dateCreated
-        FROM aux_temes AS t
-        INNER JOIN aux_categories AS g ON t.idGenere = g.id
-        INNER JOIN db_links AS l ON l.cat = t.id
-        LEFT JOIN db_links_type AS ty ON ty.id = l.tipus
-        LEFT JOIN aux_idiomes AS i ON l.lang = i.id
-        WHERE t.id = :id
-        ORDER BY l.nom ASC";
-
-
     // 4) Llistat de topics
-    // ruta GET => "/api/adreces/get/?type=all-topics"
-} else if ($slug === 'llistatTemes') {
-    global $conn;
+    // ruta GET => "/api/adreces/get/llistatSubTemes"
+} else if ($slug === 'llistatSubTemes') {
 
-    $stmt = "SELECT t.id AS idTema, t.tema_ca AS tema, g.categoria_ca AS genre, g.id AS idGenre
-            FROM aux_temes AS t
-            INNER JOIN aux_categories AS g ON t.idGenere = g.id
-            INNER JOIN db_links AS l ON l.cat = t.id
-            GROUP BY t.id
-            ORDER BY t.tema_ca ASC";
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(st.id) AS id, uuid_bin_to_text(st.tema_id) AS tema_id, st.sub_tema_ca, st.sub_tema_en, st.sub_tema_es, st.sub_tema_it, st.sub_tema_fr, t.tema_ca
+            FROM %s AS st
+            LEFT JOIN %s AS t ON st.tema_id = t.id
+            ORDER BY st.sub_tema_ca ASC
+            SQL;
 
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_TEMES, $pdo),
 
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
     // 5) Ruta para sacar 1 enlace y actualizarlo 
     // ruta GET => "/api/adreces/?linkId=11"
 } elseif ((isset($_GET['linkId']))) {
     $id = $_GET['linkId'];
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT l.id, l.web, l.nom, l.cat, l.tipus, l.lang
+
+    $stmt =     "SELECT l.id, l.web, l.nom, l.cat, l.tipus, l.lang
             FROM db_links AS l
-            WHERE l.id=?"
-    );
-
-    $stmt->execute([$id]);
-
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(null);  // Devuelve un objeto JSON nulo si no hay resultados
-    } else {
-        // Solo obtenemos la primera fila ya que parece ser una búsqueda por ID
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        echo json_encode($row);  // Codifica la fila como un objeto JSON
-    }
+            WHERE l.id=?";
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

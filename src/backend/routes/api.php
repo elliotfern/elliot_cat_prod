@@ -295,7 +295,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/adreces/post' => [
+    '/api/adreces/post/{slug}' => [
         'view' => 'src/backend/api/09_adreces/post-link.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -303,7 +303,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/adreces/put' => [
+    '/api/adreces/put/{slug}' => [
         'view' => 'src/backend/api/09_adreces/put-link.php',
         'needs_session' => false,
         'header_footer' => false,

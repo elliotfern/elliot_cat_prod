@@ -1,9 +1,8 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-// import { formatData } from '../../utils/formataData';
 import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
-import { Categoria } from '../../types/Categoria';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
+import { SubTema } from '../../types/SubTema';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -20,28 +19,28 @@ export async function taulaLlistatSubTemes() {
     slug = pageType[2];
   }
 
-  const columns: TaulaDinamica<Categoria>[] = [
+  const columns: TaulaDinamica<SubTema>[] = [
     {
-      header: 'Tema',
-      field: 'tema',
-      render: (_: unknown, row: Categoria) => `<a id="${row.idTema}" title="Show category" href="https://${window.location.host}${gestioUrl}/adreces/tema/${row.idTema}">${row.tema}</a>`,
+      header: 'Subtema',
+      field: 'sub_tema_ca',
+      render: (_: unknown, row: SubTema) => `<a id="${row.id}" title="Show category" href="https://${window.location.host}${gestioUrl}/adreces/subtema/${row.id}">${row.sub_tema_ca}</a>`,
     },
-    { header: 'Categoría', field: 'genre' },
+    { header: 'Categoría', field: 'tema_ca' },
   ];
 
   if (isAdmin) {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Categoria) => `<a id="${row.idTema}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/adreces/modifica-tema/${row.slug}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: SubTema) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/adreces/modifica-tema/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/adreces/get/?type=all-topics`,
-    containerId: 'taulaLlistatCategories',
+    url: `https://${window.location.host}/api/adreces/get/llistatSubTemes`,
+    containerId: 'taulaLlistatSubTemes',
     columns,
-    filterKeys: ['tema'],
-    filterByField: 'genre',
+    filterKeys: ['tema_ca'],
+    filterByField: 'tema_ca',
   });
 }

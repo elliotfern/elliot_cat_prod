@@ -2,7 +2,7 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getPageType } from '../../utils/urlPath';
 import { Link } from '../../types/Link';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-import { Tema } from '../../types/Tema';
+import { Tema } from '../../types/SubTema';
 
 const url = window.location.href;
 const pageType = getPageType(url);

@@ -8,7 +8,7 @@ use PDOException;
 class Audit
 {
 
-    public static function registrarCanvi(PDO $conn, ?string $userUuid, string $operacio, string $detalls, string $taulaAfectada, int $registreId): bool
+    public static function registrarCanvi(PDO $conn, ?string $userUuid, string $operacio, string $detalls, string $taulaAfectada, int | string $registreId): bool
     {
         $dataHora = date('Y-m-d H:i:s');
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';

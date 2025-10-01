@@ -1,115 +1,208 @@
 <?php
+
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Config\Tables;
+use App\Config\Audit;
+use App\Utils\ValidacioErrors;
+use App\Config\DatabaseConnection;
+use Ramsey\Uuid\Uuid;
+
+$slug = $routeParams[0];
+
 /*
- * BACKEND LIBRARY
- * FUNCIONS UPDATE BOOK
- * @update_book_ajax
+ * BACKEND DB LINKS
+ * FUNCIONS
+ * @
  */
 
-header("Content-Type: application/json");
+$conn = DatabaseConnection::getConnection();
 
-// Check if the request method is GET
+if (!$conn) {
+  die("No se pudo establecer conexión a la base de datos.");
+}
+
+// Configuración de cabeceras para aceptar JSON y responder JSON
+header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: PUT");
+
+// Definir el dominio permitido
+$allowedOrigin = APP_DOMAIN;
+
+// Llamar a la función para verificar el referer
+checkReferer($allowedOrigin);
+
+// Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
   header('HTTP/1.1 405 Method Not Allowed');
   echo json_encode(['error' => 'Method not allowed']);
   exit();
 }
 
+// Requiere ADMIN por token (user_type === 1)
+if (!isAuthenticatedAdmin()) {
+  http_response_code(403);
+  echo json_encode(['error' => 'No autoritzat (admin requerit)']);
+  exit;
+}
+
+$userUuid = getAuthenticatedUserUuid(); // para auditoría, si la soportas
+
 // a) Inserir link
-if (isset($_GET['link'])) {
+if ($slug === 'link') {
+} else if ($slug === 'tema') {
+  // 📨 Entrada JSON
+  $inputData = file_get_contents('php://input');
+  $data = json_decode($inputData, true) ?: [];
 
-  // Obtener el cuerpo de la solicitud PUT
-  $input_data = file_get_contents("php://input");
+  $errors = [];
 
-  // Decodificar los datos JSON
-  $data = json_decode($input_data, true);
-
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
+  // 🔎 Requerim id (UUIDv7 text)
+  if (empty($data['id'])) {
+    $errors[] = ValidacioErrors::requerit('id');
+  } else {
+    $idText = (string)$data['id'];
   }
 
-  // Validar los datos recibidos
-  $hasError = false;
+  // 📥 Campos opcionales (trim y null si vacío)
+  $tema_ca = array_key_exists('tema_ca', $data) ? trim((string)$data['tema_ca']) : null;
+  $tema_en = array_key_exists('tema_en', $data) ? trim((string)$data['tema_en']) : null;
+  $tema_es = array_key_exists('tema_es', $data) ? trim((string)$data['tema_es']) : null;
+  $tema_fr = array_key_exists('tema_fr', $data) ? trim((string)$data['tema_fr']) : null;
+  $tema_it = array_key_exists('tema_it', $data) ? trim((string)$data['tema_it']) : null;
 
-  $nom = !empty($data['nom']) ? data_input($data['nom']) : null;
-  $web = !empty($data['web']) ? data_input($data['web']) : null;
-  $cat = !empty($data['cat']) ? data_input($data['cat']) : null;
-  $lang = !empty($data['lang']) ? data_input($data['lang']) : null;
-  $tipus = !empty($data['tipus']) ? data_input($data['tipus']) : null;
+  // ✅ Debe venir al menos un campo tema_* (aunque sea para ponerlo a null)
+  $anyProvided = array_key_exists('tema_ca', $data)
+    || array_key_exists('tema_en', $data)
+    || array_key_exists('tema_es', $data)
+    || array_key_exists('tema_fr', $data)
+    || array_key_exists('tema_it', $data);
 
-  // Verificar si alguno de los campos está vacío
-  if (!$nom || !$web || !$cat || !$lang || !$tipus) {
-    $hasError = true;
-    $response['status'] = 'error';
-    $response['message'] = 'Faltan datos obligatorios en la solicitud.';
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit();
+  if (!$anyProvided) {
+    $errors[] = ValidacioErrors::requerit('almenys_un_idioma');
   }
 
-  // Asignar valores adicionales
-  $timestamp = date('Y-m-d');
-  $dateModified = $timestamp;
+  // (Opcional) límites de longitud
+  $maxLen = 5000;
+  $checkLen = function (?string $val, string $field) use (&$errors, $maxLen) {
+    if ($val !== null && $val !== '' && mb_strlen($val) > $maxLen) {
+      $errors[] = ValidacioErrors::massaLlarg($field, $maxLen);
+    }
+  };
+  if (array_key_exists('tema_ca', $data)) $checkLen($tema_ca, 'tema_ca');
+  if (array_key_exists('tema_en', $data)) $checkLen($tema_en, 'tema_en');
+  if (array_key_exists('tema_es', $data)) $checkLen($tema_es, 'tema_es');
+  if (array_key_exists('tema_fr', $data)) $checkLen($tema_fr, 'tema_fr');
+  if (array_key_exists('tema_it', $data)) $checkLen($tema_it, 'tema_it');
 
-  // Usar el ID desde el JSON si es que está presente
-  $id = isset($data['id']) ? (int)$data['id'] : null;
-
-  // Verificar si el ID es válido
-  if ($id === null) {
-    $hasError = true;
-    $response['status'] = 'error';
-    $response['message'] = 'ID no proporcionado o inválido.';
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit();
+  if (!empty($errors)) {
+    Response::error(MissatgesAPI::error('validacio'), $errors, 400);
   }
 
-  if (!$hasError) {
-    $sql = "UPDATE db_links
-      SET nom=:nom, web=:web, cat=:cat, lang=:lang, tipus=:tipus, dateModified=:dateModified 
-      WHERE id=:id";
 
-    global $conn;
+  // 🛠️ Construcción dinámica del UPDATE
+  $setParts = [];
+  $params = [':id' => $idText];
+
+  $normalize = function ($val) {
+    // vació -> null; si llega explicitamente null, se mantiene null
+    if ($val === null) return null;
+    return ($val === '') ? null : $val;
+  };
+
+  if (array_key_exists('tema_ca', $data)) {
+    $setParts[] = 'tema_ca = :tema_ca';
+    $params[':tema_ca'] = $normalize($tema_ca);
+  }
+  if (array_key_exists('tema_en', $data)) {
+    $setParts[] = 'tema_en = :tema_en';
+    $params[':tema_en'] = $normalize($tema_en);
+  }
+  if (array_key_exists('tema_es', $data)) {
+    $setParts[] = 'tema_es = :tema_es';
+    $params[':tema_es'] = $normalize($tema_es);
+  }
+  if (array_key_exists('tema_fr', $data)) {
+    $setParts[] = 'tema_fr = :tema_fr';
+    $params[':tema_fr'] = $normalize($tema_fr);
+  }
+  if (array_key_exists('tema_it', $data)) {
+    $setParts[] = 'tema_it = :tema_it';
+    $params[':tema_it'] = $normalize($tema_it);
+  }
+
+  if (empty($setParts)) {
+    // (no debería ocurrir por la validación previa, pero por seguridad)
+    Response::error(MissatgesAPI::error('validacio'), ['Cap camp a actualitzar'], 400);
+  }
+
+  try {
+    $sql = "UPDATE aux_temes
+            SET " . implode(', ', $setParts) . "
+            WHERE id = uuid_text_to_bin(:id)
+            LIMIT 1";
+
     $stmt = $conn->prepare($sql);
 
-    // Vincular los parámetros
-    $stmt->bindParam(":nom", $nom, PDO::PARAM_STR);
-    $stmt->bindParam(":web", $web, PDO::PARAM_STR);
-    $stmt->bindParam(":cat", $cat, PDO::PARAM_INT);
-    $stmt->bindParam(":lang", $lang, PDO::PARAM_INT);
-    $stmt->bindParam(":tipus", $tipus, PDO::PARAM_INT);
-    $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
-    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-    // Ejecutar la consulta
-    if ($stmt->execute()) {
-      // Si la ejecución fue exitosa
-      $response['status'] = 'success';
-      $response['message'] = 'Datos actualizados correctamente.';
-    } else {
-      // Si hubo un error en la ejecución
-      $response['status'] = 'error';
-      $response['message'] = 'Hubo un problema al actualizar los datos en la base de datos.';
+    foreach ($params as $k => $v) {
+      if ($k === ':id') {
+        $stmt->bindValue($k, $v, PDO::PARAM_STR);
+        continue;
+      }
+      // Campos tema_*: si null -> PDO::PARAM_NULL, si no -> STR
+      if ($v === null) {
+        $stmt->bindValue($k, null, PDO::PARAM_NULL);
+      } else {
+        $stmt->bindValue($k, $v, PDO::PARAM_STR);
+      }
     }
 
-    // Responder con el resultado
-    header("Content-Type: application/json");
-    echo json_encode($response);
-  } else {
-    // Si los datos no son válidos o hubo un error en los datos de entrada
-    $response['status'] = 'error';
-    $response['message'] = 'Los datos enviados no son válidos o hay errores en el formulario.';
+    $stmt->execute();
 
-    header("Content-Type: application/json");
-    echo json_encode($response);
+    if ($stmt->rowCount() === 0) {
+      // No existe el id o los valores son idénticos (idempotente). Distinguimos con un SELECT.
+      $chk = $conn->prepare("SELECT 1 FROM aux_temes WHERE id = uuid_text_to_bin(:id) LIMIT 1");
+      $chk->bindValue(':id', $idText, PDO::PARAM_STR);
+      $chk->execute();
+      if (!$chk->fetchColumn()) {
+        Response::error(MissatgesAPI::error('noTrobat'), ['No s’ha trobat el registre'], 404);
+      }
+      // Existe pero no cambió nada → devolvemos success idempotente
+    }
+
+    // 📝 Audit
+    Audit::registrarCanvi(
+      $conn,
+      $userUuid,
+      'UPDATE',
+      'Actualització de tema ' . $idText,
+      Tables::DB_TEMES,
+      $idText // adapta si tu Audit espera binari
+    );
+
+    // 📤 Devolver eco de lo actualizado (solo campos enviados)
+    $returnTema = [];
+    foreach (['ca', 'en', 'es', 'fr', 'it'] as $lang) {
+      $key = "tema_$lang";
+      if (array_key_exists($key, $data)) {
+        $returnTema[$lang] = $params[":$key"] ?? null;
+      }
+    }
+
+    Response::success(
+      MissatgesAPI::success('update'),
+      [
+        'id' => $idText,
+        'tema' => $returnTema
+      ],
+      200
+    );
+  } catch (PDOException $e) {
+    Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
   }
 } else {
   // response output - data error
   $response['status'] = 'error';
 
-  header("Content-Type: application/json");
   echo json_encode($response);
 }
