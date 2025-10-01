@@ -73,29 +73,27 @@ if ($slug === 'categories') {
         );
     }
 
-// 1) Llistat enllaços
-// ruta GET => "/api/links/llistatLinks"
-if ($slug === 'llistatLinks') {
+    // 1) Llistat enllaços
+    // ruta GET => "/api/links/llistatLinks"
+} else if ($slug === 'llistatLinks') {
 
     $sql = <<<SQL
             SELECT uuid_bin_to_text(l.id) AS id, l.nom, l.web, l.dateCreated, l.dateModified, st.tema_ca, s.sub_tema_ca, t.tipus_ca, i.idioma_ca
             FROM %s AS l
-            INNER JOIN %s AS s ON s.id = l.sub_tema_id
-            INNER JOIN %s AS st ON s.tema_id = st.id
-            INNER JOIN %s AS st ON s.tema_id = st.id
-            INNER JOIN %s AS t ON l.tipus = t.id
-            INNER JOIN %s AS i ON l.lang = i.id
-            GROUP BY l.id
+            LEFT JOIN %s AS s ON s.id = l.sub_tema_id
+            LEFT JOIN %s AS st ON s.tema_id = st.id
+            LEFT JOIN %s AS t ON l.tipus = t.id
+            LEFT JOIN %s AS i ON l.lang = i.id
             ORDER BY l.nom ASC
             SQL;
- 	 	 	
+
     $query = sprintf(
         $sql,
         qi(Tables::DB_LINKS, $pdo),
         qi(Tables::DB_SUBTEMES, $pdo),
         qi(Tables::DB_TEMES, $pdo),
         qi(Tables::DB_LINKS_TIPUS, $pdo),
-        qi(Tables::DB_IDIOMES, $pdo),   
+        qi(Tables::DB_IDIOMES, $pdo),
     );
 
     try {
@@ -165,7 +163,7 @@ if ($slug === 'llistatLinks') {
             INNER JOIN db_links AS l ON l.cat = t.id
             GROUP BY t.id
             ORDER BY t.tema_ca ASC";
-    
+
 
     // 5) Ruta para sacar 1 enlace y actualizarlo 
     // ruta GET => "/api/adreces/?linkId=11"
@@ -188,7 +186,6 @@ if ($slug === 'llistatLinks') {
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         echo json_encode($row);  // Codifica la fila como un objeto JSON
     }
-
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

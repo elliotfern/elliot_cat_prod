@@ -46,7 +46,7 @@ export async function taulaLlistatLinks() {
     url: `https://${window.location.host}/api/adreces/get/llistatLinks`,
     containerId: 'taulaLlistatLinks',
     columns,
-    filterKeys: ['tema_ca'],
-    filterByField: 'nom',
+    filterKeys: ['nom'],
+    filterByField: 'tema_ca',
   });
 }
