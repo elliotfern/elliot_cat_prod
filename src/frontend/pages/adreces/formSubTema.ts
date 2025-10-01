@@ -66,5 +66,5 @@ export async function formSubTema(isUpdate: boolean, id?: string) {
     });
   }
 
-  await auxiliarSelect(data.tema_id ?? 0, 'subtemes', 'tema_id', 'sub_tema_ca');
+  await auxiliarSelect(data.tema_id ?? 0, 'temes', 'tema_id', 'tema_ca');
 }
