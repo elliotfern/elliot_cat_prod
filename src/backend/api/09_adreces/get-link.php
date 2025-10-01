@@ -1,148 +1,171 @@
 <?php
-header("Access-Control-Allow-Origin: 'https://elliot.cat'");
-header("Access-Control-Allow-Headers: Authorization, Content-Type");
-header("Access-Control-Allow-Methods: GET");
-header('Content-Type: application/json');
 
-// Check if the request method is GET
+
+use App\Config\Database;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Config\Tables;
+
+$db = new Database();
+$pdo = $db->getPdo();
+$slug = $routeParams[0];
+
+// Configuración de cabeceras para aceptar JSON y responder JSON
+header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: GET");
+
+// Definir el dominio permitido
+$allowedOrigin = APP_DOMAIN;
+
+// Llamar a la función para verificar el referer
+checkReferer($allowedOrigin);
+
+// Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
     exit();
 }
 
-if (isset($_SERVER['HTTP_REFERER'])) {
-    $referer = $_SERVER['HTTP_REFERER'];
-    if (strpos($referer, 'elliot.cat') !== false) {
-        header("Access-Control-Allow-Origin: $referer");
-        header("Access-Control-Allow-Headers: Authorization, Content-Type");
-        header("Access-Control-Allow-Methods: GET");
-    } else {
-        http_response_code(403);
-        echo json_encode(['error' => 'Acceso no permitido']);
-        exit;
-    }
-} else {
-    http_response_code(403);
-    echo json_encode(['error' => 'Acceso no permitido']);
-    exit;
-}
-
 
 // 1) Llistat categories enllaços
 // ruta GET => "/api/links/?type=categories"
-if (isset($_GET['type']) && $_GET['type'] == 'categories') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT g.id, g.categoria_ca AS genre
-            FROM aux_categories AS g
+if ($slug === 'categories') {
+
+    $sql = <<<SQL
+            SELECT g.id, g.categoria_ca AS genre
+            FROM %s AS g
             INNER JOIN aux_temes AS t ON g.id = t.idGenere
             INNER JOIN db_links AS l ON l.cat = t.id
             GROUP BY g.id
-            ORDER BY g.categoria_ca ASC"
+            ORDER BY g.categoria_ca ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_TEMES, $pdo),
+
     );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-    echo json_encode($data);
+
+// 1) Llistat enllaços
+// ruta GET => "/api/links/llistatLinks"
+if ($slug === 'llistatLinks') {
+
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(l.id) AS id, l.nom, l.web, l.dateCreated, l.dateModified, st.tema_ca, s.sub_tema_ca, t.tipus_ca, i.idioma_ca
+            FROM %s AS l
+            INNER JOIN %s AS s ON s.id = l.sub_tema_id
+            INNER JOIN %s AS st ON s.tema_id = st.id
+            INNER JOIN %s AS st ON s.tema_id = st.id
+            INNER JOIN %s AS t ON l.tipus = t.id
+            INNER JOIN %s AS i ON l.lang = i.id
+            GROUP BY l.id
+            ORDER BY l.nom ASC
+            SQL;
+ 	 	 	
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_LINKS, $pdo),
+        qi(Tables::DB_SUBTEMES, $pdo),
+        qi(Tables::DB_TEMES, $pdo),
+        qi(Tables::DB_LINKS_TIPUS, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo),   
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // 2) Llistat enllaços segons una categoria en concret
     // ruta GET => "/api/links/?type=categoria$id=11"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'categoria') && (isset($_GET['id']))) {
+} else if ($slug === 'categoriaId') {
     $id = $_GET['id'];
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT t.id AS idTema, t.tema_ca AS tema, g.categoria_ca AS genre
+
+    $stmt = "SELECT t.id AS idTema, t.tema_ca AS tema, g.categoria_ca AS genre
             FROM aux_temes AS t
             INNER JOIN aux_categories AS g ON t.idGenere = g.id
             INNER JOIN db_links AS l ON l.cat = t.id
             WHERE t.idGenere=?
             GROUP BY t.id
-            ORDER BY t.tema_ca ASC"
-    );
-    $stmt->execute([$id]);
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
+            ORDER BY t.tema_ca ASC";
+
 
     // 3) Llistat enllaços segons un topic concret
     // ruta GET => "/api/links/?type=topic$id=11"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'topic') && (isset($_GET['id']))) {
+} else if ($slug === 'temaId') {
 
     $id = $_GET['id'];
 
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT l.web AS url, l.nom, t.id AS idTema, t.tema_ca AS tema, l.id AS linkId, l.lang, i.idioma_ca, ty.id AS idType, ty.type_ca, g.categoria_ca AS genre, g.id AS idCategoria, l.dateCreated
+    $stmt = "SELECT l.web AS url, l.nom, t.id AS idTema, t.tema_ca AS tema, l.id AS linkId, l.lang, i.idioma_ca, ty.id AS idType, ty.type_ca, g.categoria_ca AS genre, g.id AS idCategoria, l.dateCreated
         FROM aux_temes AS t
         INNER JOIN aux_categories AS g ON t.idGenere = g.id
         INNER JOIN db_links AS l ON l.cat = t.id
         LEFT JOIN db_links_type AS ty ON ty.id = l.tipus
         LEFT JOIN aux_idiomes AS i ON l.lang = i.id
         WHERE t.id = :id
-        ORDER BY l.nom ASC");
+        ORDER BY l.nom ASC";
 
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-
-    $stmt->execute();
-
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(array('message' => 'No rows'));
-    } else {
-        while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $data[] = $users;
-        }
-        echo json_encode($data);
-    }
 
     // 4) Llistat de topics
     // ruta GET => "/api/adreces/get/?type=all-topics"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'all-topics')) {
+} else if ($slug === 'llistatTemes') {
     global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT t.id AS idTema, t.tema_ca AS tema, g.categoria_ca AS genre, g.id AS idGenre
+
+    $stmt = "SELECT t.id AS idTema, t.tema_ca AS tema, g.categoria_ca AS genre, g.id AS idGenre
             FROM aux_temes AS t
             INNER JOIN aux_categories AS g ON t.idGenere = g.id
             INNER JOIN db_links AS l ON l.cat = t.id
             GROUP BY t.id
-            ORDER BY t.tema_ca ASC"
-    );
-    $stmt->execute();
-
-    // Obtener los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Enviar los resultados como JSON
-    echo json_encode($data);
-
-    // 4) Llistat de topics
-    // ruta GET => "/api/adreces/get/?type=totsTemes"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'totsTemes')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT 
-            t.id, 
-            CONCAT(t.tema_ca, ' (', g.categoria_ca, ')') AS tema_categoria
-            FROM aux_temes AS t
-            INNER JOIN aux_categories AS g ON t.idGenere = g.id
-            GROUP BY t.id
-            ORDER BY t.tema_ca ASC;"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
-
+            ORDER BY t.tema_ca ASC";
+    
 
     // 5) Ruta para sacar 1 enlace y actualizarlo 
     // ruta GET => "/api/adreces/?linkId=11"
@@ -166,22 +189,6 @@ if (isset($_GET['type']) && $_GET['type'] == 'categories') {
         echo json_encode($row);  // Codifica la fila como un objeto JSON
     }
 
-    // 5) Llistat de tipus de links
-    // ruta POST => "https://elliot.cat/api/adreces/?type=all-types"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'all-types')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT t.id, t.type_ca
-        FROM db_links_type AS t 
-        ORDER BY t.type_ca ASC; "
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

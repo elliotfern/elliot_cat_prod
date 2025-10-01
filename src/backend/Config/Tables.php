@@ -37,4 +37,13 @@ final class Tables
     public const DB_COMPTABILITAT_FACTURACIO_ESTAT = 'db_comptabilitat_facturacio_estat';
     public const DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT = 'db_comptabilitat_facturacio_tipus_pagament';
     public const DB_COMPTABILITAT_CATALEG_PRODUCTES = 'db_comptabilitat_cataleg_productes';
+
+    // Taules Auxiliars
+    public const DB_TEMES = 'aux_temes';
+    public const DB_SUBTEMES = 'aux_sub_temes';
+    public const DB_IDIOMES = 'aux_idiomes';
+
+    // Enllaços
+    public const DB_LINKS = 'db_links';
+    public const DB_LINKS_TIPUS = 'db_links_tipus';
 }

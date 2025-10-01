@@ -1,12 +1,13 @@
 export interface Link {
-  slug: string;
   url: string;
-  idTema: number;
+  id: string;
   nom: string;
   linkId: number;
   dateCreated: string;
-  tema: string;
-  id: string;
   idioma_ca: string;
-  type_ca: string;
+  web: string;
+  dateModified: string;
+  tema_ca: string;
+  sub_tema_ca: string;
+  tipus_ca: string;
 }

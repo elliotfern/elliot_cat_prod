@@ -1,5 +1,7 @@
 <?php
 
+ini_set('default_charset', 'UTF-8');
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailException;
 use App\Utils\Response;
@@ -380,36 +382,37 @@ if ($slug === 'invoice-email') {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">
         <tr><td style="padding:24px 24px 0 24px;" align="center">
-          <img src="' . $logo . '" alt="HispanTIC" style="max-width:220px;height:auto;display:block;">
+          <img src="' . $logo . '" alt="HispanTIC" style="max-width:120px;height:auto;display:block;">
         </td></tr>
         <tr><td style="padding:24px;">
-          <h2 style="margin:0 0 8px 0;font-size:20px;line-height:1.4;">' . htmlspecialchars($nomClient ?: $empresa) . '</h2>
+          <h2 style="margin:0 0 8px 0;font-size:20px;line-height:1.4;">' . htmlspecialchars([
+      'ca' => 'Hola ',
+      'es' => 'Hola ',
+      'en' => 'Hello ',
+      'it' => 'Salve ',
+    ][$lang]) . htmlspecialchars($nomClient ?: $empresa) . '</h2>
           <p style="margin:0 0 16px 0;font-size:14px;line-height:1.6;">' . htmlspecialchars([
       'ca' => 'Adjunt trobaràs la teva factura en format PDF.',
       'es' => 'Adjuntas encontrarás tu factura en formato PDF.',
       'en' => 'Please find attached your invoice in PDF format.',
       'it' => 'In allegato trovi la tua fattura in formato PDF.',
     ][$lang]) . '</p>
-          <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;"><strong>Invoice:</strong> #' . $id_factura . '/' . $any . '</p>
-          <p style="text-align:center;margin:0 0 8px 0;">
-            <a href="' . $cta . '" style="display:inline-block;background:#0d6efd;color:#fff;text-decoration:none;padding:10px 16px;border-radius:6px;font-weight:bold;">' .
-      htmlspecialchars([
-        'ca' => 'Descarregar factura',
-        'es' => 'Descargar factura',
-        'en' => 'Download invoice',
-        'it' => 'Scarica fattura'
-      ][$lang])
-      . '</a>
+          <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;"><strong>' . htmlspecialchars([
+      'ca' => 'Factura núm.',
+      'es' => 'Factura n.º',
+      'en' => 'Invoice number',
+      'it' => 'Numero fattura',
+    ][$lang]) . ':</strong> ' . $id_factura . '/' . $any . '</p>
           </p>
           <p style="margin:20px 0 0 0;font-size:13px;color:#555;">' . htmlspecialchars([
-        'ca' => 'Gràcies per la teva confiança.',
-        'es' => 'Gracias por tu confianza.',
-        'en' => 'Thanks for your trust.',
-        'it' => 'Grazie per la fiducia.',
-      ][$lang]) . '</p>
+      'ca' => 'Gràcies per la teva confiança.',
+      'es' => 'Gracias por tu confianza.',
+      'en' => 'Thanks for your trust.',
+      'it' => 'Grazie per la fiducia.',
+    ][$lang]) . '</p>
         </td></tr>
         <tr><td style="background:#f0f2f6;padding:16px;text-align:center;font-size:12px;color:#6b7280;">
-          HispanTIC · Portlaoise (IE) · VAT: 9323971DA
+          Elliot Fernández - HispanTIC · Fiscal Tax Number: 9323971DA
         </td></tr>
       </table>
     </td></tr>
@@ -419,6 +422,9 @@ if ($slug === 'invoice-email') {
     // PHPMailer
     $brevoApi = $_ENV['BREVO_API'];
     $mail = new PHPMailer(true);
+    $mail->CharSet  = 'UTF-8';                        // <— clave
+    $mail->Encoding = PHPMailer::ENCODING_BASE64;     // o 'quoted-printable'
+    $mail->isHTML(true);
     $mail->isSMTP();
     $mail->Host       = 'smtp-relay.brevo.com'; // Servidor SMTP de Brevo
     $mail->SMTPAuth   = true;
@@ -428,8 +434,7 @@ if ($slug === 'invoice-email') {
     $mail->Port       = 587; // Puerto SMTP para TLS
 
     $mail->setFrom('elliot@hispantic.com', 'Elliot Fernandez - HispanTIC');
-    //$mail->addAddress($clientEmail, $nomClient ?: $empresa);
-    $mail->addAddress('elliot@hispantic.com');
+    $mail->addAddress($clientEmail, $nomClient ?: $empresa);
     $mail->addReplyTo('elliot@hispantic.com', 'Elliot Fernandez - HispanTIC');
     $mail->addBCC('elliot@hispantic.com', 'Arxiu Factures');
 

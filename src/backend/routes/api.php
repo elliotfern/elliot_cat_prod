@@ -287,7 +287,7 @@ $routes = [
     ],
 
     // 09. Adreces interes
-    '/api/adreces/get' => [
+    '/api/adreces/get/{slug}' => [
         'view' => 'src/backend/api/09_adreces/get-link.php',
         'needs_session' => false,
         'header_footer' => false,

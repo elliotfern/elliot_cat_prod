@@ -300,6 +300,15 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    APP_GESTIO . $url['adreces'] . '/llistat-links' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-links.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     APP_GESTIO . $url['adreces'] . '/llistat-categories' => [
         'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-categories.php',
         'needs_session' => true,

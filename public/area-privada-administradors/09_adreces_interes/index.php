@@ -13,6 +13,7 @@
             <div class="alert alert-success quadre">
                 <h4>Tots els enllaços segons:</h4>
                 <ul class="llistat">
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-links">Llistat enllaços</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-temes">Llistat de temes</a></li>
                 </ul>
 
