@@ -10,6 +10,7 @@ const pageType = getPageType(url);
 
 export function adreces() {
   const id = parseInt(pageType[3], 10);
+  const uuid = pageType[3];
   if (pageType[2] === 'modifica-link') {
     const autor = document.getElementById('modificalink');
     if (autor) {
@@ -33,7 +34,7 @@ export function adreces() {
   } else if ([pageType[1], pageType[2]].includes('llistat-subtemes')) {
     taulaLlistatSubTemes();
   } else if (pageType[2] === 'modifica-tema') {
-    formTema(true, id);
+    formTema(true, uuid);
   } else if (pageType[2] === 'nou-tema') {
     formTema(false);
   }

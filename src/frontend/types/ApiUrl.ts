@@ -23,7 +23,7 @@ export type ApiUrls = {
     INVOICE_PDF: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => string;
     FACTURA_CLIENT_ID: (id: number) => string;
     FACTURA_CLIENT_PRODUCTE_ID: (id: number) => string;
-    TEMA_ID: (id: number) => string;
+    TEMA_ID: (id: string) => string;
   };
   POST: {
     PERFIL_CV: string;
