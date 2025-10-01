@@ -23,25 +23,25 @@ export async function taulaLlistatAdrecesPerTema() {
   const columns: TaulaDinamica<Link>[] = [
     {
       header: 'Enllaç',
-      field: 'tema',
+      field: 'tema_ca',
       render: (_: unknown, row: Link) => {
         // Verificamos si `row.tema` tiene un valor
-        if (row.tema) {
+        if (row.tema_ca) {
           const nomTema = document.getElementById('nomTema');
           if (nomTema) {
-            nomTema.innerHTML = `Tema: ${row.tema}`;
+            nomTema.innerHTML = `Tema: ${row.tema_ca}`;
           }
         }
 
         // Generamos el enlace con los valores de `row.nom` y `row.url`
-        return `<a id="${row.idTema}" title="Enllaç" href="${row.url}" target="_blank">${row.nom}</a>`;
+        return `<a id="${row.id}" title="Enllaç" href="${row.url}" target="_blank">${row.nom}</a>`;
       },
     },
     { header: 'Idioma', field: 'idioma_ca' },
-    { header: 'Tipus', field: 'type_ca' },
+    { header: 'Tipus', field: 'tema_ca' },
     {
       header: 'Data creació',
-      field: 'tema',
+      field: 'tema_ca',
       render: (_: unknown, row: Link) => `${formatData(row.dateCreated)}`,
     },
   ];
@@ -50,7 +50,7 @@ export async function taulaLlistatAdrecesPerTema() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Link) => `<a id="${row.idTema}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/adreces/modifica-link/${row.linkId}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Link) => `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/adreces/modifica-link/${row.linkId}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 
@@ -59,6 +59,6 @@ export async function taulaLlistatAdrecesPerTema() {
     containerId: 'taulaLlistatAdreces',
     columns,
     filterKeys: ['nom'],
-    filterByField: 'type_ca',
+    filterByField: 'tema_ca',
   });
 }
