@@ -50,6 +50,156 @@ $userUuid = getAuthenticatedUserUuid(); // para auditoría, si la soportas
 
 // a) Inserir link
 if ($slug === 'link') {
+  // 📨 Entrada JSON
+  $inputData = file_get_contents('php://input');
+  $data = json_decode($inputData, true) ?: [];
+
+  $errors = [];
+
+  // 🔑 id: requerit + format UUID
+  if (empty($data['id'])) {
+    $errors[] = ValidacioErrors::requerit('id');
+  } else {
+    $idText = (string)$data['id'];
+    if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $idText)) {
+      $errors[] = ValidacioErrors::format('id', 'uuid');
+    }
+  }
+
+  // 📥 Campos opcionales (si no vienen, no se actualizan)
+  $nom          = array_key_exists('nom', $data) ? trim((string)$data['nom']) : null;
+  $web          = array_key_exists('web', $data) ? trim((string)$data['web']) : null;
+  $subTemaIdTxt = array_key_exists('sub_tema_id', $data) ? trim((string)$data['sub_tema_id']) : null;
+  $lang         = array_key_exists('lang', $data) ? (int)$data['lang'] : null;
+  $tipus        = array_key_exists('tipus', $data) ? (int)$data['tipus'] : null;
+
+  // 🔎 Validacions bàsiques
+  if ($web !== null && $web !== '' && !filter_var($web, FILTER_VALIDATE_URL)) {
+    $errors[] = ValidacioErrors::format('web', 'url');
+  }
+  if ($subTemaIdTxt !== null && $subTemaIdTxt !== '') {
+    if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $subTemaIdTxt)) {
+      $errors[] = ValidacioErrors::format('sub_tema_id', 'uuid');
+    }
+  }
+  if ($lang !== null && !is_int($lang)) {
+    $errors[] = ValidacioErrors::format('lang', 'int');
+  }
+  if ($tipus !== null && !is_int($tipus)) {
+    $errors[] = ValidacioErrors::format('tipus', 'int');
+  }
+
+  // (Opcional) límites de longitud
+  $maxNom = 5000;
+  $maxWeb = 1000;
+  if ($nom !== null && $nom !== '' && mb_strlen($nom) > $maxNom) {
+    $errors[] = ValidacioErrors::massaLlarg('nom', $maxNom);
+  }
+  if ($web !== null && $web !== '' && mb_strlen($web) > $maxWeb) {
+    $errors[] = ValidacioErrors::massaLlarg('web', $maxWeb);
+  }
+
+  // Debe haber al menos 1 campo a actualizar
+  $camposAActualizar = array_filter([
+    'nom'          => $nom,
+    'web'          => $web,
+    'sub_tema_id'  => $subTemaIdTxt,
+    'lang'         => $lang,
+    'tipus'        => $tipus,
+  ], static fn($v) => $v !== null);
+
+  if (empty($camposAActualizar)) {
+    $errors[] = ValidacioErrors::requerit('almenys_un_camp');
+  }
+
+  if (!empty($errors)) {
+    Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+  }
+
+  try {
+    // Existe el registro?
+    $exists = $conn->prepare("SELECT 1 FROM db_links WHERE id = uuid_text_to_bin(:id) LIMIT 1");
+    $exists->bindValue(':id', $idText, PDO::PARAM_STR);
+    $exists->execute();
+    if (!$exists->fetchColumn()) {
+      Response::error(MissatgesAPI::error('noTrobat'), [ValidacioErrors::noExisteix('id')], 404);
+    }
+
+    // Si se cambia el sub_tema_id, comprobar que exista
+    if (array_key_exists('sub_tema_id', $camposAActualizar) && $subTemaIdTxt !== null && $subTemaIdTxt !== '') {
+      $checkSub = $conn->prepare("SELECT 1 FROM aux_sub_temes WHERE id = uuid_text_to_bin(:stid) LIMIT 1");
+      $checkSub->bindValue(':stid', $subTemaIdTxt, PDO::PARAM_STR);
+      $checkSub->execute();
+      if (!$checkSub->fetchColumn()) {
+        Response::error(MissatgesAPI::error('validacio'), [ValidacioErrors::noExisteix('sub_tema_id')], 404);
+      }
+    }
+
+    // Construcción dinámica del UPDATE
+    $sets = ["dateModified = CURDATE()"]; // siempre actualizamos fecha mod
+    $params = [':id' => [$idText, PDO::PARAM_STR]];
+
+    if (array_key_exists('nom', $camposAActualizar)) {
+      $sets[] = "nom = :nom";
+      $params[':nom'] = [$nom === '' ? null : $nom, $nom === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
+    }
+    if (array_key_exists('web', $camposAActualizar)) {
+      $sets[] = "web = :web";
+      $params[':web'] = [$web === '' ? null : $web, $web === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
+    }
+    if (array_key_exists('sub_tema_id', $camposAActualizar)) {
+      if ($subTemaIdTxt !== '' && $subTemaIdTxt !== null) {
+        $sets[] = "sub_tema_id = uuid_text_to_bin(:sub_tema_id)";
+        $params[':sub_tema_id'] = [$subTemaIdTxt, PDO::PARAM_STR];
+      }
+    }
+    if (array_key_exists('lang', $camposAActualizar)) {
+      $sets[] = "lang = :lang";
+      $params[':lang'] = [$lang, PDO::PARAM_INT];
+    }
+    if (array_key_exists('tipus', $camposAActualizar)) {
+      $sets[] = "tipus = :tipus";
+      $params[':tipus'] = [$tipus, PDO::PARAM_INT];
+    }
+
+    $sql = "UPDATE db_links SET " . implode(', ', $sets) . " WHERE id = uuid_text_to_bin(:id)";
+    $stmt = $conn->prepare($sql);
+
+    foreach ($params as $k => [$val, $type]) {
+      $stmt->bindValue($k, $val, $type);
+    }
+
+    $stmt->execute();
+
+    if ($stmt->rowCount() === 0) {
+      // Sin cambios (mismos valores)
+      Response::success(MissatgesAPI::success('noCanvis'), ['id' => $idText], 200);
+    }
+
+    // 📝 Audit
+    Audit::registrarCanvi(
+      $conn,
+      $userUuid,
+      'UPDATE',
+      "Actualització link ($idText)",
+      Tables::DB_LINKS,
+      $idText // adapta si Audit espera binari
+    );
+
+    Response::success(
+      MissatgesAPI::success('update'),
+      [
+        'id' => $idText,
+        'updated_fields' => array_keys($camposAActualizar),
+      ],
+      200
+    );
+  } catch (PDOException $e) {
+    if ((int)($e->errorInfo[1] ?? 0) === 1062) {
+      Response::error(MissatgesAPI::error('duplicat'), ['Registre duplicat'], 409);
+    }
+    Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+  }
 } else if ($slug === 'tema') {
   // 📨 Entrada JSON
   $inputData = file_get_contents('php://input');
@@ -203,84 +353,84 @@ if ($slug === 'link') {
 } else if ($slug === 'subtema') {
 
   // 📨 Entrada JSON
-$inputData = file_get_contents('php://input');
-$data = json_decode($inputData, true) ?: [];
+  $inputData = file_get_contents('php://input');
+  $data = json_decode($inputData, true) ?: [];
 
-$errors = [];
+  $errors = [];
 
-// 🔑 id: requerit + format UUID
-if (empty($data['id'])) {
+  // 🔑 id: requerit + format UUID
+  if (empty($data['id'])) {
     $errors[] = ValidacioErrors::requerit('id');
-} else {
+  } else {
     $idText = (string)$data['id'];
     if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $idText)) {
-        $errors[] = ValidacioErrors::format('id', 'uuid');
+      $errors[] = ValidacioErrors::format('id', 'uuid');
     }
-}
+  }
 
-// Campos opcionales a actualizar
-$temaIdText = isset($data['tema_id']) ? trim((string)$data['tema_id']) : null;
-$sub_ca     = array_key_exists('sub_tema_ca', $data) ? trim((string)$data['sub_tema_ca']) : null;
-$sub_en     = array_key_exists('sub_tema_en', $data) ? trim((string)$data['sub_tema_en']) : null;
-$sub_es     = array_key_exists('sub_tema_es', $data) ? trim((string)$data['sub_tema_es']) : null;
-$sub_it     = array_key_exists('sub_tema_it', $data) ? trim((string)$data['sub_tema_it']) : null;
-$sub_fr     = array_key_exists('sub_tema_fr', $data) ? trim((string)$data['sub_tema_fr']) : null;
+  // Campos opcionales a actualizar
+  $temaIdText = isset($data['tema_id']) ? trim((string)$data['tema_id']) : null;
+  $sub_ca     = array_key_exists('sub_tema_ca', $data) ? trim((string)$data['sub_tema_ca']) : null;
+  $sub_en     = array_key_exists('sub_tema_en', $data) ? trim((string)$data['sub_tema_en']) : null;
+  $sub_es     = array_key_exists('sub_tema_es', $data) ? trim((string)$data['sub_tema_es']) : null;
+  $sub_it     = array_key_exists('sub_tema_it', $data) ? trim((string)$data['sub_tema_it']) : null;
+  $sub_fr     = array_key_exists('sub_tema_fr', $data) ? trim((string)$data['sub_tema_fr']) : null;
 
-// Si se envía tema_id, validar formato UUID
-if ($temaIdText !== null && $temaIdText !== '') {
+  // Si se envía tema_id, validar formato UUID
+  if ($temaIdText !== null && $temaIdText !== '') {
     if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $temaIdText)) {
-        $errors[] = ValidacioErrors::format('tema_id', 'uuid');
+      $errors[] = ValidacioErrors::format('tema_id', 'uuid');
     }
-}
+  }
 
-// (Opcional) límites de longitud
-$maxLen = 5000;
-$checkLen = function (?string $val, string $field) use (&$errors, $maxLen) {
+  // (Opcional) límites de longitud
+  $maxLen = 5000;
+  $checkLen = function (?string $val, string $field) use (&$errors, $maxLen) {
     if ($val !== null && $val !== '' && mb_strlen($val) > $maxLen) {
-        $errors[] = ValidacioErrors::massaLlarg($field, $maxLen);
+      $errors[] = ValidacioErrors::massaLlarg($field, $maxLen);
     }
-};
-$checkLen($sub_ca, 'sub_tema_ca');
-$checkLen($sub_en, 'sub_tema_en');
-$checkLen($sub_es, 'sub_tema_es');
-$checkLen($sub_it, 'sub_tema_it');
-$checkLen($sub_fr, 'sub_tema_fr');
+  };
+  $checkLen($sub_ca, 'sub_tema_ca');
+  $checkLen($sub_en, 'sub_tema_en');
+  $checkLen($sub_es, 'sub_tema_es');
+  $checkLen($sub_it, 'sub_tema_it');
+  $checkLen($sub_fr, 'sub_tema_fr');
 
-// Debe haber al menos 1 campo a actualizar
-$camposAActualizar = array_filter([
+  // Debe haber al menos 1 campo a actualizar
+  $camposAActualizar = array_filter([
     'tema_id'      => $temaIdText,
     'sub_tema_ca'  => $sub_ca,
     'sub_tema_en'  => $sub_en,
     'sub_tema_es'  => $sub_es,
     'sub_tema_it'  => $sub_it,
     'sub_tema_fr'  => $sub_fr,
-], static fn($v) => $v !== null); // si no viene la clave, no se actualiza
+  ], static fn($v) => $v !== null); // si no viene la clave, no se actualiza
 
-if (empty($camposAActualizar)) {
+  if (empty($camposAActualizar)) {
     $errors[] = ValidacioErrors::requerit('almenys_un_camp');
-}
+  }
 
-if (!empty($errors)) {
+  if (!empty($errors)) {
     Response::error(MissatgesAPI::error('validacio'), $errors, 400);
-}
+  }
 
-try {
+  try {
     // Verificar que el registro a actualizar existe
     $exists = $conn->prepare("SELECT 1 FROM aux_sub_temes WHERE id = uuid_text_to_bin(:id) LIMIT 1");
     $exists->bindValue(':id', $idText, PDO::PARAM_STR);
     $exists->execute();
     if (!$exists->fetchColumn()) {
-        Response::error(MissatgesAPI::error('noTrobat'), [ValidacioErrors::noExisteix('id')], 404);
+      Response::error(MissatgesAPI::error('noTrobat'), [ValidacioErrors::noExisteix('id')], 404);
     }
 
     // Si se va a cambiar tema_id, comprobar que el tema existe
     if (array_key_exists('tema_id', $camposAActualizar) && $temaIdText !== null && $temaIdText !== '') {
-        $checkTema = $conn->prepare("SELECT 1 FROM aux_temes WHERE id = uuid_text_to_bin(:tema_id) LIMIT 1");
-        $checkTema->bindValue(':tema_id', $temaIdText, PDO::PARAM_STR);
-        $checkTema->execute();
-        if (!$checkTema->fetchColumn()) {
-            Response::error(MissatgesAPI::error('validacio'), [ValidacioErrors::noExisteix('tema_id')], 404);
-        }
+      $checkTema = $conn->prepare("SELECT 1 FROM aux_temes WHERE id = uuid_text_to_bin(:tema_id) LIMIT 1");
+      $checkTema->bindValue(':tema_id', $temaIdText, PDO::PARAM_STR);
+      $checkTema->execute();
+      if (!$checkTema->fetchColumn()) {
+        Response::error(MissatgesAPI::error('validacio'), [ValidacioErrors::noExisteix('tema_id')], 404);
+      }
     }
 
     // Construcción dinámica del UPDATE
@@ -288,76 +438,76 @@ try {
     $params = [':id' => [$idText, PDO::PARAM_STR]];
 
     if (array_key_exists('tema_id', $camposAActualizar)) {
-        // tema_id puede venir como cadena vacía para "no cambiar"? aquí solo lo actualizamos si no es null
-        if ($temaIdText !== null && $temaIdText !== '') {
-            $sets[] = "tema_id = uuid_text_to_bin(:tema_id)";
-            $params[':tema_id'] = [$temaIdText, PDO::PARAM_STR];
-        }
+      // tema_id puede venir como cadena vacía para "no cambiar"? aquí solo lo actualizamos si no es null
+      if ($temaIdText !== null && $temaIdText !== '') {
+        $sets[] = "tema_id = uuid_text_to_bin(:tema_id)";
+        $params[':tema_id'] = [$temaIdText, PDO::PARAM_STR];
+      }
     }
     if (array_key_exists('sub_tema_ca', $camposAActualizar)) {
-        $sets[] = "sub_tema_ca = :sub_tema_ca";
-        $params[':sub_tema_ca'] = [$sub_ca === '' ? null : $sub_ca, $sub_ca === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
+      $sets[] = "sub_tema_ca = :sub_tema_ca";
+      $params[':sub_tema_ca'] = [$sub_ca === '' ? null : $sub_ca, $sub_ca === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
     }
     if (array_key_exists('sub_tema_en', $camposAActualizar)) {
-        $sets[] = "sub_tema_en = :sub_tema_en";
-        $params[':sub_tema_en'] = [$sub_en === '' ? null : $sub_en, $sub_en === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
+      $sets[] = "sub_tema_en = :sub_tema_en";
+      $params[':sub_tema_en'] = [$sub_en === '' ? null : $sub_en, $sub_en === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
     }
     if (array_key_exists('sub_tema_es', $camposAActualizar)) {
-        $sets[] = "sub_tema_es = :sub_tema_es";
-        $params[':sub_tema_es'] = [$sub_es === '' ? null : $sub_es, $sub_es === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
+      $sets[] = "sub_tema_es = :sub_tema_es";
+      $params[':sub_tema_es'] = [$sub_es === '' ? null : $sub_es, $sub_es === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
     }
     if (array_key_exists('sub_tema_it', $camposAActualizar)) {
-        $sets[] = "sub_tema_it = :sub_tema_it";
-        $params[':sub_tema_it'] = [$sub_it === '' ? null : $sub_it, $sub_it === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
+      $sets[] = "sub_tema_it = :sub_tema_it";
+      $params[':sub_tema_it'] = [$sub_it === '' ? null : $sub_it, $sub_it === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
     }
     if (array_key_exists('sub_tema_fr', $camposAActualizar)) {
-        $sets[] = "sub_tema_fr = :sub_tema_fr";
-        $params[':sub_tema_fr'] = [$sub_fr === '' ? null : $sub_fr, $sub_fr === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
+      $sets[] = "sub_tema_fr = :sub_tema_fr";
+      $params[':sub_tema_fr'] = [$sub_fr === '' ? null : $sub_fr, $sub_fr === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
     }
 
     if (empty($sets)) {
-        // Nada que actualizar (p.e., tema_id venía vacío y no se tocaron otros campos)
-        Response::success(MissatgesAPI::success('noCanvis'), ['id' => $idText], 200);
+      // Nada que actualizar (p.e., tema_id venía vacío y no se tocaron otros campos)
+      Response::success(MissatgesAPI::success('noCanvis'), ['id' => $idText], 200);
     }
 
     $sql = "UPDATE aux_sub_temes SET " . implode(", ", $sets) . " WHERE id = uuid_text_to_bin(:id)";
     $stmt = $conn->prepare($sql);
 
     foreach ($params as $k => [$val, $type]) {
-        $stmt->bindValue($k, $val, $type);
+      $stmt->bindValue($k, $val, $type);
     }
 
     $stmt->execute();
 
     if ($stmt->rowCount() === 0) {
-        // El registro existe pero los valores son idénticos → sin cambios
-        Response::success(MissatgesAPI::success('noCanvis'), ['id' => $idText], 200);
+      // El registro existe pero los valores son idénticos → sin cambios
+      Response::success(MissatgesAPI::success('noCanvis'), ['id' => $idText], 200);
     }
 
     // 📝 Audit
     Audit::registrarCanvi(
-        $conn,
-        $userUuid,
-        'UPDATE',
-        "Actualització sub-tema ($idText)",
-        Tables::DB_SUBTEMES,
-        $idText // si Audit espera binari, adapta-ho
+      $conn,
+      $userUuid,
+      'UPDATE',
+      "Actualització sub-tema ($idText)",
+      Tables::DB_SUBTEMES,
+      $idText // si Audit espera binari, adapta-ho
     );
 
     Response::success(
-        MissatgesAPI::success('update'),
-        [
-            'id' => $idText,
-            'updated_fields' => array_keys($camposAActualizar),
-        ],
-        200
+      MissatgesAPI::success('update'),
+      [
+        'id' => $idText,
+        'updated_fields' => array_keys($camposAActualizar),
+      ],
+      200
     );
-} catch (PDOException $e) {
+  } catch (PDOException $e) {
     if ((int)($e->errorInfo[1] ?? 0) === 1062) {
-        Response::error(MissatgesAPI::error('duplicat'), ['Registre duplicat'], 409);
+      Response::error(MissatgesAPI::error('duplicat'), ['Registre duplicat'], 409);
     }
     Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
-}
+  }
 } else {
   // response output - data error
   $response['status'] = 'error';

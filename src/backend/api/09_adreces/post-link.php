@@ -50,6 +50,136 @@ $userUuid = getAuthenticatedUserUuid(); // para auditoría, si la soportas
 
 // a) Inserir link
 if ($slug === 'link') {
+  // 📨 Entrada JSON
+  $inputData = file_get_contents('php://input');
+  $data = json_decode($inputData, true) ?: [];
+
+  $errors = [];
+
+  // ✅ Generar ID (UUIDv7) en el servidor
+  try {
+    $idText = Uuid::uuid7()->toString();
+  } catch (Throwable $t) {
+    Response::error(MissatgesAPI::error('errorServidor'), ['No s’ha pogut generar l’UUID'], 500);
+  }
+
+  // 📥 Campos
+  $nom          = isset($data['nom']) ? trim((string)$data['nom']) : null;
+  $web          = isset($data['web']) ? trim((string)$data['web']) : null;
+  $subTemaIdTxt = isset($data['sub_tema_id']) ? trim((string)$data['sub_tema_id']) : null;
+  $lang         = isset($data['lang']) ? (int)$data['lang'] : null;
+  $tipus        = isset($data['tipus']) ? (int)$data['tipus'] : null;
+
+  // 🔎 Validacions bàsiques
+  if (empty($subTemaIdTxt)) {
+    $errors[] = ValidacioErrors::requerit('sub_tema_id');
+  } elseif (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $subTemaIdTxt)) {
+    $errors[] = ValidacioErrors::format('sub_tema_id', 'uuid');
+  }
+
+  if ($lang === null) {
+    $errors[] = ValidacioErrors::requerit('lang');
+  } elseif ($lang < 0) {
+    $errors[] = ValidacioErrors::format('lang', 'int_positiu');
+  }
+
+  if ($tipus === null) {
+    $errors[] = ValidacioErrors::requerit('tipus');
+  }
+
+  if (empty($web)) {
+    $errors[] = ValidacioErrors::requerit('web');
+  } else {
+    // Validación simple de URL (permite http/https)
+    if (!filter_var($web, FILTER_VALIDATE_URL)) {
+      $errors[] = ValidacioErrors::format('web', 'url');
+    }
+  }
+
+  // (Opcional) límites de longitud
+  $maxNom = 5000;
+  if ($nom !== null && $nom !== '' && mb_strlen($nom) > $maxNom) {
+    $errors[] = ValidacioErrors::massaLlarg('nom', $maxNom);
+  }
+  $maxWeb = 1000;
+  if ($web !== null && $web !== '' && mb_strlen($web) > $maxWeb) {
+    $errors[] = ValidacioErrors::massaLlarg('web', $maxWeb);
+  }
+
+  if (!empty($errors)) {
+    Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+  }
+
+
+  try {
+    // ✅ Comprovar que el sub_tema existeix
+    $check = $conn->prepare("SELECT 1 FROM aux_sub_temes WHERE id = uuid_text_to_bin(:sub_tema_id) LIMIT 1");
+    $check->bindValue(':sub_tema_id', $subTemaIdTxt, PDO::PARAM_STR);
+    $check->execute();
+    if (!$check->fetchColumn()) {
+      Response::error(
+        MissatgesAPI::error('validacio'),
+        [ValidacioErrors::noExisteix('sub_tema_id')],
+        404
+      );
+    }
+
+    // INSERT
+    $sql = "INSERT INTO db_links (
+                id, nom, web, sub_tema_id, lang, tipus, dateCreated, dateModified
+            ) VALUES (
+                uuid_text_to_bin(:id),
+                :nom,
+                :web,
+                uuid_text_to_bin(:sub_tema_id),
+                :lang,
+                :tipus,
+                CURDATE(),
+                CURDATE()
+            )";
+
+    $stmt = $conn->prepare($sql);
+
+    // Bindings (nota: nom puede ser NULL)
+    $stmt->bindValue(':id', $idText, PDO::PARAM_STR);
+    $stmt->bindValue(':nom', ($nom === '' ? null : $nom), $nom === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':web', $web, PDO::PARAM_STR);
+    $stmt->bindValue(':sub_tema_id', $subTemaIdTxt, PDO::PARAM_STR);
+    $stmt->bindValue(':lang', $lang, PDO::PARAM_INT);
+    $stmt->bindValue(':tipus', $tipus, PDO::PARAM_INT);
+
+    $stmt->execute();
+
+    // 📝 Audit
+    Audit::registrarCanvi(
+      $conn,
+      $userUuid,
+      'INSERT',
+      "Creació link ($idText) per sub_tema $subTemaIdTxt",
+      Tables::DB_LINKS,
+      $idText // si Audit espera binari, adapta-ho
+    );
+
+    Response::success(
+      MissatgesAPI::success('create'),
+      [
+        'id'           => $idText,
+        'nom'          => $nom,
+        'web'          => $web,
+        'sub_tema_id'  => $subTemaIdTxt,
+        'lang'         => $lang,
+        'tipus'        => $tipus,
+        'dateCreated'  => date('Y-m-d'),
+        'dateModified' => date('Y-m-d'),
+      ],
+      201
+    );
+  } catch (PDOException $e) {
+    if ((int)($e->errorInfo[1] ?? 0) === 1062) {
+      Response::error(MissatgesAPI::error('duplicat'), ['Registre duplicat'], 409);
+    }
+    Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+  }
 } else if ($slug === 'tema') {
   // 📨 Entrada JSON
   $inputData = file_get_contents('php://input');
