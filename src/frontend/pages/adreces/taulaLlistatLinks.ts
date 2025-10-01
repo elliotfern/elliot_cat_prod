@@ -31,6 +31,8 @@ export async function taulaLlistatLinks() {
 
     { header: 'Tema', field: 'sub_tema_ca' },
 
+    { header: 'Tipus', field: 'tipus_ca' },
+
     { header: 'Última actualització', field: 'dateModified', render: (_: unknown, row: Link) => formatData(row.dateModified) },
   ];
 

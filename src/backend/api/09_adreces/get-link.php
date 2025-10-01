@@ -255,7 +255,7 @@ if ($slug === 'llistatTemes') {
     $id = $_GET['id'];
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(l.id) AS id, uuid_bin_to_text(l.sub_tema_id) AS sub_tema_id, l.web, l.nom, l.cat, l.tipus, l.lang
+            SELECT uuid_bin_to_text(l.id) AS id, uuid_bin_to_text(l.sub_tema_id) AS sub_tema_id, l.web, l.nom, l.tipus, l.lang
             FROM db_links AS l
             WHERE l.id = uuid_text_to_bin(:id)
             SQL;

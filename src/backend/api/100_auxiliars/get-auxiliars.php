@@ -121,7 +121,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             ORDER BY i.idioma_ca ASC";
 
     try {
-tipus
+
         $result = $db->getData($query);
 
         if (empty($result)) {
@@ -1031,7 +1031,7 @@ tipus
         );
     }
 
-     // GET : llistat tipus links
+    // GET : llistat tipus links
     // URL: https://elliot.cat/api/auxiliars/get/tipusLinks
 } else if ($slug === "tipusLinks") {
 

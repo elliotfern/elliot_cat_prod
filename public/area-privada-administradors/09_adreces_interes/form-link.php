@@ -28,7 +28,7 @@
 
         <div class="col-md-4">
             <label>Categoria enllaç:</label>
-            <select class="form-select" name="cat" id="cat" value="">
+            <select class="form-select" name="sub_tema_id" id="sub_tema_id" value="">
             </select>
         </div>
 
