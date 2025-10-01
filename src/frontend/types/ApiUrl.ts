@@ -23,6 +23,7 @@ export type ApiUrls = {
     INVOICE_PDF: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => string;
     FACTURA_CLIENT_ID: (id: number) => string;
     FACTURA_CLIENT_PRODUCTE_ID: (id: number) => string;
+    TEMA_ID: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -40,6 +41,7 @@ export type ApiUrls = {
     FACTURA_CLIENT: string;
     FACTURA_CLIENT_PRODUCTE: string;
     ENVIAR_FACTURA_EMAIL: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => string;
+    TEMA: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -56,6 +58,7 @@ export type ApiUrls = {
     CLIENT: string;
     FACTURA_CLIENT: string;
     FACTURA_CLIENT_PRODUCTE: string;
+    TEMA: string;
   };
   DELETE: {};
 };

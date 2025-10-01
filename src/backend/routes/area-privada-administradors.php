@@ -309,8 +309,26 @@ $routes = [
         'menu_intranet' => true
     ],
 
-    APP_GESTIO . $url['adreces'] . '/llistat-categories' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-categories.php',
+      APP_GESTIO . $url['adreces'] . '/nou-link' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-link.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['adreces'] . '/modifica-link/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-link.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['adreces'] . '/llistat-subtemes' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-subtemes.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -327,8 +345,8 @@ $routes = [
         'menu_intranet' => true
     ],
 
-    APP_GESTIO . $url['adreces'] . '/categoria/{id}' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'vista-categoria.php',
+      APP_GESTIO . $url['adreces'] . '/nou-tema' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -336,8 +354,8 @@ $routes = [
         'menu_intranet' => true
     ],
 
-    APP_GESTIO . $url['adreces'] . '/tema/{id}' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'vista-tema.php',
+    APP_GESTIO . $url['adreces'] . '/modifica-tema/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -345,23 +363,7 @@ $routes = [
         'menu_intranet' => true
     ],
 
-    APP_GESTIO . $url['adreces'] . '/nou-link' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'modifica-link.php',
-        'needs_session' => true,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => false,
-        'menu_intranet' => true
-    ],
-
-    APP_GESTIO . $url['adreces'] . '/modifica-link/{id}' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'modifica-link.php',
-        'needs_session' => true,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => false,
-        'menu_intranet' => true
-    ],
+  
 
     // 10. Claus acces
     APP_GESTIO . $url['vault'] => [

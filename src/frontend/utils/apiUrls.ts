@@ -39,6 +39,8 @@ export const ENDPOINTS = {
   FACTURA_CLIENT_PRODUCTE: 'detallsFacturaClientProducte',
   ENVIAR_FACTURA_EMAIL: 'enviarFacturaEmail',
   ENVIAR_FACTURA: 'invoice-email',
+  TEMA_ID: 'temaId',
+  TEMA: 'tema',
 } as const;
 
 // Mapa de recursos disponibles
@@ -47,6 +49,7 @@ const RESOURCES = {
   AUXILIARS: 'auxiliars',
   CIUTATS: 'ciutats',
   COMPTABILITAT: 'comptabilitat',
+  ADRECES: 'adreces',
 } as const;
 
 const TIPUS = {
@@ -81,7 +84,9 @@ export const API_URLS: ApiUrls = {
     FACTURACIO_CLIENTS: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURACIO_CLIENTS}`,
     INVOICE_PDF: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PDF}/${ENDPOINTS.PDF_FACTURA}/${encodeURIComponent(id)}/${encodeURIComponent(lang)}`,
     FACTURA_CLIENT_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_ID}?id=${encodeURIComponent(id)}`,
-    FACTURA_CLIENT_PRODUCTE_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE_ID}?id=${encodeURIComponent(id)}`,
+    FACTURA_CLIENT_PRODUCTE_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE_ID}?id=$
+    {encodeURIComponent(id)}`,
+    TEMA_ID: (id: number) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.TEMA_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -100,6 +105,7 @@ export const API_URLS: ApiUrls = {
     FACTURA_CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.FACTURA_CLIENT}`,
     FACTURA_CLIENT_PRODUCTE: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE}`,
     ENVIAR_FACTURA_EMAIL: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PDF}/${ENDPOINTS.ENVIAR_FACTURA}/${encodeURIComponent(id)}/${encodeURIComponent(lang)}`,
+    TEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.POST}/${ENDPOINTS.TEMA}`,
   },
 
   PUT: {
@@ -117,6 +123,7 @@ export const API_URLS: ApiUrls = {
     CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PUT}/${ENDPOINTS.CLIENTS}`,
     FACTURA_CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PUT}/${ENDPOINTS.FACTURA_CLIENT}`,
     FACTURA_CLIENT_PRODUCTE: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PUT}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE}`,
+    TEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.PUT}/${ENDPOINTS.TEMA}`,
   },
 
   DELETE: {},

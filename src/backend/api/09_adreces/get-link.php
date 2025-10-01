@@ -120,18 +120,47 @@ if ($slug === 'llistatTemes') {
     }
 
     // 2) Llistat enllaços segons una categoria en concret
-    // ruta GET => "/api/links/?type=categoria$id=11"
-} else if ($slug === 'categoriaId') {
+    // ruta GET => "/api/adreces/temaId?id=11"
+} else if ($slug === 'temaId') {
     $id = $_GET['id'];
 
-    $stmt = "SELECT t.id AS idTema, t.tema_ca AS tema, g.categoria_ca AS genre
-            FROM aux_temes AS t
-            INNER JOIN aux_categories AS g ON t.idGenere = g.id
-            INNER JOIN db_links AS l ON l.cat = t.id
-            WHERE t.idGenere=?
-            GROUP BY t.id
-            ORDER BY t.tema_ca ASC";
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(t.id) AS id, t.tema_ca, t.tema_es, t.tema_en, t.tema_it, t.tema_en, t.tema_fr
+            FROM %s AS t
+            WHERE t.id = uuid_text_to_bin(:id)
+            SQL;
 
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_TEMES, $pdo),
+    );
+
+    try {
+
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // 3) Llistat enllaços segons un topic concret
     // ruta GET => "/api/links/?type=topic$id=11"

@@ -19,7 +19,7 @@ export async function taulaLlistatTemes() {
   columns.push({
     header: 'Accions',
     field: 'id',
-    render: (_: unknown, row: Tema) => `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/adreces/modifica-link/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+    render: (_: unknown, row: Tema) => `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/adreces/modifica-tema/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
   });
 
   renderDynamicTable({

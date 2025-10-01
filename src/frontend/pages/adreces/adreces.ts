@@ -3,11 +3,13 @@ import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { taulaLlistatLinks } from './taulaLlistatLinks';
 import { taulaLlistatSubTemes } from './taulaLlistatSubTemes';
 import { taulaLlistatTemes } from './taulaLlistatTemes';
+import { formTema } from './formTema';
 
 const url = window.location.href;
 const pageType = getPageType(url);
 
 export function adreces() {
+  const id = parseInt(pageType[3], 10);
   if (pageType[2] === 'modifica-link') {
     const autor = document.getElementById('modificalink');
     if (autor) {
@@ -30,5 +32,9 @@ export function adreces() {
     taulaLlistatLinks();
   } else if ([pageType[1], pageType[2]].includes('llistat-subtemes')) {
     taulaLlistatSubTemes();
+  } else if (pageType[2] === 'modifica-tema') {
+    formTema(true, id);
+  } else if (pageType[2] === 'nou-tema') {
+    formTema(false);
   }
 }
