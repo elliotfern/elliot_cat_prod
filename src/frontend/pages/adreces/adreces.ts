@@ -1,9 +1,9 @@
 import { getPageType } from '../../utils/urlPath';
-import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { taulaLlistatLinks } from './taulaLlistatLinks';
 import { taulaLlistatSubTemes } from './taulaLlistatSubTemes';
 import { taulaLlistatTemes } from './taulaLlistatTemes';
 import { formTema } from './formTema';
+import { formSubTema } from './formSubTema';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -23,5 +23,9 @@ export function adreces() {
     formTema(true, uuid);
   } else if (pageType[2] === 'nou-tema') {
     formTema(false);
+  } else if (pageType[2] === 'modifica-subtema') {
+    formSubTema(true, uuid);
+  } else if (pageType[2] === 'nou-subtema') {
+    formSubTema(false);
   }
 }

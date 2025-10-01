@@ -175,6 +175,7 @@ if ($slug === 'llistatTemes') {
 
     $query = sprintf(
         $sql,
+        qi(Tables::DB_SUBTEMES, $pdo),
         qi(Tables::DB_TEMES, $pdo),
 
     );
@@ -204,6 +205,50 @@ if ($slug === 'llistatTemes') {
             500
         );
     }
+
+    // 2) Llistat enllaços segons una categoria en concret
+    // ruta GET => "/api/adreces/subTemaId?id=11"
+} else if ($slug === 'subTemaId') {
+    $id = $_GET['id'];
+
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(t.id) AS id, uuid_bin_to_text(t.tema_id) AS tema_id, t.sub_tema_ca, t.sub_tema_en, t.sub_tema_es, t.sub_tema_it, t.sub_tema_fr
+            FROM %s AS t
+            WHERE t.id = uuid_text_to_bin(:id)
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_SUBTEMES, $pdo),
+    );
+
+    try {
+
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // 5) Ruta para sacar 1 enlace y actualizarlo 
     // ruta GET => "/api/adreces/?linkId=11"
 } elseif ((isset($_GET['linkId']))) {

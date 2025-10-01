@@ -309,7 +309,7 @@ $routes = [
         'menu_intranet' => true
     ],
 
-      APP_GESTIO . $url['adreces'] . '/nou-link' => [
+    APP_GESTIO . $url['adreces'] . '/nou-link' => [
         'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-link.php',
         'needs_session' => true,
         'header_footer' => false,
@@ -336,6 +336,24 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    APP_GESTIO . $url['adreces'] . '/nou-subtema' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-subtema.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['adreces'] . '/modifica-subtema/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-subtema.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     APP_GESTIO . $url['adreces'] . '/llistat-temes' => [
         'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-temes.php',
         'needs_session' => true,
@@ -345,7 +363,7 @@ $routes = [
         'menu_intranet' => true
     ],
 
-      APP_GESTIO . $url['adreces'] . '/nou-tema' => [
+    APP_GESTIO . $url['adreces'] . '/nou-tema' => [
         'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
         'needs_session' => true,
         'header_footer' => false,
@@ -363,7 +381,7 @@ $routes = [
         'menu_intranet' => true
     ],
 
-  
+
 
     // 10. Claus acces
     APP_GESTIO . $url['vault'] => [

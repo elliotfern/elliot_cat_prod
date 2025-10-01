@@ -32,7 +32,7 @@ export async function taulaLlistatSubTemes() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: SubTema) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/adreces/modifica-tema/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: SubTema) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/adreces/modifica-subtema/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 
