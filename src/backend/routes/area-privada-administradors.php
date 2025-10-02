@@ -372,6 +372,15 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    APP_GESTIO . $url['adreces'] . '/llistat-temes/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-tema-id.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     APP_GESTIO . $url['adreces'] . '/nou-tema' => [
         'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
         'needs_session' => true,

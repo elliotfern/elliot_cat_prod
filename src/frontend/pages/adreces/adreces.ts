@@ -6,6 +6,7 @@ import { formTema } from './formTema';
 import { formSubTema } from './formSubTema';
 import { formLink } from './formLink';
 import { taulaLlistatSubTemaId } from './taulaLlistatSubTemaId';
+import { taulaLlistatTemaId } from './taulaLlistatTemaId';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -19,6 +20,8 @@ export function adreces() {
     formLink(false);
   } else if (pageType[2] === 'llistat-temes') {
     taulaLlistatTemes();
+  } else if (pageType[2] === 'llistat-tema') {
+    taulaLlistatTemaId(uuid);
   } else if (pageType[2] === 'llistat-links') {
     taulaLlistatLinks();
   } else if (pageType[2] === 'llistat-subtemes') {

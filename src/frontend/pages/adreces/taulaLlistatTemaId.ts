@@ -2,14 +2,12 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-import { DOMAIN_WEB } from '../../utils/urls';
+import { SubTema } from '../../types/SubTema';
 import { Link } from '../../types/Link';
 import { formatData } from '../../utils/formataData';
+import { DOMAIN_WEB } from '../../utils/urls';
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
-export async function taulaLlistatSubTemes() {
+export async function taulaLlistatTemaId(id: string) {
   const isAdmin = await getIsAdmin();
 
   const columns: TaulaDinamica<Link>[] = [
@@ -36,10 +34,10 @@ export async function taulaLlistatSubTemes() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/adreces/get/llistatTemes`,
-    containerId: 'taulaLlistatSubTemes',
+    url: `https://${window.location.host}/api/adreces/get/llistatLinksTemaId?id=${id}`,
+    containerId: 'taulaLlistatTemaId',
     columns,
     filterKeys: ['tema_ca'],
-    filterByField: 'tema_ca',
+    //filterByField: 'tema_ca',
   });
 }
