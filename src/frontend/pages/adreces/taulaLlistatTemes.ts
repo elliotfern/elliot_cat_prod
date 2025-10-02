@@ -8,7 +8,7 @@ export async function taulaLlistatTemes() {
     {
       header: 'Tema',
       field: 'tema_ca',
-      render: (_: unknown, row: Tema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-temes/${row.id}">${row.tema_ca}</a>`,
+      render: (_: unknown, row: Tema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-tema/${row.id}">${row.tema_ca}</a>`,
     },
   ];
 

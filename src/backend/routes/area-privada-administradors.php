@@ -372,7 +372,7 @@ $routes = [
         'menu_intranet' => true
     ],
 
-    APP_GESTIO . $url['adreces'] . '/llistat-temes/{id}' => [
+    APP_GESTIO . $url['adreces'] . '/llistat-tema/{id}' => [
         'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-tema-id.php',
         'needs_session' => true,
         'header_footer' => false,
