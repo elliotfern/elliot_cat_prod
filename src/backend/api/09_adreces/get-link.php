@@ -307,6 +307,49 @@ if ($slug === 'llistatTemes') {
             500
         );
     }
+
+    // 5) Ruta per modificar un subTema
+    // ruta GET => "/api/adreces/detallsSubTemaId=11"
+} elseif ($slug === 'detallsSubTemaId') {
+    $id = $_GET['id'];
+
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(st.id) AS id, uuid_bin_to_text(st.tema_id) AS tema_id, st.sub_tema_ca, st.sub_tema_en, st.sub_tema_es, st.sub_tema_it, st.sub_tema_fr
+            FROM %s AS st
+            WHERE st.sub_tema_id = uuid_text_to_bin(:id)
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_SUBTEMES, $pdo),
+    );
+
+    try {
+
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, false);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

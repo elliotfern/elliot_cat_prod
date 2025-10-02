@@ -41,7 +41,7 @@ export const ENDPOINTS = {
   ENVIAR_FACTURA: 'invoice-email',
   TEMA_ID: 'temaId',
   TEMA: 'tema',
-  SUBTEMA_ID: 'subTemaId',
+  SUBTEMA_ID: 'detallsSubTemaId',
   SUBTEMA: 'subtema',
   LINK_ID: 'linkId',
   LINK: 'link',
