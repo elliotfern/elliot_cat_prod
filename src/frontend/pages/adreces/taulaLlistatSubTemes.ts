@@ -9,9 +9,15 @@ export async function taulaLlistatSubTemes() {
 
   const columns: TaulaDinamica<SubTema>[] = [
     {
+      header: 'Subtema',
+      field: 'sub_tema_ca',
+      render: (_: unknown, row: SubTema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-subtema/${row.id}">${row.sub_tema_ca}</a>`,
+    },
+
+    {
       header: 'Tema',
       field: 'tema_ca',
-      render: (_: unknown, row: SubTema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-subtema/${row.id}">${row.sub_tema_ca}</a>`,
+      render: (_: unknown, row: SubTema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-tema/${row.id}">${row.tema_ca}</a>`,
     },
   ];
 

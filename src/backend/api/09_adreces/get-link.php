@@ -169,14 +169,16 @@ if ($slug === 'llistatTemes') {
 } else if ($slug === 'llistatSubTemes') {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(st.id) AS id, uuid_bin_to_text(st.tema_id) AS tema_id, st.sub_tema_ca
+            SELECT uuid_bin_to_text(st.id) AS id, uuid_bin_to_text(st.tema_id) AS tema_id, st.sub_tema_ca, t.tema_ca
             FROM %s AS st
+            LEFT JOIN %s AS t ON st.tema_id = t.id
             ORDER BY st.sub_tema_ca ASC
             SQL;
 
     $query = sprintf(
         $sql,
         qi(Tables::DB_SUBTEMES, $pdo),
+        qi(Tables::DB_TEMES, $pdo),
 
     );
 
