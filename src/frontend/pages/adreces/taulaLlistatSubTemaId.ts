@@ -5,6 +5,7 @@ import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { SubTema } from '../../types/SubTema';
 import { Link } from '../../types/Link';
 import { formatData } from '../../utils/formataData';
+import { DOMAIN_WEB } from '../../utils/urls';
 
 export async function taulaLlistatSubTemaId(id: string) {
   const isAdmin = await getIsAdmin();
@@ -28,7 +29,7 @@ export async function taulaLlistatSubTemaId(id: string) {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Link) => `<a id="${row.id}" href="https://${window.location.hostname}/gestio/adreces/modifica-link/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Link) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/modifica-link/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 

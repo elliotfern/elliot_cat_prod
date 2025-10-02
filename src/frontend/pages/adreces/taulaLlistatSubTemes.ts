@@ -15,7 +15,7 @@ export async function taulaLlistatSubTemes() {
     {
       header: 'Subtema',
       field: 'sub_tema_ca',
-      render: (_: unknown, row: SubTema) => `<a id="${row.id}" href="https://${DOMAIN_WEB}/gestio/adreces/llistat-subtema/${row.id}">${row.sub_tema_ca}</a>`,
+      render: (_: unknown, row: SubTema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-subtema/${row.id}">${row.sub_tema_ca}</a>`,
     },
     { header: 'Categoría', field: 'tema_ca' },
   ];
@@ -24,7 +24,7 @@ export async function taulaLlistatSubTemes() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: SubTema) => `<a id="${row.id}" href="https://${DOMAIN_WEB}/gestio/adreces/modifica-subtema/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: SubTema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/modifica-subtema/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 
