@@ -47,13 +47,6 @@ $base_routes = [
     $url['persones'] => APP_INTRANET_DIR . APP_PERSONES_DIR . 'index.php',
     $url['persones'] . '/llistat-persones' => APP_INTRANET_DIR . APP_PERSONES_DIR . 'index.php',
 
-    // 09. Adreces interes
-    $url['adreces'] => APP_INTRANET_DIR . APP_ADRECES_DIR . 'index.php',
-    $url['adreces'] . '/llistat-categories' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-categories.php',
-    $url['adreces'] . '/llistat-temes' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-temes.php',
-    $url['adreces'] . '/categoria/{id}' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'vista-categoria.php',
-    $url['adreces'] . '/tema/{id}' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'vista-tema.php',
-
     // 13. Blog
     $url['blog'] => APP_INTRANET_DIR . APP_BLOG_DIR . 'index.php',
     $url['blog'] . '/article/{slug}' => APP_INTRANET_DIR . APP_BLOG_DIR . 'fitxa-article.php',

@@ -22,8 +22,8 @@
                 <h4>Marcadors:</h4>
                 <ul class="llistat">
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/0199a079-8863-7047-a05a-85e0723e4684">Elliot.cat</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">MemòriaTerrassa.cat</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Finguer.com</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/0199a090-d628-70b2-80c7-482f250e18a4">MemòriaTerrassa.cat</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/0199a3f0-d3f7-7198-ab0f-6bb987abf73d">Finguer.com</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Programació web</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Cinema</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Música</a></li>

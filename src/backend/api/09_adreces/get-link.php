@@ -206,49 +206,6 @@ if ($slug === 'llistatTemes') {
         );
     }
 
-    // 2) Llistat enllaços segons una categoria en concret
-    // ruta GET => "/api/adreces/subTemaId?id=11"
-} else if ($slug === 'subTemaId') {
-    $id = $_GET['id'];
-
-    $sql = <<<SQL
-            SELECT uuid_bin_to_text(t.id) AS id, uuid_bin_to_text(t.tema_id) AS tema_id, t.sub_tema_ca, t.sub_tema_en, t.sub_tema_es, t.sub_tema_it, t.sub_tema_fr
-            FROM %s AS t
-            WHERE t.id = uuid_text_to_bin(:id)
-            SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_SUBTEMES, $pdo),
-    );
-
-    try {
-
-        $params = [':id' => $id];
-        $result = $db->getData($query, $params, true);
-
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
-
-        Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
-        );
-    } catch (PDOException $e) {
-        Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
-        );
-    }
-
     // 5) Ruta para sacar 1 enlace y actualizarlo 
     // ruta GET => "/api/adreces/?linkId=11"
 } elseif ($slug === 'linkId') {
@@ -298,20 +255,34 @@ if ($slug === 'llistatTemes') {
     $id = $_GET['id'];
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(l.id) AS id, uuid_bin_to_text(l.sub_tema_id) AS sub_tema_id, l.web, l.nom, l.tipus, l.lang, l.dateCreated, l.dateModified
-            FROM db_links AS l
+            SELECT uuid_bin_to_text(l.id) AS id, uuid_bin_to_text(l.sub_tema_id) AS sub_tema_id, l.web, l.nom, l.tipus, l.lang, l.dateCreated, l.dateModified, st.sub_tema_ca, t.tema_ca, lt.tipus_ca
+            FROM %s AS l
+            LEFT JOIN %s AS st ON l.sub_tema_id = st.id
+            LEFT JOIN %s AS t ON st.tema_id = t.id
+            LEFT JOIN %s AS lt ON l.tipus = lt.id
             WHERE l.sub_tema_id = uuid_text_to_bin(:id)
             SQL;
 
     $query = sprintf(
         $sql,
+        qi(Tables::DB_LINKS, $pdo),
         qi(Tables::DB_SUBTEMES, $pdo),
+        qi(Tables::DB_TEMES, $pdo),
+        qi(Tables::DB_LINKS_TIPUS, $pdo),
     );
+
+
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(st.id) AS id, uuid_bin_to_text(st.tema_id) AS tema_id, st.sub_tema_ca, st.sub_tema_en, st.sub_tema_es, st.sub_tema_it, st.sub_tema_fr, t.tema_ca
+            FROM %s AS st
+            LEFT JOIN %s AS t ON st.tema_id = t.id
+            ORDER BY st.sub_tema_ca ASC
+            SQL;
 
     try {
 
         $params = [':id' => $id];
-        $result = $db->getData($query, $params, true);
+        $result = $db->getData($query, $params, false);
 
         if (empty($result)) {
             Response::error(
