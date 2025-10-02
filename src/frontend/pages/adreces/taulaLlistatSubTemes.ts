@@ -36,7 +36,7 @@ export async function taulaLlistatSubTemes() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/adreces/get/llistatTemes`,
+    url: `https://${window.location.host}/api/adreces/get/llistatSubTemes`,
     containerId: 'taulaLlistatSubTemes',
     columns,
     filterKeys: ['tema_ca'],
