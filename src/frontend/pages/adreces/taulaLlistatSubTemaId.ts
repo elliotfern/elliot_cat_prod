@@ -37,7 +37,7 @@ export async function taulaLlistatSubTemaId(id: string) {
     url: `https://${window.location.host}/api/adreces/get/subTemaId?id=${id}`,
     containerId: 'taulaLlistatSubTemaId',
     columns,
-    filterKeys: ['tema_ca'],
-    filterByField: 'nom',
+    filterKeys: ['nom'],
+    filterByField: 'sub_tema_ca',
   });
 }
