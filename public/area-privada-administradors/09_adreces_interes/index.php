@@ -24,10 +24,9 @@
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/0199a079-8863-7047-a05a-85e0723e4684">Elliot.cat</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/0199a090-d628-70b2-80c7-482f250e18a4">MemòriaTerrassa.cat</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/0199a3f0-d3f7-7198-ab0f-6bb987abf73d">Finguer.com</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Programació web</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Cinema</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Música</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Televisió</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-tema/0197acfe-0628-70e4-a2d3-d75ede595dd8/">Programació web</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-tema/0197acfe-0628-70e4-a2d3-d75edf565f0c">Cinema i tv</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/0199ae6f-24c9-7395-9bfc-87cc72c50939">Playlist Música</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['adreces']; ?>/llistat-subtema/">Altres</a></li>
                 </ul>
 

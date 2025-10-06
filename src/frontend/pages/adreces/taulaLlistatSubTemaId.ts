@@ -38,6 +38,6 @@ export async function taulaLlistatSubTemaId(id: string) {
     containerId: 'taulaLlistatSubTemaId',
     columns,
     filterKeys: ['tema_ca'],
-    filterByField: 'tema_ca',
+    filterByField: 'nom',
   });
 }

@@ -263,6 +263,7 @@ if ($slug === 'llistatTemes') {
             LEFT JOIN %s AS t ON st.tema_id = t.id
             LEFT JOIN %s AS lt ON l.tipus = lt.id
             WHERE l.sub_tema_id = uuid_text_to_bin(:id)
+            ORDER BY l.nom ASC
             SQL;
 
     $query = sprintf(
@@ -316,7 +317,7 @@ if ($slug === 'llistatTemes') {
     $sql = <<<SQL
             SELECT uuid_bin_to_text(st.id) AS id, uuid_bin_to_text(st.tema_id) AS tema_id, st.sub_tema_ca, st.sub_tema_en, st.sub_tema_es, st.sub_tema_it, st.sub_tema_fr
             FROM %s AS st
-            WHERE st.sub_tema_id = uuid_text_to_bin(:id)
+            WHERE st.id = uuid_text_to_bin(:id)
             SQL;
 
     $query = sprintf(
@@ -327,7 +328,7 @@ if ($slug === 'llistatTemes') {
     try {
 
         $params = [':id' => $id];
-        $result = $db->getData($query, $params, false);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(
