@@ -43,6 +43,16 @@
 </div>
 
 <style>
+    .cal-day-event a {
+        color: inherit;
+        text-decoration: none;
+        display: block;
+    }
+
+    .cal-day-event a:hover {
+        text-decoration: underline;
+    }
+
     #agenda-cal-wrapper {
         max-width: 960px;
         margin: 0 auto;

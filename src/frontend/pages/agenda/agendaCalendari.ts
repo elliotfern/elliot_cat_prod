@@ -185,7 +185,13 @@ function renderCalendar(year: number, monthIndex: number, events: AgendaEsdeveni
       dayEvents.slice(0, maxVisible).forEach((ev) => {
         const evDiv = document.createElement('div');
         evDiv.className = getEventClass(ev.tipus);
-        evDiv.textContent = getShortEventLabel(ev);
+
+        const link = document.createElement('a');
+        link.href = `/gestio/agenda/veure-esdeveniment/${ev.id_esdeveniment}`;
+        link.textContent = getShortEventLabel(ev);
+        link.title = ev.titol; // tooltip opcional
+
+        evDiv.appendChild(link);
         dayEventsContainer.appendChild(evDiv);
       });
 
