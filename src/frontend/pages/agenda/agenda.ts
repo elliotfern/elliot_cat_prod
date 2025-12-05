@@ -1,5 +1,6 @@
 import { getPageType } from '../../utils/urlPath';
 import { initCalendariAgenda } from './agendaCalendari';
+import { carregarEsdevenimentDetall } from './agendaEsdevenimentId';
 import { carregarAgendaFutura } from './agendaEsdevenimentsFuturs';
 
 const url = window.location.href;
@@ -14,5 +15,7 @@ export function agenda() {
     carregarAgendaFutura(usuariId);
   } else if (pageType[2] === 'calendari-esdeveniments') {
     initCalendariAgenda();
+  } else if (pageType[2] === 'veure-esdeveniment') {
+    carregarEsdevenimentDetall();
   }
 }
