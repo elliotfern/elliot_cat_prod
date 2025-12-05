@@ -479,5 +479,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    // CRON
+    '/api/cron/agenda-dia' => [
+        'view' => 'src/backend/api/22_cron/cron-agenda-dia.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 ];
 return $routes;
