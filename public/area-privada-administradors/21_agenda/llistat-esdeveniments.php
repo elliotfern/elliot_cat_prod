@@ -34,6 +34,57 @@
         color: #1f2933;
     }
 
+    .agenda-event-meta {
+        font-size: 0.9rem;
+        font-weight: 600;
+        /* más destacado */
+        color: #111827;
+        margin-top: 0.35rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: flex-start;
+    }
+
+    .agenda-event-meta strong {
+        font-weight: 700;
+    }
+
+    /* Botón Modificar */
+    .agenda-btn-modificar {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid rgba(37, 99, 235, 0.7);
+        background: rgba(59, 130, 246, 0.05);
+        color: #1d4ed8;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    }
+
+    .agenda-btn-modificar:hover {
+        background: rgba(59, 130, 246, 0.12);
+        box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .agenda-btn-modificar:active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+
+    /* Nuevo tipo: viatge */
+    .agenda-badge-tipus-viatge {
+        background: rgba(14, 165, 233, 0.08);
+        color: #0369a1;
+        border-color: rgba(14, 165, 233, 0.4);
+    }
+
+
     .agenda-title {
         font-size: 1.8rem;
         font-weight: 700;

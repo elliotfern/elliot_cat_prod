@@ -1,5 +1,5 @@
 // models/AgendaEsdeveniment.ts
-export type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'altre';
+export type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'altre' | 'viatge';
 export type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat' | 'cancel-lat';
 
 export interface AgendaEsdeveniment {
@@ -93,6 +93,8 @@ function getTipusBadgeClass(tipus: string): string {
       return 'agenda-badge agenda-badge-tipus-visita_medica';
     case 'videotrucada':
       return 'agenda-badge agenda-badge-tipus-videotrucada';
+    case 'viatge':
+      return 'agenda-badge agenda-badge-tipus-viatge'; // 👈 nuevo caso
     default:
       return 'agenda-badge agenda-badge-tipus-altre';
   }
@@ -199,7 +201,7 @@ export async function carregarAgendaFutura(usuariId: number): Promise<void> {
 
         const tipusBadge = document.createElement('span');
         tipusBadge.className = getTipusBadgeClass(ev.tipus);
-        tipusBadge.textContent = ev.tipus === 'reunio' ? 'Reunió' : ev.tipus === 'visita_medica' ? 'Visita mèdica' : ev.tipus === 'videotrucada' ? 'Videotrucada' : 'Altres';
+        tipusBadge.textContent = ev.tipus === 'reunio' ? 'Reunió' : ev.tipus === 'visita_medica' ? 'Visita mèdica' : ev.tipus === 'videotrucada' ? 'Videotrucada' : ev.tipus === 'viatge' ? 'Viatge' : 'Altres';
 
         const estatBadge = document.createElement('span');
         estatBadge.className = getEstatBadgeClass(ev.estat);
@@ -221,6 +223,7 @@ export async function carregarAgendaFutura(usuariId: number): Promise<void> {
         }
 
         mainDiv.appendChild(titleSpan);
+
         if (ev.descripcio) {
           const desc = document.createElement('div');
           desc.className = 'agenda-event-desc';
@@ -229,11 +232,25 @@ export async function carregarAgendaFutura(usuariId: number): Promise<void> {
           desc.textContent = ev.descripcio;
           mainDiv.appendChild(desc);
         }
+
         mainDiv.appendChild(badgesDiv);
 
+        // META (fecha/hora + botón)
         const metaDiv = document.createElement('div');
         metaDiv.className = 'agenda-event-meta';
-        metaDiv.textContent = formatEventDate(ev);
+
+        // 1) Fecha/hora en negrita
+        const dateSpan = document.createElement('strong');
+        dateSpan.textContent = formatEventDate(ev);
+
+        // 2) Botón "Modificar"
+        const editBtn = document.createElement('a');
+        editBtn.className = 'agenda-btn-modificar';
+        editBtn.href = `/gestio/agenda/modifica-esdeveniment/${ev.id_esdeveniment}`;
+        editBtn.textContent = 'Modificar';
+
+        metaDiv.appendChild(dateSpan);
+        metaDiv.appendChild(editBtn);
 
         item.appendChild(mainDiv);
         item.appendChild(metaDiv);
