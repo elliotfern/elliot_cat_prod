@@ -446,5 +446,38 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    // 21 Agenda esdeveniments
+    '/api/agenda/get/{slug}' => [
+        'view' => 'src/backend/api/21_agenda/get-agenda.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/agenda/post/{slug}' => [
+        'view' => 'src/backend/api/21_agenda/post-agenda.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/agenda/put/{slug}' => [
+        'view' => 'src/backend/api/21_agenda/put-agenda.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/agenda/delete/{slug}' => [
+        'view' => 'src/backend/api/21_agenda/delete-agenda.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 ];
 return $routes;

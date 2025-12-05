@@ -46,4 +46,7 @@ final class Tables
     // Enllaços
     public const DB_LINKS = 'db_links';
     public const DB_LINKS_TIPUS = 'db_links_tipus';
+
+    // Agenda esdeveniments
+    public const AGENDA_ESDEVENIMENTS = 'db_agenda_esdeveniments';
 }

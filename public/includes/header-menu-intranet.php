@@ -40,6 +40,8 @@
 
       <a href="<?php echo APP_INTRANET . $url['curriculum']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">20. Currículum</a>
 
+      <a href="<?php echo APP_INTRANET . $url['agenda']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">21. Agenda</a>
+
     </div>
   </div>
 </div>
