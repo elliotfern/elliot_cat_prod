@@ -18,7 +18,7 @@
             <div class="alert alert-success quadre">
                 <ul class="llistat">
                     <li><a href="<?php echo APP_INTRANET . $url['agenda']; ?>/llistat-esdeveniments">Veure llistat propers esdeveniments</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['agenda']; ?>/calendari">Veure calendari</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['agenda']; ?>/calendari-esdeveniments">Veure calendari</a></li>
                 </ul>
             </div>
 
