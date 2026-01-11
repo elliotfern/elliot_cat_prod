@@ -1,30 +1,62 @@
 import { RenderTableOptions } from '../../types/TaulaDinamica';
 
-export async function renderDynamicTable<T>({ url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField }: RenderTableOptions<T>) {
+type ApiResult<T> = {
+  status?: string;
+  message?: string;
+  data?: { items?: T[] } | T[];
+  items?: T[];
+};
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function pluckItems<T>(raw: unknown): T[] {
+  // Si és array directe
+  if (Array.isArray(raw)) return raw as T[];
+
+  if (!isObject(raw)) return [];
+
+  // raw.items
+  if (Array.isArray(raw.items)) return raw.items as T[];
+
+  // raw.data pot ser array o objecte amb items
+  const data = raw.data;
+  if (Array.isArray(data)) return data as T[];
+
+  if (isObject(data) && Array.isArray(data.items)) return data.items as T[];
+
+  return [];
+}
+
+export async function renderDynamicTable<T extends object>(options: RenderTableOptions<T>): Promise<void> {
+  const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField } = options;
+
   const container = document.getElementById(containerId);
-  if (!container) return console.error(`Contenedor #${containerId} no encontrado`);
-
-  const response = await fetch(url);
-  const result = await response.json();
-
-  if (result.status === 'error') {
-    container.innerHTML = `<div class="alert alert-info">${result.message || 'No hi ha dades.'}</div>`;
+  if (!container) {
+    console.error(`Contenedor #${containerId} no encontrado`);
     return;
   }
 
-  // Después:
-  type ApiResult<T> = {
-    status?: string;
-    data?: { items?: T[] } | T[];
-    items?: T[];
-  };
+  let result: ApiResult<T>;
 
-  function pluckItems<T>(r: ApiResult<T>): T[] {
-    if (Array.isArray(r?.data && (r.data as any).items)) return (r.data as any).items as T[];
-    if (Array.isArray(r?.data as any)) return r.data as T[];
-    if (Array.isArray(r?.items)) return r.items as T[];
-    if (Array.isArray(r as any)) return r as any as T[];
-    return [];
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      container.innerHTML = `<div class="alert alert-info">Error HTTP ${response.status}</div>`;
+      return;
+    }
+
+    result = (await response.json()) as ApiResult<T>;
+  } catch (_e: unknown) {
+    container.innerHTML = `<div class="alert alert-info">Error de xarxa o resposta invàlida</div>`;
+    return;
+  }
+
+  if (result.status === 'error') {
+    container.innerHTML = `<div class="alert alert-info">${result.message ?? 'No hi ha dades.'}</div>`;
+    return;
   }
 
   const data: T[] = pluckItems<T>(result);
@@ -73,14 +105,25 @@ export async function renderDynamicTable<T>({ url, columns, containerId, rowsPer
 
   function applyFilters() {
     const search = normalizeText(searchInput.value);
+
     filteredData = data
-      .filter(
-        (row) =>
-          !activeButtonFilter ||
-          // Si el filtro es sobre un array (como grups), mira si incluye el filtro
-          (Array.isArray(row[filterByField!]) ? (row[filterByField!] as unknown as string[]).includes(activeButtonFilter!) : row[filterByField!] === activeButtonFilter)
-      )
-      .filter((row) => (search.length === 0 ? true : filterKeys.some((key) => normalizeText(String(row[key])).includes(search))));
+      .filter((row) => {
+        if (!activeButtonFilter) return true;
+        if (!filterByField) return true;
+
+        const fieldValue = row[filterByField];
+
+        // Si el filtro es sobre un array (como grups), mira si incluye el filtro
+        if (Array.isArray(fieldValue)) {
+          return fieldValue.map(String).includes(activeButtonFilter);
+        }
+
+        return String(fieldValue) === activeButtonFilter;
+      })
+      .filter((row) => {
+        if (search.length === 0) return true;
+        return filterKeys.some((key) => normalizeText(String(row[key])).includes(search));
+      });
 
     currentPage = 1;
     renderTable();
@@ -91,11 +134,22 @@ export async function renderDynamicTable<T>({ url, columns, containerId, rowsPer
 
     let uniqueValues: string[] = [];
 
-    if (data.length > 0 && Array.isArray(data[0][filterByField!])) {
+    const first = data[0]?.[filterByField];
+
+    if (Array.isArray(first)) {
       // Si el campo es un array (como grups)
-      uniqueValues = Array.from(new Set(data.flatMap((row) => row[filterByField!] as unknown as string[]))).filter(Boolean);
+      uniqueValues = Array.from(
+        new Set(
+          data
+            .flatMap((row) => {
+              const v = row[filterByField];
+              return Array.isArray(v) ? v : [];
+            })
+            .map(String)
+        )
+      ).filter(Boolean);
     } else {
-      uniqueValues = Array.from(new Set(data.map((row) => row[filterByField!]))).filter(Boolean) as string[];
+      uniqueValues = Array.from(new Set(data.map((row) => String(row[filterByField])))).filter(Boolean);
     }
 
     uniqueValues = uniqueValues.sort((a, b) => {
@@ -150,7 +204,7 @@ export async function renderDynamicTable<T>({ url, columns, containerId, rowsPer
           `<tr>${columns
             .map((col) => {
               const value = row[col.field];
-              return `<td>${col.render ? col.render(value, row) : value}</td>`;
+              return `<td>${col.render ? col.render(value, row) : String(value ?? '')}</td>`;
             })
             .join('')}</tr>`
       )
@@ -170,6 +224,7 @@ export async function renderDynamicTable<T>({ url, columns, containerId, rowsPer
       };
       pagination.appendChild(link);
     }
+
     totalRecords.textContent = `Número total de registres: ${filteredData.length}`;
   }
 

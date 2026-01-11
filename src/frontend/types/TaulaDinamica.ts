@@ -1,14 +1,14 @@
-export type TaulaDinamica<T> = {
+export type TaulaDinamica<T extends object> = {
   header: string;
   field: keyof T;
-  render?: (value: T[keyof T], row: T) => string;
+  render?: (value: unknown, row: T) => string;
 };
 
-export type RenderTableOptions<T> = {
+export type RenderTableOptions<T extends object> = {
   url: string;
-  columns: TaulaDinamica<T>[];
+  columns: Array<TaulaDinamica<T>>;
   containerId: string;
   rowsPerPage?: number;
-  filterKeys?: (keyof T)[];
+  filterKeys?: Array<keyof T>;
   filterByField?: keyof T;
 };
