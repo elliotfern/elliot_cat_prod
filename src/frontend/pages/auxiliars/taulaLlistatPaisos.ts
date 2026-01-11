@@ -8,31 +8,27 @@ import { Pais } from '../../types/Pais';
 const url = window.location.href;
 const pageType = getPageType(url);
 
-export async function taulaLlistatPaisos() {
+export async function taulaLlistatPaisos(): Promise<void> {
   const isAdmin = await getIsAdmin();
-  let slug: string = '';
-  let gestioUrl: string = '';
 
-  if (isAdmin) {
-    slug = pageType[3];
-    gestioUrl = '/gestio';
-  } else {
-    slug = pageType[2];
-  }
+  // Si no fas servir slug, millor eliminar-lo
+  // const slug = isAdmin ? pageType[3] : pageType[2];
+
+  const gestioUrl = isAdmin ? '/gestio' : '';
+
+  const editHref = (id: string): string => `https://${window.location.hostname}${gestioUrl}/auxiliars/modifica-pais/${id}`;
 
   const columns: TaulaDinamica<Pais>[] = [
     {
-      header: 'Pais (català)',
+      header: 'País (català)',
       field: 'pais_ca',
-      render: (_: unknown, row: Pais) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.pais_ca}</a>`,
+      render: (_: unknown, row: Pais) => `<a id="pais-${row.id}-ca" href="${editHref(row.id)}">${row.pais_ca}</a>`,
     },
-
     {
       header: 'País (anglès)',
       field: 'pais_en',
-      render: (_: unknown, row: Pais) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.pais_en}</a>`,
+      render: (_: unknown, row: Pais) => `<a id="pais-${row.id}-en" href="${editHref(row.id)}">${row.pais_en}</a>`,
     },
-
     {
       header: 'Última actualització',
       field: 'updated_at',
@@ -44,7 +40,7 @@ export async function taulaLlistatPaisos() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Pais) => `<a a id="${row.id}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/auxiliars/modifica-pais/${row.id}"><button class="btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Pais) => `<a title="Modifica" href="${editHref(row.id)}"><button class="btn-petit">Modifica</button></a>`,
     });
   }
 
@@ -52,7 +48,6 @@ export async function taulaLlistatPaisos() {
     url: `https://api.elliot.cat/api/paisos`,
     containerId: 'taulaLlistatPaisos',
     columns,
-    filterKeys: ['pais_ca'],
-    //filterByField: 'pais_ca',
+    filterKeys: ['pais_ca', 'pais_en'],
   });
 }
