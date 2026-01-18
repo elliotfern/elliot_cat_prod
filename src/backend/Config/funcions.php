@@ -68,18 +68,29 @@ function isUserUsuari(): bool
  * @param string $allowedOrigin El dominio permitido.
  * @return void
  */
-function checkReferer($allowedOrigin)
+
+function corsAllow(array $allowedOrigins): void
 {
-    // Verificar que la cabecera 'Referer' esté presente y sea válida
-    if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], $allowedOrigin) === 0) {
-        // El Referer contiene la URL del dominio permitido
-        header("Access-Control-Allow-Origin: " . $allowedOrigin);
-    } else {
-        // Si la cabecera 'Referer' no es válida, denegar el acceso
-        header("HTTP/1.1 403 Forbidden");
-        echo json_encode(['error' => 'Accés no permés']);
-        exit();
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+    // ✅ Sin Origin (Postman / curl / same-origin): no es un caso CORS -> no bloquees
+    if ($origin === '') {
+        return;
     }
+
+    if (in_array($origin, $allowedOrigins, true)) {
+        header('Access-Control-Allow-Origin: ' . $origin);
+        header('Vary: Origin');
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization');
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        return;
+    }
+
+    http_response_code(403);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Origin not allowed', 'origin' => $origin]);
+    exit();
 }
 
 // Función para verificar el JWT

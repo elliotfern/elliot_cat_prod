@@ -219,7 +219,7 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
     if (!empty($notes)) $line .= ' (' . htmlspecialchars($notes) . ')';
     $html .= '<tr>
       <td style="padding:5px;border:1px solid black;">' . $line . '</td>
-      <td style="padding:5px;border:1px solid black;">€' . number_format($preu, 2, '.', ',') . '</td>
+      <td style="padding:5px;border:1px solid black;">' . number_format($preu, 2, ',', '.') . ' €</td>
     </tr>';
   }
 
@@ -230,17 +230,17 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
       <thead>
         <tr>
           <th scope="col">' . htmlspecialchars($T['subtotal']) . '</th>
-          <th scope="col">€' . number_format($subTotal, 2, '.', ',') . '</th>
+          <th scope="col">' . number_format($subTotal, 2, ',', '.') . ' €</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <th scope="row">' . htmlspecialchars($T['vat']) . '</th>
-          <td>' . ($facVAT == 0 ? '€0.00' : '€' . number_format($facVAT, 2, '.', ',')) . '</td>
+          <td>' . number_format((float)$facVAT, 2, ',', '.') . ' € </td>
         </tr>
         <tr>
           <th scope="row">' . htmlspecialchars($T['total']) . '</th>
-          <td><strong>€' . number_format($total, 2, '.', ',') . '</strong></td>
+          <td><strong>' . number_format($total, 2, ',', '.') . ' €</strong></td>
         </tr>
     </table>
   </div>';

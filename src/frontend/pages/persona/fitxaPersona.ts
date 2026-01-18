@@ -1,42 +1,139 @@
-interface PersonaData {
-  id2: string;
-  anyNaixement: string;
-  anyDefuncio: string | null;
-  sexe: string;
-  ciutatNaixement: string;
-  ciutatDefuncio: string | null;
-  pais_cat: string;
-  professio_ca: string;
-  web: string;
-  descripcio: string;
-  id: string;
-  slug: string;
-  grup_ids: string;
+// Respuesta genérica de la API
+interface ApiResponse<T> {
+  status: 'success' | 'error';
+  message: string;
+  errors: any[];
+  data: T;
 }
 
-// Función para realizar la solicitud Axios a la API
-export async function fitxaPersona(url: string, id: string, tipus: string, callback: (data: PersonaData) => void) {
-  const urlAjax = `${url}${id}`;
+// Lo que viene en json.data (según tu ejemplo)
+interface PersonaApiData {
+  id: string;
+  cognoms: string;
+  nom: string;
 
+  pais_ca: string | null;
+  idPais: number | null;
+
+  any_naixement: number | null;
+  any_defuncio: number | null;
+
+  nameImg: string | null;
+  alt: string | null;
+
+  web: string | null;
+  created_at: string | null; // "YYYY-MM-DD HH:MM:SS.ffffff"
+  updated_at: string | null;
+  descripcio: string | null;
+
+  slug: string;
+  idImg: number | null;
+  idSexe: number | null;
+
+  mes_naixement: number | null;
+  dia_naixement: number | null;
+  mes_defuncio: number | null;
+  dia_defuncio: number | null;
+
+  ciutatNaixement: string | null;
+  ciutatDefuncio: string | null;
+  idCiutatNaixement: number | null;
+  idCiutatDefuncio: number | null;
+
+  grup_ids: string[]; // ya viene como array
+  grup: string | null; // "Autor/a"
+}
+
+// Shape “legacy” (lo que tu código está intentando usar)
+interface PersonaLegacy {
+  id: string;
+  slug: string;
+
+  nom: string;
+  cognoms: string;
+
+  web: string;
+  descripcio: string;
+
+  // imagen legacy
+  img: string; // usas persona.img para construir URL
+
+  // fechas legacy
+  dateCreated: string | null;
+  dateModified: string | null;
+
+  // nacimiento/defunción legacy
+  anyNaixement: string; // tu código hace parseInt(...)
+  anyDefuncio: string | null;
+
+  mesNaixement: string;
+  diaNaixement: string;
+  mesDefuncio: string;
+  diaDefuncio: string;
+
+  // campos legacy usados abajo
+  genere: string; // en tu HTML lo pones como "Gènere"
+  paisAutor: string; // en tu HTML lo pones como "Pais"
+
+  ciutatNaixement: string | null;
+  ciutatDefuncio: string | null;
+
+  grup_ids: string[]; // mejor como array (no string)
+}
+
+function mapPersona(api: PersonaApiData): PersonaLegacy {
+  return {
+    id: api.id,
+    slug: api.slug,
+
+    nom: api.nom ?? '',
+    cognoms: api.cognoms ?? '',
+
+    web: api.web ?? '',
+    descripcio: api.descripcio ?? '',
+
+    // en tu API ahora viene nameImg (slug de imagen)
+    img: api.nameImg ?? '',
+
+    // en tu API son created_at / updated_at
+    dateCreated: api.created_at ?? null,
+    dateModified: api.updated_at ?? null,
+
+    // tu código espera strings parseables
+    anyNaixement: api.any_naixement != null ? String(api.any_naixement) : '',
+    anyDefuncio: api.any_defuncio != null ? String(api.any_defuncio) : null,
+
+    mesNaixement: api.mes_naixement != null ? String(api.mes_naixement) : '0',
+    diaNaixement: api.dia_naixement != null ? String(api.dia_naixement) : '0',
+
+    mesDefuncio: api.mes_defuncio != null ? String(api.mes_defuncio) : '0',
+    diaDefuncio: api.dia_defuncio != null ? String(api.dia_defuncio) : '0',
+
+    // antes tenías "genere" / "paisAutor"
+    genere: api.grup ?? '', // si esto no es “género” realmente, cambia a lo que toque
+    paisAutor: api.pais_ca ?? '',
+
+    ciutatNaixement: api.ciutatNaixement ?? null,
+    ciutatDefuncio: api.ciutatDefuncio ?? null,
+
+    grup_ids: Array.isArray(api.grup_ids) ? api.grup_ids : [],
+  };
+}
+
+export async function fitxaPersona(url: string, id: string, tipus: string, callback: (persona: PersonaApiData) => void) {
+  const urlAjax = `${url}${id}`;
   const mesosCatala = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
 
   try {
-    const response = await fetch(urlAjax, {
-      method: 'GET',
-    });
+    const response = await fetch(urlAjax, { method: 'GET' });
+    if (!response.ok) throw new Error('Error en la sol·licitud AJAX');
 
-    if (!response.ok) {
-      throw new Error('Error en la sol·licitud AJAX');
-    }
+    const json: ApiResponse<PersonaApiData> = await response.json();
+    callback(json.data); // 👈 solo data
 
-    const json = await response.json();
+    // mapper a legacy
+    const persona = mapPersona(json.data);
 
-    callback(json);
-
-    // aquí accedes directamente a la data de la persona
-    const persona = json.data;
-
-    // Transformació de les dades
     // 1. Imatge
     const imgElement = document.getElementById('nameImg');
     const altElement = document.getElementById('alt');
@@ -46,27 +143,23 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     }
 
     const nomElement = document.getElementById('nom');
-    if (nomElement) {
-      (nomElement as HTMLElement).innerHTML = `${persona.nom} ${persona.cognoms}`;
-    }
+    if (nomElement) (nomElement as HTMLElement).innerHTML = `${persona.nom} ${persona.cognoms}`;
 
     // 2. Data creacio fitxa i actualitzacio
     const dateElement = document.getElementById('dateCreated');
     const dateElement2 = document.getElementById('dateModified');
-    if (dateElement) {
+
+    if (dateElement && persona.dateCreated) {
       const dateObj = new Date(persona.dateCreated);
       const day = dateObj.getDate();
-      const month = dateObj.getMonth() + 1; // Los meses van de 0 a 11
+      const month = dateObj.getMonth() + 1;
       const year = dateObj.getFullYear();
       dateElement.textContent = `${day}/${month}/${year}`;
     }
 
-    if (dateElement2) {
+    if (dateElement2 && persona.dateModified && persona.dateCreated) {
       const dateObj = new Date(persona.dateModified);
-      // Verifica si la fecha es válida
-      if (persona['dateModified'] == '0000-00-00') {
-        dateElement2.textContent = '';
-      } else if (persona['dateModified'] == persona['dateCreated']) {
+      if (persona.dateModified === '0000-00-00' || persona.dateModified === persona.dateCreated) {
         dateElement2.textContent = '';
       } else {
         const day = dateObj.getDate();
@@ -76,15 +169,16 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
       }
     }
 
-    // 3. Naixement
+    // 3. Naixement (tu código ya funciona con el mapper)
     const anyNaixement = parseInt(persona.anyNaixement, 10);
-    const diaNaixement = parseInt(persona.diaNaixement);
-    const mesNaixement = parseInt(persona.mesNaixement);
+    const diaNaixement = parseInt(persona.diaNaixement, 10);
+    const mesNaixement = parseInt(persona.mesNaixement, 10);
 
     const anyDefuncio2 = persona.anyDefuncio ? parseInt(persona.anyDefuncio, 10) : null;
-    const diaDefuncio = parseInt(persona.diaDefuncio);
-    const mesDefuncio = parseInt(persona.mesDefuncio);
+    const diaDefuncio = parseInt(persona.diaDefuncio, 10);
+    const mesDefuncio = parseInt(persona.mesDefuncio, 10);
 
+    // ... el resto de tu función igual (persona.genere, persona.paisAutor, etc.)
     // Verificamos si el día o el mes son 0 o null, y en ese caso asignamos un string vacío ""
     const diaMostrar = isNaN(diaNaixement) || diaNaixement === 0 || diaNaixement === null ? '' : diaNaixement.toString();
     const mesMostrar = isNaN(mesNaixement) || mesNaixement === 0 || mesNaixement === null ? '' : mesNaixement.toString();
@@ -96,7 +190,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
       dataNaixement = `${diaMostrar} ${mesosCatala[parseInt(mesMostrar) - 1]} ${anyNaixement}`;
     }
 
-    const anyDefuncio = parseInt(persona.anyDefuncio, 10);
+    const anyDefuncio: number | null = persona.anyDefuncio !== null ? parseInt(persona.anyDefuncio, 10) : null;
     const anyActual = new Date().getFullYear();
 
     // calcul de l'edat
@@ -136,7 +230,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
 
     // Definir la variable `dataDefuncio`
     let dataDefuncio = '';
-    if (anyDefuncio2) {
+    if (anyDefuncio2 && anyDefuncio) {
       dataDefuncio = anyDefuncio.toString(); // Mostrar solo el año por defecto
       if (diaMostrarDefuncio && mesMostrarDefuncio) {
         dataDefuncio = `${diaMostrarDefuncio} ${mesosCatala[parseInt(mesMostrarDefuncio) - 1]} ${anyDefuncio2}`; // Añadir día y mes si existen

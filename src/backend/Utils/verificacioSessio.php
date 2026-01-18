@@ -10,40 +10,63 @@ function data_input($data)
     return $data;
 }
 
-function verificarSesion()
+/**
+ * Verifica sesión por JWT (cookie "token").
+ * - Redirige a /entrada si no hay token o es inválido.
+ * - Inyecta compatibilidad legacy: $_COOKIE['user_id'] = user_type (string)
+ * - Devuelve el objeto decoded por si quieres usarlo.
+ */
+function verificarSesion(): object
 {
-    // Inicia la sesión si no está ya iniciada
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
 
-    // Cargar variables de entorno desde .env
-    $jwtSecret = $_ENV['TOKEN'];
+    $jwtSecret = $_ENV['TOKEN'] ?? null;
+    if (!$jwtSecret) {
+        // Si no hay secret, es un fallo de config: mejor echar fuera
+        error_log("Missing TOKEN secret in env");
+        header('Location: /entrada');
+        exit();
+    }
 
-    // Verifica si la cookie del token existe y es válida
-    if (!isset($_COOKIE['token'])) {
-        header('Location: /entrada'); // Redirige a login si no existe el token
+    if (empty($_COOKIE['token'])) {
+        header('Location: /entrada');
         exit();
     }
 
     $token = trim($_COOKIE['token']);
 
     try {
-        // Decodificar el token JWT
         $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
 
-        // Obtener user_type del payload
-        $userType = $decoded->user_type ?? null;
+        $userType = isset($decoded->user_type) ? (int)$decoded->user_type : null;
 
-        // Verificar si user_type es 1 (admin) o 2 (usuario regular)
-        if (!in_array($userType, [1, 2])) {
-            header('Location: /entrada'); // Redirige si el user_type no es válido (no es admin ni usuario regular)
+        // Solo permitimos user_type 1 (admin) o 2 (usuario)
+        if (!in_array($userType, [1, 2], true)) {
+            header('Location: /entrada');
             exit();
         }
+
+        // ✅ Compatibilidad legacy (tu if antiguo)
+        $_COOKIE['user_id'] = (string)$userType;      // legacy esperaba '1' para admin
+        $_COOKIE['user_type'] = (string)$userType;
+
+        // ✅ Extra útil para plantillas/legacy
+        if (isset($decoded->nom))   $_COOKIE['nom'] = (string)$decoded->nom;
+        if (isset($decoded->email)) $_COOKIE['email'] = (string)$decoded->email;
+        if (isset($decoded->user_id)) $_COOKIE['uuid'] = (string)$decoded->user_id;
+
+        // (opcional) también en $_SESSION para no depender de $_COOKIE en templates
+        $_SESSION['user_type'] = $userType;
+        $_SESSION['nom'] = $decoded->nom ?? null;
+        $_SESSION['email'] = $decoded->email ?? null;
+        $_SESSION['uuid'] = $decoded->user_id ?? null;
+
+        return $decoded;
     } catch (Exception $e) {
-        // Si el token es inválido, ha expirado o no es manipulable
         error_log("Error al verificar sesión: " . $e->getMessage());
-        header('Location: /entrada'); // Redirige a login si el token no es válido
+        header('Location: /entrada');
         exit();
     }
 }

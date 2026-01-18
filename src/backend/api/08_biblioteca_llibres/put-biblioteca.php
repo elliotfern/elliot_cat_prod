@@ -1,6 +1,20 @@
 <?php
 
 use Ramsey\Uuid\Uuid;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Utils\Tables;
+
+// Siempre JSON
+header('Content-Type: application/json; charset=utf-8');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+  corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+  http_response_code(204);
+  exit;
+}
+
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
 // Check if the request method is PUT
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
@@ -9,14 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
   exit();
 }
 
-$allowed_origins = ['https://elliot.cat'];
-
-if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins)) {
-  header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
-} else {
-  http_response_code(403);
-  echo json_encode(['error' => 'Acceso no permitido']);
-  exit;
+function isUuid($s)
+{
+  return is_string($s) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s);
 }
 
 
@@ -155,82 +164,147 @@ if (isset($_GET['autor'])) {
 
   // Ruta actualizació llibre
   // Ruta PUT => "/api/biblioteca/put?llibre"
-} elseif (isset($_GET['llibre'])) {
-
-  // Obtener el cuerpo de la solicitud PUT
+} else if (isset($_GET['llibre'])) {
+  // Leer JSON
   $input_data = file_get_contents("php://input");
-
-  // Decodificar los datos JSON
   $data = json_decode($input_data, true);
 
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
+  if (!is_array($data)) {
+    Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+    exit;
   }
 
-  // Ahora puedes acceder a los datos como un array asociativo
-  $hasError = false; // Inicializamos la variable $hasError como false
+  // Helpers (mismo patrón)
+  $errors = [];
 
-  $autor = isset($data['autor']) ? data_input($data['autor']) : ($hasError = true);
-  $titol = isset($data['titol']) ? data_input($data['titol']) : ($hasError = true);
-  $titolEng = isset($data['titolEng']) ? data_input($data['titolEng']) : NULL;
-  $slug = isset($data['slug']) ? data_input($data['slug']) : ($hasError = true);
-  $any = isset($data['any']) ? data_input($data['any']) : ($hasError = true);
-  $tipus = isset($data['tipus']) ? data_input($data['tipus']) : ($hasError = true);
-  $idEd = isset($data['idEd']) ? data_input($data['idEd']) : ($hasError = true);
-  $idGen = isset($data['idGen']) ? data_input($data['idGen']) : ($hasError = true);
-  $subGen = isset($data['subGen']) ? data_input($data['subGen']) : ($hasError = true);
-  $lang = isset($data['lang']) ? data_input($data['lang']) : ($hasError = true);
-  $img = isset($data['img']) ? data_input($data['img']) : ($hasError = true);
-  $lang = isset($data['lang']) ? data_input($data['lang']) : ($hasError = true);
-  $estat = isset($data['estat']) ? data_input($data['estat']) : ($hasError = true);
-
-  $id = isset($data['id']) ? data_input($data['id']) : ($hasError = true);
-
-  $timestamp = date('Y-m-d');
-  $dateModified = $timestamp;
-
-  if ($hasError == false) {
-    global $conn;
-    $sql = "UPDATE 08_db_biblioteca_llibres SET autor=:autor, titol=:titol, titolEng=:titolEng, any=:any, idGen=:idGen, subGen=:subGen, idEd=:idEd, lang=:lang, slug=:slug, img=:img, tipus=:tipus, dateModified=:dateModified, estat=:estat WHERE id=:id";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(":autor", $autor, PDO::PARAM_INT);
-    $stmt->bindParam(":titol", $titol, PDO::PARAM_STR);
-    $stmt->bindParam(":titolEng", $titolEng, PDO::PARAM_STR);
-    $stmt->bindParam(":any", $any, PDO::PARAM_INT);
-    $stmt->bindParam(":idEd", $idEd, PDO::PARAM_INT);
-    $stmt->bindParam(":lang", $lang, PDO::PARAM_INT);
-    $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-    $stmt->bindParam(":tipus", $tipus, PDO::PARAM_INT);
-    $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
-    $stmt->bindParam(":idGen", $idGen, PDO::PARAM_INT);
-    $stmt->bindParam(":subGen", $subGen, PDO::PARAM_INT);
-    $stmt->bindParam(":estat", $estat, PDO::PARAM_INT);
-    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-    $stmt->bindParam(":slug", $slug, PDO::PARAM_STR);
-
-    if ($stmt->execute()) {
-      // response output
-      $response['status'] = 'success';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    } else {
-      // response output - data error
-      $response['status'] = 'error bd';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
+  $requireField = function (array $data, string $key) use (&$errors) {
+    if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+      $errors[$key] = 'required';
+      return null;
     }
-  } else {
-    // response output - data error
-    $response['status'] = 'error has error dades';
+    return data_input($data[$key]);
+  };
 
-    header("Content-Type: application/json");
-    echo json_encode($response);
+  $optionalField = function (array $data, string $key) {
+    return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
+      ? data_input($data[$key])
+      : null;
+  };
+
+  // Requeridos para update
+  $id           = $requireField($data, 'id');            // UUID string del libro
+  $titol        = $requireField($data, 'titol');
+  $slug         = $requireField($data, 'slug');
+  $any          = $requireField($data, 'any');
+
+  $tipus_id     = $requireField($data, 'tipus_id');      // UUID string
+  $editorial_id = $requireField($data, 'editorial_id');  // UUID string
+  $sub_tema_id  = $requireField($data, 'sub_tema_id');   // UUID string
+
+  $lang         = $requireField($data, 'lang');          // int
+  $estat        = $requireField($data, 'estat');         // int
+  $img          = $optionalField($data, 'img');          // int|null
+
+  // Validaciones UUID (usa tu isUuid() global)
+  if (!isUuid($id))           $errors['id'] = 'invalid_uuid';
+  if (!isUuid($tipus_id))     $errors['tipus_id'] = 'invalid_uuid';
+  if (!isUuid($editorial_id)) $errors['editorial_id'] = 'invalid_uuid';
+  if (!isUuid($sub_tema_id))  $errors['sub_tema_id'] = 'invalid_uuid';
+  if (!isUuid($estat))  $errors['estat'] = 'invalid_uuid';
+
+  // Validación ints básicos
+  if ($any !== null && !is_numeric($any))   $errors['any'] = 'invalid_int';
+  if ($lang !== null && !is_numeric($lang)) $errors['lang'] = 'invalid_int';
+  if ($img !== null && $img !== '' && !is_numeric($img)) $errors['img'] = 'invalid_int';
+
+  if (!empty($errors)) {
+    Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+    exit;
+  }
+
+  // Fecha modificación
+  $dateModified = date('Y-m-d');
+
+  global $conn;
+
+  // UPDATE
+  // - id, tipus_id, editorial_id, sub_tema_id => BINARY(16)
+  // - estat => int (NO UNHEX)
+  $sql = "UPDATE " . Tables::LLIBRES . " SET
+            titol = :titol,
+            slug = :slug,
+            any = :any,
+            tipus_id = UNHEX(REPLACE(:tipus_id, '-', '')),
+            editorial_id = UNHEX(REPLACE(:editorial_id, '-', '')),
+            sub_tema_id = UNHEX(REPLACE(:sub_tema_id, '-', '')),
+            lang = :lang,
+            img = :img,
+            estat = UNHEX(REPLACE(:estat, '-', '')),
+            dateModified = :dateModified
+          WHERE id = UNHEX(REPLACE(:id, '-', ''))
+          LIMIT 1";
+
+  try {
+    $stmt = $conn->prepare($sql);
+
+    $stmt->bindValue(':titol', $titol, PDO::PARAM_STR);
+    $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
+    $stmt->bindValue(':any', (int)$any, PDO::PARAM_INT);
+
+    $stmt->bindValue(':tipus_id', $tipus_id, PDO::PARAM_STR);
+    $stmt->bindValue(':editorial_id', $editorial_id, PDO::PARAM_STR);
+    $stmt->bindValue(':sub_tema_id', $sub_tema_id, PDO::PARAM_STR);
+
+    $stmt->bindValue(':lang', (int)$lang, PDO::PARAM_INT);
+    $stmt->bindValue(':estat', $estat, PDO::PARAM_STR);
+
+    if ($img === null || $img === '') {
+      $stmt->bindValue(':img', null, PDO::PARAM_NULL);
+    } else {
+      $stmt->bindValue(':img', (int)$img, PDO::PARAM_INT);
+    }
+
+    $stmt->bindValue(':dateModified', $dateModified, PDO::PARAM_STR);
+    $stmt->bindValue(':id', $id, PDO::PARAM_STR);
+
+    $stmt->execute();
+
+    // 0 filas afectadas puede ser:
+    // - id no existe
+    // - datos iguales (MySQL devuelve 0)
+    // Lo tratamos de forma útil:
+    if ($stmt->rowCount() === 0) {
+      // comprobamos si existe
+      $check = $conn->prepare("SELECT لاحظ FROM " . Tables::LLIBRES . " WHERE id = UNHEX(REPLACE(:id, '-', '')) LIMIT 1");
+      // ^^^ OJO: si no quieres líos, usa SELECT 1:
+      $check = $conn->prepare("SELECT 1 FROM " . Tables::LLIBRES . " WHERE id = UNHEX(REPLACE(:id, '-', '')) LIMIT 1");
+      $check->bindValue(':id', $id, PDO::PARAM_STR);
+      $check->execute();
+      $exists = (bool)$check->fetchColumn();
+
+      if (!$exists) {
+        Response::error(MissatgesAPI::error('not_found'), ['id' => $id], 404);
+        exit;
+      }
+
+      // existe pero no ha cambiado nada
+      Response::success(MissatgesAPI::success('update'), ['id' => $id, 'slug' => $slug, 'changed' => false], 200);
+      exit;
+    }
+
+    Response::success(MissatgesAPI::success('update'), ['id' => $id, 'slug' => $slug, 'changed' => true], 200);
+    exit;
+  } catch (\Throwable $e) {
+    Response::error(
+      MissatgesAPI::error('internal_error'),
+      [
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+      ],
+      500
+    );
+    exit;
   }
 } else {
   // response output - data error

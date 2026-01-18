@@ -9,7 +9,7 @@ class DatabaseConnection
 {
     private static ?PDO $conn = null;
 
-    public static function getConnection(): ?PDO
+    public static function getConnection(): PDO
     {
         if (self::$conn === null) {
             $dbHost = $_ENV['DB_HOST'] ?? 'localhost';
@@ -18,12 +18,18 @@ class DatabaseConnection
             $dbName = $_ENV['DB_DBNAME'] ?? '';
 
             try {
-                self::$conn = new PDO("mysql:host=$dbHost;dbname=$dbName", $dbUser, $dbPass);
-                self::$conn->exec("SET NAMES utf8");
-                self::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                self::$conn = new PDO(
+                    "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4",
+                    $dbUser,
+                    $dbPass,
+                    [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    ]
+                );
             } catch (PDOException $e) {
                 error_log("Error de conexión: " . $e->getMessage());
-                return null;
+                throw $e; // ✅ no retornes null
             }
         }
 

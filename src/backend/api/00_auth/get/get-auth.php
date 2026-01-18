@@ -4,42 +4,69 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 // Cargar variables de entorno desde .env
-$jwtSecret = $_ENV['TOKEN'];
+$jwtSecret = $_ENV['TOKEN'] ?? null;
 
-// Check if the request method is GET
+header('Content-Type: application/json; charset=utf-8');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    header('HTTP/1.1 405 Method Not Allowed');
+    http_response_code(405);
     echo json_encode(['error' => 'Method not allowed']);
     exit();
 }
 
-// 01. Ruta GET per comprobar si usuari està registrat o no
-// /api/auth/get/?isAdmin
-if ((isset($_GET['isAdmin']))) {
+// /api/auth/get/?me
+if (isset($_GET['me'])) {
 
-    $token = getSanitizedCookie('token');
-
-    if (!empty($token)) {
-        try {
-            // Verifica y decodifica el token
-            $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
-
-            // Verifica si el usuario tiene permisos de administrador
-            if (
-                isset($decoded->user_type) &&
-                $decoded->user_type == 1 // Solo user_type 1 es admin
-            ) {
-                echo json_encode(['isAdmin' => true]);
-                exit;
-            }
-        } catch (Exception $e) {
-            // Token inválido, expirado o manipulado
-            error_log("JWT inválido: " . $e->getMessage());
-        }
+    if (!$jwtSecret) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Server misconfigured (missing TOKEN secret)']);
+        exit;
     }
 
-    // Si no cumple, no es admin
-    echo json_encode(['isAdmin' => false]);
+    // Lee cookie token (si tienes helper, úsalo; si no, esto vale)
+    $token = $_COOKIE['token'] ?? '';
+
+    if (empty($token)) {
+        http_response_code(401);
+        echo json_encode(['authenticated' => false, 'error' => 'Missing token']);
+        exit;
+    }
+
+    try {
+        $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
+
+        // OJO: esto depende de que el JWT realmente incluya estos campos
+        $userType = $decoded->user_type ?? null;
+        $fullName = $decoded->full_name ?? null; // si no existe, lo devuelves null
+        $userId   = $decoded->user_id ?? null;   // si existe
+
+        if ($userType === null) {
+            // token válido, pero sin claim esperado
+            http_response_code(200);
+            echo json_encode([
+                'authenticated' => true,
+                'user_type' => null,
+                'warning' => 'Token has no user_type claim'
+            ]);
+            exit;
+        }
+
+        echo json_encode([
+            'authenticated' => true,
+            'user_id' => $decoded->user_id ?? null,
+            'email' => $decoded->email ?? null,
+            'full_name' => $decoded->nom ?? null,     // <-- aquí
+            'user_type' => isset($decoded->user_type) ? (int)$decoded->user_type : null,
+            'is_admin' => (isset($decoded->user_type) && (int)$decoded->user_type === 1),
+        ]);
+        exit;
+    } catch (Exception $e) {
+        // Token inválido / expirado / manipulado
+        error_log("JWT inválido: " . $e->getMessage());
+        http_response_code(401);
+        echo json_encode(['authenticated' => false, 'error' => 'Invalid token']);
+        exit;
+    }
 } else if ((isset($_GET['logOut']))) {
     // Verifica que el usuario esté autenticado
     session_start();

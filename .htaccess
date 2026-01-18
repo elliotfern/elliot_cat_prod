@@ -1,28 +1,21 @@
-<IfModule mod_headers.c>
-Header Always Set Access-Control-Allow-Origin "https://elliot.cat"
-Header Always Set Access-Control-Allow-Methods "GET, POST, PUT, OPTIONS"
-Header Always Set Access-Control-Allow-Headers "Authorization, Content-Type"
-</IfModule>
-
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    
+
     RewriteCond %{HTTP_HOST} ^elliotfern\.com$ [NC]
     RewriteRule ^(.*)$ https://elliot.cat/$1 [L,R=301]
 
     RewriteBase /
 
-    # 2. Redirige sitemap-index.xml a sitemap-index.xml.php
     RewriteRule ^sitemap-index\.xml$ sitemap-index.xml.php [L]
-
-    # 3. Redirige sitemaps de idiomas (por ejemplo, sitemap-en.xml)
     RewriteRule ^sitemap-([a-z]{2})\.xml$ sitemap-$1.xml.php [L]
-    
-    # Redireccionar "/" a "/ca/homepage"
+
     RewriteRule ^$ ca/homepage [L,R=301]
 
-    # Si no es un archivo o directorio, pasar la solicitud a index.php
+    # ✅ API siempre por el front controller
+    RewriteRule ^api/ index.php [QSA,L]
+
+    # resto del sitio: si no es archivo/carpeta, a index.php
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php?uri=$1 [QSA,L]
+    RewriteRule ^(.*)$ index.php [QSA,L]
 </IfModule>

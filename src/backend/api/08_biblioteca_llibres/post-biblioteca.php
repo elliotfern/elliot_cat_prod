@@ -1,12 +1,20 @@
 <?php
 
 use Ramsey\Uuid\Uuid;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Utils\Tables;
 
-// Definir el dominio permitido
-$allowedOrigin = APP_DOMAIN;
+// Siempre JSON
+header('Content-Type: application/json; charset=utf-8');
 
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+  corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+  http_response_code(204);
+  exit;
+}
+
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -14,6 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   echo json_encode(['error' => 'Method not allowed']);
   exit();
 }
+
+function isUuid($s)
+{
+  return is_string($s) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s);
+}
+
 
 // a) Inserir autor
 if (isset($_GET['autor'])) {
@@ -120,79 +134,256 @@ if (isset($_GET['autor'])) {
 
   // INSERIR NOU LLIBRE
   // autor	titol	titolEng	slug	any	tipus	idEd	idGen	subGen	lang	img	dateCreated
-} elseif (isset($_GET['llibre'])) {
+} else if (isset($_GET['llibre'])) {
 
-  // Obtener el cuerpo de la solicitud PUT
+  // Leer JSON
   $input_data = file_get_contents("php://input");
-
-  // Decodificar los datos JSON
   $data = json_decode($input_data, true);
 
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
+  if (!is_array($data)) {
+    Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+    exit;
   }
 
-  // Ahora puedes acceder a los datos como un array asociativo
-  $hasError = false; // Inicializamos la variable $hasError como fa
+  // Helpers
+  function requireField(array $data, string $key, array &$errors)
+  {
+    if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+      $errors[$key] = 'required';
+      return null;
+    }
+    return data_input($data[$key]);
+  }
 
-  $autor = !empty($data['autor']) ? data_input($data['autor']) : ($hasError = true);
-  $titol = !empty($data['titol']) ? data_input($data['titol']) : ($hasError = true);
-  $titolEng = isset($data['titolEng']) ? data_input($data['titolEng']) : ($hasError = true);
-  $any = !empty($data['any']) ? data_input($data['any']) : ($hasError = true);
-  $idEd = !empty($data['idEd']) ? data_input($data['idEd']) : ($hasError = true);
-  $lang = !empty($data['lang']) ? data_input($data['lang']) : ($hasError = true);
-  $img = !empty($data['img']) ? data_input($data['img']) : ($hasError = true);
-  $tipus = !empty($data['tipus']) ? data_input($data['tipus']) : ($hasError = true);
-  $idGen = !empty($data['idGen']) ? data_input($data['idGen']) : ($hasError = true);
-  $subGen = !empty($data['subGen']) ? data_input($data['subGen']) : ($hasError = true);
-  $slug = !empty($data['slug']) ? data_input($data['slug']) : ($hasError = true);
-  $estat = !empty($data['estat']) ? data_input($data['estat']) : ($hasError = true);
+  function optionalField(array $data, string $key)
+  {
+    return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
+      ? data_input($data[$key])
+      : null;
+  }
 
-  $dateCreated = date('Y-m-d');
-  $dateModified = date('Y-m-d');
+  // Validación
+  $errors = [];
 
-  if (!$hasError) {
-    global $conn;
-    $sql = "INSERT INTO 08_db_biblioteca_llibres SET autor=:autor, titol=:titol, titolEng=:titolEng, any=:any, idEd=:idEd, lang=:lang, img=:img, tipus=:tipus, idGen=:idGen, subGen=:subGen, dateCreated=:dateCreated, slug=:slug, estat=:estat, dateModified=:dateModified";
+  $titol        = requireField($data, 'titol', $errors);
+  $slug         = requireField($data, 'slug', $errors);
+  $any          = requireField($data, 'any', $errors);
+
+  $tipus_id     = requireField($data, 'tipus_id', $errors);      // UUID string
+  $editorial_id = requireField($data, 'editorial_id', $errors);  // UUID string
+  $sub_tema_id  = requireField($data, 'sub_tema_id', $errors);   // UUID string
+
+  $lang         = requireField($data, 'lang', $errors);          // int
+  $estat        = requireField($data, 'estat', $errors);         // int
+  $img          = optionalField($data, 'img');                   // int|null
+
+  if (!isUuid($tipus_id)) $errors['tipus_id'] = 'invalid_uuid';
+  if (!isUuid($editorial_id)) $errors['editorial_id'] = 'invalid_uuid';
+  if (!isUuid($sub_tema_id)) $errors['sub_tema_id'] = 'invalid_uuid';
+
+  if (!empty($errors)) {
+    Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+    exit;
+  }
+
+  // Fechas
+  $dateCreated  = date('Y-m-d');
+  $dateModified = null;
+
+  // Generar UUIDv7
+  $uuid = Uuid::uuid7();
+  $uuidBytes = $uuid->getBytes();   // para BINARY(16)
+  $uuidString = $uuid->toString();  // para devolver al frontend si quieres
+
+  global $conn;
+
+  $sql = "INSERT INTO " . Tables::LLIBRES . " (
+              id, titol, slug, any,
+              tipus_id, editorial_id, sub_tema_id, estat,
+              lang, img, 
+              dateCreated, dateModified
+          ) VALUES (
+              :id, :titol, :slug, :any,
+              UNHEX(REPLACE(:tipus_id, '-', '')),
+              UNHEX(REPLACE(:editorial_id, '-', '')),
+              UNHEX(REPLACE(:sub_tema_id, '-', '')),
+              UNHEX(REPLACE(:estat, '-', '')),
+              :lang, :img,
+              :dateCreated, :dateModified
+          )";
+
+  try {
     $stmt = $conn->prepare($sql);
-    $stmt->bindParam(":autor", $autor, PDO::PARAM_INT);
-    $stmt->bindParam(":titol", $titol, PDO::PARAM_STR);
-    $stmt->bindParam(":titolEng", $titolEng, PDO::PARAM_STR);
-    $stmt->bindParam(":slug", $slug, PDO::PARAM_STR);
-    $stmt->bindParam(":any", $any, PDO::PARAM_INT);
-    $stmt->bindParam(":idEd", $idEd, PDO::PARAM_INT);
-    $stmt->bindParam(":lang", $lang, PDO::PARAM_INT);
-    $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-    $stmt->bindParam(":tipus", $tipus, PDO::PARAM_INT);
-    $stmt->bindParam(":idGen", $idGen, PDO::PARAM_INT);
-    $stmt->bindParam(":subGen", $subGen, PDO::PARAM_INT);
-    $stmt->bindParam(":estat", $estat, PDO::PARAM_INT);
-    $stmt->bindParam(":dateCreated", $dateCreated, PDO::PARAM_STR);
-    $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
+
+    // ID UUIDv7 binario
+    $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
+
+    $stmt->bindValue(':titol', $titol, PDO::PARAM_STR);
+    $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
+    $stmt->bindValue(':any', (int)$any, PDO::PARAM_INT);
+
+    $stmt->bindValue(':tipus_id', $tipus_id, PDO::PARAM_STR);
+    $stmt->bindValue(':editorial_id', $editorial_id, PDO::PARAM_STR);
+    $stmt->bindValue(':sub_tema_id', $sub_tema_id, PDO::PARAM_STR);
+
+    $stmt->bindValue(':lang', (int)$lang, PDO::PARAM_INT);
+    $stmt->bindValue(':estat', (int)$estat, PDO::PARAM_INT);
+
+    if ($img === null || $img === '') {
+      $stmt->bindValue(':img', null, PDO::PARAM_NULL);
+    } else {
+      $stmt->bindValue(':img', (int)$img, PDO::PARAM_INT);
+    }
+
+    $stmt->bindValue(':dateCreated', $dateCreated, PDO::PARAM_STR);
+    $stmt->bindValue(':dateModified', $dateModified, PDO::PARAM_NULL);
 
     if ($stmt->execute()) {
-      // response output
-      $response['status'] = 'success';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    } else {
-      // response output - data error
-      $response['status'] = 'error db';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
+      Response::success(
+        MissatgesAPI::success('create'),
+        [
+          'id'   => $uuidString,
+          'slug' => $slug,
+        ],
+        201
+      );
+      exit;
     }
-  } else {
-    // response output - data error
-    $response['status'] = 'error dades';
 
-    header("Content-Type: application/json");
-    echo json_encode($response);
+    Response::error(
+      MissatgesAPI::error('db_error'),
+      [
+        'sqlState' => $stmt->errorCode(),
+        'info' => $stmt->errorInfo(),
+      ],
+      500
+    );
+    exit;
+  } catch (\Throwable $e) {
+    Response::error(
+      MissatgesAPI::error('internal_error'),
+      [
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+      ],
+      500
+    );
+    exit;
+  }
+
+
+  // INSERIR AUTOR A LLIBRE
+  // 
+} else if (isset($_GET['llibreAutor'])) {
+  header('Content-Type: application/json; charset=utf-8');
+
+  if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    Response::error(MissatgesAPI::error('method_not_allowed'), [], 405);
+    exit;
+  }
+
+  $input = file_get_contents("php://input");
+  $data = json_decode($input, true);
+
+  if (!is_array($data)) {
+    Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+    exit;
+  }
+
+  $errors = [];
+
+  $llibre_slug = isset($data['llibre_slug']) ? trim((string)$data['llibre_slug']) : '';
+  if ($llibre_slug === '') $errors['llibre_slug'] = 'required';
+
+  $autor_id = isset($data['autor_id']) ? (string)$data['autor_id'] : '';
+  if ($autor_id === '') $errors['autor_id'] = 'required';
+  if ($autor_id !== '' && !isUuid($autor_id)) $errors['autor_id'] = 'invalid_uuid';
+
+  if (!empty($errors)) {
+    Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+    exit;
+  }
+
+  try {
+    global $conn;
+
+    // 1) Obtener llibre_id (BINARY(16)) por slug
+    $qBook = "SELECT id FROM " . Tables::LLIBRES . " WHERE slug = :slug LIMIT 1";
+    $st = $conn->prepare($qBook);
+    $st->bindValue(':slug', $llibre_slug, PDO::PARAM_STR);
+    $st->execute();
+    $bookRow = $st->fetch(PDO::FETCH_ASSOC);
+
+    if (!$bookRow || empty($bookRow['id'])) {
+      Response::error(MissatgesAPI::error('not_found'), ['llibre_slug' => $llibre_slug], 404);
+      exit;
+    }
+
+    $llibre_id_bin = $bookRow['id']; // ya viene binario desde mysql
+
+    // 2) Autor id binario desde UUID string
+    // UNHEX(REPLACE(uuid,'-','')) para convertir a BINARY(16)
+    // 3) Evitar duplicado
+    $qExists = "
+            SELECT la.id
+            FROM " . Tables::LLIBRES_AUTORS . " la
+            WHERE la.llibre_id = :llibre_id
+              AND la.autor_id = UNHEX(REPLACE(:autor_uuid, '-', ''))
+            LIMIT 1
+        ";
+    $st2 = $conn->prepare($qExists);
+    $st2->bindValue(':llibre_id', $llibre_id_bin, PDO::PARAM_LOB);
+    $st2->bindValue(':autor_uuid', $autor_id, PDO::PARAM_STR);
+    $st2->execute();
+
+    $exists = $st2->fetch(PDO::FETCH_ASSOC);
+    if ($exists) {
+      Response::success(
+        MissatgesAPI::success('create'),
+        ['rel_id' => (int)$exists['id']],
+        200
+      );
+      exit;
+    }
+
+    // 4) Insert
+    $sql = "
+            INSERT INTO " . Tables::LLIBRES_AUTORS . " (autor_id, llibre_id)
+            VALUES (UNHEX(REPLACE(:autor_uuid, '-', '')), :llibre_id)
+        ";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bindValue(':autor_uuid', $autor_id, PDO::PARAM_STR);
+    $stmt->bindValue(':llibre_id', $llibre_id_bin, PDO::PARAM_LOB);
+
+    if ($stmt->execute()) {
+      $relId = (int)$conn->lastInsertId();
+
+      Response::success(
+        MissatgesAPI::success('create'),
+        [
+          'rel_id' => $relId,
+          'llibre_slug' => $llibre_slug,
+          'autor_id' => $autor_id,
+        ],
+        201
+      );
+      exit;
+    }
+
+    Response::error(MissatgesAPI::error('db_error'), [
+      'sqlState' => $stmt->errorCode(),
+      'info' => $stmt->errorInfo(),
+    ], 500);
+    exit;
+  } catch (\Throwable $e) {
+    Response::error(MissatgesAPI::error('internal_error'), [
+      'message' => $e->getMessage(),
+      'file' => $e->getFile(),
+      'line' => $e->getLine(),
+    ], 500);
+    exit;
   }
 } else {
   // response output - data error

@@ -5,6 +5,8 @@ import { construirTaula } from '../../services/api/construirTaula';
 import { taulaLlistatAutors } from './taulaLlistatAutors';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { taulaLlistatLlibres } from './taulaLlistatLlibres';
+import { fetchApiDataLlibre } from './fitxaLlibre';
+import { initAdminButtons, initLlibreAutorsPage } from './fitxaLlibreAutors';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -55,5 +57,12 @@ export async function biblioteca() {
     taulaLlistatAutors();
   } else if ([pageType[1], pageType[2]].includes('llistat-llibres')) {
     taulaLlistatLlibres();
+  } else if (pageType[2] === 'fitxa-llibre') {
+    const slug = pageType[3];
+    fetchApiDataLlibre(`/api/biblioteca/get/?llibreSlug=${slug}`);
+  } else if (pageType[2] === 'fitxa-llibre-autors') {
+    const slug = pageType[3];
+    initLlibreAutorsPage(slug);
+    initAdminButtons(slug);
   }
 }

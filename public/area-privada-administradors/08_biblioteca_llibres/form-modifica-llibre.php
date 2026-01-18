@@ -22,14 +22,12 @@ if ($modificaBtn === 1) {
 ?>
   <script type="module">
     // Llenar selects con opciones
-    selectOmplirDades("/api/biblioteca/get/?type=autors", "", "autor", "nomComplet");
     selectOmplirDades("/api/biblioteca/get/?type=imatgesLlibres", "", "img", "alt");
-    selectOmplirDades("/api/biblioteca/get/?type=editorials", "", "idEd", "editorial");
-    selectOmplirDades("/api/biblioteca/get/?type=generes", "", "idGen", "genere_cat");
-    selectOmplirDades("/api/biblioteca/get/?type=subgeneres", "", "subGen", "sub_genere_cat");
+    selectOmplirDades("/api/biblioteca/get/?type=temes", "", "sub_tema_id", "tema_complet");
     selectOmplirDades("/api/biblioteca/get/?type=llengues", "", "lang", "idioma_ca");
-    selectOmplirDades("/api/biblioteca/get/?type=tipus", "", "tipus", "nomTipus");
     selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", "", "estat", "estat");
+    selectOmplirDades("/api/biblioteca/get/?type=editorials", "", "editorial_id", "editorial");
+    selectOmplirDades("/api/biblioteca/get/?type=tipus", "", "tipus_id", "nomTipus");
   </script>
 <?php
 }
@@ -53,17 +51,15 @@ if ($modificaBtn === 1) {
   }
   ?>
 
-  <div class="alert alert-success" id="missatgeOk" style="display:none" role="alert">
-    <h4 class="alert-heading"><strong></strong></h4>
-    <h6></h6>
+  <div class="alert alert-success" id="okMessage" style="display:none" role="alert">
+    <div id="okText"></div>
   </div>
 
-  <div class="alert alert-danger" id="missatgeErr" style="display:none" role="alert">
-    <h4 class="alert-heading"><strong></strong></h4>
-    <h6></h6>
+  <div class="alert alert-danger" id="errMessage" style="display:none" role="alert">
+    <div id="errText"></div>
   </div>
 
-  <form method="POST" action="" id="modificaLlibre" class="row g-3">
+  <form id="modificaLlibre" class="row g-3" novalidate>
     <?php $timestamp = date('Y-m-d'); ?>
     <?php
     if ($modificaBtn === 1) {
@@ -79,19 +75,8 @@ if ($modificaBtn === 1) {
     </div>
 
     <div class="col-md-4">
-      <label>Títol en anglés:</label>
-      <input class="form-control" type="text" name="titolEng" id="titolEng" value="">
-    </div>
-
-    <div class="col-md-4">
       <label>Slug:</label>
       <input class="form-control" type="text" name="slug" id="slug" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Autor:</label>
-      <select class="form-select" name="autor" id="autor" value="">
-      </select>
     </div>
 
     <div class="col-md-4">
@@ -107,19 +92,13 @@ if ($modificaBtn === 1) {
 
     <div class="col-md-4">
       <label> Editorial:</label>
-      <select class="form-select" name="idEd" id="idEd" value="">
+      <select class="form-select" name="editorial_id" id="editorial_id"></select>
       </select>
     </div>
 
     <div class="col-md-4">
-      <label>Gènere:</label>
-      <select class="form-select" name="idGen" id="idGen" value="">
-      </select>
-    </div>
-
-    <div class="col-md-4">
-      <label>Sub-gènere:</label>
-      <select class="form-select" name="subGen" id="subGen" value="">
+      <label>Tema:</label>
+      <select class="form-select" name="sub_tema_id" id="sub_tema_id" value="">
       </select>
     </div>
 
@@ -131,7 +110,7 @@ if ($modificaBtn === 1) {
 
     <div class="col-md-4">
       <label>Tipus:</label>
-      <select class="form-select" name="tipus" id="tipus" value="">
+      <select class="form-select" name="tipus_id" id="tipus_id"></select>
       </select>
     </div>
 
@@ -167,64 +146,83 @@ if ($modificaBtn === 1) {
 </div>
 
 <script>
-  function formUpdateLlibre(id) {
-    let urlAjax = "/api/biblioteca/get/?llibreSlug=" + id;
+  function formUpdateLlibre(slug) {
+    const urlAjax = "/api/biblioteca/get/?llibreSlug=" + encodeURIComponent(slug);
 
     fetch(urlAjax, {
-        method: "GET",
+        method: "GET"
       })
-      .then(response => response.json())
-      .then(data => {
-        // Establecer valores en los campos del formulario
-        const newContent = "Llibre: " + data.titol;
+      .then(r => r.json())
+      .then(json => {
+        const data = json && json.data ? json.data : json; // compat si algún día no viene wrapper
+
+        // Título arriba
         const h2Element = document.getElementById('bookUpdateTitle');
-        h2Element.innerHTML = newContent;
+        if (h2Element) h2Element.innerHTML = "Llibre: " + (data.titol ?? '');
 
-        document.getElementById('titol').value = data.titol;
-        document.getElementById('titolEng').value = data.titolEng;
-        document.getElementById('slug').value = data.slug;
-        document.getElementById('any').value = data.any;
-        document.getElementById("id").value = data.id;
+        // Campos reales de db_llibres
+        const titolEl = document.getElementById('titol');
+        if (titolEl) titolEl.value = data.titol ?? '';
 
-        // Llenar selects con opciones
-        selectOmplirDades("/api/biblioteca/get/?type=autors", data.idAutor, "autor", "nomComplet");
+        const slugEl = document.getElementById('slug');
+        if (slugEl) slugEl.value = data.slug ?? '';
+
+        const anyEl = document.getElementById('any');
+        if (anyEl) anyEl.value = data.any ?? '';
+
+        const idEl = document.getElementById('id');
+        if (idEl) idEl.value = data.id ?? '';
+
+        // SELECTS (nombres según db_llibres)
+        // OJO: según tu respuesta actual, editorial_id / tipus_id / sub_tema_id vienen como UUID string
+        // y lang/img/estat como int.
         selectOmplirDades("/api/biblioteca/get/?type=imatgesLlibres", data.img, "img", "alt");
-        selectOmplirDades("/api/biblioteca/get/?type=editorials", data.idEd, "idEd", "editorial");
-        selectOmplirDades("/api/biblioteca/get/?type=generes", data.idGen, "idGen", "genere_cat");
-        selectOmplirDades("/api/biblioteca/get/?type=subgeneres", data.subGen, "subGen", "sub_genere_cat");
+        selectOmplirDades("/api/biblioteca/get/?type=editorials", data.editorial_id, "editorial_id", "editorial");
+        selectOmplirDades("/api/biblioteca/get/?type=temes", data.sub_tema_id, "sub_tema_id", "tema_complet");
         selectOmplirDades("/api/biblioteca/get/?type=llengues", data.lang, "lang", "idioma_ca");
-        selectOmplirDades("/api/biblioteca/get/?type=tipus", data.tipus, "tipus", "nomTipus");
+        selectOmplirDades("/api/biblioteca/get/?type=tipus", data.tipus_id, "tipus_id", "nomTipus");
         selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", data.estat, "estat", "estat");
-
       })
-      .catch(error => console.error("Error al obtener los datos:", error));
+      .catch(err => console.error("Error al obtener los datos:", err));
   }
 
   async function selectOmplirDades(url, selectedValue, selectId, textField) {
     try {
       const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Error en la sol·licitud AJAX');
-      }
+      if (!response.ok) throw new Error('Error en la sol·licitud AJAX');
 
-      const data = await response.json();
+      const json = await response.json();
+      const items = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
+
       const selectElement = document.getElementById(selectId);
       if (!selectElement) {
         console.error(`Select element with id ${selectId} not found`);
         return;
       }
 
-      // Netejar les opcions actuals
       selectElement.innerHTML = '';
 
-      // Afegir les noves opcions
-      data.forEach((item) => {
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = '— Selecciona —';
+      selectElement.appendChild(placeholder);
+
+      const selectedStr = selectedValue == null ? '' : String(selectedValue);
+
+      items.forEach((item) => {
         const option = document.createElement('option');
-        option.value = item.id;
-        option.text = item[textField];
-        if (item.id === selectedValue) {
-          option.selected = true;
-        }
+
+        // Normalmente tu API devuelve item.id (UUID string o int)
+        option.value = item.id != null ? String(item.id) : '';
+
+        let label = '';
+        if (typeof textField === 'function') label = textField(item);
+        else label = item && item[textField] != null ? String(item[textField]) : '';
+
+        option.textContent = label;
+
+        if (option.value === selectedStr) option.selected = true;
+
         selectElement.appendChild(option);
       });
     } catch (error) {

@@ -272,6 +272,24 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    APP_GESTIO . $url['biblioteca'] . '/fitxa-llibre-autors/{slug}' => [
+        'view' => APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'vista-llibre-autors.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['biblioteca'] . '/llibre-autors-afegir/{slug}' => [
+        'view' => APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'form-llibre-autors.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     APP_GESTIO . $url['biblioteca'] . '/modifica-llibre/{slug}' => [
         'view' => APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'form-modifica-llibre.php',
         'needs_session' => true,

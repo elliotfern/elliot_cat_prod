@@ -142,6 +142,15 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/biblioteca/delete' => [
+        'view' => 'src/backend/api/08_biblioteca_llibres/delete-biblioteca.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+
     // BD CINEMA
     '/api/cinema/get/{slug}' => [
         'view' => 'src/backend/api/11_cinema/get-cinema.php',

@@ -1,22 +1,29 @@
 <?php
 
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+error_reporting(E_ALL);
+
+require_once __DIR__ . '/../../../../vendor/autoload.php';
+
 use App\Config\Database;
 use App\Utils\Tables;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use Ramsey\Uuid\Uuid;
 
-// Configuración de cabeceras para aceptar JSON y responder JSON
-header("Content-Type: application/json");
-header("Access-Control-Allow-Methods: GET");
 
-// Definir el dominio permitido
-$allowedOrigin = APP_DOMAIN;
-
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
+// Siempre JSON
+header('Content-Type: application/json; charset=utf-8');
 
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    http_response_code(204);
+    exit;
+}
+
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 // Check if the request method is GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('HTTP/1.1 405 Method Not Allowed');
@@ -26,13 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 
 if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
-    // Configuración de PDO
-    $db = new Database();
 
     // Seleccionar registros que aún no tienen UUID (id NULL o en blanco)
     $query = "SELECT id, persona_id, grup_id FROM db_persones_grups_relacions";
 
     try {
+
+        // Configuración de PDO
+        $db = new Database();
+
         $params = [];
         $result = $db->getData($query, $params, false);
 
@@ -42,10 +51,8 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 [],
                 404
             );
-            return;
+            exit;
         }
-
-        var_dump($result);
 
         // Preparar statement de actualización
         global $conn;
@@ -67,88 +74,318 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         }
 
         echo "IDs actualizados con éxito.\n";
-    } catch (PDOException $e) {
+    } catch (\Throwable $e) {
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
             500
         );
+        exit;
     }
 
     // 2) Llistat llibres
-    // ruta GET => "/api/library/books/all"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'totsLlibres')) {
-    $db = new Database();
+    // ruta GET => "https://elliot.cat/api/biblioteca/get/?type?totsLlibres"
+} else if ((isset($_GET['type']) && $_GET['type'] == 'totsLlibres')) {
+    try {
+        $db = new Database();
 
-    $query = "SELECT LOWER(CONCAT_WS('-', 
-        SUBSTR(HEX(b.id), 1, 8),
-        SUBSTR(HEX(b.id), 9, 4),
-        SUBSTR(HEX(b.id), 13, 4),
-        SUBSTR(HEX(b.id), 17, 4),
-        SUBSTR(HEX(b.id), 21) )) AS id, b.titol, b.any, b.slug, 
-        a.id AS idAutor, a.cognoms AS AutCognom1, a.nom AS AutNom, a.slug AS slugAuthor,
-        g.tema_ca AS nomGenCat,
-        sg.sub_tema_ca
+        // 1) Libros (1 fila por libro)
+        $queryBooks = "
+        SELECT
+            LOWER(CONCAT_WS('-',
+                SUBSTR(HEX(b.id), 1, 8),
+                SUBSTR(HEX(b.id), 9, 4),
+                SUBSTR(HEX(b.id), 13, 4),
+                SUBSTR(HEX(b.id), 17, 4),
+                SUBSTR(HEX(b.id), 21)
+            )) AS id,
+
+            b.titol,
+            b.any,
+            b.slug,
+
+            g.tema_ca AS nomGenCat,
+            sg.sub_tema_ca
+
         FROM " . Tables::LLIBRES . " AS b
-        LEFT JOIN " . Tables::LLIBRES_AUTORS . " AS al ON b.id = al.llibre_id
-        LEFT JOIN " . Tables::PERSONES . " AS a ON al.autor_id = a.id2
-        LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sg ON b.sub_tema_id = sg.id2
-        LEFT JOIN " . Tables::AUX_TEMES . " AS g ON sg.tema_id = g.id2
+        LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sg ON b.sub_tema_id = sg.id
+        LEFT JOIN " . Tables::AUX_TEMES . " AS g ON sg.tema_id = g.id
         LEFT JOIN " . Tables::LLIBRES_EDITORIALS . " AS be ON b.editorial_id = be.id
+
         WHERE b.tipus_id = UNHEX('0197ac5b7106704b96c60728ace151f3')
-        ORDER BY b.titol ASC";
+        ORDER BY b.titol ASC
+    ";
+
+        $books = $db->getData($queryBooks);
+
+        // Sanititzar strings
+        array_walk_recursive($books, function (&$v) {
+            if (!is_string($v)) return;
+            $v = str_replace("\0", '', $v);
+            $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+        });
+
+        if (empty($books)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit;
+        }
+
+        // 2) Autores por libro (N filas por libro)
+        $queryAuthors = "
+        SELECT
+            LOWER(CONCAT_WS('-',
+                SUBSTR(HEX(la.llibre_id), 1, 8),
+                SUBSTR(HEX(la.llibre_id), 9, 4),
+                SUBSTR(HEX(la.llibre_id), 13, 4),
+                SUBSTR(HEX(la.llibre_id), 17, 4),
+                SUBSTR(HEX(la.llibre_id), 21)
+            )) AS llibre_id,
+
+            LOWER(CONCAT_WS('-',
+                SUBSTR(HEX(a.id), 1, 8),
+                SUBSTR(HEX(a.id), 9, 4),
+                SUBSTR(HEX(a.id), 13, 4),
+                SUBSTR(HEX(a.id), 17, 4),
+                SUBSTR(HEX(a.id), 21)
+            )) AS id,
+
+            a.nom,
+            a.cognoms,
+            a.slug
+
+        FROM " . Tables::LLIBRES_AUTORS . " AS la
+        INNER JOIN " . Tables::PERSONES . " AS a ON a.id = la.autor_id
+        INNER JOIN " . Tables::LLIBRES . " AS b ON b.id = la.llibre_id
+
+        WHERE b.tipus_id = UNHEX('0197ac5b7106704b96c60728ace151f3')
+        ORDER BY a.cognoms, a.nom
+    ";
+
+        $authors = $db->getData($queryAuthors);
+
+        array_walk_recursive($authors, function (&$v) {
+            if (!is_string($v)) return;
+            $v = str_replace("\0", '', $v);
+            $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+        });
+
+        // 3) Index autores por llibre_id
+        $authorsByBook = [];
+        foreach ($authors as $a) {
+            $bookId = $a['llibre_id'] ?? null;
+            if (!$bookId) continue;
+
+            $authorsByBook[$bookId][] = [
+                'id' => $a['id'] ?? null,
+                'nom' => $a['nom'] ?? null,
+                'cognoms' => $a['cognoms'] ?? null,
+                'slug' => $a['slug'] ?? null,
+            ];
+        }
+
+        // 4) Merge: añadir autors[] a cada libro
+        foreach ($books as &$b) {
+            $id = $b['id'] ?? null;
+            $b['autors'] = ($id && isset($authorsByBook[$id])) ? $authorsByBook[$id] : [];
+        }
+        unset($b);
+
+        Response::success(MissatgesAPI::success('get'), $books, 200);
+        exit;
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
+
+    // Vista amb els autors d'un llibre
+    // GET /api/biblioteca/get/?type=llibreAutors&slug=el-por-bien-del-imperio
+} elseif ((isset($_GET['type']) && $_GET['type'] == 'llibreAutors')) {
+    // Siempre JSON
+    header('Content-Type: application/json; charset=utf-8');
+
+    $slug = isset($_GET['slug']) ? (string)$_GET['slug'] : '';
+    $slug = trim($slug);
+
+    if ($slug === '') {
+        Response::error(MissatgesAPI::error('bad_request'), ['slug' => 'required'], 400);
+        exit;
+    }
 
     try {
-        $result = $db->getData($query);
+        $db = new Database();
 
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
+        // 1) Libro (1 fila)
+        $qBook = "
+            SELECT
+                LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(b.id), 1, 8),
+                    SUBSTR(HEX(b.id), 9, 4),
+                    SUBSTR(HEX(b.id), 13, 4),
+                    SUBSTR(HEX(b.id), 17, 4),
+                    SUBSTR(HEX(b.id), 21)
+                )) AS id,
+                b.slug,
+                b.titol
+            FROM " . Tables::LLIBRES . " AS b
+            WHERE b.slug = :slug
+            LIMIT 1
+        ";
+
+        $bookRows = $db->getData($qBook, [':slug' => $slug]);
+
+        // Sanititzar (por si titol trae bytes raros)
+        array_walk_recursive($bookRows, function (&$v) {
+            if (!is_string($v)) return;
+            $v = str_replace("\0", '', $v);
+            $v = @iconv('UTF-8', 'UTF-8//IGNORE', $v) ?: $v;
+        });
+
+        if (empty($bookRows)) {
+            Response::error(MissatgesAPI::error('not_found'), ['slug' => $slug], 404);
+            exit;
         }
+
+        $book = $bookRows[0];
+
+        // 2) Autores del libro (N filas)
+        // Usamos rel.id (AUTO_INCREMENT) como rel_id para poder borrar fácil luego
+        $qAuthors = "
+            SELECT
+                la.id AS rel_id,
+
+                LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(a.id), 1, 8),
+                    SUBSTR(HEX(a.id), 9, 4),
+                    SUBSTR(HEX(a.id), 13, 4),
+                    SUBSTR(HEX(a.id), 17, 4),
+                    SUBSTR(HEX(a.id), 21)
+                )) AS id,
+
+                a.nom,
+                a.cognoms,
+                a.slug
+
+            FROM " . Tables::LLIBRES_AUTORS . " AS la
+            INNER JOIN " . Tables::LLIBRES . " AS b ON b.id = la.llibre_id
+            INNER JOIN " . Tables::PERSONES . " AS a ON a.id = la.autor_id
+
+            WHERE b.slug = :slug
+            ORDER BY a.cognoms ASC, a.nom ASC
+        ";
+
+        $authors = $db->getData($qAuthors, [':slug' => $slug]);
+
+        array_walk_recursive($authors, function (&$v) {
+            if (!is_string($v)) return;
+            $v = str_replace("\0", '', $v);
+            $v = @iconv('UTF-8', 'UTF-8//IGNORE', $v) ?: $v;
+        });
 
         Response::success(
             MissatgesAPI::success('get'),
-            $result,
+            [
+                'llibre' => $book,
+                'autors' => $authors,
+            ],
             200
         );
-    } catch (PDOException $e) {
+        exit;
+    } catch (\Throwable $e) {
         Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
+            MissatgesAPI::error('internal_error'),
+            [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ],
             500
         );
+        exit;
     }
+
 
     // 3) Llistat autors
     // ruta GET => "https://elliot.cat/api/biblioteca/get/authors"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'totsAutors') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT a.id, a.nom AS AutNom, a.cognoms AS AutCognom1, a.slug, a.anyNaixement AS yearBorn, a.anyDefuncio AS yearDie, c.pais_cat AS country, c.id AS idCountry, i.nameImg,
+} else if (isset($_GET['type']) && in_array($_GET['type'], ['totsAutors', 'autors'], true)) {
+
+    try {
+        $db = new Database();
+
+        $query =
+            "SELECT 
+             LOWER(CONCAT_WS('-', 
+                SUBSTR(HEX(a.id), 1, 8),
+                SUBSTR(HEX(a.id), 9, 4),
+                SUBSTR(HEX(a.id), 13, 4),
+                SUBSTR(HEX(a.id), 17, 4),
+                SUBSTR(HEX(a.id), 21) )) AS id,
+            a.nom AS AutNom, a.cognoms AS AutCognom1, TRIM(CONCAT_WS(' ', a.nom, a.cognoms)) AS autor_nom_complet, a.slug, a.any_naixement AS yearBorn, a.any_defuncio AS yearDie, c.pais_ca AS country, c.id AS idCountry, i.nameImg,
         GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup
-        FROM db_persones AS a
-        LEFT JOIN db_countries AS c ON a.paisAutor = c.id
-        LEFT JOIN db_img AS i ON a.img = i.id
-        LEFT JOIN db_persones_grups_relacions AS rel ON a.id2 = rel.persona_id
-        LEFT JOIN db_persones_grups AS g ON rel.grup_id = g.id
-        WHERE g.id IN (
-            UNHEX(REPLACE('0197b088-1a25-72c4-8b5b-d7e2ee27de7c', '-', '')),
-            UNHEX(REPLACE('0197b088-1a27-723c-8ca7-98b4d2fe6c29', '-', ''))
-            )  
+        FROM " . Tables::PERSONES . " AS a
+        LEFT JOIN " . Tables::GEO_PAISOS . " AS c ON a.pais_autor_id = c.id
+        LEFT JOIN " . Tables::IMG . " AS i ON a.img_id = i.id
+        LEFT JOIN " . Tables::PERSONES_GRUPS_RELACIONS . " AS rel ON a.id = rel.persona_id
+        LEFT JOIN " . Tables::PERSONES_GRUPS . " AS g ON rel.grup_id = g.id
+        WHERE g.id = 0x0197b0881a2572c48b5bd7e2ee27de7c
         GROUP BY a.id
-        ORDER BY a.cognoms"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+        ORDER BY a.cognoms";
+
+        $result = $db->getData($query);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (!is_string($v)) return;
+
+            // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
+            $v = str_replace("\0", '', $v);
+
+            // Intentar normalizar a UTF-8 válido
+            // 1) Si ya es UTF-8 válido, lo deja igual
+            if (!mb_check_encoding($v, 'UTF-8')) {
+                // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
+                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) {
+                    $v = $v2;
+                } else {
+                    // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
+                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                    if ($v3 !== false) $v = $v3;
+                }
+            } else {
+                // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
+                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) $v = $v2;
+            }
+        });
+
+
+        if (empty($result)) {
+            header('Content-Type: application/json; charset=utf-8');
+            Response::error(MissatgesAPI::error('not_found'), ['slug' => $slug], 404);
+            exit;
+        }
+
+        header('Content-Type: application/json; charset=utf-8');
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+        exit;
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
-    echo json_encode($data);
 
     // 4) Authors page > list of books
     // ruta GET => "https://control.elliotfern/api/library/authors/books/9"
@@ -174,7 +411,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 [],
                 404
             );
-            return;
+            exit;
         }
 
         Response::success(
@@ -182,310 +419,492 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             $result,
             200
         );
-    } catch (PDOException $e) {
+    } catch (\Throwable $e) {
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
             500
         );
+        exit;
     }
 
-
-    // 5) Authors page
-    // ruta GET => "/api/biblioteca/get/?autorSlug=josep-fontana"
-} elseif (isset($_GET['autorSlug'])) {
-    $autorSlug = $_GET['autorSlug'];
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT a.id, a.cognoms, a.nom, p.pais_cat, a.anyNaixement, a.anyDefuncio, p.id AS idPais, o.professio_ca, i.nameImg, a.web, a.dateCreated, a.dateModified, a.descripcio, a.slug, a.img AS idImg, a.ocupacio AS idOcupacio, a.grup AS idGrup,
-        a.sexe, a.mesNaixement, a.diaNaixement, a.mesDefuncio, a.diaDefuncio, c1.city AS ciutatNaixement, c2.city AS ciutatDefuncio, a.descripcioCast, a.descripcioEng, a.descripcioIt
-                FROM db_persones AS a
-                LEFT JOIN db_countries AS p ON a.paisAutor = p.id
-                LEFT JOIN aux_professions AS o ON a.ocupacio = o.id
-                LEFT JOIN db_img AS i ON a.img = i.id
-                LEFT JOIN db_cities AS c1 ON a.ciutatNaixement = c1.id
-                LEFT JOIN db_cities AS c2 ON a.ciutatDefuncio = c2.id
-                WHERE a.slug = :slug");
-    $stmt->execute(['slug' => $autorSlug]);
-
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(null);  // Devuelve un objeto JSON nulo si no hay resultados
-    } else {
-        // Solo obtenemos la primera fila ya que parece ser una búsqueda por ID
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        echo json_encode($row);  // Codifica la fila como un objeto JSON
-    }
 
     // 6) Book page
     // ruta GET => "/api/biblioteca/get/?llibreSlug=el-por-bien-del-imperio"
-} elseif ((isset($_GET['llibreSlug']))) {
-    $slug = $_GET['llibreSlug'];
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT b.id,  b.titol, b.titolEng, b.slug, b.any, b.dateCreated, b.dateModified, b.idGen, b.subGen, b.lang, b.tipus, b.estat, b.idEd, b.img,
-        a.nom, a.cognoms, a.id AS idAutor, a.slug AS slugAutor, i.nameImg, t.nomTipus, e.editorial, g.genere_cat, id.idioma_ca, a.slug AS slugAutor, sg.sub_genere_cat,
-        el.estat
-                FROM 08_db_biblioteca_llibres AS b
-                INNER JOIN db_img AS i ON b.img = i.id
-                INNER JOIN db_persones AS a ON b.autor = a.id
-                INNER JOIN 08_aux_biblioteca_tipus as t on b.tipus = t.id
-                INNER JOIN 08_aux_biblioteca_editorials AS e ON b.idEd = e.id
-                INNER JOIN 08_aux_biblioteca_generes_literaris AS g ON b.idGen = g.id
-                LEFT JOIN 08_aux_biblioteca_sub_generes_literaris AS sg ON b.subGen = sg.id
-                LEFT JOIN 08_aux_biblioteca_estat_llibre AS el ON b.estat = el.id
-                INNER JOIN aux_idiomes AS id ON b.lang = id.id
-                WHERE b.slug = :slug");
-    $stmt->execute(['slug' => $slug]);
+} else if (isset($_GET['llibreSlug'])) {
 
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(null);  // Devuelve un objeto JSON nulo si no hay resultados
-    } else {
-        // Solo obtenemos la primera fila ya que parece ser una búsqueda por ID
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        echo json_encode($row);  // Codifica la fila como un objeto JSON
+    $slug = (string) $_GET['llibreSlug'];
+
+    try {
+        $db = new Database();
+
+        $query = "SELECT 
+                LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(b.id), 1, 8),
+                    SUBSTR(HEX(b.id), 9, 4),
+                    SUBSTR(HEX(b.id), 13, 4),
+                    SUBSTR(HEX(b.id), 17, 4),
+                    SUBSTR(HEX(b.id), 21)
+                    )) AS id,
+                 LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(b.tipus_id), 1, 8),
+                    SUBSTR(HEX(b.tipus_id), 9, 4),
+                    SUBSTR(HEX(b.tipus_id), 13, 4),
+                    SUBSTR(HEX(b.tipus_id), 17, 4),
+                    SUBSTR(HEX(b.tipus_id), 21)
+                    )) AS tipus_id,
+                LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(b.editorial_id), 1, 8),
+                    SUBSTR(HEX(b.editorial_id), 9, 4),
+                    SUBSTR(HEX(b.editorial_id), 13, 4),
+                    SUBSTR(HEX(b.editorial_id), 17, 4),
+                    SUBSTR(HEX(b.editorial_id), 21)
+                    )) AS editorial_id,
+                LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(b.sub_tema_id), 1, 8),
+                    SUBSTR(HEX(b.sub_tema_id), 9, 4),
+                    SUBSTR(HEX(b.sub_tema_id), 13, 4),
+                    SUBSTR(HEX(b.sub_tema_id), 17, 4),
+                    SUBSTR(HEX(b.sub_tema_id), 21)
+                    )) AS sub_tema_id,
+                LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(b.estat), 1, 8),
+                    SUBSTR(HEX(b.estat), 9, 4),
+                    SUBSTR(HEX(b.estat), 13, 4),
+                    SUBSTR(HEX(b.estat), 17, 4),
+                    SUBSTR(HEX(b.estat), 21)
+                    )) AS estat,
+                b.titol,
+                b.slug as llibreSlug,
+                b.slug,
+                b.any,
+                b.dateCreated,
+                b.dateModified,
+                b.lang,
+                b.img,
+                i.nameImg,
+                t.nomTipus,
+                e.editorial,
+                id.idioma_ca,
+                el.estat AS nomEstat,
+                sub_tema.sub_tema_ca,
+                tema.tema_ca,
+
+                   -- autor (1 fila por autor)
+                LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(p.id), 1, 8),
+                    SUBSTR(HEX(p.id), 9, 4),
+                    SUBSTR(HEX(p.id), 13, 4),
+                    SUBSTR(HEX(p.id), 17, 4),
+                    SUBSTR(HEX(p.id), 21)
+                )) AS autor_id,
+                p.nom AS autor_nom,
+                p.cognoms AS autor_cognoms,
+                p.slug AS autor_slug
+
+            FROM " . Tables::LLIBRES . " AS b
+            LEFT JOIN " . Tables::LLIBRES_AUTORS . " AS la ON la.llibre_id = b.id
+            LEFT JOIN " . Tables::PERSONES . " AS p ON p.id = la.autor_id
+            LEFT JOIN " . Tables::IMG . " AS i ON b.img = i.id
+            LEFT JOIN " . Tables::LLIBRES_TIPUS . " AS t ON b.tipus_id = t.id
+            LEFT JOIN " . Tables::LLIBRES_EDITORIALS . " AS e ON b.editorial_id = e.id
+            LEFT JOIN " . Tables::LLIBRES_ESTAT . " AS el ON b.estat = el.id
+            LEFT JOIN " . Tables::AUX_IDIOMES . " AS id ON b.lang = id.id
+            LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sub_tema ON sub_tema.id =  b.sub_tema_id
+            LEFT JOIN " . Tables::AUX_TEMES . " AS tema ON sub_tema.tema_id = tema.id
+            WHERE b.slug = :slug";
+
+        $params = [':slug' => $slug];
+
+        $rows = $db->getData($query, $params);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($rows, function (&$v) {
+            if (!is_string($v)) return;
+            $v = str_replace("\0", '', $v);
+
+            if (!mb_check_encoding($v, 'UTF-8')) {
+                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) $v = $v2;
+                else {
+                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                    if ($v3 !== false) $v = $v3;
+                }
+            } else {
+                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) $v = $v2;
+            }
+        });
+
+        if (empty($rows)) {
+            header('Content-Type: application/json; charset=utf-8');
+            Response::error(MissatgesAPI::error('not_found'), ['slug' => $slug], 404);
+            exit;
+        }
+
+        // 1) Datos del libro = primera fila
+        $first = $rows[0];
+
+        $result = [
+            'id'          => $first['id'],
+            'titol'       => $first['titol'],
+            'slug'        => $first['slug'],
+            'any'         => $first['any'],
+            'dateCreated' => $first['dateCreated'],
+            'dateModified' => $first['dateModified'],
+            'lang'        => $first['lang'],
+            'img'         => $first['img'],
+            'estat'       => $first['estat'],      // int
+            'nomEstat'    => $first['nomEstat'],   // texto
+
+            'tipus_id'    => $first['tipus_id'],
+            'editorial_id' => $first['editorial_id'],
+            'sub_tema_id' => $first['sub_tema_id'],
+
+            'nameImg'     => $first['nameImg'],
+            'nomTipus'    => $first['nomTipus'],
+            'editorial'   => $first['editorial'],
+            'idioma_ca'   => $first['idioma_ca'],
+
+            'sub_tema_ca' => $first['sub_tema_ca'],
+            'tema_ca'     => $first['tema_ca'],
+
+            // 2) autores
+            'autors'      => [],
+        ];
+
+        // 2) Construir array de autores (deduplicado por seguridad)
+        $seen = [];
+
+        foreach ($rows as $r) {
+            if (empty($r['autor_id'])) continue; // libro sin autores
+
+            $aid = $r['autor_id'];
+            if (isset($seen[$aid])) continue;
+
+            $seen[$aid] = true;
+
+            $result['autors'][] = [
+                'id'      => $aid,
+                'nom'     => $r['autor_nom'],
+                'cognoms' => $r['autor_cognoms'],
+                'slug'    => $r['autor_slug'],
+            ];
+        }
+
+        header('Content-Type: application/json; charset=utf-8');
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+        exit;
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
-
-
-    // 8) Movement author
-    // ruta GET => "/api/library/moviment"
-} elseif (isset($_GET['moviment'])) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT m.id, m.moviment_ca AS movement_ca
-                FROM 08_aux_biblioteca_moviments AS m
-                ORDER BY m.moviment_ca"
-    );
-    $stmt->execute();
-
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
-
-    // 9) country
-    // ruta GET => "/api/places/pais"
-} elseif (isset($_GET['pais'])) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT c.id, c.pais_cat AS pais_ca
-                FROM db_countries AS c
-                ORDER BY c.pais_cat"
-    );
-    $stmt->execute();
-
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
 
     // 10) image author
     // ruta GET => "/api/biblioteca/?type=auxiliarImatgesAutor"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'auxiliarImatgesAutor')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT i.id, CONCAT(i.nom, ' (', t.name, ')') AS alt
+} else if ((isset($_GET['type']) && $_GET['type'] == 'auxiliarImatgesAutor')) {
+
+    try {
+
+        $db = new Database();
+
+        $query = "SELECT i.id, CONCAT(i.nom, ' (', t.name, ')') AS alt
             FROM db_img AS i
             LEFT JOIN db_img_type AS t ON i.typeImg = t.id
             WHERE i.typeImg IN (1, 5, 9, 14)
-            ORDER BY i.nom"
-    );
-    $stmt->execute();
+            ORDER BY i.nom";
 
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+        $result = $db->getData($query);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (is_string($v)) {
+                // Converteix a UTF-8 vàlid (ignora bytes trencats)
+                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        });
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
-    echo json_encode($data);
 
     // 10) ruta estat del llibre
     // ruta GET => "/api/biblioteca/auxiliars/?estatLlibre"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'estatLlibre')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT e.id, e.estat
-            FROM 08_aux_biblioteca_estat_llibre AS e
-            ORDER BY e.estat"
-    );
-    $stmt->execute();
+} else if ((isset($_GET['type']) && $_GET['type'] == 'estatLlibre')) {
 
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+    try {
+        $db = new Database();
+
+        $query = "SELECT 
+           LOWER(CONCAT_WS('-', 
+                SUBSTR(HEX(e.id), 1, 8),
+                SUBSTR(HEX(e.id), 9, 4),
+                SUBSTR(HEX(e.id), 13, 4),
+                SUBSTR(HEX(e.id), 17, 4),
+                SUBSTR(HEX(e.id), 21) )) AS id,
+            e.estat
+            FROM " . Tables::LLIBRES_ESTAT . " AS e
+            ORDER BY e.estat";
+
+        $result = $db->getData($query);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (is_string($v)) {
+                // Converteix a UTF-8 vàlid (ignora bytes trencats)
+                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        });
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
-    echo json_encode($data);
-
 
     // 11) Llibre imatge
-    // ruta GET => "/api/biblioteca/auxiliars/?type=oficis"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'imatgesLlibres')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT i.id, i.alt
+    // ruta GET => "/api/biblioteca/auxiliars/?type=imatgesLlibres"
+} else if ((isset($_GET['type']) && $_GET['type'] == 'imatgesLlibres')) {
+
+    try {
+        $db = new Database();
+
+        $query = "SELECT i.id, i.alt
                 FROM db_img AS i
                 WHERE i.typeImg = 2
-                ORDER BY i.alt ASC"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+                ORDER BY i.alt ASC";
+
+        $result = $db->getData($query);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (is_string($v)) {
+                // Converteix a UTF-8 vàlid (ignora bytes trencats)
+                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        });
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
-    echo json_encode($data);
 
     // 11) Editorials
     // ruta GET => "/api/biblioteca/auxiliars/?type=editorials"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'editorials')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT e.id, e.editorial
-                FROM 08_aux_biblioteca_editorials AS e
-                ORDER BY e.editorial ASC"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+} else if ((isset($_GET['type']) && $_GET['type'] == 'editorials')) {
+
+    try {
+        $db = new Database();
+
+        $query =
+            "SELECT LOWER(CONCAT_WS('-',
+                SUBSTR(HEX(e.id), 1, 8),
+                SUBSTR(HEX(e.id), 9, 4),
+                SUBSTR(HEX(e.id), 13, 4),
+                SUBSTR(HEX(e.id), 17, 4),
+                SUBSTR(HEX(e.id), 21)
+                )) AS id, e.editorial
+                FROM " . Tables::LLIBRES_EDITORIALS . " AS e
+                ORDER BY e.editorial ASC";
+
+        $result = $db->getData($query);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (is_string($v)) {
+                // Converteix a UTF-8 vàlid (ignora bytes trencats)
+                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        });
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
-    echo json_encode($data);
 
     // 11) Gèneres
     // ruta GET => "/api/biblioteca/auxiliars/?type=llengues"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'llengues')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT l.id, l.idioma_ca 
-                    FROM aux_idiomes AS l
-                    ORDER BY l.idioma_ca ASC"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+} else if ((isset($_GET['type']) && $_GET['type'] == 'llengues')) {
+
+    try {
+        $db = new Database();
+
+        $query =  "SELECT l.id, l.idioma_ca 
+                    FROM " . Tables::AUX_IDIOMES . " AS l
+                    ORDER BY l.idioma_ca ASC";
+
+        $result = $db->getData($query);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (is_string($v)) {
+                // Converteix a UTF-8 vàlid (ignora bytes trencats)
+                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        });
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
-    echo json_encode($data);
 
     // 11) Gèneres
     // ruta GET => "/api/biblioteca/auxiliars/?type=tipus"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'tipus')) {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT t.nomTipus, t.id
-                    FROM 08_aux_biblioteca_tipus AS t
-                    ORDER BY t.nomTipus ASC"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
+} else if ((isset($_GET['type']) && $_GET['type'] == 'tipus')) {
 
+    try {
+        $db = new Database();
 
-    // 11) PROFESSIO
-    // ruta GET => "/api/biblioteca/auxiliars/?type=tipus"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'professio')) {
+        $query = "SELECT LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(t.id), 1, 8),
+                    SUBSTR(HEX(t.id), 9, 4),
+                    SUBSTR(HEX(t.id), 13, 4),
+                    SUBSTR(HEX(t.id), 17, 4),
+                    SUBSTR(HEX(t.id), 21)
+                    )) AS id, t.nomTipus
+                    FROM " . Tables::LLIBRES_TIPUS . " AS t
+                    ORDER BY t.nomTipus ASC";
 
-    /** @var PDO $conn */
-    global $conn;
-    $query = "SELECT p.id, p.professio_ca
-                    FROM aux_professions AS p
-                    ORDER BY p.professio_ca ASC";
+        $result = $db->getData($query);
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (is_string($v)) {
+                // Converteix a UTF-8 vàlid (ignora bytes trencats)
+                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        });
 
-    // Ejecutar la consulta
-    $stmt->execute();
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit();
-    }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-    exit();
-
-    // 11) moviment
-    // ruta GET => "/api/biblioteca/auxiliars/?type=tipus"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'moviment')) {
-
-    /** @var PDO $conn */
-    global $conn;
-    $query = "SELECT m.id, m.moviment_ca
-                    FROM 08_aux_biblioteca_moviments AS m
-                    ORDER BY m.moviment_ca ASC";
-
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit();
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
+    // 11) genere llibre
+    // ruta GET => "/api/biblioteca/auxiliars/?type=temes"
+} elseif ((isset($_GET['type']) && $_GET['type'] == 'temes')) {
 
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-    exit();
+    try {
+        $db = new Database();
 
-    // 11) pais
-    // ruta GET => "/api/biblioteca/auxiliars/?type=tipus"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'pais')) {
+        $query = "SELECT 
+                LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(t.id), 1, 8),
+                    SUBSTR(HEX(t.id), 9, 4),
+                    SUBSTR(HEX(t.id), 13, 4),
+                    SUBSTR(HEX(t.id), 17, 4),
+                    SUBSTR(HEX(t.id), 21) )) AS id,
+                    TRIM(CONCAT_WS(' - ', te.tema_ca, t.sub_tema_ca)) AS tema_complet
+                    FROM " . Tables::AUX_SUB_TEMES . " AS t
+                    LEFT JOIN " . Tables::AUX_TEMES . " AS te ON t.tema_id = te.id
+                    ORDER BY te.tema_ca ASC";
 
-    /** @var PDO $conn */
-    global $conn;
-    $query = "SELECT c.id, c.pais_cat
-                    FROM  db_countries AS c
-                    ORDER BY c.pais_cat ASC";
+        $result = $db->getData($query);
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (is_string($v)) {
+                // Converteix a UTF-8 vàlid (ignora bytes trencats)
+                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        });
 
-    // Ejecutar la consulta
-    $stmt->execute();
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit();
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-    exit();
 
     // 12) classificació grup persona
     // ruta GET => "/api/biblioteca/auxiliars/?type=grup"
@@ -531,65 +950,19 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
     // ruta GET => "/api/biblioteca/auxiliars/?type=sexe"
 } elseif ((isset($_GET['type']) && $_GET['type'] == 'sexe')) {
 
-    /** @var PDO $conn */
-    global $conn;
     $query = "SELECT s.id, s.genereCa
                     FROM aux_persones_genere AS s
                     ORDER BY s.genereCa ASC";
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit();
-    }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-    exit();
 
     // 11) ciutats
     // ruta GET => "/api/biblioteca/auxiliars/?type=ciutat"
 } elseif ((isset($_GET['type']) && $_GET['type'] == 'ciutat')) {
 
-    /** @var PDO $conn */
-    global $conn;
     $query = "SELECT c.id, c.city
                     FROM db_cities AS c
                     ORDER BY c.city ASC";
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit();
-    }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-    exit();
 
     // 11) calendari: dies
     // ruta GET => "/api/biblioteca/auxiliars/?type=calendariDies"
