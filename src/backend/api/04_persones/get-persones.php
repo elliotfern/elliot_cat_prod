@@ -88,7 +88,6 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
         p.pais_ca,
         a.any_naixement,
         a.any_defuncio,
-        p.id AS idPais,
         i.nameImg,
         i.alt,
         a.web,
@@ -96,17 +95,14 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
         a.updated_at,
         a.descripcio,
         a.slug,
-        a.img_id AS idImg,
-        a.sexe_id AS idSexe,
+        a.img_id,
+        a.sexe_id,
         a.mes_naixement,
         a.dia_naixement,
         a.mes_defuncio,
         a.dia_defuncio,
         c1.ciutat_ca AS ciutatNaixement,
         c2.ciutat_ca AS ciutatDefuncio,
-        a.ciutat_naixement_id AS idCiutatNaixement,
-        a.ciutat_defuncio_id AS idCiutatDefuncio,
-
         GROUP_CONCAT(
             DISTINCT LOWER(CONCAT_WS('-',
                 SUBSTR(HEX(g.id), 1, 8),
@@ -118,8 +114,32 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
             ORDER BY g.grup_ca
             SEPARATOR ','
         ) AS grup_ids,
-        GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup
-    
+        GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup,
+
+    LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(a.pais_autor_id), 1, 8),
+        SUBSTR(HEX(a.pais_autor_id), 9, 4),
+        SUBSTR(HEX(a.pais_autor_id), 13, 4),
+        SUBSTR(HEX(a.pais_autor_id), 17, 4),
+        SUBSTR(HEX(a.pais_autor_id), 21)
+    )) AS pais_autor_id,
+
+    LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(a.ciutat_defuncio_id), 1, 8),
+        SUBSTR(HEX(a.ciutat_defuncio_id), 9, 4),
+        SUBSTR(HEX(a.ciutat_defuncio_id), 13, 4),
+        SUBSTR(HEX(a.ciutat_defuncio_id), 17, 4),
+        SUBSTR(HEX(a.ciutat_defuncio_id), 21)
+    )) AS ciutat_defuncio_id,
+
+    LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(a.ciutat_naixement_id), 1, 8),
+        SUBSTR(HEX(a.ciutat_naixement_id), 9, 4),
+        SUBSTR(HEX(a.ciutat_naixement_id), 13, 4),
+        SUBSTR(HEX(a.ciutat_naixement_id), 17, 4),
+        SUBSTR(HEX(a.ciutat_naixement_id), 21)
+    )) AS ciutat_naixement_id
+
     FROM " . Tables::PERSONES . " AS a
     LEFT JOIN " . Tables::GEO_PAISOS . " AS p ON a.pais_autor_id = p.id
     LEFT JOIN " . Tables::IMG . " AS i ON a.img_id = i.id

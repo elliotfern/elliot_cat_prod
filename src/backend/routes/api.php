@@ -329,6 +329,23 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/persones/post' => [
+        'view' => 'src/backend/api/04_persones/post-persones.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/persones/put' => [
+        'view' => 'src/backend/api/04_persones/put-persones.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+
     // 17. VIATGES
     '/api/viatges/get' => [
         'view' => 'src/backend/api/17_viatges/get-viatges.php',

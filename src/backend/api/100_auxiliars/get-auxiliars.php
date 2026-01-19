@@ -4,6 +4,32 @@ use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Config\Tables;
+use Ramsey\Uuid\Uuid;
+
+// Siempre JSON
+header('Content-Type: application/json; charset=utf-8');
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    http_response_code(204);
+    exit;
+}
+
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+// Check if the request method is GET
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    header('HTTP/1.1 405 Method Not Allowed');
+    echo json_encode(['error' => 'Method not allowed']);
+    exit();
+}
+
+// Verificar que el método de la solicitud sea GET
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    header('HTTP/1.1 405 Method Not Allowed');
+    echo json_encode(['error' => 'Method not allowed']);
+    exit();
+}
 
 $db = new Database();
 $pdo = $db->getPdo();
@@ -14,23 +40,6 @@ $slug = $routeParams[0];
  * FUNCIONS
  * @
  */
-
-// Configuración de cabeceras para aceptar JSON y responder JSON
-header("Content-Type: application/json");
-header("Access-Control-Allow-Methods: GET");
-
-// Definir el dominio permitido
-$allowedOrigin = APP_DOMAIN;
-
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
-
-// Verificar que el método de la solicitud sea GET
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    header('HTTP/1.1 405 Method Not Allowed');
-    echo json_encode(['error' => 'Method not allowed']);
-    exit();
-}
 
 
 // 1) AUXILIARS

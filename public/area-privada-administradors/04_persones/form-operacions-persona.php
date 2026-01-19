@@ -36,7 +36,7 @@
 
     <div class="col-md-4">
       <label>Gènere:</label>
-      <select class="form-select" name="sexeId" id="sexeId"></select>
+      <select class="form-select" name="sexe_id" id="sexe_id"></select>
     </div>
 
     <div class="col-md-4">
@@ -48,57 +48,57 @@
 
     <div class="col-md-4">
       <label>Dia de naixement:</label>
-      <select class="form-select" name="diaNaixement" id="diaNaixement"></select>
+      <select class="form-select" name="dia_naixement" id="dia_naixement"></select>
     </div>
 
     <div class="col-md-4">
       <label>Mes de naixement:</label>
-      <select class="form-select" name="mesNaixement" id="mesNaixement"></select>
+      <select class="form-select" name="mes_naixement" id="mes_naixement"></select>
     </div>
 
     <div class="col-md-4">
       <label>Any de naixement:</label>
-      <input class="form-control" type="text" name="anyNaixement" id="anyNaixement" value="">
+      <input class="form-control" type="text" name="any_naixement" id="any_naixement" value="">
     </div>
 
     <div class="col-md-4">
       <label>Dia de defunció:</label>
-      <select class="form-select" name="diaDefuncio" id="diaDefuncio"></select>
+      <select class="form-select" name="dia_defuncio" id="dia_defuncio"></select>
     </div>
 
     <div class="col-md-4">
       <label>Mes de defunció:</label>
-      <select class="form-select" name="mesDefuncio" id="mesDefuncio"></select>
+      <select class="form-select" name="mes_defuncio" id="mes_defuncio"></select>
     </div>
 
     <div class="col-md-4">
       <label>Any de defunció:</label>
-      <input class="form-control" type="text" name="anyDefuncio" id="anyDefuncio" value="">
+      <input class="form-control" type="text" name="any_defuncio" id="any_defuncio" value="">
     </div>
 
     <div class="col-md-4">
       <label>Ciutat naixement:</label>
-      <select class="form-select" name="ciutatNaixementId" id="ciutatNaixementId"></select>
+      <select class="form-select" name="ciutat_naixement_id" id="ciutat_naixement_id"></select>
     </div>
 
     <div class="col-md-4">
       <label>Ciutat defunció:</label>
-      <select class="form-select" name="ciutatDefuncioId" id="ciutatDefuncioId"></select>
+      <select class="form-select" name="ciutat_defuncio_id" id="ciutat_defuncio_id"></select>
     </div>
 
     <div class="col-md-4">
       <label>País:</label>
-      <select class="form-select" name="paisAutorId" id="paisAutorId"></select>
+      <select class="form-select" name="pais_autor_id" id="pais_autor_id"></select>
     </div>
 
     <div class="col-md-4">
       <label>Imatge:</label>
-      <select class="form-select" name="imgId" id="imgId"></select>
+      <select class="form-select" name="img_id" id="img_id"></select>
     </div>
 
     <div class="col-md-4">
       <label for="grups">Classificació grups (professió):</label>
-      <select name="grups[]" id="grups" multiple required></select>
+      <select name="grup_ids[]" id="grup_ids" multiple required></select>
     </div>
 
     <div class="col-md-4"></div>

@@ -1,11 +1,5 @@
 <?php
 
-ini_set('display_errors', '0');
-ini_set('display_startup_errors', '0');
-error_reporting(E_ALL);
-
-require_once __DIR__ . '/../../../../vendor/autoload.php';
-
 use App\Config\Database;
 use App\Utils\Tables;
 use App\Utils\Response;
@@ -317,6 +311,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
 
     try {
         $db = new Database();
+        $autorGroupUuid = '0197b088-1a25-72c4-8b5b-d7e2ee27de7c';
 
         $query =
             "SELECT 
@@ -333,11 +328,18 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         LEFT JOIN " . Tables::IMG . " AS i ON a.img_id = i.id
         LEFT JOIN " . Tables::PERSONES_GRUPS_RELACIONS . " AS rel ON a.id = rel.persona_id
         LEFT JOIN " . Tables::PERSONES_GRUPS . " AS g ON rel.grup_id = g.id
-        WHERE g.id = 0x0197b0881a2572c48b5bd7e2ee27de7c
+        WHERE EXISTS (
+            SELECT 1
+            FROM " . Tables::PERSONES_GRUPS_RELACIONS . " r2
+            WHERE r2.persona_id = a.id
+            AND r2.grup_id = UNHEX(REPLACE(:autor_grup_uuid, '-', ''))
+        )
         GROUP BY a.id
         ORDER BY a.cognoms";
 
-        $result = $db->getData($query);
+        $params = [':autor_grup_uuid' => $autorGroupUuid];
+
+        $result = $db->getData($query, $params);
 
         // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
         array_walk_recursive($result, function (&$v) {
@@ -910,9 +912,10 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
     // ruta GET => "/api/biblioteca/auxiliars/?type=grup"
 } elseif ((isset($_GET['type']) && $_GET['type'] == 'grup')) {
 
-    /** @var PDO $conn */
-    global $conn;
-    $query = "SELECT 
+    try {
+        $db = new Database();
+
+        $query = "SELECT 
                 LOWER(CONCAT_WS('-',
                     SUBSTR(HEX(id), 1, 8),
                     SUBSTR(HEX(id), 9, 4),
@@ -921,30 +924,35 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                     SUBSTR(HEX(id), 21)
                 )) AS id,
                 grup_ca
-              FROM db_persones_grups
+              FROM " . Tables::PERSONES_GRUPS . "
               ORDER BY grup_ca ASC";
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
+        $result = $db->getData($query);
 
-    // Ejecutar la consulta
-    $stmt->execute();
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (is_string($v)) {
+                // Converteix a UTF-8 vàlid (ignora bytes trencats)
+                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        });
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit();
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
     }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-    exit();
 
     // 11) sexe
     // ruta GET => "/api/biblioteca/auxiliars/?type=sexe"
@@ -953,71 +961,6 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
     $query = "SELECT s.id, s.genereCa
                     FROM aux_persones_genere AS s
                     ORDER BY s.genereCa ASC";
-
-
-    // 11) ciutats
-    // ruta GET => "/api/biblioteca/auxiliars/?type=ciutat"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'ciutat')) {
-
-    $query = "SELECT c.id, c.city
-                    FROM db_cities AS c
-                    ORDER BY c.city ASC";
-
-
-    // 11) calendari: dies
-    // ruta GET => "/api/biblioteca/auxiliars/?type=calendariDies"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'calendariDies')) {
-    function obtenerDias()
-    {
-        $dias = [];
-        for ($i = 1; $i <= 31; $i++) {
-            $dias[] = [
-                'id' => $i,
-                'dia' => $i
-            ];
-        }
-        return $dias;
-    }
-
-    $data = obtenerDias();
-
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-    exit();
-
-    // 11) calendari: mesos
-    // ruta GET => "/api/biblioteca/auxiliars/?type=calendariMesos"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'calendariMesos')) {
-    function obtenerMesos()
-    {
-        $meses = [
-            ['id' => 1, 'mes' => 'Gener'],
-            ['id' => 2, 'mes' => 'Febrer'],
-            ['id' => 3, 'mes' => 'Març'],
-            ['id' => 4, 'mes' => 'Abril'],
-            ['id' => 5, 'mes' => 'Maig'],
-            ['id' => 6, 'mes' => 'Juny'],
-            ['id' => 7, 'mes' => 'Juliol'],
-            ['id' => 8, 'mes' => 'Agost'],
-            ['id' => 9, 'mes' => 'Setembre'],
-            ['id' => 10, 'mes' => 'Octubre'],
-            ['id' => 11, 'mes' => 'Novembre'],
-            ['id' => 12, 'mes' => 'Desembre']
-        ];
-        return $meses;
-    }
-
-    $data = obtenerMesos();
-
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-    exit();
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

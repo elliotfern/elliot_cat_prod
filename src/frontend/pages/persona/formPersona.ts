@@ -7,6 +7,7 @@ import { setTrixHTML } from '../../utils/setTrix';
 
 interface Fitxa {
   [key: string]: unknown;
+  grup_ids?: string[];
   status: string;
   message: string;
   id: string;
@@ -18,19 +19,26 @@ interface Fitxa {
   estat: number;
   experiencia_id: number;
   institucio_localitzacio: number;
-  logo_id: number;
-  genereId: number;
-  paisAutorId: number;
-  imgId: number;
-  ciutatNaixementId: number;
-  ciutatDefuncioId: number;
+
+  // --- PERSONA / AUTOR (alineado con DB)
+  sexe_id: number;
+  pais_autor_id: number;
+  img_id: number;
+
+  ciutat_naixement_id: number;
+  ciutat_defuncio_id: number;
+
   descripcio: string;
-  anyNaixement: number;
-  mesNaixement: number;
-  diaNaixement: number;
-  anyDefuncio: number;
-  mesDefuncio: number;
-  diaDefuncio: number;
+
+  any_naixement: number;
+  mes_naixement: number;
+  dia_naixement: number;
+
+  any_defuncio: number;
+  mes_defuncio: number;
+  dia_defuncio: number;
+
+  // --- relaciones
   grups: GrupDTO[];
 }
 
@@ -58,7 +66,8 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
   if (!divTitol || !btnSubmit || !form) return;
 
   if (slug && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PERSONA_DETALL_SLUG(slug), true);
+    //const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PERSONA_DETALL_SLUG(slug), true);
+    const response = await fetchDataGet<ApiResponse<Fitxa>>(`https://elliot.cat/api/persones/get/?persona=${slug}`, true);
 
     if (!response || !response.data) return;
     data = response.data;
@@ -79,27 +88,29 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
     }
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formPersona', API_URLS.PUT.PERSONA(id));
+      //transmissioDadesDB(event, 'PUT', 'formPersona', API_URLS.PUT.PERSONA(id));
+      transmissioDadesDB(event, 'PUT', 'formPersona', `https://elliot.cat/api/persones/put/?persona=${id}`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nova Persona</h2>`;
     btnSubmit.textContent = 'Inserir dades';
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formPersona', API_URLS.POST.PERSONA, true);
+      //transmissioDadesDB(event, 'POST', 'formPersona', API_URLS.POST.PERSONA, true);
+      transmissioDadesDB(event, 'POST', 'formPersona', 'https://elliot.cat/api/persones/post/?persona', true);
     });
   }
 
-  const grupIds = data.grups?.map((g: { id: string; nom: string }) => g.id) ?? [];
-  await auxiliarSelect(grupIds, 'grups', 'grups', 'grup_ca');
+  const grupIds: string[] = Array.isArray(data.grup_ids) ? data.grup_ids : Array.isArray(data.grups) ? data.grups.map((g: { id: string }) => g.id) : [];
+  await auxiliarSelect(grupIds, 'grups', 'grup_ids', 'grup_ca');
 
-  await auxiliarSelect(data.imgId ?? 0, 'auxiliarImatgesAutor', 'imgId', 'alt');
-  await auxiliarSelect(data.paisAutorId ?? 0, 'paisos', 'paisAutorId', 'pais_cat');
-  await auxiliarSelect(data.genereId ?? 0, 'sexes', 'sexeId', 'nom');
-  await auxiliarSelect(data.ciutatNaixementId ?? 0, 'ciutats', 'ciutatNaixementId', 'city');
-  await auxiliarSelect(data.ciutatDefuncioId ?? 0, 'ciutats', 'ciutatDefuncioId', 'city');
-  await auxiliarSelect(data.diaNaixement ?? 0, 'calendariDies', 'diaNaixement', 'dia');
-  await auxiliarSelect(data.diaDefuncio ?? 0, 'calendariDies', 'diaDefuncio', 'dia');
-  await auxiliarSelect(data.mesNaixement ?? 0, 'calendariMesos', 'mesNaixement', 'mes');
-  await auxiliarSelect(data.mesDefuncio ?? 0, 'calendariMesos', 'mesDefuncio', 'mes');
+  await auxiliarSelect(data.img_id ?? 0, 'auxiliarImatgesAutor', 'img_id', 'alt');
+  await auxiliarSelect(data.pais_autor_id ?? 0, 'paisos', 'pais_autor_id', 'pais_ca');
+  await auxiliarSelect(data.sexe_id ?? 0, 'sexes', 'sexe_id', 'nom');
+  await auxiliarSelect(data.ciutat_naixement_id ?? 0, 'ciutats', 'ciutat_naixement_id', 'city');
+  await auxiliarSelect(data.ciutat_defuncio_id ?? 0, 'ciutats', 'ciutat_defuncio_id', 'city');
+  await auxiliarSelect(data.dia_naixement ?? 0, 'calendariDies', 'dia_naixement', 'dia');
+  await auxiliarSelect(data.dia_defuncio ?? 0, 'calendariDies', 'dia_defuncio', 'dia');
+  await auxiliarSelect(data.mes_naixement ?? 0, 'calendariMesos', 'mes_naixement', 'mes');
+  await auxiliarSelect(data.mes_defuncio ?? 0, 'calendariMesos', 'mes_defuncio', 'mes');
 }

@@ -66,16 +66,19 @@ export async function transmissioDadesDB(
 
   // Crear un objeto para almacenar los datos del formulario
   const formDataRaw = new FormData(form);
-  const formData: { [key: string]: FormDataEntryValue } = {};
+  const formData: Record<string, unknown> = {};
 
-  formDataRaw.forEach((value, key) => {
-    formData[key] = value;
-  });
+  for (const [rawKey, value] of formDataRaw.entries()) {
+    const isArrayKey = rawKey.endsWith('[]');
+    const key = isArrayKey ? rawKey.slice(0, -2) : rawKey;
 
-  // Normalizaciones típicas
-  // (si img viene vacío, que sea null)
-  if ('img' in formData && (formData['img'] === '' || formData['img'] === null)) {
-    formData['img'] = null as any;
+    if (isArrayKey) {
+      const arr = (formData[key] as FormDataEntryValue[] | undefined) ?? [];
+      arr.push(value);
+      formData[key] = arr;
+    } else {
+      formData[key] = value;
+    }
   }
 
   const jsonData = JSON.stringify(formData);
