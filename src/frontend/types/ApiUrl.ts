@@ -26,6 +26,7 @@ export type ApiUrls = {
     TEMA_ID: (id: string) => string;
     SUBTEMA_ID: (id: string) => string;
     LINK_ID: (id: string) => string;
+    AGENDA_ID: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -46,6 +47,7 @@ export type ApiUrls = {
     TEMA: string;
     SUBTEMA: string;
     LINK: string;
+    AGENDA_ESDEVENIMENT: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -65,6 +67,7 @@ export type ApiUrls = {
     TEMA: string;
     SUBTEMA: string;
     LINK: string;
+    AGENDA_ESDEVENIMENT: string;
   };
   DELETE: {};
 };

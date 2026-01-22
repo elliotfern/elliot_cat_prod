@@ -2,6 +2,7 @@ import { getPageType } from '../../utils/urlPath';
 import { initCalendariAgenda } from './agendaCalendari';
 import { carregarEsdevenimentDetall } from './agendaEsdevenimentId';
 import { carregarAgendaFutura } from './agendaEsdevenimentsFuturs';
+import { formAgendaEsdeveniment } from './formAgenda';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -17,5 +18,10 @@ export function agenda() {
     initCalendariAgenda();
   } else if (pageType[2] === 'veure-esdeveniment') {
     carregarEsdevenimentDetall();
+  } else if (pageType[2] === 'nou-esdeveniment') {
+    formAgendaEsdeveniment(false);
+  } else if (pageType[2] === 'modifica-esdeveniment') {
+    const id = pageType[3];
+    formAgendaEsdeveniment(true, id);
   }
 }

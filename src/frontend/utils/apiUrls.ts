@@ -45,6 +45,8 @@ export const ENDPOINTS = {
   SUBTEMA: 'subtema',
   LINK_ID: 'linkId',
   LINK: 'link',
+  AGENDA_ID: 'esdevenimentId',
+  AGENDA: 'agenda',
 } as const;
 
 // Mapa de recursos disponibles
@@ -54,6 +56,7 @@ const RESOURCES = {
   CIUTATS: 'ciutats',
   COMPTABILITAT: 'comptabilitat',
   ADRECES: 'adreces',
+  AGENDA: 'agenda',
 } as const;
 
 const TIPUS = {
@@ -93,6 +96,7 @@ export const API_URLS: ApiUrls = {
     TEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.TEMA_ID}?id=${encodeURIComponent(id)}`,
     SUBTEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.SUBTEMA_ID}?id=${encodeURIComponent(id)}`,
     LINK_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.LINK_ID}?id=${encodeURIComponent(id)}`,
+    AGENDA_ID: (id: number) => `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.GET}/${ENDPOINTS.AGENDA_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -114,6 +118,7 @@ export const API_URLS: ApiUrls = {
     TEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.POST}/${ENDPOINTS.TEMA}`,
     SUBTEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.POST}/${ENDPOINTS.SUBTEMA}`,
     LINK: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.POST}/${ENDPOINTS.LINK}`,
+    AGENDA_ESDEVENIMENT: `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.POST}`,
   },
 
   PUT: {
@@ -134,6 +139,7 @@ export const API_URLS: ApiUrls = {
     TEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.PUT}/${ENDPOINTS.TEMA}`,
     SUBTEMA: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.PUT}/${ENDPOINTS.SUBTEMA}`,
     LINK: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.PUT}/${ENDPOINTS.LINK}`,
+    AGENDA_ESDEVENIMENT: `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.PUT}`,
   },
 
   DELETE: {},

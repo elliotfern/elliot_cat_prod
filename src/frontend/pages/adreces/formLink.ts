@@ -3,7 +3,6 @@ import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-import { setTrixHTML } from '../../utils/setTrix';
 
 interface Fitxa {
   [key: string]: unknown;

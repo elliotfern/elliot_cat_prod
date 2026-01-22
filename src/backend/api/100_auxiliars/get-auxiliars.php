@@ -1081,6 +1081,94 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             500
         );
     }
+
+    // GET : llistat tipus agenda
+    // URL: https://elliot.cat/api/auxiliars/get/subtemes
+} else if ($slug === "tipusAgenda") {
+
+    try {
+        $result = [
+            [
+                'tipus' => 'reunio',
+                'tipus_ca' => 'Reunió'
+            ],
+            [
+                'tipus' => 'visita_medica',
+                'tipus_ca' => 'Visita mèdica'
+            ],
+            [
+                'tipus' => 'videotrucada',
+                'tipus_ca' => 'Videotrucada'
+            ],
+            [
+                'tipus' => 'altre',
+                'tipus_ca' => 'Altre'
+            ]
+        ];
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : llistat estats agenda
+    // URL: https://elliot.cat/api/auxiliars/get/estatsAgenda
+} else if ($slug === "estatsAgenda") {
+
+    try {
+        $result = [
+            [
+                'estat' => 'pendent',
+                'estat_ca' => 'Pendent'
+            ],
+            [
+                'estat' => 'confirmat',
+                'estat_ca' => 'Confirmat'
+            ],
+            [
+                'estat' => 'cancel·lat',
+                'estat_ca' => 'Cancel·lat'
+            ]
+        ];
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

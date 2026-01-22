@@ -16,14 +16,16 @@ $pdo = $db->getPdo();
  */
 
 // Configuración de cabeceras para aceptar JSON y responder JSON
-header("Content-Type: application/json");
-header("Access-Control-Allow-Methods: GET");
+// Siempre JSON
+header('Content-Type: application/json; charset=utf-8');
 
-// Dominio permitido
-$allowedOrigin = APP_DOMAIN;
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    http_response_code(204);
+    exit;
+}
 
-// Verificar referer
-checkReferer($allowedOrigin);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
 // Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -34,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 /**
  * GET : Esdeveniment per ID
- * URL: https://tu-dominio/api/agenda/get/esdevenimentId?id=1
+ * URL: https://elliot.cat/api/agenda/get/esdevenimentId?id=1
  */
 if ($slug === "esdevenimentId") {
 
