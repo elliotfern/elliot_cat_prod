@@ -54,12 +54,10 @@ if ($slug === "esdevenimentId") {
     $sql = <<<SQL
             SELECT 
                 e.id_esdeveniment,
-                e.usuari_id,
                 e.titol,
                 e.descripcio,
                 e.tipus,
                 e.lloc,
-                e.url_videotrucada,
                 e.data_inici,
                 e.data_fi,
                 e.tot_el_dia,
@@ -107,7 +105,7 @@ if ($slug === "esdevenimentId") {
      * URL: https://tu-dominio/api/agenda/get/esdevenimentsFuturs?usuari_id=1
      */
 } else if ($slug === "esdevenimentsFuturs") {
-    $usuariId = isset($_GET['usuari_id']) ? (int)$_GET['usuari_id'] : null;
+    $usuariId = 1;
 
     if (!$usuariId) {
         Response::error(
@@ -121,12 +119,10 @@ if ($slug === "esdevenimentId") {
     $sql = <<<SQL
             SELECT 
                 e.id_esdeveniment,
-                e.usuari_id,
                 e.titol,
                 e.descripcio,
                 e.tipus,
                 e.lloc,
-                e.url_videotrucada,
                 e.data_inici,
                 e.data_fi,
                 e.tot_el_dia,
@@ -135,8 +131,7 @@ if ($slug === "esdevenimentId") {
                 e.actualitzat_el
             FROM %s AS e
             WHERE 
-                e.usuari_id  = :usuari_id
-                AND e.data_inici >= NOW()
+                 e.data_inici >= NOW()
             ORDER BY e.data_inici ASC
         SQL;
 
@@ -146,11 +141,8 @@ if ($slug === "esdevenimentId") {
     );
 
     try {
-        $params = [
-            ':usuari_id' => $usuariId,
-        ];
 
-        $rows = $db->getData($query, $params);
+        $rows = $db->getData($query);
 
         // Para agenda puede tener sentido devolver [] con 200 aunque no haya nada
         Response::success(
@@ -173,7 +165,7 @@ if ($slug === "esdevenimentId") {
      */
 } else if ($slug === "esdevenimentsRang") {
 
-    $usuariId = isset($_GET['usuari_id']) ? (int)$_GET['usuari_id'] : null;
+    $usuariId = 1;
     $from     = $_GET['from'] ?? null; // format: YYYY-MM-DD
     $to       = $_GET['to']   ?? null; // format: YYYY-MM-DD
 
@@ -193,12 +185,10 @@ if ($slug === "esdevenimentId") {
     $sql = <<<SQL
             SELECT 
                 e.id_esdeveniment,
-                e.usuari_id,
                 e.titol,
                 e.descripcio,
                 e.tipus,
                 e.lloc,
-                e.url_videotrucada,
                 e.data_inici,
                 e.data_fi,
                 e.tot_el_dia,
@@ -207,8 +197,7 @@ if ($slug === "esdevenimentId") {
                 e.actualitzat_el
             FROM %s AS e
             WHERE 
-                e.usuari_id   = :usuari_id
-                AND e.data_inici >= :from
+                e.data_inici >= :from
                 AND e.data_inici <= :to
             ORDER BY e.data_inici ASC
         SQL;
@@ -220,7 +209,6 @@ if ($slug === "esdevenimentId") {
 
     try {
         $params = [
-            ':usuari_id' => $usuariId,
             ':from'      => $fromDateTime,
             ':to'        => $toDateTime,
         ];

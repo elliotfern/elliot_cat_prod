@@ -1089,19 +1089,19 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     try {
         $result = [
             [
-                'tipus' => 'reunio',
+                'id' => 'reunio',
                 'tipus_ca' => 'Reunió'
             ],
             [
-                'tipus' => 'visita_medica',
+                'id' => 'visita_medica',
                 'tipus_ca' => 'Visita mèdica'
             ],
             [
-                'tipus' => 'videotrucada',
+                'id' => 'videotrucada',
                 'tipus_ca' => 'Videotrucada'
             ],
             [
-                'tipus' => 'altre',
+                'id' => 'altre',
                 'tipus_ca' => 'Altre'
             ]
         ];
@@ -1135,15 +1135,15 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     try {
         $result = [
             [
-                'estat' => 'pendent',
+                'id' => 'pendent',
                 'estat_ca' => 'Pendent'
             ],
             [
-                'estat' => 'confirmat',
+                'id' => 'confirmat',
                 'estat_ca' => 'Confirmat'
             ],
             [
-                'estat' => 'cancel·lat',
+                'id' => 'cancel·lat',
                 'estat_ca' => 'Cancel·lat'
             ]
         ];

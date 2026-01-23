@@ -307,6 +307,8 @@ if (isset($_GET['persona'])) {
         );
         exit;
     }
+} else if (isset($_GET['grupPersona'])) {
+    
 }
 
 Response::error(MissatgesAPI::error('bad_request'), ['route' => 'invalid'], 400);

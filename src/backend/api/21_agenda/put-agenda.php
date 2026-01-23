@@ -57,8 +57,8 @@ if (!is_array($data)) {
 
 // ID: por query o body
 $id = 0;
-if (isset($data['id'])) {
-    $id = (int)$data['id'];
+if (isset($data['id_esdeveniment'])) {
+    $id = (int)$data['id_esdeveniment'];
 }
 
 if ($id <= 0) {

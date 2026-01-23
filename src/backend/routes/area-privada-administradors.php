@@ -914,6 +914,34 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    // Auxiliars > grups/professions persones
+    APP_GESTIO . $url['auxiliars'] . '/llistat-grups' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'grups/llistat-grups.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/nou-grup' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'persones/form-grup.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/modifica-grup/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'persones/form-grup.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
     // 17. Viatges
     APP_GESTIO . $url['viatges'] => [
         'view' => APP_INTRANET_DIR . APP_VIATGES_DIR . 'index.php',

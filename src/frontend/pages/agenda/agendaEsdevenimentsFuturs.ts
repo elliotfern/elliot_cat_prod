@@ -4,7 +4,6 @@ export type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat' | 'cance
 
 export interface AgendaEsdeveniment {
   id_esdeveniment: number;
-  usuari_id: number;
   titol: string;
   descripcio?: string | null;
   tipus: TipusEsdeveniment;
@@ -122,6 +121,7 @@ function getEstatBadgeClass(estat: string): string {
  */
 export async function carregarAgendaFutura(usuariId: number): Promise<void> {
   const container = document.getElementById('agenda-llistat');
+  usuariId = 1;
   if (!container) return;
 
   container.innerHTML = '<p>Carregant agenda...</p>';

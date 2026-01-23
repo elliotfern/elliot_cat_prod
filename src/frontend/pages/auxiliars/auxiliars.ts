@@ -1,5 +1,6 @@
 import { getPageType } from '../../utils/urlPath';
 import { formCiutat } from './formCiutat';
+import { formGrupPersones } from './formGrupPersones';
 import { formPais } from './formPais';
 import { taulaLlistatCiutats } from './taulaLlistatCiutats';
 import { taulaLlistatImatges } from './taulaLlistatImatges';
@@ -24,5 +25,7 @@ export function auxiliars() {
     formPais(false);
   } else if ([pageType[2]].includes('modifica-pais')) {
     formPais(true, id);
+  } else if ([pageType[2]].includes('nou-grup')) {
+    formGrupPersones(false);
   }
 }

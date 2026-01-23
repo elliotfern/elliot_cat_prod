@@ -5,12 +5,10 @@ export type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat' | 'cance
 
 export interface AgendaEsdeveniment {
   id_esdeveniment: number;
-  usuari_id: number;
   titol: string;
   descripcio?: string | null;
   tipus: TipusEsdeveniment;
   lloc?: string | null;
-  url_videotrucada?: string | null;
   data_inici: string; // "YYYY-MM-DD HH:MM:SS"
   data_fi: string;
   tot_el_dia: number;
@@ -211,6 +209,7 @@ function renderCalendar(year: number, monthIndex: number, events: AgendaEsdeveni
 /** Carga eventos del mes desde el backend */
 async function loadMonthData(usuariId: number, year: number, monthIndex: number): Promise<AgendaEsdeveniment[]> {
   const { from, to } = getMonthRange(year, monthIndex);
+  usuariId = 1;
 
   const res = await fetch(`/api/agenda/get/esdevenimentsRang?usuari_id=${usuariId}&from=${from}&to=${to}`, {
     method: 'GET',

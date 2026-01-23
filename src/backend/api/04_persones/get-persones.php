@@ -64,7 +64,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
     echo json_encode($data);
 
     // ruta GET => "/api/persones/get/?persona=josep-fontana"
-} elseif (isset($_GET['persona'])) {
+} else if (isset($_GET['persona'])) {
 
     $autorSlug = $_GET['persona'] ?? null;
 
@@ -195,6 +195,72 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
         $result['grup_ids'] = !empty($result['grup_ids'])
             ? array_values(array_filter(explode(',', $result['grup_ids'])))
             : [];
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
+    // ruta GET => "/api/persones/get/?grupPersona={id}"
+} else if (isset($_GET['grupPersona'])) {
+
+    $id = $_GET['grupPersona'] ?? null;
+
+    try {
+        if (empty($id)) {
+            Response::error(MissatgesAPI::error('bad_request'), ['id' => 'required'], 400);
+            exit;
+        }
+
+        $db = new Database();
+
+        $query = "SELECT LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(a.id), 1, 8),
+        SUBSTR(HEX(a.id), 9, 4),
+        SUBSTR(HEX(a.id), 13, 4),
+        SUBSTR(HEX(a.id), 17, 4),
+        SUBSTR(HEX(a.id), 21)
+        )) AS id, a.grup_ca, a.grup_es, a.grup_en, a.grup_it, a.grup_fr
+         FROM " . Tables::PERSONES_GRUPS . " AS a";
+
+        $rows = $db->getData($query);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($rows, function (&$v) {
+            if (!is_string($v)) return;
+
+            // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
+            $v = str_replace("\0", '', $v);
+
+            // Intentar normalizar a UTF-8 válido
+            // 1) Si ya es UTF-8 válido, lo deja igual
+            if (!mb_check_encoding($v, 'UTF-8')) {
+                // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
+                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) {
+                    $v = $v2;
+                } else {
+                    // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
+                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                    if ($v3 !== false) $v = $v3;
+                }
+            } else {
+                // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
+                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) $v = $v2;
+            }
+        });
+
+        if (empty($rows)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit;
+        }
 
         Response::success(MissatgesAPI::success('get'), $result, 200);
     } catch (\Throwable $e) {

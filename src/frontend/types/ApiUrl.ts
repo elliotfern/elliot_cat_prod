@@ -27,6 +27,7 @@ export type ApiUrls = {
     SUBTEMA_ID: (id: string) => string;
     LINK_ID: (id: string) => string;
     AGENDA_ID: (id: number) => string;
+    PERSONES_GRUPS_ID: (id: string) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -48,6 +49,7 @@ export type ApiUrls = {
     SUBTEMA: string;
     LINK: string;
     AGENDA_ESDEVENIMENT: string;
+    PERSONES_GRUPS: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -68,6 +70,7 @@ export type ApiUrls = {
     SUBTEMA: string;
     LINK: string;
     AGENDA_ESDEVENIMENT: string;
+    PERSONES_GRUPS: string;
   };
   DELETE: {};
 };

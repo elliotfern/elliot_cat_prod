@@ -5,7 +5,6 @@ export type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat' | 'cance
 
 export interface AgendaEsdeveniment {
   id_esdeveniment: number;
-  usuari_id: number;
   titol: string;
   descripcio?: string | null;
   tipus: TipusEsdeveniment;
