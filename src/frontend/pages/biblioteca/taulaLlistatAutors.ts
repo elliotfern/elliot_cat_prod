@@ -44,6 +44,10 @@ export async function taulaLlistatAutors() {
     containerId: 'taulaLlistatAutors',
     columns,
     filterKeys: ['AutCognom1'],
-    filterByField: 'profession',
+    filterByField: 'grup',
+
+    // ✅ NOMÉS aquí
+    filterSplitBy: { grup: ',' },
+    filterSplitTrim: true,
   });
 }

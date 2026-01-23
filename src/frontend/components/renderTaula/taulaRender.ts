@@ -30,7 +30,7 @@ function pluckItems<T>(raw: unknown): T[] {
 }
 
 export async function renderDynamicTable<T extends object>(options: RenderTableOptions<T>): Promise<void> {
-  const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField } = options;
+  const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField, filterSplitBy, filterSplitTrim = true } = options;
 
   const container = document.getElementById(containerId);
   if (!container) {
@@ -103,6 +103,21 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase();
 
+  function getFilterParts(raw: unknown): string[] {
+    const s = String(raw ?? '');
+    if (!s) return [];
+
+    if (!filterByField) return [s];
+
+    const splitter = filterSplitBy?.[filterByField];
+    if (!splitter) return [s]; // comportament antic
+
+    return s
+      .split(splitter as any)
+      .map((x) => (filterSplitTrim ? x.trim() : x))
+      .filter(Boolean);
+  }
+
   function applyFilters() {
     const search = normalizeText(searchInput.value);
 
@@ -113,11 +128,18 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
         const fieldValue = row[filterByField];
 
-        // Si el filtro es sobre un array (como grups), mira si incluye el filtro
+        // 1) si ja és array, igual que ara
         if (Array.isArray(fieldValue)) {
           return fieldValue.map(String).includes(activeButtonFilter);
         }
 
+        // 2) si hi ha split opt-in, compara contra les parts
+        const parts = getFilterParts(fieldValue);
+        if (parts.length > 1) {
+          return parts.includes(activeButtonFilter);
+        }
+
+        // 3) fallback antic
         return String(fieldValue) === activeButtonFilter;
       })
       .filter((row) => {
@@ -149,7 +171,15 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
         )
       ).filter(Boolean);
     } else {
-      uniqueValues = Array.from(new Set(data.map((row) => String(row[filterByField])))).filter(Boolean);
+      // ✅ Si hi ha split configurat per aquest camp, aplanem valors
+      const splitter = filterSplitBy?.[filterByField];
+
+      if (splitter) {
+        uniqueValues = Array.from(new Set(data.flatMap((row) => getFilterParts(row[filterByField])).map(String))).filter(Boolean);
+      } else {
+        // comportament antic
+        uniqueValues = Array.from(new Set(data.map((row) => String(row[filterByField])))).filter(Boolean);
+      }
     }
 
     uniqueValues = uniqueValues.sort((a, b) => {

@@ -20,10 +20,17 @@
         <input type="hidden" name="id" id="id" value="">
 
         <div class="col-md-4">
-            <label for="ciutat_ca" class="form-label">Nom (català) *</label>
-            <input type="text" class="form-control" id="ciutat_ca" name="ciutat_ca" required maxlength="150" />
+            <label for="ciutat" class="form-label">Nom (llengua original) *</label>
+            <input type="text" class="form-control" id="ciutat" name="ciutat" required maxlength="150" />
             <div class="invalid-feedback">Obligatori.</div>
         </div>
+
+        <div class="col-md-4">
+            <label for="ciutat_ca" class="form-label">Nom (català) *</label>
+            <input type="text" class="form-control" id="ciutat_ca" name="ciutat_ca" maxlength="150" />
+            <div class="invalid-feedback">Obligatori.</div>
+        </div>
+
         <div class="col-md-4">
             <label for="ciutat_en" class="form-label">Nom (anglès)</label>
             <input type="text" class="form-control" id="ciutat_en" name="ciutat_en" maxlength="150" />

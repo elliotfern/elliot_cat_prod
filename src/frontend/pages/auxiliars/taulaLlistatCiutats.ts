@@ -3,7 +3,6 @@ import { formatData } from '../../utils/formataData';
 import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-import { Imatge } from '../../types/Imatge';
 import { Ciutat } from '../../types/Ciutat';
 
 const url = window.location.href;
@@ -24,14 +23,20 @@ export async function taulaLlistatCiutats() {
   const columns: TaulaDinamica<Ciutat>[] = [
     {
       header: 'Ciutat',
-      field: 'city',
-      render: (_: unknown, row: Ciutat) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.city}</a>`,
+      field: 'ciutat',
+      render: (_: unknown, row: Ciutat) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.ciutat}</a>`,
     },
 
     {
-      header: 'Ciutat (anglès)',
-      field: 'ciutat_en',
-      render: (_: unknown, row: Ciutat) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.ciutat_en}</a>`,
+      header: 'Ciutat (català)',
+      field: 'ciutat_ca',
+      render: (_: unknown, row: Ciutat) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.ciutat_ca}</a>`,
+    },
+
+    {
+      header: 'País',
+      field: 'pais_ca',
+      render: (_: unknown, row: Ciutat) => `<a id="${row.idPais}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-pais/${row.idPais}">${row.pais_ca}</a>`,
     },
 
     {
@@ -53,7 +58,7 @@ export async function taulaLlistatCiutats() {
     url: `https://${window.location.host}/api/auxiliars/get/ciutats`,
     containerId: 'taulaLlistatCiutats',
     columns,
-    filterKeys: ['city'],
-    filterByField: 'city',
+    filterKeys: ['ciutat'],
+    filterByField: 'pais_ca',
   });
 }

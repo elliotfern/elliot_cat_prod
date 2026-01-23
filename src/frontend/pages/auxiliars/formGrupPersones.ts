@@ -46,16 +46,18 @@ export async function formGrupPersones(isUpdate: boolean, id?: string) {
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<GrupPersones>>(API_URLS.GET.PERSONES_GRUPS_ID(id), true);
+    // ⚠️ La API devuelve data: [ { ... } ]
+    const response = await fetchDataGet<ApiResponse<GrupPersones[]>>(API_URLS.GET.PERSONES_GRUPS_ID(id), true);
 
-    if (!response || !response.data) return;
+    if (!response || !Array.isArray(response.data) || response.data.length === 0) return;
 
-    data = response.data;
+    const fitxa = response.data[0];
 
-    divTitol.innerHTML = `<h2>Modificació dades Grup de persones</h2>`;
+    // MUY IMPORTANTE: setea el hidden id (tu renderFormInputs puede no tocarlo)
+    const inputId = document.getElementById('id') as HTMLInputElement | null;
+    if (inputId) inputId.value = fitxa.id;
 
-    // Rellena inputs por id/name (tu helper)
-    renderFormInputs(data);
+    renderFormInputs(fitxa);
 
     btnSubmit.textContent = 'Modificar dades';
 

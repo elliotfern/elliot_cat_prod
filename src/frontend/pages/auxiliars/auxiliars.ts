@@ -2,6 +2,7 @@ import { getPageType } from '../../utils/urlPath';
 import { formCiutat } from './formCiutat';
 import { formGrupPersones } from './formGrupPersones';
 import { formPais } from './formPais';
+import { taulaLlistatGrupsPersones } from './llistatGrup';
 import { taulaLlistatCiutats } from './taulaLlistatCiutats';
 import { taulaLlistatImatges } from './taulaLlistatImatges';
 import { taulaLlistatPaisos } from './taulaLlistatPaisos';
@@ -25,7 +26,11 @@ export function auxiliars() {
     formPais(false);
   } else if ([pageType[2]].includes('modifica-pais')) {
     formPais(true, id);
-  } else if ([pageType[2]].includes('nou-grup')) {
+  } else if (pageType[2] === 'nou-grup') {
     formGrupPersones(false);
+  } else if (pageType[2] === 'modifica-grup') {
+    formGrupPersones(true, id);
+  } else if (pageType[2] === 'llistat-grups') {
+    taulaLlistatGrupsPersones();
   }
 }

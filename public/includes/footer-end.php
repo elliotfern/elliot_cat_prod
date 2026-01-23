@@ -1,4 +1,4 @@
-<script type="module" src="/dist/bundle.js?v=1.3.42"></script>
+<script type="module" src="/dist/bundle.js?v=1.3.55"></script>
 </body>
 
 </html>

@@ -113,16 +113,20 @@
     <div class="container">
       <div class="row">
         <div class="col-6 text-left">
-
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="history.back()">
+            ← Tornar enrere
+          </button>
         </div>
         <div class="col-6 text-right derecha">
-
-          <button type="submit" id="btnPersona" class="btn btn-primary">Actualitza persona</button>
-
+          <button type="submit" id="btnPersona" class="btn btn-primary">
+            Actualitza persona
+          </button>
         </div>
       </div>
     </div>
-
 
   </form>
 </div>

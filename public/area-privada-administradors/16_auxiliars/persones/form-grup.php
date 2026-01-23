@@ -24,31 +24,31 @@
 
         <div class="col-md-4">
             <label for="grup_ca" class="form-label">Nom (català) *</label>
-            <input type="text" class="form-control" id="grup_ca" name="grup_ca" required maxlength="150" />
+            <input type="text" class="form-control" id="grup_ca" name="grup_ca" required maxlength="150" value="" />
             <div class="invalid-feedback">Obligatori.</div>
         </div>
 
         <div class="col-md-4">
             <label for="grup_es" class="form-label">Nom (castellà) *</label>
-            <input type="text" class="form-control" id="grup_es" name="grup_es" required maxlength="150" />
+            <input type="text" class="form-control" id="grup_es" name="grup_es" value="" maxlength="150" />
             <div class="invalid-feedback">Obligatori.</div>
         </div>
 
         <div class="col-md-4">
             <label for="grup_en" class="form-label">Nom (anglès) *</label>
-            <input type="text" class="form-control" id="grup_en" name="grup_en" required maxlength="150" />
+            <input type="text" class="form-control" id="grup_en" name="grup_en" value="" maxlength="150" />
             <div class="invalid-feedback">Obligatori.</div>
         </div>
 
         <div class="col-md-4">
             <label for="grup_it" class="form-label">Nom (italià) *</label>
-            <input type="text" class="form-control" id="grup_it" name="grup_it" required maxlength="150" />
+            <input type="text" class="form-control" id="grup_it" name="grup_it" value="" maxlength="150" />
             <div class="invalid-feedback">Obligatori.</div>
         </div>
 
         <div class="col-md-4">
             <label for="grup_fr" class="form-label">Nom (francès) *</label>
-            <input type="text" class="form-control" id="grup_fr" name="grup_fr" required maxlength="150" />
+            <input type="text" class="form-control" id="grup_fr" name="grup_fr" value="" maxlength="150" />
             <div class="invalid-feedback">Obligatori.</div>
         </div>
 

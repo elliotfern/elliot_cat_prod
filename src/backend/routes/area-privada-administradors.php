@@ -916,7 +916,7 @@ $routes = [
 
     // Auxiliars > grups/professions persones
     APP_GESTIO . $url['auxiliars'] . '/llistat-grups' => [
-        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'grups/llistat-grups.php',
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'persones/llistat-grups.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,

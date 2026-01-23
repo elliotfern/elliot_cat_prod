@@ -212,11 +212,57 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
 
     $id = $_GET['grupPersona'] ?? null;
 
+    $idHex = str_replace('-', '', strtolower($id));
+    if (!ctype_xdigit($idHex) || strlen($idHex) !== 32) {
+        Response::error(MissatgesAPI::error('invalid_data'), ['id' => 'invalid_uuid'], 400);
+        exit;
+    }
+
+    $idBytes = hex2bin($idHex);
+
     try {
         if (empty($id)) {
             Response::error(MissatgesAPI::error('bad_request'), ['id' => 'required'], 400);
             exit;
         }
+
+        $db = new Database();
+
+        $query = "SELECT LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(a.id), 1, 8),
+        SUBSTR(HEX(a.id), 9, 4),
+        SUBSTR(HEX(a.id), 13, 4),
+        SUBSTR(HEX(a.id), 17, 4),
+        SUBSTR(HEX(a.id), 21)
+        )) AS id, a.grup_ca, a.grup_es, a.grup_en, a.grup_it, a.grup_fr
+         FROM " . Tables::PERSONES_GRUPS . " AS a
+         WHERE a.id = :id
+         LIMIT 1";
+
+        $params = [':id' => $idBytes];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
+
+    // ruta GET => "/api/persones/get/?grupPersones"
+} else if (isset($_GET['grupPersones'])) {
+
+    try {
 
         $db = new Database();
 
@@ -262,7 +308,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
             exit;
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(MissatgesAPI::success('get'), $rows, 200);
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([

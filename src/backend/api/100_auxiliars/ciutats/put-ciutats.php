@@ -67,6 +67,7 @@ $reUUID = '~^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$~i';
 
 // Datos entrantes
 $id          = $trimOrNull($data['id'] ?? null);               // UUID texto (obligatorio)
+$ciutat      = $trimOrNull($data['ciutat'] ?? null);        // obligatori
 $ciutat_ca   = $trimOrNull($data['ciutat_ca'] ?? null);        // obligatori
 $ciutat_en   = $trimOrNull($data['ciutat_en'] ?? null);        // opcional
 $descripcio  = $trimOrNull($data['descripcio'] ?? null);       // opcional (TEXT)
@@ -79,8 +80,8 @@ if (!$id) {
 } elseif (!preg_match($reUUID, $id)) {
     $errors[] = 'Camp "id" no és un UUID vàlid.';
 }
-if (!$ciutat_ca) {
-    $errors[] = 'Camp "ciutat_ca" requerit.';
+if (!$ciutat) {
+    $errors[] = 'Camp "ciutat" requerit.';
 }
 if ($pais_id !== null && !preg_match($reUUID, $pais_id)) {
     $errors[] = 'Camp "pais_id" no és un UUID vàlid.';
@@ -103,7 +104,8 @@ try {
 
     // UPDATE — convertir UUIDs texto -> binario en SQL; strings a NULL si vienen vacíos
     $sql = "UPDATE db_geo_ciutats
-               SET ciutat_ca  = :ciutat_ca,
+               SET ciutat = :ciutat,
+                   ciutat_ca  = :ciutat_ca,
                    ciutat_en  = :ciutat_en,
                    descripcio = :descripcio,
                    pais_id    = uuid_text_to_bin(NULLIF(:pais_id, '')),
@@ -116,6 +118,7 @@ try {
 
     // ciutat_ca (obligatorio)
     $stmt->bindValue(':ciutat_ca', $ciutat_ca, PDO::PARAM_STR);
+    $stmt->bindValue(':ciutat', $ciutat, PDO::PARAM_STR);
 
     // ciutat_en (nullable)
     if ($ciutat_en === null) $stmt->bindValue(':ciutat_en', null, PDO::PARAM_NULL);

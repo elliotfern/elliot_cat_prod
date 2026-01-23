@@ -269,7 +269,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     // Luego el resto
     parrafosHTML.push(
       {
-        label: 'Gènere: ',
+        label: 'Professió / grup: ',
         value: persona.genere,
       },
       { label: 'Pais: ', value: persona.paisAutor },
