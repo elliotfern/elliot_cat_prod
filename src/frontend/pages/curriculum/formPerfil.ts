@@ -64,5 +64,5 @@ export async function formPerfil(isUpdate: boolean, id?: number) {
   }
 
   await auxiliarSelect(data.img_perfil ?? 0, 'imatgesUsuaris', 'img_perfil', 'nom');
-  await auxiliarSelect(data.localitzacio_ciutat ?? 0, 'ciutats', 'localitzacio_ciutat', 'city');
+  await auxiliarSelect(data.localitzacio_ciutat ?? 0, 'ciutats', 'localitzacio_ciutat', 'ciutat');
 }

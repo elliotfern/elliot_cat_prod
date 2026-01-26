@@ -184,7 +184,7 @@
             return `
         <tr>
             <td><a href="./fitxa-esdeveniment/${evento.slug}" title="Esdeveniment">${evento.esdeNom}</a></td>
-            <td>${evento.city} (${evento.pais_cat})</td>
+            <td>${evento.ciutat} (${evento.pais_cat})</td>
              <td>${dataFinal}</td>
             <td>${evento.etapaNom}</td>
             <td>${evento.nomSubEtapa}</td>

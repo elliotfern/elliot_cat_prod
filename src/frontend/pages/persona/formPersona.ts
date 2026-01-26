@@ -107,8 +107,8 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
   await auxiliarSelect(data.img_id ?? 0, 'auxiliarImatgesAutor', 'img_id', 'alt');
   await auxiliarSelect(data.pais_autor_id ?? 0, 'paisos', 'pais_autor_id', 'pais_ca');
   await auxiliarSelect(data.sexe_id ?? 0, 'sexes', 'sexe_id', 'nom');
-  await auxiliarSelect(data.ciutat_naixement_id ?? 0, 'ciutats', 'ciutat_naixement_id', 'city');
-  await auxiliarSelect(data.ciutat_defuncio_id ?? 0, 'ciutats', 'ciutat_defuncio_id', 'city');
+  await auxiliarSelect(data.ciutat_naixement_id ?? 0, 'ciutats', 'ciutat_naixement_id', 'ciutat');
+  await auxiliarSelect(data.ciutat_defuncio_id ?? 0, 'ciutats', 'ciutat_defuncio_id', 'ciutat');
   await auxiliarSelect(data.dia_naixement ?? 0, 'calendariDies', 'dia_naixement', 'dia');
   await auxiliarSelect(data.dia_defuncio ?? 0, 'calendariDies', 'dia_defuncio', 'dia');
   await auxiliarSelect(data.mes_naixement ?? 0, 'calendariMesos', 'mes_naixement', 'mes');

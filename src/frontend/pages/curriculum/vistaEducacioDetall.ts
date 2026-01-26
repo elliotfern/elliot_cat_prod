@@ -24,8 +24,8 @@ interface Educacio {
   updated_at: string;
 
   nameImg?: string | null;
-  city?: string | null;
-  pais_cat?: string | null;
+  ciutat?: string | null;
+  pais_ca?: string | null;
 
   i18n: EducacioI18n[];
 }
@@ -104,7 +104,7 @@ function renderTabs(ed: Educacio): string {
 function renderEducacio(ed: Educacio): string {
   const logoUrl = ed.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${ed.nameImg}.png` : null;
 
-  const localitzacio = [ed.city, ed.pais_cat].filter(Boolean).join(', ');
+  const localitzacio = [ed.ciutat, ed.pais_ca].filter(Boolean).join(', ');
 
   const periode = ed.data_inici ? `${fmtDate(ed.data_inici)} - ${ed.data_fi ? fmtDate(ed.data_fi) : 'actualitat'}` : '';
 

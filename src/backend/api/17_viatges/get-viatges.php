@@ -92,7 +92,7 @@ if (isset($_GET['llistatVisitesEspai'])) {
 } else if (isset($_GET['fitxaEspai'])) {
     $slug = $_GET['fitxaEspai'];
 
-    $query = "SELECT p.id, p.nom, p.EspNomCast, p.EspNomEng, p.slug, p.EspNomIt, p.EspFundacio, p.EspDescripcio, p.EspDescripcioCast, p.EspDescripcioEng, p.EspDescripcioIt, p.EspTipus, p.EspWeb, p.idCiutat, c.city, a.TipusNom, p.img AS idImg, i.nom AS img, i.alt, i.nameImg, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified
+    $query = "SELECT p.id, p.nom, p.EspNomCast, p.EspNomEng, p.slug, p.EspNomIt, p.EspFundacio, p.EspDescripcio, p.EspDescripcioCast, p.EspDescripcioEng, p.EspDescripcioIt, p.EspTipus, p.EspWeb, p.idCiutat, c.ciutat, a.TipusNom, p.img AS idImg, i.nom AS img, i.alt, i.nameImg, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified
     FROM db_travel_places AS p
     INNER JOIN db_cities AS c ON c.id = p.idCiutat
     INNER JOIN db_travel_accommodation_type AS a ON p.EspTipus = a.id
@@ -202,7 +202,7 @@ if (isset($_GET['llistatVisitesEspai'])) {
 } else if (isset($_GET['llistatEspaisViatge'])) {
     $slug = $_GET['llistatEspaisViatge'];
 
-    $query = "SELECT p.nom, p.id, v.dataVisita, c.city, p.slug
+    $query = "SELECT p.nom, p.id, v.dataVisita, c.ciutat, p.slug
             FROM db_travel_places_visited AS v
             INNER JOIN db_viatges_llistat AS l ON v.idViatge = l.id
             INNER JOIN db_travel_places AS p ON p.id = v.espId
@@ -235,7 +235,7 @@ if (isset($_GET['llistatVisitesEspai'])) {
 } else if (isset($_GET['fitxaEspaiDetalls'])) {
     $slug = $_GET['fitxaEspaiDetalls'];
 
-    $query = "SELECT p.id, p.nom, p.EspNomCast, p.EspNomEng, p.EspNomIt, p.EspFundacio, p.EspDescripcio, p.EspDescripcioCast, p.EspDescripcioEng, p.EspDescripcioIt, p.EspTipus, p.EspWeb, p.idCiutat, c.city, a.TipusNom, i.nom AS img, i.alt, i.nameImg, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified
+    $query = "SELECT p.id, p.nom, p.EspNomCast, p.EspNomEng, p.EspNomIt, p.EspFundacio, p.EspDescripcio, p.EspDescripcioCast, p.EspDescripcioEng, p.EspDescripcioIt, p.EspTipus, p.EspWeb, p.idCiutat, c.ciutat, a.TipusNom, i.nom AS img, i.alt, i.nameImg, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified
     FROM db_travel_places AS p
     INNER JOIN db_cities AS c ON c.id = p.idCiutat
     INNER JOIN db_travel_accommodation_type AS a ON p.EspTipus = a.id

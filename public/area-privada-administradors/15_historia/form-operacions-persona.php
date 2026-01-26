@@ -27,8 +27,8 @@ if ($modificaBtn === 1) {
     selectOmplirDades("/api/biblioteca/get/?type=pais", "", "paisAutor", "pais_cat");
     selectOmplirDades("/api/biblioteca/get/?type=grup", "", "grup", "grup_ca");
     selectOmplirDades("/api/biblioteca/get/?type=sexe", "", "sexe", "genereCa");
-    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatNaixement", "city");
-    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatDefuncio", "city");
+    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatNaixement", "ciutat");
+    selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatDefuncio", "ciutat");
     selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "diaNaixement", "dia");
     selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "diaDefuncio", "dia");
     selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", "", "mesNaixement", "mes");
@@ -251,8 +251,8 @@ if ($modificaBtn === 1) {
         selectOmplirDades("/api/biblioteca/get/?type=pais", data.idPais, "paisAutor", "pais_cat");
         selectOmplirDades("/api/biblioteca/get/?type=grup", data.idGrup, "grup", "grup_ca");
         selectOmplirDades("/api/biblioteca/get/?type=sexe", data.idSexe, "sexe", "genereCa");
-        selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutatNaixement, "ciutatNaixement", "city");
-        selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutatDefuncio, "ciutatDefuncio", "city");
+        selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutatNaixement, "ciutatNaixement", "ciutat");
+        selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutatDefuncio, "ciutatDefuncio", "ciutat");
         selectOmplirDades("/api/biblioteca/get/?type=calendariDies", data.diaNaixement, "diaNaixement", "dia");
         selectOmplirDades("/api/biblioteca/get/?type=calendariDies", data.diaDefuncio, "diaDefuncio", "dia");
         selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", data.mesNaixement, "mesNaixement", "mes");

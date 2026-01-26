@@ -66,5 +66,5 @@ export async function formTema(isUpdate: boolean, id?: string) {
   }
 
   // await auxiliarSelect(data.logo_id ?? 0, 'imatgesEmpreses', 'logo_id', 'nom');
-  //await auxiliarSelect(data.institucio_localitzacio ?? 0, 'ciutats', 'institucio_localitzacio', 'city');
+  //await auxiliarSelect(data.institucio_localitzacio ?? 0, 'ciutats', 'institucio_localitzacio', 'ciutat');
 }

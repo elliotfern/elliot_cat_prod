@@ -26,8 +26,8 @@ interface Experiencia {
   idi18n: number;
 
   nameImg?: string | null;
-  city?: string | null;
-  pais_cat?: string | null;
+  ciutat?: string | null;
+  pais_ca?: string | null;
 
   i18n: ExperienciaI18n[];
 }
@@ -132,7 +132,7 @@ function renderTabs(exp: Experiencia): string {
 
 function renderExperiencia(exp: Experiencia): string {
   const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}.png` : null;
-  const localitzacio = [exp.city, exp.pais_cat].filter(Boolean).join(', ');
+  const localitzacio = [exp.ciutat, exp.pais_ca].filter(Boolean).join(', ');
 
   return `
     <div class="mb-3">

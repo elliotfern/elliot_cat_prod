@@ -149,7 +149,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
     $etapaFiltro = isset($_GET['etapa']) ? $_GET['etapa'] : '';
     $subetapaFiltro = isset($_GET['subetapa']) ? $_GET['subetapa'] : '';
 
-    $query = "SELECT e.id, esdeNom, slug, esdeDataIDia, esdeDataIMes, esdeDataIAny, esdeDataFDia, esdeDataFMes, esdeDataFAny, s.nomSubEtapa, p.etapaNom, c.city, co.pais_cat
+    $query = "SELECT e.id, esdeNom, slug, esdeDataIDia, esdeDataIMes, esdeDataIAny, esdeDataFDia, esdeDataFMes, esdeDataFAny, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id
@@ -256,7 +256,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
 } else if (isset($_GET['esdeveniment'])) {
     $slug = $_GET['esdeveniment'];
 
-    $query = "SELECT e.id, e.esdeNom, e.esdeNomCast, e.esdeNomEng, e.esdeNomIt, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, e.esSubEtapa, e.esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.city, co.pais_cat, e.img, i.nameImg, e.descripcio, i.alt
+    $query = "SELECT e.id, e.esdeNom, e.esdeNomCast, e.esdeNomEng, e.esdeNomIt, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, e.esSubEtapa, e.esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, e.descripcio, i.alt
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id
@@ -573,7 +573,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
 } else if (isset($_GET['fitxaOrganitzacio'])) {
     $slug = $_GET['fitxaOrganitzacio'];
 
-    $query = "SELECT o.id, o.nomOrg, o.slug, o.orgSig, o.dataFunda, o.dataDiss, ci.city, c.pais_cat, i.nameImg, o.dateCreated, o.dateModified,
+    $query = "SELECT o.id, o.nomOrg, o.slug, o.orgSig, o.dataFunda, o.dataDiss, ci.ciutat, c.pais_ca, i.nameImg, o.dateCreated, o.dateModified,
     sp.nomSubEtapa, ph.etapaNom, ot.nomTipus, ip.ideologia, i.alt, o.nomOrgCast, o.nomOrgEng, o.nomOrgIt, o.orgPais, o.orgCiutat, o.orgSubEtapa, o.orgTipus, o.orgIdeologia, o.img
     FROM db_historia_organitzacions AS o
     LEFT JOIN db_countries AS c ON o.orgPais = c.id

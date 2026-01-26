@@ -22,7 +22,7 @@ if ($modificaBtn === 1) {
 ?>
     <script type="module">
         // Llenar selects con opciones
-        selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "orgCiutat", "city");
+        selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "orgCiutat", "ciutat");
         selectOmplirDades("/api/historia/get/?llistatSubEtapes", "", "orgSubEtapa", "nomSubEtapa");
         selectOmplirDades("/api/historia/get/?llistatImatgesOrganitzacions", "", "img", "nom");
         selectOmplirDades("/api/historia/get/?llistatIdeologies", "", "orgIdeologia", "ideologia");
@@ -202,7 +202,7 @@ if ($modificaBtn === 1) {
                 document.getElementById("dataDiss").value = data.dataDiss === 0 ? '' : data.dataDiss;
 
                 // Llenar selects con opciones
-                selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.orgCiutat, "orgCiutat", "city");
+                selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.orgCiutat, "orgCiutat", "ciutat");
                 selectOmplirDades("/api/historia/get/?llistatSubEtapes", data.orgSubEtapa, "orgSubEtapa", "nomSubEtapa");
                 selectOmplirDades("/api/historia/get/?llistatImatgesOrganitzacions", data.img, "img", "nom");
                 selectOmplirDades("/api/historia/get/?llistatIdeologies", data.orgIdeologia, "orgIdeologia", "ideologia");

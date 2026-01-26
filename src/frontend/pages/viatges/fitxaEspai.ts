@@ -27,7 +27,7 @@ export async function fitxaEspai() {
     tipusImatge: 'viatge-espai',
     details: {
       Titol: result.nom,
-      Ciutat: result.city,
+      Ciutat: result.ciutat,
       Fundació: result.EspFundacio,
       'Tipus espai': result.TipusNom,
       Web: result.EspWeb,
@@ -63,7 +63,7 @@ export async function fitxaEspai() {
     }).addTo(map);
 
     // Añadir un marcador en las coordenadas
-    L.marker([lat, lon]).addTo(map).bindPopup(`<b>${result.nom}</b><br>${result.city}`).openPopup();
+    L.marker([lat, lon]).addTo(map).bindPopup(`<b>${result.nom}</b><br>${result.ciutat}`).openPopup();
 
     // Ajustar el tamaño del mapa si el contenedor cambia o no es visible inicialmente
     map.invalidateSize();

@@ -23,7 +23,7 @@ if ($modificaBtn === 1) {
 ?>
     <script type="module">
         // Llenar selects con opciones
-        selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "idCiutat", "city");
+        selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "idCiutat", "ciutat");
         selectOmplirDades("/api/viatges/get/?llistatImatgesEspais", "", "img", "nom");
         selectOmplirDades("/api/viatges/get/?llistatTipusEspais", "", "EspTipus", "TipusNom");
     </script>

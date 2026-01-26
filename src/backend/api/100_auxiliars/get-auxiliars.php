@@ -345,10 +345,10 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "ciutats") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca, c.updated_at, c.created_at, c.ciutat_en, c.ciutat, p.id AS idPais, p.pais_ca
+            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat_ca, c.updated_at, c.created_at, c.ciutat_en, c.ciutat, uuid_bin_to_text(p.id) AS idPais, p.pais_ca
             FROM %s AS c
             LEFT JOIN %s AS p ON c.pais_id = p.id
-            ORDER BY c.ciutat_ca ASC
+            ORDER BY c.ciutat ASC
             SQL;
 
     $query = sprintf(
@@ -424,7 +424,8 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 
     $sql = <<<SQL
         SELECT
-          uuid_bin_to_text(c.id)     AS id,
+          uuid_bin_to_text(c.id) AS id,
+          c.ciutat,
           c.ciutat_ca,
           c.ciutat_en,
           c.descripcio,

@@ -3,5 +3,5 @@ export interface Espai {
   nom: string;
   dataVisita: string;
   id: number;
-  city: string;
+  ciutat: string;
 }

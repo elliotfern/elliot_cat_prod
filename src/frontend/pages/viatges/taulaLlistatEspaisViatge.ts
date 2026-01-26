@@ -5,8 +5,6 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Espai } from '../../types/Espai';
 
-
-
 const url = window.location.href;
 const pageType = getPageType(url);
 
@@ -28,7 +26,7 @@ export async function taulaLlistatEspaisViatges() {
       field: 'nom',
       render: (_: unknown, row: Espai) => `<a href="https://${window.location.host}${gestioUrl}/viatges/fitxa-espai/${row.slug}">${row.nom}</a>`,
     },
-    { header: 'Ciutat', field: 'city' },
+    { header: 'Ciutat', field: 'ciutat' },
     {
       header: 'Data visita',
       field: 'dataVisita',
@@ -52,7 +50,7 @@ export async function taulaLlistatEspaisViatges() {
     url: `https://${window.location.host}/api/viatges/get/?llistatEspaisViatge=${slug}`,
     containerId: 'taulaLlistatEspaisViatge',
     columns,
-    filterKeys: ['nom', 'city'],
-    filterByField: 'city',
+    filterKeys: ['nom', 'ciutat'],
+    filterByField: 'ciutat',
   });
 }

@@ -10,7 +10,7 @@ interface PerfilCV {
   nom_complet: string;
   tel: string | null;
   web: string | null;
-  ciutat_ca: string | null; // ci.city
+  ciutat_ca: string | null; // ci.ciutat
   nameImg: string | null; // i.nameImg
   disponibilitat: number | null;
   visibilitat: Vis;

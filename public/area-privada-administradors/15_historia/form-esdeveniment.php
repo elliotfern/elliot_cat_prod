@@ -22,7 +22,7 @@ if ($modificaBtn === 1) {
 ?>
     <script type="module">
         // Llenar selects con opciones
-        selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "esdeCiutat", "city");
+        selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "esdeCiutat", "ciutat");
         selectOmplirDades("/api/historia/get/?llistatSubEtapes", "", "esSubEtapa", "nomSubEtapa");
         selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "esdeDataIDia", "dia");
         selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "esdeDataFDia", "dia");
@@ -207,7 +207,7 @@ if ($modificaBtn === 1) {
                 document.getElementById("esdeDataFAny").value = data.esdeDataFAny === 0 ? '' : data.esdeDataFAny;
 
                 // Llenar selects con opciones
-                selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.esdeCiutat, "esdeCiutat", "city");
+                selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.esdeCiutat, "esdeCiutat", "ciutat");
                 selectOmplirDades("/api/historia/get/?llistatSubEtapes", data.esSubEtapa, "esSubEtapa", "nomSubEtapa");
                 selectOmplirDades("/api/biblioteca/get/?type=calendariDies", data.esdeDataIDia, "esdeDataIDia", "dia");
                 selectOmplirDades("/api/biblioteca/get/?type=calendariDies", data.esdeDataFDia, "esdeDataFDia", "dia");

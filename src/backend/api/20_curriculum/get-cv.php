@@ -252,7 +252,7 @@ if ($slug === "perfilCV") {
     $id   = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
     $sql = <<<SQL
-              SELECT e.id, e.empresa, e.empresa_url, uuid_bin_to_text(e.empresa_localitzacio) AS empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat_ca AS city, co.pais_ca AS pais_cat
+              SELECT e.id, e.empresa, e.empresa_url, uuid_bin_to_text(e.empresa_localitzacio) AS empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat, co.pais_ca AS pais_cat
               FROM %s AS e
               LEFT JOIN %s AS i ON e.logo_empresa = i.id
               LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id
@@ -288,7 +288,7 @@ if ($slug === "perfilCV") {
 } else if ($slug === "experiencies") {
 
     $sql = <<<SQL
-              SELECT e.id, e.empresa, e.empresa_url, uuid_bin_to_text(e.empresa_localitzacio) AS empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat_ca AS city, co.pais_ca AS pais_cat
+              SELECT e.id, e.empresa, e.empresa_url, uuid_bin_to_text(e.empresa_localitzacio) AS empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat, co.pais_ca AS pais_cat
               FROM %s AS e
               LEFT JOIN %s AS i ON e.logo_empresa = i.id
               LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id
@@ -327,7 +327,7 @@ if ($slug === "perfilCV") {
         // 1. Datos principales
 
         $sql = <<<SQL
-             SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat_ca AS city, co.pais_ca AS pais_cat
+             SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat, co.pais_ca AS pais_cat
                     FROM %s e
                     LEFT JOIN %s AS i ON e.logo_empresa = i.id
                     LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id

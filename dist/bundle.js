@@ -26129,7 +26129,12 @@ function taulaLlistatCiutats() {
             {
                 header: 'Ciutat (català)',
                 field: 'ciutat_ca',
-                render: (_, row) => `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.ciutat_ca}</a>`,
+                render: (_, row) => {
+                    if (row.ciutat_ca == null || row.ciutat_ca.trim() === '') {
+                        return '';
+                    }
+                    return `<a id="${row.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-ciutat/${row.id}">${row.ciutat_ca}</a>`;
+                },
             },
             {
                 header: 'País',

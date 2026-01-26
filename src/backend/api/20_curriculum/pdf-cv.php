@@ -87,7 +87,7 @@ function hrLine($pdf)
 // Perfil
 
 $sql = <<<SQL
-                SELECT c.nom_complet, c.email, c.tel, c.web, ci.ciutat_ca AS city, i.nameImg
+                SELECT c.nom_complet, c.email, c.tel, c.web, ci.ciutat, i.nameImg
                 FROM %s c
                 LEFT JOIN %s i ON c.img_perfil = i.id
                 LEFT JOIN %s ci ON c.localitzacio_ciutat = ci.id
@@ -164,7 +164,7 @@ $habilitats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Experiència professional
 $sql = <<<SQL
-            SELECT e.id, e.empresa, e.empresa_url, e.data_inici, e.data_fi, e.is_current, i.nameImg, c.ciutat_ca AS city, co.pais_en AS pais_cat
+            SELECT e.id, e.empresa, e.empresa_url, e.data_inici, e.data_fi, e.is_current, i.nameImg, c.ciutat, co.pais_en AS pais_cat
             FROM %s AS e
             LEFT JOIN %s i ON e.logo_empresa = i.id
             LEFT JOIN %s c ON e.empresa_localitzacio = c.id
@@ -207,7 +207,7 @@ foreach ($experiencies as $index => $exp) {
 $sql = <<<SQL
             SELECT e.id, e.institucio, e.institucio_url, e.data_inici, e.data_fi,
                 (SELECT nameImg FROM %s WHERE id = e.logo_id LIMIT 1) AS nameImg,
-                (SELECT ciutat_ca FROM %s WHERE id = e.institucio_localitzacio LIMIT 1) AS city,
+                (SELECT ciutat_ca FROM %s WHERE id = e.institucio_localitzacio LIMIT 1) AS ciutat,
                 (SELECT pais_ca FROM %s WHERE id = 
                 (SELECT pais_ca FROM %s WHERE id = e.institucio_localitzacio LIMIT 1)
                 LIMIT 1) AS pais_cat
@@ -273,7 +273,7 @@ $pdf->SetFont('helvetica', '', 12);
 $pdf->MultiCell(120, 8, $perfilI18n['titular'] ?? '', 0, 'L');
 
 $pdf->SetFont('helvetica', '', 10);
-$contacte = "{$perfil['email']} | {$perfil['web']} | {$perfil['tel']} | {$perfil['city']}";
+$contacte = "{$perfil['email']} | {$perfil['web']} | {$perfil['tel']} | {$perfil['ciutat']}";
 $pdf->MultiCell(120, 6, $contacte, 0, 'L');
 $pdf->Ln(5);
 
@@ -331,7 +331,7 @@ foreach ($experiencies as $exp) {
     $blockText  = $exp['empresa'] . " · " . ($exp['i18n']['rol_titol'] ?? '') . "\n";
     $periode    = fmtDateLocale($exp['data_inici'], $locale) . " - " .
         ($exp['is_current'] ? currentLabel($locale) : fmtDateLocale($exp['data_fi'], $locale));
-    $loc        = implode(', ', array_filter([$exp['city'], $exp['pais_cat']]));
+    $loc        = implode(', ', array_filter([$exp['ciutat'], $exp['pais_ca']]));
     $periodeLoc = $periode . ($loc ? " · " . $loc : "");
     $blockText .= $periodeLoc . "\n";
 

@@ -29,7 +29,7 @@ $slug = $routeParams[0];
                         <p><strong>Data: </strong> <span id="data"></span></p>
                         <p><strong>Etapa històrica: </strong> <span id="etapaNom"></span></p>
                         <p><strong>Sub-etapa: </strong> <span id="nomSubEtapa"></span></p>
-                        <p><strong>Ciutat: </strong> <span id="city"></span></p>
+                        <p><strong>Ciutat: </strong> <span id="ciutat"></span></p>
                         <p><strong>País: </strong> <span id="pais_cat"></span></p>
                     </div>
                 </div>
@@ -108,7 +108,7 @@ $slug = $routeParams[0];
                     document.getElementById('nom').textContent = data.esdeNom;
                     document.getElementById('nameImg').src = `https://media.elliot.cat/img/historia-esdeveniment/${data.nameImg}.jpg`;
                     document.getElementById('nomSubEtapa').textContent = data.nomSubEtapa;
-                    document.getElementById('city').textContent = data.city;
+                    document.getElementById('ciutat').textContent = data.ciutat;
                     document.getElementById('etapaNom').textContent = data.etapaNom;
                     document.getElementById('pais_cat').textContent = data.pais_cat;
                     document.getElementById('descripcio').textContent = data.descripcio;

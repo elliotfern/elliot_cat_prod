@@ -17,8 +17,8 @@ interface Educacio {
 
   // extra de la API
   nameImg?: string | null;
-  city?: string | null;
-  pais_cat?: string | null;
+  ciutat?: string | null;
+  pais_ca?: string | null;
 }
 
 interface ApiResponse<T> {
@@ -51,7 +51,7 @@ function renderTable(rows: Educacio[]): string {
   const body = rows
     .map((r) => {
       const logoUrl = r.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${r.nameImg}.png` : null;
-      const localitzacio = [r.city, r.pais_cat].filter(Boolean).join(', ');
+      const localitzacio = [r.ciutat, r.pais_ca].filter(Boolean).join(', ');
       const periode = `${fmtDate(r.data_inici)} - ${fmtDate(r.data_fi) || 'actualitat'}`;
 
       const editHref = `https://elliot.cat/gestio/curriculum/modifica-educacio/${r.id}`;

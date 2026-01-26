@@ -22,7 +22,7 @@ if ($modificaBtn === 1) {
 ?>
     <script type="module">
         // Llenar selects con opciones
-        selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "idCiutat", "city");
+        selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "idCiutat", "ciutat");
         selectOmplirDades("/api/viatges/get/?llistatImatgesEspais", "", "img", "nom");
         selectOmplirDades("/api/viatges/get/?llistatTipusEspais", "", "EspTipus", "TipusNom");
     </script>
@@ -202,7 +202,7 @@ if ($modificaBtn === 1) {
                 document.getElementById("EspFundacio").value = data.EspFundacio === 0 ? '' : data.EspFundacio;
 
                 // Llenar selects con opciones
-                selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutat, "idCiutat", "city");
+                selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutat, "idCiutat", "ciutat");
                 selectOmplirDades("/api/viatges/get/?llistatImatgesEspais", data.idImg, "img", "nom");
                 selectOmplirDades("/api/viatges/get/?llistatTipusEspais", data.EspTipus, "EspTipus", "TipusNom");
 

@@ -64,5 +64,5 @@ export async function formExperiencies(isUpdate: boolean, id?: number) {
   }
 
   await auxiliarSelect(data.logo_empresa ?? 0, 'imatgesEmpreses', 'logo_empresa', 'nom');
-  await auxiliarSelect(data.empresa_localitzacio ?? 0, 'ciutats', 'empresa_localitzacio', 'city');
+  await auxiliarSelect(data.empresa_localitzacio ?? 0, 'ciutats', 'empresa_localitzacio', 'ciutat');
 }

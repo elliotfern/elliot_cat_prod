@@ -321,7 +321,13 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 SUBSTR(HEX(a.id), 13, 4),
                 SUBSTR(HEX(a.id), 17, 4),
                 SUBSTR(HEX(a.id), 21) )) AS id,
-            a.nom AS AutNom, a.cognoms AS AutCognom1, TRIM(CONCAT_WS(' ', a.nom, a.cognoms)) AS autor_nom_complet, a.slug, a.any_naixement AS yearBorn, a.any_defuncio AS yearDie, c.pais_ca AS country, c.id AS idCountry, i.nameImg,
+            LOWER(CONCAT_WS('-', 
+                SUBSTR(HEX(c.id), 1, 8),
+                SUBSTR(HEX(c.id), 9, 4),
+                SUBSTR(HEX(c.id), 13, 4),
+                SUBSTR(HEX(c.id), 17, 4),
+                SUBSTR(HEX(c.id), 21) )) AS idCountry,
+            a.nom AS AutNom, a.cognoms AS AutCognom1, TRIM(CONCAT_WS(' ', a.nom, a.cognoms)) AS autor_nom_complet, a.slug, a.any_naixement AS yearBorn, a.any_defuncio AS yearDie, c.pais_ca AS country, i.nameImg,
         GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup
         FROM " . Tables::PERSONES . " AS a
         LEFT JOIN " . Tables::GEO_PAISOS . " AS c ON a.pais_autor_id = c.id
