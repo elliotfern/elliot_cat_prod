@@ -13,11 +13,14 @@ $pdo = $db->getPdo();
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: GET");
 
-// Definir el dominio permitido
-$allowedOrigin = APP_DOMAIN;
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    http_response_code(204);
+    exit;
+}
 
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+
 
 // Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -348,7 +351,7 @@ if ($slug === 'clients') {
             ic.facIva, ic.facEstat, ic.facPaymentType,
             vt.ivaPercen, ist.estat, pt.tipusNom, pt.id AS idPayment,
             c.clientNom, c.clientCognoms, c.clientEmpresa, c.clientEmail, c.clientWeb,
-            c.clientNIF, c.clientAdreca, ciu.ciutat_ca AS clientCiutat,
+            c.clientNIF, c.clientAdreca, ciu.ciutat AS clientCiutat,
             pro.provincia_ca AS clientProvincia, pa.pais_ca AS clientPais, c.clientCP
         FROM %s AS ic
         LEFT JOIN %s AS vt  ON ic.facIva = vt.id

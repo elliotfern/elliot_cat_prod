@@ -24527,7 +24527,7 @@ function formTema(isUpdate, id) {
             });
         }
         // await auxiliarSelect(data.logo_id ?? 0, 'imatgesEmpreses', 'logo_id', 'nom');
-        //await auxiliarSelect(data.institucio_localitzacio ?? 0, 'ciutats', 'institucio_localitzacio', 'city');
+        //await auxiliarSelect(data.institucio_localitzacio ?? 0, 'ciutats', 'institucio_localitzacio', 'ciutat');
     });
 }
 
@@ -28580,7 +28580,7 @@ function formEducacio(isUpdate, id) {
             });
         }
         yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_3__.auxiliarSelect)((_a = data.logo_id) !== null && _a !== void 0 ? _a : 0, 'imatgesEmpreses', 'logo_id', 'nom');
-        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_3__.auxiliarSelect)((_b = data.institucio_localitzacio) !== null && _b !== void 0 ? _b : 0, 'ciutats', 'institucio_localitzacio', 'city');
+        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_3__.auxiliarSelect)((_b = data.institucio_localitzacio) !== null && _b !== void 0 ? _b : 0, 'ciutats', 'institucio_localitzacio', 'ciutat');
     });
 }
 
@@ -28722,7 +28722,7 @@ function formExperiencies(isUpdate, id) {
             });
         }
         yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_3__.auxiliarSelect)((_a = data.logo_empresa) !== null && _a !== void 0 ? _a : 0, 'imatgesEmpreses', 'logo_empresa', 'nom');
-        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_3__.auxiliarSelect)((_b = data.empresa_localitzacio) !== null && _b !== void 0 ? _b : 0, 'ciutats', 'empresa_localitzacio', 'city');
+        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_3__.auxiliarSelect)((_b = data.empresa_localitzacio) !== null && _b !== void 0 ? _b : 0, 'ciutats', 'empresa_localitzacio', 'ciutat');
     });
 }
 
@@ -29008,7 +29008,7 @@ function formPerfil(isUpdate, id) {
             });
         }
         yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_3__.auxiliarSelect)((_a = data.img_perfil) !== null && _a !== void 0 ? _a : 0, 'imatgesUsuaris', 'img_perfil', 'nom');
-        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_3__.auxiliarSelect)((_b = data.localitzacio_ciutat) !== null && _b !== void 0 ? _b : 0, 'ciutats', 'localitzacio_ciutat', 'city');
+        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_3__.auxiliarSelect)((_b = data.localitzacio_ciutat) !== null && _b !== void 0 ? _b : 0, 'ciutats', 'localitzacio_ciutat', 'ciutat');
     });
 }
 
@@ -29134,7 +29134,7 @@ function renderTable(rows) {
     const body = rows
         .map((r) => {
         const logoUrl = r.nameImg ? `${_utils_urls__WEBPACK_IMPORTED_MODULE_2__.DOMAIN_IMG}/img/logos-empreses/${r.nameImg}.png` : null;
-        const localitzacio = [r.city, r.pais_cat].filter(Boolean).join(', ');
+        const localitzacio = [r.ciutat, r.pais_ca].filter(Boolean).join(', ');
         const periode = `${fmtDate(r.data_inici)} - ${fmtDate(r.data_fi) || 'actualitat'}`;
         const editHref = `https://elliot.cat/gestio/curriculum/modifica-educacio/${r.id}`;
         const detailHref = `https://elliot.cat/gestio/curriculum/perfil-educacio-i18n/${r.id}`;
@@ -29285,7 +29285,7 @@ function renderTabs(ed) {
 }
 function renderEducacio(ed) {
     const logoUrl = ed.nameImg ? `${_utils_urls__WEBPACK_IMPORTED_MODULE_2__.DOMAIN_IMG}/img/logos-empreses/${ed.nameImg}.png` : null;
-    const localitzacio = [ed.city, ed.pais_cat].filter(Boolean).join(', ');
+    const localitzacio = [ed.ciutat, ed.pais_ca].filter(Boolean).join(', ');
     const periode = ed.data_inici ? `${fmtDate(ed.data_inici)} - ${ed.data_fi ? fmtDate(ed.data_fi) : 'actualitat'}` : '';
     return `
     <div class="mb-3">
@@ -29459,7 +29459,7 @@ function renderTabs(exp) {
 }
 function renderExperiencia(exp) {
     const logoUrl = exp.nameImg ? `${_utils_urls__WEBPACK_IMPORTED_MODULE_2__.DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}.png` : null;
-    const localitzacio = [exp.city, exp.pais_cat].filter(Boolean).join(', ');
+    const localitzacio = [exp.ciutat, exp.pais_ca].filter(Boolean).join(', ');
     return `
     <div class="mb-3">
       <div class="d-flex align-items-center mb-3">
@@ -30903,8 +30903,8 @@ function formPersona(isUpdate, slug) {
         yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_b = data.img_id) !== null && _b !== void 0 ? _b : 0, 'auxiliarImatgesAutor', 'img_id', 'alt');
         yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_c = data.pais_autor_id) !== null && _c !== void 0 ? _c : 0, 'paisos', 'pais_autor_id', 'pais_ca');
         yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_d = data.sexe_id) !== null && _d !== void 0 ? _d : 0, 'sexes', 'sexe_id', 'nom');
-        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_e = data.ciutat_naixement_id) !== null && _e !== void 0 ? _e : 0, 'ciutats', 'ciutat_naixement_id', 'city');
-        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_f = data.ciutat_defuncio_id) !== null && _f !== void 0 ? _f : 0, 'ciutats', 'ciutat_defuncio_id', 'city');
+        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_e = data.ciutat_naixement_id) !== null && _e !== void 0 ? _e : 0, 'ciutats', 'ciutat_naixement_id', 'ciutat');
+        yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_f = data.ciutat_defuncio_id) !== null && _f !== void 0 ? _f : 0, 'ciutats', 'ciutat_defuncio_id', 'ciutat');
         yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_g = data.dia_naixement) !== null && _g !== void 0 ? _g : 0, 'calendariDies', 'dia_naixement', 'dia');
         yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_h = data.dia_defuncio) !== null && _h !== void 0 ? _h : 0, 'calendariDies', 'dia_defuncio', 'dia');
         yield (0,_utils_auxiliarSelect__WEBPACK_IMPORTED_MODULE_2__.auxiliarSelect)((_j = data.mes_naixement) !== null && _j !== void 0 ? _j : 0, 'calendariMesos', 'mes_naixement', 'mes');
@@ -31148,7 +31148,7 @@ function fitxaEspai() {
             tipusImatge: 'viatge-espai',
             details: {
                 Titol: result.nom,
-                Ciutat: result.city,
+                Ciutat: result.ciutat,
                 Fundació: result.EspFundacio,
                 'Tipus espai': result.TipusNom,
                 Web: result.EspWeb,
@@ -31179,7 +31179,7 @@ function fitxaEspai() {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             }).addTo(map);
             // Añadir un marcador en las coordenadas
-            leaflet__WEBPACK_IMPORTED_MODULE_3__.marker([lat, lon]).addTo(map).bindPopup(`<b>${result.nom}</b><br>${result.city}`).openPopup();
+            leaflet__WEBPACK_IMPORTED_MODULE_3__.marker([lat, lon]).addTo(map).bindPopup(`<b>${result.nom}</b><br>${result.ciutat}`).openPopup();
             // Ajustar el tamaño del mapa si el contenedor cambia o no es visible inicialmente
             map.invalidateSize();
         }
@@ -31306,7 +31306,7 @@ function taulaLlistatEspaisViatges() {
                 field: 'nom',
                 render: (_, row) => `<a href="https://${window.location.host}${gestioUrl}/viatges/fitxa-espai/${row.slug}">${row.nom}</a>`,
             },
-            { header: 'Ciutat', field: 'city' },
+            { header: 'Ciutat', field: 'ciutat' },
             {
                 header: 'Data visita',
                 field: 'dataVisita',
@@ -31328,8 +31328,8 @@ function taulaLlistatEspaisViatges() {
             url: `https://${window.location.host}/api/viatges/get/?llistatEspaisViatge=${slug}`,
             containerId: 'taulaLlistatEspaisViatge',
             columns,
-            filterKeys: ['nom', 'city'],
-            filterByField: 'city',
+            filterKeys: ['nom', 'ciutat'],
+            filterByField: 'ciutat',
         });
     });
 }
