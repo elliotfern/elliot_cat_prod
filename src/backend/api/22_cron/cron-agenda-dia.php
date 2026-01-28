@@ -9,16 +9,64 @@ use App\Config\Tables;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailException;
 
+/**
+ * LOG: escribe siempre en error_log del servidor.
+ * En cron suele acabar en el error_log principal del hosting o en el del directorio.
+ */
+function cron_log(string $msg, array $ctx = []): void
+{
+    $prefix = '[agenda_resum_dia] ';
+    if ($ctx) {
+        $msg .= ' | ' . json_encode($ctx, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    error_log($prefix . $msg);
+}
+
+/**
+ * Captura fatal errors y excepciones no controladas y las manda a error_log.
+ */
+set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
+    cron_log('PHP error', ['severity' => $severity, 'message' => $message, 'file' => $file, 'line' => $line]);
+    return false; // deja que PHP también lo gestione
+});
+
+set_exception_handler(static function (Throwable $e): void {
+    cron_log('Uncaught exception', [
+        'type' => get_class($e),
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+    ]);
+    exit(1);
+});
+
+register_shutdown_function(static function (): void {
+    $err = error_get_last();
+    if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        cron_log('Fatal shutdown error', $err);
+    }
+});
+
 // 0) Zona horaria coherente en TODO el script
 $TZ_NAME = 'Europe/Madrid';
 date_default_timezone_set($TZ_NAME);
 $tz = new DateTimeZone($TZ_NAME);
 
-// 1) Cargar tu secret de Brevo (ajústalo a tu proyecto)
+// 0.1) Asegura que PHPMailer (Composer) se carga
+$autoload = __DIR__ . '/../vendor/autoload.php';
+if (!is_file($autoload)) {
+    cron_log('Missing composer autoload', ['path' => $autoload]);
+    exit(1);
+}
+require_once $autoload;
 
-$brevoApi = getenv('BREVO_API') ?: '';
+// 1) Cargar secret Brevo (mejor loguear si está vacío)
+$brevoApi = (string)($_ENV['BREVO_API'] ?? '');
+// Alternativa robusta por si $_ENV no está poblado en cron:
+// $brevoApi = $brevoApi !== '' ? $brevoApi : (getenv('BREVO_API') ?: '');
+
 if ($brevoApi === '') {
-    // error_log('BREVO_SMTP_KEY missing');
+    cron_log('BREVO_API vacío/no definido (no se puede enviar por SMTP)');
     exit(1);
 }
 
@@ -26,7 +74,10 @@ try {
     $db  = new Database();
     $pdo = $db->getPdo();
 } catch (Throwable $e) {
-    // error_log($e->getMessage());
+    cron_log('DB connection failed', [
+        'type' => get_class($e),
+        'message' => $e->getMessage(),
+    ]);
     exit(1);
 }
 
@@ -37,7 +88,9 @@ $today = $now->format('Y-m-d');
 $start = $today . ' 00:00:00';
 $end   = (new DateTime($today, $tz))->modify('+1 day')->format('Y-m-d') . ' 00:00:00';
 
-// 3) Eventos que SOLAPAN con el día (punto 6)
+cron_log('Run', ['today' => $today, 'start' => $start, 'end' => $end]);
+
+// 3) Eventos que SOLAPAN con el día
 $sql = <<<SQL
 SELECT
     e.id_esdeveniment,
@@ -66,26 +119,41 @@ $params = [
 
 try {
     $stmt = $pdo->prepare($query);
+
     if (!$stmt->execute($params)) {
-        // error_log(print_r($stmt->errorInfo(), true));
+        $err = $stmt->errorInfo();
+        cron_log('SQL execute failed', ['errorInfo' => $err]);
         exit(1);
     }
+
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    // error_log($e->getMessage());
+    cron_log('SQL exception', [
+        'type' => get_class($e),
+        'message' => $e->getMessage(),
+        // 'query' => $query, // si quieres, descomenta para ver la query
+    ]);
     exit(1);
 }
 
-if (!is_array($rows) || empty($rows)) {
+if (!is_array($rows)) {
+    cron_log('Fetch returned non-array');
+    exit(1);
+}
+
+cron_log('Events fetched', ['count' => count($rows)]);
+
+if (empty($rows)) {
+    cron_log('No events today -> no email sent');
     exit(0);
 }
 
-// 4) Destinatario (por ahora solo tú)
+// 4) Destinatario
 $YOUR_EMAIL = 'elliot@hispantic.com';
 $YOUR_NAME  = 'Elliot Fernandez';
 
 // 5) Construir email
-$subject = "Agenda del dia $today";
+$subject  = "Agenda del dia $today";
 $bodyText = buildAgendaEmailText($YOUR_NAME, $today, $rows, $tz, $start, $end);
 $bodyHtml = buildAgendaEmailHtml($YOUR_NAME, $today, $rows, $tz, $start, $end);
 
@@ -102,6 +170,12 @@ try {
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
 
+    // Log SMTP en error_log (sin mostrarlo en web)
+    $mail->SMTPDebug  = 2; // 0 en producción cuando ya funcione
+    $mail->Debugoutput = static function (string $str, int $level) {
+        cron_log("SMTP[$level] $str");
+    };
+
     // From / To
     $mail->setFrom('elliot@hispantic.com', 'Agenda');
     $mail->addAddress($YOUR_EMAIL, $YOUR_NAME);
@@ -114,12 +188,19 @@ try {
     $mail->isHTML(true);
 
     $mail->send();
+    cron_log('Email sent', ['to' => $YOUR_EMAIL, 'subject' => $subject]);
     exit(0);
 } catch (MailException $e) {
-    // error_log('Mailer error: ' . $e->getMessage());
+    cron_log('Mailer error', [
+        'type' => get_class($e),
+        'message' => $e->getMessage(),
+    ]);
     exit(1);
 } catch (Throwable $e) {
-    // error_log('Unknown error: ' . $e->getMessage());
+    cron_log('Unknown mail error', [
+        'type' => get_class($e),
+        'message' => $e->getMessage(),
+    ]);
     exit(1);
 }
 
