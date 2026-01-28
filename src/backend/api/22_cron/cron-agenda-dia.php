@@ -9,44 +9,6 @@ use App\Config\Tables;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailException;
 
-/**
- * LOG: escribe siempre en error_log del servidor.
- * En cron suele acabar en el error_log principal del hosting o en el del directorio.
- */
-function cron_log(string $msg, array $ctx = []): void
-{
-    $prefix = '[agenda_resum_dia] ';
-    if ($ctx) {
-        $msg .= ' | ' . json_encode($ctx, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    }
-    error_log($prefix . $msg);
-}
-
-/**
- * Captura fatal errors y excepciones no controladas y las manda a error_log.
- */
-set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
-    cron_log('PHP error', ['severity' => $severity, 'message' => $message, 'file' => $file, 'line' => $line]);
-    return false; // deja que PHP también lo gestione
-});
-
-set_exception_handler(static function (Throwable $e): void {
-    cron_log('Uncaught exception', [
-        'type' => get_class($e),
-        'message' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-    ]);
-    exit(1);
-});
-
-register_shutdown_function(static function (): void {
-    $err = error_get_last();
-    if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
-        cron_log('Fatal shutdown error', $err);
-    }
-});
-
 // 0) Zona horaria coherente en TODO el script
 $TZ_NAME = 'Europe/Madrid';
 date_default_timezone_set($TZ_NAME);
@@ -63,7 +25,7 @@ $brevoApi = (string)($_ENV['BREVO_API'] ?? '');
 // $brevoApi = $brevoApi !== '' ? $brevoApi : (getenv('BREVO_API') ?: '');
 
 if ($brevoApi === '') {
-    cron_log('BREVO_API vacío/no definido (no se puede enviar por SMTP)');
+    error_log('BREVO_API vacío/no definido (no se puede enviar por SMTP)');
     exit(1);
 }
 
@@ -71,10 +33,7 @@ try {
     $db  = new Database();
     $pdo = $db->getPdo();
 } catch (Throwable $e) {
-    cron_log('DB connection failed', [
-        'type' => get_class($e),
-        'message' => $e->getMessage(),
-    ]);
+    error_log('[agenda_resum_dia] DB error: ' . $e->getMessage());
     exit(1);
 }
 
@@ -84,8 +43,6 @@ $today = $now->format('Y-m-d');
 
 $start = $today . ' 00:00:00';
 $end   = (new DateTime($today, $tz))->modify('+1 day')->format('Y-m-d') . ' 00:00:00';
-
-cron_log('Run', ['today' => $today, 'start' => $start, 'end' => $end]);
 
 // 3) Eventos que SOLAPAN con el día
 $sql = <<<SQL
@@ -119,29 +76,23 @@ try {
 
     if (!$stmt->execute($params)) {
         $err = $stmt->errorInfo();
-        cron_log('SQL execute failed', ['errorInfo' => $err]);
+        error_log('[agenda_resum_dia] SQL error: ' . json_encode($stmt->errorInfo()));
         exit(1);
     }
 
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    cron_log('SQL exception', [
-        'type' => get_class($e),
-        'message' => $e->getMessage(),
-        // 'query' => $query, // si quieres, descomenta para ver la query
-    ]);
+
     exit(1);
 }
 
 if (!is_array($rows)) {
-    cron_log('Fetch returned non-array');
     exit(1);
 }
 
-cron_log('Events fetched', ['count' => count($rows)]);
 
 if (empty($rows)) {
-    cron_log('No events today -> no email sent');
+    error_log('No events today -> no email sent');
     exit(0);
 }
 
@@ -168,10 +119,7 @@ try {
     $mail->Port       = 587;
 
     // Log SMTP en error_log (sin mostrarlo en web)
-    $mail->SMTPDebug  = 2; // 0 en producción cuando ya funcione
-    $mail->Debugoutput = static function (string $str, int $level) {
-        cron_log("SMTP[$level] $str");
-    };
+    $mail->SMTPDebug  = 0; // 0 en producción cuando ya funcione
 
     // From / To
     $mail->setFrom('elliot@hispantic.com', 'Agenda');
@@ -185,19 +133,13 @@ try {
     $mail->isHTML(true);
 
     $mail->send();
-    cron_log('Email sent', ['to' => $YOUR_EMAIL, 'subject' => $subject]);
+
     exit(0);
 } catch (MailException $e) {
-    cron_log('Mailer error', [
-        'type' => get_class($e),
-        'message' => $e->getMessage(),
-    ]);
+    error_log('[agenda_resum_dia] Mailer error: ' . $e->getMessage());
     exit(1);
 } catch (Throwable $e) {
-    cron_log('Unknown mail error', [
-        'type' => get_class($e),
-        'message' => $e->getMessage(),
-    ]);
+    error_log('Unknown mail error');
     exit(1);
 }
 
