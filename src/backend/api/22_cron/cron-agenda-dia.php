@@ -53,12 +53,9 @@ date_default_timezone_set($TZ_NAME);
 $tz = new DateTimeZone($TZ_NAME);
 
 // 0.1) Asegura que PHPMailer (Composer) se carga
-$autoload = __DIR__ . '/../vendor/autoload.php';
-if (!is_file($autoload)) {
-    cron_log('Missing composer autoload', ['path' => $autoload]);
-    exit(1);
-}
-require_once $autoload;
+require_once(APP_ROOT . '/vendor/phpmailer/phpmailer/src/Exception.php');
+require_once(APP_ROOT . '/vendor/phpmailer/phpmailer/src/PHPMailer.php');
+require_once(APP_ROOT . '/vendor/phpmailer/phpmailer/src/SMTP.php');
 
 // 1) Cargar secret Brevo (mejor loguear si está vacío)
 $brevoApi = (string)($_ENV['BREVO_API'] ?? '');
