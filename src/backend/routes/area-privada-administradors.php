@@ -907,7 +907,7 @@ $routes = [
 
     // Auxiliars : temes i subtemes
     APP_GESTIO . $url['auxiliars'] . '/llistat-subtemes' => [
-        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'llistat-subtemes.php',
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'temes/llistat-subtemes.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -916,7 +916,7 @@ $routes = [
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/nou-subtema' => [
-        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'form-subtema.php',
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'temes/form-subtema.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -925,7 +925,7 @@ $routes = [
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/modifica-subtema/{id}' => [
-        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'form-subtema.php',
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'temes/form-subtema.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -934,7 +934,7 @@ $routes = [
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/llistat-temes' => [
-        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'llistat-temes.php',
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'temes/llistat-temes.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -943,7 +943,7 @@ $routes = [
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/nou-tema' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'temes/form-tema.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -952,7 +952,7 @@ $routes = [
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/modifica-tema/{id}' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'temes/form-tema.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
