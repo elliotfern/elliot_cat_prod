@@ -1,4 +1,8 @@
 import { getPageType } from '../../utils/urlPath';
+import { formSubTema } from '../adreces/formSubTema';
+import { formTema } from '../adreces/formTema';
+import { taulaLlistatSubTemes } from '../adreces/taulaLlistatSubTemes';
+import { taulaLlistatTemes } from '../adreces/taulaLlistatTemes';
 import { formCiutat } from './formCiutat';
 import { formGrupPersones } from './formGrupPersones';
 import { formPais } from './formPais';
@@ -32,5 +36,17 @@ export function auxiliars() {
     formGrupPersones(true, id);
   } else if (pageType[2] === 'llistat-grups') {
     taulaLlistatGrupsPersones();
+  } else if (pageType[2] === 'llistat-temes') {
+    taulaLlistatTemes();
+  } else if (pageType[2] === 'llistat-subtemes') {
+    taulaLlistatSubTemes();
+  } else if (pageType[2] === 'modifica-tema') {
+    formTema(true, id);
+  } else if (pageType[2] === 'nou-tema') {
+    formTema(false);
+  } else if (pageType[2] === 'modifica-subtema') {
+    formSubTema(true, id);
+  } else if (pageType[2] === 'nou-subtema') {
+    formSubTema(false);
   }
 }

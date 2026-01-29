@@ -363,24 +363,6 @@ $routes = [
         'menu_intranet' => true
     ],
 
-    APP_GESTIO . $url['adreces'] . '/nou-subtema' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-subtema.php',
-        'needs_session' => true,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => false,
-        'menu_intranet' => true
-    ],
-
-    APP_GESTIO . $url['adreces'] . '/modifica-subtema/{id}' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-subtema.php',
-        'needs_session' => true,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => false,
-        'menu_intranet' => true
-    ],
-
     APP_GESTIO . $url['adreces'] . '/llistat-temes' => [
         'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-temes.php',
         'needs_session' => true,
@@ -398,25 +380,6 @@ $routes = [
         'apiSenseHTML' => false,
         'menu_intranet' => true
     ],
-
-    APP_GESTIO . $url['adreces'] . '/nou-tema' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
-        'needs_session' => true,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => false,
-        'menu_intranet' => true
-    ],
-
-    APP_GESTIO . $url['adreces'] . '/modifica-tema/{id}' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
-        'needs_session' => true,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => false,
-        'menu_intranet' => true
-    ],
-
 
 
     // 10. Claus acces
@@ -941,6 +904,62 @@ $routes = [
         'apiSenseHTML' => false,
         'menu_intranet' => true
     ],
+
+    // Auxiliars : temes i subtemes
+    APP_GESTIO . $url['auxiliars'] . '/llistat-subtemes' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'llistat-subtemes.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/nou-subtema' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'form-subtema.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/modifica-subtema/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'form-subtema.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/llistat-temes' => [
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'llistat-temes.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/nou-tema' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
+    APP_GESTIO . $url['auxiliars'] . '/modifica-tema/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'form-tema.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
 
     // 17. Viatges
     APP_GESTIO . $url['viatges'] => [

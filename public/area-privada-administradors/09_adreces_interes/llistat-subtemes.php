@@ -7,7 +7,7 @@
             <h1>Adreces d'interés: llistat Sub-temes</h1>
             <?php if (isUserAdmin()) : ?>
                 <p>
-                    <button onclick="window.location.href='<?php echo APP_INTRANET . $url['adreces']; ?>/nou-subtema/'" class="button btn-gran btn-secondari">Afegir sub-tema</button>
+                    <button onclick="window.location.href='<?php echo APP_INTRANET . $url['auxiliar']; ?>/nou-subtema/'" class="button btn-gran btn-secondari">Afegir sub-tema</button>
                 </p>
             <?php endif; ?>
 

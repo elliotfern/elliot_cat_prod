@@ -25,6 +25,8 @@
                     <li><a href="<?php echo APP_INTRANET . $url['auxiliars']; ?>/llistat-ciutats">Llistat de ciutats</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['auxiliars']; ?>/llistat-paisos">Llistat de paisos</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['auxiliars']; ?>/llistat-grups">Llistat de grups / professions de persones</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['auxiliars']; ?>/llistat-temes">Llistat temes</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['auxiliars']; ?>/llistat-subtemes">Llistat de subtemes</a></li>
                 </ul>
             </div>
 
