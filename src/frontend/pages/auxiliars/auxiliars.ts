@@ -37,6 +37,7 @@ export function auxiliars() {
   } else if (pageType[2] === 'llistat-grups') {
     taulaLlistatGrupsPersones();
   } else if (pageType[2] === 'llistat-temes') {
+    console.log('hola');
     taulaLlistatTemes();
   } else if (pageType[2] === 'llistat-subtemes') {
     taulaLlistatSubTemes();
