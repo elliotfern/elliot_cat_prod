@@ -1,14 +1,13 @@
 <?php
 header("Content-Type: application/json");
 
-
-if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
-    http_response_code(204);
-    exit;
-}
-
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+
+if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
+    header('HTTP/1.1 405 Method Not Allowed');
+    echo json_encode(['error' => 'Metode no permès']);
+    exit();
+}
 
 // Función para generar una contraseña encriptada y su IV
 function generateEncryptedPassword($password, $token)
