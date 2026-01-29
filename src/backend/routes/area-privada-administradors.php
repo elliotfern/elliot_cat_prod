@@ -943,7 +943,7 @@ $routes = [
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/nou-tema' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'temes/form-tema.php',
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'temes/form-tema.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -952,7 +952,7 @@ $routes = [
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/modifica-tema/{id}' => [
-        'view' => APP_INTRANET_DIR . APP_ADRECES_DIR . 'temes/form-tema.php',
+        'view' => APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'temes/form-tema.php',
         'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
