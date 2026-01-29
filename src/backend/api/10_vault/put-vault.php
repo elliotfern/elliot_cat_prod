@@ -1,18 +1,14 @@
 <?php
 header("Content-Type: application/json");
 
-// Definir el dominio permitido
-$allowedOrigin = "https://elliot.cat";
 
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
-
-// Check if the request method is PUT
-if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
-    header('HTTP/1.1 405 Method Not Allowed');
-    echo json_encode(['error' => 'Method not allowed']);
-    exit();
+if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    http_response_code(204);
+    exit;
 }
+
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
 // Función para generar una contraseña encriptada y su IV
 function generateEncryptedPassword($password, $token)

@@ -17,14 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
-// Check if the request method is GET
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    header('HTTP/1.1 405 Method Not Allowed');
-    echo json_encode(['error' => 'Method not allowed']);
-    exit();
-}
 
-// Verificar que el método de la solicitud sea GET
+// Check if the request method is GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
