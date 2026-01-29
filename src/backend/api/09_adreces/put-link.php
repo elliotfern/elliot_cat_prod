@@ -30,7 +30,7 @@ header("Access-Control-Allow-Methods: PUT");
 $allowedOrigin = APP_DOMAIN;
 
 // Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
 // Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {

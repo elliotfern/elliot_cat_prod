@@ -26,11 +26,7 @@ if (!$conn) {
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: POST");
 
-// Definir el dominio permitido
-$allowedOrigin = APP_DOMAIN;
-
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
 // Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
