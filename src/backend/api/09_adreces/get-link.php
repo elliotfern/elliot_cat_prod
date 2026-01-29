@@ -14,19 +14,13 @@ $slug = $routeParams[0];
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: GET");
 
-// Definir el dominio permitido
-$allowedOrigin = APP_DOMAIN;
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
-
-// Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('HTTP/1.1 405 Method Not Allowed');
-    echo json_encode(['error' => 'Method not allowed']);
+    echo json_encode(['error' => 'Metode no permès']);
     exit();
 }
-
 
 // 1) Llistat categories enllaços
 // ruta GET => "/api/links/llistatTemes"
