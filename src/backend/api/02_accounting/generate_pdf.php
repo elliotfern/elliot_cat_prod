@@ -300,7 +300,7 @@ function generateInvoicePdfBinary(array $obj, array $arr2, array $T): string
   $pdf->AddPage('P', 'A4');
 
   // Logo
-  $imagePath = "https://elliot.cat/public/img/hispantic_logo.jpg";
+  $imagePath = "https://media.elliot.cat/img/img-hispantic/hispantic_logo.jpg";
   $pdf->Image($imagePath, 17, 10, 70, 0, '', '', '', false, 150);
 
   // Márgenes y fuentes
@@ -370,7 +370,7 @@ if ($slug === 'invoice-email') {
       'it' => "Fattura #{$id_factura}/{$any}",
     ][$lang] ?? "Invoice #{$id_factura}/{$any}";
 
-    $logo = 'https://elliot.cat/public/img/hispantic_logo.jpg';
+    $logo = 'https://media.elliot.cat/img/img-hispantic/hispantic_logo.jpg';
     $cta  = "https://elliot.cat/api/comptabilitat/pdf/invoice-pdf/{$idInvoice}/{$lang}";
 
     $emailHtml = '
