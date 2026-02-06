@@ -9,11 +9,7 @@ use App\Config\DatabaseConnection;
 
 $slug = $routeParams[0];
 
-// Definir el dominio permitido
-$allowedOrigin = APP_DOMAIN;
-
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
