@@ -34,33 +34,45 @@
 </header>
 
 <script>
-    document.getElementById("menuToggle").addEventListener("click", function() {
-        let menu = document.getElementById("navbarMenu");
-        if (menu.classList.contains("menuHidden")) {
-            menu.classList.remove("menuHidden");
-            menu.classList.add("menuVisible");
-        } else {
-            menu.classList.remove("menuVisible");
-            menu.classList.add("menuHidden");
-        }
-    });
-
-    export function setupIntranetNavOffset() {
+    function setupIntranetNavOffset() {
         const intranetNav = document.getElementById("intranetNav");
-        if (!intranetNav) return;
+        const siteHeader = document.getElementById("siteHeader");
 
-        // Intenta detectar el header superior fijo
-        const siteHeader =
-            (document.getElementById("siteHeader")) ||
-            (document.querySelector("header")); // fallback razonable
+        if (!intranetNav || !siteHeader) return;
+
+        const EXTRA_PX = 2; // ajustable: 1..4 si quieres
 
         const apply = () => {
-            const headerH = siteHeader ? siteHeader.getBoundingClientRect().height : 0;
-            intranetNav.style.top = `${Math.max(0, Math.round(headerH))}px`;
+            // getBoundingClientRect da altura real en px (puede ser decimal)
+            const rect = siteHeader.getBoundingClientRect();
+            const headerH = rect.height;
+
+            // Evita redondeos; sumamos extra para que nunca se “meta debajo”
+            intranetNav.style.top = `calc(${headerH}px + ${EXTRA_PX}px)`;
         };
 
         apply();
+
+        // Recalcula al redimensionar
         window.addEventListener("resize", apply);
+
+        // Recalcula cuando el header cambie de tamaño (menú visible/hidden, fonts, etc.)
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(() => apply());
+            ro.observe(siteHeader);
+        }
+
+        // Por si cambian fuentes/estilos después de DOMContentLoaded
+        window.addEventListener("load", apply);
+
+        // También recalcula al abrir/cerrar tu menú superior
+        const menuToggle = document.getElementById("menuToggle");
+        if (menuToggle) {
+            menuToggle.addEventListener("click", () => {
+                // espera a que cambien clases y layout
+                requestAnimationFrame(() => apply());
+            });
+        }
     }
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -69,17 +81,18 @@
 
         setupIntranetNavOffset();
 
-        languagesDropdown.addEventListener("click", function(event) {
-            event.preventDefault();
-            languageMenu.style.display = languageMenu.style.display === "flex" ? "none" : "flex";
-        });
+        if (languagesDropdown && languageMenu) {
+            languagesDropdown.addEventListener("click", function(event) {
+                event.preventDefault();
+                languageMenu.style.display = languageMenu.style.display === "flex" ? "none" : "flex";
+            });
 
-        // Cerrar el menú si se hace clic fuera de él
-        document.addEventListener("click", function(event) {
-            if (!languagesDropdown.contains(event.target) && !languageMenu.contains(event.target)) {
-                languageMenu.style.display = "none";
-            }
-        });
+            document.addEventListener("click", function(event) {
+                if (!languagesDropdown.contains(event.target) && !languageMenu.contains(event.target)) {
+                    languageMenu.style.display = "none";
+                }
+            });
+        }
     });
 </script>
 
