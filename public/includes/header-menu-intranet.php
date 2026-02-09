@@ -1,47 +1,47 @@
-<div class="container-menu">
-  <button class="btn-petit" id="logoutButton">Tancar sessió</button>
-  <div class="row">
-    <div class="col-12 col-md-12 d-flex flex-column flex-md-row justify-content-md-between gap-3">
-      <a href="<?php echo APP_INTRANET; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">01. Inici</a>
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-3">
+  <div class="container-fluid">
 
-      <a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">02. Gestió Comptabilitat i clients</a>
+    <a class="navbar-brand fw-semibold" href="<?php echo APP_INTRANET; ?>">Intranet</a>
 
-      <a href="<?php echo APP_INTRANET . $url['persones']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">04. Persones</a>
+    <button class="navbar-toggler" type="button"
+      data-bs-toggle="collapse" data-bs-target="#intranetNavbar"
+      aria-controls="intranetNavbar" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-      <a href="<?php echo APP_INTRANET . $url['programacio']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">05. Programació</a>
+    <div class="collapse navbar-collapse" id="intranetNavbar">
 
-      <a href="<?php echo APP_INTRANET . $url['projectes']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">06. Gestor projectes</a>
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-      <a href="<?php echo APP_INTRANET . $url['contactes']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">07. Agenda contactes</a>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET; ?>">01. Inici</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>">02. Gestió Comptabilitat i clients</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['persones']; ?>">04. Persones</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['programacio']; ?>">05. Programació</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['projectes']; ?>">06. Gestor projectes</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['contactes']; ?>">07. Agenda contactes</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['biblioteca']; ?>">08. Biblioteca</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['adreces']; ?>">09. Links</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['vault'];  ?>">10. Claus</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['cinema']; ?>">11. Cinema</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['xarxes']; ?>">12. Xarxes socials</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['blog']; ?>">13. Blog</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['rss']; ?>">14. Lector RSS</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['historia']; ?>">15. Historia</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['auxiliars']; ?>">16. Auxiliars</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['viatges']; ?>">17. Viatges</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['usuaris']; ?>">18. Gestió usuaris</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['radio']; ?>">19. Ràdio</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['curriculum']; ?>">20. Currículum</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['agenda']; ?>">21. Agenda</a></li>
 
-      <a href="<?php echo APP_INTRANET . $url['biblioteca']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">08. Biblioteca</a>
+      </ul>
 
-      <a href="<?php echo APP_INTRANET . $url['adreces']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">09. Links</a>
-
-      <a href="<?php echo APP_INTRANET . $url['vault'];  ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">10. Claus</a>
-
-      <a href="<?php echo APP_INTRANET . $url['cinema']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">11. Cinema</a>
-
-      <a href="<?php echo APP_INTRANET . $url['xarxes']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">12. Xarxes socials</a>
-
-      <a href="<?php echo APP_INTRANET . $url['blog']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">13. Blog</a>
-
-      <a href="<?php echo APP_INTRANET . $url['rss']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">14. Lector RSS</a>
-
-      <a href="<?php echo APP_INTRANET . $url['historia']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">15. Historia</a>
-
-      <a href="<?php echo APP_INTRANET . $url['auxiliars']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">16. Auxiliars</a>
-
-      <a href="<?php echo APP_INTRANET . $url['viatges']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">17. Viatges</a>
-
-      <a href="<?php echo APP_INTRANET . $url['usuaris']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">18. Gestió usuaris</a>
-
-      <a href="<?php echo APP_INTRANET . $url['radio']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">19. Ràdio</a>
-
-      <a href="<?php echo APP_INTRANET . $url['curriculum']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">20. Currículum</a>
-
-      <a href="<?php echo APP_INTRANET . $url['agenda']; ?>" class="btn btn-success menuBtn w-100 w-md-auto" role="button" aria-disabled="false">21. Agenda</a>
-
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-danger btn-sm" id="logoutButton" type="button">
+          Tancar sessió
+        </button>
+      </div>
     </div>
   </div>
-</div>
+</nav>
