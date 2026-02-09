@@ -50,4 +50,10 @@ final class Tables
 
     // Agenda esdeveniments
     public const AGENDA_ESDEVENIMENTS = 'db_agenda_esdeveniments';
+
+    // Projectes
+    // App\Config\Tables.php
+    public const PROJECTES = 'db_projectes';
+    public const PROJECTES_TASQUES = 'db_projectes_tasques';
+    public const PROJECTES_CATEGORIES = 'db_projectes_categories';
 }

@@ -514,5 +514,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    // PROJECTES
+    '/api/projectes/get/{slug}' => [
+        'view' => 'src/backend/api/06_projectes/get-projectes.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 ];
 return $routes;

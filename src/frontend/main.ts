@@ -1,6 +1,7 @@
 import 'trix/dist/trix.css';
 import 'trix';
 import './estils/style.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import { getPageType } from './utils/urlPath';
 import { cinema } from './pages/cinema/funcions';
@@ -23,6 +24,7 @@ import { areaPrivadaUsuaris } from './pages/areaPrivadaUsuaris/funcions';
 import { transmissioDadesDB } from './utils/actualitzarDades';
 import { curriculum } from './pages/curriculum/curriculum';
 import { agenda } from './pages/agenda/agenda';
+import { projectes } from './pages/projectes/projectes';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -59,7 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
     curriculum();
   } else if (pageType[1] === 'agenda') {
     agenda();
-
+  } else if (pageType[1] === 'projectes') {
+    projectes();
     // Part accessible tant a usuaris com a visitants
   } else if (pageType[1] === 'lector-rss' || pageType[0] === 'lector-rss') {
     lectorRss();

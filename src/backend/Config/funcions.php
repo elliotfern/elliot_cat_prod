@@ -176,7 +176,7 @@ function getAuthenticatedUserUuid(): ?string
 }
 
 /** Conserva tu función original por compatibilidad (ahora puede devolver null) */
-function getAuthenticatedUserId(): ?int
+function getAuthenticatedUserId(): ?string
 {
     return getAuthFromToken()['user_id_uuid'];
 }
