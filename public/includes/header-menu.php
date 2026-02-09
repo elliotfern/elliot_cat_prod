@@ -1,4 +1,4 @@
-<header class="header">
+<header id="siteHeader" class="header">
     <div class="headerContent">
         <!-- Logo -->
         <h1 class="logo">
@@ -45,9 +45,29 @@
         }
     });
 
+    export function setupIntranetNavOffset() {
+        const intranetNav = document.getElementById("intranetNav");
+        if (!intranetNav) return;
+
+        // Intenta detectar el header superior fijo
+        const siteHeader =
+            (document.getElementById("siteHeader")) ||
+            (document.querySelector("header")); // fallback razonable
+
+        const apply = () => {
+            const headerH = siteHeader ? siteHeader.getBoundingClientRect().height : 0;
+            intranetNav.style.top = `${Math.max(0, Math.round(headerH))}px`;
+        };
+
+        apply();
+        window.addEventListener("resize", apply);
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         const languagesDropdown = document.getElementById("languagesDropdown");
         const languageMenu = document.querySelector(".superMenu1");
+
+        setupIntranetNavOffset();
 
         languagesDropdown.addEventListener("click", function(event) {
             event.preventDefault();

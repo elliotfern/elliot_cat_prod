@@ -1,47 +1,74 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-3">
+<nav id="intranetNav" class="navbar navbar-light bg-light border-bottom" style="position: sticky; z-index: 1020;">
   <div class="container-fluid">
+    <a class="navbar-brand fw-semibold" href="<?= APP_INTRANET ?>">Intranet</a>
 
-    <a class="navbar-brand fw-semibold" href="<?php echo APP_INTRANET; ?>">Intranet</a>
+    <!-- Favoritos (desktop) -->
+    <div class="d-none d-lg-flex gap-2">
+      <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET ?>">Inici</a>
+      <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET . $url['projectes'] ?>">Projectes</a>
+      <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET . $url['programacio'] ?>">Programació</a>
+      <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET . $url['comptabilitat'] ?>">Comptabilitat</a>
+      <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET . $url['agenda'] ?>">Agenda</a>
+    </div>
 
-    <button class="navbar-toggler" type="button"
-      data-bs-toggle="collapse" data-bs-target="#intranetNavbar"
-      aria-controls="intranetNavbar" aria-expanded="false"
-      aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <div class="d-flex gap-2 align-items-center">
+      <button class="btn btn-sm btn-outline-primary" type="button"
+        data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas"
+        aria-controls="menuOffcanvas">
+        ☰ Més
+      </button>
 
-    <div class="collapse navbar-collapse" id="intranetNavbar">
-
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET; ?>">01. Inici</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>">02. Gestió Comptabilitat i clients</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['persones']; ?>">04. Persones</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['programacio']; ?>">05. Programació</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['projectes']; ?>">06. Gestor projectes</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['contactes']; ?>">07. Agenda contactes</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['biblioteca']; ?>">08. Biblioteca</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['adreces']; ?>">09. Links</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['vault'];  ?>">10. Claus</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['cinema']; ?>">11. Cinema</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['xarxes']; ?>">12. Xarxes socials</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['blog']; ?>">13. Blog</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['rss']; ?>">14. Lector RSS</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['historia']; ?>">15. Historia</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['auxiliars']; ?>">16. Auxiliars</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['viatges']; ?>">17. Viatges</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['usuaris']; ?>">18. Gestió usuaris</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['radio']; ?>">19. Ràdio</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['curriculum']; ?>">20. Currículum</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?php echo APP_INTRANET . $url['agenda']; ?>">21. Agenda</a></li>
-
-      </ul>
-
-      <div class="d-flex gap-2">
-        <button class="btn btn-outline-danger btn-sm" id="logoutButton" type="button">
-          Tancar sessió
-        </button>
-      </div>
+      <button class="btn btn-sm btn-outline-danger" id="logoutButton" type="button">
+        Tancar sessió
+      </button>
     </div>
   </div>
 </nav>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="menuOffcanvas" aria-labelledby="menuOffcanvasLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="menuOffcanvasLabel">Menú</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+
+    <!-- Aquí ya pondremos TODOS tus enlaces agrupados -->
+    <div class="list-group mb-3">
+      <div class="small text-muted mb-2">Gestió</div>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['comptabilitat'] ?>">Comptabilitat i clients</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['usuaris'] ?>">Gestió usuaris</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['projectes'] ?>">Gestor projectes</a>
+    </div>
+
+    <div class="list-group mb-3">
+      <div class="small text-muted mb-2">CRM / Contactes</div>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['persones'] ?>">Persones</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['contactes'] ?>">Agenda contactes</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['agenda'] ?>">Agenda</a>
+    </div>
+
+    <div class="list-group mb-3">
+      <div class="small text-muted mb-2">Contingut</div>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['blog'] ?>">Blog</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['rss'] ?>">Lector RSS</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['historia'] ?>">Historia</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['biblioteca'] ?>">Biblioteca</a>
+    </div>
+
+    <div class="list-group mb-3">
+      <div class="small text-muted mb-2">Eines</div>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['adreces'] ?>">Links</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['vault'] ?>">Claus</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['auxiliars'] ?>">Auxiliars</a>
+    </div>
+
+    <div class="list-group">
+      <div class="small text-muted mb-2">Oci</div>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['cinema'] ?>">Cinema</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['radio'] ?>">Ràdio</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['viatges'] ?>">Viatges</a>
+      <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['xarxes'] ?>">Xarxes socials</a>
+    </div>
+
+  </div>
+</div>
