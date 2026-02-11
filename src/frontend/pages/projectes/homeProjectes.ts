@@ -214,7 +214,7 @@ function renderActiveProjectsCard(items: ProjectWithNext[]): string {
     </div>
   `;
 }
-
+ 
 async function fetchHome(): Promise<HomeData> {
   const res = await fetch('/api/projectes/get/home', {
     method: 'GET',

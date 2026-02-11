@@ -1,22 +1,22 @@
-  <div class="container">
+<div id="barraNavegacioContenidor"></div>
 
-      <div id="barraNavegacioContenidor"></div>
+<div class="contingut">
+    <h1>Gestor de projectes</h1>
 
-      <main>
-          <div class="container contingut">
-              <h1>Gestor de projectes</h1>
+    <?php if (isUserAdmin()) : ?>
+        <p>
+            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/nou-projecte/'"
+                class="button btn-gran btn-secondari">
+                Afegir projecte
+            </button>
+        </p>
+    <?php endif; ?>
 
-              <?php if (isUserAdmin()) : ?>
-                  <p>
-                      <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/nou-projecte/'" class="button btn-gran btn-secondari">Afegir projecte</button>
-                  </p>
-              <?php endif; ?>
+    <div id="projectesHomePanels" class="mb-4"></div>
 
-              <div id="projectesHomePanels" class="mb-4"></div>
-              <div id="panelProjectesActius" class="mb-4"></div>
+    <!-- ESTE YA NO LO NECESITAS si renderizas todo dentro del anterior -->
+    <!-- <div id="panelProjectesActius" class="mb-4"></div> -->
 
-              <div id="taulaProjectes"></div>
+    <div id="taulaProjectes"></div>
 
-          </div>
-      </main>
-  </div>
+</div>
