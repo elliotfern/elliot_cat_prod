@@ -236,11 +236,12 @@ async function fetchHome(): Promise<HomeData> {
 }
 
 export async function initProjectesHome(): Promise<void> {
-  const panels = document.getElementById('projectesHomePanels') as HTMLDivElement | null;
-  console.log('panels?', panels);
-  if (!panels) return;
+  const panels = el<HTMLDivElement>('projectesHomePanels');
+  const actius = el<HTMLDivElement>('panelProjectesActius');
+  if (!panels || !actius) return;
 
   panels.innerHTML = `<div class="text-muted">Carregant...</div>`;
+  actius.innerHTML = '';
 
   try {
     const data = await fetchHome();
@@ -249,9 +250,10 @@ export async function initProjectesHome(): Promise<void> {
       <div class="row g-3">
         <div class="col-12 col-lg-6">${renderTodayCard(data.today ?? [])}</div>
         <div class="col-12 col-lg-6">${renderBlockedCard(data.blocked ?? [])}</div>
-        <div class="col-12">${renderActiveProjectsCard(data.activeProjects ?? [])}</div>
       </div>
     `;
+
+    actius.innerHTML = renderActiveProjectsCard(data.activeProjects ?? []);
   } catch (e) {
     console.error(e);
     panels.innerHTML = `

@@ -13,4 +13,6 @@
     <?php endif; ?>
 
     <div id="projectesHomePanels" class="mb-4"></div>
+    <div id="panelProjectesActius" class="mb-4"></div>
+    <div id="taulaProjectes"></div>
 </div>
