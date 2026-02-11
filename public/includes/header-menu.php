@@ -1,4 +1,4 @@
-<header id="siteHeader" class="bg-white border-bottom">
+<header id="siteHeader" class="bg-white border-bottom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
 
@@ -71,14 +71,20 @@
     function setupIntranetNavOffset() {
         const intranetNav = document.getElementById("intranetNav");
         const siteHeader = document.getElementById("siteHeader");
-        if (!intranetNav || !siteHeader) return;
+        if (!siteHeader) return;
 
         const EXTRA_PX = 2;
 
         const apply = () => {
-            const rect = siteHeader.getBoundingClientRect();
-            const headerH = rect.height;
-            intranetNav.style.top = `calc(${headerH}px + ${EXTRA_PX}px)`;
+            const headerH = siteHeader.getBoundingClientRect().height;
+
+            // 1) empuja el contenido general
+            document.documentElement.style.setProperty("--siteHeaderH", `${headerH}px`);
+
+            // 2) coloca intranetNav justo debajo del header
+            if (intranetNav) {
+                intranetNav.style.top = `calc(${headerH}px + ${EXTRA_PX}px)`;
+            }
         };
 
         apply();
@@ -90,7 +96,7 @@
             ro.observe(siteHeader);
         }
 
-        // Bootstrap collapse events (abre/cierra el menú)
+        // Bootstrap collapse events (cuando abre/cierra el menú móvil cambia la altura)
         const navbarMenu = document.getElementById("navbarMenu");
         if (navbarMenu) {
             navbarMenu.addEventListener("shown.bs.collapse", apply);
@@ -98,10 +104,28 @@
         }
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        setupIntranetNavOffset();
-    });
+    document.addEventListener("DOMContentLoaded", setupIntranetNavOffset);
 </script>
 
-
 <div class="container">
+
+    <style>
+        /* Header por encima de todo */
+        #siteHeader {
+            z-index: 1050;
+            /* similar al navbar en bootstrap */
+        }
+
+        /* Intranet nav justo debajo del header, siempre */
+        #intranetNav {
+            position: sticky;
+            /* o fixed si lo usas así */
+            z-index: 1040;
+            /* un pelín por debajo del header */
+        }
+
+        /* Como el header es fixed-top, hay que empujar el contenido hacia abajo */
+        body {
+            padding-top: var(--siteHeaderH, 0px);
+        }
+    </style>
