@@ -72,16 +72,15 @@
         z-index: 1050;
     }
 
-    /* Intranet sticky justo debajo del header */
     #intranetNav {
         position: sticky;
         top: var(--headerH, 0px);
         z-index: 1040;
     }
 
-    /* Empuja el contenido por debajo de header + intranet */
+    /* SOLO compensamos el header fijo */
     body {
-        padding-top: var(--topOffset, 0px);
+        padding-top: var(--headerH, 0px);
     }
 </style>
 
@@ -93,25 +92,31 @@
         const siteHeader = document.getElementById("siteHeader");
         if (!siteHeader) return;
 
-        // Si está dentro de un .container, lo sacamos
         const container = intranetNav.closest(".container");
         if (container) siteHeader.insertAdjacentElement("afterend", intranetNav);
     }
 
-    function setupTopOffsets() {
+    function setupTopLayout() {
         const siteHeader = document.getElementById("siteHeader");
         const intranetNav = document.getElementById("intranetNav");
         if (!siteHeader) return;
+
+        // Tu contenedor global (el que abres para no repetir código)
+        const mainContainer = document.querySelector("div.container");
 
         const apply = () => {
             const headerH = siteHeader.getBoundingClientRect().height;
             const intranetH = intranetNav ? intranetNav.getBoundingClientRect().height : 0;
 
+            // Header fijo: empuja el body solo con el header
             document.documentElement.style.setProperty("--headerH", `${headerH}px`);
-            document.documentElement.style.setProperty("--topOffset", `${headerH + intranetH}px`);
+
+            // Empuja el contenido con la altura del intranet (NO el body)
+            if (mainContainer) {
+                mainContainer.style.paddingTop = intranetNav ? `${intranetH}px` : "0px";
+            }
         };
 
-        // Varias pasadas para asegurar layout estable
         apply();
         requestAnimationFrame(apply);
         setTimeout(apply, 50);
@@ -123,16 +128,15 @@
             const ro = new ResizeObserver(apply);
             ro.observe(siteHeader);
             if (intranetNav) ro.observe(intranetNav);
+            if (mainContainer) ro.observe(mainContainer);
         }
 
-        // Bootstrap collapse (menú móvil)
         const navbarMenu = document.getElementById("navbarMenu");
         if (navbarMenu) {
             navbarMenu.addEventListener("shown.bs.collapse", () => requestAnimationFrame(apply));
             navbarMenu.addEventListener("hidden.bs.collapse", () => requestAnimationFrame(apply));
         }
 
-        // Bootstrap offcanvas (tu menú "Més"): puede cambiar alturas si hay scrollbars
         const offcanvas = document.getElementById("menuOffcanvas");
         if (offcanvas) {
             offcanvas.addEventListener("shown.bs.offcanvas", () => requestAnimationFrame(apply));
@@ -142,9 +146,8 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         relocateIntranetNavOutsideContainer();
-        setupTopOffsets();
+        setupTopLayout();
     });
 </script>
-
 
 <div class="container">
