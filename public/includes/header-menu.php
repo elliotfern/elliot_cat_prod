@@ -68,23 +68,39 @@
 </header>
 
 <script>
-    function setupIntranetNavOffset() {
+    function relocateIntranetNavOutsideContainer() {
         const intranetNav = document.getElementById("intranetNav");
+        if (!intranetNav) return;
+
+        const container = intranetNav.closest(".container");
+        if (!container) return;
+
         const siteHeader = document.getElementById("siteHeader");
+        if (!siteHeader) return;
+
+        // Mueve el intranetNav justo después del header (fuera del container)
+        siteHeader.insertAdjacentElement("afterend", intranetNav);
+    }
+
+    function setupTopOffsets() {
+        const siteHeader = document.getElementById("siteHeader");
+        const intranetNav = document.getElementById("intranetNav");
         if (!siteHeader) return;
 
         const EXTRA_PX = 2;
 
         const apply = () => {
             const headerH = siteHeader.getBoundingClientRect().height;
+            const intranetH = intranetNav ? intranetNav.getBoundingClientRect().height : 0;
 
-            // 1) empuja el contenido general
-            document.documentElement.style.setProperty("--siteHeaderH", `${headerH}px`);
-
-            // 2) coloca intranetNav justo debajo del header
+            // 1) colocar intranetNav justo debajo del header
             if (intranetNav) {
                 intranetNav.style.top = `calc(${headerH}px + ${EXTRA_PX}px)`;
             }
+
+            // 2) empujar el contenido: header + intranet
+            const totalOffset = headerH + intranetH + EXTRA_PX;
+            document.documentElement.style.setProperty("--topOffset", `${totalOffset}px`);
         };
 
         apply();
@@ -94,9 +110,10 @@
         if (window.ResizeObserver) {
             const ro = new ResizeObserver(() => apply());
             ro.observe(siteHeader);
+            if (intranetNav) ro.observe(intranetNav);
         }
 
-        // Bootstrap collapse events (cuando abre/cierra el menú móvil cambia la altura)
+        // Bootstrap collapse (cuando abre/cierra el menú cambia altura del header)
         const navbarMenu = document.getElementById("navbarMenu");
         if (navbarMenu) {
             navbarMenu.addEventListener("shown.bs.collapse", apply);
@@ -104,7 +121,11 @@
         }
     }
 
-    document.addEventListener("DOMContentLoaded", setupIntranetNavOffset);
+    document.addEventListener("DOMContentLoaded", setupTopOffsets);
+
+    document.addEventListener("DOMContentLoaded", function() {
+        relocateIntranetNavOutsideContainer();
+    });
 </script>
 
 <div class="container">
