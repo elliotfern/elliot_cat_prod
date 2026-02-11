@@ -67,79 +67,79 @@
     </nav>
 </header>
 
+<style>
+    #siteHeader {
+        z-index: 1050;
+    }
+
+    /* Intranet fijo debajo del header */
+    #intranetNav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: var(--headerH, 0px);
+        z-index: 1040;
+    }
+
+    /* El contenido baja header + intranet */
+    body {
+        padding-top: var(--topOffset, 0px);
+    }
+</style>
+
+
+<script>
+    function relocateIntranetNavOutsideContainer() {
+        const intranetNav = document.getElementById("intranetNav");
+        if (!intranetNav) return;
+
+        const container = intranetNav.closest(".container");
+        if (!container) return;
+
+        const siteHeader = document.getElementById("siteHeader");
+        if (!siteHeader) return;
+
+        siteHeader.insertAdjacentElement("afterend", intranetNav);
+    }
+
+    function setupTopOffsets() {
+        const siteHeader = document.getElementById("siteHeader");
+        const intranetNav = document.getElementById("intranetNav");
+        if (!siteHeader) return;
+
+        const apply = () => {
+            const headerH = siteHeader.getBoundingClientRect().height;
+            const intranetH = intranetNav ? intranetNav.getBoundingClientRect().height : 0;
+
+            // 1) intranet pegado al header
+            document.documentElement.style.setProperty("--headerH", `${headerH}px`);
+
+            // 2) contenido por debajo de ambos
+            document.documentElement.style.setProperty("--topOffset", `${headerH + intranetH}px`);
+        };
+
+        apply();
+        window.addEventListener("resize", apply);
+        window.addEventListener("load", apply);
+
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(apply);
+            ro.observe(siteHeader);
+            if (intranetNav) ro.observe(intranetNav);
+        }
+
+        // Bootstrap: al abrir/cerrar el menú móvil cambia la altura del header
+        const navbarMenu = document.getElementById("navbarMenu");
+        if (navbarMenu) {
+            navbarMenu.addEventListener("shown.bs.collapse", apply);
+            navbarMenu.addEventListener("hidden.bs.collapse", apply);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        relocateIntranetNavOutsideContainer();
+        requestAnimationFrame(setupTopOffsets);
+    });
+</script>
+
 <div class="container">
-
-    <style>
-        #siteHeader {
-            z-index: 1050;
-        }
-
-        /* Intranet fijo debajo del header */
-        #intranetNav {
-            position: fixed;
-            left: 0;
-            right: 0;
-            top: var(--headerH, 0px);
-            z-index: 1040;
-        }
-
-        /* El contenido baja header + intranet */
-        body {
-            padding-top: var(--topOffset, 0px);
-        }
-    </style>
-
-
-    <script>
-        function relocateIntranetNavOutsideContainer() {
-            const intranetNav = document.getElementById("intranetNav");
-            if (!intranetNav) return;
-
-            const container = intranetNav.closest(".container");
-            if (!container) return;
-
-            const siteHeader = document.getElementById("siteHeader");
-            if (!siteHeader) return;
-
-            siteHeader.insertAdjacentElement("afterend", intranetNav);
-        }
-
-        function setupTopOffsets() {
-            const siteHeader = document.getElementById("siteHeader");
-            const intranetNav = document.getElementById("intranetNav");
-            if (!siteHeader) return;
-
-            const apply = () => {
-                const headerH = siteHeader.getBoundingClientRect().height;
-                const intranetH = intranetNav ? intranetNav.getBoundingClientRect().height : 0;
-
-                // 1) intranet pegado al header
-                document.documentElement.style.setProperty("--headerH", `${headerH}px`);
-
-                // 2) contenido por debajo de ambos
-                document.documentElement.style.setProperty("--topOffset", `${headerH + intranetH}px`);
-            };
-
-            apply();
-            window.addEventListener("resize", apply);
-            window.addEventListener("load", apply);
-
-            if (window.ResizeObserver) {
-                const ro = new ResizeObserver(apply);
-                ro.observe(siteHeader);
-                if (intranetNav) ro.observe(intranetNav);
-            }
-
-            // Bootstrap: al abrir/cerrar el menú móvil cambia la altura del header
-            const navbarMenu = document.getElementById("navbarMenu");
-            if (navbarMenu) {
-                navbarMenu.addEventListener("shown.bs.collapse", apply);
-                navbarMenu.addEventListener("hidden.bs.collapse", apply);
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            relocateIntranetNavOutsideContainer();
-            requestAnimationFrame(setupTopOffsets);
-        });
-    </script>
