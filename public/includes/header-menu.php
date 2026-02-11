@@ -72,34 +72,30 @@
         z-index: 1050;
     }
 
-    /* Intranet fijo debajo del header */
+    /* Intranet sticky justo debajo del header */
     #intranetNav {
-        position: fixed;
-        left: 0;
-        right: 0;
+        position: sticky;
         top: var(--headerH, 0px);
         z-index: 1040;
     }
 
-    /* El contenido baja header + intranet */
+    /* Empuja el contenido por debajo de header + intranet */
     body {
         padding-top: var(--topOffset, 0px);
     }
 </style>
-
 
 <script>
     function relocateIntranetNavOutsideContainer() {
         const intranetNav = document.getElementById("intranetNav");
         if (!intranetNav) return;
 
-        const container = intranetNav.closest(".container");
-        if (!container) return;
-
         const siteHeader = document.getElementById("siteHeader");
         if (!siteHeader) return;
 
-        siteHeader.insertAdjacentElement("afterend", intranetNav);
+        // Si está dentro de un .container, lo sacamos
+        const container = intranetNav.closest(".container");
+        if (container) siteHeader.insertAdjacentElement("afterend", intranetNav);
     }
 
     function setupTopOffsets() {
@@ -111,14 +107,15 @@
             const headerH = siteHeader.getBoundingClientRect().height;
             const intranetH = intranetNav ? intranetNav.getBoundingClientRect().height : 0;
 
-            // 1) intranet pegado al header
             document.documentElement.style.setProperty("--headerH", `${headerH}px`);
-
-            // 2) contenido por debajo de ambos
             document.documentElement.style.setProperty("--topOffset", `${headerH + intranetH}px`);
         };
 
+        // Varias pasadas para asegurar layout estable
         apply();
+        requestAnimationFrame(apply);
+        setTimeout(apply, 50);
+
         window.addEventListener("resize", apply);
         window.addEventListener("load", apply);
 
@@ -128,18 +125,26 @@
             if (intranetNav) ro.observe(intranetNav);
         }
 
-        // Bootstrap: al abrir/cerrar el menú móvil cambia la altura del header
+        // Bootstrap collapse (menú móvil)
         const navbarMenu = document.getElementById("navbarMenu");
         if (navbarMenu) {
-            navbarMenu.addEventListener("shown.bs.collapse", apply);
-            navbarMenu.addEventListener("hidden.bs.collapse", apply);
+            navbarMenu.addEventListener("shown.bs.collapse", () => requestAnimationFrame(apply));
+            navbarMenu.addEventListener("hidden.bs.collapse", () => requestAnimationFrame(apply));
+        }
+
+        // Bootstrap offcanvas (tu menú "Més"): puede cambiar alturas si hay scrollbars
+        const offcanvas = document.getElementById("menuOffcanvas");
+        if (offcanvas) {
+            offcanvas.addEventListener("shown.bs.offcanvas", () => requestAnimationFrame(apply));
+            offcanvas.addEventListener("hidden.bs.offcanvas", () => requestAnimationFrame(apply));
         }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
         relocateIntranetNavOutsideContainer();
-        requestAnimationFrame(setupTopOffsets);
+        setupTopOffsets();
     });
 </script>
+
 
 <div class="container">

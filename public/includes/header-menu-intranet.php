@@ -1,5 +1,4 @@
-<nav id="intranetNav" class="navbar navbar-light bg-light border-bottom"
-  style="position: sticky;">
+<nav id="intranetNav" class="navbar navbar-light bg-light border-bottom">
   <div class="container-fluid">
     <a class="navbar-brand fw-semibold" href="<?= APP_INTRANET ?>">Intranet</a>
 
