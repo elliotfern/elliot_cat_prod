@@ -214,7 +214,7 @@ function renderActiveProjectsCard(items: ProjectWithNext[]): string {
     </div>
   `;
 }
- 
+
 async function fetchHome(): Promise<HomeData> {
   const res = await fetch('/api/projectes/get/home', {
     method: 'GET',
@@ -237,11 +237,9 @@ async function fetchHome(): Promise<HomeData> {
 
 export async function initProjectesHome(): Promise<void> {
   const panels = el<HTMLDivElement>('projectesHomePanels');
-  const actius = el<HTMLDivElement>('panelProjectesActius');
-  if (!panels || !actius) return;
+  if (!panels) return;
 
   panels.innerHTML = `<div class="text-muted">Carregant...</div>`;
-  actius.innerHTML = '';
 
   try {
     const data = await fetchHome();
@@ -250,10 +248,11 @@ export async function initProjectesHome(): Promise<void> {
       <div class="row g-3">
         <div class="col-12 col-lg-6">${renderTodayCard(data.today ?? [])}</div>
         <div class="col-12 col-lg-6">${renderBlockedCard(data.blocked ?? [])}</div>
+
+        <!-- tercera a ancho completo -->
+        <div class="col-12">${renderActiveProjectsCard(data.activeProjects ?? [])}</div>
       </div>
     `;
-
-    actius.innerHTML = renderActiveProjectsCard(data.activeProjects ?? []);
   } catch (e) {
     console.error(e);
     panels.innerHTML = `

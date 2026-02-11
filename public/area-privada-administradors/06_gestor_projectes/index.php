@@ -13,10 +13,4 @@
     <?php endif; ?>
 
     <div id="projectesHomePanels" class="mb-4"></div>
-
-    <!-- ESTE YA NO LO NECESITAS si renderizas todo dentro del anterior -->
-    <div id="panelProjectesActius" class="mb-4"></div>
-
-    <div id="taulaProjectes"></div>
-
 </div>
