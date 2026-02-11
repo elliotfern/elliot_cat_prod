@@ -1,99 +1,107 @@
-<header id="siteHeader" class="header">
-    <div class="headerContent">
-        <!-- Logo -->
-        <h1 class="logo">
-            <a href="/ca/homepage" class="text-decoration-none text-dark">Elliot Fernandez</a>
-        </h1>
+<header id="siteHeader" class="bg-white border-bottom">
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
 
-        <!-- Toggle Menu Button -->
-        <button class="toggleMenuButton" id="menuToggle">☰</button>
+            <!-- Logo / Brand -->
+            <a class="navbar-brand fw-bold text-dark text-decoration-none" href="/ca/homepage">
+                Elliot Fernandez
+            </a>
 
-        <!-- Navigation Menu -->
-        <nav class="containerMenu menuHidden" id="navbarMenu">
-            <ul>
-                <li><a href="/ca/homepage">Inici</a></li>
-                <li><a href="/about">Sobre l'autor</a></li>
-                <li><a href="/biblioteca">Biblioteca</a></li>
-                <li><a href="/ca/historia">Història</a></li>
-                <li><a href="/blog">Blog</a></li>
+            <!-- Toggler (mobile) -->
+            <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarMenu"
+                aria-controls="navbarMenu"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+                id="menuToggle">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <!-- Languages Dropdown -->
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" id="languagesDropdown">Languages</a>
-                    <ul class="superMenu1" style="display:none">
-                        <li><a href="#">English</a></li>
-                        <li><a href="#">Spanish</a></li>
-                        <li><a href="#">Italian</a></li>
-                        <li><a href="#">French</a></li>
-                        <li><a href="#">Catalan</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-    </div>
+            <!-- Menu -->
+            <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ca/homepage">Inici</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">Sobre l'autor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/biblioteca">Biblioteca</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ca/historia">Història</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog">Blog</a>
+                    </li>
+
+                    <!-- Languages dropdown -->
+                    <li class="nav-item dropdown">
+                        <a
+                            class="nav-link dropdown-toggle"
+                            href="#"
+                            id="languagesDropdown"
+                            role="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Languages
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languagesDropdown">
+                            <li><a class="dropdown-item" href="#">English</a></li>
+                            <li><a class="dropdown-item" href="#">Spanish</a></li>
+                            <li><a class="dropdown-item" href="#">Italian</a></li>
+                            <li><a class="dropdown-item" href="#">French</a></li>
+                            <li><a class="dropdown-item" href="#">Catalan</a></li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
 </header>
 
 <script>
     function setupIntranetNavOffset() {
         const intranetNav = document.getElementById("intranetNav");
         const siteHeader = document.getElementById("siteHeader");
-
         if (!intranetNav || !siteHeader) return;
 
-        const EXTRA_PX = 2; // ajustable: 1..4 si quieres
+        const EXTRA_PX = 2;
 
         const apply = () => {
-            // getBoundingClientRect da altura real en px (puede ser decimal)
             const rect = siteHeader.getBoundingClientRect();
             const headerH = rect.height;
-
-            // Evita redondeos; sumamos extra para que nunca se “meta debajo”
             intranetNav.style.top = `calc(${headerH}px + ${EXTRA_PX}px)`;
         };
 
         apply();
-
-        // Recalcula al redimensionar
         window.addEventListener("resize", apply);
+        window.addEventListener("load", apply);
 
-        // Recalcula cuando el header cambie de tamaño (menú visible/hidden, fonts, etc.)
         if (window.ResizeObserver) {
             const ro = new ResizeObserver(() => apply());
             ro.observe(siteHeader);
         }
 
-        // Por si cambian fuentes/estilos después de DOMContentLoaded
-        window.addEventListener("load", apply);
-
-        // También recalcula al abrir/cerrar tu menú superior
-        const menuToggle = document.getElementById("menuToggle");
-        if (menuToggle) {
-            menuToggle.addEventListener("click", () => {
-                // espera a que cambien clases y layout
-                requestAnimationFrame(() => apply());
-            });
+        // Bootstrap collapse events (abre/cierra el menú)
+        const navbarMenu = document.getElementById("navbarMenu");
+        if (navbarMenu) {
+            navbarMenu.addEventListener("shown.bs.collapse", apply);
+            navbarMenu.addEventListener("hidden.bs.collapse", apply);
         }
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        const languagesDropdown = document.getElementById("languagesDropdown");
-        const languageMenu = document.querySelector(".superMenu1");
-
         setupIntranetNavOffset();
-
-        if (languagesDropdown && languageMenu) {
-            languagesDropdown.addEventListener("click", function(event) {
-                event.preventDefault();
-                languageMenu.style.display = languageMenu.style.display === "flex" ? "none" : "flex";
-            });
-
-            document.addEventListener("click", function(event) {
-                if (!languagesDropdown.contains(event.target) && !languageMenu.contains(event.target)) {
-                    languageMenu.style.display = "none";
-                }
-            });
-        }
     });
 </script>
+
 
 <div class="container">

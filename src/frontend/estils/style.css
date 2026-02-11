@@ -10,7 +10,7 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 */
 
 /* HEADER */
-@import './header.css';
+  @import './header.css';
 @import './contenidor.css';
 @import './loginPage.css';
 @import './menuIntranet.css';
