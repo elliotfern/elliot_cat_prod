@@ -236,6 +236,7 @@ async function fetchHome(): Promise<HomeData> {
 }
 
 export async function initProjectesHome(): Promise<void> {
+  console.log('panels?', document.getElementById('projectesHomePanels'));
   const panels = el<HTMLDivElement>('projectesHomePanels');
   if (!panels) return;
 
