@@ -9,7 +9,7 @@ export function projectes() {
   const idLocale = parseInt(pageType[4], 10);
 
   if (pageType[1] === 'projectes') {
-    initProjectesHome();
+    void initProjectesHome();
   } else if (pageType[2] === 'calendari-es') {
     //initCalendariAgenda();
   }

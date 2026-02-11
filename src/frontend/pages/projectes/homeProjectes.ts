@@ -236,8 +236,8 @@ async function fetchHome(): Promise<HomeData> {
 }
 
 export async function initProjectesHome(): Promise<void> {
-  console.log('panels?', document.getElementById('projectesHomePanels'));
-  const panels = el<HTMLDivElement>('projectesHomePanels');
+  const panels = document.getElementById('projectesHomePanels') as HTMLDivElement | null;
+  console.log('panels?', panels);
   if (!panels) return;
 
   panels.innerHTML = `<div class="text-muted">Carregant...</div>`;
@@ -249,8 +249,6 @@ export async function initProjectesHome(): Promise<void> {
       <div class="row g-3">
         <div class="col-12 col-lg-6">${renderTodayCard(data.today ?? [])}</div>
         <div class="col-12 col-lg-6">${renderBlockedCard(data.blocked ?? [])}</div>
-
-        <!-- tercera a ancho completo -->
         <div class="col-12">${renderActiveProjectsCard(data.activeProjects ?? [])}</div>
       </div>
     `;
