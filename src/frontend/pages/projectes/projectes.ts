@@ -1,4 +1,5 @@
 import { getPageType } from '../../utils/urlPath';
+import { formProjecte } from './formProjecte';
 import { initProjectesHome } from './homeProjectes';
 
 const url = window.location.href;
@@ -10,7 +11,9 @@ export function projectes() {
 
   if (pageType[1] === 'projectes') {
     void initProjectesHome();
-  } else if (pageType[2] === 'calendari-es') {
-    //initCalendariAgenda();
+  } else if (pageType[2] === 'modifica-projecte') {
+    formProjecte(true, id);
+  } else if (pageType[2] === 'crea-projecte') {
+    formProjecte(false);
   }
 }
