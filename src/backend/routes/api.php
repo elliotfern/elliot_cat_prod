@@ -523,5 +523,21 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/projectes/post/{slug}' => [
+        'view' => 'src/backend/api/06_projectes/post-projectes.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/projectes/put/{slug}' => [
+        'view' => 'src/backend/api/06_projectes/put-projectes.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 ];
 return $routes;

@@ -38,6 +38,10 @@ type HomeData = {
   activeProjects: ProjectWithNext[];
 };
 
+function projectEditUrl(projectId: number): string {
+  return `/gestio/projectes/modifica-projecte/${encodeURIComponent(String(projectId))}`;
+}
+
 function el<T extends Element>(id: string): T | null {
   return document.getElementById(id) as T | null;
 }
@@ -185,6 +189,8 @@ function renderActiveProjectsCard(items: ProjectWithNext[]): string {
          </div>`
         : `<div class="text-muted">Sense NEXT definit</div>`;
 
+      const editHref = projectEditUrl(p.project_id);
+
       return `
       <tr>
         <td>
@@ -193,6 +199,11 @@ function renderActiveProjectsCard(items: ProjectWithNext[]): string {
         </td>
         <td>${nextHtml}</td>
         <td class="text-nowrap">${badge('Prio ' + prioLabel(p.project_priority), 'text-bg-light text-dark')}</td>
+        <td class="text-nowrap text-end">
+          <a class="btn btn-sm btn-outline-primary" href="${editHref}">
+            Modificar
+          </a>
+        </td>
       </tr>
     `;
     })
@@ -200,7 +211,14 @@ function renderActiveProjectsCard(items: ProjectWithNext[]): string {
 
   const body = items.length
     ? `<div class="table-responsive"><table class="table table-sm align-middle mb-0">
-         <thead><tr><th>Projecte</th><th>Next</th><th>Info</th></tr></thead>
+         <thead>
+           <tr>
+             <th>Projecte</th>
+             <th>Next</th>
+             <th>Info</th>
+             <th class="text-end">Accions</th>
+           </tr>
+         </thead>
          <tbody>${rows}</tbody>
        </table></div>`
     : `<div class="text-muted">No hi ha projectes actius.</div>`;

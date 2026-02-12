@@ -225,6 +225,15 @@ $routes = [
         'menu_intranet' => true
     ],
 
+    APP_GESTIO . $url['projectes'] . '/modifica-projecte/{id}' => [
+        'view' => APP_INTRANET_DIR . APP_PROJECTES_DIR . 'form-projecte.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => false,
+        'menu_intranet' => true
+    ],
+
 
     // 07. Agenda contactes
     APP_GESTIO . $url['contactes'] => [

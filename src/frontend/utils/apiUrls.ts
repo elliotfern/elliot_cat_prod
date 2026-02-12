@@ -48,6 +48,9 @@ export const ENDPOINTS = {
   AGENDA_ID: 'esdevenimentId',
   AGENDA: 'agenda',
   GRUP_PERSONA: 'grupPersona',
+  PROJECTE_ID: 'id',
+  PROJECTE_CREATE: 'createProjecte',
+  PROJECTE_UPDATE: 'updateProjecte',
 } as const;
 
 // Mapa de recursos disponibles
@@ -59,6 +62,7 @@ const RESOURCES = {
   ADRECES: 'adreces',
   AGENDA: 'agenda',
   PERSONA: 'persones',
+  PROJECTES: 'projectes',
 } as const;
 
 const TIPUS = {
@@ -100,6 +104,7 @@ export const API_URLS: ApiUrls = {
     LINK_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.LINK_ID}?id=${encodeURIComponent(id)}`,
     AGENDA_ID: (id: number) => `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.GET}/${ENDPOINTS.AGENDA_ID}?id=${encodeURIComponent(id)}`,
     PERSONES_GRUPS_ID: (id: string) => `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.GET}/?grupPersona=${encodeURIComponent(id)}`,
+    PROJECTE_ID: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.PROJECTE_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -123,6 +128,7 @@ export const API_URLS: ApiUrls = {
     LINK: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.POST}/${ENDPOINTS.LINK}`,
     AGENDA_ESDEVENIMENT: `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.POST}`,
     PERSONES_GRUPS: `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.POST}/?${ENDPOINTS.GRUP_PERSONA}`,
+    PROJECTE: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.POST}/?${ENDPOINTS.PROJECTE_CREATE}`,
   },
 
   PUT: {
@@ -145,6 +151,7 @@ export const API_URLS: ApiUrls = {
     LINK: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.PUT}/${ENDPOINTS.LINK}`,
     AGENDA_ESDEVENIMENT: `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.PUT}`,
     PERSONES_GRUPS: `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.PUT}/?${ENDPOINTS.GRUP_PERSONA}`,
+    PROJECTE: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.PUT}/?${ENDPOINTS.PROJECTE_UPDATE}`,
   },
 
   DELETE: {},

@@ -158,10 +158,93 @@ if ($slug === 'home') {
     }
 
     return;
-}
 
-Response::error(
-    MissatgesAPI::error('forbidden'),
-    ['Slug no reconegut'],
-    403
-);
+    /**
+     * GET : Projecte per ID
+     * URL: https://elliot.cat/api/projectes/get/id?id=123
+     */
+} else if ($slug === 'id') {
+    $userUuid = getAuthenticatedUserUuid(); // string UUID o null
+    if (!$userUuid) {
+        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
+        return;
+    }
+
+    $userBin = uuidToBin($userUuid);
+    if ($userBin === null) {
+        Response::error(MissatgesAPI::error('validacio'), ['UUID invàlid'], 400);
+        return;
+    }
+
+    // Validar id
+    $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    if (!$id || $id <= 0) {
+        Response::error(MissatgesAPI::error('validacio'), ['id invàlid'], 400);
+        return;
+    }
+
+    // Query: projecte + categoria
+    $sql = <<<SQL
+        SELECT
+          p.id,
+          p.name,
+          p.description,
+          p.status,
+          p.category_id,
+          c.name AS category_name,
+          p.start_date,
+          p.end_date,
+          p.priority,
+          p.client_id,
+          p.budget_id,
+          p.invoice_id,
+          p.created_at,
+          p.updated_at
+        FROM %s AS p
+        LEFT JOIN %s AS c ON c.id = p.category_id
+        WHERE p.id = :id
+        LIMIT 1
+    SQL;
+
+    $q = sprintf(
+        $sql,
+        qi(Tables::PROJECTES, $pdo),
+        qi(Tables::PROJECTES_CATEGORIES, $pdo)
+    );
+
+    try {
+        $row = $db->getData($q, [':id' => $id]);
+
+        // getData suele devolver array de filas; pillamos la primera
+        $item = is_array($row) && isset($row[0]) ? $row[0] : null;
+
+        if (!$item) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                ['Projecte no trobat'],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $item,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
+} else {
+    Response::error(
+        MissatgesAPI::error('forbidden'),
+        ['Slug no reconegut'],
+        403
+    );
+}
