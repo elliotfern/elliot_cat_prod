@@ -98,6 +98,44 @@ function prioLabel(n: number): string {
   }
 }
 
+function projectDetailsUrl(projectId: number): string {
+  return `/gestio/projectes/fitxa-projecte/${encodeURIComponent(String(projectId))}`;
+}
+
+function projectPriorityLabel(n: number): string {
+  switch (n) {
+    case 1:
+      return 'Baixa';
+    case 2:
+      return 'Mitja';
+    case 3:
+      return 'Alta';
+    case 4:
+      return 'Molt alta';
+    default:
+      return '—';
+  }
+}
+
+function projectPriorityBtn(n: number): string {
+  const label = projectPriorityLabel(n);
+
+  // Colors Bootstrap 5 segons prioritat
+  const cls =
+    n === 1
+      ? 'btn-success' // Baixa
+      : n === 2
+        ? 'btn-warning' // Mitja
+        : n === 3
+          ? 'btn-danger' // Alta
+          : n === 4
+            ? 'btn-dark' // Molt alta
+            : 'btn-secondary';
+
+  // "Botó" sense clicar (disabled)
+  return `<span class="btn btn-sm ${cls} disabled" role="button" aria-disabled="true" tabindex="-1">${esc(label)}</span>`;
+}
+
 function badge(text: string, cls = 'text-bg-secondary'): string {
   return `<span class="badge ${cls}">${esc(text)}</span>`;
 }
@@ -192,20 +230,27 @@ function renderActiveProjectsCard(items: ProjectWithNext[]): string {
       const editHref = projectEditUrl(p.project_id);
 
       return `
-      <tr>
-        <td>
-          <div class="fw-semibold">${esc(p.project_name)}</div>
-          ${p.category_name ? `<div class="small text-muted">${esc(p.category_name)}</div>` : ''}
-        </td>
-        <td>${nextHtml}</td>
-        <td class="text-nowrap">${badge('Prio ' + prioLabel(p.project_priority), 'text-bg-light text-dark')}</td>
-        <td class="text-nowrap text-end">
-          <a class="btn btn-sm btn-outline-primary" href="${editHref}">
-            Modificar
-          </a>
-        </td>
-      </tr>
-    `;
+        <tr>
+          <td>
+            <a class="text-decoration-none link-dark" href="${projectDetailsUrl(p.project_id)}">
+              <div class="fw-semibold">${esc(p.project_name)}</div>
+            </a>
+            ${p.category_name ? `<div class="small text-muted">${esc(p.category_name)}</div>` : ''}
+          </td>
+
+          <td>${nextHtml}</td>
+
+          <td class="text-nowrap">
+            ${projectPriorityBtn(p.project_priority)}
+          </td>
+
+          <td class="text-nowrap text-end">
+            <a class="btn btn-sm btn-outline-primary" href="${editHref}">
+              Modificar
+            </a>
+          </td>
+        </tr>
+      `;
     })
     .join('');
 
