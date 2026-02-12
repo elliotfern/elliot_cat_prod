@@ -92,8 +92,6 @@ if (!$routeFound) {
 
     $apiSenseHTML = $routeInfo['apiSenseHTML'] ?? false;
 
-    // Menu per la intranet
-    $headerMenuIntranet = $routeInfo['menu_intranet'] ?? false;
 }
 
 // Incluir encabezado y pie de página si no se especifica que no lo tenga
@@ -116,14 +114,4 @@ if ($noHeaderFooter) {
 } elseif ($apiSenseHTML) {
     // Incluir la vista asociada a la ruta
     include $view;
-} elseif ($headerMenuIntranet) {
-    include 'public/includes/header.php';
-    include 'public/includes/header-menu.php';
-    include 'public/includes/header-menu-intranet.php';
-
-    // Incluir la vista asociada a la ruta
-    include $view;
-
-    include 'public/includes/footer.php';
-    include 'public/includes/footer-end.php';
 }

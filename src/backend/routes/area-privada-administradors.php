@@ -6,7 +6,6 @@ $defaultProtectedConfig = [
     'header_footer' => false,
     'header_menu_footer' => false,
     'apiSenseHTML' => false,
-    'menu_intranet' => true
 ];
 
 // Función que verifica si el usuario es Admin
@@ -37,7 +36,6 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
     ],
 
     // 02.1 Clients
@@ -47,7 +45,6 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
     ],
 
     APP_GESTIO . $url['comptabilitat'] . '/nou-client' => [
@@ -56,7 +53,6 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
     ],
 
     APP_GESTIO . $url['comptabilitat'] . '/modifica-client/{id}' => [
@@ -65,7 +61,6 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
     ],
 
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients' => [
@@ -74,7 +69,6 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
     ],
 
     APP_GESTIO . $url['comptabilitat'] . '/nova-factura' => [
@@ -83,7 +77,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['comptabilitat'] . '/modifica-factura/{id}' => [
@@ -92,7 +86,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['comptabilitat'] . '/fitxa-factura-client/{id}' => [
@@ -101,7 +95,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['comptabilitat'] . '/nou-producte-factura' => [
@@ -110,7 +104,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['comptabilitat'] . '/modifica-producte-factura/{id}' => [
@@ -119,7 +113,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 04. Base de dades persones
@@ -129,7 +123,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['persones'] . '/llistat-persones' => [
@@ -138,7 +132,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['persones'] . '/fitxa-persona/{slug}' => [
@@ -147,7 +141,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
 
@@ -157,7 +151,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['persones'] . '/nova-persona' => [
@@ -166,7 +160,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 05. Programacio
@@ -176,7 +170,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['programacio'] . '/daw' => [
@@ -185,7 +179,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['programacio'] . '/links' => [
@@ -194,7 +188,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['programacio'] . '/links/{id}' => [
@@ -203,7 +197,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 06. Gestor projectes
@@ -213,7 +207,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['projectes'] . '/nou-projecte' => [
@@ -222,7 +216,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['projectes'] . '/modifica-projecte/{id}' => [
@@ -231,7 +225,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
 
@@ -242,7 +236,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 08. Biblioteca
@@ -252,7 +246,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['biblioteca'] . '/llistat-llibres' => [
@@ -261,7 +255,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['biblioteca'] . '/llistat-autors' => [
@@ -270,7 +264,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['biblioteca'] . '/fitxa-llibre/{slug}' => [
@@ -279,7 +273,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['biblioteca'] . '/fitxa-autor/{slug}' => [
@@ -288,7 +282,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['biblioteca'] . '/fitxa-llibre-autors/{slug}' => [
@@ -297,7 +291,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['biblioteca'] . '/llibre-autors-afegir/{slug}' => [
@@ -306,7 +300,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['biblioteca'] . '/modifica-llibre/{slug}' => [
@@ -315,7 +309,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['biblioteca'] . '/nou-llibre' => [
@@ -324,7 +318,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 09. Adreces interes
@@ -334,7 +328,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['adreces'] . '/llistat-links' => [
@@ -343,7 +337,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['adreces'] . '/nou-link' => [
@@ -352,7 +346,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['adreces'] . '/modifica-link/{id}' => [
@@ -361,7 +355,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['adreces'] . '/llistat-subtemes' => [
@@ -370,7 +364,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['adreces'] . '/llistat-subtema/{id}' => [
@@ -379,7 +373,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['adreces'] . '/llistat-temes' => [
@@ -388,7 +382,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['adreces'] . '/llistat-tema/{id}' => [
@@ -397,7 +391,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
 
@@ -408,7 +402,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['vault'] . '/nou-vault' => [
@@ -417,7 +411,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['vault'] . '/modifica-vault/{id}' => [
@@ -426,7 +420,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 11. Cinema i televisió
@@ -436,7 +430,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/llistat-pelicules' => [
@@ -445,7 +439,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/llistat-series' => [
@@ -454,7 +448,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/llistat-directors' => [
@@ -463,7 +457,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/llistat-actors' => [
@@ -472,7 +466,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/llistat-obres-teatre' => [
@@ -481,7 +475,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/fitxa-pelicula/{slug}' => [
@@ -490,7 +484,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/fitxa-actor/{slug}' => [
@@ -499,7 +493,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/fitxa-director/{slug}' => [
@@ -508,7 +502,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/fitxa-serie/{slug}' => [
@@ -517,7 +511,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/nova-pelicula' => [
@@ -526,7 +520,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/modifica-pelicula/{id}' => [
@@ -535,7 +529,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/nova-serie' => [
@@ -544,7 +538,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] .  '/modifica-serie/{id}' => [
@@ -553,7 +547,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/inserir-actor-pelicula/{slug}' => [
@@ -562,7 +556,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/modifica-actor-pelicula/{slug}' => [
@@ -571,7 +565,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/inserir-actor-serie/{slug}' => [
@@ -580,7 +574,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['cinema'] . '/modifica-actor-serie/{slug}' => [
@@ -589,7 +583,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 12. Xarxes socials
@@ -599,7 +593,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['xarxes'] . '/mastodon' => [
@@ -608,7 +602,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['xarxes'] . '/publica' => [
@@ -617,7 +611,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 13. Blog
@@ -627,7 +621,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['blog'] . '/article/{slug}' => [
@@ -636,7 +630,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['blog'] . '/nou-article' => [
@@ -645,7 +639,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['blog'] . '/modifica-article/{id}' => [
@@ -654,7 +648,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 14. Lector rss
@@ -664,7 +658,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 15. Història
@@ -674,7 +668,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/llistat-cursos' => [
@@ -683,7 +677,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/llistat-organitzacions' => [
@@ -692,7 +686,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/llistat-esdeveniments' => [
@@ -701,7 +695,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/fitxa-persona/{slug}' => [
@@ -710,7 +704,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/fitxa-politic/{slug}' => [
@@ -719,7 +713,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/fitxa-esdeveniment/{slug}' => [
@@ -728,7 +722,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/fitxa-organitzacio/{slug}' => [
@@ -737,7 +731,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/nou-esdeveniment' => [
@@ -746,7 +740,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/modifica-esdeveniment/{slug}' => [
@@ -755,7 +749,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/modifica-esdeveniment-persona/{slug}' => [
@@ -764,7 +758,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/modifica-esdeveniment-organitzacio/{slug}' => [
@@ -773,7 +767,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/nou-persona-carrec/{slug}' => [
@@ -782,7 +776,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/modifica-persona-carrec/{id}' => [
@@ -791,7 +785,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/modifica-organitzacio/{slug}' => [
@@ -800,7 +794,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['historia'] . '/nova-organitzacio' => [
@@ -809,7 +803,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // 16. Auxiliars
@@ -819,7 +813,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/llistat-imatges' => [
@@ -828,7 +822,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/nova-imatge' => [
@@ -837,7 +831,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // Auxiliars > ciutats
@@ -847,7 +841,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/modifica-ciutat/{id}' => [
@@ -856,7 +850,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/llistat-ciutats' => [
@@ -865,7 +859,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // Auxiliars > paisos
@@ -875,7 +869,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/modifica-pais/{id}' => [
@@ -884,7 +878,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/llistat-paisos' => [
@@ -893,7 +887,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // Auxiliars > grups/professions persones
@@ -903,7 +897,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/nou-grup' => [
@@ -912,7 +906,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/modifica-grup/{id}' => [
@@ -921,7 +915,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // Auxiliars : temes i subtemes
@@ -931,7 +925,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/nou-subtema' => [
@@ -940,7 +934,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/modifica-subtema/{id}' => [
@@ -949,7 +943,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/llistat-temes' => [
@@ -958,7 +952,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/nou-tema' => [
@@ -967,7 +961,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['auxiliars'] . '/modifica-tema/{id}' => [
@@ -976,7 +970,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
 
@@ -987,7 +981,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['viatges'] . '/llistat-viatges' => [
@@ -996,7 +990,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['viatges'] . '/fitxa-viatge/{slug}' => [
@@ -1005,7 +999,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['viatges'] . '/fitxa-espai/{slug}' => [
@@ -1014,7 +1008,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['viatges'] . '/modifica-espai/{slug}' => [
@@ -1023,7 +1017,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['viatges'] . '/nou-espai' => [
@@ -1032,7 +1026,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // Gestió usuaris
@@ -1042,7 +1036,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['usuaris'] . '/llistat-usuaris' => [
@@ -1051,7 +1045,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['usuaris'] . '/nou-usuari' => [
@@ -1060,7 +1054,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['usuaris'] . '/modifica-usuari/{id}' => [
@@ -1069,7 +1063,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // RADIO ONLINE
@@ -1080,7 +1074,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['radio'] . '/catmusica' => [
@@ -1089,7 +1083,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // CURRICULUM
@@ -1099,7 +1093,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/nou-perfil" => [
@@ -1108,7 +1102,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/modifica-perfil/{id}" => [
@@ -1117,7 +1111,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/perfil-cv" => [
@@ -1126,7 +1120,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
 
@@ -1136,7 +1130,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/nou-perfil-i18n" => [
@@ -1145,7 +1139,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/perfil-cv-i18n" => [
@@ -1154,7 +1148,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/nou-link" => [
@@ -1163,7 +1157,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/modifica-link/{id}" => [
@@ -1172,7 +1166,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/perfil-links" => [
@@ -1181,7 +1175,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/nova-habilitat" => [
@@ -1190,7 +1184,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/modifica-habilitat/{id}" => [
@@ -1199,7 +1193,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/perfil-habilitats" => [
@@ -1208,7 +1202,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/nova-experiencia" => [
@@ -1217,7 +1211,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/modifica-experiencia/{id}" => [
@@ -1226,7 +1220,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/perfil-experiencies" => [
@@ -1235,7 +1229,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/perfil-experiencia-professional/{id}" => [
@@ -1244,7 +1238,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/modifica-experiencia-i18n/{id}" => [
@@ -1253,7 +1247,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/nova-experiencia-i18n" => [
@@ -1262,7 +1256,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
 
@@ -1272,7 +1266,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/modifica-educacio/{id}" => [
@@ -1281,7 +1275,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/perfil-educacio" => [
@@ -1290,7 +1284,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/nou-educacio-i18n" => [
@@ -1299,7 +1293,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/modifica-educacio-i18n/{id}" => [
@@ -1308,7 +1302,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['curriculum'] . "/perfil-educacio-i18n/{id}" => [
@@ -1317,7 +1311,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     // Agenda esdeveniments
@@ -1327,7 +1321,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['agenda'] . "/llistat-esdeveniments" => [
@@ -1336,7 +1330,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['agenda'] . "/calendari-esdeveniments" => [
@@ -1345,7 +1339,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['agenda'] . "/veure-esdeveniment/{id}" => [
@@ -1354,7 +1348,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['agenda'] . "/nou-esdeveniment" => [
@@ -1363,7 +1357,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
     APP_GESTIO . $url['agenda'] . "/modifica-esdeveniment/{id}" => [
@@ -1372,7 +1366,7 @@ $routes = [
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => false,
-        'menu_intranet' => true
+
     ],
 
 ];
