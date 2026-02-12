@@ -35,6 +35,12 @@ jobs:
           echo "---- git diff ----"
           git diff -- public/includes/footer-end.php || true
 
+      - name: Verify version on server
+        run: |
+          ssh epgylzqu@87.98.230.129 "bash -lc '
+            grep -n \"bundle.js?v=\" /home/epgylzqu/elliotfern.com/public/includes/footer-end.php || true
+          '"
+
       - name: Build frontend assets
         run: npm run build
 
