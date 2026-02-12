@@ -13,9 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # -------------------------
+      # 1. Checkout
+      # -------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
+      # -------------------------
+      # 2. Node setup
+      # -------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -25,25 +31,28 @@ jobs:
       - name: Install dependencies (npm)
         run: npm ci
 
+      # -------------------------
+      # 3. Bump versión
+      # -------------------------
       - name: Bump version in footer-end.php
         run: node bump-version.cjs
 
       - name: Show bumped version
         run: |
           echo "---- footer-end.php (bundle line) ----"
-          grep -n "bundle.js?v=" -n public/includes/footer-end.php || true
+          grep -n "bundle.js?v=" public/includes/footer-end.php || true
           echo "---- git diff ----"
           git diff -- public/includes/footer-end.php || true
 
-      - name: Verify version on server
-        run: |
-          ssh epgylzqu@87.98.230.129 "bash -lc '
-            grep -n \"bundle.js?v=\" /home/epgylzqu/elliotfern.com/public/includes/footer-end.php || true
-          '"
-
+      # -------------------------
+      # 4. Build frontend
+      # -------------------------
       - name: Build frontend assets
         run: npm run build
 
+      # -------------------------
+      # 5. SSH setup
+      # -------------------------
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -51,9 +60,15 @@ jobs:
 
       - name: Add server to known_hosts
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
           ssh-keyscan -H 87.98.230.129 >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
+      # -------------------------
+      # 6. Rsync deploy
+      # -------------------------
       - name: Sync project to shared hosting (rsync)
         run: |
           set -euo pipefail
@@ -73,6 +88,21 @@ jobs:
             -e "ssh" \
             ./ "$REMOTE:$REMOTE_DIR"
 
+      # -------------------------
+      # 7. Verify version on server
+      # -------------------------
+      - name: Verify version on server
+        run: |
+          ssh epgylzqu@87.98.230.129 "bash -lc '
+            echo \"---- footer-end.php on server ----\"
+            grep -n \"bundle.js?v=\" /home/epgylzqu/elliotfern.com/public/includes/footer-end.php
+            echo \"---- bundle.js info ----\"
+            ls -lh /home/epgylzqu/elliotfern.com/public/dist/bundle.js || true
+          '"
+
+      # -------------------------
+      # 8. Composer install
+      # -------------------------
       - name: Composer install on server
         run: |
           set -euo pipefail
@@ -83,9 +113,5 @@ jobs:
 
             command -v composer >/dev/null 2>&1 || { echo \"ERROR: composer no está instalado\"; exit 3; }
 
-            # si es prod típico:
             composer install --no-dev --prefer-dist --optimize-autoloader
-
-            # opcional si usas plugins y te da guerra en shared hosting:
-            # composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
           '"
