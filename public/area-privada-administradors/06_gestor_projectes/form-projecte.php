@@ -3,7 +3,9 @@
 
 <div class="d-flex align-items-center justify-content-between mb-3">
     <h2>Gestor de projectes</h2>
-    <div id="titolForm"></div>
+    <p>
+    <h4><span id="titolForm"></span></p>
+    </h4>
     <button class="btn btn-outline-secondary" type="button" id="btnBack">← Torna</button>
 </div>
 

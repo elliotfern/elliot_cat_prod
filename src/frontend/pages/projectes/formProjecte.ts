@@ -42,7 +42,6 @@ export async function formProjecte(isUpdate: boolean, id?: number) {
 
   if (!divTitol || !btnSubmit || !form) return;
 
-  // Defaults según DB (status=1, priority=3)
   let data: Partial<FitxaProjecte> = {
     status: 1,
     priority: 3,
@@ -55,6 +54,22 @@ export async function formProjecte(isUpdate: boolean, id?: number) {
     description: null,
   };
 
+  // Esperar a que existan los selects en DOM (muy importante si el HTML se inyecta)
+  async function waitForElement(id: string, timeoutMs = 2000): Promise<HTMLElement | null> {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const el = document.getElementById(id);
+      if (el) return el;
+      await new Promise((r) => setTimeout(r, 25));
+    }
+    return null;
+  }
+
+  await waitForElement('category_id');
+  await waitForElement('client_id');
+  await waitForElement('budget_id');
+  await waitForElement('invoice_id');
+
   if (id && isUpdate) {
     const response = await fetchDataGet<ApiResponse<FitxaProjecte>>(API_URLS.GET.PROJECTE_ID(id), true);
     if (!response || !response.data) return;
@@ -64,10 +79,15 @@ export async function formProjecte(isUpdate: boolean, id?: number) {
     divTitol.innerHTML = `<h2>Modificació del projecte</h2>`;
     btnSubmit.textContent = 'Modificar dades';
 
-    // Rellena inputs por name/id
+    // 1) cargar selects con preselección
+    await auxiliarSelect(data.category_id, 'projectes_categories', 'category_id', 'name');
+    await auxiliarSelect(data.client_id, 'clients', 'client_id', 'clientEmpresa');
+    await auxiliarSelect(data.budget_id, 'budgets', 'budget_id', 'concepte');
+    await auxiliarSelect(data.invoice_id, 'facturesClients', 'invoice_id', 'facConcepte');
+
+    // 2) rellenar inputs (ahora ya existen opciones)
     renderFormInputs(data);
 
-    // Submit PUT
     form.addEventListener('submit', function (event) {
       transmissioDadesDB(event, 'PUT', 'formProjecte', API_URLS.PUT.PROJECTE);
     });
@@ -75,17 +95,14 @@ export async function formProjecte(isUpdate: boolean, id?: number) {
     divTitol.innerHTML = `<h2>Creació de nou projecte</h2>`;
     btnSubmit.textContent = 'Inserir dades';
 
-    // Submit POST
+    // cargar selects sin selección
+    await auxiliarSelect(null, 'projectes_categories', 'category_id', 'name');
+    await auxiliarSelect(null, 'clients', 'client_id', 'clientEmpresa');
+    await auxiliarSelect(null, 'budgets', 'budget_id', 'concepte');
+    await auxiliarSelect(null, 'facturesClients', 'invoice_id', 'facConcepte');
+
     form.addEventListener('submit', function (event) {
       transmissioDadesDB(event, 'POST', 'formProjecte', API_URLS.POST.PROJECTE, true);
     });
   }
-
-  // Selects (precarga con el valor actual)
-  // OJO: auxiliarSelect(valorSeleccionado, taula/slug, selectId/name, labelKey)
-  await auxiliarSelect(data.category_id ?? 0, 'projectes_categories', 'category_id', 'name');
-
-  await auxiliarSelect(data.client_id ?? 0, 'clients', 'client_id', 'clientEmpresa');
-  await auxiliarSelect(data.budget_id ?? 0, 'budgets', 'budget_id', 'concepte');
-  await auxiliarSelect(data.invoice_id ?? 0, 'facturesClients', 'invoice_id', 'facConcepte');
 }
