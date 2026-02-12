@@ -1236,8 +1236,8 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     }
 
     // Llistat Factures clients
-    // ruta GET => "/api/cinema/get/auxiliars/projectesCategories"
-} else if ($slug === "projectesCategories") {
+    // ruta GET => "/api/cinema/get/auxiliars/projectes_categories"
+} else if ($slug === "projectes_categories") {
 
     $sql = <<<SQL
             SELECT c.id, c.name
