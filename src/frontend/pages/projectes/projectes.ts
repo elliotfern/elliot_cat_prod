@@ -21,7 +21,7 @@ export function projectes() {
       formProjecte(true, id);
       break;
 
-    case 'crea-projecte':
+    case 'nou-projecte':
       formProjecte(false);
       break;
 

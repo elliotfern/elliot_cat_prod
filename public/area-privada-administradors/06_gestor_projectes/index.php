@@ -5,7 +5,7 @@
 
     <?php if (isUserAdmin()) : ?>
         <p>
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/crea-projecte/'"
+            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/nou-projecte/'"
                 class="button btn-gran btn-secondari">
                 Afegir projecte
             </button>
