@@ -111,7 +111,7 @@ if ($slug === 'home') {
         LEFT JOIN %s AS c ON c.id = p.category_id
         LEFT JOIN %s AS t ON t.project_id = p.id AND t.is_next = 1
         WHERE p.status = 1
-        ORDER BY p.priority ASC, p.updated_at DESC
+        ORDER BY p.updated_at DESC
     SQL;
 
     $qToday = sprintf(
