@@ -28,6 +28,13 @@ jobs:
       - name: Bump version in footer-end.php
         run: node bump-version.cjs
 
+      - name: Show bumped version
+        run: |
+          echo "---- footer-end.php (bundle line) ----"
+          grep -n "bundle.js?v=" -n public/includes/footer-end.php || true
+          echo "---- git diff ----"
+          git diff -- public/includes/footer-end.php || true
+
       - name: Build frontend assets
         run: npm run build
 
