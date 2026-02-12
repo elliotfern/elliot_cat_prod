@@ -1,12 +1,17 @@
 <div class="barraNavegacio">
 </div>
 
-<div class="d-flex align-items-center justify-content-between mb-3">
-    <h2>Gestor de projectes</h2>
-    <p>
-    <h4><span id="titolForm"></span></p>
-    </h4>
-    <button class="btn btn-outline-secondary" type="button" id="btnBack">← Torna</button>
+<div class="d-flex align-items-start justify-content-between mb-3">
+    <div class="d-flex flex-column">
+        <h2 class="mb-1">Gestor de projectes</h2>
+        <h4 class="mb-0">
+            <span id="titolForm"></span>
+        </h4>
+    </div>
+
+    <button class="btn btn-outline-secondary" type="button" id="btnBack">
+        ← Torna
+    </button>
 </div>
 
 <!-- Alerts -->
