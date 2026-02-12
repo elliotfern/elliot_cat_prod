@@ -13,15 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # -------------------------
-      # 1. Checkout
-      # -------------------------
+      # 1) Checkout
       - name: Checkout
         uses: actions/checkout@v4
 
-      # -------------------------
-      # 2. Node setup
-      # -------------------------
+      # 2) Node setup
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -31,28 +27,25 @@ jobs:
       - name: Install dependencies (npm)
         run: npm ci
 
-      # -------------------------
-      # 3. Bump versión
-      # -------------------------
-      - name: Bump version in footer-end.php
-        run: node bump-version.cjs
-
-      - name: Show bumped version
-        run: |
-          echo "---- footer-end.php (bundle line) ----"
-          grep -n "bundle.js?v=" public/includes/footer-end.php || true
-          echo "---- git diff ----"
-          git diff -- public/includes/footer-end.php || true
-
-      # -------------------------
-      # 4. Build frontend
-      # -------------------------
+      # 3) Build frontend
       - name: Build frontend assets
         run: npm run build
 
-      # -------------------------
-      # 5. SSH setup
-      # -------------------------
+      # 4) Write APP_VERSION (version.txt)
+      - name: Write APP_VERSION file
+        run: |
+          echo "${GITHUB_SHA}" > public/version.txt
+          echo "APP_VERSION=${GITHUB_SHA}"
+          echo "---- version.txt ----"
+          cat public/version.txt
+
+      # (Opcional) Mostrar línea del footer (ahora no tendrá v=1.3.xx, tendrá v=<sha>)
+      - name: Show footer-end.php line
+        run: |
+          echo "---- footer-end.php (bundle line) ----"
+          grep -n "bundle.js?v=" public/includes/footer-end.php || true
+
+      # 5) SSH setup
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -66,9 +59,7 @@ jobs:
           ssh-keyscan -H 87.98.230.129 >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      # -------------------------
-      # 6. Rsync deploy
-      # -------------------------
+      # 6) Rsync deploy
       - name: Sync project to shared hosting (rsync)
         run: |
           set -euo pipefail
@@ -88,21 +79,21 @@ jobs:
             -e "ssh" \
             ./ "$REMOTE:$REMOTE_DIR"
 
-      # -------------------------
-      # 7. Verify version on server
-      # -------------------------
+      # 7) Verify version on server
       - name: Verify version on server
         run: |
           ssh epgylzqu@87.98.230.129 "bash -lc '
-            echo \"---- footer-end.php on server ----\"
-            grep -n \"bundle.js?v=\" /home/epgylzqu/elliotfern.com/public/includes/footer-end.php
+            echo \"---- version.txt on server ----\"
+            cat /home/epgylzqu/elliotfern.com/public/version.txt || true
+
+            echo \"---- footer-end.php on server (bundle line) ----\"
+            grep -n \"bundle.js?v=\" /home/epgylzqu/elliotfern.com/public/includes/footer-end.php || true
+
             echo \"---- bundle.js info ----\"
             ls -lh /home/epgylzqu/elliotfern.com/public/dist/bundle.js || true
           '"
 
-      # -------------------------
-      # 8. Composer install
-      # -------------------------
+      # 8) Composer install on server
       - name: Composer install on server
         run: |
           set -euo pipefail
