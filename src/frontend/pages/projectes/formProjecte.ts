@@ -96,6 +96,7 @@ export async function formProjecte(isUpdate: boolean, id?: number) {
     btnSubmit.textContent = 'Inserir dades';
 
     // cargar selects sin selección
+    console.log('FOrm create');
     await auxiliarSelect(null, 'projectes_categories', 'category_id', 'name');
     await auxiliarSelect(null, 'clients', 'client_id', 'clientEmpresa');
     await auxiliarSelect(null, 'budgets', 'budget_id', 'concepte');
