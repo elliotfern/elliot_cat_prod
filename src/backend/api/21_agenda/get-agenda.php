@@ -166,8 +166,8 @@ if ($slug === "esdevenimentId") {
 } else if ($slug === "esdevenimentsRang") {
 
     $usuariId = 1;
-    $from     = $_GET['from'] ?? null; // format: YYYY-MM-DD
-    $to       = $_GET['to']   ?? null; // format: YYYY-MM-DD
+    $from     = $_GET['from'] ?? null; // YYYY-MM-DD
+    $to       = $_GET['to']   ?? null; // YYYY-MM-DD
 
     if (!$usuariId || !$from || !$to) {
         Response::error(
@@ -178,83 +178,74 @@ if ($slug === "esdevenimentId") {
         return;
     }
 
-    // Normalizamos a rang complet del dia
     $fromDateTime = $from . ' 00:00:00';
     $toDateTime   = $to   . ' 23:59:59';
 
+    // 1) Eventos reales
     $sql = <<<SQL
-            SELECT 
-                e.id_esdeveniment,
-                e.titol,
-                e.descripcio,
-                e.tipus,
-                e.lloc,
-                e.data_inici,
-                e.data_fi,
-                e.tot_el_dia,
-                e.estat,
-                e.creat_el,
-                e.actualitzat_el
-            FROM %s AS e
-            WHERE 
-                e.data_inici >= :from
-                AND e.data_inici <= :to
-            ORDER BY e.data_inici ASC
-        SQL;
+        SELECT 
+            e.id_esdeveniment,
+            e.titol,
+            e.descripcio,
+            e.tipus,
+            e.lloc,
+            e.data_inici,
+            e.data_fi,
+            e.tot_el_dia,
+            e.estat,
+            e.creat_el,
+            e.actualitzat_el
+        FROM %s AS e
+        WHERE 
+            e.data_inici >= :from
+            AND e.data_inici <= :to
+        ORDER BY e.data_inici ASC
+    SQL;
 
-    // En esdevenimentsRang:
-
-    $from = $_GET['from'] ?? null; // YYYY-MM-DD
-    $to   = $_GET['to']   ?? null; // YYYY-MM-DD
-
-    if (!$from || !$to) {
-        Response::error(MissatgesAPI::error('validacio'), ['Paràmetres requerits: from, to'], 400);
-        return;
-    }
-
+    // 2) Cumpleaños virtuales (DATE + LAST_DAY)
     $sqlBirthdays = <<<SQL
         SELECT
-        t.id_esdeveniment,
-        t.titol,
-        t.descripcio,
-        t.tipus,
-        t.lloc,
-        CONCAT(t.ymd, ' 00:00:00') AS data_inici,
-        CONCAT(t.ymd, ' 23:59:59') AS data_fi,
-        t.tot_el_dia,
-        t.estat,
-        t.creat_el,
-        t.actualitzat_el,
-        t.origen,
-        t.contacte_id
+            t.id_esdeveniment,
+            t.titol,
+            t.descripcio,
+            t.tipus,
+            t.lloc,
+            CONCAT(t.ymd, ' 00:00:00') AS data_inici,
+            CONCAT(t.ymd, ' 23:59:59') AS data_fi,
+            t.tot_el_dia,
+            t.estat,
+            t.creat_el,
+            t.actualitzat_el,
+            t.origen,
+            t.contacte_id
         FROM (
-        SELECT
-            (-c.id) AS id_esdeveniment,
-            CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
-            NULL AS descripcio,
-            'aniversari' AS tipus,
-            NULL AS lloc,
-            CASE
-            WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
-                THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
-            ELSE DATE(CONCAT(
-                YEAR(:fromDate), '-',
-                LPAD(MONTH(c.data_naixement), 2, '0'), '-',
-                LPAD(DAY(c.data_naixement), 2, '0')
-            ))
-            END AS ymd,
-            1 AS tot_el_dia,
-            'confirmat' AS estat,
-            NOW() AS creat_el,
-            NOW() AS actualitzat_el,
-            'contacte' AS origen,
-            c.id AS contacte_id
-        FROM db_contactes c
-        WHERE c.data_naixement IS NOT NULL
+            SELECT
+                (-c.id) AS id_esdeveniment,
+                CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
+                NULL AS descripcio,
+                'aniversari' AS tipus,
+                NULL AS lloc,
+                CASE
+                    WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
+                        THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
+                    ELSE DATE(CONCAT(
+                        YEAR(:fromDate), '-',
+                        LPAD(MONTH(c.data_naixement), 2, '0'), '-',
+                        LPAD(DAY(c.data_naixement), 2, '0')
+                    ))
+                END AS ymd,
+                1 AS tot_el_dia,
+                'confirmat' AS estat,
+                NOW() AS creat_el,
+                NOW() AS actualitzat_el,
+                'contacte' AS origen,
+                c.id AS contacte_id
+            FROM db_contactes c
+            WHERE c.data_naixement IS NOT NULL
         ) t
         WHERE t.ymd BETWEEN DATE(:fromDate) AND DATE(:toDate)
-        SQL;
-
+        ORDER BY t.ymd ASC
+    SQL;
 
     $query = sprintf(
         $sql,
@@ -262,36 +253,27 @@ if ($slug === "esdevenimentId") {
     );
 
     try {
-        $params = [
-            ':from'      => $fromDateTime,
-            ':to'        => $toDateTime,
-        ];
-
-        // 1) eventos reales (tu query actual)
-        $events = $db->getData($query, $params) ?: [];
-
-        $birthdays = $db->getData($sqlBirthdays, [
-            ':fromDate' => $from, // OJO: YYYY-MM-DD (sin hora)
-            ':toDate'   => $to,   // OJO: YYYY-MM-DD (sin hora)
+        // Eventos agenda
+        $events = $db->getData($query, [
+            ':from' => $fromDateTime,
+            ':to'   => $toDateTime,
         ]) ?: [];
 
-        if (empty($rows)) {
-            // Para un calendario vacío puede ser útil devolver 200 con []
-            Response::success(
-                MissatgesAPI::success('get'),
-                [],
-                200
-            );
-            return;
-        }
+        // Cumpleaños (pasamos YYYY-MM-DD)
+        $birthdays = $db->getData($sqlBirthdays, [
+            ':fromDate' => $from,
+            ':toDate'   => $to,
+        ]) ?: [];
 
-        // 3) merge + ordenar por data_inici
-        $events = $db->getData($query, $params) ?: [];
-
+        // Merge + ordenar por data_inici
         $all = array_merge($events, $birthdays);
         usort($all, fn($a, $b) => strcmp((string)$a['data_inici'], (string)$b['data_inici']));
 
-        Response::success(MissatgesAPI::success('get'), $all, 200);
+        Response::success(
+            MissatgesAPI::success('get'),
+            $all,
+            200
+        );
         return;
     } catch (PDOException $e) {
         Response::error(
@@ -299,6 +281,7 @@ if ($slug === "esdevenimentId") {
             [$e->getMessage()],
             500
         );
+        return;
     }
 } else {
     // Slug no reconocido
