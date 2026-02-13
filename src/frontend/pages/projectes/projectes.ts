@@ -3,21 +3,26 @@ import { formProjecte } from './formProjecte';
 import { formTask } from './formTasca';
 import { initProjectesHome } from './homeProjectes';
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
 export function projectes() {
-  const id = parseInt(pageType[3], 10);
+  const pageType = getPageType(window.location.href);
 
-  if (pageType[1] !== 'projectes') return;
+  // Encuentra dónde está "projectes" en la ruta
+  const iProjectes = pageType.indexOf('projectes');
+  if (iProjectes === -1) return;
 
-  if (pageType.length === 2) {
-    // /projectes
+  const actionRaw = pageType[iProjectes + 1] ?? '';
+  const action = String(actionRaw).split('?')[0].replace(/\/+$/, '');
+
+  const idRaw = pageType[iProjectes + 2];
+  const id = idRaw ? Number.parseInt(String(idRaw), 10) : undefined;
+
+  // /.../projectes
+  if (!action) {
     void initProjectesHome();
     return;
   }
 
-  switch (pageType[2]) {
+  switch (action) {
     case 'modifica-projecte':
       formProjecte(true, id);
       break;
@@ -31,7 +36,7 @@ export function projectes() {
       break;
 
     case 'modifica-tasca':
-      formTask(false);
+      formTask(true, id);
       break;
 
     default:
