@@ -209,6 +209,20 @@
         color: #374151;
     }
 
+    .cal-day-event--aniversari {
+        background: rgba(245, 158, 11, 0.14);
+        /* ámbar suave */
+        color: #b45309;
+        /* ámbar oscuro */
+        border-left: 0;
+        /* no hace falta con pill */
+        opacity: 1;
+    }
+
+    .cal-day-event--aniversari a {
+        font-weight: 700;
+    }
+
     /* Indicador cuando hay más eventos */
     .cal-day-more {
         font-size: 0.6rem;
@@ -229,5 +243,15 @@
         .cal-month-title {
             font-size: 1.2rem;
         }
+    }
+
+    .cal-day-event--aniversari {
+        border-left: 3px solid currentColor;
+        opacity: 0.95;
+    }
+
+    .cal-day-event--aniversari a {
+        font-weight: 600;
+        text-decoration: none;
     }
 </style>

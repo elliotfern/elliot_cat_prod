@@ -1,5 +1,5 @@
 // models/AgendaEsdeveniment.ts
-export type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'viatge' | 'altre';
+export type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'viatge' | 'altre' | 'aniversari';
 
 export type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat' | 'cancel-lat';
 
@@ -9,12 +9,16 @@ export interface AgendaEsdeveniment {
   descripcio?: string | null;
   tipus: TipusEsdeveniment;
   lloc?: string | null;
-  data_inici: string; // "YYYY-MM-DD HH:MM:SS"
+  data_inici: string;
   data_fi: string;
   tot_el_dia: number;
   estat: EstatEsdeveniment;
   creat_el: string;
   actualitzat_el: string;
+
+  // añadidos (opcionales)
+  origen?: 'agenda' | 'contacte';
+  contacte_id?: number;
 }
 
 const MONTHS_CA = ['Gener', 'Febrer', 'Març', 'Abril', 'Maig', 'Juny', 'Juliol', 'Agost', 'Setembre', 'Octubre', 'Novembre', 'Desembre'];
@@ -62,6 +66,8 @@ function getMonthTitle(year: number, monthIndex: number): string {
 /** Clase para evento en el calendario según tipus */
 function getEventClass(tipus: string): string {
   switch (tipus) {
+    case 'aniversari':
+      return 'cal-day-event cal-day-event--aniversari';
     case 'reunio':
       return 'cal-day-event cal-day-event--reunio';
     case 'visita_medica':
@@ -185,7 +191,14 @@ function renderCalendar(year: number, monthIndex: number, events: AgendaEsdeveni
         evDiv.className = getEventClass(ev.tipus);
 
         const link = document.createElement('a');
-        link.href = `/gestio/agenda/veure-esdeveniment/${ev.id_esdeveniment}`;
+        const isBirthday = ev.tipus === 'aniversari' || ev.origen === 'contacte';
+
+        if (isBirthday && ev.contacte_id) {
+          link.href = `/gestio/agenda-contactes/fitxa-contacte/${ev.contacte_id}`;
+        } else {
+          link.href = `/gestio/agenda/veure-esdeveniment/${ev.id_esdeveniment}`;
+        }
+
         link.textContent = getShortEventLabel(ev);
         link.title = ev.titol; // tooltip opcional
 

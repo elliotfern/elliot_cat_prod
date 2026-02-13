@@ -202,6 +202,42 @@ if ($slug === "esdevenimentId") {
             ORDER BY e.data_inici ASC
         SQL;
 
+    // Cumpleaños virtuales desde contactos (data_naixement = DATE)
+    $sqlBirthdays = <<<SQL
+        SELECT
+        (-c.id) AS id_esdeveniment,
+        CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
+        NULL AS descripcio,
+        'aniversari' AS tipus,
+        NULL AS lloc,
+
+        CONCAT(occ.ymd, ' 00:00:00') AS data_inici,
+        CONCAT(occ.ymd, ' 23:59:59') AS data_fi,
+
+        1 AS tot_el_dia,
+        'confirmat' AS estat,
+        NOW() AS creat_el,
+        NOW() AS actualitzat_el,
+        'contacte' AS origen,
+        c.id AS contacte_id
+        FROM db_contactes c
+        CROSS JOIN (
+        SELECT
+            CASE
+            WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
+                THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
+            ELSE DATE(CONCAT(
+                YEAR(:fromDate), '-',
+                LPAD(MONTH(c.data_naixement), 2, '0'), '-',
+                LPAD(DAY(c.data_naixement), 2, '0')
+            ))
+            END AS ymd
+        ) AS occ
+        WHERE
+        c.data_naixement IS NOT NULL
+        AND occ.ymd BETWEEN DATE(:fromDate) AND DATE(:toDate)
+        SQL;
+
     $query = sprintf(
         $sql,
         qi(Tables::AGENDA_ESDEVENIMENTS, $pdo)
@@ -213,7 +249,17 @@ if ($slug === "esdevenimentId") {
             ':to'        => $toDateTime,
         ];
 
-        $rows = $db->getData($query, $params);
+        // 1) eventos reales (tu query actual)
+        $events = $db->getData($query, $params) ?: [];
+
+        // 2) Aniversari
+        $birthdays = $db->getData(
+            $sqlBirthdays,
+            [
+                ':fromDate' => $fromDateTime, // 'YYYY-MM-DD 00:00:00'
+                ':toDate'   => $toDateTime,   // 'YYYY-MM-DD 23:59:59'
+            ]
+        ) ?: [];
 
         if (empty($rows)) {
             // Para un calendario vacío puede ser útil devolver 200 con []
@@ -225,11 +271,12 @@ if ($slug === "esdevenimentId") {
             return;
         }
 
-        Response::success(
-            MissatgesAPI::success('get'),
-            $rows,
-            200
-        );
+        // 3) merge + ordenar por data_inici
+        $all = array_merge($events, $birthdays);
+        usort($all, fn($a, $b) => strcmp((string)$a['data_inici'], (string)$b['data_inici']));
+
+        Response::success(MissatgesAPI::success('get'), $all, 200);
+        return;
     } catch (PDOException $e) {
         Response::error(
             MissatgesAPI::error('errorBD'),

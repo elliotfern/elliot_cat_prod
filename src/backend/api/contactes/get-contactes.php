@@ -6,10 +6,10 @@
 if (isset($_GET['contactes'])) {
     global $conn;
 
-    $query = "SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, t.tipus, p.pais_cat AS country, c.adreca
+    $query = "SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, t.tipus, p.pais_ca AS country, c.adreca
             FROM db_contactes AS c
             LEFT JOIN aux_contactes_tipus AS t ON c.tipus = t.id
-            LEFT JOIN db_countries AS p ON c.pais = p.id
+            LEFT JOIN db_geo_paisos AS p ON c.pais = p.id
             ORDER BY c.cognoms ASC";
 
     // Preparar la consulta
@@ -37,10 +37,10 @@ if (isset($_GET['contactes'])) {
     global $conn;
     $data = array();
     $stmt = $conn->prepare(
-        "SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, t.id AS tipus_id, t.tipus, c.adreca, p.id AS pais_id, p.pais_cat AS country
+        "SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, t.id AS tipus_id, t.tipus, c.adreca, p.id AS pais_id, p.pais_ca AS country
             FROM db_contactes AS c
             LEFT JOIN aux_contactes_tipus AS t ON c.tipus = t.id
-            LEFT JOIN db_countries AS p ON c.pais = p.id
+            LEFT JOIN db_geo_paisos AS p ON c.pais = p.id
             WHERE c.id = $id"
     );
     $stmt->execute();
@@ -72,9 +72,9 @@ if (isset($_GET['contactes'])) {
     global $conn;
     $data = array();
     $stmt = $conn->prepare(
-        "SELECT c.id, c.pais_cat AS country
-            FROM db_countries AS c
-            ORDER BY c.pais_cat ASC"
+        "SELECT c.id, c.pais_ca AS country
+            FROM db_geo_paisos AS c
+            ORDER BY c.pais_ca ASC"
     );
     $stmt->execute();
     if ($stmt->rowCount() === 0) echo ('No rows');
