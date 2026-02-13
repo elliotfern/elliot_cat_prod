@@ -66,14 +66,11 @@ export async function formTask(isUpdate: boolean, id?: number) {
   const divTitol = document.getElementById('titolForm') as HTMLSpanElement | HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnProjecte') as HTMLButtonElement | null;
 
-  if (!divTitol || !btnSubmit || !form) {
-    console.error('formTask: faltan elementos base', {
-      taskForm: !!form,
-      titolForm: !!divTitol,
-      btnProjecte: !!btnSubmit,
-    });
-    return;
-  }
+  if (!divTitol || !btnSubmit || !form) return;
+
+  // ✅ guard
+  if (form.dataset.inited === '1') return;
+  form.dataset.inited = '1';
 
   // ahora ya sí:
   await waitForElement('project_id');
@@ -147,7 +144,10 @@ export async function formTask(isUpdate: boolean, id?: number) {
     syncBlockedUI(Number(statusSel?.value ?? 1));
 
     form.addEventListener('submit', function (event) {
+      if (btnSubmit.disabled) return;
+      btnSubmit.disabled = true;
       transmissioDadesDB(event, 'POST', 'taskForm', API_URLS.POST.TASCA, true);
+      setTimeout(() => (btnSubmit.disabled = false), 2000); // o re-habilitar en callback si tu helper lo soporta
     });
   }
 }
