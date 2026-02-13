@@ -5,7 +5,7 @@
     <div class="d-flex flex-column">
         <h2 class="mb-1">Gestor de projectes</h2>
         <h4 class="mb-0">
-            <span id="titolForm"></span>
+            <div id="titolForm"></div>
         </h4>
     </div>
 

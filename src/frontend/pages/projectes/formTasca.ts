@@ -41,6 +41,12 @@ export async function formTask(isUpdate: boolean, id?: number) {
   const divTitol = document.getElementById('titolForm') as HTMLSpanElement | HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnProjecte') as HTMLButtonElement | null;
 
+  console.log('formTask check', {
+    taskForm: !!document.getElementById('taskForm'),
+    titolForm: !!document.getElementById('titolForm'),
+    btnProjecte: !!document.getElementById('btnProjecte'),
+  });
+
   if (!divTitol || !btnSubmit || !form) return;
 
   let data: Partial<FitxaTask> = {

@@ -24,20 +24,20 @@ export function projectes() {
 
   switch (action) {
     case 'modifica-projecte':
-      formProjecte(true, id);
+      void formProjecte(true, id);
       break;
 
     case 'nou-projecte':
-      formProjecte(false);
+      void formProjecte(false);
       break;
 
     case 'nova-tasca':
       console.log('hola');
-      formTask(false);
+      void formTask(false);
       break;
 
     case 'modifica-tasca':
-      formTask(true, id);
+      void formTask(true, id);
       break;
 
     default:
