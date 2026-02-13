@@ -202,7 +202,6 @@ if ($slug === "esdevenimentId") {
             ORDER BY e.data_inici ASC
         SQL;
 
-    // Cumpleaños virtuales desde contactos (data_naixement = DATE)
     $sqlBirthdays = <<<SQL
         SELECT
         (-c.id) AS id_esdeveniment,
@@ -211,18 +210,18 @@ if ($slug === "esdevenimentId") {
         'aniversari' AS tipus,
         NULL AS lloc,
 
-        CONCAT(occ.ymd, ' 00:00:00') AS data_inici,
-        CONCAT(occ.ymd, ' 23:59:59') AS data_fi,
+        -- Ocurrencia del cumpleaños en el año del :fromDate
+        CASE
+            WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
+            THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
+            ELSE DATE(CONCAT(
+            YEAR(:fromDate), '-',
+            LPAD(MONTH(c.data_naixement), 2, '0'), '-',
+            LPAD(DAY(c.data_naixement), 2, '0')
+            ))
+        END AS ymd,
 
-        1 AS tot_el_dia,
-        'confirmat' AS estat,
-        NOW() AS creat_el,
-        NOW() AS actualitzat_el,
-        'contacte' AS origen,
-        c.id AS contacte_id
-        FROM db_contactes c
-        CROSS JOIN (
-        SELECT
+        CONCAT(
             CASE
             WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
                 THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
@@ -231,12 +230,34 @@ if ($slug === "esdevenimentId") {
                 LPAD(MONTH(c.data_naixement), 2, '0'), '-',
                 LPAD(DAY(c.data_naixement), 2, '0')
             ))
-            END AS ymd
-        ) AS occ
-        WHERE
-        c.data_naixement IS NOT NULL
-        AND occ.ymd BETWEEN DATE(:fromDate) AND DATE(:toDate)
+            END,
+            ' 00:00:00'
+        ) AS data_inici,
+
+        CONCAT(
+            CASE
+            WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
+                THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
+            ELSE DATE(CONCAT(
+                YEAR(:fromDate), '-',
+                LPAD(MONTH(c.data_naixement), 2, '0'), '-',
+                LPAD(DAY(c.data_naixement), 2, '0')
+            ))
+            END,
+            ' 23:59:59'
+        ) AS data_fi,
+
+        1 AS tot_el_dia,
+        'confirmat' AS estat,
+        NOW() AS creat_el,
+        NOW() AS actualitzat_el,
+        'contacte' AS origen,
+        c.id AS contacte_id
+        FROM db_contactes c
+        WHERE c.data_naixement IS NOT NULL
+        HAVING ymd BETWEEN DATE(:fromDate) AND DATE(:toDate)
         SQL;
+
 
     $query = sprintf(
         $sql,
