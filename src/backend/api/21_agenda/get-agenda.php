@@ -202,26 +202,38 @@ if ($slug === "esdevenimentId") {
             ORDER BY e.data_inici ASC
         SQL;
 
+    // En esdevenimentsRang:
+
+    $from = $_GET['from'] ?? null; // YYYY-MM-DD
+    $to   = $_GET['to']   ?? null; // YYYY-MM-DD
+
+    if (!$from || !$to) {
+        Response::error(MissatgesAPI::error('validacio'), ['Paràmetres requerits: from, to'], 400);
+        return;
+    }
+
     $sqlBirthdays = <<<SQL
         SELECT
-        (-c.id) AS id_esdeveniment,
-        CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
-        NULL AS descripcio,
-        'aniversari' AS tipus,
-        NULL AS lloc,
-
-        -- Ocurrencia del cumpleaños en el año del :fromDate
-        CASE
-            WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
-            THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
-            ELSE DATE(CONCAT(
-            YEAR(:fromDate), '-',
-            LPAD(MONTH(c.data_naixement), 2, '0'), '-',
-            LPAD(DAY(c.data_naixement), 2, '0')
-            ))
-        END AS ymd,
-
-        CONCAT(
+        t.id_esdeveniment,
+        t.titol,
+        t.descripcio,
+        t.tipus,
+        t.lloc,
+        CONCAT(t.ymd, ' 00:00:00') AS data_inici,
+        CONCAT(t.ymd, ' 23:59:59') AS data_fi,
+        t.tot_el_dia,
+        t.estat,
+        t.creat_el,
+        t.actualitzat_el,
+        t.origen,
+        t.contacte_id
+        FROM (
+        SELECT
+            (-c.id) AS id_esdeveniment,
+            CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
+            NULL AS descripcio,
+            'aniversari' AS tipus,
+            NULL AS lloc,
             CASE
             WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
                 THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
@@ -230,32 +242,17 @@ if ($slug === "esdevenimentId") {
                 LPAD(MONTH(c.data_naixement), 2, '0'), '-',
                 LPAD(DAY(c.data_naixement), 2, '0')
             ))
-            END,
-            ' 00:00:00'
-        ) AS data_inici,
-
-        CONCAT(
-            CASE
-            WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
-                THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
-            ELSE DATE(CONCAT(
-                YEAR(:fromDate), '-',
-                LPAD(MONTH(c.data_naixement), 2, '0'), '-',
-                LPAD(DAY(c.data_naixement), 2, '0')
-            ))
-            END,
-            ' 23:59:59'
-        ) AS data_fi,
-
-        1 AS tot_el_dia,
-        'confirmat' AS estat,
-        NOW() AS creat_el,
-        NOW() AS actualitzat_el,
-        'contacte' AS origen,
-        c.id AS contacte_id
+            END AS ymd,
+            1 AS tot_el_dia,
+            'confirmat' AS estat,
+            NOW() AS creat_el,
+            NOW() AS actualitzat_el,
+            'contacte' AS origen,
+            c.id AS contacte_id
         FROM db_contactes c
         WHERE c.data_naixement IS NOT NULL
-        HAVING ymd BETWEEN DATE(:fromDate) AND DATE(:toDate)
+        ) t
+        WHERE t.ymd BETWEEN DATE(:fromDate) AND DATE(:toDate)
         SQL;
 
 
@@ -273,14 +270,10 @@ if ($slug === "esdevenimentId") {
         // 1) eventos reales (tu query actual)
         $events = $db->getData($query, $params) ?: [];
 
-        // 2) Aniversari
-        $birthdays = $db->getData(
-            $sqlBirthdays,
-            [
-                ':fromDate' => $fromDateTime, // 'YYYY-MM-DD 00:00:00'
-                ':toDate'   => $toDateTime,   // 'YYYY-MM-DD 23:59:59'
-            ]
-        ) ?: [];
+        $birthdays = $db->getData($sqlBirthdays, [
+            ':fromDate' => $from, // OJO: YYYY-MM-DD (sin hora)
+            ':toDate'   => $to,   // OJO: YYYY-MM-DD (sin hora)
+        ]) ?: [];
 
         if (empty($rows)) {
             // Para un calendario vacío puede ser útil devolver 200 con []
@@ -293,6 +286,8 @@ if ($slug === "esdevenimentId") {
         }
 
         // 3) merge + ordenar por data_inici
+        $events = $db->getData($query, $params) ?: [];
+
         $all = array_merge($events, $birthdays);
         usort($all, fn($a, $b) => strcmp((string)$a['data_inici'], (string)$b['data_inici']));
 
