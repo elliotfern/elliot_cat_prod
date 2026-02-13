@@ -1276,6 +1276,48 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             500
         );
     }
+
+    // Llistat Projectes
+    // ruta GET => "/api/cinema/get/auxiliars/projectes"
+} else if ($slug === "projectes") {
+
+    $sql = <<<SQL
+            SELECT c.id, c.name
+            FROM %s AS c
+            ORDER BY c.id DESC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::PROJECTES, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

@@ -64,10 +64,10 @@
         <div class="col-12 col-lg-3">
             <label for="priority" class="form-label">Prioritat</label>
             <select id="priority" name="priority" class="form-select" required>
-                <option value="1">1 (Baixa)</option>
-                <option value="2">2</option>
-                <option value="3" selected>3</option>
-                <option value="4">4 (Alta)</option>
+                <option value="1">1 - Baixa</option>
+                <option value="2">2 - Mitja</option>
+                <option value="3">3 - Alta</option>
+                <option value="4">4 - Urgent</option>
             </select>
         </div>
 
