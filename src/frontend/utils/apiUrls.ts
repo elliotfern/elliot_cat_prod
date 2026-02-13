@@ -54,6 +54,8 @@ export const ENDPOINTS = {
   TASK_ID: 'tascaId',
   TASCA_CREATE: 'createTask',
   TASCA_UPDATE: 'updateTask',
+  DETALLS_TASQUES: 'detalls',
+  TASQUES: 'tasques',
 } as const;
 
 // Mapa de recursos disponibles
@@ -109,6 +111,8 @@ export const API_URLS: ApiUrls = {
     PERSONES_GRUPS_ID: (id: string) => `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.GET}/?grupPersona=${encodeURIComponent(id)}`,
     PROJECTE_ID: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.PROJECTE_ID}?id=${encodeURIComponent(id)}`,
     TASK_ID: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.TASK_ID}?id=${encodeURIComponent(id)}`,
+    PROJECTE_DETALLS: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.DETALLS_TASQUES}?id=${encodeURIComponent(id)}`,
+    PROJECTE_TASQUES: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.TASQUES}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {

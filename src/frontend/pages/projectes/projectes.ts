@@ -1,4 +1,5 @@
 import { getPageType } from '../../utils/urlPath';
+import { initProjecteDetalls } from './fitxaProjecte';
 import { formProjecte } from './formProjecte';
 import { formTask } from './formTasca';
 import { initProjectesHome } from './homeProjectes';
@@ -14,7 +15,7 @@ export function projectes() {
   const action = String(actionRaw).split('?')[0].replace(/\/+$/, '');
 
   const idRaw = pageType[iProjectes + 2];
-  const id = idRaw ? Number.parseInt(String(idRaw), 10) : undefined;
+  const id = Number.parseInt(String(idRaw), 10);
 
   // /.../projectes
   if (!action) {
@@ -38,6 +39,10 @@ export function projectes() {
 
     case 'modifica-tasca':
       void formTask(true, id);
+      break;
+
+    case 'fitxa-projecte':
+      void initProjecteDetalls(id);
       break;
 
     default:

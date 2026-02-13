@@ -30,6 +30,8 @@ export type ApiUrls = {
     PERSONES_GRUPS_ID: (id: string) => string;
     PROJECTE_ID: (id: number) => string;
     TASK_ID: (id: number) => string;
+    PROJECTE_DETALLS: (id: number) => string;
+    PROJECTE_TASQUES: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2021",
+    "lib": ["DOM", "DOM.Iterable", "ES2021"],
     "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
@@ -9,7 +10,7 @@
     "allowJs": true,
     "outDir": "./dist",
     "rootDir": "./src/",
-    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+
     "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "src/frontend/types"]
       },
