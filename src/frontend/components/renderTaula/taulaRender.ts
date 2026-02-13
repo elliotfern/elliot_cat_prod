@@ -85,8 +85,14 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   const thead = document.createElement('thead');
   thead.classList.add('table-primary');
   const tbody = document.createElement('tbody');
-  const pagination = document.createElement('div');
-  pagination.id = 'pagination';
+
+  // Paginacio
+  const paginationNav = document.createElement('nav');
+  paginationNav.setAttribute('aria-label', 'Paginació');
+
+  const pagination = document.createElement('ul');
+  pagination.className = 'pagination justify-content-center mt-3';
+  paginationNav.appendChild(pagination);
 
   // Crear el numero total de registres
   const totalRecords = document.createElement('div');
@@ -242,17 +248,24 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
     pagination.innerHTML = '';
+
     for (let i = 1; i <= totalPages; i++) {
-      const link = document.createElement('a');
-      link.textContent = i.toString();
-      link.href = '#';
-      link.className = 'pagination-link' + (i === currentPage ? ' current-page' : '');
-      link.onclick = (e) => {
+      const li = document.createElement('li');
+      li.className = 'page-item' + (i === currentPage ? ' active' : '');
+
+      const a = document.createElement('a');
+      a.className = 'page-link';
+      a.href = '#';
+      a.textContent = String(i);
+      a.addEventListener('click', (e) => {
         e.preventDefault();
+        if (i === currentPage) return;
         currentPage = i;
         renderTable();
-      };
-      pagination.appendChild(link);
+      });
+
+      li.appendChild(a);
+      pagination.appendChild(li);
     }
 
     totalRecords.textContent = `Número total de registres: ${filteredData.length}`;

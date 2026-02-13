@@ -9,6 +9,11 @@
                 class="button btn-gran btn-secondari">
                 Afegir projecte
             </button>
+
+            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/nova-tasca/'"
+                class="button btn-gran btn-secondari">
+                Afegir tasca
+            </button>
         </p>
     <?php endif; ?>
 
