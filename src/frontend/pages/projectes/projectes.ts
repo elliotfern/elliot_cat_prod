@@ -32,6 +32,7 @@ export function projectes() {
       break;
 
     case 'nova-tasca':
+      console.log('hola');
       formTask(false);
       break;
 
