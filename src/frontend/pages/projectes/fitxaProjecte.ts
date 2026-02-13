@@ -1,5 +1,6 @@
 import { fetchDataGet } from '../../services/api/fetchData';
 import { API_URLS } from '../../utils/apiUrls';
+import { formatData } from '../../utils/formataData';
 
 // --- Types ---
 type ProjecteDetalls = {
@@ -9,8 +10,8 @@ type ProjecteDetalls = {
   status: number;
   category_id: number | null;
   category_name?: string | null;
-  start_date: string | null;
-  end_date: string | null;
+  start_date: string;
+  end_date: string;
   priority: number;
   client_id: number | null;
   client_name?: string | null;
@@ -28,7 +29,7 @@ type TascaItem = {
   notes: string | null;
   status: number;
   priority: number;
-  planned_date: string | null;
+  planned_date: string;
   is_next: number;
   blocked_reason: string | null;
   estimated_hours: string | number | null;
@@ -65,12 +66,6 @@ function setText(id: string, value: string) {
   el.textContent = value;
 }
 
-function formatDate(s: string | null): string {
-  if (!s) return '—';
-  // ya viene YYYY-MM-DD
-  return s;
-}
-
 function labelStatus(status: number): string {
   switch (status) {
     case 1:
@@ -89,13 +84,13 @@ function labelStatus(status: number): string {
 function labelPriority(p: number): string {
   switch (p) {
     case 1:
-      return '1 (Baixa)';
+      return '1 - Baixa';
     case 2:
-      return '2';
+      return '2 - Mitja';
     case 3:
-      return '3';
+      return '3 - Alta';
     case 4:
-      return '4 (Alta)';
+      return '4 - Urgent';
     default:
       return String(p);
   }
@@ -157,11 +152,11 @@ export async function initProjecteDetalls(id: number): Promise<void> {
     <div class="row g-3">
       <div class="col-12 col-md-6">
         <div class="small text-muted">Data inici</div>
-        <div>${escapeHtml(formatDate(p.start_date))}</div>
+        <div>${escapeHtml(formatData(p.start_date))}</div>
       </div>
       <div class="col-12 col-md-6">
         <div class="small text-muted">Data fi</div>
-        <div>${escapeHtml(formatDate(p.end_date))}</div>
+        <div>${escapeHtml(formatData(p.end_date))}</div>
       </div>
 
       <div class="col-12">
@@ -225,7 +220,7 @@ export async function initProjecteDetalls(id: number): Promise<void> {
                   <td>${escapeHtml(t.title ?? '')}</td>
                   <td>${escapeHtml(labelStatus(Number(t.status)))}</td>
                   <td>${escapeHtml(labelPriority(Number(t.priority)))}</td>
-                  <td>${escapeHtml(formatDate(t.planned_date))}</td>
+                  <td>${escapeHtml(formatData(t.planned_date))}</td>
                   <td>${Number(t.is_next) === 1 ? '✅' : ''}</td>
                   <td class="text-end">
                     <a class="btn btn-sm btn-outline-secondary"

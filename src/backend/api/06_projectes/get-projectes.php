@@ -283,10 +283,10 @@ if ($slug === 'home') {
           t.estimated_hours,
           t.created_at,
           t.updated_at,
-          t.done_at
-          -- , p.name AS project_name
+          t.done_at, 
+          p.name AS project_name
         FROM %s AS t
-        -- LEFT JOIN %s AS p ON p.id = t.project_id
+        LEFT JOIN %s AS p ON p.id = t.project_id
         WHERE t.id = :id
           AND t.user_id = :user_id
         LIMIT 1
@@ -294,7 +294,8 @@ if ($slug === 'home') {
 
     $q = sprintf(
         $sql,
-        qi(Tables::PROJECTES_TASQUES, $pdo)
+        qi(Tables::PROJECTES_TASQUES, $pdo),
+        qi(Tables::PROJECTES, $pdo)
     );
 
     try {

@@ -15,9 +15,9 @@ $id = $routeParams[0];
                 Afegir tasca
             </button>
 
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/modifica-tasca/<?php echo $id; ?>'"
+            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/modifica-projecte/<?php echo $id; ?>'"
                 class="button btn-gran btn-secondari">
-                Edita tasca
+                Edita projecte
             </button>
         </p>
     <?php endif; ?>
