@@ -81,6 +81,42 @@ try {
     }
 
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // 3.1) Cumpleaños de hoy (contactes)
+    $sqlB = <<<SQL
+        SELECT
+            (-c.id) AS id_esdeveniment,
+            CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
+            NULL AS descripcio,
+            'aniversari' AS tipus,
+            NULL AS lloc,
+            CONCAT(:today, ' 00:00:00') AS data_inici,
+            CONCAT(:today, ' 23:59:59') AS data_fi,
+            1 AS tot_el_dia,
+            'confirmat' AS estat
+        FROM db_contactes c
+        WHERE
+            c.data_naixement IS NOT NULL
+            AND (
+                -- mismo mes/día
+                (MONTH(c.data_naixement) = MONTH(:today) AND DAY(c.data_naixement) = DAY(:today))
+                -- excepción 29/02 -> en años NO bisiestos cae el 28/02
+                OR (
+                    MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
+                    AND MONTH(:today) = 2 AND DAY(:today) = DAY(LAST_DAY(CONCAT(YEAR(:today), '-02-01')))
+                )
+            )
+        ORDER BY c.nom ASC, c.cognoms ASC
+        SQL;
+
+    try {
+        $stmtB = $pdo->prepare($sqlB);
+        $stmtB->execute([':today' => $today]);
+        $birthdays = $stmtB->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log('[agenda_resum_dia] Birthdays SQL error: ' . $e->getMessage());
+        $birthdays = [];
+    }
 } catch (PDOException $e) {
 
     exit(1);
@@ -91,12 +127,34 @@ if (!is_array($rows)) {
 }
 
 
-if (empty($rows)) {
-    error_log('No events today -> no email sent');
+$rows = is_array($rows) ? $rows : [];
+$birthdays = is_array($birthdays ?? null) ? $birthdays : [];
+
+$all = array_merge($rows, $birthdays);
+
+// Si no hay nada (ni eventos ni cumples), no mandes email
+if (empty($all)) {
+    error_log('No events/birthdays today -> no email sent');
     exit(0);
 }
 
-// 4) Destinatario
+// Orden: todo el día primero, luego por hora inicio, y título
+usort($all, function ($a, $b) {
+    $ta = (int)($a['tot_el_dia'] ?? 0);
+    $tb = (int)($b['tot_el_dia'] ?? 0);
+    if ($ta !== $tb) return $tb <=> $ta; // 1 primero
+
+    $da = (string)($a['data_inici'] ?? '');
+    $db = (string)($b['data_inici'] ?? '');
+    if ($da !== $db) return strcmp($da, $db);
+
+    return strcmp((string)($a['titol'] ?? ''), (string)($b['titol'] ?? ''));
+});
+
+// Y a partir de aquí usas $all en vez de $rows
+$rows = $all;
+
+// 4) Destinatario 
 $YOUR_EMAIL = 'elliot@hispantic.com';
 $YOUR_NAME  = 'Elliot Fernandez';
 
@@ -195,6 +253,7 @@ function buildAgendaEmailText(
         $titol = (string)($ev['titol'] ?? '');
         $lloc  = (string)($ev['lloc'] ?? '');
         $tipus = (string)($ev['tipus'] ?? '');
+        if ($tipus === 'aniversari') $tipus = '🎂 aniversari';
 
         $line = "- [{$horaText}] {$titol}";
         if (trim($lloc) !== '') {

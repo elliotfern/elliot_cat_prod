@@ -44,6 +44,9 @@
 
 <style>
     .cal-day-event a {
+        white-space: inherit;
+        overflow: visible;
+        text-overflow: clip;
         color: inherit;
         text-decoration: none;
         display: block;
@@ -122,7 +125,7 @@
 
     /* Celda de día */
     .cal-day {
-        min-height: 80px;
+        min-height: 96px;
         background: #ffffff;
         border-radius: 10px;
         border: 1px solid rgba(229, 231, 235, 0.9);
@@ -131,7 +134,7 @@
         flex-direction: column;
         gap: 0.25rem;
         font-size: 0.78rem;
-        overflow: hidden;
+        overflow: visible;
     }
 
     .cal-day--empty {
@@ -175,12 +178,29 @@
 
     /* Evento */
     .cal-day-event {
-        border-radius: 999px;
-        padding: 0.05rem 0.35rem;
+        border-radius: 10px;
+        padding: 0.15rem 0.45rem;
         font-size: 0.65rem;
-        white-space: nowrap;
+    }
+
+    .cal-day-event a {
+        color: inherit;
+        text-decoration: none;
+        display: -webkit-box;
+        /* necesario para clamp */
+        -webkit-box-orient: vertical;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        /* 2 líneas */
         overflow: hidden;
-        text-overflow: ellipsis;
+        /* importante */
+        white-space: normal;
+        /* importante */
+        line-height: 1.15;
+    }
+
+    .cal-day-event a:hover {
+        text-decoration: underline;
     }
 
     /* Colores por tipus */
@@ -215,12 +235,12 @@
         color: #b45309;
         /* ámbar oscuro */
         border-left: 0;
-        /* no hace falta con pill */
-        opacity: 1;
+        opacity: 0.95;
     }
 
     .cal-day-event--aniversari a {
         font-weight: 700;
+        text-decoration: none;
     }
 
     /* Indicador cuando hay más eventos */
@@ -243,15 +263,5 @@
         .cal-month-title {
             font-size: 1.2rem;
         }
-    }
-
-    .cal-day-event--aniversari {
-        border-left: 3px solid currentColor;
-        opacity: 0.95;
-    }
-
-    .cal-day-event--aniversari a {
-        font-weight: 600;
-        text-decoration: none;
     }
 </style>
