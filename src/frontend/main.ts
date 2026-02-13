@@ -27,10 +27,28 @@ import { curriculum } from './pages/curriculum/curriculum';
 import { agenda } from './pages/agenda/agenda';
 import { projectes } from './pages/projectes/projectes';
 
-const url = window.location.href;
-const pageType = getPageType(url);
+function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
+  if (document.getElementById(id)) {
+    cb();
+    return;
+  }
+
+  const obs = new MutationObserver(() => {
+    if (document.getElementById(id)) {
+      obs.disconnect();
+      cb();
+    }
+  });
+
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+
+  window.setTimeout(() => obs.disconnect(), timeoutMs);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
+  const url = window.location.href;
+  const pageType = getPageType(url);
+
   barraNavegacio();
   mostrarBotonsNomesAdmin();
 
@@ -62,7 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
     curriculum();
   } else if (pageType[1] === 'agenda') {
     agenda();
-  } else if (pageType[1] === 'projectes') {
+  } else if (pageType.includes('projectes')) {
+    // si es una pantalla que inyecta forms tarde, espera al contenedor
+    whenElementExists('taskForm', () => projectes(), 6000);
+    // y por si es la home o nou-projecte (sin taskForm), también:
+    whenElementExists('formProjecte', () => projectes(), 6000);
+    // fallback: llama una vez igualmente
     projectes();
     // Part accessible tant a usuaris com a visitants
   } else if (pageType[1] === 'lector-rss' || pageType[0] === 'lector-rss') {
