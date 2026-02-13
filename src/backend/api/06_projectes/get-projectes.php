@@ -241,6 +241,99 @@ if ($slug === 'home') {
     }
 
     return;
+
+    /**
+     * GET : Tasca per ID
+     * URL: https://elliot.cat/api/tasks/get/tascaId?id=123
+     */
+} else if ($slug === 'tascaId') {
+
+    $userUuid = getAuthenticatedUserUuid(); // string UUID o null
+    if (!$userUuid) {
+        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
+        return;
+    }
+
+    $userBin = uuidToBin($userUuid);
+    if ($userBin === null) {
+        Response::error(MissatgesAPI::error('validacio'), ['UUID invàlid'], 400);
+        return;
+    }
+
+    // Validar id
+    $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    if (!$id || $id <= 0) {
+        Response::error(MissatgesAPI::error('validacio'), ['id invàlid'], 400);
+        return;
+    }
+
+    // Query: tasca (i opcionalment el nom del projecte)
+    $sql = <<<SQL
+        SELECT
+          t.id,
+          t.project_id,
+          t.title,
+          t.subject,
+          t.notes,
+          t.status,
+          t.priority,
+          t.planned_date,
+          t.is_next,
+          t.blocked_reason,
+          t.estimated_hours,
+          t.created_at,
+          t.updated_at,
+          t.done_at
+          -- , p.name AS project_name
+        FROM %s AS t
+        -- LEFT JOIN %s AS p ON p.id = t.project_id
+        WHERE t.id = :id
+          AND t.user_id = :user_id
+        LIMIT 1
+    SQL;
+
+    $q = sprintf(
+        $sql,
+        qi(Tables::PROJECTES_TASQUES, $pdo)
+    );
+
+    try {
+        $row = $db->getData($q, [
+            ':id' => $id,
+            ':user_id' => $userBin,
+        ]);
+
+        // getData suele devolver array de filas; pillamos la primera
+        $item = is_array($row) && isset($row[0]) ? $row[0] : null;
+
+        if (!$item) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                ['Tasca no trobada'],
+                404
+            );
+            return;
+        }
+
+        // Normalizaciones opcionales (si tu driver devuelve is_next como string, etc.)
+        // $item['is_next'] = (int)($item['is_next'] ?? 0);
+        // $item['status'] = (int)($item['status'] ?? 1);
+        // $item['priority'] = (int)($item['priority'] ?? 3);
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $item,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
 } else {
     Response::error(
         MissatgesAPI::error('forbidden'),

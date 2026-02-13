@@ -51,6 +51,9 @@ export const ENDPOINTS = {
   PROJECTE_ID: 'id',
   PROJECTE_CREATE: 'createProjecte',
   PROJECTE_UPDATE: 'updateProjecte',
+  TASK_ID: 'tascaId',
+  TASCA_CREATE: 'createTask',
+  TASCA_UPDATE: 'updateTask',
 } as const;
 
 // Mapa de recursos disponibles
@@ -105,6 +108,7 @@ export const API_URLS: ApiUrls = {
     AGENDA_ID: (id: number) => `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.GET}/${ENDPOINTS.AGENDA_ID}?id=${encodeURIComponent(id)}`,
     PERSONES_GRUPS_ID: (id: string) => `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.GET}/?grupPersona=${encodeURIComponent(id)}`,
     PROJECTE_ID: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.PROJECTE_ID}?id=${encodeURIComponent(id)}`,
+    TASK_ID: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.TASK_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -129,6 +133,7 @@ export const API_URLS: ApiUrls = {
     AGENDA_ESDEVENIMENT: `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.POST}`,
     PERSONES_GRUPS: `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.POST}/?${ENDPOINTS.GRUP_PERSONA}`,
     PROJECTE: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.POST}/${ENDPOINTS.PROJECTE_CREATE}`,
+    TASCA: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.POST}/${ENDPOINTS.TASCA_CREATE}`,
   },
 
   PUT: {
@@ -152,6 +157,7 @@ export const API_URLS: ApiUrls = {
     AGENDA_ESDEVENIMENT: `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.PUT}`,
     PERSONES_GRUPS: `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.PUT}/?${ENDPOINTS.GRUP_PERSONA}`,
     PROJECTE: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.PUT}/${ENDPOINTS.PROJECTE_UPDATE}`,
+    TASCA: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.POST}/${ENDPOINTS.TASCA_UPDATE}`,
   },
 
   DELETE: {},

@@ -1,5 +1,6 @@
 import { getPageType } from '../../utils/urlPath';
 import { formProjecte } from './formProjecte';
+import { formTask } from './formTasca';
 import { initProjectesHome } from './homeProjectes';
 
 const url = window.location.href;
@@ -23,6 +24,14 @@ export function projectes() {
 
     case 'nou-projecte':
       formProjecte(false);
+      break;
+
+    case 'nova-tasca':
+      formTask(false);
+      break;
+
+    case 'modifica-tasca':
+      formTask(false);
       break;
 
     default:
