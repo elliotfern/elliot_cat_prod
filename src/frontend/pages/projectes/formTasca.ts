@@ -37,18 +37,6 @@ interface ApiResponse<T> {
 }
 
 export async function formTask(isUpdate: boolean, id?: number) {
-  const form = document.getElementById('taskForm') as HTMLFormElement | null;
-  const divTitol = document.getElementById('titolForm') as HTMLSpanElement | HTMLDivElement | null;
-  const btnSubmit = document.getElementById('btnProjecte') as HTMLButtonElement | null;
-
-  console.log('formTask check', {
-    taskForm: !!document.getElementById('taskForm'),
-    titolForm: !!document.getElementById('titolForm'),
-    btnProjecte: !!document.getElementById('btnProjecte'),
-  });
-
-  if (!divTitol || !btnSubmit || !form) return;
-
   let data: Partial<FitxaTask> = {
     status: 1,
     priority: 3,
@@ -61,8 +49,7 @@ export async function formTask(isUpdate: boolean, id?: number) {
     blocked_reason: null,
   };
 
-  // Esperar a que existan los selects en DOM (importante si el HTML se inyecta)
-  async function waitForElement(idEl: string, timeoutMs = 2000): Promise<HTMLElement | null> {
+  async function waitForElement(idEl: string, timeoutMs = 4000): Promise<HTMLElement | null> {
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
       const el = document.getElementById(idEl);
@@ -72,6 +59,23 @@ export async function formTask(isUpdate: boolean, id?: number) {
     return null;
   }
 
+  // ⬅️ CLAVE: esperar el form (porque se inyecta más tarde)
+  await waitForElement('taskForm');
+
+  const form = document.getElementById('taskForm') as HTMLFormElement | null;
+  const divTitol = document.getElementById('titolForm') as HTMLSpanElement | HTMLDivElement | null;
+  const btnSubmit = document.getElementById('btnProjecte') as HTMLButtonElement | null;
+
+  if (!divTitol || !btnSubmit || !form) {
+    console.error('formTask: faltan elementos base', {
+      taskForm: !!form,
+      titolForm: !!divTitol,
+      btnProjecte: !!btnSubmit,
+    });
+    return;
+  }
+
+  // ahora ya sí:
   await waitForElement('project_id');
   await waitForElement('status');
   await waitForElement('priority');
