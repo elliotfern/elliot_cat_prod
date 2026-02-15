@@ -204,32 +204,69 @@ if ($slug === 'llistatArticles') {
         );
     }
 
-    // URL: /api/blog/get/?articleSlug=revolut    
-} else if (isset($_GET['articleSlug'])) {
-    $slug = $_GET['articleSlug'];
-    global $conn;
+    // Article per slug
+    // URL: /api/blog/get/articleSlug?articleSlug=revolut  
+} else if ($slug === 'articleSlug') {
 
-    $query = "SELECT b.id, b.post_type, b.post_title, b.post_excerpt, b.lang, b.post_content, b.post_status, b.slug, b.categoria, b.post_date, b.post_modified, t.tema_ca
-        FROM db_blog AS b
-        LEFT JOIN aux_temes AS t ON b.categoria = t.id
-        WHERE b.slug = :slug";
+    header('Content-Type: application/json; charset=utf-8');
 
-    $stmt = $conn->prepare($query);
-    $stmt->bindParam(':slug', $slug, PDO::PARAM_STR);
+    $articleSlug = (string)($_GET['articleSlug'] ?? '');
+    $articleSlug = trim($articleSlug);
 
-    $stmt->execute();
-
-    // Verificar si hay resultados antes de hacer fetch
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(["error" => "No rows found"]);
-        exit;
+    // Validació bàsica de slug (ajusta si uses altres caràcters)
+    if ($articleSlug === '' || !preg_match('~^[a-z0-9][a-z0-9\-]*[a-z0-9]$|^[a-z0-9]$~', $articleSlug)) {
+        Response::error('Paràmetre articleSlug invàlid', [], 400);
+        return;
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+    $sql = "
+        SELECT
+            b.id,
+            b.post_type,
+            b.post_title,
+            b.post_excerpt,
+            b.lang,
+            b.post_content,
+            b.post_status,
+            b.slug,
+            b.categoria,
+            HEX(b.categoria) AS categoria_hex,
+            b.post_date,
+            b.post_modified,
+            t.tema_ca
+        FROM " . qi(Tables::BLOG, $pdo) . " AS b
+        LEFT JOIN " . qi(Tables::DB_TEMES, $pdo) . " AS t ON b.categoria = t.id
+        WHERE b.slug = :slug
+        LIMIT 1
+    ";
 
-    // Enviar respuesta en formato JSON
-    echo json_encode($data);
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':slug', $articleSlug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        // (Opcional) si quieres ocultar borradores:
+        // if (($row['post_status'] ?? '') !== 'publish') { ... 404 o 403 ... }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $row,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // No se proporcionó un token
     header('HTTP/1.1 403 Forbidden');

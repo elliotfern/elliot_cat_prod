@@ -1,8 +1,10 @@
 import { getPageType } from '../../utils/urlPath';
+import { renderBlogArticleView } from './article';
 import { renderBlogListPaged } from './llistatArticles';
 
 export function blog() {
   const pageType = getPageType(window.location.href);
+  const slug = pageType[2];
 
   // Encuentra dónde está "blog" en la ruta
   const iBlog = pageType.indexOf('blog');
@@ -21,7 +23,8 @@ export function blog() {
   }
 
   switch (action) {
-    case 'modifica-projecte':
+    case 'article':
+      void renderBlogArticleView(slug);
       break;
 
     case 'nou-projecte':

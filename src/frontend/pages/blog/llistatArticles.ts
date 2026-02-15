@@ -57,7 +57,7 @@ function getYear(dateStr: string): number | null {
 
 function buildArticleUrl(slug: string): string {
   // Ajusta aquesta ruta si el teu blog públic és diferent (ex: /ca/blog/slug)
-  return `/blog/${encodeURIComponent(slug)}`;
+  return `/blog/article/${encodeURIComponent(slug)}`;
 }
 
 function parseApiPayload(json: any): ApiPayload {
