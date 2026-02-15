@@ -1,10 +1,19 @@
+import { getIsAdmin } from '../../services/auth/isAdmin';
 import { getPageType } from '../../utils/urlPath';
 import { renderBlogArticleView } from './article';
 import { renderBlogListPaged } from './llistatArticles';
 
-export function blog() {
+export async function blog() {
   const pageType = getPageType(window.location.href);
-  const slug = pageType[2];
+
+  // ✅ Óptimo: calculamos 1 sola vez
+  const isAdmin = await getIsAdmin();
+  let slug = '';
+  if (isAdmin) {
+    slug = pageType[3];
+  } else {
+    slug = pageType[2];
+  }
 
   // Encuentra dónde está "blog" en la ruta
   const iBlog = pageType.indexOf('blog');
