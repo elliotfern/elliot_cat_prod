@@ -24,6 +24,11 @@ final class ValidacioErrors
         return "El camp <strong>$camp</strong> no és vàlid.";
     }
 
+    public static function duplicat(string $camp): string
+    {
+        return "El camp <strong>$camp</strong> ja existeix.";
+    }
+
 
     /**
      * Alias més específic per indicar “format” incorrecte.

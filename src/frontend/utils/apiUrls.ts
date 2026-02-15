@@ -56,6 +56,7 @@ export const ENDPOINTS = {
   TASCA_UPDATE: 'updateTask',
   DETALLS_TASQUES: 'detalls',
   TASQUES: 'tasques',
+  BLOG_ARTICLE_ID: 'articleId',
 } as const;
 
 // Mapa de recursos disponibles
@@ -68,6 +69,7 @@ const RESOURCES = {
   AGENDA: 'agenda',
   PERSONA: 'persones',
   PROJECTES: 'projectes',
+  BLOG: 'blog',
 } as const;
 
 const TIPUS = {
@@ -113,6 +115,7 @@ export const API_URLS: ApiUrls = {
     TASK_ID: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.TASK_ID}?id=${encodeURIComponent(id)}`,
     PROJECTE_DETALLS: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.DETALLS_TASQUES}?id=${encodeURIComponent(id)}`,
     PROJECTE_TASQUES: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.TASQUES}?id=${encodeURIComponent(id)}`,
+    BLOG_ARTICLE_ID: (id: number) => `${API_BASE}/${RESOURCES.BLOG}/${TIPUS.GET}/${ENDPOINTS.BLOG_ARTICLE_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {
@@ -138,6 +141,7 @@ export const API_URLS: ApiUrls = {
     PERSONES_GRUPS: `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.POST}/?${ENDPOINTS.GRUP_PERSONA}`,
     PROJECTE: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.POST}/${ENDPOINTS.PROJECTE_CREATE}`,
     TASCA: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.POST}/${ENDPOINTS.TASCA_CREATE}`,
+    BLOG_ARTICLE: `${API_BASE}/${RESOURCES.BLOG}/${TIPUS.POST}`,
   },
 
   PUT: {
@@ -162,6 +166,7 @@ export const API_URLS: ApiUrls = {
     PERSONES_GRUPS: `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.PUT}/?${ENDPOINTS.GRUP_PERSONA}`,
     PROJECTE: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.PUT}/${ENDPOINTS.PROJECTE_UPDATE}`,
     TASCA: `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.PUT}/${ENDPOINTS.TASCA_UPDATE}`,
+    BLOG_ARTICLE: `${API_BASE}/${RESOURCES.BLOG}/${TIPUS.PUT}`,
   },
 
   DELETE: {},

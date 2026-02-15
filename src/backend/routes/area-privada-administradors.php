@@ -125,8 +125,8 @@ $routes = [
     // 13. Blog
     APP_GESTIO . $url['blog'] => route(APP_INTRANET_DIR . APP_BLOG_DIR . 'index.php'),
     APP_GESTIO . $url['blog'] . '/article/{slug}' => route(APP_INTRANET_DIR . APP_BLOG_DIR . 'fitxa-article.php'),
-    APP_GESTIO . $url['blog'] . '/nou-article' => route(APP_INTRANET_DIR . APP_BLOG_DIR . 'modifica-article.php'),
-    APP_GESTIO . $url['blog'] . '/modifica-article/{id}' => route(APP_INTRANET_DIR . APP_BLOG_DIR . 'modifica-article.php'),
+    APP_GESTIO . $url['blog'] . '/nou-article' => route(APP_INTRANET_DIR . APP_BLOG_DIR . 'form-article.php'),
+    APP_GESTIO . $url['blog'] . '/modifica-article/{id}' => route(APP_INTRANET_DIR . APP_BLOG_DIR . 'form-article.php'),
 
     // 14. Lector rss
     APP_GESTIO . $url['rss'] => route(APP_INTRANET_DIR . APP_RSS_DIR . 'index.php'),

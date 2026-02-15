@@ -1,6 +1,8 @@
 // src/frontend/pages/blog/articleView.ts
 // Ruta pública: /blog/article/<slug>
 
+import { getIsAdmin } from '../../services/auth/isAdmin';
+
 type BlogArticleDetail = {
   id: number;
   post_title: string;
@@ -62,7 +64,8 @@ export async function renderBlogArticleView(slug: string): Promise<void> {
   `;
 
   try {
-    const a = await fetchArticleBySlug(slug);
+    // 🔹 Paralelizamos carga de artículo + admin
+    const [a, isAdmin] = await Promise.all([fetchArticleBySlug(slug), getIsAdmin()]);
 
     const title = escapeHtml(a.post_title || '(Sense títol)');
     const excerpt = (a.post_excerpt ?? '').trim();
@@ -70,15 +73,25 @@ export async function renderBlogArticleView(slug: string): Promise<void> {
     const cat = escapeHtml((a.tema_ca ?? 'Sense categoria') || 'Sense categoria');
     const dateLabel = escapeHtml(formatDateCa(a.post_date));
 
+    const editButton = isAdmin
+      ? `
+        <div class="mb-3 text-end">
+          <a href="/gestio/blog/modifica-article/${a.id}" 
+             class="btn btn-sm btn-outline-primary">
+             ✏️ Modificar article
+          </a>
+        </div>
+      `
+      : '';
+
     // ⚠️ contentHtml se inserta como HTML (igual que haces en otras páginas).
     // Si el contenido puede venir de usuarios, habría que sanitizar en servidor o con una lib.
     container.innerHTML = `
-      <div class="mb-3">
-        <a class="text-decoration-none" href="/blog">← Tornar al blog</a>
-      </div>
-
       <article class="card">
         <div class="card-body">
+
+         ${editButton}
+         
           <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
             <span class="badge text-bg-light border">${cat}</span>
             <span class="text-muted small">${dateLabel}</span>
@@ -93,6 +106,10 @@ export async function renderBlogArticleView(slug: string): Promise<void> {
           <div class="blog-content" id="blogContent"></div>
         </div>
       </article>
+
+      <div class="mb-3">
+        <a class="text-decoration-none" href="/blog">← Tornar al blog</a>
+      </div>
     `;
 
     const contentEl = container.querySelector<HTMLDivElement>('#blogContent');

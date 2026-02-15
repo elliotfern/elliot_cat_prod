@@ -32,6 +32,7 @@ export type ApiUrls = {
     TASK_ID: (id: number) => string;
     PROJECTE_DETALLS: (id: number) => string;
     PROJECTE_TASQUES: (id: number) => string;
+    BLOG_ARTICLE_ID: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -56,6 +57,7 @@ export type ApiUrls = {
     PERSONES_GRUPS: string;
     PROJECTE: string;
     TASCA: string;
+    BLOG_ARTICLE: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -79,6 +81,7 @@ export type ApiUrls = {
     PERSONES_GRUPS: string;
     PROJECTE: string;
     TASCA: string;
+    BLOG_ARTICLE: string;
   };
   DELETE: {};
 };

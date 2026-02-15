@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
@@ -258,6 +260,63 @@ if ($slug === 'llistatArticles') {
         Response::success(
             MissatgesAPI::success('get'),
             $row,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Article per slug
+    // URL: /api/blog/get/articleId?id=333  
+} else if ($slug === 'articleId') {
+
+    $idRaw = $_GET['id'] ?? null;
+    $id = is_string($idRaw) ? (int)$idRaw : (int)$idRaw;
+
+    if ($id <= 0) {
+        Response::error('ID invàlid', ['id' => $idRaw], 400);
+        exit;
+    }
+
+    try {
+        // Nota: devolvemos categoria como HEX para que el frontend no trate binary(16) directamente
+        $query = "
+            SELECT
+                b.id,
+                b.post_type,
+                b.post_title,
+                b.post_content,
+                b.post_excerpt,
+                b.lang,
+                b.post_status,
+                b.slug,
+                HEX(b.categoria) AS categoria,
+                b.post_date,
+                b.post_modified
+            FROM db_blog b
+            WHERE b.id = :id
+            LIMIT 1
+        ";
+
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, false);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
             200
         );
     } catch (PDOException $e) {

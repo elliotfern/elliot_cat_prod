@@ -36,16 +36,13 @@ export async function blog() {
       void renderBlogArticleView(slug);
       break;
 
-    case 'nou-projecte':
+    case 'modifica-article':
       break;
 
-    case 'nova-tasca':
+    case 'nou-article':
       break;
 
     case 'modifica-tasca':
-      break;
-
-    case 'fitxa-projecte':
       break;
 
     default:

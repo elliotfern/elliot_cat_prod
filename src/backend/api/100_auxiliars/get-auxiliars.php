@@ -1318,6 +1318,91 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             500
         );
     }
+
+
+    // GET : estat publicacio
+    // URL: https://elliot.cat/api/auxiliars/get/estatsPublicacio
+} else if ($slug === "estatsPublicacio") {
+
+    try {
+        $result = [
+            [
+                'id' => 'publicat',
+                'post_status' => 'Publicat'
+            ],
+            [
+                'id' => 'esborrany',
+                'post_status' => 'Esborrany'
+            ],
+            [
+                'id' => 'cancel·lat',
+                'post_status' => 'Cancel·lat'
+            ]
+        ];
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+      // GET : tipus publicacio
+    // URL: https://elliot.cat/api/auxiliars/get/tipusPublicacio
+} else if ($slug === "tipusPublicacio") {
+
+    try {
+        $result = [
+            [
+                'id' => 'publicat',
+                'post_status' => 'Publicat'
+            ],
+            [
+                'id' => 'esborrany',
+                'post_status' => 'Esborrany'
+            ],
+            [
+                'id' => 'cancel·lat',
+                'post_status' => 'Cancel·lat'
+            ]
+        ];
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
