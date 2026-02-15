@@ -48,7 +48,7 @@ $lang         = isset($data['lang']) ? (int)$data['lang'] : null;
 $post_status  = isset($data['post_status']) ? trim((string)$data['post_status']) : 'publish';
 $slug         = isset($data['slug']) ? trim((string)$data['slug']) : '';
 
-$categoriaHex = isset($data['categoria']) ? strtoupper(trim((string)$data['categoria'])) : '';
+$categoriaTxt = isset($data['categoria']) ? trim((string)$data['categoria']) : '';
 
 // 🔎 Validaciones
 if ($post_title === '') $errors[] = ValidacioErrors::requerit('post_title');
@@ -70,10 +70,10 @@ if ($slug === '') {
     if (mb_strlen($slug) > 200) $errors[] = ValidacioErrors::massaLlarg('slug', 200);
 }
 
-if ($categoriaHex === '') {
+if ($categoriaTxt === '') {
     $errors[] = ValidacioErrors::requerit('categoria');
-} elseif (!preg_match('/^[0-9A-F]{32}$/', $categoriaHex)) {
-    $errors[] = ValidacioErrors::format('categoria', 'hex32');
+} elseif (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $categoriaTxt)) {
+    $errors[] = ValidacioErrors::format('categoria', 'uuid');
 }
 
 if ($post_type !== '' && mb_strlen($post_type) > 20) $errors[] = ValidacioErrors::massaLlarg('post_type', 20);
@@ -96,7 +96,7 @@ try {
     INSERT INTO db_blog (
       post_type, post_title, post_content, post_excerpt, lang, post_status, slug, categoria, post_date, post_modified
     ) VALUES (
-      :post_type, :post_title, :post_content, :post_excerpt, :lang, :post_status, :slug, UNHEX(:categoria), NOW(), NOW()
+      :post_type, :post_title, :post_content, :post_excerpt, :lang, :post_status, :slug,  uuid_text_to_bin(:categoria), NOW(), NOW()
     )
   ";
 
@@ -112,7 +112,7 @@ try {
     $stmt->bindValue(':lang', $lang, PDO::PARAM_INT);
     $stmt->bindValue(':post_status', $post_status, PDO::PARAM_STR);
     $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
-    $stmt->bindValue(':categoria', $categoriaHex, PDO::PARAM_STR);
+    $stmt->bindValue(':categoria', $categoriaTxt, PDO::PARAM_STR);
 
     $stmt->execute();
 

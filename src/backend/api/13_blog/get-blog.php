@@ -303,7 +303,7 @@ if ($slug === 'llistatArticles') {
         ";
 
         $params = [':id' => $id];
-        $result = $db->getData($query, $params, false);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(
