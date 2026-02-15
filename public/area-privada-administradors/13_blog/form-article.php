@@ -94,5 +94,6 @@
         padding: 1rem;
         font-size: 1.1rem;
         line-height: 1.6;
+        background-color: white !important;
     }
 </style>

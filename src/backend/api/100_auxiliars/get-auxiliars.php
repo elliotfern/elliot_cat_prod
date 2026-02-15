@@ -1362,23 +1362,23 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
         );
     }
 
-      // GET : tipus publicacio
+    // GET : tipus publicacio
     // URL: https://elliot.cat/api/auxiliars/get/tipusPublicacio
 } else if ($slug === "tipusPublicacio") {
 
     try {
         $result = [
             [
-                'id' => 'publicat',
-                'post_status' => 'Publicat'
+                'id' => 'post',
+                'post_type' => 'Article'
             ],
             [
-                'id' => 'esborrany',
-                'post_status' => 'Esborrany'
+                'id' => 'historia_oberta',
+                'post_type' => 'Història Oberta'
             ],
             [
-                'id' => 'cancel·lat',
-                'post_status' => 'Cancel·lat'
+                'id' => 'microblogging',
+                'post_type' => 'Microblogging'
             ]
         ];
 

@@ -63,7 +63,7 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
       auxiliarSelect(current.post_status ?? 'publicat', 'estatsPublicacio', 'post_status', 'post_status'),
 
       // Tipus (varchar): idem
-      auxiliarSelect(current.post_type ?? 'article', 'tipusPublicacio', 'post_type', 'post_status'),
+      auxiliarSelect(current.post_type ?? 'article', 'tipusPublicacio', 'post_type', 'post_type'),
     ]);
   }
 
