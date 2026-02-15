@@ -231,8 +231,7 @@ if ($slug === 'llistatArticles') {
             b.post_content,
             b.post_status,
             b.slug,
-            b.categoria,
-            HEX(b.categoria) AS categoria_hex,
+            bin_to_uuid_text(b.categoria) AS categoria_hex,
             b.post_date,
             b.post_modified,
             t.tema_ca
