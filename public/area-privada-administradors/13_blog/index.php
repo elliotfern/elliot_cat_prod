@@ -7,4 +7,4 @@
 <?php
 } ?>
 
-<div id="articleList"></div>
+<div id="articleList" style="margin-top:25px;margin-bottom:30px"></div>

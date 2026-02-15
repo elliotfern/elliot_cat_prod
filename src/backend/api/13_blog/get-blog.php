@@ -130,6 +130,80 @@ if ($slug === 'llistatArticles') {
             500
         );
     }
+
+    // Facets del blog (anys + categories)
+    // URL: /api/blog/get/filtresArticles
+} else if ($slug === 'filtresArticles') {
+
+    // 1) Anyos disponibles (de post_date)
+    $sqlYears = sprintf(
+        "SELECT DISTINCT YEAR(b.post_date) AS y
+         FROM %s AS b
+         WHERE b.post_date IS NOT NULL
+         ORDER BY y DESC",
+        qi(Tables::BLOG, $pdo)
+    );
+
+    // 2) Categories disponibles (HEX id + label)
+    // OJO: si quieres incluir también categorías que no estén usadas, cambia el JOIN.
+    $sqlCats = sprintf(
+        "SELECT DISTINCT
+            HEX(t.id) AS hex,
+            t.tema_ca AS label
+         FROM %s AS b
+         INNER JOIN %s AS t ON b.categoria = t.id
+         WHERE b.categoria IS NOT NULL
+         ORDER BY label ASC",
+        qi(Tables::BLOG, $pdo),
+        qi(Tables::DB_TEMES, $pdo)
+    );
+
+    try {
+        // YEARS
+        $stmtY = $pdo->query($sqlYears);
+        $yearsRaw = $stmtY->fetchAll(PDO::FETCH_ASSOC);
+
+        $years = [];
+        foreach ($yearsRaw as $r) {
+            $y = (int)($r['y'] ?? 0);
+            if ($y > 0) $years[] = $y;
+        }
+
+        // CATEGORIES
+        $stmtC = $pdo->query($sqlCats);
+        $catsRaw = $stmtC->fetchAll(PDO::FETCH_ASSOC);
+
+        $categories = [];
+        foreach ($catsRaw as $r) {
+            $hex = (string)($r['hex'] ?? '');
+            $label = (string)($r['label'] ?? '');
+            $hex = trim($hex);
+            $label = trim($label);
+
+            if ($hex === '' || $label === '') continue;
+
+            $categories[] = [
+                'hex' => $hex,
+                'label' => $label,
+            ];
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            [
+                'years' => $years,
+                'categories' => $categories,
+            ],
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // URL: /api/blog/get/?articleSlug=revolut    
 } else if (isset($_GET['articleSlug'])) {
     $slug = $_GET['articleSlug'];

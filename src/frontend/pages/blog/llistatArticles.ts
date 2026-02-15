@@ -180,31 +180,58 @@ export async function renderBlogListPaged(): Promise<void> {
   // Si el blog creix molt, millor fer un endpoint /filtresArticles.
   let facetsLoaded = false;
 
+  // ✅ Reemplaza tu ensureFacets() actual por ESTE (versión buena: facets desde backend)
+  //
+  // Requiere endpoint:
+  //   GET https://{host}/api/blog/get/filtresArticles
+  // Respuesta esperada (dentro de json.data o json):
+  //   { years: number[], categories: { hex: string, label: string }[] }
+
+  type BlogFacets = {
+    years: number[];
+    categories: Array<{ hex: string; label: string }>;
+  };
+
+  async function fetchFacets(): Promise<BlogFacets> {
+    const url = `https://${window.location.host}/api/blog/get/filtresArticles`;
+    const r = await fetch(url, { credentials: 'include' });
+    const json = await r.json();
+
+    const data = (json?.data ?? json) as Partial<BlogFacets>;
+
+    return {
+      years: Array.isArray(data.years) ? data.years.filter((y) => Number.isFinite(y)) : [],
+      categories: Array.isArray(data.categories)
+        ? data.categories
+            .filter((c) => c && typeof c.hex === 'string' && typeof c.label === 'string')
+            .map((c) => ({ hex: c.hex.trim(), label: c.label.trim() }))
+            .filter((c) => c.hex !== '' && c.label !== '')
+        : [],
+    };
+  }
+
+  // ---- Dentro de renderBlogListPaged() ----
+  // Asume que existen estas variables en scope:
+  //   yearSelect: HTMLSelectElement
+  //   catSelect: HTMLSelectElement
+  //   facetsLoaded: boolean
+  //   escapeHtml: (input: unknown) => string
   async function ensureFacets(): Promise<void> {
     if (facetsLoaded) return;
 
-    const first = await fetchPage({ page: 1, limit: 300, order: state.order }); // ajusta si cal
-    const items = first.items ?? [];
+    const facets = await fetchFacets();
 
-    // Anyos
-    const years = Array.from(new Set(items.map((i) => getYear(i.post_date)).filter((y): y is number => typeof y === 'number' && y > 0))).sort((a, b) => b - a);
+    // YEARS
+    const years = Array.from(new Set(facets.years))
+      .filter((y) => y >= 1970 && y <= 2100)
+      .sort((a, b) => b - a);
 
     yearSelect.innerHTML = [`<option value="0">Tots</option>`, ...years.map((y) => `<option value="${y}">${y}</option>`)].join('');
 
-    // Categories per HEX
-    const catMap = new Map<string, string>(); // hex -> label
+    // CATEGORIES (HEX -> label)
+    const categories = facets.categories.slice().sort((a, b) => a.label.localeCompare(b.label, 'ca'));
 
-    for (const i of items) {
-      const hex = (i.categoria_hex ?? '').trim();
-      if (!hex) continue;
-
-      const label = (i.tema_ca ?? '').trim() || 'Sense categoria';
-      catMap.set(hex, label);
-    }
-
-    const catEntries = Array.from(catMap.entries()).sort((a, b) => a[1].localeCompare(b[1], 'ca'));
-
-    catSelect.innerHTML = [`<option value="">Totes</option>`, `<option value="0">Sense categoria</option>`, ...catEntries.map(([uuid, label]) => `<option value="${escapeHtml(uuid)}">${escapeHtml(label)}</option>`)].join('');
+    catSelect.innerHTML = [`<option value="">Totes</option>`, `<option value="0">Sense categoria</option>`, ...categories.map((c) => `<option value="${escapeHtml(c.hex)}">${escapeHtml(c.label)}</option>`)].join('');
 
     facetsLoaded = true;
   }
