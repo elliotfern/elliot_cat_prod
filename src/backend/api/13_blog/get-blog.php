@@ -252,8 +252,9 @@ if ($slug === 'llistatArticles') {
             return;
         }
 
-        // (Opcional) si quieres ocultar borradores:
-        // if (($row['post_status'] ?? '') !== 'publish') { ... 404 o 403 ... }
+        // ✅ Normalizar categoria para que coincida con el endpoint de categorías (UUID con guiones)
+        $hex = (string)($row['categoria_hex'] ?? '');
+        $row['categoria'] = $hex !== '' ? hexToUuidText($hex) : null;
 
         Response::success(
             MissatgesAPI::success('get'),
@@ -311,6 +312,10 @@ if ($slug === 'llistatArticles') {
             );
             return;
         }
+
+        // ✅ Normalizar categoria para que coincida con el endpoint de categorías (UUID con guiones)
+        $hex = (string)($result['categoria'] ?? '');
+        $result['categoria'] = $hex !== '' ? hexToUuidText($hex) : null;
 
         Response::success(
             MissatgesAPI::success('get'),
