@@ -1,5 +1,5 @@
 import { getPageType } from '../../utils/urlPath';
-import { renderLlistatArticlesBlog } from './llistatArticles';
+import { renderBlogListPaged } from './llistatArticles';
 
 export function blog() {
   const pageType = getPageType(window.location.href);
@@ -16,7 +16,7 @@ export function blog() {
 
   // /.../blog
   if (!action) {
-    void renderLlistatArticlesBlog();
+    void renderBlogListPaged();
     return;
   }
 
