@@ -72,7 +72,7 @@
         <div class="col-12">
             <label class="form-label"><strong>Article</strong></label>
             <input type="hidden" id="post_content" name="post_content" value="">
-            <trix-editor input="post_content"></trix-editor>
+            <trix-editor input="post_content" class="editor-blog"></trix-editor>
         </div>
 
         <!-- Accions -->
@@ -87,3 +87,12 @@
 
     </div>
 </form>
+
+<style>
+    .editor-blog {
+        min-height: 500px;
+        padding: 1rem;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+</style>
