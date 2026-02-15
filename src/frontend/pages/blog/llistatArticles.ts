@@ -1,9 +1,15 @@
 // src/frontend/pages/blog/llistatArticlesPaged.ts
-// Renderitza llistat d'articles del blog amb:
+// Llistat d'articles del blog amb:
 // - paginació clàssica (Prev / Next)
-// - filtres server-side: any (year) i categoria (cat=uuid o cat=0 per "Sense categoria")
+// - filtres server-side: any (year) i categoria (cat=hex o cat=0 per "Sense categoria")
 // - ordre (asc/desc)
+// - URL diferent segons admin:
+//    admin  -> /gestio/blog/article/<slug>
+//    públic -> /blog/article/<slug>
+//
 // Container esperat: <div id="articleList"></div>
+
+import { getIsAdmin } from '../../services/auth/isAdmin';
 
 type BlogArticle = {
   id: number;
@@ -11,7 +17,7 @@ type BlogArticle = {
   slug: string;
   post_date: string;
   tema_ca?: string | null;
-  categoria_hex?: string | null;
+  categoria_hex?: string | null; // ve del backend: HEX(b.categoria)
 };
 
 type ApiPayload = {
@@ -24,11 +30,11 @@ type ApiPayload = {
     has_prev: boolean;
     has_next: boolean;
   };
-  filters?: {
-    year?: number | null;
-    cat?: string | null;
-    order?: 'asc' | 'desc';
-  };
+};
+
+type BlogFacets = {
+  years: number[];
+  categories: Array<{ hex: string; label: string }>;
 };
 
 function escapeHtml(input: unknown): string {
@@ -50,16 +56,6 @@ function formatDateCa(dateStr: string): string {
   return d.toLocaleDateString('ca-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-function getYear(dateStr: string): number | null {
-  const m = String(dateStr).match(/^(\d{4})/);
-  return m ? Number(m[1]) : null;
-}
-
-function buildArticleUrl(slug: string): string {
-  // Ajusta aquesta ruta si el teu blog públic és diferent (ex: /ca/blog/slug)
-  return `/blog/article/${encodeURIComponent(slug)}`;
-}
-
 function parseApiPayload(json: any): ApiPayload {
   // Suporta:
   // - { status, data: { items, pagination } }
@@ -69,11 +65,18 @@ function parseApiPayload(json: any): ApiPayload {
 
   if (data && Array.isArray(data.items) && data.pagination) return data as ApiPayload;
 
-  // fallback ultra-defensiu (si tornessis a retornar array)
+  // fallback (si tornessis a retornar array)
   if (Array.isArray(data)) {
     return {
       items: data as BlogArticle[],
-      pagination: { page: 1, limit: data.length, total: data.length, pages: 1, has_prev: false, has_next: false },
+      pagination: {
+        page: 1,
+        limit: data.length,
+        total: data.length,
+        pages: 1,
+        has_prev: false,
+        has_next: false,
+      },
     };
   }
 
@@ -88,7 +91,7 @@ async function fetchPage(params: {
   limit: number;
   order: 'asc' | 'desc';
   year?: number;
-  cat?: string; // '' | '0' | uuid
+  cat?: string; // '' | '0' | hex
 }): Promise<ApiPayload> {
   const usp = new URLSearchParams();
   usp.set('page', String(params.page));
@@ -105,15 +108,43 @@ async function fetchPage(params: {
   return parseApiPayload(json);
 }
 
+async function fetchFacets(): Promise<BlogFacets> {
+  const url = `https://${window.location.host}/api/blog/get/filtresArticles`;
+  const r = await fetch(url, { credentials: 'include' });
+  const json = await r.json();
+
+  const data = (json?.data ?? json) as Partial<BlogFacets>;
+
+  const years = Array.isArray(data.years) ? data.years.map((y) => Number(y)).filter((y) => Number.isFinite(y)) : [];
+
+  const categories = Array.isArray(data.categories)
+    ? data.categories
+        .filter((c) => c && typeof (c as any).hex === 'string' && typeof (c as any).label === 'string')
+        .map((c) => ({ hex: (c as any).hex.trim(), label: (c as any).label.trim() }))
+        .filter((c) => c.hex !== '' && c.label !== '')
+    : [];
+
+  return { years, categories };
+}
+
 export async function renderBlogListPaged(): Promise<void> {
   const container = document.getElementById('articleList');
   if (!container) return;
+
+  // ✅ Óptimo: calculamos 1 sola vez
+  const isAdmin = await getIsAdmin();
+
+  // ✅ URL según rol
+  function buildArticleUrl(slug: string): string {
+    const safe = encodeURIComponent(slug);
+    return isAdmin ? `/gestio/blog/article/${safe}` : `/blog/article/${safe}`;
+  }
 
   const state = {
     page: 1,
     limit: 10,
     year: 0, // 0 = tots
-    cat: '', // '' = totes, '0' = sense categoria, uuid = categoria
+    cat: '', // '' = totes, '0' = sense categoria, hex = categoria
     order: 'desc' as 'asc' | 'desc',
   };
 
@@ -175,47 +206,8 @@ export async function renderBlogListPaged(): Promise<void> {
   const nextBtn = container.querySelector<HTMLButtonElement>('#blogNextBtn')!;
   const resetBtn = container.querySelector<HTMLButtonElement>('#blogResetBtn')!;
 
-  // Facets (anys + categories) – sense endpoint extra.
-  // Truc: fem una càrrega “gran” inicial per construir els selects.
-  // Si el blog creix molt, millor fer un endpoint /filtresArticles.
   let facetsLoaded = false;
 
-  // ✅ Reemplaza tu ensureFacets() actual por ESTE (versión buena: facets desde backend)
-  //
-  // Requiere endpoint:
-  //   GET https://{host}/api/blog/get/filtresArticles
-  // Respuesta esperada (dentro de json.data o json):
-  //   { years: number[], categories: { hex: string, label: string }[] }
-
-  type BlogFacets = {
-    years: number[];
-    categories: Array<{ hex: string; label: string }>;
-  };
-
-  async function fetchFacets(): Promise<BlogFacets> {
-    const url = `https://${window.location.host}/api/blog/get/filtresArticles`;
-    const r = await fetch(url, { credentials: 'include' });
-    const json = await r.json();
-
-    const data = (json?.data ?? json) as Partial<BlogFacets>;
-
-    return {
-      years: Array.isArray(data.years) ? data.years.filter((y) => Number.isFinite(y)) : [],
-      categories: Array.isArray(data.categories)
-        ? data.categories
-            .filter((c) => c && typeof c.hex === 'string' && typeof c.label === 'string')
-            .map((c) => ({ hex: c.hex.trim(), label: c.label.trim() }))
-            .filter((c) => c.hex !== '' && c.label !== '')
-        : [],
-    };
-  }
-
-  // ---- Dentro de renderBlogListPaged() ----
-  // Asume que existen estas variables en scope:
-  //   yearSelect: HTMLSelectElement
-  //   catSelect: HTMLSelectElement
-  //   facetsLoaded: boolean
-  //   escapeHtml: (input: unknown) => string
   async function ensureFacets(): Promise<void> {
     if (facetsLoaded) return;
 
@@ -228,7 +220,7 @@ export async function renderBlogListPaged(): Promise<void> {
 
     yearSelect.innerHTML = [`<option value="0">Tots</option>`, ...years.map((y) => `<option value="${y}">${y}</option>`)].join('');
 
-    // CATEGORIES (HEX -> label)
+    // CATEGORIES (HEX)
     const categories = facets.categories.slice().sort((a, b) => a.label.localeCompare(b.label, 'ca'));
 
     catSelect.innerHTML = [`<option value="">Totes</option>`, `<option value="0">Sense categoria</option>`, ...categories.map((c) => `<option value="${escapeHtml(c.hex)}">${escapeHtml(c.label)}</option>`)].join('');
@@ -245,6 +237,7 @@ export async function renderBlogListPaged(): Promise<void> {
     const rowsHtml = items
       .map((row) => {
         const href = buildArticleUrl(row.slug);
+
         const title = escapeHtml(row.post_title || '(Sense títol)');
         const cat = escapeHtml((row.tema_ca ?? 'Sense categoria') || 'Sense categoria');
         const dateLabel = escapeHtml(formatDateCa(row.post_date));
@@ -269,7 +262,7 @@ export async function renderBlogListPaged(): Promise<void> {
   async function load(): Promise<void> {
     await ensureFacets();
 
-    // UX: desactiva botons mentre carrega
+    // UX: desactiva mentre carrega
     prevBtn.disabled = true;
     nextBtn.disabled = true;
 
@@ -296,10 +289,10 @@ export async function renderBlogListPaged(): Promise<void> {
     prevBtn.disabled = !(pag?.has_prev ?? page > 1);
     nextBtn.disabled = !(pag?.has_next ?? page < pages);
 
-    // sincronitza selects (per si vens d'URL amb params en el futur)
+    // sincronitza selects
     yearSelect.value = String(state.year);
-    orderSelect.value = state.order;
     catSelect.value = state.cat;
+    orderSelect.value = state.order;
   }
 
   // Events filtres
@@ -310,7 +303,7 @@ export async function renderBlogListPaged(): Promise<void> {
   });
 
   catSelect.addEventListener('change', () => {
-    state.cat = catSelect.value; // '' | '0' | uuid
+    state.cat = catSelect.value; // '' | '0' | hex
     state.page = 1;
     load();
   });
@@ -318,7 +311,6 @@ export async function renderBlogListPaged(): Promise<void> {
   orderSelect.addEventListener('change', () => {
     state.order = orderSelect.value === 'asc' ? 'asc' : 'desc';
     state.page = 1;
-    // facets depenen de l'ordre? (no, però deixem-ho simple)
     load();
   });
 
