@@ -27,6 +27,28 @@ interface ApiResponse<T> {
   data: T;
 }
 
+function fillFormFromData(form: HTMLFormElement, data: Record<string, unknown>) {
+  // 1) Inputs/textarea/select por NAME
+  for (const [key, val] of Object.entries(data)) {
+    const el = form.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`[name="${key}"]`);
+    if (!el) continue;
+
+    const v = val ?? '';
+    if (el instanceof HTMLInputElement && (el.type === 'checkbox' || el.type === 'radio')) {
+      el.checked = Boolean(v);
+    } else {
+      el.value = String(v);
+    }
+  }
+
+  // 2) Fallback: si algo está solo por ID (por si algún campo no tiene name)
+  for (const [key, val] of Object.entries(data)) {
+    const el = document.getElementById(key) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+    if (!el) continue;
+    if ('value' in el && (el as any).value === '') el.value = String(val ?? '');
+  }
+}
+
 /**
  * Formulari Blog Article (Create / Update)
  * - View PHP: /gestio/blog/modifica-article/{id} (update)
@@ -72,15 +94,22 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
     const response = await fetchDataGet<ApiResponse<BlogArticleFitxa>>(API_URLS.GET.BLOG_ARTICLE_ID(id), true);
     if (!response || !response.data) return;
 
-    data = response.data;
+    const row = Array.isArray(response.data) ? response.data[0] : response.data;
+    if (!row) return;
+
+    data = row;
 
     // 3) Títol UI
     divTitol.textContent = 'Modificar article';
     btnSubmit.textContent = 'Desar canvis';
 
-    // 4) Selects + inputs
     await fillSelects(data);
+
+    // 1) tu helper (si quieres mantenerlo)
     renderFormInputs(data);
+
+    // 2) ✅ relleno seguro (esto te arregla los text inputs sí o sí)
+    fillFormFromData(form, data as Record<string, unknown>);
 
     // 5) Dates (datetime-local)
     const postDateEl = document.getElementById('post_date') as HTMLInputElement | null;
@@ -99,7 +128,6 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
     btnSubmit.textContent = 'Crear article';
 
     await fillSelects(data);
-    renderFormInputs(data);
 
     // post_modified readonly (buit)
     const postModEl = document.getElementById('post_modified') as HTMLInputElement | null;
