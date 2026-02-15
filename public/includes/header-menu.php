@@ -60,8 +60,11 @@
                             <li><a class="dropdown-item" href="#">Catalan</a></li>
                         </ul>
                     </li>
-
                 </ul>
+
+                <!-- User area button (TS will fill) -->
+                <div class="ms-lg-3 mt-2 mt-lg-0 d-flex align-items-center" id="userAreaSlot"></div>
+
             </div>
         </div>
     </nav>

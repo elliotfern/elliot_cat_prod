@@ -26,6 +26,7 @@ import { transmissioDadesDB } from './utils/actualitzarDades';
 import { curriculum } from './pages/curriculum/curriculum';
 import { agenda } from './pages/agenda/agenda';
 import { projectes } from './pages/projectes/projectes';
+import { initUserAreaButton } from './components/header/userAreaButton';
 
 function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
   if (document.getElementById(id)) {
@@ -49,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const url = window.location.href;
   const pageType = getPageType(url);
 
+  void initUserAreaButton();
   barraNavegacio();
   mostrarBotonsNomesAdmin();
 
