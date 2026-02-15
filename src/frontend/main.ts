@@ -27,6 +27,7 @@ import { curriculum } from './pages/curriculum/curriculum';
 import { agenda } from './pages/agenda/agenda';
 import { projectes } from './pages/projectes/projectes';
 import { initUserAreaButton } from './components/header/userAreaButton';
+import { blog } from './pages/blog/blog';
 
 function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
   if (document.getElementById(id)) {
@@ -108,5 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     usuaris();
   } else if (pageType[0] === 'usuaris') {
     areaPrivadaUsuaris();
+  } else if (pageType[1] === 'blog' || pageType[0] === 'blog') {
+    blog();
   }
 });

@@ -372,7 +372,7 @@ $routes = [
     ],
 
     // Blog
-    '/api/blog/get' => [
+    '/api/blog/get/{slug}' => [
         'view' => 'src/backend/api/13_blog/get-blog.php',
         'needs_session' => false,
         'header_footer' => false,
