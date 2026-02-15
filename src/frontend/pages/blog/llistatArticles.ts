@@ -237,7 +237,7 @@ export async function renderBlogListPaged(): Promise<void> {
     listWrap.innerHTML = `<div class="list-group">${rowsHtml}</div>`;
   }
 
-  async function load(): Promise<void> {
+  async function renderLlistatArticlesBlog(): Promise<void> {
     await ensureFacets();
 
     // UX: desactiva botons mentre carrega
@@ -277,20 +277,20 @@ export async function renderBlogListPaged(): Promise<void> {
   yearSelect.addEventListener('change', () => {
     state.year = parseInt(yearSelect.value, 10) || 0;
     state.page = 1;
-    load();
+    renderLlistatArticlesBlog();
   });
 
   catSelect.addEventListener('change', () => {
     state.cat = catSelect.value; // '' | '0' | uuid
     state.page = 1;
-    load();
+    renderLlistatArticlesBlog();
   });
 
   orderSelect.addEventListener('change', () => {
     state.order = orderSelect.value === 'asc' ? 'asc' : 'desc';
     state.page = 1;
     // facets depenen de l'ordre? (no, però deixem-ho simple)
-    load();
+    renderLlistatArticlesBlog();
   });
 
   resetBtn.addEventListener('click', () => {
@@ -303,22 +303,22 @@ export async function renderBlogListPaged(): Promise<void> {
     catSelect.value = '';
     orderSelect.value = 'desc';
 
-    load();
+    renderLlistatArticlesBlog();
   });
 
   // Events paginació
   prevBtn.addEventListener('click', () => {
     if (state.page > 1) {
       state.page -= 1;
-      load();
+      renderLlistatArticlesBlog();
     }
   });
 
   nextBtn.addEventListener('click', () => {
     state.page += 1;
-    load();
+    renderLlistatArticlesBlog();
   });
 
   // init
-  load();
+  renderLlistatArticlesBlog();
 }
