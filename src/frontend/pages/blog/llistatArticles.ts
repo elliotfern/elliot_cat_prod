@@ -1,25 +1,35 @@
-// llistatArticles.ts
-// Renderitza llistat d'articles amb buscador + filtres (any / categoria)
+// src/frontend/pages/blog/llistatArticlesPaged.ts
+// Renderitza llistat d'articles del blog amb:
+// - paginació clàssica (Prev / Next)
+// - filtres server-side: any (year) i categoria (cat=uuid o cat=0 per "Sense categoria")
+// - ordre (asc/desc)
 // Container esperat: <div id="articleList"></div>
 
 type BlogArticle = {
   id: number;
-  post_type: string;
   post_title: string;
-  post_excerpt?: string | null;
-  lang?: string | null;
-  post_status?: string | null;
   slug: string;
-  categoria?: number | string | null;
-  post_date: string;      // "YYYY-MM-DD ..." o ISO
-  post_modified?: string; // opcional
-  tema_ca?: string | null; // nom categoria (CA)
+  post_date: string;
+  tema_ca?: string | null;
+  categoria_uuid?: string | null; // ve del backend: BIN_TO_UUID(b.categoria)
 };
 
-type ApiResponse<T> =
-  | { status: 'success' | 'ok'; data: T; message?: string }
-  | { status: 'error'; message?: string; errors?: unknown; data?: T }
-  | T; // fallback si l'API retorna l'array directament
+type ApiPayload = {
+  items: BlogArticle[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+    has_prev: boolean;
+    has_next: boolean;
+  };
+  filters?: {
+    year?: number | null;
+    cat?: string | null;
+    order?: 'asc' | 'desc';
+  };
+};
 
 function escapeHtml(input: unknown): string {
   return String(input ?? '')
@@ -30,255 +40,285 @@ function escapeHtml(input: unknown): string {
     .replaceAll("'", '&#039;');
 }
 
-function parseApiData(resp: ApiResponse<BlogArticle[]>): BlogArticle[] {
-  if (Array.isArray(resp)) return resp;
-  if (resp && Array.isArray((resp as any).data)) return (resp as any).data;
-  return [];
-}
-
-function getYearFromDate(dateStr: string): number | null {
-  if (!dateStr) return null;
-  const m = String(dateStr).match(/^(\d{4})/);
-  return m ? Number(m[1]) : null;
-}
-
 function formatDateCa(dateStr: string): string {
-  // Intenta parsejar "YYYY-MM-DD ..." sense trencar.
   const iso = String(dateStr).trim().replace(' ', 'T');
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) {
-    // fallback: retorna només YYYY-MM-DD si existeix
     const m = String(dateStr).match(/^(\d{4}-\d{2}-\d{2})/);
     return m ? m[1] : String(dateStr);
   }
   return d.toLocaleDateString('ca-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-function normalizeText(s: string): string {
-  return (s ?? '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, ''); // treu accents
+function getYear(dateStr: string): number | null {
+  const m = String(dateStr).match(/^(\d{4})/);
+  return m ? Number(m[1]) : null;
 }
 
-function buildArticleUrl(row: BlogArticle): string {
-  // Ajusta aquí la ruta pública real del teu blog si és diferent
-  // Ex: /blog/<slug> o /ca/blog/<slug>
-  return `/blog/${encodeURIComponent(row.slug)}`;
+function buildArticleUrl(slug: string): string {
+  // Ajusta aquesta ruta si el teu blog públic és diferent (ex: /ca/blog/slug)
+  return `/blog/${encodeURIComponent(slug)}`;
 }
 
-export async function renderLlistatArticlesBlog(): Promise<void> {
+function parseApiPayload(json: any): ApiPayload {
+  // Suporta:
+  // - { status, data: { items, pagination } }
+  // - { data: { items, pagination } }
+  // - { items, pagination }
+  const data = json?.data ?? json;
+
+  if (data && Array.isArray(data.items) && data.pagination) return data as ApiPayload;
+
+  // fallback ultra-defensiu (si tornessis a retornar array)
+  if (Array.isArray(data)) {
+    return {
+      items: data as BlogArticle[],
+      pagination: { page: 1, limit: data.length, total: data.length, pages: 1, has_prev: false, has_next: false },
+    };
+  }
+
+  return {
+    items: [],
+    pagination: { page: 1, limit: 10, total: 0, pages: 1, has_prev: false, has_next: false },
+  };
+}
+
+async function fetchPage(params: {
+  page: number;
+  limit: number;
+  order: 'asc' | 'desc';
+  year?: number;
+  cat?: string; // '' | '0' | uuid
+}): Promise<ApiPayload> {
+  const usp = new URLSearchParams();
+  usp.set('page', String(params.page));
+  usp.set('limit', String(params.limit));
+  usp.set('order', params.order);
+
+  if (params.year && params.year > 0) usp.set('year', String(params.year));
+  if (params.cat && params.cat !== '') usp.set('cat', params.cat);
+
+  const url = `https://${window.location.host}/api/blog/get/llistatArticles?${usp.toString()}`;
+
+  const r = await fetch(url, { credentials: 'include' });
+  const json = await r.json();
+  return parseApiPayload(json);
+}
+
+export async function renderBlogListPaged(): Promise<void> {
   const container = document.getElementById('articleList');
   if (!container) return;
+
+  const state = {
+    page: 1,
+    limit: 10,
+    year: 0, // 0 = tots
+    cat: '', // '' = totes, '0' = sense categoria, uuid = categoria
+    order: 'desc' as 'asc' | 'desc',
+  };
 
   container.innerHTML = `
     <div class="d-flex flex-column gap-3">
       <div class="card">
         <div class="card-body">
           <div class="row g-2 align-items-end">
-            <div class="col-12 col-lg-6">
-              <label class="form-label mb-1" for="blogSearchInput">Cerca</label>
-              <input id="blogSearchInput" type="search" class="form-control" placeholder="Cerca per títol..." />
-            </div>
-            <div class="col-12 col-lg-3">
+            <div class="col-12 col-lg-4">
               <label class="form-label mb-1" for="blogYearSelect">Any</label>
-              <select id="blogYearSelect" class="form-select"></select>
+              <select id="blogYearSelect" class="form-select">
+                <option value="0">Tots</option>
+              </select>
             </div>
-            <div class="col-12 col-lg-3">
+
+            <div class="col-12 col-lg-5">
               <label class="form-label mb-1" for="blogCatSelect">Categoria</label>
-              <select id="blogCatSelect" class="form-select"></select>
+              <select id="blogCatSelect" class="form-select">
+                <option value="">Totes</option>
+                <option value="0">Sense categoria</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-lg-3">
+              <label class="form-label mb-1" for="blogOrderSelect">Ordre</label>
+              <select id="blogOrderSelect" class="form-select">
+                <option value="desc" selected>Més nous</option>
+                <option value="asc">Més antics</option>
+              </select>
             </div>
           </div>
 
-          <div class="mt-3 d-flex flex-wrap gap-2" id="blogYearChips"></div>
-
           <div class="mt-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <div class="text-muted" id="blogCountInfo">Carregant...</div>
-            <button type="button" class="btn btn-outline-secondary btn-sm" id="blogResetBtn">
+            <div class="text-muted" id="blogCountInfo">—</div>
+            <button class="btn btn-outline-secondary btn-sm" type="button" id="blogResetBtn">
               Neteja filtres
             </button>
           </div>
         </div>
       </div>
 
-      <div id="blogListWrap" class="d-flex flex-column gap-2"></div>
+      <div id="blogListWrap"></div>
+
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <button class="btn btn-outline-secondary" type="button" id="blogPrevBtn">← Anterior</button>
+        <div class="text-muted" id="blogPageInfo">—</div>
+        <button class="btn btn-outline-secondary" type="button" id="blogNextBtn">Següent →</button>
+      </div>
     </div>
   `;
 
-  const searchInput = container.querySelector<HTMLInputElement>('#blogSearchInput')!;
   const yearSelect = container.querySelector<HTMLSelectElement>('#blogYearSelect')!;
   const catSelect = container.querySelector<HTMLSelectElement>('#blogCatSelect')!;
-  const yearChips = container.querySelector<HTMLDivElement>('#blogYearChips')!;
+  const orderSelect = container.querySelector<HTMLSelectElement>('#blogOrderSelect')!;
   const listWrap = container.querySelector<HTMLDivElement>('#blogListWrap')!;
   const countInfo = container.querySelector<HTMLDivElement>('#blogCountInfo')!;
+  const pageInfo = container.querySelector<HTMLDivElement>('#blogPageInfo')!;
+  const prevBtn = container.querySelector<HTMLButtonElement>('#blogPrevBtn')!;
+  const nextBtn = container.querySelector<HTMLButtonElement>('#blogNextBtn')!;
   const resetBtn = container.querySelector<HTMLButtonElement>('#blogResetBtn')!;
 
-  // 1) Fetch
-  const url = `https://${window.location.host}/api/blog/get/llistatArticles`;
-  let all: BlogArticle[] = [];
-  try {
-    const r = await fetch(url, { credentials: 'include' });
-    const json = (await r.json()) as ApiResponse<BlogArticle[]>;
-    all = parseApiData(json);
-  } catch (e) {
-    listWrap.innerHTML = `
-      <div class="alert alert-danger mb-0">
-        No s'ha pogut carregar el llistat d'articles.
-      </div>
-    `;
-    countInfo.textContent = 'Error de càrrega';
-    return;
+  // Facets (anys + categories) – sense endpoint extra.
+  // Truc: fem una càrrega “gran” inicial per construir els selects.
+  // Si el blog creix molt, millor fer un endpoint /filtresArticles.
+  let facetsLoaded = false;
+
+  async function ensureFacets(): Promise<void> {
+    if (facetsLoaded) return;
+
+    const first = await fetchPage({ page: 1, limit: 300, order: state.order }); // ajusta si cal
+    const items = first.items ?? [];
+
+    // Anyos
+    const years = Array.from(new Set(items.map((i) => getYear(i.post_date)).filter((y): y is number => typeof y === 'number' && y > 0))).sort((a, b) => b - a);
+
+    yearSelect.innerHTML = [`<option value="0">Tots</option>`, ...years.map((y) => `<option value="${y}">${y}</option>`)].join('');
+
+    // Categories per UUID
+    const catMap = new Map<string, string>(); // uuid -> label
+    for (const i of items) {
+      const uuid = (i.categoria_uuid ?? '').trim();
+      if (!uuid) continue;
+      const label = (i.tema_ca ?? '').trim() || 'Sense categoria';
+      catMap.set(uuid, label);
+    }
+
+    const catEntries = Array.from(catMap.entries()).sort((a, b) => a[1].localeCompare(b[1], 'ca'));
+
+    catSelect.innerHTML = [`<option value="">Totes</option>`, `<option value="0">Sense categoria</option>`, ...catEntries.map(([uuid, label]) => `<option value="${escapeHtml(uuid)}">${escapeHtml(label)}</option>`)].join('');
+
+    facetsLoaded = true;
   }
 
-  // 2) Normalitza + ordena (tu tens ORDER BY ASC, però aquí ho deixo en DESC per UX; canvia si vols)
-  const rows = all
-    .map((x) => ({
-      ...x,
-      _year: getYearFromDate(x.post_date) ?? 0,
-      _cat: (x.tema_ca ?? '').trim() || 'Sense categoria',
-      _title: (x.post_title ?? '').trim(),
-      _dateLabel: formatDateCa(x.post_date),
-    }))
-    .sort((a, b) => (b.post_date > a.post_date ? 1 : -1)); // DESC per defecte
-
-  // 3) Dades per filtres
-  const years = Array.from(new Set(rows.map((r) => r._year).filter((y) => y > 0))).sort((a, b) => b - a);
-  const cats = Array.from(new Set(rows.map((r) => r._cat))).sort((a, b) => a.localeCompare(b, 'ca'));
-
-  // Estat
-  let state = {
-    q: '',
-    year: 'all' as 'all' | string, // string = "2026" etc
-    cat: 'all' as 'all' | string,
-  };
-
-  // 4) UI filtres
-  yearSelect.innerHTML = [
-    `<option value="all">Tots</option>`,
-    ...years.map((y) => `<option value="${y}">${y}</option>`),
-  ].join('');
-
-  catSelect.innerHTML = [
-    `<option value="all">Totes</option>`,
-    ...cats.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`),
-  ].join('');
-
-  // Chips per any (ràpids)
-  const buildYearChips = () => {
-    // Mostra alguns anys com a "píndoles" clicables (tots + fins a 10 anys)
-    const max = 10;
-    const chipYears = years.slice(0, max);
-    yearChips.innerHTML = [
-      `<button type="button" class="btn btn-sm ${state.year === 'all' ? 'btn-primary' : 'btn-outline-primary'}" data-year="all">Tots</button>`,
-      ...chipYears.map(
-        (y) =>
-          `<button type="button" class="btn btn-sm ${
-            state.year === String(y) ? 'btn-primary' : 'btn-outline-primary'
-          }" data-year="${y}">${y}</button>`
-      ),
-    ].join('');
-  };
-
-  const applyFilters = () => {
-    const qn = normalizeText(state.q);
-    const filtered = rows.filter((r) => {
-      const okYear = state.year === 'all' ? true : String(r._year) === state.year;
-      const okCat = state.cat === 'all' ? true : r._cat === state.cat;
-      const okQ = !qn ? true : normalizeText(r._title).includes(qn);
-      return okYear && okCat && okQ;
-    });
-
-    // Agrupa per any (per header)
-    const grouped = new Map<number, typeof filtered>();
-    for (const r of filtered) {
-      const y = r._year || 0;
-      if (!grouped.has(y)) grouped.set(y, []);
-      grouped.get(y)!.push(r);
-    }
-    const groupKeys = Array.from(grouped.keys()).sort((a, b) => b - a);
-
-    // Render
-    if (filtered.length === 0) {
-      listWrap.innerHTML = `<div class="alert alert-secondary mb-0">No hi ha resultats amb aquests filtres.</div>`;
-      countInfo.textContent = `0 resultats`;
-      buildYearChips();
+  function renderList(items: BlogArticle[]): void {
+    if (!items.length) {
+      listWrap.innerHTML = `<div class="alert alert-secondary mb-0">No hi ha articles.</div>`;
       return;
     }
 
-    const html: string[] = [];
-    for (const year of groupKeys) {
-      const items = grouped.get(year)!;
+    const rowsHtml = items
+      .map((row) => {
+        const href = buildArticleUrl(row.slug);
+        const title = escapeHtml(row.post_title || '(Sense títol)');
+        const cat = escapeHtml((row.tema_ca ?? 'Sense categoria') || 'Sense categoria');
+        const dateLabel = escapeHtml(formatDateCa(row.post_date));
 
-      html.push(`
-        <div class="card">
-          <div class="card-header d-flex align-items-center justify-content-between">
-            <strong>${year || 'Sense any'}</strong>
-            <span class="badge text-bg-secondary">${items.length}</span>
-          </div>
-          <div class="list-group list-group-flush">
-            ${items
-              .map((row) => {
-                const href = buildArticleUrl(row);
-                const title = escapeHtml(row._title || '(Sense títol)');
-                const cat = escapeHtml(row._cat);
-                const dateLabel = escapeHtml(row._dateLabel);
+        return `
+          <a class="list-group-item list-group-item-action" href="${href}">
+            <div class="d-flex flex-column flex-md-row gap-1 gap-md-3 align-items-md-center justify-content-between">
+              <div class="d-flex flex-column">
+                <div class="fw-semibold">${title}</div>
+                <div class="text-muted small">${dateLabel} · <span class="badge text-bg-light border">${cat}</span></div>
+              </div>
+              <div class="text-muted small d-none d-md-block">→</div>
+            </div>
+          </a>
+        `;
+      })
+      .join('');
 
-                return `
-                  <a class="list-group-item list-group-item-action" href="${href}">
-                    <div class="d-flex flex-column flex-md-row gap-1 gap-md-3 align-items-md-center justify-content-between">
-                      <div class="d-flex flex-column">
-                        <div class="fw-semibold">${title}</div>
-                        <div class="text-muted small">${dateLabel} · <span class="badge text-bg-light border">${cat}</span></div>
-                      </div>
-                      <div class="text-muted small d-none d-md-block">→</div>
-                    </div>
-                  </a>
-                `;
-              })
-              .join('')}
-          </div>
-        </div>
-      `);
-    }
+    listWrap.innerHTML = `<div class="list-group">${rowsHtml}</div>`;
+  }
 
-    listWrap.innerHTML = html.join('');
-    countInfo.textContent = `${filtered.length} resultats`;
-    buildYearChips();
-  };
+  async function load(): Promise<void> {
+    await ensureFacets();
 
-  // 5) Events
-  searchInput.addEventListener('input', () => {
-    state.q = searchInput.value.trim();
-    applyFilters();
-  });
+    // UX: desactiva botons mentre carrega
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
 
+    const data = await fetchPage({
+      page: state.page,
+      limit: state.limit,
+      order: state.order,
+      year: state.year > 0 ? state.year : undefined,
+      cat: state.cat !== '' ? state.cat : undefined,
+    });
+
+    const items = data.items ?? [];
+    const pag = data.pagination;
+
+    renderList(items);
+
+    const total = pag?.total ?? items.length;
+    const pages = pag?.pages ?? 1;
+    const page = pag?.page ?? state.page;
+
+    countInfo.textContent = `Mostrant ${items.length} de ${total}`;
+    pageInfo.textContent = `Pàgina ${page} de ${pages}`;
+
+    prevBtn.disabled = !(pag?.has_prev ?? page > 1);
+    nextBtn.disabled = !(pag?.has_next ?? page < pages);
+
+    // sincronitza selects (per si vens d'URL amb params en el futur)
+    yearSelect.value = String(state.year);
+    orderSelect.value = state.order;
+    catSelect.value = state.cat;
+  }
+
+  // Events filtres
   yearSelect.addEventListener('change', () => {
-    state.year = yearSelect.value === 'all' ? 'all' : yearSelect.value;
-    applyFilters();
+    state.year = parseInt(yearSelect.value, 10) || 0;
+    state.page = 1;
+    load();
   });
 
   catSelect.addEventListener('change', () => {
-    state.cat = catSelect.value === 'all' ? 'all' : catSelect.value;
-    applyFilters();
+    state.cat = catSelect.value; // '' | '0' | uuid
+    state.page = 1;
+    load();
   });
 
-  yearChips.addEventListener('click', (ev) => {
-    const btn = (ev.target as HTMLElement).closest<HTMLButtonElement>('button[data-year]');
-    if (!btn) return;
-    const y = btn.dataset.year!;
-    state.year = y === 'all' ? 'all' : y;
-    yearSelect.value = state.year;
-    applyFilters();
+  orderSelect.addEventListener('change', () => {
+    state.order = orderSelect.value === 'asc' ? 'asc' : 'desc';
+    state.page = 1;
+    // facets depenen de l'ordre? (no, però deixem-ho simple)
+    load();
   });
 
   resetBtn.addEventListener('click', () => {
-    state = { q: '', year: 'all', cat: 'all' };
-    searchInput.value = '';
-    yearSelect.value = 'all';
-    catSelect.value = 'all';
-    applyFilters();
+    state.page = 1;
+    state.year = 0;
+    state.cat = '';
+    state.order = 'desc';
+
+    yearSelect.value = '0';
+    catSelect.value = '';
+    orderSelect.value = 'desc';
+
+    load();
   });
 
-  // 6) Render inicial
-  applyFilters();
+  // Events paginació
+  prevBtn.addEventListener('click', () => {
+    if (state.page > 1) {
+      state.page -= 1;
+      load();
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    state.page += 1;
+    load();
+  });
+
+  // init
+  load();
 }
