@@ -1,6 +1,7 @@
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { getPageType } from '../../utils/urlPath';
 import { renderBlogArticleView } from './article';
+import { formBlogArticle } from './formArticle';
 import { renderBlogListPaged } from './llistatArticles';
 
 export async function blog() {
@@ -37,12 +38,11 @@ export async function blog() {
       break;
 
     case 'modifica-article':
+      void formBlogArticle(true, id);
       break;
 
     case 'nou-article':
-      break;
-
-    case 'modifica-tasca':
+      formBlogArticle(false);
       break;
 
     default:
