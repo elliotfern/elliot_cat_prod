@@ -81,8 +81,7 @@ if ($slug === 'llistatArticles') {
 
         // DATA paginada
         $sql = sprintf(
-            "SELECT b.id, b.post_type, b.post_title, b.post_excerpt, b.lang, b.post_status, b.slug,
-                    b.categoria, HEX(b.categoria) AS categoria_hex, b.post_date, b.post_modified, t.tema_ca
+            "SELECT b.id, b.post_type, b.post_title, b.post_excerpt, b.lang, b.post_status, b.slug, HEX(b.categoria) AS categoria_hex, b.post_date, b.post_modified, t.tema_ca
              FROM %s AS b
              LEFT JOIN %s AS t ON b.categoria = t.id
              %s
@@ -231,7 +230,7 @@ if ($slug === 'llistatArticles') {
             b.post_content,
             b.post_status,
             b.slug,
-            bin_to_uuid_text(b.categoria) AS categoria_hex,
+            HEX(b.categoria) AS categoria_hex,
             b.post_date,
             b.post_modified,
             t.tema_ca
