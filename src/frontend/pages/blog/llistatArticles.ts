@@ -11,7 +11,7 @@ type BlogArticle = {
   slug: string;
   post_date: string;
   tema_ca?: string | null;
-  categoria_uuid?: string | null; // ve del backend: BIN_TO_UUID(b.categoria)
+  categoria_hex?: string | null;
 };
 
 type ApiPayload = {
@@ -191,13 +191,15 @@ export async function renderBlogListPaged(): Promise<void> {
 
     yearSelect.innerHTML = [`<option value="0">Tots</option>`, ...years.map((y) => `<option value="${y}">${y}</option>`)].join('');
 
-    // Categories per UUID
-    const catMap = new Map<string, string>(); // uuid -> label
+    // Categories per HEX
+    const catMap = new Map<string, string>(); // hex -> label
+
     for (const i of items) {
-      const uuid = (i.categoria_uuid ?? '').trim();
-      if (!uuid) continue;
+      const hex = (i.categoria_hex ?? '').trim();
+      if (!hex) continue;
+
       const label = (i.tema_ca ?? '').trim() || 'Sense categoria';
-      catMap.set(uuid, label);
+      catMap.set(hex, label);
     }
 
     const catEntries = Array.from(catMap.entries()).sort((a, b) => a[1].localeCompare(b[1], 'ca'));

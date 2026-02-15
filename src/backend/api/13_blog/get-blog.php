@@ -56,11 +56,10 @@ if ($slug === 'llistatArticles') {
         if ($cat === '0') {
             $where[] = "b.categoria IS NULL";
         } else {
-            $where[] = "b.categoria = UUID_TO_BIN(:cat)";
-            $params[':cat'] = $cat;
+            $where[] = "b.categoria = UNHEX(:cat)";
+            $params[':cat'] = $cat; // cat viene como HEX (32 chars)
         }
     }
-
 
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
@@ -81,7 +80,7 @@ if ($slug === 'llistatArticles') {
         // DATA paginada
         $sql = sprintf(
             "SELECT b.id, b.post_type, b.post_title, b.post_excerpt, b.lang, b.post_status, b.slug,
-                    b.categoria, BIN_TO_UUID(b.categoria) AS categoria_uuid, b.post_date, b.post_modified, t.tema_ca
+                    b.categoria, HEX(b.categoria) AS categoria_hex, b.post_date, b.post_modified, t.tema_ca
              FROM %s AS b
              LEFT JOIN %s AS t ON b.categoria = t.id
              %s
