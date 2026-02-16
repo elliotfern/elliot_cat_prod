@@ -28,6 +28,7 @@ import { agenda } from './pages/agenda/agenda';
 import { projectes } from './pages/projectes/projectes';
 import { initUserAreaButton } from './components/header/userAreaButton';
 import { blog } from './pages/blog/blog';
+import { initI18nHeaderLinks } from './components/header/i18nHeaderLinks';
 
 function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
   if (document.getElementById(id)) {
@@ -51,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const url = window.location.href;
   const pageType = getPageType(url);
 
+  initI18nHeaderLinks();
   void initUserAreaButton();
   barraNavegacio();
   mostrarBotonsNomesAdmin();
