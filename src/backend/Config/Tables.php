@@ -23,6 +23,7 @@ final class Tables
 
     // Imatges
     public const DB_IMATGES = 'db_img';
+    public const DB_IMATGES_TIPUS = 'db_img_type';
 
     // Geografia
     public const DB_CIUTATS = 'db_geo_ciutats';

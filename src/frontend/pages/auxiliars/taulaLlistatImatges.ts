@@ -22,6 +22,11 @@ export async function taulaLlistatImatges() {
 
   const columns: TaulaDinamica<Imatge>[] = [
     {
+      header: 'ID',
+      field: 'id',
+      render: (_: unknown, row: Imatge) => `[img id=${row.id}] - [img id=${row.id} alt="Foto del MNACTEC" caption="Terrassa, 2026"]`,
+    },
+    {
       header: '',
       field: 'nameImg',
       render: (_: unknown, row: Imatge) => `<a id="${row.id}" title="Imatges detalls" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-imatge/${row.id}"> <img src="https://media.elliot.cat/img/${row.name}/${row.nameImg}.jpg" alt="${row.nom}" width="60" height="auto"> </a>`,
@@ -50,7 +55,7 @@ export async function taulaLlistatImatges() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/auxiliars/get/?llistatCompletImatges`,
+    url: `https://${window.location.host}/api/auxiliars/get/llistatCompletImatges`,
     containerId: 'taulaLlistatImatges',
     columns,
     filterKeys: ['nom'],

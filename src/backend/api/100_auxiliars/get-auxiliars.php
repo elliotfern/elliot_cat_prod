@@ -4,7 +4,6 @@ use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Config\Tables;
-use Ramsey\Uuid\Uuid;
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -240,31 +239,50 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     }
 
     // Llistat complet imatges
-    // ruta GET => "/api/auxiliars/get/?llistatCompletImatges"
-} else if (isset($_GET['llistatCompletImatges'])) {
+    // ruta GET => "/api/auxiliars/get/llistatCompletImatges"
+} else if ($slug === 'llistatCompletImatges') {
 
-    $query = "SELECT i.id, i.typeImg, i.nom, t.name, i.dateCreated, i.nameImg
-            FROM db_img AS i
+
+    $sql = <<<SQL
+            SELECT i.id, i.typeImg, i.nom, t.name, i.dateCreated, i.nameImg
+            FROM %s AS i
             LEFT JOIN db_img_type AS t ON i.typeImg = t.id
-            ORDER BY i.nom ASC";
+            ORDER BY i.nom ASC
+            SQL;
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_IMATGES, $pdo),
+        qi(Tables::DB_IMATGES_TIPUS, $pdo),
 
-    // Ejecutar la consulta
-    $stmt->execute();
+    );
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
 
     // GET : llistat imatges usuaris
     // URL: https://elliot.cat/api/auxiliars/get/imatgesUsuaris
