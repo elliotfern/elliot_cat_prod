@@ -46,7 +46,7 @@ $slug = $routeParams[0];
         // Iterar sobre cada curso y agregarlo a la lista
         cursos.forEach(curso => {
             const li = document.createElement('li');
-            const postLink = `https://elliot.cat/ca/article/${curso.post_name}`; // Construye el link
+            const postLink = `https://elliot.cat/ca/historia/article/${curso.post_name}`; // Construye el link
 
             li.innerHTML = `
           <h6><a href="${postLink}">${curso.post_title}</a></h6>

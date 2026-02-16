@@ -2,11 +2,25 @@ import { getPageType } from '../../utils/urlPath';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { fitxaPersona } from '../persona/fitxaPersona';
 import { construirTaula } from '../../services/api/construirTaula';
+import { renderBlogArticleView } from '../blog/article';
 
 const url = window.location.href;
 const pageType = getPageType(url);
 
+function isLang(seg: string | undefined): boolean {
+  return ['ca', 'es', 'en', 'fr', 'it', 'pt'].includes(String(seg || '').toLowerCase());
+}
+
 export function historiaOberta() {
+  // /ca/historia/article/<slug>
+  if (pageType[2] === 'article') {
+    const slug = pageType[3] ?? '';
+    const langPrefix = isLang(pageType[0]) ? `/${pageType[0]}` : '';
+    // const backHref = `${langPrefix}/historia`;
+
+    void renderBlogArticleView(slug, 'historia');
+  }
+
   if (pageType[3] === 'modifica-article') {
   } else if (pageType[2] === 'fitxa-persona') {
     fitxaPersona('/api/persones/get/?persona=', pageType[3], 'historia-persona', function (data) {

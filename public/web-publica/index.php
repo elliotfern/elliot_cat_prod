@@ -114,7 +114,7 @@
                     const courseElement = document.createElement('div');
                     courseElement.classList.add('gridItem');
 
-                    const courseLink = `/ca/course/${course.paramName}`;
+                    const courseLink = `/ca/historia/curs/${course.paramName}`;
 
                     // Crear el contenido del curso
                     courseElement.innerHTML = `

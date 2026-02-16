@@ -3,6 +3,8 @@
 
 import { getIsAdmin } from '../../services/auth/isAdmin';
 
+type ArticleScope = 'blog' | 'historia';
+
 type BlogArticleDetail = {
   id: number;
   post_title: string;
@@ -35,19 +37,26 @@ function formatDateCa(dateStr: string): string {
   return d.toLocaleDateString('ca-ES', { year: 'numeric', month: 'long', day: '2-digit' });
 }
 
-async function fetchArticleBySlug(slug: string): Promise<BlogArticleDetail> {
+async function fetchArticleBySlug(slug: string, tipus: ArticleScope): Promise<BlogArticleDetail> {
   const usp = new URLSearchParams();
   usp.set('articleSlug', slug);
+  usp.set('scope', tipus);
 
   const url = `https://${window.location.host}/api/blog/get/articleSlug?${usp.toString()}`;
   const r = await fetch(url, { credentials: 'include' });
+
+  // si el backend devuelve 404, lo tratamos como error
+  if (!r.ok) {
+    throw new Error(`HTTP_${r.status}`);
+  }
+
   const json = await r.json();
   const data = (json?.data ?? json) as BlogArticleDetail;
 
   return data;
 }
 
-export async function renderBlogArticleView(slug: string): Promise<void> {
+export async function renderBlogArticleView(slug: string, tipus: ArticleScope): Promise<void> {
   const container = document.getElementById('articleView');
   if (!container) return;
 
@@ -65,7 +74,7 @@ export async function renderBlogArticleView(slug: string): Promise<void> {
 
   try {
     // 🔹 Paralelizamos carga de artículo + admin
-    const [a, isAdmin] = await Promise.all([fetchArticleBySlug(slug), getIsAdmin()]);
+    const [a, isAdmin] = await Promise.all([fetchArticleBySlug(slug, tipus), getIsAdmin()]);
 
     const title = escapeHtml(a.post_title || '(Sense títol)');
     const excerpt = (a.post_excerpt ?? '').trim();
@@ -117,9 +126,11 @@ export async function renderBlogArticleView(slug: string): Promise<void> {
       contentEl.innerHTML = contentHtml || `<div class="text-muted">Sense contingut.</div>`;
     }
   } catch (e) {
+    const msg = e instanceof Error && e.message === 'HTTP_404' ? `Article no trobat.` : `No s'ha pogut carregar l'article.`;
+
     container.innerHTML = `
       <div class="alert alert-danger mb-0">
-        No s'ha pogut carregar l'article.
+        ${escapeHtml(msg)}
       </div>
     `;
   }

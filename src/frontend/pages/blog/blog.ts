@@ -34,7 +34,7 @@ export async function blog() {
 
   switch (action) {
     case 'article':
-      void renderBlogArticleView(slug);
+      void renderBlogArticleView(slug, 'blog');
       break;
 
     case 'modifica-article':

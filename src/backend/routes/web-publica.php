@@ -12,10 +12,10 @@ $base_routes = [
     '/nou-usuari' =>  'public/web-publica/autenticacio-usuaris/registre-usuari.php',
 
     // ARTICLES
-    '/article/{slug}' => 'public/web-publica/article.php',
+    '/historia/article/{slug}' => 'public/web-publica/article.php',
 
     // CURSOS
-    '/course/{slug}' => 'public/web-publica/curs.php',
+    '/historia/curs/{slug}' => 'public/web-publica/curs.php',
 
     // 08. Biblioteca llibres
     $url['biblioteca'] => APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'index.php',
@@ -85,7 +85,7 @@ $routes = [
     ],
 
     // ARTICLES
-    '/ca/article/{slug}' => [
+    '/ca/historia/article/{slug}' => [
         'view' => 'public/web-publica/article.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -93,7 +93,7 @@ $routes = [
     ],
 
     // CURSOS
-    '/ca/course/{slug}' => [
+    '/ca/historia/curs/{slug}' => [
         'view' => 'public/web-publica/curs.php',
         'needs_session' => false,
         'header_footer' => false,

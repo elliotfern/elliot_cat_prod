@@ -144,7 +144,6 @@ function renderBlogImgShortcodes(string $html, PDO $pdo): string
     return $html;
 }
 
-
 // Llistat complet del blog
 // URL: /api/blog/get/llistatArticles?page=1&limit=10&order=asc|desc
 if ($slug === 'llistatArticles') {
@@ -173,6 +172,10 @@ if ($slug === 'llistatArticles') {
     // WHERE dinámico
     $where = [];
     $params = [];
+
+    // Excluir historia_oberta del listado del blog
+    $where[] = "b.post_type <> :excluded_post_type";
+    $params[':excluded_post_type'] = 'historia_oberta';
 
     // (Opcional) filtra por año usando el campo post_date (YYYY-...)
     if ($year >= 1970 && $year <= 2100) {
@@ -381,7 +384,7 @@ if ($slug === 'llistatArticles') {
     }
 
     // Article per slug
-    // URL: /api/blog/get/articleSlug?articleSlug=revolut  
+    // URL: /api/blog/get/articleSlug?articleSlug=revolut&scope=blog|historia
 } else if ($slug === 'articleSlug') {
 
     header('Content-Type: application/json; charset=utf-8');
@@ -389,10 +392,30 @@ if ($slug === 'llistatArticles') {
     $articleSlug = (string)($_GET['articleSlug'] ?? '');
     $articleSlug = trim($articleSlug);
 
-    // Validació bàsica de slug (ajusta si uses altres caràcters)
+    // scope: blog (default) o historia
+    $scope = strtolower(trim((string)($_GET['scope'] ?? 'blog')));
+    if (!in_array($scope, ['blog', 'historia'], true)) {
+        $scope = 'blog';
+    }
+
+    // Validació bàsica de slug
     if ($articleSlug === '' || !preg_match('~^[a-z0-9][a-z0-9\-]*[a-z0-9]$|^[a-z0-9]$~', $articleSlug)) {
         Response::error('Paràmetre articleSlug invàlid', [], 400);
         return;
+    }
+
+    // Segons l’scope:
+    // - blog: NO deixar veure historia_oberta
+    // - historia: només deixar veure historia_oberta
+    $whereExtra = '';
+    $bindPostType = false;
+
+    if ($scope === 'blog') {
+        $whereExtra = " AND b.post_type <> :post_type ";
+        $bindPostType = true;
+    } else if ($scope === 'historia') {
+        $whereExtra = " AND b.post_type = :post_type ";
+        $bindPostType = true;
     }
 
     $sql = "
@@ -412,26 +435,33 @@ if ($slug === 'llistatArticles') {
         FROM " . qi(Tables::BLOG, $pdo) . " AS b
         LEFT JOIN " . qi(Tables::DB_TEMES, $pdo) . " AS t ON b.categoria = t.id
         WHERE b.slug = :slug
+        $whereExtra
         LIMIT 1
     ";
 
     try {
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':slug', $articleSlug, PDO::PARAM_STR);
+
+        if ($bindPostType) {
+            $stmt->bindValue(':post_type', 'historia_oberta', PDO::PARAM_STR);
+        }
+
         $stmt->execute();
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        // Si existe slug pero no encaja con scope => 404 igual (así “no se puede abrir” desde esa sección)
         if (!$row) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
             return;
         }
 
-        // ✅ Normalizar categoria para que coincida con el endpoint de categorías (UUID con guiones)
+        // ✅ Normalizar categoria (UUID con guiones)
         $hex = (string)($row['categoria_hex'] ?? '');
         $row['categoria'] = $hex !== '' ? hexToUuidText($hex) : null;
 
-        // ✅ Reemplazar shortcodes de imágenes del blog en el backend
+        // ✅ Reemplazar shortcodes de imágenes del blog
         if (isset($row['post_content']) && is_string($row['post_content']) && $row['post_content'] !== '') {
             $row['post_content'] = renderBlogImgShortcodes($row['post_content'], $pdo);
         }
@@ -448,7 +478,6 @@ if ($slug === 'llistatArticles') {
             500
         );
     }
-
     // Article per slug
     // URL: /api/blog/get/articleId?id=333  
 } else if ($slug === 'articleId') {
