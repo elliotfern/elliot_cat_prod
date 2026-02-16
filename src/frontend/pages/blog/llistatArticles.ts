@@ -322,6 +322,7 @@ export async function renderBlogListPaged(): Promise<void> {
                     ${statusBadge ? ` ${statusBadge}` : ''}
                   </div>
                 </div>
+            </a>
 
                 <div class="d-flex align-items-center gap-2">
                   ${
@@ -336,10 +337,8 @@ export async function renderBlogListPaged(): Promise<void> {
                         </button>`
                       : ''
                   }
-                  <div class="text-muted small d-none d-md-block">→</div>
                 </div>
               </div>
-            </a>
           `;
       })
       .join('');
