@@ -59,3 +59,11 @@ a:visited,
 a:hover {
   text-decoration: underline;
 }
+
+body {
+  padding-top: 72px;
+}
+
+:root {
+  --headerH: 72px;
+}

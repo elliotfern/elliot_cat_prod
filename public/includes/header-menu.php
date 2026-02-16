@@ -187,9 +187,12 @@
             document.documentElement.style.setProperty("--headerH", `${headerH}px`);
 
             // Empuja el contenido con la altura del intranet (NO el body)
+            // Empuja el contenido con la altura del intranet (NO el body)
+            // Si NO hay intranet, dejamos un pequeño margen para que no quede pegado al header
             if (mainContainer) {
-                mainContainer.style.paddingTop = intranetNav ? `${intranetH}px` : "0px";
+                mainContainer.style.paddingTop = intranetNav ? `${intranetH}px` : "16px";
             }
+
         };
 
         apply();
