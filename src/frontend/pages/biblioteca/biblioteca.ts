@@ -40,10 +40,12 @@ export async function biblioteca() {
     // ✅ Admin => /gestio ; Públic => /{lang}
     const basePrefix = isAdmin ? '/gestio' : getLangPrefix();
 
+    const columnes = isAdmin ? ['Titol', 'Any', 'Accions'] : ['Titol', 'Any'];
+
     fitxaPersona('/api/persones/get/?persona=', slug, 'biblioteca-autor', function (data) {
-      construirTaula('taula1', '/api/biblioteca/get/?type=autorLlibres&id=', data.id, ['Titol', 'Any', 'Accions'], function (fila, columna) {
+      construirTaula('taula1', '/api/biblioteca/get/?type=autorLlibres&id=', data.id, columnes, function (fila, columna) {
         if (columna.toLowerCase() === 'titol') {
-          const href = `${DOMAIN_WEB}${basePrefix}/biblioteca/fitxa-llibre/${encodeURIComponent(fila['slug'])}`;
+          const href = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-llibre/${encodeURIComponent(fila['slug'])}`;
           return `<a href="${href}">${fila['titol']}</a>`;
         } else if (columna.toLowerCase() === 'accions') {
           if (!isAdmin) return ''; // ✅ acciones solo admin
