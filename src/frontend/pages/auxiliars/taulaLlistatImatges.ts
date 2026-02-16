@@ -24,7 +24,7 @@ export async function taulaLlistatImatges() {
     {
       header: 'ID',
       field: 'id',
-      render: (_: unknown, row: Imatge) => `[img id=${row.id}] - [img id=${row.id} alt="Foto del MNACTEC" caption="Terrassa, 2026"]`,
+      render: (_: unknown, row: Imatge) => `[img id=${row.id}] - [img id=${row.id} alt="${row.nom}" caption="${row.alt}"]`,
     },
     {
       header: '',

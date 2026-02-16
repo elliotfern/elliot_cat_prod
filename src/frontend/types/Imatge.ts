@@ -5,4 +5,5 @@ export interface Imatge {
   nom: string;
   name: string;
   nameImg: string;
+  alt: string;
 }

@@ -244,7 +244,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 
 
     $sql = <<<SQL
-            SELECT i.id, i.typeImg, i.nom, t.name, i.dateCreated, i.nameImg
+            SELECT i.id, i.typeImg, i.nom, t.name, i.dateCreated, i.nameImg, i.alt
             FROM %s AS i
             LEFT JOIN db_img_type AS t ON i.typeImg = t.id
             ORDER BY i.nom ASC
