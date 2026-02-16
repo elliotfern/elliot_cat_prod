@@ -3,20 +3,22 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { Persona } from '../../types/Persona';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
+import { getLangPrefix } from '../../utils/locales/getLangPrefix';
+import { API_BASE, DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
 
 export async function taulaLlistatAutors() {
   const isAdmin = await getIsAdmin(); // Comprovar si és admin
-  let gestioUrl: string = '';
 
-  if (isAdmin) {
-    gestioUrl = '/gestio';
-  }
+  // ✅ Admin => /gestio ; Públic => /{lang}
+  const basePrefix = isAdmin ? '/gestio' : getLangPrefix();
 
   const columns: TaulaDinamica<Persona>[] = [
     {
       header: 'Autor/a',
       field: 'id',
-      render: (_: unknown, row: Persona) => `<a href="https://${window.location.host}${gestioUrl}/biblioteca/fitxa-autor/${row.slug}">${row.AutNom} ${row.AutCognom1}</a>`,
+      render: (_: unknown, row: Persona) => `<a href="${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-autor/${encodeURIComponent(row.slug)}">
+          ${row.AutNom} ${row.AutCognom1}
+        </a>`,
     },
     { header: 'País', field: 'country' },
     { header: 'Professió', field: 'grup' },
@@ -34,13 +36,13 @@ export async function taulaLlistatAutors() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Persona) => `
-        <a href="https://${window.location.host}/gestio/base-dades-persones/modifica-persona/${row.slug}">
+        <a href="${INTRANET_WEB}/base-dades-persones/modifica-persona/${row.slug}">
            <button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/biblioteca/get/?type=totsAutors`,
+    url: `${API_BASE}/biblioteca/get/?type=totsAutors`,
     containerId: 'taulaLlistatAutors',
     columns,
     filterKeys: ['AutCognom1'],
