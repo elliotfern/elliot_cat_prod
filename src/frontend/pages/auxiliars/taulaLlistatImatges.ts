@@ -22,20 +22,23 @@ export async function taulaLlistatImatges() {
 
   const columns: TaulaDinamica<Imatge>[] = [
     {
-      header: 'ID',
-      field: 'id',
-      render: (_: unknown, row: Imatge) => `[img id=${row.id}] - [img id=${row.id} alt="${row.nom}" caption="${row.alt}"]`,
+      header: 'Imatge',
+      field: 'nom',
+      render: (_: unknown, row: Imatge) => `<a id="${row.id}" title="Imatges detalls" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-imatge/${row.id}">${row.nom}</a>`,
     },
+
     {
       header: '',
       field: 'nameImg',
       render: (_: unknown, row: Imatge) => `<a id="${row.id}" title="Imatges detalls" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-imatge/${row.id}"> <img src="https://media.elliot.cat/img/${row.name}/${row.nameImg}.jpg" alt="${row.nom}" width="60" height="auto"> </a>`,
     },
+
     {
-      header: 'Imatge',
-      field: 'nom',
-      render: (_: unknown, row: Imatge) => `<a id="${row.id}" title="Imatges detalls" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-imatge/${row.id}">${row.nom}</a>`,
+      header: 'ID',
+      field: 'id',
+      render: (_: unknown, row: Imatge) => `[img id=${row.id}] - [img id=${row.id} alt="${row.nom}" caption="${row.alt}"]`,
     },
+
     { header: 'Tipus Imatge', field: 'name' },
     {
       header: 'Data creació',
