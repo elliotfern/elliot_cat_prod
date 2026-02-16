@@ -143,16 +143,18 @@ function renderBlogImgShortcodes(string $html, PDO $pdo): string
 
     return $html;
 }
-
 // Llistat complet del blog
 // URL: /api/blog/get/llistatArticles?page=1&limit=10&order=asc|desc
 if ($slug === 'llistatArticles') {
+
+    $excludedPostType = 'historia_oberta';
+
     $page  = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $order = isset($_GET['order']) ? strtolower((string)$_GET['order']) : 'desc';
 
     $year  = isset($_GET['year']) ? (int)$_GET['year'] : 0;
-    $cat   = isset($_GET['cat']) ? (string)$_GET['cat'] : ''; // puede venir vacío
+    $cat   = isset($_GET['cat']) ? trim((string)$_GET['cat']) : ''; // puede venir vacío
 
     $lang = isset($_GET['lang']) ? (int)$_GET['lang'] : 0;
 
@@ -175,7 +177,14 @@ if ($slug === 'llistatArticles') {
 
     // Excluir historia_oberta del listado del blog
     $where[] = "b.post_type <> :excluded_post_type";
-    $params[':excluded_post_type'] = 'historia_oberta';
+    $params[':excluded_post_type'] = $excludedPostType;
+
+    // ✅ En público: solo publicados
+    if (!isUserAdmin()) {
+        $where[] = "b.post_status IN ('publish','published','publicat')";
+        // (opcional) si no quieres posts sin fecha en público:
+        // $where[] = "b.post_date IS NOT NULL";
+    }
 
     // (Opcional) filtra por año usando el campo post_date (YYYY-...)
     if ($year >= 1970 && $year <= 2100) {
@@ -185,13 +194,18 @@ if ($slug === 'llistatArticles') {
 
     // (Opcional) filtra por categoría
     // - si cat="0" => sin categoría
-    // - si cat es UUID (texto) => convertimos a BINARY(16)
+    // - si cat es HEX(32) => convertimos a BINARY(16)
     if ($cat !== '') {
         if ($cat === '0') {
             $where[] = "b.categoria IS NULL";
         } else {
+            // ✅ validación básica: HEX de 32 chars
+            if (!preg_match('/^[0-9a-fA-F]{32}$/', $cat)) {
+                Response::error('Paràmetre cat invàlid', [], 400);
+                return;
+            }
             $where[] = "b.categoria = UNHEX(:cat)";
-            $params[':cat'] = $cat; // cat viene como HEX (32 chars)
+            $params[':cat'] = strtolower($cat);
         }
     }
 
@@ -206,10 +220,13 @@ if ($slug === 'llistatArticles') {
     try {
         // COUNT total
         $sqlCount = sprintf(
-            "SELECT COUNT(*) AS total FROM %s AS b %s",
+            "SELECT COUNT(*) AS total
+             FROM %s AS b
+             %s",
             qi(Tables::BLOG, $pdo),
             $whereSql
         );
+
         $stmtCount = $pdo->prepare($sqlCount);
         foreach ($params as $k => $v) {
             $stmtCount->bindValue($k, $v);
@@ -219,7 +236,18 @@ if ($slug === 'llistatArticles') {
 
         // DATA paginada
         $sql = sprintf(
-            "SELECT b.id, b.post_type, b.post_title, b.post_excerpt, b.lang, b.post_status, b.slug, HEX(b.categoria) AS categoria_hex, b.post_date, b.post_modified, t.tema_ca
+            "SELECT
+                b.id,
+                b.post_type,
+                b.post_title,
+                b.post_excerpt,
+                b.lang,
+                b.post_status,
+                b.slug,
+                HEX(b.categoria) AS categoria_hex,
+                b.post_date,
+                b.post_modified,
+                t.tema_ca
              FROM %s AS b
              LEFT JOIN %s AS t ON b.categoria = t.id
              %s
@@ -238,6 +266,7 @@ if ($slug === 'llistatArticles') {
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
+
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $pages = (int)ceil(($total > 0 ? $total : 1) / $limit);
@@ -275,17 +304,25 @@ if ($slug === 'llistatArticles') {
     // URL: /api/blog/get/filtresArticles
 } else if ($slug === 'filtresArticles') {
 
+    $excludedPostType = 'historia_oberta';
+
+    // ✅ Admin? (si no, solo publicados)
+    $isAdmin = function_exists('isUserAdmin') && isUserAdmin();
+    $statusWhere = $isAdmin ? "" : " AND b.post_status IN ('publish','published','publicat')";
+
     // 1) Anyos disponibles (de post_date)
     $sqlYears = sprintf(
         "SELECT DISTINCT YEAR(b.post_date) AS y
          FROM %s AS b
          WHERE b.post_date IS NOT NULL
+           AND b.post_type <> :excluded_post_type
+           %s
          ORDER BY y DESC",
-        qi(Tables::BLOG, $pdo)
+        qi(Tables::BLOG, $pdo),
+        $statusWhere
     );
 
     // 2) Categories disponibles (HEX id + label)
-    // OJO: si quieres incluir también categorías que no estén usadas, cambia el JOIN.
     $sqlCats = sprintf(
         "SELECT DISTINCT
             HEX(t.id) AS hex,
@@ -293,15 +330,24 @@ if ($slug === 'llistatArticles') {
          FROM %s AS b
          INNER JOIN %s AS t ON b.categoria = t.id
          WHERE b.categoria IS NOT NULL
+           AND b.post_date IS NOT NULL
+           AND b.post_type <> :excluded_post_type
+           %s
          ORDER BY label ASC",
         qi(Tables::BLOG, $pdo),
-        qi(Tables::DB_TEMES, $pdo)
+        qi(Tables::DB_TEMES, $pdo),
+        $statusWhere
     );
 
     // 3) Idiomes disponibles (només els permesos i que apareixen al blog)
     $allowedLangIds = [1, 2, 3, 4, 7];
 
-    $inLang = implode(',', array_fill(0, count($allowedLangIds), '?'));
+    // ✅ Placeholders nombrados (no mezclar ? y :named)
+    $langPlaceholders = [];
+    foreach ($allowedLangIds as $i => $_) {
+        $langPlaceholders[] = ':lang' . $i;
+    }
+    $inLang = implode(',', $langPlaceholders);
 
     $sqlLangs = sprintf(
         "SELECT DISTINCT
@@ -310,14 +356,20 @@ if ($slug === 'llistatArticles') {
          FROM %s AS b
          INNER JOIN %s AS l ON b.lang = l.id
          WHERE b.lang IN ($inLang)
+           AND b.post_date IS NOT NULL
+           AND b.post_type <> :excluded_post_type
+           %s
          ORDER BY label ASC",
         qi(Tables::BLOG, $pdo),
-        qi(Tables::DB_IDIOMES, $pdo)
+        qi(Tables::DB_IDIOMES, $pdo),
+        $statusWhere
     );
 
     try {
         // YEARS
-        $stmtY = $pdo->query($sqlYears);
+        $stmtY = $pdo->prepare($sqlYears);
+        $stmtY->bindValue(':excluded_post_type', $excludedPostType);
+        $stmtY->execute();
         $yearsRaw = $stmtY->fetchAll(PDO::FETCH_ASSOC);
 
         $years = [];
@@ -325,17 +377,19 @@ if ($slug === 'llistatArticles') {
             $y = (int)($r['y'] ?? 0);
             if ($y > 0) $years[] = $y;
         }
+        $years = array_values(array_unique($years));
+        rsort($years);
 
         // CATEGORIES
-        $stmtC = $pdo->query($sqlCats);
+        $stmtC = $pdo->prepare($sqlCats);
+        $stmtC->bindValue(':excluded_post_type', $excludedPostType);
+        $stmtC->execute();
         $catsRaw = $stmtC->fetchAll(PDO::FETCH_ASSOC);
 
         $categories = [];
         foreach ($catsRaw as $r) {
-            $hex = (string)($r['hex'] ?? '');
-            $label = (string)($r['label'] ?? '');
-            $hex = trim($hex);
-            $label = trim($label);
+            $hex = trim((string)($r['hex'] ?? ''));
+            $label = trim((string)($r['label'] ?? ''));
 
             if ($hex === '' || $label === '') continue;
 
@@ -344,12 +398,14 @@ if ($slug === 'llistatArticles') {
                 'label' => $label,
             ];
         }
+        usort($categories, fn($a, $b) => strcmp($a['label'], $b['label']));
 
         // LANGS
         $stmtL = $pdo->prepare($sqlLangs);
         foreach ($allowedLangIds as $i => $langId) {
-            $stmtL->bindValue($i + 1, $langId, PDO::PARAM_INT); // placeholders ? (1-based)
+            $stmtL->bindValue(':lang' . $i, $langId, PDO::PARAM_INT);
         }
+        $stmtL->bindValue(':excluded_post_type', $excludedPostType);
         $stmtL->execute();
         $langsRaw = $stmtL->fetchAll(PDO::FETCH_ASSOC);
 
@@ -365,6 +421,7 @@ if ($slug === 'llistatArticles') {
                 'label' => $label,
             ];
         }
+        usort($langs, fn($a, $b) => strcmp($a['label'], $b['label']));
 
         Response::success(
             MissatgesAPI::success('get'),

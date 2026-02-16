@@ -13,6 +13,13 @@
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { langIdToCode } from '../../utils/locales/getLangPrefix';
 
+function isPublicStatus(status?: string | null): boolean {
+  const s = String(status ?? '')
+    .toLowerCase()
+    .trim();
+  return s === 'publish' || s === 'published' || s === 'publicat';
+}
+
 function renderStatusBadge(status?: string | null): string {
   const s = String(status ?? '')
     .toLowerCase()
@@ -354,16 +361,23 @@ export async function renderBlogListPaged(): Promise<void> {
       lang: state.lang > 0 ? state.lang : undefined,
     });
 
-    const items = data.items ?? [];
+    let items = data.items ?? [];
+
+    if (!isAdmin) {
+      items = items.filter((x) => isPublicStatus(x.post_status));
+    }
+
     const pag = data.pagination;
 
     renderList(items);
 
-    const total = pag?.total ?? items.length;
     const pages = pag?.pages ?? 1;
     const page = pag?.page ?? state.page;
 
-    countInfo.textContent = `Mostrant ${items.length} de ${total}`;
+    const visibleCount = items.length;
+    const totalFromApi = pag?.total ?? visibleCount;
+
+    countInfo.textContent = `Mostrant ${visibleCount} de ${!isAdmin ? visibleCount : totalFromApi}`;
     pageInfo.textContent = `Pàgina ${page} de ${pages}`;
 
     prevBtn.disabled = !(pag?.has_prev ?? page > 1);
