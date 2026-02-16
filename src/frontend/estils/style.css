@@ -67,3 +67,11 @@ body {
 :root {
   --headerH: 72px;
 }
+
+a.link-external i {
+  opacity: 0.8;
+}
+
+a.link-internal i {
+  opacity: 0.5;
+}
