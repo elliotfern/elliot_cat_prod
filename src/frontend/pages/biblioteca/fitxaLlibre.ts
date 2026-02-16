@@ -1,3 +1,6 @@
+import { getLangPrefix, isInGestio } from '../../utils/locales/getLangPrefix';
+import { DOMAIN_WEB } from '../../utils/urls';
+
 type ApiResponse<T> = {
   status: 'success' | 'error';
   message: string;
@@ -86,7 +89,8 @@ function renderAutors(data: BookData) {
   const el = document.getElementById('linkAutor');
   if (!el) return;
 
-  const base = `${window.location.origin}/gestio/biblioteca/fitxa-autor/`;
+  const basePrefix = isInGestio() ? 'gestio' : getLangPrefix();
+  const base = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-autor/`;
 
   // 1) Preferimos array autors[]
   const autors = Array.isArray(data.autors) ? data.autors.filter((a) => a && a.slug) : [];

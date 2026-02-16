@@ -11,3 +11,8 @@ export const LANGS: LangCode[] = ['ca', 'es', 'en', 'fr', 'it'];
 export function isLang(seg: string | undefined): boolean {
   return LANGS.includes(String(seg ?? '').toLowerCase() as LangCode);
 }
+
+export function isInGestio(): boolean {
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  return parts[0] === 'gestio';
+}

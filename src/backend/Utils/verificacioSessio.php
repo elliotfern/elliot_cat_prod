@@ -12,7 +12,7 @@ function data_input($data)
 
 /**
  * Verifica sesión por JWT (cookie "token").
- * - Redirige a /entrada si no hay token o es inválido.
+ * - Redirige a /ca/entrada si no hay token o es inválido.
  * - Inyecta compatibilidad legacy: $_COOKIE['user_id'] = user_type (string)
  * - Devuelve el objeto decoded por si quieres usarlo.
  */
@@ -26,12 +26,12 @@ function verificarSesion(): object
     if (!$jwtSecret) {
         // Si no hay secret, es un fallo de config: mejor echar fuera
         error_log("Missing TOKEN secret in env");
-        header('Location: /entrada');
+        header('Location: /ca/entrada');
         exit();
     }
 
     if (empty($_COOKIE['token'])) {
-        header('Location: /entrada');
+        header('Location: /ca/entrada');
         exit();
     }
 
@@ -44,7 +44,7 @@ function verificarSesion(): object
 
         // Solo permitimos user_type 1 (admin) o 2 (usuario)
         if (!in_array($userType, [1, 2], true)) {
-            header('Location: /entrada');
+            header('Location: /ca/entrada');
             exit();
         }
 
@@ -66,7 +66,7 @@ function verificarSesion(): object
         return $decoded;
     } catch (Exception $e) {
         error_log("Error al verificar sesión: " . $e->getMessage());
-        header('Location: /entrada');
+        header('Location: /ca/entrada');
         exit();
     }
 }
@@ -78,7 +78,7 @@ function verificarAdmin(): object
     $decoded = verificarSesion(); // ya valida token + user_type 1 o 2
 
     if ((int)($decoded->user_type ?? 0) !== 1) {
-        header('Location: /entrada');
+        header('Location: /ca/entrada');
         exit();
     }
 

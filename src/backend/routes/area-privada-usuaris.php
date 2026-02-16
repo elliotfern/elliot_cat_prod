@@ -5,7 +5,7 @@ function checkIfUsuari()
 {
     if (!isUserUsuari()) {
         // Si no es admin, redirigimos al login o a una página de acceso denegado
-        header('Location: /entrada');
+        header('Location: /ca/entrada');
         exit;
     }
 }
