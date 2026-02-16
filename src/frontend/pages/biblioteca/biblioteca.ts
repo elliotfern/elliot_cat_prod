@@ -37,7 +37,7 @@ export async function biblioteca() {
     if (isAdmin) {
       slug = pageType[3];
     } else {
-      slug = pageType[2];
+      slug = pageType[3];
     }
 
     fitxaPersona('/api/persones/get/?persona=', slug, 'biblioteca-autor', function (data) {
