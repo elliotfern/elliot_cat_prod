@@ -46,55 +46,72 @@
         <div id="coursesList" class="gridContainer"></div>
 
         <script>
-            // Función para obtener y mostrar la lista de cursos
-            const getCoursesList = async (lang = 'es') => {
-                try {
-                    // Realiza la solicitud a la API
-                    const response = await fetch(`https://elliot.cat/api/historia/get/?type=llistatCursos&langCurso=${lang}`);
-                    const courses = await response.json(); // Parseamos la respuesta como JSON
+            function getLangFromPath() {
+                const parts = window.location.pathname.split('/').filter(Boolean);
+                const first = String(parts[0] || '').toLowerCase();
+                const allowed = ['ca', 'es', 'en', 'fr', 'it', 'pt'];
+                return allowed.includes(first) ? first : 'ca';
+            }
 
-                    // Llama a la función para mostrar los cursos
-                    displayCourses(courses);
+            const currentLang = getLangFromPath();
+
+            // Función para obtener y mostrar la lista de cursos
+            const getCoursesList = async (lang) => {
+                try {
+                    const url = new URL('https://elliot.cat/api/historia/get/');
+                    url.searchParams.set('type', 'llistatCursos');
+                    url.searchParams.set('langCurso', lang);
+
+                    const response = await fetch(url.toString(), {
+                        credentials: 'include'
+                    });
+                    if (!response.ok) throw new Error(`HTTP_${response.status}`);
+
+                    const data = await response.json();
+
+                    // si tu API devuelve {data:[...]}, esto lo soporta; si devuelve [...], también
+                    const courses = (data && data.data) ? data.data : data;
+
+                    displayCourses(courses, lang);
                 } catch (error) {
                     console.error('Error fetching data:', error);
                 }
             };
 
             // Función para mostrar los cursos
-            const displayCourses = (courses) => {
+            const displayCourses = (courses, lang) => {
                 const coursesListContainer = document.getElementById('coursesList');
+                if (!coursesListContainer) return;
 
-                // Limpiar el contenido de la lista antes de agregar los nuevos elementos
                 coursesListContainer.innerHTML = '';
 
-                // Iterar sobre cada curso y agregarlo a la grilla
-                courses.forEach(course => {
+                (courses || []).forEach((course) => {
                     const courseElement = document.createElement('div');
                     courseElement.classList.add('gridItem');
 
-                    const courseLink = `/ca/historia/curs/${course.paramName}`;
+                    // ✅ ahora el link usa el idioma actual
+                    const courseLink = `/${lang}/historia/curs/${encodeURIComponent(course.paramName)}`;
 
-                    // Crear el contenido del curso
                     courseElement.innerHTML = `
-          <a href="${courseLink}">
-            <img src="${course.img}" alt="${course.nombreCurso}" />
-          </a>
-          <a href="${courseLink}" style="text-decoration: none; color: inherit;">
-            <h3 style="font-size: 17px; color: inherit;">${course.nombreCurso}</h3>
-          </a>
-          <p>${course.resumen}</p>
-          <p>
-            <a href="${courseLink}">${'Enlace al curso'}</a>
-          </p>
-        `;
+        <a href="${courseLink}">
+          <img src="${course.img}" alt="${course.nombreCurso || ''}" />
+        </a>
+        <a href="${courseLink}" style="text-decoration: none; color: inherit;">
+          <h3 style="font-size: 17px; color: inherit;">${course.nombreCurso || ''}</h3>
+        </a>
+        <p>${course.resumen || ''}</p>
+        <p>
+          <a href="${courseLink}">Enlace al curso</a>
+        </p>
+      `;
 
-                    // Agregar el elemento del curso a la grilla
                     coursesListContainer.appendChild(courseElement);
                 });
             };
 
-            // Llamada a la función para obtener y mostrar los cursos (ajusta el idioma si es necesario)
-            getCoursesList('ca');
+            // ✅ Cargar cursos con el idioma de la URL actual
+            getCoursesList(currentLang);
         </script>
+
     </div>
 </main>
