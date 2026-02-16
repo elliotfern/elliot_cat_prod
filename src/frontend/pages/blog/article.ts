@@ -1,5 +1,5 @@
 // src/frontend/pages/blog/articleView.ts
-// Ruta pública: /blog/article/<slug>
+// Ruta pública: /{lang}/blog/article/<slug>  i  /{lang}/historia/article/<slug>
 
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { decorateLinksInHtml } from '../../utils/linksExterns';
@@ -47,15 +47,38 @@ async function fetchArticleBySlug(slug: string, tipus: ArticleScope): Promise<Bl
   const url = `https://${window.location.host}/api/blog/get/articleSlug?${usp.toString()}`;
   const r = await fetch(url, { credentials: 'include' });
 
-  // si el backend devuelve 404, lo tratamos como error
-  if (!r.ok) {
-    throw new Error(`HTTP_${r.status}`);
-  }
+  if (!r.ok) throw new Error(`HTTP_${r.status}`);
 
   const json = await r.json();
   const data = (json?.data ?? json) as BlogArticleDetail;
-
   return data;
+}
+
+/**
+ * Redirige a la misma ruta pero con el prefijo de idioma correcto según a.lang.
+ * Mantiene querystring y hash.
+ * Devuelve true si ha redirigido.
+ */
+function redirectIfLangMismatch(articleLangId: number | null | undefined): boolean {
+  const urlCode = getUrlLangCode() ?? 'ca';
+  const n = Number(articleLangId);
+
+  if (!Number.isFinite(n)) return false;
+
+  const correctCode = LANG_ID_TO_CODE[n];
+  if (!correctCode || correctCode === urlCode) return false;
+
+  const parts = window.location.pathname.split('/').filter(Boolean);
+
+  // Si la ruta ya empieza por idioma, lo sustituimos; si no, lo insertamos (robusto).
+  const hasLangPrefix = !!getUrlLangCode();
+  const rest = hasLangPrefix ? parts.slice(1) : parts;
+
+  const newPath = `/${correctCode}/${rest.join('/')}`;
+  const newUrl = `${window.location.origin}${newPath}${window.location.search}${window.location.hash}`;
+
+  window.location.replace(newUrl);
+  return true;
 }
 
 export async function renderBlogArticleView(slug: string, tipus: ArticleScope): Promise<void> {
@@ -80,43 +103,22 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
   `;
 
   try {
-    // 🔹 Paralelizamos carga de artículo + admin
     const [a, isAdmin] = await Promise.all([fetchArticleBySlug(slug, tipus), getIsAdmin()]);
 
-    // ✅ En HISTORIA: redirigir si idioma no coincide
-    if (tipus === 'historia') {
-      const urlCode = getUrlLangCode();
-      const articleLangId = Number(a.lang);
-
-      if (urlCode && Number.isFinite(articleLangId)) {
-        const correctCode = LANG_ID_TO_CODE[articleLangId];
-
-        if (correctCode && correctCode !== urlCode) {
-          // reconstruimos la URL con el idioma correcto
-          const parts = window.location.pathname.split('/').filter(Boolean);
-
-          // parts[0] es el idioma actual
-          parts[0] = correctCode;
-
-          const newPath = '/' + parts.join('/');
-
-          window.location.replace(newPath);
-          return; // muy importante
-        }
-      }
-    }
+    // ✅ Bloqueo por idioma para TODO: blog + historia
+    // (si el artículo es 'ca' y estás en /en/... -> te manda a /ca/...)
+    if (redirectIfLangMismatch(a.lang)) return;
 
     const title = escapeHtml(a.post_title || '(Sense títol)');
     const excerpt = (a.post_excerpt ?? '').trim();
-
-    const contentHtml = decorateLinksInHtml(a.post_content ?? '').trim(); // viene como HTML
+    const contentHtml = decorateLinksInHtml(a.post_content ?? '').trim();
     const cat = escapeHtml((a.tema_ca ?? 'Sense categoria') || 'Sense categoria');
     const dateLabel = escapeHtml(formatDateCa(a.post_date));
 
     const editButton = isAdmin
       ? `
         <div class="mb-3 text-end">
-          <a href="/gestio/blog/modifica-article/${a.id}" 
+          <a href="/gestio/blog/modifica-article/${a.id}"
              class="btn btn-sm btn-outline-primary">
              ✏️ Modificar article
           </a>
@@ -124,14 +126,12 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
       `
       : '';
 
-    // ⚠️ contentHtml se inserta como HTML (igual que haces en otras páginas).
-    // Si el contenido puede venir de usuarios, habría que sanitizar en servidor o con una lib.
     container.innerHTML = `
       <article class="card">
         <div class="card-body">
 
-         ${editButton}
-         
+          ${editButton}
+
           <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
             <span class="badge text-bg-light border">${cat}</span>
             <span class="text-muted small">${dateLabel}</span>
@@ -147,11 +147,11 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
         </div>
       </article>
 
-     <div class="mb-3">
-  <a class="text-decoration-none" href="${backHref}">
-    ${backLabel}
-  </a>
-</div>
+      <div class="mb-3">
+        <a class="text-decoration-none" href="${backHref}">
+          ${backLabel}
+        </a>
+      </div>
     `;
 
     const contentEl = container.querySelector<HTMLDivElement>('#blogContent');
@@ -163,7 +163,6 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
 
     if (e instanceof Error) {
       if (e.message === 'HTTP_404') msg = `Article no trobat.`;
-      if (e.message === 'LANG_MISMATCH') msg = `Aquest article no està disponible en aquest idioma.`;
     }
 
     container.innerHTML = `
