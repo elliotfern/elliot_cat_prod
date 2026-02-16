@@ -12,6 +12,7 @@ $base_routes = [
     '/nou-usuari' =>  'public/web-publica/autenticacio-usuaris/registre-usuari.php',
 
     // ARTICLES
+    '/historia' => 'public/web-publica/article.php',
     '/historia/article/{slug}' => 'public/web-publica/article.php',
 
     // CURSOS
@@ -85,6 +86,13 @@ $routes = [
     ],
 
     // ARTICLES
+    '/ca/historia' => [
+        'view' => 'public/web-publica/historia.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => true,
+    ],
+
     '/ca/historia/article/{slug}' => [
         'view' => 'public/web-publica/article.php',
         'needs_session' => false,
