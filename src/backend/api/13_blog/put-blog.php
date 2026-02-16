@@ -89,16 +89,6 @@ if (!empty($errors)) {
 }
 
 try {
-    // ✅ comprobar que existe
-    $check = $conn->prepare("SELECT slug FROM db_blog WHERE id = :id LIMIT 1");
-    $check->bindValue(':id', $id, PDO::PARAM_INT);
-    $check->execute();
-    $oldSlug = $check->fetchColumn();
-
-    if (!$oldSlug) {
-        Response::error(MissatgesAPI::error('noTrobat'), ['Article no trobat'], 404);
-    }
-
     // ✅ evitar colisión de slug con otro artículo
     $checkSlug = $conn->prepare("SELECT 1 FROM db_blog WHERE slug = :slug AND id <> :id LIMIT 1");
     $checkSlug->bindValue(':slug', $slug, PDO::PARAM_STR);
