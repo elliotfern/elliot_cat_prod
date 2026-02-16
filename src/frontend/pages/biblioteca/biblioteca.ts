@@ -38,7 +38,7 @@ export async function biblioteca() {
     const slug = pageType[3] || '';
 
     // ✅ Admin => /gestio ; Públic => /{lang}
-    const basePrefix = isAdmin ? '/gestio' : getLangPrefix();
+    const basePrefix = isAdmin ? 'gestio' : getLangPrefix();
 
     const columnes = isAdmin ? ['Titol', 'Any', 'Accions'] : ['Titol', 'Any'];
 
