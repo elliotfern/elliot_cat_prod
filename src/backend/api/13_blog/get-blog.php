@@ -155,6 +155,14 @@ if ($slug === 'llistatArticles') {
     $year  = isset($_GET['year']) ? (int)$_GET['year'] : 0;
     $cat   = isset($_GET['cat']) ? (string)$_GET['cat'] : ''; // puede venir vacío
 
+    $lang = isset($_GET['lang']) ? (int)$_GET['lang'] : 0;
+
+    // Idiomes permesos (IDs)
+    $allowedLangIds = [1, 2, 3, 4, 7];
+    if ($lang !== 0 && !in_array($lang, $allowedLangIds, true)) {
+        $lang = 0;
+    }
+
     if ($page < 1) $page = 1;
     if ($limit < 1) $limit = 10;
     if ($limit > 50) $limit = 50;
@@ -182,6 +190,12 @@ if ($slug === 'llistatArticles') {
             $where[] = "b.categoria = UNHEX(:cat)";
             $params[':cat'] = $cat; // cat viene como HEX (32 chars)
         }
+    }
+
+    // (Opcional) filtra por idioma (ID)
+    if ($lang > 0) {
+        $where[] = "b.lang = :lang";
+        $params[':lang'] = $lang;
     }
 
     $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
@@ -241,6 +255,7 @@ if ($slug === 'llistatArticles') {
                     'year' => $year ?: null,
                     'cat'  => $cat !== '' ? $cat : null,
                     'order' => $order,
+                    'lang' => $lang > 0 ? $lang : null,
                 ],
             ],
             200
@@ -280,6 +295,23 @@ if ($slug === 'llistatArticles') {
         qi(Tables::DB_TEMES, $pdo)
     );
 
+    // 3) Idiomes disponibles (només els permesos i que apareixen al blog)
+    $allowedLangIds = [1, 2, 3, 4, 7];
+
+    $inLang = implode(',', array_fill(0, count($allowedLangIds), '?'));
+
+    $sqlLangs = sprintf(
+        "SELECT DISTINCT
+            l.id AS id,
+            l.idioma_ca AS label
+         FROM %s AS b
+         INNER JOIN %s AS l ON b.lang = l.id
+         WHERE b.lang IN ($inLang)
+         ORDER BY label ASC",
+        qi(Tables::BLOG, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo)
+    );
+
     try {
         // YEARS
         $stmtY = $pdo->query($sqlYears);
@@ -310,11 +342,33 @@ if ($slug === 'llistatArticles') {
             ];
         }
 
+        // LANGS
+        $stmtL = $pdo->prepare($sqlLangs);
+        foreach ($allowedLangIds as $i => $langId) {
+            $stmtL->bindValue($i + 1, $langId, PDO::PARAM_INT); // placeholders ? (1-based)
+        }
+        $stmtL->execute();
+        $langsRaw = $stmtL->fetchAll(PDO::FETCH_ASSOC);
+
+        $langs = [];
+        foreach ($langsRaw as $r) {
+            $id = (int)($r['id'] ?? 0);
+            $label = trim((string)($r['label'] ?? ''));
+
+            if ($id <= 0 || $label === '') continue;
+
+            $langs[] = [
+                'id' => $id,
+                'label' => $label,
+            ];
+        }
+
         Response::success(
             MissatgesAPI::success('get'),
             [
                 'years' => $years,
                 'categories' => $categories,
+                'langs' => $langs,
             ],
             200
         );

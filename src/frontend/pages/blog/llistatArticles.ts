@@ -2,6 +2,7 @@
 // Llistat d'articles del blog amb:
 // - paginació clàssica (Prev / Next)
 // - filtres server-side: any (year) i categoria (cat=hex o cat=0 per "Sense categoria")
+// - filtre server-side: idioma (lang=id)
 // - ordre (asc/desc)
 // - URL diferent segons admin:
 //    admin  -> /gestio/blog/article/<slug>
@@ -18,6 +19,7 @@ type BlogArticle = {
   post_date: string;
   tema_ca?: string | null;
   categoria_hex?: string | null; // ve del backend: HEX(b.categoria)
+  lang?: number | null; // idioma ID
 };
 
 type ApiPayload = {
@@ -35,6 +37,7 @@ type ApiPayload = {
 type BlogFacets = {
   years: number[];
   categories: Array<{ hex: string; label: string }>;
+  langs: Array<{ id: number; label: string }>;
 };
 
 function escapeHtml(input: unknown): string {
@@ -92,6 +95,7 @@ async function fetchPage(params: {
   order: 'asc' | 'desc';
   year?: number;
   cat?: string; // '' | '0' | hex
+  lang?: number; // 0/undefined = tots
 }): Promise<ApiPayload> {
   const usp = new URLSearchParams();
   usp.set('page', String(params.page));
@@ -100,6 +104,7 @@ async function fetchPage(params: {
 
   if (params.year && params.year > 0) usp.set('year', String(params.year));
   if (params.cat && params.cat !== '') usp.set('cat', params.cat);
+  if (params.lang && params.lang > 0) usp.set('lang', String(params.lang));
 
   const url = `https://${window.location.host}/api/blog/get/llistatArticles?${usp.toString()}`;
 
@@ -124,7 +129,14 @@ async function fetchFacets(): Promise<BlogFacets> {
         .filter((c) => c.hex !== '' && c.label !== '')
     : [];
 
-  return { years, categories };
+  const langs = Array.isArray((data as any).langs)
+    ? (data as any).langs
+        .filter((x: any) => x && Number.isFinite(Number(x.id)) && typeof x.label === 'string')
+        .map((x: any) => ({ id: Number(x.id), label: String(x.label).trim() }))
+        .filter((x: any) => x.id > 0 && x.label !== '')
+    : [];
+
+  return { years, categories, langs };
 }
 
 export async function renderBlogListPaged(): Promise<void> {
@@ -145,6 +157,7 @@ export async function renderBlogListPaged(): Promise<void> {
     limit: 10,
     year: 0, // 0 = tots
     cat: '', // '' = totes, '0' = sense categoria, hex = categoria
+    lang: 0, // 0 = tots, >0 = idioma id
     order: 'desc' as 'asc' | 'desc',
   };
 
@@ -153,14 +166,14 @@ export async function renderBlogListPaged(): Promise<void> {
       <div class="card">
         <div class="card-body">
           <div class="row g-2 align-items-end">
-            <div class="col-12 col-lg-4">
+            <div class="col-12 col-lg-3">
               <label class="form-label mb-1" for="blogYearSelect">Any</label>
               <select id="blogYearSelect" class="form-select">
                 <option value="0">Tots</option>
               </select>
             </div>
 
-            <div class="col-12 col-lg-5">
+            <div class="col-12 col-lg-4">
               <label class="form-label mb-1" for="blogCatSelect">Categoria</label>
               <select id="blogCatSelect" class="form-select">
                 <option value="">Totes</option>
@@ -169,6 +182,13 @@ export async function renderBlogListPaged(): Promise<void> {
             </div>
 
             <div class="col-12 col-lg-3">
+              <label class="form-label mb-1" for="blogLangSelect">Idioma</label>
+              <select id="blogLangSelect" class="form-select">
+                <option value="0">Tots</option>
+              </select>
+            </div>
+
+            <div class="col-12 col-lg-2">
               <label class="form-label mb-1" for="blogOrderSelect">Ordre</label>
               <select id="blogOrderSelect" class="form-select">
                 <option value="desc" selected>Més nous</option>
@@ -198,6 +218,7 @@ export async function renderBlogListPaged(): Promise<void> {
 
   const yearSelect = container.querySelector<HTMLSelectElement>('#blogYearSelect')!;
   const catSelect = container.querySelector<HTMLSelectElement>('#blogCatSelect')!;
+  const langSelect = container.querySelector<HTMLSelectElement>('#blogLangSelect')!;
   const orderSelect = container.querySelector<HTMLSelectElement>('#blogOrderSelect')!;
   const listWrap = container.querySelector<HTMLDivElement>('#blogListWrap')!;
   const countInfo = container.querySelector<HTMLDivElement>('#blogCountInfo')!;
@@ -224,6 +245,11 @@ export async function renderBlogListPaged(): Promise<void> {
     const categories = facets.categories.slice().sort((a, b) => a.label.localeCompare(b.label, 'ca'));
 
     catSelect.innerHTML = [`<option value="">Totes</option>`, `<option value="0">Sense categoria</option>`, ...categories.map((c) => `<option value="${escapeHtml(c.hex)}">${escapeHtml(c.label)}</option>`)].join('');
+
+    // LANGS (ID)
+    const langs = facets.langs.slice().sort((a, b) => a.label.localeCompare(b.label, 'ca'));
+
+    langSelect.innerHTML = [`<option value="0">Tots</option>`, ...langs.map((l) => `<option value="${l.id}">${escapeHtml(l.label)}</option>`)].join('');
 
     facetsLoaded = true;
   }
@@ -272,6 +298,7 @@ export async function renderBlogListPaged(): Promise<void> {
       order: state.order,
       year: state.year > 0 ? state.year : undefined,
       cat: state.cat !== '' ? state.cat : undefined,
+      lang: state.lang > 0 ? state.lang : undefined,
     });
 
     const items = data.items ?? [];
@@ -292,6 +319,7 @@ export async function renderBlogListPaged(): Promise<void> {
     // sincronitza selects
     yearSelect.value = String(state.year);
     catSelect.value = state.cat;
+    langSelect.value = String(state.lang);
     orderSelect.value = state.order;
   }
 
@@ -308,6 +336,12 @@ export async function renderBlogListPaged(): Promise<void> {
     load();
   });
 
+  langSelect.addEventListener('change', () => {
+    state.lang = parseInt(langSelect.value, 10) || 0; // 0 | id
+    state.page = 1;
+    load();
+  });
+
   orderSelect.addEventListener('change', () => {
     state.order = orderSelect.value === 'asc' ? 'asc' : 'desc';
     state.page = 1;
@@ -318,10 +352,12 @@ export async function renderBlogListPaged(): Promise<void> {
     state.page = 1;
     state.year = 0;
     state.cat = '';
+    state.lang = 0;
     state.order = 'desc';
 
     yearSelect.value = '0';
     catSelect.value = '';
+    langSelect.value = '0';
     orderSelect.value = 'desc';
 
     load();
