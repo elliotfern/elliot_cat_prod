@@ -2,16 +2,16 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Llibre } from '../../types/Llibre';
+import { API_BASE, DOMAIN_WEB } from '../../utils/urls';
+import { getLangPrefix } from '../../utils/locales/getLangPrefix';
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
 
-function renderAutorsCell(row: Llibre, gestioUrl: string): string {
-  const base = `https://${window.location.host}${gestioUrl}/biblioteca/fitxa-autor/`;
-
+function renderAutorsCell(row: Llibre, basePrefix: string): string {
+  const base = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-autor/`;
   const autors = Array.isArray((row as any).autors) ? (row as any).autors : [];
-
   if (autors.length === 0) return '';
 
   return autors
@@ -27,18 +27,18 @@ function renderAutorsCell(row: Llibre, gestioUrl: string): string {
 
 export async function taulaLlistatLlibres() {
   const isAdmin = await getIsAdmin();
-  const gestioUrl = isAdmin ? '/gestio' : '';
+  const basePrefix = isAdmin ? '/gestio' : getLangPrefix();
 
   const columns: TaulaDinamica<Llibre>[] = [
     {
       header: 'Llibre',
       field: 'titol',
-      render: (_: unknown, row: Llibre) => `<a href="https://${window.location.host}${gestioUrl}/biblioteca/fitxa-llibre/${encodeURIComponent(row.slug)}">${escapeHtml(row.titol)}</a>`,
+      render: (_: unknown, row: Llibre) => `<a href="${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-llibre/${encodeURIComponent(row.slug)}">${escapeHtml(row.titol)}</a>`,
     },
     {
       header: 'Autor/a',
       field: 'autors' as any, // por si tu generic exige field existente
-      render: (_: unknown, row: Llibre) => renderAutorsCell(row, gestioUrl),
+      render: (_: unknown, row: Llibre) => renderAutorsCell(row, basePrefix),
     },
     {
       header: 'Gènere',
@@ -63,14 +63,14 @@ export async function taulaLlistatLlibres() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Llibre) => `
-        <a href="https://${window.location.host}/gestio/biblioteca/modifica-llibre/${encodeURIComponent(row.slug)}">
+        <a href="${DOMAIN_WEB}/gestio/biblioteca/modifica-llibre/${encodeURIComponent(row.slug)}">
           <button type="button" class="button btn-petit">Modifica</button>
         </a>`,
     });
   }
 
   renderDynamicTable<Llibre>({
-    url: `https://${window.location.host}/api/biblioteca/get/?type=totsLlibres`,
+    url: `${API_BASE}/biblioteca/get/?type=totsLlibres`,
     containerId: 'taulaLlistatLlibres',
     columns,
     filterKeys: ['titol'],

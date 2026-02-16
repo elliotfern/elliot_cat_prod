@@ -6,46 +6,61 @@
                 Elliot Fernandez
             </a>
 
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="/ca/homepage" data-route="/homepage">Inici</a>
-                </li>
+            <!-- ✅ Toggler (mobile) -->
+            <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarMenu"
+                aria-controls="navbarMenu"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+                id="menuToggle">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/ca/sobre-autor" data-route="/sobre-autor">Sobre l'autor</a>
-                </li>
+            <!-- ✅ Collapse menu wrapper -->
+            <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/ca/biblioteca" data-route="/biblioteca">Biblioteca</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ca/homepage" data-route="/homepage">Inici</a>
+                    </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/ca/historia" data-route="/historia">Història</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ca/sobre-autor" data-route="/sobre-autor">Sobre l'autor</a>
+                    </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/ca/blog" data-route="/blog">Blog</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ca/biblioteca" data-route="/biblioteca">Biblioteca</a>
+                    </li>
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="languagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Idiomes
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languagesDropdown">
-                        <li><a class="dropdown-item" href="#" data-lang="ca">Català</a></li>
-                        <li><a class="dropdown-item" href="#" data-lang="en">Anglès</a></li>
-                        <li><a class="dropdown-item" href="#" data-lang="es">Castellà</a></li>
-                        <li><a class="dropdown-item" href="#" data-lang="it">Italià</a></li>
-                        <li><a class="dropdown-item" href="#" data-lang="fr">Francès</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ca/historia" data-route="/historia">Història</a>
+                    </li>
 
-                    </ul>
-                </li>
-            </ul>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ca/blog" data-route="/blog">Blog</a>
+                    </li>
 
-            <!-- User area button (TS will fill) -->
-            <div class="ms-lg-3 mt-2 mt-lg-0 d-flex align-items-center" id="userAreaSlot"></div>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="languagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Idiomes
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languagesDropdown">
+                            <li><a class="dropdown-item" href="#" data-lang="ca">Català</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="en">Anglès</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="es">Castellà</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="it">Italià</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="fr">Francès</a></li>
+                        </ul>
+                    </li>
+                </ul>
 
-        </div>
+                <!-- User area button (TS will fill) -->
+                <div class="ms-lg-3 mt-2 mt-lg-0 d-flex align-items-center" id="userAreaSlot"></div>
+            </div>
+
         </div>
     </nav>
 </header>

@@ -22,7 +22,7 @@
 </div>
 
 <script>
-  let urlAjax = devDirectory + "/api/biblioteca/get/?type=totsLlibres";
+  let urlAjax = "https://elliot.cat/api/biblioteca/get/?type=totsLlibres";
 
 
   fetch(urlAjax, {

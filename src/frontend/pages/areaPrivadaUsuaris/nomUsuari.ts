@@ -1,6 +1,5 @@
 export async function nomUsuari(): Promise<void> {
-  const devDirectory = `https://${window.location.hostname}`;
-  const urlAjax = `${devDirectory}/api/auth/get/nomUsuari`;
+  const urlAjax = `https://${window.location.hostname}/api/auth/get/nomUsuari`;
 
   const userDiv = document.getElementById('benvingudaUsuari');
   if (userDiv) {
