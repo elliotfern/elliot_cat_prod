@@ -5,6 +5,34 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 
 type ArticleScope = 'blog' | 'historia';
 
+type LangCode = 'ca' | 'es' | 'en' | 'fr' | 'it';
+
+function getUrlLangCode(): LangCode | null {
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  const first = String(parts[0] ?? '').toLowerCase();
+  if (first in LANG_MAP) return first as LangCode;
+  return null;
+}
+
+const LANG_MAP: Record<LangCode, number> = {
+  ca: 1,
+  es: 2,
+  en: 3,
+  fr: 4,
+  it: 7,
+};
+
+function langCodeToId(code: LangCode): number {
+  return LANG_MAP[code];
+}
+
+const LANG_ID_TO_CODE: Record<number, LangCode> = Object.fromEntries(Object.entries(LANG_MAP).map(([code, id]) => [id, code as LangCode])) as Record<number, LangCode>;
+
+function parseLangId(v: unknown): number | null {
+  const n = Number(String(v ?? '').trim());
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 type BlogArticleDetail = {
   id: number;
   post_title: string;
@@ -14,7 +42,7 @@ type BlogArticleDetail = {
   post_date: string;
   post_modified?: string | null;
   tema_ca?: string | null;
-  lang?: string | null;
+  lang?: number | null;
   post_status?: string | null;
 };
 
@@ -76,6 +104,29 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
     // 🔹 Paralelizamos carga de artículo + admin
     const [a, isAdmin] = await Promise.all([fetchArticleBySlug(slug, tipus), getIsAdmin()]);
 
+    // ✅ En HISTORIA: redirigir si idioma no coincide
+    if (tipus === 'historia') {
+      const urlCode = getUrlLangCode();
+      const articleLangId = Number(a.lang);
+
+      if (urlCode && Number.isFinite(articleLangId)) {
+        const correctCode = LANG_ID_TO_CODE[articleLangId];
+
+        if (correctCode && correctCode !== urlCode) {
+          // reconstruimos la URL con el idioma correcto
+          const parts = window.location.pathname.split('/').filter(Boolean);
+
+          // parts[0] es el idioma actual
+          parts[0] = correctCode;
+
+          const newPath = '/' + parts.join('/');
+
+          window.location.replace(newPath);
+          return; // muy importante
+        }
+      }
+    }
+
     const title = escapeHtml(a.post_title || '(Sense títol)');
     const excerpt = (a.post_excerpt ?? '').trim();
     const contentHtml = (a.post_content ?? '').trim(); // viene como HTML
@@ -126,7 +177,12 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
       contentEl.innerHTML = contentHtml || `<div class="text-muted">Sense contingut.</div>`;
     }
   } catch (e) {
-    const msg = e instanceof Error && e.message === 'HTTP_404' ? `Article no trobat.` : `No s'ha pogut carregar l'article.`;
+    let msg = `No s'ha pogut carregar l'article.`;
+
+    if (e instanceof Error) {
+      if (e.message === 'HTTP_404') msg = `Article no trobat.`;
+      if (e.message === 'LANG_MISMATCH') msg = `Aquest article no està disponible en aquest idioma.`;
+    }
 
     container.innerHTML = `
       <div class="alert alert-danger mb-0">
