@@ -33,7 +33,7 @@ export async function taulaLlistatLlibres() {
     {
       header: 'Llibre',
       field: 'titol',
-      render: (_: unknown, row: Llibre) => `<a href="${buildFrontUrl(`/biblioteca/fitxa-llibre/${row.slug}`)}">${escapeHtml(row.titol)}</a>`,
+      render: (_: unknown, row: Llibre) => `<a href="${buildFrontUrl(`biblioteca/fitxa-llibre/${row.slug}`)}">${escapeHtml(row.titol)}</a>`,
     },
     {
       header: 'Autor/a',
