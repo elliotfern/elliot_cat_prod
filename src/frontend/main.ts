@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   console.log(pageType);
-  if (pageType[0] === 'entrada') {
+  if (pageType[1] === 'entrada') {
     loginPage();
   } else if (pageType[0] === 'nou-usuari') {
     const autor = document.getElementById('formUsuari');
