@@ -7,6 +7,8 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { taulaLlistatLlibres } from './taulaLlistatLlibres';
 import { fetchApiDataLlibre } from './fitxaLlibre';
 import { initAdminButtons, initLlibreAutorsPage } from './fitxaLlibreAutors';
+import { getLangPrefix } from '../../utils/locales/getLangPrefix';
+import { DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -32,23 +34,22 @@ export async function biblioteca() {
     const isAdmin = await getIsAdmin();
     const url = window.location.href;
     const pageType = getPageType(url);
-    let slug: string = '';
 
-    if (isAdmin) {
-      slug = pageType[3];
-    } else {
-      slug = pageType[3];
-    }
+    const slug = pageType[3] || '';
+
+    // ✅ Admin => /gestio ; Públic => /{lang}
+    const basePrefix = isAdmin ? '/gestio' : getLangPrefix();
 
     fitxaPersona('/api/persones/get/?persona=', slug, 'biblioteca-autor', function (data) {
       construirTaula('taula1', '/api/biblioteca/get/?type=autorLlibres&id=', data.id, ['Titol', 'Any', 'Accions'], function (fila, columna) {
         if (columna.toLowerCase() === 'titol') {
-          // Manejar el caso del título
-          return '<a href="' + window.location.origin + '/gestio/biblioteca/fitxa-llibre/' + fila['slug'] + '">' + fila['titol'] + '</a>';
+          const href = `${DOMAIN_WEB}${basePrefix}/biblioteca/fitxa-llibre/${encodeURIComponent(fila['slug'])}`;
+          return `<a href="${href}">${fila['titol']}</a>`;
         } else if (columna.toLowerCase() === 'accions') {
-          return `<button onclick="window.location.href='${window.location.origin}/gestio/biblioteca/modifica-llibre/${fila['slug']}'" class="button btn-petit">Modificar</button>`;
+          if (!isAdmin) return ''; // ✅ acciones solo admin
+          const href = `${INTRANET_WEB}/biblioteca/modifica-llibre/${encodeURIComponent(fila['slug'])}`;
+          return `<button onclick="window.location.href='${href}'" class="button btn-petit">Modificar</button>`;
         } else {
-          // Manejar otros casos
           return fila[columna.toLowerCase()];
         }
       });
