@@ -2,6 +2,7 @@
 // Ruta pública: /blog/article/<slug>
 
 import { getIsAdmin } from '../../services/auth/isAdmin';
+import { decorateLinksInHtml } from '../../utils/linksExterns';
 
 type ArticleScope = 'blog' | 'historia';
 
@@ -125,7 +126,8 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
 
     const title = escapeHtml(a.post_title || '(Sense títol)');
     const excerpt = (a.post_excerpt ?? '').trim();
-    const contentHtml = (a.post_content ?? '').trim(); // viene como HTML
+
+    const contentHtml = decorateLinksInHtml(a.post_content ?? '').trim(); // viene como HTML
     const cat = escapeHtml((a.tema_ca ?? 'Sense categoria') || 'Sense categoria');
     const dateLabel = escapeHtml(formatDateCa(a.post_date));
 
