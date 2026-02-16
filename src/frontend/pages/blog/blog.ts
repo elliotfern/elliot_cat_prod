@@ -13,7 +13,7 @@ export async function blog() {
   if (isAdmin) {
     slug = pageType[3];
   } else {
-    slug = pageType[2];
+    slug = pageType[3];
   }
 
   // Encuentra dónde está "blog" en la ruta
