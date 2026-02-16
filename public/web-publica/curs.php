@@ -13,46 +13,58 @@ $slug = $routeParams[0];
     </div>
 </main>
 <script>
-    const nameCourse = "<?php echo $slug; ?>";
-    const lang = "ca";
+    const nameCourse = "<?php echo htmlspecialchars($slug, ENT_QUOTES); ?>";
+
+    function getLangFromPath() {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        const first = (parts[0] || '').toLowerCase();
+        const allowed = ['ca', 'es', 'en', 'fr', 'it'];
+        return allowed.includes(first) ? first : 'ca';
+    }
+
+    const lang = getLangFromPath();
+
     // Función para obtener los cursos desde la API
     async function obtenerCursos(nameCourse, lang) {
         try {
-            // Realiza la solicitud fetch a la API
-            const response = await fetch(`https://elliot.cat/api/historia/get/?type=curso&paramName=${nameCourse}&langCurso=${lang}`);
+            const url = new URL('https://elliot.cat/api/historia/get/');
+            url.searchParams.set('type', 'curso');
+            url.searchParams.set('paramName', nameCourse);
+            url.searchParams.set('langCurso', lang);
 
-            // Verifica si la respuesta es exitosa
+            const response = await fetch(url.toString(), {
+                credentials: 'include'
+            });
+
             if (!response.ok) {
                 throw new Error('Error en la solicitud a la API');
             }
 
-            // Convierte la respuesta a JSON
             const data = await response.json();
 
-            // Muestra los cursos
-            mostrarCursos(data);
+            // Si tu API devuelve {data: [...]}, usa ese; si devuelve directamente [...], cae al mismo
+            const cursos = (data && data.data) ? data.data : data;
+
+            mostrarCursos(cursos, lang);
         } catch (error) {
             console.error('Hubo un problema con la solicitud Fetch:', error);
         }
     }
 
     // Función para mostrar los cursos en la lista
-    function mostrarCursos(cursos) {
+    function mostrarCursos(cursos, lang) {
         const listaCursos = document.getElementById('courseList');
+        if (!listaCursos) return;
 
-        // Limpiar la lista antes de agregar los nuevos elementos
         listaCursos.innerHTML = '';
 
-        // Iterar sobre cada curso y agregarlo a la lista
-        cursos.forEach(curso => {
+        (cursos || []).forEach(curso => {
             const li = document.createElement('li');
-            const postLink = `https://elliot.cat/ca/historia/article/${curso.post_name}`; // Construye el link
 
-            li.innerHTML = `
-          <h6><a href="${postLink}">${curso.post_title}</a></h6>
+            // usa el idioma actual en el link
+            const postLink = `https://elliot.cat/${lang}/historia/article/${encodeURIComponent(curso.post_name)}`;
 
-        `;
-
+            li.innerHTML = `<h6><a href="${postLink}">${curso.post_title}</a></h6>`;
             listaCursos.appendChild(li);
         });
     }

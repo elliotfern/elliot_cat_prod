@@ -16,15 +16,11 @@ function getUrlLangCode(): LangCode | null {
 
 const LANG_MAP: Record<LangCode, number> = {
   ca: 1,
-  es: 2,
-  en: 3,
+  es: 3,
+  en: 2,
   fr: 4,
   it: 7,
 };
-
-function langCodeToId(code: LangCode): number {
-  return LANG_MAP[code];
-}
 
 const LANG_ID_TO_CODE: Record<number, LangCode> = Object.fromEntries(Object.entries(LANG_MAP).map(([code, id]) => [id, code as LangCode])) as Record<number, LangCode>;
 
