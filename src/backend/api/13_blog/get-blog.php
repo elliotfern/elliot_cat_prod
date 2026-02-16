@@ -24,6 +24,112 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit();
 }
 
+/**
+ * Parse attrs tipo: id=22 alt="hola" class="rounded" caption="..."
+ */
+function parseShortcodeAttrs(string $attrStr): array
+{
+    $attrs = [];
+    if (preg_match_all('~(\w+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s]+))~u', $attrStr, $m, PREG_SET_ORDER)) {
+        foreach ($m as $x) {
+            $k = strtolower($x[1]);
+            $v = $x[2] !== '' ? $x[2] : ($x[3] !== '' ? $x[3] : $x[4]);
+            $attrs[$k] = $v;
+        }
+    }
+    return $attrs;
+}
+
+/**
+ * Reemplaza [img id=22 ...] por <figure><img ...></figure>
+ * - Solo permite imágenes typeImg=13 (blog)
+ * - Una sola query para todas las ids
+ */
+function renderBlogImgShortcodes(string $html, PDO $pdo): string
+{
+    // Encuentra todos los shortcodes [img ...]
+    if (!preg_match_all('~\[img\s+([^\]]+)\]~i', $html, $matches, PREG_SET_ORDER)) {
+        return $html;
+    }
+
+    $items = [];
+    $ids = [];
+
+    foreach ($matches as $m) {
+        $raw = $m[0];
+        $attrStr = $m[1];
+
+        $attrs = parseShortcodeAttrs($attrStr);
+        $id = isset($attrs['id']) ? (int)$attrs['id'] : 0;
+
+        if ($id > 0) {
+            $items[] = ['raw' => $raw, 'id' => $id, 'attrs' => $attrs];
+            $ids[$id] = true;
+        }
+    }
+
+    if (!$ids) return $html;
+
+    $idList = array_keys($ids);
+
+    // Query única a db_img (y validamos typeImg=21)
+    $in = implode(',', array_fill(0, count($idList), '?'));
+    $sql = "
+        SELECT i.id, i.nameImg, i.alt, i.typeImg
+        FROM db_img i
+        WHERE i.id IN ($in) AND i.typeImg = 13
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($idList);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $byId = [];
+    foreach ($rows as $r) {
+        $byId[(int)$r['id']] = $r;
+    }
+
+    // Reemplazar cada shortcode por su HTML
+    foreach ($items as $it) {
+        $id = (int)$it['id'];
+        $attrs = $it['attrs'];
+
+        if (!isset($byId[$id])) {
+            // id no existe o no es typeImg=21 => placeholder (o lo puedes borrar)
+            $replacement = '<div class="alert alert-warning my-3">Imatge no trobada o no és del blog (id=' . $id . ')</div>';
+            $html = str_replace($it['raw'], $replacement, $html);
+            continue;
+        }
+
+        $img = $byId[$id];
+        $fileBase = (string)$img['nameImg']; // sin extensión
+        $src = 'https://media.elliot.cat/img/blog/' . rawurlencode($fileBase) . '.jpg';
+
+        // alt: shortcode alt > BD alt > vacío
+        $alt = $attrs['alt'] ?? ($img['alt'] ?? '');
+        $altSafe = htmlspecialchars((string)$alt, ENT_QUOTES, 'UTF-8');
+
+        // class extra opcional
+        $classExtra = trim((string)($attrs['class'] ?? ''));
+        $class = trim('img-fluid rounded ' . $classExtra);
+        $classSafe = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');
+
+        // caption opcional
+        $caption = (string)($attrs['caption'] ?? '');
+        $captionSafe = htmlspecialchars($caption, ENT_QUOTES, 'UTF-8');
+
+        $figure =
+            '<figure class="my-4 text-center">' .
+            '<img loading="lazy" decoding="async" class="' . $classSafe . '" src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" alt="' . $altSafe . '">' .
+            ($caption !== '' ? '<figcaption class="small text-muted mt-2">' . $captionSafe . '</figcaption>' : '') .
+            '</figure>';
+
+        $html = str_replace($it['raw'], $figure, $html);
+    }
+
+    return $html;
+}
+
+
 // Llistat complet del blog
 // URL: /api/blog/get/llistatArticles?page=1&limit=10&order=asc|desc
 if ($slug === 'llistatArticles') {
@@ -255,6 +361,11 @@ if ($slug === 'llistatArticles') {
         // ✅ Normalizar categoria para que coincida con el endpoint de categorías (UUID con guiones)
         $hex = (string)($row['categoria_hex'] ?? '');
         $row['categoria'] = $hex !== '' ? hexToUuidText($hex) : null;
+
+        // ✅ Reemplazar shortcodes de imágenes del blog en el backend
+        if (isset($row['post_content']) && is_string($row['post_content']) && $row['post_content'] !== '') {
+            $row['post_content'] = renderBlogImgShortcodes($row['post_content'], $pdo);
+        }
 
         Response::success(
             MissatgesAPI::success('get'),

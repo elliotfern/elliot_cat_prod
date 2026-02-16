@@ -39,7 +39,7 @@
         <option value="8">Cinema: pel·lícula</option>
         <option value="11">Viatges: viatge</option>
         <option value="17">Viatges: espai</option>
-        <option value="13">Blog</option>
+        <option value="13">Blog: imatges</option>
         <option value="18">Usuaris: avatars</option>
         <option value="19">Web: icones</option>
         <option value="20">CV: logos empreses</option>
