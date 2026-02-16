@@ -1,6 +1,3 @@
-<?php
-verificaTipusUsuari();
-?>
 <div class="pantallaLogin">
   <div class="card" style="max-width: 400px;">
     <div class="card-body">

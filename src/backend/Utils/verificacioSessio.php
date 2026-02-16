@@ -70,3 +70,43 @@ function verificarSesion(): object
         exit();
     }
 }
+
+function getAuthUserType(): ?int
+{
+    $jwtSecret = $_ENV['TOKEN'] ?? null;
+    if (!$jwtSecret) {
+        return null;
+    }
+
+    $token = $_COOKIE['token'] ?? '';
+    $token = trim((string)$token);
+    if ($token === '') {
+        return null;
+    }
+
+    try {
+        $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
+
+        if (!isset($decoded->user_type)) {
+            return null;
+        }
+
+        $userType = (int)$decoded->user_type;
+        return in_array($userType, [1, 2], true) ? $userType : null;
+    } catch (Exception $e) {
+        error_log("Error en getAuthUserType(): " . $e->getMessage());
+        return null;
+    }
+}
+
+function verificarAdmin(): object
+{
+    $decoded = verificarSesion(); // ya valida token + user_type 1 o 2
+
+    if ((int)($decoded->user_type ?? 0) !== 1) {
+        header('Location: /entrada');
+        exit();
+    }
+
+    return $decoded;
+}

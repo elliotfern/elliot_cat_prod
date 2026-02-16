@@ -1,12 +1,5 @@
 import { getIsAdmin } from '../auth/isAdmin';
 
-function handleLogin() {
-  const isAdmin = localStorage.getItem('isAdmin');
-  if (isAdmin === 'false') {
-    localStorage.removeItem('isAdmin');
-  }
-}
-
 export async function loginApi(event: Event) {
   event.preventDefault();
 
@@ -33,15 +26,6 @@ export async function loginApi(event: Event) {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        handleLogin();
-
-        // Aquí podrías guardar datos si los necesitas
-        if (data.user_type === 1) {
-          localStorage.setItem('isAdmin', 'true');
-        } else {
-          localStorage.setItem('isAdmin', 'false');
-        }
-
         if (loginMessageOk && loginMessageErr) {
           loginMessageOk.style.display = 'block';
           loginMessageOk.innerHTML = data.message;

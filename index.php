@@ -22,28 +22,31 @@ if ($requestUri === '') {
     $requestUri = '/';
 }
 
+if (strpos($requestUri, APP_GESTIO) === 0) {
+    verificarAdmin(); // admin-only, y ya hace verificarSesion internamente
+}
+
 // Detectar l'idioma de l'usuari des de la URL o la cookie
 $language = 'ca'; // Per defecte, català
 
 // Verificar si la ruta es solo el idioma, sin "/reserva"
-if (preg_match('#^/(fr|en|es|it)$#', $requestUri, $matches)) {
+if (preg_match('#^/(ca|fr|en|es|it)$#', $requestUri, $matches)) {
     $language = $matches[1];
-    // Redirigir a la página correspondiente /fr/reserva, /en/reserva, /ca/reserva
     header("Location: /$language/homepage", true, 301);
     exit();
 }
 
 // Detectar el idioma desde la URL (si existe en la ruta)
-preg_match('#^/(fr|en|es|it)/#', $requestUri, $matches);
-$language = $matches[1] ?? null;  // Si hay un idioma en la URL, lo usamos
+preg_match('#^/(ca|fr|en|es|it)/#', $requestUri, $matches);
+$language = $matches[1] ?? null;
 
-// Si no hay idioma en la URL y es la raíz (o idioma por defecto), usamos 'es'
+// Si no hay idioma en la URL y es la raíz (o idioma por defecto), usamos 'ca'
 if (empty($language)) {
     // Comprobamos si la ruta es la raíz (ejemplo: /reserva) y no incluye idioma
     if (preg_match('#^/homepage$#', $requestUri)) {
-        $language = 'ca';  // Asumimos que si está en la raíz, el idioma es 'es'
+        $language = 'ca';  // Asumimos que si está en la raíz, el idioma es 'ca'
     } else {
-        // Si la cookie 'language' ya existe, usamos ese valor; sino, asignamos 'es' por defecto
+        // Si la cookie 'language' ya existe, usamos ese valor; sino, asignamos 'ca' por defecto
         $language = $_COOKIE['language'] ?? 'ca';
     }
 }
@@ -80,9 +83,14 @@ if (!$routeFound) {
 } else {
     // Verificar si la ruta requiere sesión
     $needsSession = $routeInfo['needs_session'] ?? false;
-    if ($needsSession) {
-        verificarSesion(); // Llamada a la función de verificación de sesión
+    $needsAdmin   = $routeInfo['needs_admin'] ?? false;
+
+    if ($needsAdmin) {
+        verificarAdmin();
+    } elseif ($needsSession) {
+        verificarSesion();
     }
+
 
     // Determinar si la vista necesita encabezado y pie de página
     $noHeaderFooter = $routeInfo['header_footer'] ?? false;
@@ -91,7 +99,6 @@ if (!$routeFound) {
     $headerMenu = $routeInfo['header_menu_footer'] ?? false;
 
     $apiSenseHTML = $routeInfo['apiSenseHTML'] ?? false;
-
 }
 
 // Incluir encabezado y pie de página si no se especifica que no lo tenga

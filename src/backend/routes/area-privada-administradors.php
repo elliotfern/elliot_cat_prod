@@ -3,8 +3,9 @@
 // Configuración por defecto para rutas que requieren sesión, sin header_footer, con header_menu_footer
 $defaultProtectedConfig = [
     'needs_session' => true,
+    'needs_admin'   => true,   // 🔒 TODAS las rutas de gestio requieren admin
     'header_footer' => false,
-    'header_menu_footer' => true, // SIEMPRE TRUE
+    'header_menu_footer' => true,
     'apiSenseHTML' => false,
 ];
 
@@ -12,19 +13,7 @@ $defaultProtectedConfig = [
 function route(string $viewPath): array
 {
     global $defaultProtectedConfig;
-
-    return array_merge($defaultProtectedConfig, [
-        'view' => $viewPath,
-    ]);
-}
-
-// Función que verifica si el usuario es Admin
-function checkIfAdmin(): void
-{
-    if (!isUserAdmin()) {
-        header('Location: /entrada');
-        exit;
-    }
+    return array_merge($defaultProtectedConfig, ['view' => $viewPath]);
 }
 
 $routes = [
@@ -230,10 +219,5 @@ $routes = [
     APP_GESTIO . $url['agenda'] . "/nou-esdeveniment" => route(APP_INTRANET_DIR . APP_AGENDA_DIR . 'form-esdeveniment.php'),
     APP_GESTIO . $url['agenda'] . "/modifica-esdeveniment/{id}" => route(APP_INTRANET_DIR . APP_AGENDA_DIR . 'form-esdeveniment.php'),
 ];
-
-// Verificar si el usuario es admin antes de procesar las rutas privadas (admin)
-if (isset($_SERVER['REQUEST_URI']) && (strpos($_SERVER['REQUEST_URI'], APP_GESTIO . '/gestio') === 0 || strpos($_SERVER['REQUEST_URI'], APP_GESTIO) === 0)) {
-    checkIfAdmin();
-}
 
 return $routes;

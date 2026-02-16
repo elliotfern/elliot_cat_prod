@@ -12,55 +12,14 @@ function getSanitizedCookie($name)
 
 function isUserAdmin(): bool
 {
-    // Cargar variables de entorno desde .env
-    $jwtSecret = $_ENV['TOKEN'];
-
-    if (!isset($_COOKIE['token'])) {
-        return false;
-    }
-
-    $token = trim($_COOKIE['token']);
-
-    try {
-        $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
-
-        // Comprobamos si el usuario es admin (user_type = 1)
-        if (isset($decoded->user_type) && $decoded->user_type == 1) {
-            return true;
-        }
-    } catch (Exception $e) {
-        // Token inválido, expirado o manipulado
-        error_log("Error en isUserAdmin(): " . $e->getMessage());
-    }
-
-    return false;
+    return getAuthUserType() === 1;
 }
 
-function isUserUsuari(): bool
+function isUserAuthenticated(): bool
 {
-    // Cargar variables de entorno desde .env
-    $jwtSecret = $_ENV['TOKEN'];
-
-    if (!isset($_COOKIE['token'])) {
-        return false;
-    }
-
-    $token = trim($_COOKIE['token']);
-
-    try {
-        $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
-
-        // Comprobamos si el usuario es admin (user_type = 1)
-        if (isset($decoded->user_type) && ($decoded->user_type == 1 || $decoded->user_type == 2)) {
-            return true;
-        }
-    } catch (Exception $e) {
-        // Token inválido, expirado o manipulado
-        error_log("Error en isUserAdmin(): " . $e->getMessage());
-    }
-
-    return false;
+    return getAuthUserType() !== null;
 }
+
 
 /**
  * Verifica que la solicitud provenga del dominio permitido.
@@ -110,27 +69,30 @@ function verificarJWT($token)
     }
 }
 
-function verificaTipusUsuari()
+function verificaTipusUsuari(): void
 {
-    // Obtener el token de las cookies
     $token = $_COOKIE['token'] ?? null;
 
-    if ($token) {
-        $usuario = verificarJWT($token);
-
-        if ($usuario) {
-            $user_type = $usuario->user_type; // Tipo de usuario en el JWT
-
-            // Dependiendo del tipo de usuario, redirige a una página diferente
-            if ($user_type == 1) { // Admin
-                header('Location: /gestio');
-            } elseif ($user_type == 2) { // User
-                header('Location: /usuaris');
-            }
-            // Si no es admin ni user, deja que continúe en la página actual
-        }
-    } else {
+    if (!$token) {
         return;
+    }
+
+    $usuario = verificarJWT($token);
+
+    if (!$usuario) {
+        return;
+    }
+
+    $user_type = $usuario->user_type ?? null;
+
+    switch ($user_type) {
+        case 1:
+            header('Location: /gestio');
+            exit;
+
+        case 2:
+            header('Location: /usuaris');
+            exit;
     }
 }
 
