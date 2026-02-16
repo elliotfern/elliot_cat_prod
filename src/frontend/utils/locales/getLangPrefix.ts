@@ -1,4 +1,4 @@
-import { ALLOWED_LANGS, LangCode } from '../../types/Idioma';
+import { ALLOWED_LANGS, LANG_MAP, LangCode, LANGS } from '../../types/Idioma';
 import { DOMAIN_WEB } from '../urls';
 
 export function getLangPrefix(): string {
@@ -6,8 +6,6 @@ export function getLangPrefix(): string {
   const first = String(parts[0] ?? '').toLowerCase();
   return (ALLOWED_LANGS as string[]).includes(first) ? `${first}` : 'ca';
 }
-
-export const LANGS: LangCode[] = ['ca', 'es', 'en', 'fr', 'it'];
 
 export function isLang(seg: string | undefined): boolean {
   return LANGS.includes(String(seg ?? '').toLowerCase() as LangCode);
@@ -30,3 +28,12 @@ export function buildFrontUrl(path: string): string {
   const basePrefix = isInGestio() ? 'gestio' : getLangPrefix();
   return `${DOMAIN_WEB}/${basePrefix}/${cleanPath}`;
 }
+
+export function getUrlLangCode(): LangCode | null {
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  const first = String(parts[0] ?? '').toLowerCase();
+  if (first in LANG_MAP) return first as LangCode;
+  return null;
+}
+
+export const LANG_ID_TO_CODE: Record<number, LangCode> = Object.fromEntries(Object.entries(LANG_MAP).map(([code, id]) => [id, code as LangCode])) as Record<number, LangCode>;

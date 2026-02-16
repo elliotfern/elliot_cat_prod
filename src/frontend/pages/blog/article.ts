@@ -3,32 +3,9 @@
 
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { decorateLinksInHtml } from '../../utils/linksExterns';
+import { getUrlLangCode, LANG_ID_TO_CODE } from '../../utils/locales/getLangPrefix';
 
 type ArticleScope = 'blog' | 'historia';
-
-type LangCode = 'ca' | 'es' | 'en' | 'fr' | 'it';
-
-function getUrlLangCode(): LangCode | null {
-  const parts = window.location.pathname.split('/').filter(Boolean);
-  const first = String(parts[0] ?? '').toLowerCase();
-  if (first in LANG_MAP) return first as LangCode;
-  return null;
-}
-
-const LANG_MAP: Record<LangCode, number> = {
-  ca: 1,
-  en: 3,
-  es: 2,
-  fr: 4,
-  it: 7,
-};
-
-const LANG_ID_TO_CODE: Record<number, LangCode> = Object.fromEntries(Object.entries(LANG_MAP).map(([code, id]) => [id, code as LangCode])) as Record<number, LangCode>;
-
-function parseLangId(v: unknown): number | null {
-  const n = Number(String(v ?? '').trim());
-  return Number.isFinite(n) && n > 0 ? n : null;
-}
 
 type BlogArticleDetail = {
   id: number;
