@@ -42,12 +42,15 @@ function parseShortcodeAttrs(string $attrStr): array
 
 /**
  * Reemplaza [img id=22 ...] por <figure><img ...></figure>
- * - Solo permite imágenes typeImg=13 (blog)
+ * - Permite imágenes de cualquier type
  * - Una sola query para todas las ids
  */
 function renderBlogImgShortcodes(string $html, PDO $pdo): string
 {
-    // Encuentra todos los shortcodes [img ...]
+    // Tipos permitidos en artículos públicos
+    $allowedTypeIds = [1, 2, 3, 4, 6, 7, 8, 11, 12, 13, 15, 16, 17];
+
+    // Buscar shortcodes [img ...]
     if (!preg_match_all('~\[img\s+([^\]]+)\]~i', $html, $matches, PREG_SET_ORDER)) {
         return $html;
     }
@@ -71,14 +74,16 @@ function renderBlogImgShortcodes(string $html, PDO $pdo): string
     if (!$ids) return $html;
 
     $idList = array_keys($ids);
-
-    // Query única a db_img (y validamos typeImg=21)
     $in = implode(',', array_fill(0, count($idList), '?'));
+
+    // Query única
     $sql = "
-        SELECT i.id, i.nameImg, i.alt, i.typeImg
+        SELECT i.id, i.nameImg, i.alt, i.typeImg, t.name AS dir
         FROM db_img i
-        WHERE i.id IN ($in) AND i.typeImg = 13
+        JOIN db_img_type t ON t.id = i.typeImg
+        WHERE i.id IN ($in)
     ";
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute($idList);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -88,32 +93,42 @@ function renderBlogImgShortcodes(string $html, PDO $pdo): string
         $byId[(int)$r['id']] = $r;
     }
 
-    // Reemplazar cada shortcode por su HTML
     foreach ($items as $it) {
-        $id = (int)$it['id'];
+        $id = $it['id'];
         $attrs = $it['attrs'];
 
         if (!isset($byId[$id])) {
-            // id no existe o no es typeImg=21 => placeholder (o lo puedes borrar)
-            $replacement = '<div class="alert alert-warning my-3">Imatge no trobada o no és del blog (id=' . $id . ')</div>';
+            $replacement = '<div class="alert alert-warning my-3">Imatge no trobada (id=' . $id . ')</div>';
             $html = str_replace($it['raw'], $replacement, $html);
             continue;
         }
 
         $img = $byId[$id];
-        $fileBase = (string)$img['nameImg']; // sin extensión
-        $src = 'https://media.elliot.cat/img/blog/' . rawurlencode($fileBase) . '.jpg';
 
-        // alt: shortcode alt > BD alt > vacío
+        // 🔐 Validación de tipo permitido
+        if (!in_array((int)$img['typeImg'], $allowedTypeIds, true)) {
+            $replacement = '<div class="alert alert-warning my-3">Tipus d\'imatge no permès (id=' . $id . ')</div>';
+            $html = str_replace($it['raw'], $replacement, $html);
+            continue;
+        }
+
+        $dir = (string)$img['dir']; // nombre del directorio
+        $fileBase = (string)$img['nameImg'];
+
+        $src = 'https://media.elliot.cat/img/' .
+            rawurlencode($dir) . '/' .
+            rawurlencode($fileBase) . '.jpg';
+
+        // ALT prioridad: shortcode > BD > vacío
         $alt = $attrs['alt'] ?? ($img['alt'] ?? '');
         $altSafe = htmlspecialchars((string)$alt, ENT_QUOTES, 'UTF-8');
 
-        // class extra opcional
+        // Clase extra opcional
         $classExtra = trim((string)($attrs['class'] ?? ''));
         $class = trim('img-fluid rounded ' . $classExtra);
         $classSafe = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');
 
-        // caption opcional
+        // Caption opcional
         $caption = (string)($attrs['caption'] ?? '');
         $captionSafe = htmlspecialchars($caption, ENT_QUOTES, 'UTF-8');
 
