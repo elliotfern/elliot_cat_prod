@@ -1,4 +1,5 @@
 import { ALLOWED_LANGS, LangCode } from '../../types/Idioma';
+import { DOMAIN_WEB } from '../urls';
 
 export function getLangPrefix(): string {
   const parts = window.location.pathname.split('/').filter(Boolean);
@@ -15,4 +16,17 @@ export function isLang(seg: string | undefined): boolean {
 export function isInGestio(): boolean {
   const parts = window.location.pathname.split('/').filter(Boolean);
   return parts[0] === 'gestio';
+}
+
+/**
+ * Construye una URL correcta según contexto:
+ * - Admin (gestio) -> /gestio/...
+ * - Público        -> /{lang}/...
+ *
+ * @param path Ej: "/biblioteca/fitxa-autor/slug"
+ */
+export function buildFrontUrl(path: string): string {
+  const cleanPath = path.startsWith('/') ? path : `${path}`;
+  const basePrefix = isInGestio() ? 'gestio' : getLangPrefix();
+  return `${DOMAIN_WEB}/${basePrefix}/${cleanPath}`;
 }

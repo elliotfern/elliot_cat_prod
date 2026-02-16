@@ -10,7 +10,7 @@ export async function taulaLlistatAutors() {
   const isAdmin = await getIsAdmin(); // Comprovar si és admin
 
   // ✅ Admin => /gestio ; Públic => /{lang}
-  const basePrefix = isAdmin ? '/gestio' : getLangPrefix();
+  const basePrefix = isAdmin ? 'gestio' : getLangPrefix();
 
   const columns: TaulaDinamica<Persona>[] = [
     {

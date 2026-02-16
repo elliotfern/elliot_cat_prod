@@ -3,7 +3,7 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Llibre } from '../../types/Llibre';
 import { API_BASE, DOMAIN_WEB } from '../../utils/urls';
-import { getLangPrefix } from '../../utils/locales/getLangPrefix';
+import { buildFrontUrl, getLangPrefix } from '../../utils/locales/getLangPrefix';
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -27,13 +27,13 @@ function renderAutorsCell(row: Llibre, basePrefix: string): string {
 
 export async function taulaLlistatLlibres() {
   const isAdmin = await getIsAdmin();
-  const basePrefix = isAdmin ? '/gestio' : getLangPrefix();
+  const basePrefix = isAdmin ? 'gestio' : getLangPrefix();
 
   const columns: TaulaDinamica<Llibre>[] = [
     {
       header: 'Llibre',
       field: 'titol',
-      render: (_: unknown, row: Llibre) => `<a href="${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-llibre/${encodeURIComponent(row.slug)}">${escapeHtml(row.titol)}</a>`,
+      render: (_: unknown, row: Llibre) => `<a href="${buildFrontUrl(`/biblioteca/fitxa-llibre/${row.slug}`)}">${escapeHtml(row.titol)}</a>`,
     },
     {
       header: 'Autor/a',
