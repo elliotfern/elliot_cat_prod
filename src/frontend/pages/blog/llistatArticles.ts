@@ -12,6 +12,21 @@
 
 import { getIsAdmin } from '../../services/auth/isAdmin';
 
+type LangCode = 'ca' | 'es' | 'en' | 'fr' | 'it';
+
+const LANG_ID_TO_CODE: Record<number, LangCode> = {
+  1: 'ca',
+  2: 'es',
+  3: 'en',
+  4: 'fr',
+  7: 'it',
+};
+
+function langIdToCode(langId: number | null | undefined): LangCode {
+  const n = Number(langId);
+  return Number.isFinite(n) && LANG_ID_TO_CODE[n] ? LANG_ID_TO_CODE[n] : 'ca';
+}
+
 type BlogArticle = {
   id: number;
   post_title: string;
@@ -147,9 +162,16 @@ export async function renderBlogListPaged(): Promise<void> {
   const isAdmin = await getIsAdmin();
 
   // ✅ URL según rol
-  function buildArticleUrl(slug: string): string {
+  function buildArticleUrl(slug: string, langId?: number | null): string {
     const safe = encodeURIComponent(slug);
-    return isAdmin ? `/gestio/blog/article/${safe}` : `/blog/article/${safe}`;
+
+    if (isAdmin) {
+      // backoffice: lo dejamos sin idioma (como lo tienes ahora)
+      return `/gestio/blog/article/${safe}`;
+    }
+
+    const code = langIdToCode(langId);
+    return `/${code}/blog/article/${safe}`;
   }
 
   const state = {
@@ -262,8 +284,7 @@ export async function renderBlogListPaged(): Promise<void> {
 
     const rowsHtml = items
       .map((row) => {
-        const href = buildArticleUrl(row.slug);
-
+        const href = buildArticleUrl(row.slug, row.lang);
         const title = escapeHtml(row.post_title || '(Sense títol)');
         const cat = escapeHtml((row.tema_ca ?? 'Sense categoria') || 'Sense categoria');
         const dateLabel = escapeHtml(formatDateCa(row.post_date));

@@ -15,20 +15,12 @@
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  transition:
-    transform 0.3s,
-    box-shadow 0.3s;
   padding: 30px;
   background-color: #fff1d0 !important;
 }
 
 .card-body {
   padding: 20px;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .card-img-top {
@@ -48,12 +40,6 @@
 .card-text {
   font-size: 1rem;
   color: #555;
-}
-
-h3 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
 }
 
 /* Estilo para las etiquetas de los campos */
@@ -76,22 +62,8 @@ label {
 
 /* Mensajes de alerta */
 .alert {
-  text-align: center;
   border-radius: 5px;
   border: 1px solid #000000;
   padding: 30px;
   margin-bottom: 25px;
-}
-
-.alert-success {
-  background-color: #d4edda;
-  color: #155724;
-  font-weight: bold;
-}
-
-.alert-danger {
-  background-color: #f8d7da;
-  color: #721c24;
-  /* texto negrita  */
-  font-weight: bold;
 }

@@ -9,7 +9,7 @@
       <h2>Llistat d'autors</h2>
 
       <div id="isAdminButton" style="display: none;">
-        <?php if (isset($_COOKIE['user_id']) && $_COOKIE['user_id'] === '1') : ?>
+        <?php if (isUserAdmin()) :  ?>
           <p>
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['persona']; ?>/nova-persona/'" class="button btn-gran btn-secondari">Afegir autor</button>
           </p>

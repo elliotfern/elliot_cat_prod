@@ -15,7 +15,7 @@ $slug = $routeParams[0];
             <div class="alert alert-danger" id="missatgeErr" style="display:none"></div>
 
             <div id="isAdminButton" style="display: none;">
-                <?php if (isset($_COOKIE['user_id']) && $_COOKIE['user_id'] === '1') : ?>
+                <?php if (isUserAdmin()) : ?>
                     <p>
                         <button
                             id="btnAfegirAutor"

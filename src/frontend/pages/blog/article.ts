@@ -16,8 +16,8 @@ function getUrlLangCode(): LangCode | null {
 
 const LANG_MAP: Record<LangCode, number> = {
   ca: 1,
-  es: 3,
-  en: 2,
+  en: 3,
+  es: 2,
   fr: 4,
   it: 7,
 };
