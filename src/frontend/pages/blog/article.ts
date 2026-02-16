@@ -168,7 +168,9 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
       </article>
 
       <div class="mb-3">
-        <a class="text-decoration-none" href="/blog">← Tornar al blog</a>
+        <a class="text-decoration-none" href="${tipus === 'historia' ? `/${getUrlLangCode() ?? 'ca'}/historia` : `/blog`}">
+          ${tipus === 'historia' ? '← Tornar a la secció Història' : '← Tornar al blog'}
+        </a>
       </div>
     `;
 
