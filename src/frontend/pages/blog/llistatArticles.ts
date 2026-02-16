@@ -252,18 +252,6 @@ export async function renderBlogListPaged(): Promise<void> {
   const langSelect = container.querySelector<HTMLSelectElement>('#blogLangSelect')!;
   const orderSelect = container.querySelector<HTMLSelectElement>('#blogOrderSelect')!;
   const listWrap = container.querySelector<HTMLDivElement>('#blogListWrap')!;
-
-  listWrap.addEventListener('click', (ev) => {
-    const btn = (ev.target as HTMLElement | null)?.closest?.('.blog-edit-btn') as HTMLButtonElement | null;
-    if (!btn) return;
-
-    ev.preventDefault();
-    ev.stopPropagation();
-
-    const url = btn.getAttribute('data-edit-url');
-    if (url) window.location.href = url;
-  });
-
   const countInfo = container.querySelector<HTMLDivElement>('#blogCountInfo')!;
   const pageInfo = container.querySelector<HTMLDivElement>('#blogPageInfo')!;
   const prevBtn = container.querySelector<HTMLButtonElement>('#blogPrevBtn')!;
@@ -312,41 +300,38 @@ export async function renderBlogListPaged(): Promise<void> {
         const statusBadge = isAdmin ? renderStatusBadge(row.post_status) : '';
 
         return `
-              <div class="list-group-item list-group-item-action position-relative">
-                <div class="d-flex flex-column flex-md-row gap-2 gap-md-3 align-items-md-center justify-content-between">
+  <div class="list-group-item list-group-item-action position-relative">
+    <!-- ✅ Link que cubre todo el item -->
+    <a class="stretched-link" href="${href}" aria-label="${title}"></a>
 
-                  <div class="d-flex flex-column">
-                    <div class="fw-semibold">${title}</div>
+    <div class="d-flex flex-column flex-md-row gap-2 gap-md-3 align-items-md-center justify-content-between">
+      <div class="d-flex flex-column">
+        <div class="fw-semibold">${title}</div>
 
-                    <div class="small">
-                      <span class="text-muted">${dateLabel} · </span>
-                      <span class="badge text-bg-light border">${cat}</span>
-                      ${statusBadge ? ` ${statusBadge}` : ''}
-                    </div>
+        <div class="small">
+          <span class="text-muted">${dateLabel} · </span>
+          <span class="badge text-bg-light border">${cat}</span>
+          ${statusBadge ? ` ${statusBadge}` : ''}
+        </div>
+      </div>
 
-                    <!-- ✅ Link “invisible” que estira el click a toda la fila -->
-                    <a class="stretched-link" href="${href}" aria-label="${title}"></a>
-                  </div>
-
-                  <div class="d-flex align-items-center gap-2">
-                    ${
-                      isAdmin
-                        ? `<a
-                            class="btn btn-sm btn-outline-primary blog-edit-btn position-relative"
-                            style="z-index: 2;"
-                            href="${escapeHtml(buildEditUrl(row.id))}"
-                          >
-                            <i class="bi bi-pencil-square me-1" aria-hidden="true"></i>
-                            Edita
-                          </a>`
-                        : ''
-                    }
-                    <div class="text-muted small d-none d-md-block">→</div>
-                  </div>
-
-                </div>
-              </div>
-            `;
+      <div class="d-flex align-items-center gap-2 position-relative" style="z-index: 2;">
+        ${
+          isAdmin
+            ? `<a
+                class="btn btn-sm btn-outline-primary blog-edit-btn"
+                href="${escapeHtml(buildEditUrl(row.id))}"
+              >
+                <i class="bi bi-pencil-square me-1" aria-hidden="true"></i>
+                Edita
+              </a>`
+            : ''
+        }
+        <div class="text-muted small d-none d-md-block">→</div>
+      </div>
+    </div>
+  </div>
+`;
       })
       .join('');
 
