@@ -24,7 +24,7 @@ export function isInGestio(): boolean {
  * @param path Ej: "/biblioteca/fitxa-autor/slug"
  */
 export function buildFrontUrl(path: string): string {
-  const cleanPath = path.startsWith('/') ? path : `${path}`;
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
   const basePrefix = isInGestio() ? 'gestio' : getLangPrefix();
   return `${DOMAIN_WEB}/${basePrefix}/${cleanPath}`;
 }
@@ -37,3 +37,8 @@ export function getUrlLangCode(): LangCode | null {
 }
 
 export const LANG_ID_TO_CODE: Record<number, LangCode> = Object.fromEntries(Object.entries(LANG_MAP).map(([code, id]) => [id, code as LangCode])) as Record<number, LangCode>;
+
+export function langIdToCode(langId: number | null | undefined): LangCode {
+  const n = Number(langId);
+  return Number.isFinite(n) && LANG_ID_TO_CODE[n] ? LANG_ID_TO_CODE[n] : 'ca';
+}

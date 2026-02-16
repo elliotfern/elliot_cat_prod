@@ -11,20 +11,28 @@
 // Container esperat: <div id="articleList"></div>
 
 import { getIsAdmin } from '../../services/auth/isAdmin';
+import { langIdToCode } from '../../utils/locales/getLangPrefix';
 
-type LangCode = 'ca' | 'es' | 'en' | 'fr' | 'it';
+function renderStatusBadge(status?: string | null): string {
+  const s = String(status ?? '')
+    .toLowerCase()
+    .trim();
 
-const LANG_ID_TO_CODE: Record<number, LangCode> = {
-  1: 'ca',
-  2: 'es',
-  3: 'en',
-  4: 'fr',
-  7: 'it',
-};
+  if (s === 'draft' || s === 'borrador') {
+    return `<span class="badge text-bg-warning">Borrador</span>`;
+  }
 
-function langIdToCode(langId: number | null | undefined): LangCode {
-  const n = Number(langId);
-  return Number.isFinite(n) && LANG_ID_TO_CODE[n] ? LANG_ID_TO_CODE[n] : 'ca';
+  if (s === 'publish' || s === 'published' || s === 'publicat') {
+    return `<span class="badge text-bg-success">Publicat</span>`;
+  }
+
+  if (!s) return '';
+
+  return `<span class="badge text-bg-secondary">${escapeHtml(s)}</span>`;
+}
+
+function buildEditUrl(id: number): string {
+  return `/gestio/blog/modifica-article/${encodeURIComponent(String(id))}`;
 }
 
 type BlogArticle = {
@@ -35,6 +43,7 @@ type BlogArticle = {
   tema_ca?: string | null;
   categoria_hex?: string | null; // ve del backend: HEX(b.categoria)
   lang?: number | null; // idioma ID
+  post_status?: string | null; // 'publish' | 'draft' ...
 };
 
 type ApiPayload = {
@@ -243,6 +252,18 @@ export async function renderBlogListPaged(): Promise<void> {
   const langSelect = container.querySelector<HTMLSelectElement>('#blogLangSelect')!;
   const orderSelect = container.querySelector<HTMLSelectElement>('#blogOrderSelect')!;
   const listWrap = container.querySelector<HTMLDivElement>('#blogListWrap')!;
+
+  listWrap.addEventListener('click', (ev) => {
+    const btn = (ev.target as HTMLElement | null)?.closest?.('.blog-edit-btn') as HTMLButtonElement | null;
+    if (!btn) return;
+
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    const url = btn.getAttribute('data-edit-url');
+    if (url) window.location.href = url;
+  });
+
   const countInfo = container.querySelector<HTMLDivElement>('#blogCountInfo')!;
   const pageInfo = container.querySelector<HTMLDivElement>('#blogPageInfo')!;
   const prevBtn = container.querySelector<HTMLButtonElement>('#blogPrevBtn')!;
@@ -288,18 +309,38 @@ export async function renderBlogListPaged(): Promise<void> {
         const title = escapeHtml(row.post_title || '(Sense títol)');
         const cat = escapeHtml((row.tema_ca ?? 'Sense categoria') || 'Sense categoria');
         const dateLabel = escapeHtml(formatDateCa(row.post_date));
+        const statusBadge = isAdmin ? renderStatusBadge(row.post_status) : '';
 
         return `
-          <a class="list-group-item list-group-item-action" href="${href}">
-            <div class="d-flex flex-column flex-md-row gap-1 gap-md-3 align-items-md-center justify-content-between">
-              <div class="d-flex flex-column">
-                <div class="fw-semibold">${title}</div>
-                <div class="text-muted small">${dateLabel} · <span class="badge text-bg-light border">${cat}</span></div>
+            <a class="list-group-item list-group-item-action" href="${href}">
+              <div class="d-flex flex-column flex-md-row gap-2 gap-md-3 align-items-md-center justify-content-between">
+                <div class="d-flex flex-column">
+                  <div class="fw-semibold">${title}</div>
+                  <div class="small">
+                    <span class="text-muted">${dateLabel} · </span>
+                    <span class="badge text-bg-light border">${cat}</span>
+                    ${statusBadge ? ` ${statusBadge}` : ''}
+                  </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                  ${
+                    isAdmin
+                      ? `<button
+                          type="button"
+                          class="btn btn-sm btn-outline-primary blog-edit-btn"
+                          data-edit-url="${escapeHtml(buildEditUrl(row.id))}"
+                        >
+                          <i class="bi bi-pencil-square me-1" aria-hidden="true"></i>
+                          Edita
+                        </button>`
+                      : ''
+                  }
+                  <div class="text-muted small d-none d-md-block">→</div>
+                </div>
               </div>
-              <div class="text-muted small d-none d-md-block">→</div>
-            </div>
-          </a>
-        `;
+            </a>
+          `;
       })
       .join('');
 
