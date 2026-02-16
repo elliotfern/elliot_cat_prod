@@ -52,7 +52,17 @@ export async function barraNavegacio() {
   }
 
   // Items restantes
-  const filteredParts = parts.filter((p) => !p.includes('fitxa'));
+  const filteredParts = parts.filter((p, index) => {
+    // eliminar "fitxa"
+    if (p.includes('fitxa')) return false;
+
+    // eliminar "article" cuando viene después de blog
+    if (!inGestio && p === 'article' && parts[index - 1] === 'blog') {
+      return false;
+    }
+
+    return true;
+  });
 
   filteredParts.forEach((part, index) => {
     const label = capitalizeWords(part);

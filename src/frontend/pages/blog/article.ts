@@ -85,6 +85,11 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
   const container = document.getElementById('articleView');
   if (!container) return;
 
+  const langCode = getUrlLangCode() ?? 'ca';
+  const backSection = tipus === 'historia' ? 'historia' : 'blog';
+  const backHref = `/${langCode}/${backSection}`;
+  const backLabel = tipus === 'historia' ? '← Tornar a la secció Història' : '← Tornar al blog';
+
   if (!slug) {
     container.innerHTML = `<div class="alert alert-danger mb-0">Slug invàlid.</div>`;
     return;
@@ -165,11 +170,11 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
         </div>
       </article>
 
-      <div class="mb-3">
-        <a class="text-decoration-none" href="${tipus === 'historia' ? `/${getUrlLangCode() ?? 'ca'}/historia` : `/blog`}">
-          ${tipus === 'historia' ? '← Tornar a la secció Història' : '← Tornar al blog'}
-        </a>
-      </div>
+     <div class="mb-3">
+  <a class="text-decoration-none" href="${backHref}">
+    ${backLabel}
+  </a>
+</div>
     `;
 
     const contentEl = container.querySelector<HTMLDivElement>('#blogContent');
