@@ -698,7 +698,8 @@ if ($slug === 'carrecsPersona') {
         nameCa AS nombreCurso,
         resumenCa AS resumen,
         img,
-        paramNameCa AS paramName
+        paramNameCa AS paramName,
+        lastModified
         FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     } else if ($lang === "en") {
@@ -707,7 +708,8 @@ if ($slug === 'carrecsPersona') {
         nameEn AS nombreCurso,
         resumenEn AS resumen,
         img,
-        paramNameEn AS paramName
+        paramNameEn AS paramName,
+        lastModified
         FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     } else if ($lang === "es") {
@@ -716,7 +718,8 @@ if ($slug === 'carrecsPersona') {
         nameEs AS nombreCurso,
         resumenEs AS resumen,
         img,
-        paramNameEs AS paramName
+        paramNameEs AS paramName,
+        lastModified
         FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     } else if ($lang === "fr") {
@@ -725,7 +728,8 @@ if ($slug === 'carrecsPersona') {
         nameFr AS nombreCurso,
         resumenFr AS resumen,
         img,
-        paramNameFr AS paramName
+        paramNameFr AS paramName,
+        lastModified
         FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     } else if ($lang === "it") {
@@ -734,12 +738,13 @@ if ($slug === 'carrecsPersona') {
         nameIt AS nombreCurso,
         resumenIt AS resumen,
         img,
-        paramNameIt AS paramName
+        paramNameIt AS paramName,
+        lastModified
         FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     }
 
-  try {
+    try {
         $result = $db->getData($sql);
 
         if (empty($result)) {
