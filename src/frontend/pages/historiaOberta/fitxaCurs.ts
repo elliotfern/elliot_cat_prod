@@ -47,7 +47,7 @@ export async function taulaArticlesCurs(cursId: string): Promise<void> {
   // 1) Fetch del endpoint
   container.innerHTML = `<div class="alert alert-info">Carregant articles...</div>`;
 
-  const url = `https://${window.location.host}/api/historia-oberta/get/cursArticles?cursId=${encodeURIComponent(cursId)}`;
+  const url = `https://${window.location.host}/api/historia/get/cursArticles?cursId=${encodeURIComponent(cursId)}`;
 
   const res = await fetch(url, { credentials: 'include' });
   if (!res.ok) {
