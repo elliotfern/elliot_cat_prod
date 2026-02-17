@@ -66,8 +66,6 @@ $sqlExists = "
     SELECT id
     FROM " . DEST_TABLE . "
     WHERE slug = :slug
-      AND post_type = :post_type
-      AND lang = :lang
     LIMIT 1
 ";
 $stmtExists = $pdo->prepare($sqlExists);
@@ -95,9 +93,7 @@ foreach ($rows as $r) {
 
     // Existe?
     $stmtExists->execute([
-        ':slug' => $slug,
-        ':post_type' => DEST_POST_TYPE,
-        ':lang' => DEST_LANG,
+        ':slug' => $slug
     ]);
     $found = $stmtExists->fetch(PDO::FETCH_ASSOC);
 
