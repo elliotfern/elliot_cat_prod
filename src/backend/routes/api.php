@@ -262,6 +262,14 @@ $routes = [
     ],
 
     // HISTORIA OBERTA
+    '/api/historia/migracio' => [
+        'view' => 'src/backend/api/16_historia_oberta/migracio.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     '/api/historia/get/{slug}' => [
         'view' => 'src/backend/api/16_historia_oberta/get-historia.php',
         'needs_session' => false,
