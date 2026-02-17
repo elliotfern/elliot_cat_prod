@@ -59,4 +59,8 @@ final class Tables
 
     // Blog
     public const BLOG = 'db_blog';
+
+    // Història
+    public const DB_HISTORIA_OBERTA_ARTICLES = 'db_historia_oberta_articles';
+    public const DB_HISTORIA_OBERTA_CURSOS = 'db_historia_oberta_cursos';
 }

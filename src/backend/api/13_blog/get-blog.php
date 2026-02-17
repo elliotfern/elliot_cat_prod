@@ -595,6 +595,292 @@ if ($slug === 'llistatArticles') {
             500
         );
     }
+
+    // Llistat Historia Oberta (INTRANET ONLY)
+    // URL: /api/blog/get/llistatHistoriaOberta?page=1&limit=10&order=asc|desc&curs=0|id&lang=0|id&status=publish|draft|...
+} else if ($slug === 'llistatHistoriaOberta') {
+
+    // ✅ intranet-only (si quieres, fuerza admin)
+    if (!isUserAdmin()) {
+        Response::error('No autoritzat', [], 403);
+        return;
+    }
+
+    $page  = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
+    $order = isset($_GET['order']) ? strtolower((string)$_GET['order']) : 'asc';
+
+    $curs   = isset($_GET['curs']) ? (int)$_GET['curs'] : 0;   // 0 = tots
+    $lang   = isset($_GET['lang']) ? (int)$_GET['lang'] : 0;   // 0 = tots
+    $status = isset($_GET['status']) ? trim((string)$_GET['status']) : ''; // '' = tots
+
+    if ($page < 1) $page = 1;
+    if ($limit < 1) $limit = 20;
+    if ($limit > 100) $limit = 100;
+    if (!in_array($order, ['asc', 'desc'], true)) $order = 'asc';
+
+    $offset = ($page - 1) * $limit;
+
+    // Idiomes permesos (ajusta a los tuyos)
+    $allowedLangIds = [1, 2, 3, 4, 7];
+    if ($lang !== 0 && !in_array($lang, $allowedLangIds, true)) {
+        $lang = 0;
+    }
+
+    $where = [];
+    $params = [];
+
+    // Solo historia_oberta
+    $where[] = "b.post_type = 'historia_oberta'";
+
+    if ($curs > 0) {
+        $where[] = "hoa.curs = :curs";
+        $params[':curs'] = $curs;
+    }
+
+    if ($lang > 0) {
+        $where[] = "b.lang = :lang";
+        $params[':lang'] = $lang;
+    }
+
+    if ($status !== '') {
+        $where[] = "LOWER(TRIM(b.post_status)) = LOWER(TRIM(:status))";
+        $params[':status'] = $status;
+    }
+
+    $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+    try {
+
+        // COUNT
+        $sqlCount = "
+            SELECT COUNT(*) AS total
+            FROM " . qi(Tables::BLOG, $pdo) . " b
+            INNER JOIN " . qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo) . " hoa
+              ON (b.id = hoa.ca OR b.id = hoa.es OR b.id = hoa.en OR b.id = hoa.fr OR b.id = hoa.it)
+            INNER JOIN " . qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo) . " c
+              ON c.id = hoa.curs
+            $whereSql
+        ";
+
+        $stmtCount = $pdo->prepare($sqlCount);
+        foreach ($params as $k => $v) $stmtCount->bindValue($k, $v);
+        $stmtCount->execute();
+        $total = (int)$stmtCount->fetchColumn();
+
+        // DATA
+        $sql = "
+            SELECT
+              b.id AS blog_id,
+              hoa.id AS group_id,
+              hoa.curs AS curs_id,
+              c.ordre AS curs_ordre,
+              hoa.ordre AS article_ordre,
+
+              -- Nombre del curso según idioma del artículo
+              CASE b.lang
+                WHEN 1 THEN c.nameCa
+                WHEN 2 THEN c.nameEs
+                WHEN 3 THEN c.nameEn
+                WHEN 4 THEN c.nameFr
+                WHEN 7 THEN c.nameIt
+                ELSE c.nameCa
+              END AS course_name,
+
+              b.lang,
+              b.post_status,
+              b.slug,
+              b.post_title,
+              b.post_date,
+              b.post_modified
+            FROM " . qi(Tables::BLOG, $pdo) . " b
+            INNER JOIN " . qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo) . " hoa
+              ON (b.id = hoa.ca OR b.id = hoa.es OR b.id = hoa.en OR b.id = hoa.fr OR b.id = hoa.it)
+            INNER JOIN " . qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo) . " c
+              ON c.id = hoa.curs
+            $whereSql
+            ORDER BY c.ordre $order, hoa.ordre $order, b.lang ASC, b.post_date DESC
+            LIMIT :limit OFFSET :offset
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        foreach ($params as $k => $v) $stmt->bindValue($k, $v);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $pages = (int)ceil(($total > 0 ? $total : 1) / $limit);
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            [
+                'items' => $rows,
+                'pagination' => [
+                    'page' => $page,
+                    'limit' => $limit,
+                    'total' => $total,
+                    'pages' => $pages,
+                    'has_prev' => $page > 1,
+                    'has_next' => $page < $pages,
+                ],
+                'filters' => [
+                    'curs' => $curs ?: null,
+                    'lang' => $lang ?: null,
+                    'status' => $status !== '' ? $status : null,
+                    'order' => $order,
+                ],
+            ],
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    // Facets Historia Oberta (Cursos + Idiomes + Estats)
+    // URL: /api/blog/get/filtresHistoriaOberta
+} else if ($slug === 'filtresHistoriaOberta') {
+
+    // ✅ intranet-only
+    if (!function_exists('isUserAdmin') || !isUserAdmin()) {
+        Response::error('No autoritzat', [], 403);
+        return;
+    }
+
+    // Idiomes permesos (IDs) - ajusta si cal
+    $allowedLangIds = [1, 2, 3, 4, 7];
+
+    // (Opcional) idioma UI para labels de cursos: ?uiLang=ca|es|en|fr|it
+    $uiLang = strtolower(trim((string)($_GET['uiLang'] ?? 'ca')));
+    if (!in_array($uiLang, ['ca', 'es', 'en', 'fr', 'it'], true)) $uiLang = 'ca';
+
+    // Map uiLang -> columna nameXX en db_historia_oberta_cursos
+    $courseNameColumn = match ($uiLang) {
+        'es' => 'nameEs',
+        'en' => 'nameEn',
+        'fr' => 'nameFr',
+        'it' => 'nameIt',
+        default => 'nameCa',
+    };
+
+    try {
+
+        /**
+         * 1) COURSES
+         * - Devuelve todos los cursos, ordenados por ordre (y luego id)
+         */
+        $sqlCourses = sprintf(
+            "SELECT
+                c.id AS id,
+                COALESCE(c.ordre, 0) AS ordre,
+                TRIM(COALESCE(c.%s, c.nameCa)) AS label
+             FROM %s AS c
+             ORDER BY COALESCE(c.ordre, 0) ASC, c.id ASC",
+            $courseNameColumn,
+            qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo)
+        );
+
+        $stmtC = $pdo->prepare($sqlCourses);
+        $stmtC->execute();
+        $coursesRaw = $stmtC->fetchAll(PDO::FETCH_ASSOC);
+
+        $courses = [];
+        foreach ($coursesRaw as $r) {
+            $id = (int)($r['id'] ?? 0);
+            $ordre = (int)($r['ordre'] ?? 0);
+            $label = trim((string)($r['label'] ?? ''));
+
+            if ($id <= 0) continue;
+            if ($label === '') $label = 'Curs ' . $id;
+
+            $courses[] = [
+                'id' => $id,
+                'ordre' => $ordre,
+                'label' => $label,
+            ];
+        }
+
+        /**
+         * 2) LANGS (solo los allowed)
+         * - Los sacamos de tu tabla de idiomas
+         * - Nota: aquí uso idioma_ca como label, como en tu endpoint existente
+         */
+        $langPlaceholders = [];
+        foreach ($allowedLangIds as $i => $_) $langPlaceholders[] = ':lang' . $i;
+        $inLang = implode(',', $langPlaceholders);
+
+        $sqlLangs = sprintf(
+            "SELECT
+                l.id AS id,
+                TRIM(l.idioma_ca) AS label
+             FROM %s AS l
+             WHERE l.id IN ($inLang)
+             ORDER BY label ASC",
+            qi(Tables::DB_IDIOMES, $pdo)
+        );
+
+        $stmtL = $pdo->prepare($sqlLangs);
+        foreach ($allowedLangIds as $i => $langId) {
+            $stmtL->bindValue(':lang' . $i, $langId, PDO::PARAM_INT);
+        }
+        $stmtL->execute();
+        $langsRaw = $stmtL->fetchAll(PDO::FETCH_ASSOC);
+
+        $langs = [];
+        foreach ($langsRaw as $r) {
+            $id = (int)($r['id'] ?? 0);
+            $label = trim((string)($r['label'] ?? ''));
+            if ($id <= 0 || $label === '') continue;
+            $langs[] = ['id' => $id, 'label' => $label];
+        }
+
+        /**
+         * 3) STATUSES (distinct) SOLO historia_oberta
+         * - Sacamos los estados existentes en db_blog para post_type=historia_oberta
+         * - Y opcionalmente solo de idiomas allowed
+         */
+        $sqlStatuses = sprintf(
+            "SELECT DISTINCT
+                TRIM(LOWER(COALESCE(b.post_status, ''))) AS s
+             FROM %s AS b
+             WHERE b.post_type = 'historia_oberta'
+               AND b.lang IN ($inLang)
+             ORDER BY s ASC",
+            qi(Tables::BLOG, $pdo)
+        );
+
+        $stmtS = $pdo->prepare($sqlStatuses);
+        foreach ($allowedLangIds as $i => $langId) {
+            $stmtS->bindValue(':lang' . $i, $langId, PDO::PARAM_INT);
+        }
+        $stmtS->execute();
+        $statusesRaw = $stmtS->fetchAll(PDO::FETCH_ASSOC);
+
+        $statuses = [];
+        foreach ($statusesRaw as $r) {
+            $s = trim((string)($r['s'] ?? ''));
+            if ($s === '') continue;
+            $statuses[] = $s;
+        }
+        $statuses = array_values(array_unique($statuses));
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            [
+                'courses' => $courses,
+                'langs' => $langs,
+                'statuses' => $statuses,
+                'uiLang' => $uiLang,
+            ],
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // No se proporcionó un token
     header('HTTP/1.1 403 Forbidden');

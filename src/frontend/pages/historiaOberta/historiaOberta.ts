@@ -3,6 +3,7 @@ import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { fitxaPersona } from '../persona/fitxaPersona';
 import { construirTaula } from '../../services/api/construirTaula';
 import { renderBlogArticleView } from '../blog/article';
+import { renderHistoriaObertaListPaged } from './llistatHistoriaObertaPaged';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -19,6 +20,10 @@ export function historiaOberta() {
     // const backHref = `${langPrefix}/historia`;
 
     void renderBlogArticleView(slug, 'historia');
+  }
+
+  if (pageType[2] === 'llistat-articles') {
+    void renderHistoriaObertaListPaged();
   }
 
   if (pageType[3] === 'modifica-article') {

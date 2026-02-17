@@ -122,6 +122,7 @@ $routes = [
 
     // 15. Història
     APP_GESTIO . $url['historia'] => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'index.php'),
+    APP_GESTIO . $url['historia'] . '/llistat-articles' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'llistat-articles.php'),
     APP_GESTIO . $url['historia'] . '/llistat-cursos' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'llistat-cursos.php'),
     APP_GESTIO . $url['historia'] . '/llistat-organitzacions' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'llistat-organitzacions.php'),
     APP_GESTIO . $url['historia'] . '/llistat-esdeveniments' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'llistat-esdeveniments.php'),
