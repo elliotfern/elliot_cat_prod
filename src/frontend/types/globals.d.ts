@@ -1,4 +1,5 @@
-
 interface Window {
-    dayjs: typeof import('dayjs');
+  dayjs: typeof import('dayjs');
 }
+
+declare const Trix: any;

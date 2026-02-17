@@ -48,6 +48,52 @@ function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
   window.setTimeout(() => obs.disconnect(), timeoutMs);
 }
 
+document.addEventListener('trix-before-initialize', function () {
+  // H2
+  Trix.config.blockAttributes.heading2 = {
+    tagName: 'h2',
+    terminal: true,
+    breakOnReturn: true,
+    group: false,
+  };
+
+  // H3
+  Trix.config.blockAttributes.heading3 = {
+    tagName: 'h3',
+    terminal: true,
+    breakOnReturn: true,
+    group: false,
+  };
+
+  // H4
+  Trix.config.blockAttributes.heading4 = {
+    tagName: 'h4',
+    terminal: true,
+    breakOnReturn: true,
+    group: false,
+  };
+});
+
+document.addEventListener('trix-initialize', function (event) {
+  const editorElement = event.target as any;
+  const toolbar = editorElement.toolbarElement;
+  if (!toolbar) return;
+
+  const blockGroup = toolbar.querySelector('.trix-button-group--block-tools');
+  if (!blockGroup) return;
+
+  const customGroup = document.createElement('span');
+  customGroup.className = 'trix-button-group';
+
+  customGroup.innerHTML = `
+    <button type="button" class="trix-button" data-trix-attribute="heading2">H2</button>
+    <button type="button" class="trix-button" data-trix-attribute="heading3">H3</button>
+    <button type="button" class="trix-button" data-trix-attribute="heading4">H4</button>
+  `;
+
+  blockGroup.appendChild(customGroup);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   const url = window.location.href;
   const pageType = getPageType(url);
