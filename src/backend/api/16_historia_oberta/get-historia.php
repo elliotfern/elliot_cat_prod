@@ -886,35 +886,35 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
     $lang = $_GET['langCurso'];
 
     if ($lang === "ca") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameCa AS courseName, c.descripCa AS courseDescription, c.id AS cursId
+        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameCa AS courseName, c.descripCa AS courseDescription, c.id AS cursId
         FROM db_historia_oberta_cursos AS c
         LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
         LEFT JOIN db_blog AS p ON p.ID = l.ca
         WHERE c.paramNameCa = :param
         ORDER BY l.ordre ASC";
     } else if ($lang === "en") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameEn AS courseName, c.descripEn AS courseDescription, c.id AS cursId
+        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameEn AS courseName, c.descripEn AS courseDescription, c.id AS cursId
         FROM db_historia_oberta_cursos AS c
         LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
         LEFT JOIN db_blog AS p ON p.ID = l.en
         WHERE c.paramNameEn = :param
         ORDER BY l.ordre ASC;";
     } else if ($lang === "fr") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameFr AS courseName, c.descripFr AS courseDescription, c.id AS cursId
+        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameFr AS courseName, c.descripFr AS courseDescription, c.id AS cursId
         FROM db_historia_oberta_cursos AS c
         LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
         LEFT JOIN db_blog AS p ON p.ID = l.fr
         WHERE c.paramNameFr = :param
         ORDER BY l.ordre ASC;";
     } else if ($lang === "es") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameEs AS courseName, c.descripEs AS courseDescription, c.id AS cursId
+        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameEs AS courseName, c.descripEs AS courseDescription, c.id AS cursId
         FROM db_historia_oberta_cursos AS c
         LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
         LEFT JOIN db_blog AS p ON p.ID = l.es
         WHERE c.paramNameEs = :param
         ORDER BY l.ordre ASC;";
     } else if ($lang === "it") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameIt AS courseName, c.descripIt AS courseDescription, c.id AS cursId
+        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameIt AS courseName, c.descripIt AS courseDescription, c.id AS cursId
         FROM db_historia_oberta_cursos AS c
         LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
         LEFT JOIN db_blog AS p ON p.ID = l.it
