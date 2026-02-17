@@ -37,6 +37,16 @@ export function historiaOberta() {
     void taulaArticlesCurs(id);
   }
 
+  if (pageType[2] === 'modifica-curs-article') {
+    const id = pageType[3] ?? '';
+    void taulaArticlesCurs(id);
+  }
+
+  if (pageType[2] === 'nou-curs-article') {
+    const id = pageType[3] ?? '';
+    void taulaArticlesCurs(id);
+  }
+
   if (pageType[3] === 'modifica-article') {
   } else if (pageType[2] === 'fitxa-persona') {
     fitxaPersona('/api/persones/get/?persona=', pageType[3], 'historia-persona', function (data) {
