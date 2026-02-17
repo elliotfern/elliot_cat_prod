@@ -183,16 +183,12 @@
             const headerH = siteHeader.getBoundingClientRect().height;
             const intranetH = intranetNav ? intranetNav.getBoundingClientRect().height : 0;
 
-            // Header fijo: empuja el body solo con el header
             document.documentElement.style.setProperty("--headerH", `${headerH}px`);
+            document.documentElement.style.setProperty("--intranetH", `${intranetH}px`);
 
-            // Empuja el contenido con la altura del intranet (NO el body)
-            // Empuja el contenido con la altura del intranet (NO el body)
-            // Si NO hay intranet, dejamos un pequeño margen para que no quede pegado al header
             if (mainContainer) {
                 mainContainer.style.paddingTop = intranetNav ? `${intranetH}px` : "16px";
             }
-
         };
 
         apply();

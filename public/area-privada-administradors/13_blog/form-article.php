@@ -96,4 +96,20 @@
         line-height: 1.6;
         background-color: white !important;
     }
+
+    /* Toolbar de Trix pegada debajo del header + intranet */
+    trix-toolbar {
+        position: sticky;
+        top: calc(var(--headerH, 0px) + var(--intranetH, 0px));
+        z-index: 1035;
+        /* por encima del contenido */
+        background: #fff;
+        padding: 6px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, .08);
+    }
+
+    /* Opcional: un pelín de sombra al pegarse */
+    trix-toolbar {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, .04);
+    }
 </style>
