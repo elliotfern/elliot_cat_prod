@@ -24,7 +24,7 @@ const CATEGORIA_HEX = '0x0197acfe062670cf96e00f8ae5e17eac'; // <-- CAMBIA ESTO
 
 // Si quieres filtrar qué WP posts importar:
 const ONLY_STATUS = 'null';     // o null para todos
-const ONLY_WP_TYPE = 'post';       // o 'page' etc. o null
+const ONLY_WP_TYPE = 'null';       // o 'page' etc. o null
 
 // Límite / batch
 $limit = 5000;
@@ -83,6 +83,9 @@ $stmtSrc->bindValue(':lim', $limit, PDO::PARAM_INT);
 $stmtSrc->execute();
 $rows = $stmtSrc->fetchAll(PDO::FETCH_ASSOC);
 
+echo "Rows found: " . count($rows) . PHP_EOL;
+exit;
+
 // 2) Prepared: exists + insert
 $sqlExists = "
     SELECT id
@@ -125,6 +128,7 @@ foreach ($rows as $r) {
 
     if ($found) {
         $skipped++;
+        echo "SKIPPED slug={$slug}\n";
         continue;
     }
 
