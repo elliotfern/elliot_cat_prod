@@ -5,6 +5,7 @@ import { construirTaula } from '../../services/api/construirTaula';
 import { renderBlogArticleView } from '../blog/article';
 import { renderHistoriaObertaListPaged } from './llistatHistoriaObertaPaged';
 import { taulaLlistatCursosHistoria } from './llistatCursos';
+import { taulaArticlesCurs } from './fitxaCurs';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -29,6 +30,11 @@ export function historiaOberta() {
 
   if (pageType[2] === 'llistat-cursos') {
     void taulaLlistatCursosHistoria();
+  }
+
+  if (pageType[2] === 'fitxa-curs') {
+    const id = pageType[3] ?? '';
+    void taulaArticlesCurs(id);
   }
 
   if (pageType[3] === 'modifica-article') {
