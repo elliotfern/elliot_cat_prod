@@ -821,7 +821,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
         resumenCa AS resumen,
         img,
         paramNameCa AS paramName
-        FROM db_openhistory_courses 
+        FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     } else if ($slug === "en") {
         $sql = "SELECT id,
@@ -830,7 +830,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
         resumenEn AS resumen,
         img,
         paramNameEn AS paramName
-        FROM db_openhistory_courses 
+        FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     } else if ($slug === "es") {
         $sql = "SELECT id,
@@ -839,7 +839,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
         resumenEs AS resumen,
         img,
         paramNameEs AS paramName
-        FROM db_openhistory_courses 
+        FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     } else if ($slug === "fr") {
         $sql = "SELECT id,
@@ -848,7 +848,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
         resumenFr AS resumen,
         img,
         paramNameFr AS paramName
-        FROM db_openhistory_courses 
+        FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     } else if ($slug === "it") {
         $sql = "SELECT id,
@@ -857,7 +857,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
         resumenIt AS resumen,
         img,
         paramNameIt AS paramName
-        FROM db_openhistory_courses 
+        FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
     }
 
@@ -887,37 +887,37 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistat-articles') {
 
     if ($lang === "ca") {
         $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameCa AS courseName, c.descripCa AS courseDescription, c.id AS cursId
-        FROM db_openhistory_courses AS c
-        LEFT JOIN epgylzqu_historia_web.posts_lang AS l ON c.id = l.curs
-        LEFT JOIN epgylzqu_historia_web.xfr_posts AS p ON p.ID = l.ca
+        FROM db_historia_oberta_cursos AS c
+        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
+        LEFT JOIN db_blog AS p ON p.ID = l.ca
         WHERE c.paramNameCa = :param
         ORDER BY l.ordre ASC";
     } else if ($lang === "en") {
         $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameEn AS courseName, c.descripEn AS courseDescription, c.id AS cursId
-        FROM db_openhistory_courses AS c
-        LEFT JOIN epgylzqu_historia_web.posts_lang AS l ON c.id = l.curs
-        LEFT JOIN epgylzqu_historia_web.xfr_posts AS p ON p.ID = l.en
+        FROM db_historia_oberta_cursos AS c
+        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
+        LEFT JOIN db_blog AS p ON p.ID = l.en
         WHERE c.paramNameEn = :param
         ORDER BY l.ordre ASC;";
     } else if ($lang === "fr") {
         $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameFr AS courseName, c.descripFr AS courseDescription, c.id AS cursId
-        FROM db_openhistory_courses AS c
-        LEFT JOIN epgylzqu_historia_web.posts_lang AS l ON c.id = l.curs
-        LEFT JOIN epgylzqu_historia_web.xfr_posts AS p ON p.ID = l.fr
+        FROM db_historia_oberta_cursos AS c
+        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
+        LEFT JOIN db_blog AS p ON p.ID = l.fr
         WHERE c.paramNameFr = :param
         ORDER BY l.ordre ASC;";
     } else if ($lang === "es") {
         $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameEs AS courseName, c.descripEs AS courseDescription, c.id AS cursId
-        FROM db_openhistory_courses AS c
-        LEFT JOIN epgylzqu_historia_web.posts_lang AS l ON c.id = l.curs
-        LEFT JOIN epgylzqu_historia_web.xfr_posts AS p ON p.ID = l.es
+        FROM db_historia_oberta_cursos AS c
+        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
+        LEFT JOIN db_blog AS p ON p.ID = l.es
         WHERE c.paramNameEs = :param
         ORDER BY l.ordre ASC;";
     } else if ($lang === "it") {
         $query = "SELECT p.ID, p.post_title, p.post_date, p.post_name, c.nameIt AS courseName, c.descripIt AS courseDescription, c.id AS cursId
-        FROM db_openhistory_courses AS c
-        LEFT JOIN epgylzqu_historia_web.posts_lang AS l ON c.id = l.curs
-        LEFT JOIN epgylzqu_historia_web.xfr_posts AS p ON p.ID = l.it
+        FROM db_historia_oberta_cursos AS c
+        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
+        LEFT JOIN db_blog AS p ON p.ID = l.it
         WHERE c.paramNameIt = :param
         ORDER BY l.ordre ASC;";
     }
