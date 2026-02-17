@@ -1,5 +1,7 @@
 <?php
 
+// script de migracio de posts
+
 declare(strict_types=1);
 
 use App\Config\Database;
