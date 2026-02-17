@@ -3,7 +3,7 @@
 
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { decorateLinksInHtml } from '../../utils/linksExterns';
-import { getUrlLangCode, LANG_ID_TO_CODE } from '../../utils/locales/getLangPrefix';
+import { getUrlLangCode, LANG_ID_TO_CODE, isInGestio } from '../../utils/locales/getLangPrefix';
 
 type ArticleScope = 'blog' | 'historia';
 
@@ -60,6 +60,9 @@ async function fetchArticleBySlug(slug: string, tipus: ArticleScope): Promise<Bl
  * Devuelve true si ha redirigido.
  */
 function redirectIfLangMismatch(articleLangId: number | null | undefined): boolean {
+  // 🚫 Nunca redirigir en la intranet
+  if (isInGestio()) return false;
+
   const urlCode = getUrlLangCode() ?? 'ca';
   const n = Number(articleLangId);
 
@@ -70,7 +73,6 @@ function redirectIfLangMismatch(articleLangId: number | null | undefined): boole
 
   const parts = window.location.pathname.split('/').filter(Boolean);
 
-  // Si la ruta ya empieza por idioma, lo sustituimos; si no, lo insertamos (robusto).
   const hasLangPrefix = !!getUrlLangCode();
   const rest = hasLangPrefix ? parts.slice(1) : parts;
 

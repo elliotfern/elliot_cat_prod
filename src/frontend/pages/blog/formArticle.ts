@@ -2,8 +2,10 @@ import { fetchDataGet } from '../../services/api/fetchData';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
+import { LANG_ID_TO_CODE } from '../../utils/locales/getLangPrefix';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 import { setTrixHTML } from '../../utils/setTrix';
+import { DOMAIN_WEB } from '../../utils/urls';
 
 interface BlogArticleFitxa {
   [key: string]: unknown;
@@ -100,7 +102,23 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
     data = row;
 
     // 3) Títol UI
-    divTitol.textContent = 'Modificar article';
+
+    // 3) Títol UI amb link públic (amb idioma)
+    const langId = Number(data.lang ?? 1);
+    const langCode = LANG_ID_TO_CODE[langId] ?? 'ca';
+
+    const publicUrl = `${DOMAIN_WEB}/${langCode}/blog/article/${encodeURIComponent(String(data.slug ?? ''))}`;
+
+    divTitol.innerHTML = `
+        Modifica article:
+        <a href="${publicUrl}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-decoration-none">
+          ${String(data.post_title ?? '')}
+        </a>
+      `;
+
     btnSubmit.textContent = 'Desar canvis';
 
     await fillSelects(data);
