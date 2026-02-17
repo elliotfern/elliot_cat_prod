@@ -22,9 +22,6 @@ const DEST_LANG = 1;
 // ejemplo: 'AABBCCDDEEFF00112233445566778899'
 const CATEGORIA_HEX = '0x0197acfe062670cf96e00f8ae5e17eac'; // <-- CAMBIA ESTO
 
-// Si quieres filtrar qué WP posts importar:
-const ONLY_STATUS = 'null';     // o null para todos
-const ONLY_WP_TYPE = 'null';       // o 'page' etc. o null
 
 // Límite / batch
 $limit = 5000;
@@ -41,23 +38,6 @@ function slugify(string $s): string
 }
 
 // 1) Leer origen
-$where = [];
-$params = [];
-
-if (ONLY_STATUS !== '0' && ONLY_STATUS !== '') {
-    if (ONLY_STATUS !== null) {
-        $where[] = "post_status = :st";
-        $params[':st'] = ONLY_STATUS;
-    }
-}
-if (ONLY_WP_TYPE !== '0' && ONLY_WP_TYPE !== '') {
-    if (ONLY_WP_TYPE !== null) {
-        $where[] = "post_type = :pt";
-        $params[':pt'] = ONLY_WP_TYPE;
-    }
-}
-
-$whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
 $sqlSrc = "
     SELECT
@@ -68,23 +48,19 @@ $sqlSrc = "
         post_title,
         post_excerpt,
         post_status,
-        post_name
-    FROM " . ORIG_TABLE . "
-    $whereSql
-    ORDER BY ID ASC
-    LIMIT :lim
+        post_name,
+        post_type
+    FROM epgylzqu_historia_web.xfr_posts
+    WHERE post_type = 'post'
 ";
 
-$stmtSrc = $pdo->prepare($sqlSrc);
-foreach ($params as $k => $v) {
-    $stmtSrc->bindValue($k, $v, PDO::PARAM_STR);
-}
-$stmtSrc->bindValue(':lim', $limit, PDO::PARAM_INT);
-$stmtSrc->execute();
+$stmtSrc = $pdo->query($sqlSrc);
 $rows = $stmtSrc->fetchAll(PDO::FETCH_ASSOC);
 
 echo "Rows found: " . count($rows) . PHP_EOL;
+print_r($rows);
 exit;
+
 
 // 2) Prepared: exists + insert
 $sqlExists = "
