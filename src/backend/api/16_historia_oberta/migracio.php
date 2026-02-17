@@ -20,7 +20,7 @@ const DEST_LANG = 1;
 // ⚠️ IMPORTANTE: categoria BIN(16) NOT NULL en db_blog
 // Pon aquí el HEX (32 chars) de la categoria/tema que quieras usar para imports WP
 // ejemplo: 'AABBCCDDEEFF00112233445566778899'
-const CATEGORIA_HEX = '0x0197acfe062670cf96e00f8ae5e17eac'; // <-- CAMBIA ESTO
+const CATEGORIA_HEX = '0197ACFE062670CF96E00F8AE5E17EAC'; // <-- CAMBIA ESTO
 
 
 // Límite / batch
@@ -58,9 +58,6 @@ $stmtSrc = $pdo->query($sqlSrc);
 $rows = $stmtSrc->fetchAll(PDO::FETCH_ASSOC);
 
 echo "Rows found: " . count($rows) . PHP_EOL;
-print_r($rows);
-exit;
-
 
 // 2) Prepared: exists + insert
 $sqlExists = "
