@@ -58,8 +58,7 @@
             // Función para obtener y mostrar la lista de cursos
             const getCoursesList = async (lang) => {
                 try {
-                    const url = new URL('https://elliot.cat/api/historia/get/');
-                    url.searchParams.set('type', 'llistatCursos');
+                    const url = new URL('https://elliot.cat/api/historia/get/llistatCursos');
                     url.searchParams.set('langCurso', lang);
 
                     const response = await fetch(url.toString(), {

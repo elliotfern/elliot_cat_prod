@@ -262,7 +262,7 @@ $routes = [
     ],
 
     // HISTORIA OBERTA
-    '/api/historia/get' => [
+    '/api/historia/get/{slug}' => [
         'view' => 'src/backend/api/16_historia_oberta/get-historia.php',
         'needs_session' => false,
         'header_footer' => false,

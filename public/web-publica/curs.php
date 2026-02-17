@@ -27,8 +27,7 @@ $slug = $routeParams[0];
     // Función para obtener los cursos desde la API
     async function obtenerCursos(nameCourse, lang) {
         try {
-            const url = new URL('https://elliot.cat/api/historia/get/');
-            url.searchParams.set('type', 'curso');
+            const url = new URL('https://elliot.cat/api/historia/get/cursHistoria');
             url.searchParams.set('paramName', nameCourse);
             url.searchParams.set('langCurso', lang);
 
@@ -62,7 +61,7 @@ $slug = $routeParams[0];
             const li = document.createElement('li');
 
             // usa el idioma actual en el link
-            const postLink = `https://elliot.cat/${lang}/historia/article/${encodeURIComponent(curso.post_name)}`;
+            const postLink = `https://elliot.cat/${lang}/historia/article/${encodeURIComponent(curso.slug)}`;
 
             li.innerHTML = `<h6><a href="${postLink}">${curso.post_title}</a></h6>`;
             listaCursos.appendChild(li);
