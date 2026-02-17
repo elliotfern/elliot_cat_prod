@@ -9,7 +9,7 @@ const url = window.location.href;
 const pageType = getPageType(url);
 
 function isLang(seg: string | undefined): boolean {
-  return ['ca', 'es', 'en', 'fr', 'it', 'pt'].includes(String(seg || '').toLowerCase());
+  return ['ca', 'es', 'en', 'fr', 'it'].includes(String(seg || '').toLowerCase());
 }
 
 export function historiaOberta() {

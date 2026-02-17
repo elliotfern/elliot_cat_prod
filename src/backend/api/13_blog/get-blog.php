@@ -680,13 +680,12 @@ if ($slug === 'llistatArticles') {
               -- Nombre del curso según idioma del artículo
               CASE b.lang
                 WHEN 1 THEN c.nameCa
-                WHEN 2 THEN c.nameEs
-                WHEN 3 THEN c.nameEn
-                WHEN 4 THEN c.nameFr
-                WHEN 7 THEN c.nameIt
+                WHEN 2 THEN c.nameEn
+                WHEN 3 THEN c.nameEs
+                WHEN 4 THEN c.nameIt
+                WHEN 7 THEN c.nameFr
                 ELSE c.nameCa
-              END AS course_name,
-
+                END AS course_name,
               b.lang,
               b.post_status,
               b.slug,
