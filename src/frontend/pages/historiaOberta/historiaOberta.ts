@@ -6,6 +6,7 @@ import { renderBlogArticleView } from '../blog/article';
 import { renderHistoriaObertaListPaged } from './llistatHistoriaObertaPaged';
 import { taulaLlistatCursosHistoria } from './llistatCursos';
 import { taulaArticlesCurs } from './fitxaCurs';
+import { formCursArticle } from './formCursArticle';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -38,13 +39,13 @@ export function historiaOberta() {
   }
 
   if (pageType[2] === 'modifica-curs-article') {
-    const id = pageType[3] ?? '';
-    void taulaArticlesCurs(id);
+    const id = Number(pageType[3]);
+    void formCursArticle(true, id);
   }
 
   if (pageType[2] === 'nou-curs-article') {
     const id = pageType[3] ?? '';
-    void taulaArticlesCurs(id);
+    void formCursArticle(false);
   }
 
   if (pageType[3] === 'modifica-article') {

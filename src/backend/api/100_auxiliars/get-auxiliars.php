@@ -1421,6 +1421,269 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             500
         );
     }
+
+    // Llistat complet imatges
+    // ruta GET => "/api/auxiliars/get/historiaCursos"
+} else if ($slug === 'historiaCursos') {
+
+
+    $sql = <<<SQL
+            SELECT c.id, c.nameCa AS nomCurs
+            FROM %s AS c
+            ORDER BY c.nameCa ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo)
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat complet articles historia cat
+    // ruta GET => "/api/auxiliars/get/blogArticlesCa"
+} else if ($slug === 'blogArticlesCa') {
+
+    $sql = <<<SQL
+                SELECT id, post_title
+                FROM %s
+                WHERE lang = 1
+                AND post_type = 'historia_oberta'
+                ORDER BY post_date DESC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::BLOG, $pdo)
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat complet articles historia es
+    // ruta GET => "/api/auxiliars/get/blogArticlesEs"
+} else if ($slug === 'blogArticlesEs') {
+
+    $sql = <<<SQL
+                SELECT id, post_title
+                FROM %s
+                WHERE lang = 3
+                AND post_type = 'historia_oberta'
+                ORDER BY post_date DESC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::BLOG, $pdo)
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat complet articles historia en
+    // ruta GET => "/api/auxiliars/get/blogArticlesEn"
+} else if ($slug === 'blogArticlesEn') {
+
+    $sql = <<<SQL
+                SELECT id, post_title
+                FROM %s
+                WHERE lang = 2
+                AND post_type = 'historia_oberta'
+                ORDER BY post_date DESC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::BLOG, $pdo)
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat complet articles historia es
+    // ruta GET => "/api/auxiliars/get/blogArticlesIt"
+} else if ($slug === 'blogArticlesIt') {
+
+    $sql = <<<SQL
+                SELECT id, post_title
+                FROM %s
+                WHERE lang = 4
+                AND post_type = 'historia_oberta'
+                ORDER BY post_date DESC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::BLOG, $pdo)
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat complet articles historia es
+    // ruta GET => "/api/auxiliars/get/blogArticlesFr"
+} else if ($slug === 'blogArticlesFr') {
+
+    $sql = <<<SQL
+                SELECT id, post_title
+                FROM %s
+                WHERE lang = 7
+                AND post_type = 'historia_oberta'
+                ORDER BY post_date DESC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::BLOG, $pdo)
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

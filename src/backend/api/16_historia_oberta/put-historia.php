@@ -1,16 +1,35 @@
 <?php
-/*
- * BACKEND HISTORIA
- * FUNCIONS INSERT
- * 
- */
 
-// Check if the request method is PUT
+declare(strict_types=1);
+
+use App\Config\Database;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Config\Tables;
+
+$slug = $routeParams[0] ?? null;
+
+$db  = new Database();
+$pdo = $db->getPdo();
+
+// Siempre JSON
+header('Content-Type: application/json; charset=utf-8');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    http_response_code(204);
+    exit;
+}
+
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+
+// Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
     exit();
 }
+
 
 // a) Inserir pelicula
 if (isset($_GET['esdeveniment'])) {
@@ -397,6 +416,180 @@ if (isset($_GET['esdeveniment'])) {
         header("Content-Type: application/json");
         echo json_encode($response);
     }
+
+    /**
+     * PUT : Actualitzar slot curs-article (db_historia_oberta_articles)
+     * URL: /api/historia/put/updateCursArticle
+     * BODY:
+     * {
+     *   "id": 12,
+     *   "curs": 3,
+     *   "ordre": 2,
+     *   "ca": 123,
+     *   "es": 456,
+     *   "en": null,
+     *   "fr": null,
+     *   "it": null
+     * }
+     */
+} else if ($slug === 'updateCursArticle') {
+
+    $userUuid = getAuthenticatedUserUuid();
+    if (!$userUuid) {
+        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
+        return;
+    }
+
+    if (!isUserAdmin()) {
+        Response::error(MissatgesAPI::error('validacio'), ['Permís denegat'], 403);
+        return;
+    }
+
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw ?: '', true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+        return;
+    }
+
+    $errors = [];
+
+    $optIntOrNull = static function ($v): ?int {
+        if ($v === null) return null;
+        if ($v === '') return null;
+        if (!is_numeric($v)) return null;
+        return (int)$v;
+    };
+
+    $requireInt = static function (array $data, string $key, array &$errors): ?int {
+        if (!array_key_exists($key, $data)) {
+            $errors[$key] = 'required';
+            return null;
+        }
+        if (!is_numeric($data[$key])) {
+            $errors[$key] = 'must_be_int';
+            return null;
+        }
+        $n = (int)$data[$key];
+        if ($n <= 0) {
+            $errors[$key] = 'must_be_gt_0';
+            return null;
+        }
+        return $n;
+    };
+
+    $id    = $requireInt($data, 'id', $errors);
+    $curs  = $requireInt($data, 'curs', $errors);
+    $ordre = $requireInt($data, 'ordre', $errors);
+
+    $ca = $optIntOrNull($data['ca'] ?? null);
+    $es = $optIntOrNull($data['es'] ?? null);
+    $en = $optIntOrNull($data['en'] ?? null);
+    $fr = $optIntOrNull($data['fr'] ?? null);
+    $it = $optIntOrNull($data['it'] ?? null);
+
+    foreach (['ca' => $ca, 'es' => $es, 'en' => $en, 'fr' => $fr, 'it' => $it] as $k => $v) {
+        if ($v !== null && $v <= 0) $errors[$k] = 'must_be_gt_0_or_null';
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+        return;
+    }
+
+    try {
+        // Existe slot?
+        $sqlSlot = sprintf(
+            "SELECT id FROM %s WHERE id = :id LIMIT 1",
+            qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo)
+        );
+        $slot = $db->getData($sqlSlot, [':id' => $id], true);
+        if (empty($slot)) {
+            Response::error(MissatgesAPI::error('not_found'), ['slot not found'], 404);
+            return;
+        }
+
+        // Existe curs?
+        $sqlCurs = sprintf(
+            "SELECT id FROM %s WHERE id = :id LIMIT 1",
+            qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo)
+        );
+        $exists = $db->getData($sqlCurs, [':id' => $curs], true);
+        if (empty($exists)) {
+            Response::error(MissatgesAPI::error('invalid_data'), ['curs' => 'not_found'], 400);
+            return;
+        }
+
+        // Validar blog ids si vienen
+        $validateBlog = static function (\PDO $pdo, Database $db, int $blogId, int $expectedLang): bool {
+            $q = sprintf(
+                "SELECT id FROM %s WHERE id = :id AND lang = :lang AND post_type = 'historia_oberta' LIMIT 1",
+                qi(Tables::BLOG, $pdo)
+            );
+            $r = $db->getData($q, [':id' => $blogId, ':lang' => $expectedLang], true);
+            return !empty($r);
+        };
+
+        $langMap = ['ca' => 1, 'en' => 2, 'es' => 3, 'it' => 4, 'fr' => 7];
+
+        foreach (['ca' => $ca, 'es' => $es, 'en' => $en, 'fr' => $fr, 'it' => $it] as $k => $v) {
+            if ($v !== null) {
+                $expected = $langMap[$k];
+                if (!$validateBlog($pdo, $db, $v, $expected)) {
+                    Response::error(MissatgesAPI::error('invalid_data'), [$k => 'blog_not_found_or_lang_mismatch'], 400);
+                    return;
+                }
+            }
+        }
+
+        // Update
+        $sql = <<<SQL
+            UPDATE %s
+            SET
+                ca = :ca,
+                es = :es,
+                fr = :fr,
+                en = :en,
+                it = :it,
+                curs = :curs,
+                ordre = :ordre
+            WHERE id = :id
+            LIMIT 1
+        SQL;
+
+        $q = sprintf($sql, qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo));
+        $stmt = $pdo->prepare($q);
+
+        $bindNullableInt = static function (\PDOStatement $st, string $param, ?int $val): void {
+            if ($val === null) $st->bindValue($param, null, PDO::PARAM_NULL);
+            else $st->bindValue($param, $val, PDO::PARAM_INT);
+        };
+
+        $bindNullableInt($stmt, ':ca', $ca);
+        $bindNullableInt($stmt, ':es', $es);
+        $bindNullableInt($stmt, ':fr', $fr);
+        $bindNullableInt($stmt, ':en', $en);
+        $bindNullableInt($stmt, ':it', $it);
+
+        $stmt->bindValue(':curs', $curs, PDO::PARAM_INT);
+        $stmt->bindValue(':ordre', $ordre, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        if (!$stmt->execute()) {
+            Response::error(MissatgesAPI::error('errorBD'), [
+                'sqlState' => $stmt->errorCode(),
+                'info' => $stmt->errorInfo(),
+            ], 500);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    return;
     // si no hi ha cap endpoint valid, mostrar error:
 } else {
     // response output - data error

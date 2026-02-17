@@ -270,7 +270,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/historia/post' => [
+    '/api/historia/post/{slug}' => [
         'view' => 'src/backend/api/16_historia_oberta/post-historia.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -278,7 +278,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/historia/put' => [
+    '/api/historia/put/{slug}' => [
         'view' => 'src/backend/api/16_historia_oberta/put-historia.php',
         'needs_session' => false,
         'header_footer' => false,

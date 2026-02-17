@@ -1,9 +1,25 @@
 <?php
-/*
- * BACKEND HISTORIA
- * FUNCIONS INSERT
- * 
- */
+
+use App\Config\Database;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Config\Tables;
+
+$slug = $routeParams[0] ?? '';
+
+$db  = new Database();
+$pdo = $db->getPdo();
+
+// Siempre JSON
+header('Content-Type: application/json; charset=utf-8');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    http_response_code(204);
+    exit;
+}
+
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -385,6 +401,166 @@ if (isset($_GET['esdeveniment'])) {
         header("Content-Type: application/json");
         echo json_encode($response);
     }
+
+
+    /**
+     * POST : Crear slot curs-article (db_historia_oberta_articles)
+     * URL: /api/historia/post/createCursArticle
+     * BODY:
+     * {
+     *   "curs": 3,
+     *   "ordre": 1,
+     *   "ca": 123,
+     *   "es": null,
+     *   "en": null,
+     *   "fr": null,
+     *   "it": null
+     * }
+     */
+} else if ($slug === 'createCursArticle') {
+
+    // Auth (si lo usas en intranet)
+    $userUuid = getAuthenticatedUserUuid();
+    if (!$userUuid) {
+        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
+        return;
+    }
+
+    // (Opcional) exigir admin
+    if (!isUserAdmin()) {
+        Response::error(MissatgesAPI::error('validacio'), ['Permís denegat'], 403);
+        return;
+    }
+
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw ?: '', true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+        return;
+    }
+
+    // Helpers
+    $errors = [];
+
+    $optIntOrNull = static function ($v): ?int {
+        if ($v === null) return null;
+        if ($v === '') return null;
+        if (!is_numeric($v)) return null;
+        return (int)$v;
+    };
+
+    $requireInt = static function (array $data, string $key, array &$errors): ?int {
+        if (!array_key_exists($key, $data)) {
+            $errors[$key] = 'required';
+            return null;
+        }
+        if (!is_numeric($data[$key])) {
+            $errors[$key] = 'must_be_int';
+            return null;
+        }
+        $n = (int)$data[$key];
+        if ($n <= 0) {
+            $errors[$key] = 'must_be_gt_0';
+            return null;
+        }
+        return $n;
+    };
+
+    $curs  = $requireInt($data, 'curs', $errors);
+    $ordre = $requireInt($data, 'ordre', $errors);
+
+    $ca = $optIntOrNull($data['ca'] ?? null);
+    $es = $optIntOrNull($data['es'] ?? null);
+    $en = $optIntOrNull($data['en'] ?? null);
+    $fr = $optIntOrNull($data['fr'] ?? null);
+    $it = $optIntOrNull($data['it'] ?? null);
+
+    // Validaciones básicas de nullables: si viene no-null debe ser >0
+    foreach (['ca' => $ca, 'es' => $es, 'en' => $en, 'fr' => $fr, 'it' => $it] as $k => $v) {
+        if ($v !== null && $v <= 0) $errors[$k] = 'must_be_gt_0_or_null';
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+        return;
+    }
+
+    try {
+        // (Opcional recomendado) Validar que el curs existe
+        $sqlCurs = sprintf(
+            "SELECT id FROM %s WHERE id = :id LIMIT 1",
+            qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo)
+        );
+        $exists = $db->getData($sqlCurs, [':id' => $curs], true);
+        if (empty($exists)) {
+            Response::error(MissatgesAPI::error('invalid_data'), ['curs' => 'not_found'], 400);
+            return;
+        }
+
+        // (Opcional recomendado) Validar artículos en db_blog (lang + post_type)
+        $validateBlog = static function (\PDO $pdo, Database $db, int $blogId, int $expectedLang): bool {
+            $q = sprintf(
+                "SELECT id FROM %s WHERE id = :id AND lang = :lang AND post_type = 'historia_oberta' LIMIT 1",
+                qi(Tables::BLOG, $pdo)
+            );
+            $r = $db->getData($q, [':id' => $blogId, ':lang' => $expectedLang], true);
+            return !empty($r);
+        };
+
+        // lang mapping: ca=1 en=2 es=3 it=4 fr=7
+        $langMap = ['ca' => 1, 'en' => 2, 'es' => 3, 'it' => 4, 'fr' => 7];
+
+        foreach (['ca' => $ca, 'es' => $es, 'en' => $en, 'fr' => $fr, 'it' => $it] as $k => $v) {
+            if ($v !== null) {
+                $expected = $langMap[$k];
+                if (!$validateBlog($pdo, $db, $v, $expected)) {
+                    Response::error(MissatgesAPI::error('invalid_data'), [$k => 'blog_not_found_or_lang_mismatch'], 400);
+                    return;
+                }
+            }
+        }
+
+        // Insert
+        $sql = <<<SQL
+            INSERT INTO %s (ca, es, fr, en, it, curs, ordre)
+            VALUES (:ca, :es, :fr, :en, :it, :curs, :ordre)
+        SQL;
+
+        $q = sprintf($sql, qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo));
+        $stmt = $pdo->prepare($q);
+
+        $bindNullableInt = static function (\PDOStatement $st, string $param, ?int $val): void {
+            if ($val === null) $st->bindValue($param, null, PDO::PARAM_NULL);
+            else $st->bindValue($param, $val, PDO::PARAM_INT);
+        };
+
+        $bindNullableInt($stmt, ':ca', $ca);
+        $bindNullableInt($stmt, ':es', $es);
+        $bindNullableInt($stmt, ':fr', $fr);
+        $bindNullableInt($stmt, ':en', $en);
+        $bindNullableInt($stmt, ':it', $it);
+
+        $stmt->bindValue(':curs', $curs, PDO::PARAM_INT);
+        $stmt->bindValue(':ordre', $ordre, PDO::PARAM_INT);
+
+        if (!$stmt->execute()) {
+            Response::error(MissatgesAPI::error('errorBD'), [
+                'sqlState' => $stmt->errorCode(),
+                'info' => $stmt->errorInfo(),
+            ], 500);
+            return;
+        }
+
+        $newId = (int)$pdo->lastInsertId();
+
+        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    return;
+
     // si no hi ha cap endpoint valid, mostrar error:
 } else {
     // response output - data error

@@ -1023,4 +1023,60 @@ if ($slug === 'carrecsPersona') {
     }
 
     return;
+
+    /**
+     * GET : Slot (db_historia_oberta_articles) per ID
+     * URL: /api/historia/get/cursArticleId?id=12
+     */
+} else if ($slug === 'cursArticleId') {
+
+    header('Content-Type: application/json; charset=utf-8');
+
+    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+    if ($id <= 0) {
+        Response::error(MissatgesAPI::error('invalid_param'), ['id'], 400);
+        return;
+    }
+
+    $sql = sprintf(
+        "SELECT
+            a.id,
+            a.ca,
+            a.es,
+            a.en,
+            a.fr,
+            a.it,
+            a.curs,
+            a.ordre,
+            c.nameCa AS cursNameCa
+         FROM %s AS a
+         LEFT JOIN %s AS c ON c.id = a.curs
+         WHERE a.id = :id
+         LIMIT 1",
+        qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo),
+        qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo)
+    );
+
+    try {
+        $row = $db->getData($sql, [':id' => $id], true);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), ['slot not found'], 404);
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $row,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
 }
