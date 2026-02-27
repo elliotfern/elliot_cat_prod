@@ -198,24 +198,30 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         exit;
     }
 
-    // Vista amb els autors d'un llibre
-    // GET /api/biblioteca/get/?type=llibreAutors&slug=el-por-bien-del-imperio
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'llibreAutors')) {
-    // Siempre JSON
+    // 2) Llistat llibre Autors
+    // ruta GET => "https://elliot.cat/api/biblioteca/get/?type?llibreAutors"
+} else if ((isset($_GET['type']) && $_GET['type'] == 'llibreAutors')) {
+
     header('Content-Type: application/json; charset=utf-8');
 
-    $slug = isset($_GET['slug']) ? (string)$_GET['slug'] : '';
-    $slug = trim($slug);
-
+    $slug = trim((string)($_GET['slug'] ?? ''));
     if ($slug === '') {
         Response::error(MissatgesAPI::error('bad_request'), ['slug' => 'required'], 400);
         exit;
     }
 
+    $sanitize = function (&$data): void {
+        if (!is_array($data)) return;
+        array_walk_recursive($data, function (&$v) {
+            if (!is_string($v)) return;
+            $v = str_replace("\0", '', $v);
+            $v = @iconv('UTF-8', 'UTF-8//IGNORE', $v) ?: $v;
+        });
+    };
+
     try {
         $db = new Database();
 
-        // 1) Libro (1 fila)
         $qBook = "
             SELECT
                 LOWER(CONCAT_WS('-',
@@ -232,28 +238,17 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             LIMIT 1
         ";
 
-        $bookRows = $db->getData($qBook, [':slug' => $slug]);
+        $book = $db->getOne($qBook, [':slug' => $slug]);
 
-        // Sanititzar (por si titol trae bytes raros)
-        array_walk_recursive($bookRows, function (&$v) {
-            if (!is_string($v)) return;
-            $v = str_replace("\0", '', $v);
-            $v = @iconv('UTF-8', 'UTF-8//IGNORE', $v) ?: $v;
-        });
-
-        if (empty($bookRows)) {
+        if (!$book) {
             Response::error(MissatgesAPI::error('not_found'), ['slug' => $slug], 404);
             exit;
         }
+        $sanitize($book);
 
-        $book = $bookRows[0];
-
-        // 2) Autores del libro (N filas)
-        // Usamos rel.id (AUTO_INCREMENT) como rel_id para poder borrar fácil luego
         $qAuthors = "
             SELECT
                 la.id AS rel_id,
-
                 LOWER(CONCAT_WS('-',
                     SUBSTR(HEX(a.id), 1, 8),
                     SUBSTR(HEX(a.id), 9, 4),
@@ -261,26 +256,18 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                     SUBSTR(HEX(a.id), 17, 4),
                     SUBSTR(HEX(a.id), 21)
                 )) AS id,
-
                 a.nom,
                 a.cognoms,
                 a.slug
-
             FROM " . Tables::LLIBRES_AUTORS . " AS la
             INNER JOIN " . Tables::LLIBRES . " AS b ON b.id = la.llibre_id
             INNER JOIN " . Tables::PERSONES . " AS a ON a.id = la.autor_id
-
             WHERE b.slug = :slug
             ORDER BY a.cognoms ASC, a.nom ASC
         ";
 
-        $authors = $db->getData($qAuthors, [':slug' => $slug]);
-
-        array_walk_recursive($authors, function (&$v) {
-            if (!is_string($v)) return;
-            $v = str_replace("\0", '', $v);
-            $v = @iconv('UTF-8', 'UTF-8//IGNORE', $v) ?: $v;
-        });
+        $authors = $db->getAll($qAuthors, [':slug' => $slug]);
+        $sanitize($authors);
 
         Response::success(
             MissatgesAPI::success('get'),

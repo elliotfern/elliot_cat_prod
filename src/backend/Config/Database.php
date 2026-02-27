@@ -21,12 +21,15 @@ class Database
     }
 
     /**
-     * Executa una consulta SQL i retorna els resultats.
+     * Executa una consulta SQL i retorna els resultats. > LEGACY
      *
-     * @param string $query Consulta SQL
-     * @param array $params Paràmetres per a la consulta preparada, amb claus amb ':' (ex: ':id')
-     * @param bool $single Indica si es vol un únic registre o tots
-     * @return array|null Retorna array de resultats, un únic registre o null si no hi ha dades.
+     * - Si $single = false: retorna SEMPRE un array (pot ser []).
+     * - Si $single = true : retorna un registre (array) o null si no hi ha fila.
+     *
+     * @param string $query  Consulta SQL
+     * @param array  $params Paràmetres per a la consulta preparada (claus amb ':' o sense)
+     * @param bool   $single Indica si es vol un únic registre o tots
+     * @return array|null
      * @throws PDOException En cas d'error en la consulta
      */
     public function getData(string $query, array $params = [], bool $single = false): array|null
@@ -34,19 +37,91 @@ class Database
         $stmt = $this->conn->prepare($query);
 
         foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+            // Accepta ':slug' o 'slug'
+            $paramKey = (is_string($key) && $key !== '' && $key[0] !== ':') ? ':' . $key : $key;
+
+            // Tipus PDO
+            if (is_int($value)) {
+                $type = PDO::PARAM_INT;
+            } elseif (is_bool($value)) {
+                $type = PDO::PARAM_BOOL;
+            } elseif ($value === null) {
+                $type = PDO::PARAM_NULL;
+            } else {
+                $type = PDO::PARAM_STR;
+            }
+
+            $stmt->bindValue($paramKey, $value, $type);
         }
 
         $stmt->execute();
 
         if ($single) {
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result === false ? null : $result;
-        } else {
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return empty($result) ? null : $result;
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return ($row === false) ? null : $row;
         }
+
+        // ✅ IMPORTANT: sempre array (si no hi ha files, retorna [])
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return is_array($rows) ? $rows : [];
     }
+
+    /**
+     * Ejecuta una consulta y devuelve TODAS las filas (array, puede ser vacío)
+     */
+    public function getAll(string $query, array $params = []): array
+    {
+        $stmt = $this->conn->prepare($query);
+
+        foreach ($params as $key => $value) {
+            $paramKey = (is_string($key) && $key !== '' && $key[0] !== ':')
+                ? ':' . $key
+                : $key;
+
+            $type = match (true) {
+                is_int($value)   => PDO::PARAM_INT,
+                is_bool($value)  => PDO::PARAM_BOOL,
+                $value === null  => PDO::PARAM_NULL,
+                default          => PDO::PARAM_STR,
+            };
+
+            $stmt->bindValue($paramKey, $value, $type);
+        }
+
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return is_array($rows) ? $rows : [];
+    }
+
+    /**
+     * Ejecuta una consulta y devuelve UNA fila o null
+     */
+    public function getOne(string $query, array $params = []): ?array
+    {
+        $stmt = $this->conn->prepare($query);
+
+        foreach ($params as $key => $value) {
+            $paramKey = (is_string($key) && $key !== '' && $key[0] !== ':')
+                ? ':' . $key
+                : $key;
+
+            $type = match (true) {
+                is_int($value)   => PDO::PARAM_INT,
+                is_bool($value)  => PDO::PARAM_BOOL,
+                $value === null  => PDO::PARAM_NULL,
+                default          => PDO::PARAM_STR,
+            };
+
+            $stmt->bindValue($paramKey, $value, $type);
+        }
+
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row === false ? null : $row;
+    }
+
 
     /**
      * Retorna la connexió PDO interna.
