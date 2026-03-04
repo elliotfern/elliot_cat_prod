@@ -2,6 +2,9 @@
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\SignatureInvalidException;
+use Firebase\JWT\BeforeValidException;
 
 // Cargar variables de entorno desde .env
 $jwtSecret = $_ENV['TOKEN'] ?? null;
@@ -60,11 +63,25 @@ if (isset($_GET['me'])) {
             'is_admin' => (isset($decoded->user_type) && (int)$decoded->user_type === 1),
         ]);
         exit;
-    } catch (Exception $e) {
-        // Token inválido / expirado / manipulado
-        error_log("JWT inválido: " . $e->getMessage());
+    } catch (ExpiredException $e) {
+        error_log("JWT expirado: " . $e->getMessage());
         http_response_code(401);
-        echo json_encode(['authenticated' => false, 'error' => 'Invalid token']);
+        echo json_encode(['authenticated' => false, 'error' => 'Token expired']);
+        exit;
+    } catch (SignatureInvalidException $e) {
+        error_log("Firma inválida: " . $e->getMessage());
+        http_response_code(401);
+        echo json_encode(['authenticated' => false, 'error' => 'Invalid signature']);
+        exit;
+    } catch (BeforeValidException $e) {
+        error_log("Token usado antes de tiempo: " . $e->getMessage());
+        http_response_code(401);
+        echo json_encode(['authenticated' => false, 'error' => 'Token not yet valid']);
+        exit;
+    } catch (Exception $e) {
+        error_log("Otro error JWT: " . $e->getMessage());
+        http_response_code(401);
+        echo json_encode(['authenticated' => false, 'error' => $e->getMessage()]);
         exit;
     }
 } else if ((isset($_GET['logOut']))) {
@@ -92,4 +109,3 @@ if (isset($_GET['me'])) {
 
     exit;
 }
- 
