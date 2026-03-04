@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e8277bb0ea6d7d5e0ea689e680e17289",
+    "content-hash": "b375d8b4e781a3497556823ffcf67570",
     "packages": [
         {
             "name": "brick/math",
@@ -68,16 +68,16 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v6.11.1",
+            "version": "v7.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "d1e91ecf8c598d073d0995afa8cd5c75c6e19e66"
+                "reference": "28aa0694bcfdfa5e2959c394d5a1ee7a5083629e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/d1e91ecf8c598d073d0995afa8cd5c75c6e19e66",
-                "reference": "d1e91ecf8c598d073d0995afa8cd5c75c6e19e66",
+                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/28aa0694bcfdfa5e2959c394d5a1ee7a5083629e",
+                "reference": "28aa0694bcfdfa5e2959c394d5a1ee7a5083629e",
                 "shasum": ""
             },
             "require": {
@@ -125,9 +125,9 @@
             ],
             "support": {
                 "issues": "https://github.com/firebase/php-jwt/issues",
-                "source": "https://github.com/firebase/php-jwt/tree/v6.11.1"
+                "source": "https://github.com/firebase/php-jwt/tree/v7.0.3"
             },
-            "time": "2025-04-09T20:32:01+00:00"
+            "time": "2026-02-25T22:16:40+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -756,16 +756,16 @@
         },
         {
             "name": "tecnickcom/tcpdf",
-            "version": "6.10.1",
+            "version": "6.11.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tecnickcom/TCPDF.git",
-                "reference": "7a2701251e5d52fc3d508fd71704683eb54f5939"
+                "reference": "e1e2ade18e574e963473f53271591edd8c0033ec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tecnickcom/TCPDF/zipball/7a2701251e5d52fc3d508fd71704683eb54f5939",
-                "reference": "7a2701251e5d52fc3d508fd71704683eb54f5939",
+                "url": "https://api.github.com/repos/tecnickcom/TCPDF/zipball/e1e2ade18e574e963473f53271591edd8c0033ec",
+                "reference": "e1e2ade18e574e963473f53271591edd8c0033ec",
                 "shasum": ""
             },
             "require": {
@@ -815,7 +815,7 @@
             ],
             "support": {
                 "issues": "https://github.com/tecnickcom/TCPDF/issues",
-                "source": "https://github.com/tecnickcom/TCPDF/tree/6.10.1"
+                "source": "https://github.com/tecnickcom/TCPDF/tree/6.11.2"
             },
             "funding": [
                 {
@@ -823,7 +823,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2025-11-21T10:58:21+00:00"
+            "time": "2026-03-03T08:58:10+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
