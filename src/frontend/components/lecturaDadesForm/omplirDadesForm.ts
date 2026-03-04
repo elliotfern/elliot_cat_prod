@@ -1,5 +1,3 @@
-import Quill from 'quill';
-
 interface TrixEditorElement extends HTMLElement {
   editor: {
     loadHTML: (html: string) => void;
@@ -71,32 +69,4 @@ function initializeQuill(textareaId: string, content: string | null) {
     textarea.insertAdjacentElement('afterend', editorContainer);
     textarea.style.display = 'none'; // Ocultar el textarea original
   }
-
-  // Inicializar Quill en el contenedor
-  const quill = new Quill(editorContainer, {
-    theme: 'snow',
-    modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, false] }], // Encabezados
-        ['bold', 'italic', 'underline', 'strike'], // Negrita, cursiva, etc.
-        [{ list: 'ordered' }, { list: 'bullet' }], // Listas
-        [{ script: 'sub' }, { script: 'super' }], // Subíndice y superíndice
-        [{ indent: '-1' }, { indent: '+1' }], // Sangría
-        [{ color: [] }, { background: [] }], // Colores
-        [{ align: [] }], // Alineación
-        ['link', 'image', 'video'], // Enlaces, imágenes y videos
-        ['clean'], // Eliminar formato
-      ],
-    },
-  });
-
-  // 🔹 Verificar si `content` existe y no está vacío antes de cargarlo
-  if (content && content.trim() !== '') {
-    quill.root.innerHTML = content;
-  }
-
-  // Actualizar el textarea cuando Quill cambie
-  quill.on('text-change', () => {
-    textarea.value = quill.root.innerHTML;
-  });
 }

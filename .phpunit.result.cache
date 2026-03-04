@@ -1,1 +1,0 @@
-{"version":1,"defects":{"Tests\\Models\\VaultModelTest::testGetPasswordsReturnsCorrectData":5,"Tests\\Models\\VaultModelTest::testGetPasswordsReturnsNullOnFailure":8},"times":{"Tests\\Models\\VaultModelTest::testGetPasswordsReturnsCorrectData":0.012,"Tests\\Models\\VaultModelTest::testGetPasswordsReturnsNullOnFailure":0}}
