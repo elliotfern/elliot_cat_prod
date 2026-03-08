@@ -165,11 +165,11 @@ if ($slug === "esdevenimentId") {
      */
 } else if ($slug === "esdevenimentsRang") {
 
-    $usuariId = 1;
-    $from     = $_GET['from'] ?? null; // YYYY-MM-DD
-    $to       = $_GET['to']   ?? null; // YYYY-MM-DD
+    $usuariId = isset($_GET['usuari_id']) ? (int)$_GET['usuari_id'] : 0;
+    $from     = $_GET['from'] ?? null;
+    $to       = $_GET['to']   ?? null;
 
-    if (!$usuariId || !$from || !$to) {
+    if ($usuariId <= 0 || !$from || !$to) {
         Response::error(
             MissatgesAPI::error('validacio'),
             ['Paràmetres requerits: usuari_id, from, to'],
@@ -178,10 +178,22 @@ if ($slug === "esdevenimentId") {
         return;
     }
 
+    if (
+        !preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) ||
+        !preg_match('/^\d{4}-\d{2}-\d{2}$/', $to)
+    ) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['Format de data invàlid. Usa YYYY-MM-DD'],
+            400
+        );
+        return;
+    }
+
     $fromDateTime = $from . ' 00:00:00';
     $toDateTime   = $to   . ' 23:59:59';
+    $yearFrom     = (int)substr($from, 0, 4);
 
-    // 1) Eventos reales
     $sql = <<<SQL
         SELECT 
             e.id_esdeveniment,
@@ -202,7 +214,6 @@ if ($slug === "esdevenimentId") {
         ORDER BY e.data_inici ASC
     SQL;
 
-    // 2) Cumpleaños virtuales (DATE + LAST_DAY)
     $sqlBirthdays = <<<SQL
         SELECT
             t.id_esdeveniment,
@@ -227,9 +238,9 @@ if ($slug === "esdevenimentId") {
                 NULL AS lloc,
                 CASE
                     WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
-                        THEN DATE(LAST_DAY(CONCAT(YEAR(:fromDate), '-02-01')))
+                        THEN DATE(LAST_DAY(CONCAT(:yearFrom1, '-02-01')))
                     ELSE DATE(CONCAT(
-                        YEAR(:fromDate), '-',
+                        :yearFrom2, '-',
                         LPAD(MONTH(c.data_naixement), 2, '0'), '-',
                         LPAD(DAY(c.data_naixement), 2, '0')
                     ))
@@ -243,7 +254,7 @@ if ($slug === "esdevenimentId") {
             FROM db_contactes c
             WHERE c.data_naixement IS NOT NULL
         ) t
-        WHERE t.ymd BETWEEN DATE(:fromDate) AND DATE(:toDate)
+        WHERE t.ymd BETWEEN :fromDate AND :toDate
         ORDER BY t.ymd ASC
     SQL;
 
@@ -253,21 +264,23 @@ if ($slug === "esdevenimentId") {
     );
 
     try {
-        // Eventos agenda
         $events = $db->getData($query, [
             ':from' => $fromDateTime,
             ':to'   => $toDateTime,
         ]) ?: [];
 
-        // Cumpleaños (pasamos YYYY-MM-DD)
         $birthdays = $db->getData($sqlBirthdays, [
-            ':fromDate' => $from,
-            ':toDate'   => $to,
+            ':yearFrom1' => $yearFrom,
+            ':yearFrom2' => $yearFrom,
+            ':fromDate'  => $from,
+            ':toDate'    => $to,
         ]) ?: [];
 
-        // Merge + ordenar por data_inici
         $all = array_merge($events, $birthdays);
-        usort($all, fn($a, $b) => strcmp((string)$a['data_inici'], (string)$b['data_inici']));
+
+        usort($all, static function ($a, $b) {
+            return strcmp((string)($a['data_inici'] ?? ''), (string)($b['data_inici'] ?? ''));
+        });
 
         Response::success(
             MissatgesAPI::success('get'),
