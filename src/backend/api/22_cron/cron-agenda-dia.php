@@ -21,9 +21,6 @@ require_once(APP_ROOT . '/vendor/phpmailer/phpmailer/src/SMTP.php');
 
 // 1) Cargar secret Brevo (mejor loguear si está vacío)
 $brevoApi = (string)($_ENV['BREVO_API'] ?? '');
-// Alternativa robusta por si $_ENV no está poblado en cron:
-// $brevoApi = $brevoApi !== '' ? $brevoApi : (getenv('BREVO_API') ?: '');
-
 if ($brevoApi === '') {
     error_log('BREVO_API vacío/no definido (no se puede enviar por SMTP)');
     exit(1);
@@ -44,8 +41,9 @@ $today = $now->format('Y-m-d');
 $start = $today . ' 00:00:00';
 $end   = (new DateTime($today, $tz))->modify('+1 day')->format('Y-m-d') . ' 00:00:00';
 
-// 3) Eventos que SOLAPAN con el día
-$sql = <<<SQL
+try {
+    // 3) Eventos que SOLAPAN con el día
+    $sql = <<<SQL
 SELECT
     e.id_esdeveniment,
     e.titol,
@@ -58,81 +56,66 @@ SELECT
     e.estat
 FROM %s AS e
 WHERE
-    e.data_inici <  :end
+    e.data_inici < :end
     AND e.data_fi    >= :start
     AND e.estat <> 'cancel·lat'
 ORDER BY e.data_inici ASC
 SQL;
 
-$query = sprintf($sql, qi(Tables::AGENDA_ESDEVENIMENTS, $pdo));
+    $query = sprintf($sql, qi(Tables::AGENDA_ESDEVENIMENTS, $pdo));
 
-$params = [
-    ':start' => $start,
-    ':end'   => $end,
-];
-
-try {
     $stmt = $pdo->prepare($query);
-
-    if (!$stmt->execute($params)) {
-        $err = $stmt->errorInfo();
-        error_log('[agenda_resum_dia] SQL error: ' . json_encode($stmt->errorInfo()));
-        exit(1);
-    }
-
+    $stmt->execute([':start' => $start, ':end' => $end]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 3.1) Cumpleaños de hoy (contactes)
+    // 3.1) Cumpleaños de hoy (contactes) - versión corregida
+    $todayObj   = new DateTime($today, $tz);
+    $todayMonth = (int)$todayObj->format('m');
+    $todayDay   = (int)$todayObj->format('d');
+    $todayYear  = (int)$todayObj->format('Y');
+    $lastFebDay = ($todayYear % 4 === 0 && ($todayYear % 100 !== 0 || $todayYear % 400 === 0)) ? 29 : 28;
+
     $sqlB = <<<SQL
-        SELECT
-            (-c.id) AS id_esdeveniment,
-            CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
-            NULL AS descripcio,
-            'aniversari' AS tipus,
-            NULL AS lloc,
-            CONCAT(:today, ' 00:00:00') AS data_inici,
-            CONCAT(:today, ' 23:59:59') AS data_fi,
-            1 AS tot_el_dia,
-            'confirmat' AS estat
-        FROM db_contactes c
-        WHERE
-            c.data_naixement IS NOT NULL
-            AND (
-                -- mismo mes/día
-                (MONTH(c.data_naixement) = MONTH(:today) AND DAY(c.data_naixement) = DAY(:today))
-                -- excepción 29/02 -> en años NO bisiestos cae el 28/02
-                OR (
-                    MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
-                    AND MONTH(:today) = 2 AND DAY(:today) = DAY(LAST_DAY(CONCAT(YEAR(:today), '-02-01')))
-                )
-            )
-        ORDER BY c.nom ASC, c.cognoms ASC
-        SQL;
+SELECT
+    (-c.id) AS id_esdeveniment,
+    CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
+    NULL AS descripcio,
+    'aniversari' AS tipus,
+    NULL AS lloc,
+    CONCAT(:today, ' 00:00:00') AS data_inici,
+    CONCAT(:today, ' 23:59:59') AS data_fi,
+    1 AS tot_el_dia,
+    'confirmat' AS estat
+FROM db_contactes c
+WHERE c.data_naixement IS NOT NULL
+  AND (
+        (MONTH(c.data_naixement) = :month AND DAY(c.data_naixement) = :day)
+        OR (MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29 AND :month = 2 AND :day = :lastFebDay)
+      )
+ORDER BY c.nom ASC, c.cognoms ASC
+SQL;
 
-    try {
-        $stmtB = $pdo->prepare($sqlB);
-        $stmtB->execute([':today' => $today]);
-        $birthdays = $stmtB->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        error_log('[agenda_resum_dia] Birthdays SQL error: ' . $e->getMessage());
-        $birthdays = [];
-    }
+    $stmtB = $pdo->prepare($sqlB);
+    $stmtB->execute([
+        ':today'     => $today,
+        ':month'     => $todayMonth,
+        ':day'       => $todayDay,
+        ':lastFebDay' => $lastFebDay
+    ]);
+    $birthdays = $stmtB->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-
+    error_log('[agenda_resum_dia] SQL error: ' . $e->getMessage());
     exit(1);
 }
 
-if (!is_array($rows)) {
-    exit(1);
-}
-
-
-$rows = is_array($rows) ? $rows : [];
+// Asegurar arrays
+$rows      = is_array($rows) ? $rows : [];
 $birthdays = is_array($birthdays ?? null) ? $birthdays : [];
 
+// Unir eventos + cumpleaños
 $all = array_merge($rows, $birthdays);
 
-// Si no hay nada (ni eventos ni cumples), no mandes email
+// Si no hay nada (ni eventos ni cumpleaños), no mandes email
 if (empty($all)) {
     error_log('No events/birthdays today -> no email sent');
     exit(0);
@@ -142,7 +125,7 @@ if (empty($all)) {
 usort($all, function ($a, $b) {
     $ta = (int)($a['tot_el_dia'] ?? 0);
     $tb = (int)($b['tot_el_dia'] ?? 0);
-    if ($ta !== $tb) return $tb <=> $ta; // 1 primero
+    if ($ta !== $tb) return $tb <=> $ta;
 
     $da = (string)($a['data_inici'] ?? '');
     $db = (string)($b['data_inici'] ?? '');
@@ -151,7 +134,7 @@ usort($all, function ($a, $b) {
     return strcmp((string)($a['titol'] ?? ''), (string)($b['titol'] ?? ''));
 });
 
-// Y a partir de aquí usas $all en vez de $rows
+// Ahora usamos $all en vez de $rows
 $rows = $all;
 
 // 4) Destinatario 
@@ -175,23 +158,18 @@ try {
     $mail->Password   = $brevoApi;
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
+    $mail->SMTPDebug  = 0; // 0 en producción
 
-    // Log SMTP en error_log (sin mostrarlo en web)
-    $mail->SMTPDebug  = 0; // 0 en producción cuando ya funcione
-
-    // From / To
     $mail->setFrom('elliot@hispantic.com', 'Agenda');
     $mail->addAddress($YOUR_EMAIL, $YOUR_NAME);
     $mail->addReplyTo($YOUR_EMAIL, $YOUR_NAME);
 
-    // Contenido
     $mail->Subject = $subject;
     $mail->Body    = $bodyHtml;
     $mail->AltBody = $bodyText;
     $mail->isHTML(true);
 
     $mail->send();
-
     exit(0);
 } catch (MailException $e) {
     error_log('[agenda_resum_dia] Mailer error: ' . $e->getMessage());
@@ -201,6 +179,7 @@ try {
     exit(1);
 }
 
+// --- Funciones buildAgendaEmailText y buildAgendaEmailHtml aquí quedan igual que tu versión original ---
 
 /**
  * Texto plano
