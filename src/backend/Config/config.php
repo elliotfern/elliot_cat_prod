@@ -56,6 +56,7 @@ define('APP_USUARIS_DIR', '18_usuaris/');
 define('APP_RADIO_DIR', '19_radio/');
 define('APP_CV_DIR', '20_curriculum/');
 define('APP_AGENDA_DIR', '21_agenda/');
+define('APP_TAULELL_DIR', '22_taulell_pendents/');
 
 // definicio de url
 $url = [
@@ -80,4 +81,5 @@ $url = [
     'radio' => '/radio',
     'curriculum' => '/curriculum',
     'agenda' => '/agenda',
+    'taulell_pendents' => '/taulell-pendents',
 ];

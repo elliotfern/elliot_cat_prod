@@ -1,8 +1,6 @@
-<div class="container contenidor">
+<div class="container">
 
     <div id="barraNavegacioContenidor"></div>
-
-
 
     <h1>Intranet</h1>
     <div id="isAdminButton" style="display: none;">
@@ -12,8 +10,9 @@
             </p>
 
             <div class="alert alert-success quadre">
+                <h3>Taulell temes pendents</h3>
                 <ul class="llistat">
-                    <li></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['taulell_pendents']; ?>/legalitzacio-titol">Legalització títol llicenciatura d'història</a></li>
                 </ul>
             </div>
 
@@ -24,10 +23,3 @@
     </div>
 
 </div>
-<style>
-    .contenidor {
-        width: 100%;
-        background-color: #ffffff;
-        padding: 25px;
-    }
-</style>

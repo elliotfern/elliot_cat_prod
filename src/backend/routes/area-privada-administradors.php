@@ -225,6 +225,10 @@ $routes = [
     APP_GESTIO . $url['agenda'] . "/veure-esdeveniment/{id}" => route(APP_INTRANET_DIR . APP_AGENDA_DIR . 'veure-esdeveniment.php'),
     APP_GESTIO . $url['agenda'] . "/nou-esdeveniment" => route(APP_INTRANET_DIR . APP_AGENDA_DIR . 'form-esdeveniment.php'),
     APP_GESTIO . $url['agenda'] . "/modifica-esdeveniment/{id}" => route(APP_INTRANET_DIR . APP_AGENDA_DIR . 'form-esdeveniment.php'),
+
+    // Taulell pendents
+    APP_GESTIO . $url['taulell_pendents'] . "/legalitzacio-titol" => route(APP_INTRANET_DIR . APP_TAULELL_DIR . 'titol_llicenciatura.php'),
+    APP_GESTIO . $url['taulell_pendents'] . "/declaracio-valor-titol" => route(APP_INTRANET_DIR . APP_TAULELL_DIR . 'declaracio_valor_titol.php'),
 ];
 
 return $routes;
