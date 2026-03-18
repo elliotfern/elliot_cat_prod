@@ -25,7 +25,7 @@
         <p>3) Consulado Italiano en Barcelona. Pasos que s'ha de seguir:</p>
         <p><a href="https://consbarcellona.esteri.it/it/servizi-consolari-e-visti/servizi-per-il-cittadino-italiano/studi/dichiarazioni-di-valore/">Sito internet</a></p>
 
-        <ol>
+        <ul>
             <li>
                 <strong>1 - Verifica tu título</strong><br>
                 Asegúrate de que sea un título oficial (no “título propio”). Si no lo es, el consulado <strong>no puede emitir</strong> la declaración.
@@ -102,7 +102,7 @@
                     <li>Recibirás la <strong>Dichiarazione di Valore</strong> una vez aprobado.</li>
                 </ul>
             </li>
-        </ol>
+        </ul>
 
         <p><em>💡 Consejo: Antes de enviar todo, confirma con el consulado que tu certificado digital con CSV es suficiente para evitar retrasos.</em></p>
 
