@@ -138,12 +138,6 @@ function renderGrup(data: BookData) {
   // 1) Preferimos
   const grup = data.nom_grup;
 
-  // 3) Sin autores
-  if (grup.length === 0) {
-    el.textContent = ''; // o "Autor: —"
-    return;
-  }
-
   // 4) Pintar 1 o N con etiqueta
   const etiqueta = 'Llibre desat a la cool·lecció';
   const href = `${base}${encodeURIComponent(data.idGrup)}`;
