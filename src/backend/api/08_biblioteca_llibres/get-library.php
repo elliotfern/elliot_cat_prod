@@ -575,6 +575,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             'sub_tema_ca' => $first['sub_tema_ca'],
             'tema_ca'     => $first['tema_ca'],
             'nom_grup'    => $first['nom_grup'],
+            'idGrup'    => $first['idGrup'],
 
             // 2) autores
             'autors'      => [],
