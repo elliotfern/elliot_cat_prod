@@ -16,10 +16,9 @@ export async function taulaLlistatGrups() {
   const columns: TaulaDinamica<Llibre>[] = [
     {
       header: 'Col·lecció',
-      field: 'titol',
+      field: 'nom',
       render: (_: unknown, row: Llibre) => `<a href="${buildFrontUrl(`biblioteca/fitxa-grup/${row.id}`)}">${escapeHtml(row.nom)}</a>`,
     },
-   
   ];
 
   if (isAdmin) {
