@@ -19,7 +19,7 @@ $slug = $routeParams[0];
       <?php endif; ?>
     </div>
 
-    <div class="dadesFitxa" style="background-color: darkgray;padding:5px;">
+    <div class="dadesFitxa" style="background-color: #D4D4D4;padding:15px; border-radius:10px;">
       <strong>Aquesta fitxa ha estat creada el: </strong><span id="dateCreated"></span> <span id="dateModified"></span>
     </div>
 
