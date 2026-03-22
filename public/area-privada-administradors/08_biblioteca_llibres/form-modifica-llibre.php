@@ -176,6 +176,10 @@ if ($modificaBtn === 1) {
         const titolEl = document.getElementById('titol_original');
         if (titolEl) titolEl.value = data.titol_original ?? '';
 
+        const titolCa = document.getElementById('titol_catala');
+        if (titolCa) titolCa.value = data.titol_catala ?? '';
+
+
         const slugEl = document.getElementById('slug');
         if (slugEl) slugEl.value = data.slug ?? '';
 

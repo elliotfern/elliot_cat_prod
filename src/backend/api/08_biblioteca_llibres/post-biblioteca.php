@@ -202,8 +202,7 @@ if (isset($_GET['autor'])) {
   $sql = "INSERT INTO " . Tables::LLIBRES . " (
               id, titol_original, titol_catala, slug, any,
               tipus_id, editorial_id, sub_tema_id, estat,
-              lang, img, 
-              dateCreated, dateModified, grup
+              lang, img, dateCreated, dateModified, grup
           ) VALUES (
               :id, :titol_original, :titol_catala, :slug, :any,
               UNHEX(REPLACE(:tipus_id, '-', '')),
@@ -211,7 +210,8 @@ if (isset($_GET['autor'])) {
               UNHEX(REPLACE(:sub_tema_id, '-', '')),
               UNHEX(REPLACE(:estat, '-', '')),
               :lang, :img,
-              :dateCreated, :dateModified, :grup
+              :dateCreated, :dateModified,
+              UNHEX(REPLACE(:grup, '-', ''))
           )";
 
   try {
