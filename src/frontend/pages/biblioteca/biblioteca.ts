@@ -70,5 +70,13 @@ export async function biblioteca() {
     const slug = pageType[3];
     initLlibreAutorsPage(slug);
     initAdminButtons(slug);
+  } else if (pageType[2] === 'nou-grup') {
+    const llibre = document.getElementById('formAfegirGrup');
+    if (llibre) {
+      // Lanzar actualizador de datos
+      llibre.addEventListener('submit', function (event) {
+        transmissioDadesDB(event, 'POST', 'formAfegirGrup', '/api/biblioteca/post/?grupLlibre');
+      });
+    }
   }
 }

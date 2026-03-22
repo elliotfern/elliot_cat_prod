@@ -389,6 +389,99 @@ if (isset($_GET['autor'])) {
     ], 500);
     exit;
   }
+
+  // INSERIR NOU LLIBRE
+} else if (isset($_GET['grupLlibre'])) {
+
+  // Leer JSON
+  $input_data = file_get_contents("php://input");
+  $data = json_decode($input_data, true);
+
+  if (!is_array($data)) {
+    Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+    exit;
+  }
+
+  // Helpers
+  function requireField(array $data, string $key, array &$errors)
+  {
+    if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+      $errors[$key] = 'required';
+      return null;
+    }
+    return data_input($data[$key]);
+  }
+
+  function optionalField(array $data, string $key)
+  {
+    return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
+      ? data_input($data[$key])
+      : null;
+  }
+
+  // Validación
+  $errors = [];
+
+  $nom = requireField($data, 'nom', $errors);
+
+  if (!empty($errors)) {
+    Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+    exit;
+  }
+
+  // Generar UUIDv7
+  $uuid = Uuid::uuid7();
+  $uuidBytes = $uuid->getBytes();   // para BINARY(16)
+  $uuidString = $uuid->toString();  // para devolver al frontend si quieres
+
+  global $conn;
+
+  $sql = "INSERT INTO " . Tables::LLIBRES_GRUP . " (
+              id, nom
+          ) VALUES (
+              :id, :nom
+          )";
+
+  try {
+    $stmt = $conn->prepare($sql);
+
+    // ID UUIDv7 binario
+    $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
+    $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
+
+    if ($stmt->execute()) {
+      Response::success(
+        MissatgesAPI::success('create'),
+        [
+          'id'   => $uuidString,
+          'nom' => $nom,
+        ],
+        201
+      );
+      exit;
+    }
+
+    Response::error(
+      MissatgesAPI::error('db_error'),
+      [
+        'sqlState' => $stmt->errorCode(),
+        'info' => $stmt->errorInfo(),
+      ],
+      500
+    );
+    exit;
+  } catch (\Throwable $e) {
+    Response::error(
+      MissatgesAPI::error('internal_error'),
+      [
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+      ],
+      500
+    );
+    exit;
+  }
 } else {
   // response output - data error
   $response['status'] = 'error ruta';
