@@ -45,9 +45,9 @@ export async function biblioteca() {
 
     fitxaPersona('/api/persones/get/?persona=', slug, 'biblioteca-autor', function (data) {
       construirTaula('taula1', '/api/biblioteca/get/?type=autorLlibres&id=', data.id, columnes, function (fila, columna) {
-        if (columna.toLowerCase() === 'titol') {
+        if (columna.toLowerCase() === 'titol_original') {
           const href = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-llibre/${encodeURIComponent(fila['slug'])}`;
-          return `<a href="${href}">${fila['titol']}</a>`;
+          return `<a href="${href}">${fila['titol_original']}</a>`;
         } else if (columna.toLowerCase() === 'accions') {
           if (!isAdmin) return ''; // ✅ acciones solo admin
           const href = `${INTRANET_WEB}/biblioteca/modifica-llibre/${encodeURIComponent(fila['slug'])}`;
