@@ -9,8 +9,13 @@ $slug = $routeParams[0] ?? '';
 <div class="container-fluid form">
     <h2>Afegir col·lecció</h2>
 
-    <div class="alert alert-success" id="missatgeOk" style="display:none"></div>
-    <div class="alert alert-danger" id="missatgeErr" style="display:none"></div>
+    <div id="okMessage" class="alert alert-success" style="display:none">
+        <span id="okText"></span>
+    </div>
+
+    <div id="errMessage" class="alert alert-danger" style="display:none">
+        <span id="errText"></span>
+    </div>
 
     <form id="formAfegirGrup" class="row g-3">
         <input type="hidden" id="id" name="id" value="">
