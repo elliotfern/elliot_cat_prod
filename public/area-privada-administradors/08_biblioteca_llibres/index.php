@@ -26,6 +26,7 @@ $baseAdmin = APP_INTRANET; // normalmente "https://elliot.cat/gestio" o similar
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['biblioteca']; ?>/nou-llibre/'" class="button btn-gran btn-secondari">Afegir llibre</button>
 
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['persona']; ?>/nova-persona/'" class="button btn-gran btn-secondari">Afegir autor/a</button>
+            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['persona']; ?>/nou-grup/'" class="button btn-gran btn-secondari">Afegir grup llibre</button>
         </p>
     <?php endif; ?>
 </div>
@@ -36,6 +37,7 @@ $baseAdmin = APP_INTRANET; // normalmente "https://elliot.cat/gestio" o similar
             <!-- Admin: /gestio/... -->
             <li><a href="<?= htmlspecialchars($baseAdmin . $url['biblioteca'] . '/llistat-llibres', ENT_QUOTES) ?>">Llistat de llibres</a></li>
             <li><a href="<?= htmlspecialchars($baseAdmin . $url['biblioteca'] . '/llistat-autors', ENT_QUOTES) ?>">Llistat d'autors/es</a></li>
+            <li><a href="<?= htmlspecialchars($baseAdmin . $url['biblioteca'] . '/llistat-grups', ENT_QUOTES) ?>">Llistat de grups de llibres</a></li>
         <?php else: ?>
             <!-- Públic: /{lang}/... -->
             <li><a href="<?= htmlspecialchars($basePublic . '/biblioteca/llistat-llibres', ENT_QUOTES) ?>">Llistat de llibres</a></li>

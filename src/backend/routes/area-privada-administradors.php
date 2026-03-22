@@ -71,6 +71,10 @@ $routes = [
     APP_GESTIO . $url['biblioteca'] . '/modifica-llibre/{slug}' => route(APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'form-modifica-llibre.php'),
     APP_GESTIO . $url['biblioteca'] . '/nou-llibre' => route(APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'form-modifica-llibre.php'),
 
+    APP_GESTIO . $url['biblioteca'] . '/llistat-grups' => route(APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'vista-llistat-grups.php'),
+    APP_GESTIO . $url['biblioteca'] . '/modifica-grup/{slug}' => route(APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'form-grup.php'),
+    APP_GESTIO . $url['biblioteca'] . '/nou-grup' => route(APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'form-grup.php'),
+
     // 09. Adreces interes
     APP_GESTIO . $url['adreces'] => route(APP_INTRANET_DIR . APP_ADRECES_DIR . 'index.php'),
     APP_GESTIO . $url['adreces'] . '/llistat-links' => route(APP_INTRANET_DIR . APP_ADRECES_DIR . 'llistat-links.php'),

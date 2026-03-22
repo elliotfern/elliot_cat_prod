@@ -70,8 +70,13 @@ if ($modificaBtn === 1) {
     ?>
 
     <div class="col-md-4">
-      <label>Títol original:</label>
-      <input class="form-control" type="text" name="titol" id="titol" value="">
+      <label>Títol llibre en llengua original:</label>
+      <input class="form-control" type="text" name="titol_original" id="titol_original" value="">
+    </div>
+
+    <div class="col-md-4">
+      <label>Títol llibre en llengua catalana:</label>
+      <input class="form-control" type="text" name="titol_catala" id="titol_catala" value="">
     </div>
 
     <div class="col-md-4">
@@ -111,6 +116,12 @@ if ($modificaBtn === 1) {
     <div class="col-md-4">
       <label>Tipus:</label>
       <select class="form-select" name="tipus_id" id="tipus_id"></select>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label>Col·lecció:</label>
+      <select class="form-select" name="grup" id="grup" value="">
       </select>
     </div>
 
@@ -158,11 +169,11 @@ if ($modificaBtn === 1) {
 
         // Título arriba
         const h2Element = document.getElementById('bookUpdateTitle');
-        if (h2Element) h2Element.innerHTML = "Llibre: " + (data.titol ?? '');
+        if (h2Element) h2Element.innerHTML = "Títol del llibre: " + (data.titol_original ?? '');
 
         // Campos reales de db_llibres
-        const titolEl = document.getElementById('titol');
-        if (titolEl) titolEl.value = data.titol ?? '';
+        const titolEl = document.getElementById('titol_original');
+        if (titolEl) titolEl.value = data.titol_original ?? '';
 
         const slugEl = document.getElementById('slug');
         if (slugEl) slugEl.value = data.slug ?? '';
@@ -182,6 +193,7 @@ if ($modificaBtn === 1) {
         selectOmplirDades("/api/biblioteca/get/?type=llengues", data.lang, "lang", "idioma_ca");
         selectOmplirDades("/api/biblioteca/get/?type=tipus", data.tipus_id, "tipus_id", "nomTipus");
         selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", data.estat, "estat", "estat");
+        selectOmplirDades("/api/biblioteca/get/?type=grup", data.grup, "grup", "nom");
       })
       .catch(err => console.error("Error al obtener los datos:", err));
   }

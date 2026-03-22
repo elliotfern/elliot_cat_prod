@@ -84,8 +84,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         $db = new Database();
 
         // 1) Libros (1 fila por libro)
-        $queryBooks = "
-        SELECT
+        $queryBooks = "SELECT
             LOWER(CONCAT_WS('-',
                 SUBSTR(HEX(b.id), 1, 8),
                 SUBSTR(HEX(b.id), 9, 4),
@@ -94,21 +93,21 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 SUBSTR(HEX(b.id), 21)
             )) AS id,
 
-            b.titol,
+            b.titol_original,
+            b.titol_catala,
             b.any,
             b.slug,
-
             g.tema_ca AS nomGenCat,
-            sg.sub_tema_ca
+            sg.sub_tema_ca,
+            c.nom AS nom_grup
 
         FROM " . Tables::LLIBRES . " AS b
         LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sg ON b.sub_tema_id = sg.id
         LEFT JOIN " . Tables::AUX_TEMES . " AS g ON sg.tema_id = g.id
         LEFT JOIN " . Tables::LLIBRES_EDITORIALS . " AS be ON b.editorial_id = be.id
-
+        LEFT JOIN " . Tables::LLIBRES_GRUP . " AS c ON b.grup = c.id
         WHERE b.tipus_id = UNHEX('0197ac5b7106704b96c60728ace151f3')
-        ORDER BY b.titol ASC
-    ";
+        ORDER BY b.titol ASC";
 
         $books = $db->getData($queryBooks);
 
@@ -125,8 +124,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         }
 
         // 2) Autores por libro (N filas por libro)
-        $queryAuthors = "
-        SELECT
+        $queryAuthors = "SELECT
             LOWER(CONCAT_WS('-',
                 SUBSTR(HEX(la.llibre_id), 1, 8),
                 SUBSTR(HEX(la.llibre_id), 9, 4),
@@ -150,10 +148,8 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         FROM " . Tables::LLIBRES_AUTORS . " AS la
         INNER JOIN " . Tables::PERSONES . " AS a ON a.id = la.autor_id
         INNER JOIN " . Tables::LLIBRES . " AS b ON b.id = la.llibre_id
-
         WHERE b.tipus_id = UNHEX('0197ac5b7106704b96c60728ace151f3')
-        ORDER BY a.cognoms, a.nom
-    ";
+        ORDER BY a.cognoms, a.nom";
 
         $authors = $db->getData($queryAuthors);
 
@@ -232,7 +228,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                     SUBSTR(HEX(b.id), 21)
                 )) AS id,
                 b.slug,
-                b.titol
+                b.titol_original
             FROM " . Tables::LLIBRES . " AS b
             WHERE b.slug = :slug
             LIMIT 1
@@ -246,8 +242,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         }
         $sanitize($book);
 
-        $qAuthors = "
-            SELECT
+        $qAuthors = "SELECT
                 la.id AS rel_id,
                 LOWER(CONCAT_WS('-',
                     SUBSTR(HEX(a.id), 1, 8),
@@ -263,8 +258,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             INNER JOIN " . Tables::LLIBRES . " AS b ON b.id = la.llibre_id
             INNER JOIN " . Tables::PERSONES . " AS a ON a.id = la.autor_id
             WHERE b.slug = :slug
-            ORDER BY a.cognoms ASC, a.nom ASC
-        ";
+            ORDER BY a.cognoms ASC, a.nom ASC";
 
         $authors = $db->getAll($qAuthors, [':slug' => $slug]);
         $sanitize($authors);
@@ -390,7 +384,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
     // Quitar guiones del UUID
     $id = str_replace('-', '', $_GET['id']);
 
-    $query = "SELECT b.any, b.titol, b.slug
+    $query = "SELECT b.any, b.titol_original, b.titol_catala, b.slug
                 FROM db_llibres AS b
                 LEFT JOIN db_llibres_autors AS la ON b.id = la.llibre_id
                 WHERE la.autor_id = UNHEX(:id)
@@ -469,7 +463,8 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                     SUBSTR(HEX(b.estat), 17, 4),
                     SUBSTR(HEX(b.estat), 21)
                     )) AS estat,
-                b.titol,
+                b.titol_original,
+                b.titol_catala,
                 b.slug as llibreSlug,
                 b.slug,
                 b.any,
@@ -485,6 +480,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 sub_tema.sub_tema_ca,
                 tema.tema_ca,
 
+
                    -- autor (1 fila por autor)
                 LOWER(CONCAT_WS('-',
                     SUBSTR(HEX(p.id), 1, 8),
@@ -495,7 +491,8 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 )) AS autor_id,
                 p.nom AS autor_nom,
                 p.cognoms AS autor_cognoms,
-                p.slug AS autor_slug
+                p.slug AS autor_slug,
+                c.nom AS nom_grup
 
             FROM " . Tables::LLIBRES . " AS b
             LEFT JOIN " . Tables::LLIBRES_AUTORS . " AS la ON la.llibre_id = b.id
@@ -507,6 +504,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             LEFT JOIN " . Tables::AUX_IDIOMES . " AS id ON b.lang = id.id
             LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sub_tema ON sub_tema.id =  b.sub_tema_id
             LEFT JOIN " . Tables::AUX_TEMES . " AS tema ON sub_tema.tema_id = tema.id
+            LEFT JOIN " . Tables::LLIBRES_GRUP . " AS c ON b.grup = c.id
             WHERE b.slug = :slug";
 
         $params = [':slug' => $slug];
@@ -542,7 +540,8 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
 
         $result = [
             'id'          => $first['id'],
-            'titol'       => $first['titol'],
+            'titol_original'       => $first['titol_original'],
+            'titol_catala' => $first['titol_catala'],
             'slug'        => $first['slug'],
             'any'         => $first['any'],
             'dateCreated' => $first['dateCreated'],
@@ -563,6 +562,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
 
             'sub_tema_ca' => $first['sub_tema_ca'],
             'tema_ca'     => $first['tema_ca'],
+            'nom_grup'    => $first['nom_grup'],
 
             // 2) autores
             'autors'      => [],
@@ -660,6 +660,51 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             e.estat
             FROM " . Tables::LLIBRES_ESTAT . " AS e
             ORDER BY e.estat";
+
+        $result = $db->getData($query);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (is_string($v)) {
+                // Converteix a UTF-8 vàlid (ignora bytes trencats)
+                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            }
+        });
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
+
+    // 10) ruta grup llibre
+    // ruta GET => "/api/biblioteca/auxiliars/?grup"
+} else if ((isset($_GET['type']) && $_GET['type'] == 'grup')) {
+
+    try {
+        $db = new Database();
+
+        $query = "SELECT 
+           LOWER(CONCAT_WS('-', 
+                SUBSTR(HEX(e.id), 1, 8),
+                SUBSTR(HEX(e.id), 9, 4),
+                SUBSTR(HEX(e.id), 13, 4),
+                SUBSTR(HEX(e.id), 17, 4),
+                SUBSTR(HEX(e.id), 21) )) AS id,
+            e.nom
+            FROM " . Tables::LLIBRES_GRUP . " AS e
+            ORDER BY e.nom";
 
         $result = $db->getData($query);
 

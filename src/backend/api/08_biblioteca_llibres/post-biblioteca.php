@@ -133,7 +133,6 @@ if (isset($_GET['autor'])) {
 
 
   // INSERIR NOU LLIBRE
-  // autor	titol	titolEng	slug	any	tipus	idEd	idGen	subGen	lang	img	dateCreated
 } else if (isset($_GET['llibre'])) {
 
   // Leer JSON
@@ -165,13 +164,15 @@ if (isset($_GET['autor'])) {
   // Validación
   $errors = [];
 
-  $titol        = requireField($data, 'titol', $errors);
+  $titol_original = requireField($data, 'titol_original', $errors);
+  $titol_catala = requireField($data, 'titol_catala', $errors);
   $slug         = requireField($data, 'slug', $errors);
   $any          = requireField($data, 'any', $errors);
 
   $tipus_id     = requireField($data, 'tipus_id', $errors);      // UUID string
   $editorial_id = requireField($data, 'editorial_id', $errors);  // UUID string
   $sub_tema_id  = requireField($data, 'sub_tema_id', $errors);   // UUID string
+  $grup  = requireField($data, 'grup', $errors);   // UUID string
 
   $lang         = requireField($data, 'lang', $errors);          // int
   $estat        = requireField($data, 'estat', $errors);         // int
@@ -180,6 +181,7 @@ if (isset($_GET['autor'])) {
   if (!isUuid($tipus_id)) $errors['tipus_id'] = 'invalid_uuid';
   if (!isUuid($editorial_id)) $errors['editorial_id'] = 'invalid_uuid';
   if (!isUuid($sub_tema_id)) $errors['sub_tema_id'] = 'invalid_uuid';
+  if (!isUuid($grup)) $errors['grup'] = 'invalid_uuid';
 
   if (!empty($errors)) {
     Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
@@ -198,18 +200,18 @@ if (isset($_GET['autor'])) {
   global $conn;
 
   $sql = "INSERT INTO " . Tables::LLIBRES . " (
-              id, titol, slug, any,
+              id, titol_original, titol_catala, slug, any,
               tipus_id, editorial_id, sub_tema_id, estat,
               lang, img, 
-              dateCreated, dateModified
+              dateCreated, dateModified, grup
           ) VALUES (
-              :id, :titol, :slug, :any,
+              :id, :titol_original, :titol_catala, :slug, :any,
               UNHEX(REPLACE(:tipus_id, '-', '')),
               UNHEX(REPLACE(:editorial_id, '-', '')),
               UNHEX(REPLACE(:sub_tema_id, '-', '')),
               UNHEX(REPLACE(:estat, '-', '')),
               :lang, :img,
-              :dateCreated, :dateModified
+              :dateCreated, :dateModified, :grup
           )";
 
   try {
@@ -218,7 +220,8 @@ if (isset($_GET['autor'])) {
     // ID UUIDv7 binario
     $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
 
-    $stmt->bindValue(':titol', $titol, PDO::PARAM_STR);
+    $stmt->bindValue(':titol_original', $titol_original, PDO::PARAM_STR);
+    $stmt->bindValue(':titol_catala', $titol_catala, PDO::PARAM_STR);
     $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
     $stmt->bindValue(':any', (int)$any, PDO::PARAM_INT);
 
@@ -237,6 +240,7 @@ if (isset($_GET['autor'])) {
 
     $stmt->bindValue(':dateCreated', $dateCreated, PDO::PARAM_STR);
     $stmt->bindValue(':dateModified', $dateModified, PDO::PARAM_NULL);
+    $stmt->bindValue(':grup', $grup, PDO::PARAM_STR);
 
     if ($stmt->execute()) {
       Response::success(

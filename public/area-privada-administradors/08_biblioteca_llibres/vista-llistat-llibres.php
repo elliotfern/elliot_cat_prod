@@ -51,12 +51,14 @@
           <h6><span style="background-color:black;color:white;padding:5px;">${llibre.codiGenere}.${llibre.nomGenCat}</span></h6>
           <h6><span style="background-color:black;color:white;padding:5px;margin-top:5px">${llibre.codiSubGenere}.${llibre.sub_genere_cat}</span></h6>
           <h3 class="links-contactes" style="margin-top: 15px;">
-            <a href="${window.location.origin}/gestio/biblioteca/fitxa-llibre/${llibre.slug}" title="Fitxa del llibre">${llibre.titol}</a>
+            <a href="${window.location.origin}/gestio/biblioteca/fitxa-llibre/${llibre.slug}" title="Fitxa del llibre">${llibre.titol_original}</a>
           </h3>
           <p class="links-contactes autor"><strong>Autor/a:</strong> <a href="${window.location.origin}/gestio/biblioteca/fitxa-autor/${llibre.slugAuthor}">${llibre.AutNom} ${llibre.AutCognom1}</a></p>
           <p><strong>Any: </strong> ${llibre.any}</p>
           <p><strong>Editorial: </strong> ${llibre.editorial}</p>
           <p><strong>Idioma original: </strong> ${llibre.idioma_ca}</p>
+          <p><strong>Forma part de la col·lecció: </strong> ${llibre.nom_grup}</p>
+
           <p><button type='button' class='button btn-petit'>${llibre.estat}</button></p>
           <p>
           <button onclick="window.location.href='${window.location.origin}/gestio/biblioteca/modifica-llibre/${llibre.slug}'" class="button btn-petit">Modificar</button>

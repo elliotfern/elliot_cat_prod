@@ -192,14 +192,16 @@ if (isset($_GET['autor'])) {
   };
 
   // Requeridos para update
-  $id           = $requireField($data, 'id');            // UUID string del libro
-  $titol        = $requireField($data, 'titol');
+  $id  = $requireField($data, 'id');            // UUID string del libro
+  $titol_original = $requireField($data, 'titol_original');
+  $titol_catala = $requireField($data, 'titol_catala');
   $slug         = $requireField($data, 'slug');
   $any          = $requireField($data, 'any');
 
   $tipus_id     = $requireField($data, 'tipus_id');      // UUID string
   $editorial_id = $requireField($data, 'editorial_id');  // UUID string
   $sub_tema_id  = $requireField($data, 'sub_tema_id');   // UUID string
+  $grup  = $requireField($data, 'grup');   // UUID string
 
   $lang         = $requireField($data, 'lang');          // int
   $estat        = $requireField($data, 'estat');         // int
@@ -211,6 +213,7 @@ if (isset($_GET['autor'])) {
   if (!isUuid($editorial_id)) $errors['editorial_id'] = 'invalid_uuid';
   if (!isUuid($sub_tema_id))  $errors['sub_tema_id'] = 'invalid_uuid';
   if (!isUuid($estat))  $errors['estat'] = 'invalid_uuid';
+  if (!isUuid($grup))  $errors['grup'] = 'invalid_uuid';
 
   // Validación ints básicos
   if ($any !== null && !is_numeric($any))   $errors['any'] = 'invalid_int';
@@ -231,7 +234,8 @@ if (isset($_GET['autor'])) {
   // - id, tipus_id, editorial_id, sub_tema_id => BINARY(16)
   // - estat => int (NO UNHEX)
   $sql = "UPDATE " . Tables::LLIBRES . " SET
-            titol = :titol,
+            titol_original = :titol_original,
+            titol_catala = :titol_catala,
             slug = :slug,
             any = :any,
             tipus_id = UNHEX(REPLACE(:tipus_id, '-', '')),
@@ -240,14 +244,16 @@ if (isset($_GET['autor'])) {
             lang = :lang,
             img = :img,
             estat = UNHEX(REPLACE(:estat, '-', '')),
-            dateModified = :dateModified
+            dateModified = :dateModified,
+            grup = UNHEX(REPLACE(:grup, '-', ''))
           WHERE id = UNHEX(REPLACE(:id, '-', ''))
           LIMIT 1";
 
   try {
     $stmt = $conn->prepare($sql);
 
-    $stmt->bindValue(':titol', $titol, PDO::PARAM_STR);
+    $stmt->bindValue(':titol_original', $titol_original, PDO::PARAM_STR);
+    $stmt->bindValue(':titol_catala', $titol_catala, PDO::PARAM_STR);
     $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
     $stmt->bindValue(':any', (int)$any, PDO::PARAM_INT);
 
@@ -265,6 +271,7 @@ if (isset($_GET['autor'])) {
     }
 
     $stmt->bindValue(':dateModified', $dateModified, PDO::PARAM_STR);
+    $stmt->bindValue(':grup', $grup, PDO::PARAM_STR);
     $stmt->bindValue(':id', $id, PDO::PARAM_STR);
 
     $stmt->execute();
@@ -275,7 +282,6 @@ if (isset($_GET['autor'])) {
     // Lo tratamos de forma útil:
     if ($stmt->rowCount() === 0) {
       // comprobamos si existe
-      $check = $conn->prepare("SELECT لاحظ FROM " . Tables::LLIBRES . " WHERE id = UNHEX(REPLACE(:id, '-', '')) LIMIT 1");
       // ^^^ OJO: si no quieres líos, usa SELECT 1:
       $check = $conn->prepare("SELECT 1 FROM " . Tables::LLIBRES . " WHERE id = UNHEX(REPLACE(:id, '-', '')) LIMIT 1");
       $check->bindValue(':id', $id, PDO::PARAM_STR);

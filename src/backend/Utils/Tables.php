@@ -13,6 +13,7 @@ class Tables
     public const LLIBRES_EDITORIALS = 'db_llibres_editorials';
     public const LLIBRES_TIPUS = 'db_llibres_tipus';
     public const LLIBRES_ESTAT = 'db_llibres_estats';
+    public const LLIBRES_GRUP = 'db_llibres_grup';
 
     public const AUX_TEMES = 'aux_temes';
     public const AUX_SUB_TEMES = 'aux_sub_temes';

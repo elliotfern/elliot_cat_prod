@@ -126,7 +126,7 @@ $slug = $routeParams[0] ?? '';
 
         const data = json?.data ?? json;
         const h4 = document.getElementById('bookTitle');
-        if (h4) h4.textContent = data?.titol ? `Llibre: ${data.titol}` : '';
+        if (h4) h4.textContent = data?.titol_original ? `Títol original del llibre: ${data.titol_original}` : '';
     }
 
     async function submitAfegirAutor(e) {

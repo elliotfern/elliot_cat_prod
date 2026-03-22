@@ -7,7 +7,8 @@ $slug = $routeParams[0];
 
   <main>
     <div class="container contingut">
-      <h1>Biblioteca de llibres: <span id="titolBook"></span></h1>
+      <h1>Biblioteca de llibres</h1>
+      <h3>Títol de l'obra en llengua original: <span id="titolBook"></span></h3>
 
       <div id="isAdminButton" style="display: none;">
         <?php if (isUserAdmin()) :  ?>
@@ -32,7 +33,7 @@ $slug = $routeParams[0];
         <div class="columna">
 
           <div class="quadre-detalls">
-            <p><strong>Títol anglès: </strong> <span id="titolEng"></span></p>
+            <p><strong>Títol en català: </strong> <span id="titol_catala"></span></p>
             <div id="linkAutor"></div>
             <p><strong>Any de publicació: </strong> <span id="any"></span></p>
             <p><strong>Editorial: </strong> <span id="editorial"></span></p>
