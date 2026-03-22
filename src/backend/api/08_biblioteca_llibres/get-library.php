@@ -504,7 +504,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                     SUBSTR(HEX(c.id), 13, 4),
                     SUBSTR(HEX(c.id), 17, 4),
                     SUBSTR(HEX(c.id), 21)
-                    )) AS idGrup,
+                    )) AS idGrup
 
             FROM " . Tables::LLIBRES . " AS b
             LEFT JOIN " . Tables::LLIBRES_AUTORS . " AS la ON la.llibre_id = b.id
