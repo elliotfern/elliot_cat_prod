@@ -41,6 +41,8 @@ $slug = $routeParams[0];
             <p><strong>Sub-gènere: </strong> <span id="sub_genere_cat"></span></p>
             <p><strong>Idioma original: </strong> <span id="idioma_ca"></span></p>
             <p><strong>Tipus d'obra: </strong> <span id="nomTipus"></span></p>
+            <div id="linkGrup"></div>
+
             <p><button type='button' class='button btn-petit'><span id="estat"></span></button></p>
           </div>
         </div>

@@ -17,9 +17,12 @@ type AutorData = {
 
 type BookData = {
   id: string;
-  titol: string;
+  titol_original: string;
+  titol_catala: string;
   slug: string;
   any: number;
+  nom_grup: string;
+  idGrup: string;
 
   dateCreated: string | null;
   dateModified: string | null;
@@ -125,6 +128,29 @@ function renderAutors(data: BookData) {
   el.innerHTML = `<strong>${etiqueta}:</strong> ${links}`;
 }
 
+function renderGrup(data: BookData) {
+  const el = document.getElementById('linkGrup');
+  if (!el) return;
+
+  const basePrefix = isInGestio() ? 'gestio' : getLangPrefix();
+  const base = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-grup/`;
+
+  // 1) Preferimos
+  const grup = data.nom_grup;
+
+  // 3) Sin autores
+  if (grup.length === 0) {
+    el.textContent = ''; // o "Autor: —"
+    return;
+  }
+
+  // 4) Pintar 1 o N con etiqueta
+  const etiqueta = 'Llibre desat a la cool·lecció';
+  const href = `${base}${encodeURIComponent(data.idGrup)}`;
+
+  el.innerHTML = `<strong>${etiqueta}:</strong> <a href="${href}">${grup}</a>`;
+}
+
 // Función para realizar la solicitud a la API
 export function fetchApiDataLlibre(url: string) {
   fetch(url, {
@@ -152,14 +178,14 @@ export function fetchApiDataLlibre(url: string) {
       const fechaMod = formatDateES(data.dateModified ?? null);
 
       // DOM básicos
-      setText('titolBook', data.titol);
+      setText('titolBook', data.titol_original);
       setImg('nameImg', `https://media.elliot.cat/img/biblioteca-llibre/${data.nameImg}.jpg`);
 
       // Autores (1 o varios)
       renderAutors(data);
+      renderGrup(data);
 
       // Campos legacy (algunos ya no existen)
-      setText('titolEng', ''); // no viene
       setText('genere_cat', data.tema_ca ?? '');
       setText('sub_genere_cat', data.sub_tema_ca ?? '');
 
@@ -168,6 +194,8 @@ export function fetchApiDataLlibre(url: string) {
       setText('idioma_ca', data.idioma_ca);
       setText('nomTipus', data.nomTipus);
       setText('estat', data.nomEstat);
+      setText('estat', data.nomEstat);
+      setText('titol_catala', data.titol_catala);
 
       // Fechas
       setText('dateCreated', fechaCre);

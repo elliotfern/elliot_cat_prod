@@ -99,7 +99,14 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             b.slug,
             g.tema_ca AS nomGenCat,
             sg.sub_tema_ca,
-            c.nom AS nom_grup
+            c.nom AS nom_grup,
+            LOWER(CONCAT_WS('-',
+                SUBSTR(HEX(c.id), 1, 8),
+                SUBSTR(HEX(c.id), 9, 4),
+                SUBSTR(HEX(c.id), 13, 4),
+                SUBSTR(HEX(c.id), 17, 4),
+                SUBSTR(HEX(c.id), 21)
+            )) AS idGrup
 
         FROM " . Tables::LLIBRES . " AS b
         LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sg ON b.sub_tema_id = sg.id
@@ -107,7 +114,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         LEFT JOIN " . Tables::LLIBRES_EDITORIALS . " AS be ON b.editorial_id = be.id
         LEFT JOIN " . Tables::LLIBRES_GRUP . " AS c ON b.grup = c.id
         WHERE b.tipus_id = UNHEX('0197ac5b7106704b96c60728ace151f3')
-        ORDER BY b.titol ASC";
+        ORDER BY b.titol_original ASC";
 
         $books = $db->getData($queryBooks);
 
