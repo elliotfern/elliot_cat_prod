@@ -194,7 +194,7 @@ if (isset($_GET['autor'])) {
   // Requeridos para update
   $id  = $requireField($data, 'id');            // UUID string del libro
   $titol_original = $requireField($data, 'titol_original');
-  $titol_catala = $requireField($data, 'titol_catala');
+  $titol_catala = $optionalField($data, 'titol_catala');
   $slug         = $requireField($data, 'slug');
   $any          = $requireField($data, 'any');
 

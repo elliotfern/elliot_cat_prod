@@ -165,7 +165,7 @@ if (isset($_GET['autor'])) {
   $errors = [];
 
   $titol_original = requireField($data, 'titol_original', $errors);
-  $titol_catala = requireField($data, 'titol_catala', $errors);
+  $titol_catala = optionalField($data, 'titol_catala');
   $slug         = requireField($data, 'slug', $errors);
   $any          = requireField($data, 'any', $errors);
 
