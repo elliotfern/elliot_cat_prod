@@ -7,7 +7,7 @@ $slug = $routeParams[0];
 
   <div class="contingut">
     <h1>Biblioteca de llibres</h1>
-    <h3>Títol de l'obra en llengua original: <span id="titolBook"></span></h3>
+    <h3>Fitxa d'informació bàsica del llibre</h3>
 
     <div id="isAdminButton" style="display: none;">
       <?php if (isUserAdmin()) :  ?>
@@ -19,7 +19,7 @@ $slug = $routeParams[0];
       <?php endif; ?>
     </div>
 
-    <div class="dadesFitxa">
+    <div class="dadesFitxa" style="background-color: darkgray;padding:5px;">
       <strong>Aquesta fitxa ha estat creada el: </strong><span id="dateCreated"></span> <span id="dateModified"></span>
     </div>
 
@@ -32,6 +32,7 @@ $slug = $routeParams[0];
       <div class="columna">
 
         <div class="quadre-detalls">
+          <p><strong>Títol original: </strong> <span id="titol_original"></span></p>
           <p><strong>Títol en català: </strong> <span id="titol_catala"></span></p>
           <p>
           <div id="linkAutor"></div>

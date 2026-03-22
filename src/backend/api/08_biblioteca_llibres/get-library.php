@@ -486,8 +486,6 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 el.estat AS nomEstat,
                 sub_tema.sub_tema_ca,
                 tema.tema_ca,
-
-
                    -- autor (1 fila por autor)
                 LOWER(CONCAT_WS('-',
                     SUBSTR(HEX(p.id), 1, 8),
@@ -499,7 +497,14 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 p.nom AS autor_nom,
                 p.cognoms AS autor_cognoms,
                 p.slug AS autor_slug,
-                c.nom AS nom_grup
+                c.nom AS nom_grup,
+                 LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(c.id), 1, 8),
+                    SUBSTR(HEX(c.id), 9, 4),
+                    SUBSTR(HEX(c.id), 13, 4),
+                    SUBSTR(HEX(c.id), 17, 4),
+                    SUBSTR(HEX(c.id), 21)
+                    )) AS idGrup,
 
             FROM " . Tables::LLIBRES . " AS b
             LEFT JOIN " . Tables::LLIBRES_AUTORS . " AS la ON la.llibre_id = b.id

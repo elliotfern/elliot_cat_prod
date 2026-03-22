@@ -68,11 +68,6 @@ function setImg(id: string, src: string) {
   if (el) el.src = src;
 }
 
-function setHref(id: string, href: string) {
-  const el = document.getElementById(id) as HTMLAnchorElement | null;
-  if (el) el.href = href;
-}
-
 function formatDateES(dateStr: string | null): string {
   if (!dateStr) return '';
   const iso = dateStr.includes(' ') ? dateStr.replace(' ', 'T') : dateStr; // "YYYY-MM-DD HH:MM:SS" -> ISO
@@ -172,7 +167,8 @@ export function fetchApiDataLlibre(url: string) {
       const fechaMod = formatDateES(data.dateModified ?? null);
 
       // DOM básicos
-      setText('titolBook', data.titol_original);
+      setText('titol_original', data.titol_original);
+      setText('titol_catala', data.titol_catala);
       setImg('nameImg', `https://media.elliot.cat/img/biblioteca-llibre/${data.nameImg}.jpg`);
 
       // Autores (1 o varios)
@@ -182,14 +178,12 @@ export function fetchApiDataLlibre(url: string) {
       // Campos legacy (algunos ya no existen)
       setText('genere_cat', data.tema_ca ?? '');
       setText('sub_genere_cat', data.sub_tema_ca ?? '');
-
       setText('any', data.any);
       setText('editorial', data.editorial);
       setText('idioma_ca', data.idioma_ca);
       setText('nomTipus', data.nomTipus);
       setText('estat', data.nomEstat);
       setText('estat', data.nomEstat);
-      setText('titol_catala', data.titol_catala);
 
       // Fechas
       setText('dateCreated', fechaCre);
