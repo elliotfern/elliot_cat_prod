@@ -9,6 +9,7 @@ import { fetchApiDataLlibre } from './fitxaLlibre';
 import { initAdminButtons, initLlibreAutorsPage } from './fitxaLlibreAutors';
 import { getLangPrefix } from '../../utils/locales/getLangPrefix';
 import { DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
+import { taulaLlistatGrups } from './taulaLlistatGrups';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -60,6 +61,8 @@ export async function biblioteca() {
     taulaLlistatAutors();
   } else if ([pageType[1], pageType[2]].includes('llistat-llibres')) {
     taulaLlistatLlibres();
+  } else if ([pageType[1], pageType[2]].includes('llistat-grups')) {
+    taulaLlistatGrups();
   } else if (pageType[2] === 'fitxa-llibre') {
     const slug = pageType[3];
     fetchApiDataLlibre(`/api/biblioteca/get/?llibreSlug=${slug}`);

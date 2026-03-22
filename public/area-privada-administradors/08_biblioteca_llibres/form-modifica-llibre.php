@@ -28,6 +28,7 @@ if ($modificaBtn === 1) {
     selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", "", "estat", "estat");
     selectOmplirDades("/api/biblioteca/get/?type=editorials", "", "editorial_id", "editorial");
     selectOmplirDades("/api/biblioteca/get/?type=tipus", "", "tipus_id", "nomTipus");
+    selectOmplirDades("/api/biblioteca/get/?type=grupLlibre", "", "grup", "nom");
   </script>
 <?php
 }
@@ -193,7 +194,7 @@ if ($modificaBtn === 1) {
         selectOmplirDades("/api/biblioteca/get/?type=llengues", data.lang, "lang", "idioma_ca");
         selectOmplirDades("/api/biblioteca/get/?type=tipus", data.tipus_id, "tipus_id", "nomTipus");
         selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", data.estat, "estat", "estat");
-        selectOmplirDades("/api/biblioteca/get/?type=grup", data.grup, "grup", "nom");
+        selectOmplirDades("/api/biblioteca/get/?type=grupLlibre", data.grup, "grup", "nom");
       })
       .catch(err => console.error("Error al obtener los datos:", err));
   }

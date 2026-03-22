@@ -139,7 +139,7 @@ function renderGrup(data: BookData) {
   const grup = data.nom_grup;
 
   // 4) Pintar 1 o N con etiqueta
-  const etiqueta = 'Llibre desat a la cool·lecció';
+  const etiqueta = 'Llibre desat a la col·lecció';
   const href = `${base}${encodeURIComponent(data.idGrup)}`;
 
   el.innerHTML = `<strong>${etiqueta}:</strong> <a href="${href}">${grup}</a>`;

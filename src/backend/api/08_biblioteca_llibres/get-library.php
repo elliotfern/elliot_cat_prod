@@ -696,8 +696,8 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
     }
 
     // 10) ruta grup llibre
-    // ruta GET => "/api/biblioteca/auxiliars/?grup"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'grup')) {
+    // ruta GET => "/api/biblioteca/auxiliars/?grupLlibre"
+} else if ((isset($_GET['type']) && $_GET['type'] == 'grupLlibre')) {
 
     try {
         $db = new Database();

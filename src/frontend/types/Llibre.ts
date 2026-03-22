@@ -8,4 +8,5 @@ export interface Llibre {
   any: string;
   sub_genere_cat: string;
   nomGenCat: string;
+  nom: string;
 }
