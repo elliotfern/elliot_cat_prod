@@ -391,7 +391,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
     // Quitar guiones del UUID
     $id = str_replace('-', '', $_GET['id']);
 
-    $query = "SELECT b.any, b.titol_original, b.titol_catala, b.slug
+    $query = "SELECT b.any, b.titol_original AS titol, b.titol_catala, b.slug
                 FROM db_llibres AS b
                 LEFT JOIN db_llibres_autors AS la ON b.id = la.llibre_id
                 WHERE la.autor_id = UNHEX(:id)
