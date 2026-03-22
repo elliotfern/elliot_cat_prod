@@ -29,7 +29,7 @@ export async function taulaLlistatLlibres() {
     {
       header: 'Llibre',
       field: 'titol',
-      render: (_: unknown, row: Llibre) => `<a href="${buildFrontUrl(`biblioteca/fitxa-llibre/${row.slug}`)}">${row.titol}</a>`,
+      render: (_: unknown, row: Llibre) => `<a href="${buildFrontUrl(`biblioteca/fitxa-llibre/${row.slug}`)}">${row.titol_original}</a>`,
     },
     {
       header: 'Autor/a',
@@ -47,6 +47,15 @@ export async function taulaLlistatLlibres() {
         return text;
       },
     },
+
+    {
+      header: 'Col·lecció',
+      field: 'nom_grup',
+      render: (_: unknown, row: Llibre) => {
+        return row.nom_grup;
+      },
+    },
+
     {
       header: 'Any',
       field: 'any',
@@ -69,7 +78,7 @@ export async function taulaLlistatLlibres() {
     url: `${API_BASE}/biblioteca/get/?type=totsLlibres`,
     containerId: 'taulaLlistatLlibres',
     columns,
-    filterKeys: ['titol'],
+    filterKeys: ['titol_original'],
     filterByField: 'nomGenCat',
   });
 }
