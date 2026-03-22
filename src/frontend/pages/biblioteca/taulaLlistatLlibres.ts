@@ -5,10 +5,6 @@ import { Llibre } from '../../types/Llibre';
 import { API_BASE, DOMAIN_WEB } from '../../utils/urls';
 import { buildFrontUrl, getLangPrefix } from '../../utils/locales/getLangPrefix';
 
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-
 function renderAutorsCell(row: Llibre, basePrefix: string): string {
   const base = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-autor/`;
   const autors = Array.isArray((row as any).autors) ? (row as any).autors : [];
@@ -18,7 +14,7 @@ function renderAutorsCell(row: Llibre, basePrefix: string): string {
     .filter((a: any) => a && typeof a.slug === 'string' && a.slug.length > 0)
     .map((a: any) => {
       const fullName = [a.nom, a.cognoms].filter(Boolean).join(' ').trim();
-      const label = escapeHtml(fullName || a.slug);
+      const label = fullName || a.slug;
       const href = `${base}${encodeURIComponent(a.slug)}`;
       return `<a href="${href}">${label}</a>`;
     })
@@ -33,7 +29,7 @@ export async function taulaLlistatLlibres() {
     {
       header: 'Llibre',
       field: 'titol',
-      render: (_: unknown, row: Llibre) => `<a href="${buildFrontUrl(`biblioteca/fitxa-llibre/${row.slug}`)}">${escapeHtml(row.titol)}</a>`,
+      render: (_: unknown, row: Llibre) => `<a href="${buildFrontUrl(`biblioteca/fitxa-llibre/${row.slug}`)}">${row.titol}</a>`,
     },
     {
       header: 'Autor/a',
@@ -48,7 +44,7 @@ export async function taulaLlistatLlibres() {
         const sub = (row as any).sub_tema_ca ?? (row as any).sub_genere_cat ?? '';
         // Si ya tienes sub_tema_ca (nuevo endpoint) mejor
         const text = sub ? `${nomGenCat} (${sub})` : `${nomGenCat}`;
-        return escapeHtml(text);
+        return text;
       },
     },
     {
