@@ -57,6 +57,7 @@
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat d'estats de facturació</a></li>
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de tipus d'IVA</a></li>
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de tipus de pagament</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-productes">Llistat catàleg de productes i serveis</a></li>
             </ul>
 
             db_comptabilitat_facturacio_estat
