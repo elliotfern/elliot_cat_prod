@@ -36,6 +36,8 @@ export type ApiUrls = {
     HISTORIA_CURS_ARTICLE_ID: (id: number) => string;
     EMISSORS_FACTURES: string;
     EMISSOR_ID: (id: number) => string;
+    PRODUCTES: string;
+    PRODUCTE_ID: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -63,6 +65,7 @@ export type ApiUrls = {
     BLOG_ARTICLE: string;
     HISTORIA_CURS_ARTICLE: string;
     EMISSOR: string;
+    PRODUCTE: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -89,6 +92,7 @@ export type ApiUrls = {
     BLOG_ARTICLE: string;
     HISTORIA_CURS_ARTICLE: string;
     EMISSOR: string;
+    PRODUCTE: string;
   };
   DELETE: {};
 };

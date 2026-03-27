@@ -7,6 +7,7 @@ import { formFacturaProducte } from './formFacturaProducte';
 import { taulaFacturacioClients } from './taulaFacturacioClients';
 import { taulaLlistatClients } from './taulaLlistatClients';
 import { taulaLlistatEmissors } from './taulaLlistatEmissors';
+import { taulaLlistatProductes } from './taulaLlistatProductes';
 
 export function comptabilitat() {
   const url = window.location.href;
@@ -36,6 +37,12 @@ export function comptabilitat() {
   } else if (pageType[2] === 'nou-emissor') {
     formEmissor(false);
   } else if (pageType[2] === 'modifica-emissor') {
+    formEmissor(true, id);
+  } else if (pageType[2] === 'llistat-productes') {
+    taulaLlistatProductes();
+  } else if (pageType[2] === 'nou-producte') {
+    formEmissor(false);
+  } else if (pageType[2] === 'modifica-producte') {
     formEmissor(true, id);
   }
 }

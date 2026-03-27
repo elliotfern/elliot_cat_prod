@@ -540,6 +540,100 @@ if ($slug === 'clients') {
             500
         );
     }
+
+    // GET : Llistat de productes
+    // ruta => "https://elliot.cat/api/comptabilitat/get/productes"
+} else if ($slug === 'productes') {
+
+    $sql = <<<SQL
+        SELECT 
+            p.id,
+            p.producte,
+            p.descripcio,
+            p.unitat,
+            p.preu_recomanat,
+            p.actiu,
+            p.created_at,
+            p.updated_at
+        FROM %s AS p
+        ORDER BY p.producte ASC
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : Obtenir producte per ID
+    // ruta => "https://elliot.cat/api/comptabilitat/get/producteId?id={id}"
+} else if ($slug === 'producteId' && isset($_GET['id'])) {
+
+    $producte_id = (int) $_GET['id'];
+
+    $sql = <<<SQL
+        SELECT id, producte, descripcio, actiu, unitat, preu_recomanat
+        FROM %s
+        WHERE id = :producte_id
+        LIMIT 1
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
+    );
+
+    try {
+
+        $params = [':producte_id' => $emisproducte_idsor_id];
+        $result = $db->getData($query, $params, true);
+
+        if (!$result) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

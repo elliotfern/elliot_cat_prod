@@ -467,6 +467,78 @@ if ($slug === 'clients') {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+
+    // POST : Crear nuevo producto
+    // ruta => "https://elliot.cat/api/comptabilitat/post/producte"
+} else if ($slug === 'producte' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+        return;
+    }
+
+    // Helpers
+    $trimOrNull  = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
+    $toFloatOrNull = static fn($v): ?float => (is_numeric($v) ? (float)$v : null);
+    $toIntOrNull = static fn($v): ?int => (is_numeric($v) ? (int)$v : null);
+
+    // Datos
+    $producte       = $trimOrNull($data['producte'] ?? null);
+    $descripcio     = $trimOrNull($data['descripcio'] ?? null);
+    $actiu          = $toIntOrNull($data['actiu'] ?? 1) ?? 1;
+    $unitat         = $trimOrNull($data['unitat'] ?? null);
+    $preu_recomanat = $toFloatOrNull($data['preu_recomanat'] ?? null);
+
+    // Validación
+    $errors = [];
+    if ($producte === null) {
+        $errors[] = ValidacioErrors::requerit('producte');
+    } elseif (mb_strlen($producte) > 255) {
+        $errors[] = ValidacioErrors::massaLlarg('producte', 255);
+    }
+
+    if ($descripcio !== null && mb_strlen($descripcio) > 1000) {
+        $errors[] = ValidacioErrors::massaLlarg('descripcio', 1000);
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+        return;
+    }
+
+    try {
+        $conn->beginTransaction();
+
+        $sql = "INSERT INTO db_comptabilitat_cataleg_productes
+                   (producte, descripcio, actiu, unitat, preu_recomanat)
+                VALUES
+                   (:producte, :descripcio, :actiu, :unitat, :preu_recomanat)";
+
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bindValue(':producte', $producte, PDO::PARAM_STR);
+        $stmt->bindValue(':descripcio', $descripcio, $descripcio !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':actiu', $actiu, PDO::PARAM_INT);
+        $stmt->bindValue(':unitat', $unitat, $unitat !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':preu_recomanat', $preu_recomanat, $preu_recomanat !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+
+        $stmt->execute();
+        $newId = (int)$conn->lastInsertId();
+
+        // Auditoría
+        $detalls = sprintf("Creació producte: %s", $producte);
+        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_cataleg_productes', $newId);
+
+        $conn->commit();
+
+        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+    } catch (Throwable $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
