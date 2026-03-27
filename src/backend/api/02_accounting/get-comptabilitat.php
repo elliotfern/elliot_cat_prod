@@ -511,7 +511,8 @@ if ($slug === 'clients') {
 
     $query = sprintf(
         $sql,
-        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
+        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo),
+        qi(Tables::DB_PAISOS, $pdo)
     );
 
     try {
