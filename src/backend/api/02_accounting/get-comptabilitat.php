@@ -517,7 +517,7 @@ if ($slug === 'clients') {
 
     try {
         $params = [':emissor_id' => $emissor_id];
-        $result = $db->getData($query, $params, false);
+        $result = $db->getData($query, $params, true);
 
         if (!$result) {
             Response::error(
