@@ -610,7 +610,7 @@ if ($slug === 'clients') {
 
     try {
 
-        $params = [':producte_id' => $emisproducte_idsor_id];
+        $params = [':producte_id' => $producte_id];
         $result = $db->getData($query, $params, true);
 
         if (!$result) {
