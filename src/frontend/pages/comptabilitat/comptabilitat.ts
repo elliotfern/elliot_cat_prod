@@ -29,5 +29,7 @@ export function comptabilitat() {
     formClient(false);
   } else if (pageType[2] === 'modifica-client') {
     formClient(true, id);
+   } else if (pageType[2] === 'llistat-emissors') {
+    taulaLlistatClients();
   }
 }

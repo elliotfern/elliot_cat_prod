@@ -60,6 +60,7 @@ export const ENDPOINTS = {
   HISTORIA_CURS_ARTICLE_ID: 'cursArticleId',
   HISTORIA_CURS_ARTICLE_CREATE: 'createCursArticle',
   HISTORIA_CURS_ARTICLE_UPDATE: 'updateCursArticle',
+  EMISSORS_FACTURES: 'emissors',
 } as const;
 
 // Mapa de recursos disponibles
@@ -121,6 +122,7 @@ export const API_URLS: ApiUrls = {
     PROJECTE_TASQUES: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.TASQUES}?id=${encodeURIComponent(id)}`,
     BLOG_ARTICLE_ID: (id: number) => `${API_BASE}/${RESOURCES.BLOG}/${TIPUS.GET}/${ENDPOINTS.BLOG_ARTICLE_ID}?id=${encodeURIComponent(id)}`,
     HISTORIA_CURS_ARTICLE_ID: (id: number) => `${API_BASE}/${RESOURCES.HISTORIA}/${TIPUS.GET}/${ENDPOINTS.HISTORIA_CURS_ARTICLE_ID}?id=${encodeURIComponent(id)}`,
+    EMISSORS_FACTURES: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.EMISSORS_FACTURES}}`,
   },
 
   POST: {

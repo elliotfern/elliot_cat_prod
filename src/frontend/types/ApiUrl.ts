@@ -34,6 +34,7 @@ export type ApiUrls = {
     PROJECTE_TASQUES: (id: number) => string;
     BLOG_ARTICLE_ID: (id: number) => string;
     HISTORIA_CURS_ARTICLE_ID: (id: number) => string;
+    EMISSORS_FACTURES: string;
   };
   POST: {
     PERFIL_CV: string;

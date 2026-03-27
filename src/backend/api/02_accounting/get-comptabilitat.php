@@ -423,7 +423,7 @@ if ($slug === 'clients') {
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
-} elseif (isset($_GET['type']) && $_GET['type'] == 'accounting-supplies-invoices') {
+} else if (isset($_GET['type']) && $_GET['type'] == 'accounting-supplies-invoices') {
     global $conn;
     $data = array();
     $stmt = $conn->prepare(
@@ -442,4 +442,60 @@ if ($slug === 'clients') {
     }
     header('Content-Type: application/json');
     echo json_encode($data);
+
+    // GET : Llistat d'emissors
+// ruta => "https://elliot.cat/api/comptabilitat/get/emissors"
+} else if ($slug === 'emissors') {
+
+    $sql = <<<SQL
+        SELECT 
+            e.id, 
+            e.nom, 
+            e.nif, 
+            e.numero_iva, 
+            e.pais, 
+            e.adreca, 
+            e.telefon, 
+            e.email, 
+            e.created_at, 
+            e.updated_at
+        FROM %s AS e
+        ORDER BY e.nom ASC
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
+    );
+
+    try {
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    } else {
+    // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
+    header('HTTP/1.1 403 Forbidden');
+    echo json_encode(['error' => 'Something get wrong']);
+    exit();
 }

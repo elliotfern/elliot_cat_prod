@@ -18,18 +18,50 @@
           </p>
 
           <div class="alert alert-success quadre">
-            <h4 style="text-align: left;">Clients:</h4>
+            <h4 style="text-align: left;">Clients i proveïdors:</h4>
             <ul class="llistat">
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-clients">Llistat de clients</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-proveidors">Llistat de proveïdors</a></li>
+
             </ul>
 
-            <h4 style="text-align: left;">Comptabilitat:</h4>
+            <h4 style="text-align: left;">Comptabilitat (despeses):</h4>
             <ul class="llistat">
-              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de pressupostos</a></li>
-              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients">Llistat de factures enviades a clients</a></li>
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors">Llistat de factures rebudes</a></li>
+            </ul>
+
+            <h4 style="text-align: left;">Comptabilitat (ingressos):</h4>
+            <ul class="llistat">
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients">Llistat de factures enviades a clients (Partita IVA Italia)</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients">Llistat de factures enviades a clients (Autònom Irlanda)</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients">Llistat de factures enviades a clients (HispanTIC LTD Irlanda)</a></li>
+
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-anys">Facturació detallada per anys</a></li>
             </ul>
+
+            <h4 style="text-align: left;">Comptabilitat (beneficis detallats):</h4>
+            <ul class="llistat">
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-anys">Facturació detallada per anys</a></li>
+            </ul>
+
+            <h4 style="text-align: left;">Pressupostos:</h4>
+            <ul class="llistat">
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de pressupostos</a></li>
+            </ul>
+
+            <h4 style="text-align: left;">Taules auxiliars:</h4>
+            <ul class="llistat">
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de categories de despeses</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de sub-categories de despeses</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-emissors">Llistat d'emissors de factures</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat d'estats de facturació</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de tipus d'IVA</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de tipus de pagament</a></li>
+            </ul>
+
+            db_comptabilitat_facturacio_estat
+            db_comptabilitat_facturacio_tipus_iva
+            db_comptabilitat_facturacio_tipus_pagament
           </div>
 
         <?php } else {

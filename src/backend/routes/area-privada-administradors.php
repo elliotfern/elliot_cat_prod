@@ -36,6 +36,11 @@ $routes = [
     APP_GESTIO . $url['comptabilitat'] . '/nou-producte-factura' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-producte.php'),
     APP_GESTIO . $url['comptabilitat'] . '/modifica-producte-factura/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-producte.php'),
 
+    // 02.Auxiliars
+    APP_GESTIO . $url['comptabilitat'] . '/llistat-emissors' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-emissors.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/nou-emissor' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-emissor.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/modifica-emissor/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-emissor.php'),
+
     // 04. Base de dades persones
     APP_GESTIO . $url['persones'] => route(APP_INTRANET_DIR . APP_PERSONES_DIR . 'index.php'),
     APP_GESTIO . $url['persones'] . '/llistat-persones' => route(APP_INTRANET_DIR . APP_PERSONES_DIR . 'index.php'),

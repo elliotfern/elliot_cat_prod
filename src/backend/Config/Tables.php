@@ -40,6 +40,9 @@ final class Tables
     public const DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT = 'db_comptabilitat_facturacio_tipus_pagament';
     public const DB_COMPTABILITAT_CATALEG_PRODUCTES = 'db_comptabilitat_cataleg_productes';
 
+
+    public const DB_COMPTABILITAT_EMISSORS = 'db_comptabilitat_emissors ';
+
     // Taules Auxiliars
     public const DB_TEMES = 'aux_temes';
     public const DB_SUBTEMES = 'aux_sub_temes';
