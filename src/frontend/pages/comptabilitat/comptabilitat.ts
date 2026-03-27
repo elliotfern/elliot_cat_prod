@@ -4,6 +4,7 @@ import { formClient } from './formClient';
 import { formEmissor } from './formEmissor';
 import { formFacturaClient } from './formFacturaClient';
 import { formFacturaProducte } from './formFacturaProducte';
+import { formProducte } from './formProducte';
 import { taulaFacturacioClients } from './taulaFacturacioClients';
 import { taulaLlistatClients } from './taulaLlistatClients';
 import { taulaLlistatEmissors } from './taulaLlistatEmissors';
@@ -41,8 +42,8 @@ export function comptabilitat() {
   } else if (pageType[2] === 'llistat-productes') {
     taulaLlistatProductes();
   } else if (pageType[2] === 'nou-producte') {
-    formEmissor(false);
+    formProducte(false);
   } else if (pageType[2] === 'modifica-producte') {
-    formEmissor(true, id);
+    formProducte(true, id);
   }
 }
