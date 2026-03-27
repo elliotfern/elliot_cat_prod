@@ -453,19 +453,22 @@ if ($slug === 'clients') {
             e.nom, 
             e.nif, 
             e.numero_iva, 
-            e.pais, 
+            uuid_bin_to_text(e.pais) as pais_id, 
+            p.pais_ca,
             e.adreca, 
             e.telefon, 
             e.email, 
             e.created_at, 
             e.updated_at
         FROM %s AS e
+        LEFT JOIN %s AS p ON e.pais = p.id
         ORDER BY e.nom ASC
     SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
+        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo),
+        qi(Tables::DB_PAISOS, $pdo)
     );
 
     try {
@@ -499,8 +502,9 @@ if ($slug === 'clients') {
     $emissor_id = (int) $_GET['id'];
 
     $sql = <<<SQL
-        SELECT e.id, e.nom, e.nif, e.numero_iva, uuid_bin_to_text(e.pais) AS pais, e.adreca, e.telefon, e.email
+        SELECT e.id, e.nom, e.nif, e.numero_iva, uuid_bin_to_text(e.pais) AS pais, p.pais_ca, e.adreca, e.telefon, e.email
         FROM %s AS e
+        LEFT JOIN %s AS p ON e.pais = p.id
         WHERE e.id = :emissor_id
         LIMIT 1
     SQL;

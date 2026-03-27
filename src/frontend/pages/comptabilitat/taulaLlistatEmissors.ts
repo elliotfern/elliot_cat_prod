@@ -9,7 +9,7 @@ interface Emissor {
   nom: string;
   nif: string;
   numero_iva: string;
-  pais: string;
+  pais_ca: string;
   adreca: string;
   telefon: string;
   email: string;
@@ -41,8 +41,8 @@ export async function taulaLlistatEmissors() {
     },
     {
       header: 'País',
-      field: 'pais',
-      render: (_: unknown, row: Emissor) => `${row.pais}`,
+      field: 'pais_ca',
+      render: (_: unknown, row: Emissor) => `${row.pais_ca}`,
     },
     {
       header: 'Telèfon',
@@ -68,6 +68,6 @@ export async function taulaLlistatEmissors() {
     url: API_URLS.GET.EMISSORS_FACTURES, // Assumint que tens aquest endpoint a constants
     containerId: 'taulaLlistatEmissors',
     columns,
-    filterKeys: ['pais'],
+    filterKeys: ['pais_ca'],
   });
 }
