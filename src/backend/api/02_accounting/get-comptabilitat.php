@@ -444,7 +444,7 @@ if ($slug === 'clients') {
     echo json_encode($data);
 
     // GET : Llistat d'emissors
-// ruta => "https://elliot.cat/api/comptabilitat/get/emissors"
+    // ruta => "https://elliot.cat/api/comptabilitat/get/emissors"
 } else if ($slug === 'emissors') {
 
     $sql = <<<SQL
@@ -492,8 +492,49 @@ if ($slug === 'clients') {
             500
         );
     }
+    // GET : Obtenir emissor per ID
+    // ruta => "https://elliot.cat/api/comptabilitat/get/emissorId?id={id}"
+} else if ($slug === 'emissorId' && isset($_GET['id'])) {
 
-    } else {
+    $emissor_id = (int) $_GET['id'];
+
+    $sql = <<<SQL
+        SELECT e.id, e.nom, e.nif, e.numero_iva, uuid_bin_to_text(e.pais) AS pais, e.adreca, e.telefon, e.email
+        FROM %s AS e
+        WHERE e.id = :emissor_id
+        LIMIT 1
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
+    );
+
+    try {
+        $result = $db->getData($query);
+
+        if (!$result) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+} else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
     echo json_encode(['error' => 'Something get wrong']);

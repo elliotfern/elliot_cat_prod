@@ -377,6 +377,96 @@ if ($slug === 'clients') {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+
+    // POST : Crear nou emissor
+} else if ($slug === 'emissor') {
+
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // Helpers
+    $trimOrNull  = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
+    $toIntOrNull = static fn($v): ?int    => (is_numeric($v) ? (int)$v : null);
+    $uuidOrNull  = static function ($v): ?string {
+        if ($v === null || $v === '') return null;
+        $s = is_string($v) ? trim($v) : '';
+        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s) ? strtolower($s) : null;
+    };
+    $dateOrNull  = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
+
+    // Datos
+    $nom       = $trimOrNull($data['nom'] ?? null);
+    $nif       = $trimOrNull($data['nif'] ?? null);
+    $numero_iva = $trimOrNull($data['numero_iva'] ?? null);
+    $pais      = $uuidOrNull($data['pais'] ?? null);
+    $adreca    = $trimOrNull($data['adreca'] ?? null);
+    $telefon   = $trimOrNull($data['telefon'] ?? null);
+    $email     = $trimOrNull($data['email'] ?? null);
+
+    // Validación
+    $errors = [];
+    if ($nom === null) {
+        $errors[] = ValidacioErrors::requerit('nom');
+    } elseif (mb_strlen($nom) > 255) {
+        $errors[] = ValidacioErrors::massaLlarg('nom', 255);
+    }
+
+    if ($nif !== null && mb_strlen($nif) > 20) {
+        $errors[] = ValidacioErrors::massaLlarg('nif', 20);
+    }
+    if ($numero_iva !== null && mb_strlen($numero_iva) > 20) {
+        $errors[] = ValidacioErrors::massaLlarg('numero_iva', 20);
+    }
+    if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = ValidacioErrors::invalid('email');
+    }
+    if ($telefon !== null && mb_strlen($telefon) > 20) {
+        $errors[] = ValidacioErrors::massaLlarg('telefon', 20);
+    }
+    if ($adreca !== null && mb_strlen($adreca) > 255) {
+        $errors[] = ValidacioErrors::massaLlarg('adreca', 255);
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        $conn->beginTransaction();
+
+        $sql = "INSERT INTO db_comptabilitat_emissors
+                   (nom, nif, numero_iva, pais, adreca, telefon, email, created_at, updated_at)
+                VALUES
+                   (:nom, :nif, :numero_iva, uuid_text_to_bin(NULLIF(:pais, '')), :adreca, :telefon, :email, NOW(), NOW())";
+
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
+        $stmt->bindValue(':nif', $nif, $nif !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':numero_iva', $numero_iva, $numero_iva !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':pais', $pais, $pais !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':adreca', $adreca, $adreca !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':telefon', $telefon, $telefon !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':email', $email, $email !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+
+        $stmt->execute();
+        $newId = (int)$conn->lastInsertId();
+
+        // Auditoría
+        $detalls = sprintf("Creació emissor: %s (%s)", $nom, $email ?? '-');
+        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_emissors', $newId);
+
+        $conn->commit();
+
+        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+    } catch (Throwable $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

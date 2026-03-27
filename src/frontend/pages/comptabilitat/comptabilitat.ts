@@ -1,10 +1,12 @@
 import { getPageType } from '../../utils/urlPath';
 import { detallsFacturaClients } from './detallsFacturaClient';
 import { formClient } from './formClient';
+import { formEmissor } from './formEmissor';
 import { formFacturaClient } from './formFacturaClient';
 import { formFacturaProducte } from './formFacturaProducte';
 import { taulaFacturacioClients } from './taulaFacturacioClients';
 import { taulaLlistatClients } from './taulaLlistatClients';
+import { taulaLlistatEmissors } from './taulaLlistatEmissors';
 
 export function comptabilitat() {
   const url = window.location.href;
@@ -29,7 +31,11 @@ export function comptabilitat() {
     formClient(false);
   } else if (pageType[2] === 'modifica-client') {
     formClient(true, id);
-   } else if (pageType[2] === 'llistat-emissors') {
-    taulaLlistatClients();
+  } else if (pageType[2] === 'llistat-emissors') {
+    taulaLlistatEmissors();
+  } else if (pageType[2] === 'nou-emissor') {
+    formEmissor(false);
+  } else if (pageType[2] === 'modifica-emissor') {
+    formEmissor(true, id);
   }
 }
