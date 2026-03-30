@@ -41,7 +41,7 @@ function i18nInvoice(string $lang): array
       'iban' => 'IBAN',
       'bic' => 'BIC-SWIFT',
       'footer_owner' => 'Elliot Fernandez',
-      'footer_tax_ref' => 'Número de referència fiscal: 9323971DA',
+      'footer_tax_ref' => 'Número de referència fiscal:',
     ],
     'es' => [
       'pdf_title' => 'PDF de factura',
@@ -63,7 +63,7 @@ function i18nInvoice(string $lang): array
       'iban' => 'IBAN',
       'bic' => 'BIC-SWIFT',
       'footer_owner' => 'Elliot Fernandez',
-      'footer_tax_ref' => 'Número de referencia fiscal: 9323971DA',
+      'footer_tax_ref' => 'Número de referencia fiscal:',
     ],
     'en' => [
       'pdf_title' => 'Invoice PDF',
@@ -85,7 +85,7 @@ function i18nInvoice(string $lang): array
       'iban' => 'IBAN',
       'bic' => 'BIC-SWIFT',
       'footer_owner' => 'Elliot Fernandez',
-      'footer_tax_ref' => 'Tax reference number: 9323971DA',
+      'footer_tax_ref' => 'Tax reference number:',
     ],
     'it' => [
       'pdf_title' => 'PDF della fattura',
@@ -107,7 +107,7 @@ function i18nInvoice(string $lang): array
       'iban' => 'IBAN',
       'bic' => 'BIC-SWIFT',
       'footer_owner' => 'Elliot Fernandez',
-      'footer_tax_ref' => 'Numero di riferimento fiscale: 9323971DA',
+      'footer_tax_ref' => 'Numero di riferimento fiscale:',
     ],
   ];
   return $i18n[$lang];
@@ -115,45 +115,55 @@ function i18nInvoice(string $lang): array
 
 function fetchInvoiceAndProducts(int $idInvoice): array
 {
-  $url  = "https://elliot.cat/api/comptabilitat/get/facturaClientsPDF?id={$idInvoice}";
-  $url2 = "https://elliot.cat/api/comptabilitat/get/facturaProductesPDF?id={$idInvoice}";
-  $invoiceData = hacerLlamadaAPI($url);
-  $productData = hacerLlamadaAPI($url2);
+  // Nuevo endpoint que ya devuelve toda la info
+  $url = "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id={$idInvoice}";
+  $data = hacerLlamadaAPI($url);
 
-  $obj = $invoiceData ?? null;
-  if (!$obj || empty($obj['id'])) {
+  if (!$data || empty($data['id'])) {
     throw new RuntimeException('Factura no trobada');
   }
 
-  $arr2 = $productData ?? [];
-  // si viene objeto único, conviértelo a array
-  if (!is_array($arr2) || (is_array($arr2) && array_values($arr2) !== $arr2)) {
-    $arr2 = [$arr2];
+  $invoice = $data; // contiene datos de factura
+  $products = $data['products'] ?? [];
+
+  // Si viene un solo producto como objeto, lo convertimos a array
+  if (!is_array($products) || (is_array($products) && array_values($products) !== $products)) {
+    $products = [$products];
   }
-  return [$obj, $arr2];
+
+  return [$invoice, $products];
 }
 
 function buildInvoiceHtml(array $obj, array $arr2, array $T): string
 {
   $id_factura   = (int)$obj['id'];
-  $empresa      = $obj['clientEmpresa'] ?? '';
-  $nomClient    = $obj['clientNom'] ?? '';
-  $cognoms      = $obj['clientCognoms'] ?? '';
-  $adreca       = $obj['clientAdreca'] ?? '';
-  $ciutat       = $obj['clientCiutat'] ?? '';
-  $provincia    = $obj['clientProvincia'] ?? '';
-  $pais         = $obj['clientPais'] ?? '';
-  $nif          = $obj['clientNIF'] ?? '';
-  $cp           = $obj['clientCP'] ?? '';
-  $any          = (int)($obj['yearInvoice'] ?? date('Y'));
-  $facDate_net  = !empty($obj['facData']) ? date('d/m/Y', strtotime($obj['facData'])) : '';
-  $facDue_net   = !empty($obj['facDueDate']) ? date('d/m/Y', strtotime($obj['facDueDate'])) : '';
-  $pagament     = $obj['tipusNom'] ?? '';
-  $idPayment    = (int)($obj['idPayment'] ?? 0);
+  $empresa      = $obj['empresa'] ?? '';
+  $nomClient    = $obj['nom'] ?? '';
+  $cognoms      = $obj['cognoms'] ?? '';
+  $adreca       = $obj['adreca'] ?? '';
+  $ciutat       = $obj['ciutat'] ?? '';
+  $provincia    = $obj['provincia'] ?? '';
+  $pais         = $obj['pais'] ?? '';
+  $nif          = $obj['nif'] ?? '';
+  $cp           = $obj['cp'] ?? '';
+  $any          = (int)($obj['year'] ?? date('Y'));
+  $facDate_net  = !empty($obj['dataFactura']) ? date('d/m/Y', strtotime($obj['dataFactura'])) : '';
+  $facDue_net   = !empty($obj['dataVenciment']) ? date('d/m/Y', strtotime($obj['dataVenciment'])) : '';
+  $pagament     = $obj['metodePagament'] ?? '';
+  $tipusPagament     = $obj['tipusNom'] ?? '';
+  $notesPagament     = $obj['metodeNotes'] ?? '';
 
-  $subTotal     = (float)($obj['facSubtotal'] ?? 0);
-  $facVAT       = (float)($obj['facVAT'] ?? 0);
-  $total        = (float)($obj['facTotal'] ?? 0);
+  $subTotal     = (float)($obj['subtotal'] ?? 0);
+  $facVAT       = (float)($obj['vat'] ?? 0);
+  $total        = (float)($obj['total'] ?? 0);
+
+  $emissorNom   = $obj['emissorNom'] ?? '';
+  $emissorNIF   = $obj['emissorNIF'] ?? '';
+  $emissorNumeroIVA = $obj['emissorNumeroIVA'] ?? '';
+  $emissorPais  = $obj['emissorPais'] ?? '';
+  $emissorAdreca = $obj['emissorAdreca'] ?? '';
+  $emissorTelefon = $obj['emissorTelefon'] ?? '';
+  $emissorEmail = $obj['emissorEmail'] ?? '';
 
   $styles = '<style>
     .table-custom thead tr { background-color: black; color: white; }
@@ -182,13 +192,13 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
             ' . htmlspecialchars($pais) . '
           </th>
           <th>
-            <strong>HISPANTIC®</strong><br>
-            Elliot Fernandez<br>
-            NIF: 9323971DA<br>
-            4 Meehan Court <br>
-            Portlaoise, co. Laois<br>
-            R32 F6YC<br>
-            Ireland
+
+            <strong>' . htmlspecialchars($emissorNom) . '</strong><br>
+            NIF: ' . htmlspecialchars($emissorNIF) . '<br>
+            Partita Iva: ' . htmlspecialchars($emissorNumeroIVA) . '<br>
+            ' . htmlspecialchars($emissorAdreca) . '<br>
+            ' . htmlspecialchars($emissorPais) . '<br>
+            ' . htmlspecialchars($emissorTelefon) . ' - ' . htmlspecialchars($emissorEmail) . '<br>
           </th>
         </tr>
       </thead>
@@ -212,14 +222,16 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
 
   foreach ($arr2 as $obj2) {
     if (!$obj2) continue;
-    $prod  = $obj2['producte'] ?? '';
+    $prod  = $obj2['nom'] ?? '';
     $notes = $obj2['notes'] ?? '';
     $preu  = isset($obj2['preu']) ? (float)$obj2['preu'] : 0.0;
+
     $line  = htmlspecialchars($prod);
     if (!empty($notes)) $line .= ' (' . htmlspecialchars($notes) . ')';
+
     $html .= '<tr>
-      <td style="padding:5px;border:1px solid black;">' . $line . '</td>
-      <td style="padding:5px;border:1px solid black;">' . number_format($preu, 2, ',', '.') . ' €</td>
+        <td style="padding:5px;border:1px solid black;">' . $line . '</td>
+        <td style="padding:5px;border:1px solid black;">' . number_format($preu, 2, ',', '.') . ' €</td>
     </tr>';
   }
 
@@ -246,32 +258,14 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
   </div>';
 
   // Mensajes según método de pago
-  if ($idPayment === 7) {
-    $html .= '
+  $html .= '
     <div class="container">
       <h5 style="text-align: center;">' . htmlspecialchars($T['paid_by_bank_transfer']) . '</h5>
       <div style="text-align: center;">
-        <strong>' . htmlspecialchars($T['bank']) . ': N26</strong><br>
-        ' . htmlspecialchars($T['iban']) . ': ES16 1563 2626 3632 6466 4439<br>
-        ' . htmlspecialchars($T['bic']) . ': NTSBESM1XXX
+        <strong>' . htmlspecialchars($tipusPagament) . '</strong><br>
+        ' . htmlspecialchars($notesPagament) . '
       </div>
     </div>';
-  } elseif ($idPayment === 5) {
-    $html .= '
-    <div class="container">
-      <h4 style="text-align: center;">' . htmlspecialchars($T['paid_with_stripe']) . '</h4>
-    </div>';
-  } elseif ($idPayment === 2) {
-    $html .= '
-    <div class="container">
-      <h4 style="text-align: center;">' . htmlspecialchars($T['paid_bank_transfer']) . '</h4>
-      <div style="text-align: center;">
-        <strong>' . htmlspecialchars($T['bank']) . ': N26 (Germany)</strong><br>
-        ' . htmlspecialchars($T['iban']) . ': DE56 1001 1001 2620 4037 54<br>
-        ' . htmlspecialchars($T['bic']) . ': NTSBDEB1XXX
-      </div>
-    </div>';
-  }
 
   return $html;
 }
@@ -285,7 +279,7 @@ class MYPDF extends TCPDF
     $this->SetFont('helvetica', 'I', 8);
     $this->Cell(0, 10, ($T['page'] ?? 'Page') . ' ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
     $this->Ln(4);
-    $this->Cell(0, 10, ($T['footer_owner'] ?? 'Elliot Fernandez') . ' — ' . ($T['footer_tax_ref'] ?? 'Tax reference number: 9323971DA'), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+    $this->Cell(0, 10, ($T['footer_owner'] ?? 'Elliot Fernandez') . ' — ' . ($T['footer_tax_ref'] ?? 'Tax reference number'), 0, false, 'C', 0, '', 0, false, 'T', 'M');
   }
 }
 

@@ -214,24 +214,21 @@ if ($slug === 'clients') {
 } else if ($slug === 'facturaCompleta') {
 
     $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+    $pdf = isset($_GET['pdf']) ? true : false; // Parámetro opcional
 
     if (!$id) {
-        Response::error(
-            MissatgesAPI::error('missing_id'),
-            [],
-            400
-        );
+        Response::error(MissatgesAPI::error('missing_id'), [], 400);
         return;
     }
 
     try {
-        // 1️⃣ Obtenemos la factura principal
+        // 1️⃣ Factura principal + datos cliente + IVA + estado + método pago
         $sqlFactura = <<<SQL
             SELECT 
                 ic.id,
                 ic.client_id,
-                ic.concepte,
                 ic.emissor_id,
+                ic.concepte,
                 ic.data_factura,
                 ic.numero_factura,
                 YEAR(ic.data_factura) AS yearInvoice,
@@ -244,7 +241,7 @@ if ($slug === 'clients') {
                 ic.tipus_iva,
                 ic.estat,
                 ic.metode_pagament,
-                ic.notes, 
+                ic.notes,
                 ic.projecte_id,
                 ic.arxiu_url,
                 ic.recurrent,
@@ -255,12 +252,31 @@ if ($slug === 'clients') {
                 pt.notes AS metodeNotes,
                 c.clientNom,
                 c.clientCognoms,
-                c.clientEmpresa
+                c.clientEmpresa,
+                c.clientEmail,
+                c.clientWeb,
+                c.clientNIF,
+                c.clientAdreca,
+                ciu.ciutat AS clientCiutat,
+                pro.provincia_ca AS clientProvincia,
+                pa.pais_ca AS clientPais,
+                c.clientCP,
+                e.nom AS emissorNom,
+                e.nif AS emissorNIF,
+                e.numero_iva AS emissorNumeroIVA,
+                e.pais AS emissorPais,
+                e.adreca AS emissorAdreca,
+                e.telefon AS emissorTelefon,
+                e.email AS emissorEmail
             FROM %s AS ic
             LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
             LEFT JOIN %s AS ist ON ist.id = ic.estat
             LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
             LEFT JOIN %s AS c ON ic.client_id = c.id
+            LEFT JOIN %s AS ciu ON ciu.id = c.ciutat_id
+            LEFT JOIN %s AS pro ON pro.id = c.provincia_id
+            LEFT JOIN %s AS pa ON pa.id = c.pais_id
+            LEFT JOIN %s AS e ON e.id = ic.emissor_id
             WHERE ic.id = :id
             LIMIT 1
         SQL;
@@ -271,21 +287,21 @@ if ($slug === 'clients') {
             qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
             qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
             qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
-            qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo)
+            qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+            qi(Tables::DB_CIUTATS, $pdo),
+            qi(Tables::DB_PROVINCIES, $pdo),
+            qi(Tables::DB_PAISOS, $pdo),
+            qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
         );
 
         $factura = $db->getData($queryFactura, [':id' => $id], true);
 
         if (!$factura) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
             return;
         }
 
-        // 2️⃣ Obtenemos los productos asociados POR NUMERO_FACTURA
+        // 2️⃣ Productos asociados por numero_factura
         $sqlProductes = <<<SQL
             SELECT 
                 p.id,
@@ -318,11 +334,7 @@ if ($slug === 'clients') {
             200
         );
     } catch (PDOException $e) {
-        Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
-        );
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 } else if (isset($_GET['type']) && $_GET['type'] == 'accounting-elliotfernandez-supplies-invoices') {
     global $conn;
@@ -344,92 +356,6 @@ if ($slug === 'clients') {
     }
     header('Content-Type: application/json');
     echo json_encode($data);
-} else if ($slug === 'facturaClientsPDF') {
-    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-    if ($id <= 0) {
-        Response::error(MissatgesAPI::error('validacio'), ['id invàlid'], 400);
-    }
-
-    $sql = <<<SQL
-        SELECT
-            ic.id, ic.idUser, ic.facConcepte, ic.facData,
-            YEAR(ic.facData) AS yearInvoice,
-            ic.facDueDate, ic.facSubtotal, ic.facFees, ic.facTotal, ic.facVAT,
-            ic.facIva, ic.facEstat, ic.facPaymentType,
-            vt.ivaPercen, ist.estat, pt.tipusNom, pt.id AS idPayment,
-            c.clientNom, c.clientCognoms, c.clientEmpresa, c.clientEmail, c.clientWeb,
-            c.clientNIF, c.clientAdreca, ciu.ciutat AS clientCiutat,
-            pro.provincia_ca AS clientProvincia, pa.pais_ca AS clientPais, c.clientCP
-        FROM %s AS ic
-        LEFT JOIN %s AS vt  ON ic.facIva = vt.id
-        LEFT JOIN %s AS ist ON ist.id = ic.facEstat
-        LEFT JOIN %s AS pt  ON ic.facPaymentType = pt.id
-        LEFT JOIN %s AS c   ON ic.idUser = c.id
-        LEFT JOIN %s AS ciu ON ciu.id = c.ciutat_id 
-        LEFT JOIN %s AS pro ON pro.id = c.provincia_id
-        LEFT JOIN %s AS pa  ON pa.id = c.pais_id
-        WHERE ic.id = :id
-    SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
-        qi(Tables::DB_CIUTATS, $pdo),
-        qi(Tables::DB_PROVINCIES, $pdo),
-        qi(Tables::DB_PAISOS, $pdo),
-    );
-
-    try {
-        /** @var PDO $conn */
-        $stmt = $conn->prepare($query);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-
-        // Recopilar los resultados
-        $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        header('Content-Type: application/json');
-        echo json_encode($data);
-    } catch (PDOException $e) {
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
-    }
-} else if ($slug === 'facturaProductesPDF') {
-    $id = $_GET['id'];
-    global $conn;
-
-    $sql = <<<SQL
-                SELECT p.id, p.factura_id, pd.producte, p.notes, p.preu
-                        FROM %s AS p
-                        LEFT JOIN %s AS pd ON pd.id = p.producte_id
-                        WHERE p.factura_id = :id
-                        GROUP BY p.id
-                        ORDER BY p.preu DESC
-            SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
-    );
-
-    try {
-        /** @var PDO $conn */
-        $stmt = $conn->prepare($query);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-
-        // Recopilar los resultados
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        header('Content-Type: application/json');
-        echo json_encode($data);
-    } catch (PDOException $e) {
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
-    }
 } else if (isset($_GET['type']) && $_GET['type'] == 'accounting-supplies-invoices') {
     global $conn;
     $data = array();
