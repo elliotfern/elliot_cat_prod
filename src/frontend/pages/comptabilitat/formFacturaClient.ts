@@ -59,6 +59,13 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
 
     divTitol.innerHTML = `<h2>Modificació dades Factura client</h2>`;
     renderFormInputs(data);
+
+    const idValue = document.querySelector('#id') as HTMLInputElement | null;
+
+    if (idValue) {
+      idValue.value = String(data.factura.id);
+    }
+
     btnSubmit.textContent = 'Modificar dades';
     form.addEventListener('submit', (event) => transmissioDadesDB(event, 'PUT', 'formFacturaClient', API_URLS.PUT.FACTURA_CLIENT, true, 'none', preProcessFacturaFormData));
   } else {
@@ -84,9 +91,12 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
  * Preprocesa los datos del formulario de factura antes de enviar
  */
 function preProcessFacturaFormData(rawData: Record<string, any>): Record<string, any> {
+  // Tomamos el hidden input id
+  const idInput = document.querySelector<HTMLInputElement>('#id');
+  const idValue = idInput ? Number(idInput.value) : null;
   return {
+    id: idValue, // ✅ aquí incluimos el id para el PUT
     numero_factura: rawData.numero_factura ?? null,
-
     client_id: rawData.client_id ? Number(rawData.client_id) : null,
     concepte: rawData.concepte ?? null,
     data_factura: rawData.data_factura ?? null,

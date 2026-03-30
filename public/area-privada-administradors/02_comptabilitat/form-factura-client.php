@@ -16,7 +16,7 @@
     <form method="POST" action="" class="row g-3" id="formFacturaClient">
 
         <div class="row g-3">
-            <input type="hidden" id="id" name="id" />
+            <input type="hidden" id="id" name="id" value="" />
 
             <!-- Selección de cliente -->
             <div class="col-md-4">
