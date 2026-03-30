@@ -166,7 +166,7 @@ if ($slug === 'clients') {
         LEFT JOIN %s AS ist ON ist.id = ic.estat
         LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
         LEFT JOIN %s AS c ON ic.client_id = c.id
-        WHERE (:emissor_id IS NULL OR ic.emissor_id = :emissor_id)
+        WHERE ic.emissor_id = :emissor_id
         ORDER BY ic.id DESC
     SQL;
 
