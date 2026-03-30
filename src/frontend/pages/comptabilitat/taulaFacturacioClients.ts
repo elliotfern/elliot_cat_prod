@@ -73,14 +73,32 @@ async function sendInvoiceEmail(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'i
   }
 }
 
-export async function taulaFacturacioClients() {
+const EMISSORS: Record<number, string> = {
+  1: 'Hispano Atlantic Consulting Ltd',
+  2: 'Autònom Irlanda',
+  3: 'Partita Iva Itàlia',
+};
+
+export function renderTitolEmissor(emissorId: number) {
+  const container = document.getElementById('titolTipusFactura');
+  if (!container) return;
+
+  const titol = EMISSORS[emissorId] || 'Emissor desconegut';
+
+  container.innerHTML = `<h3>${titol}</h3>`;
+}
+
+export async function taulaFacturacioClients(emissorId: number) {
   const isAdmin = await getIsAdmin();
 
   const columns: TaulaDinamica<Factura>[] = [
     {
       header: 'Num',
-      field: 'yearInvoice',
-      render: (_: unknown, row: Factura) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/comptabilitat/fitxa-factura-client/${row.id}">${row.id}/${row.yearInvoice}</a>`,
+      field: 'numero_factura',
+      render: (_: unknown, row: Factura) =>
+        `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/comptabilitat/fitxa-factura-client/${row.id}">
+          ${row.numero_factura}/${row.yearInvoice}
+        </a>`,
     },
     {
       header: 'Empresa',
@@ -89,78 +107,48 @@ export async function taulaFacturacioClients() {
     },
     {
       header: 'Data factura',
-      field: 'facData',
+      field: 'data_factura',
       render: (_: unknown, row: Factura) => {
-        const inici = formatData(row.facData);
-        return `${inici}`;
+        return formatData(row.data_factura);
       },
     },
     {
       header: 'Concepte',
-      field: 'facConcepte',
+      field: 'concepte',
     },
     {
       header: 'Total',
-      field: 'facTotal',
-      render: (_: unknown, row: Factura) => `${row.facTotal}€`,
+      field: 'total_factura',
+      render: (_: unknown, row: Factura) => `${row.total_factura}€`,
     },
     {
       header: 'Estat',
       field: 'estat',
-      render: (_: unknown, row: Factura) => `<button type="button" class="btn-petit btn-primari">${row.estat}</button>`,
+      render: (_: unknown, row: Factura) => `<button class="btn-petit btn-primari">${row.estat}</button>`,
     },
     {
       header: 'PDF',
       field: 'id',
-      render: (_: unknown, row: Factura) =>
-        `<div class="btn-group separat" role="group" aria-label="Descarregar PDF">
-      <button type="button"
-              class="btn-petit btn-secondari js-pdf"
-              data-invoice-id="${row.id}"
-              data-lang="ca"
-              data-file-name="invoice_${row.id}-${row.yearInvoice}_ca.pdf">
-        PDF (català)
-      </button>
-      <button type="button"
-              class="btn-petit btn-secondari js-pdf"
-              data-invoice-id="${row.id}"
-              data-lang="es"
-              data-file-name="invoice_${row.id}-${row.yearInvoice}_es.pdf">
-        PDF (castellà)
-      </button>
-      <button type="button"
-              class="btn-petit btn-secondari js-pdf"
-              data-invoice-id="${row.id}"
-              data-lang="en"
-              data-file-name="invoice_${row.id}-${row.yearInvoice}_en.pdf">
-        PDF (anglès)
-      </button>
-      <button type="button"
-              class="btn-petit btn-secondari js-pdf"
-              data-invoice-id="${row.id}"
-              data-lang="it"
-              data-file-name="invoice_${row.id}-${row.yearInvoice}_it.pdf">
-        PDF (italià)
-      </button>
-    </div>
-  `,
+      render: (_: unknown, row: Factura) => `
+        <div class="btn-group separat">
+          <button class="btn-petit btn-secondari js-pdf" data-invoice-id="${row.id}" data-lang="ca">PDF (CA)</button>
+          <button class="btn-petit btn-secondari js-pdf" data-invoice-id="${row.id}" data-lang="es">PDF (ES)</button>
+          <button class="btn-petit btn-secondari js-pdf" data-invoice-id="${row.id}" data-lang="en">PDF (EN)</button>
+          <button class="btn-petit btn-secondari js-pdf" data-invoice-id="${row.id}" data-lang="it">PDF (IT)</button>
+        </div>
+      `,
     },
-
     {
       header: 'Enviar email',
       field: 'id',
-      render: (_: unknown, row: Factura) =>
-        `<div class="btn-group separat" role="group" aria-label="Enviar factura per email">
-      <button type="button" class="btn-petit btn-secondari js-send"
-              data-invoice-id="${row.id}" data-lang="ca">Enviar (català)</button>
-      <button type="button" class="btn-petit btn-secondari js-send"
-              data-invoice-id="${row.id}" data-lang="es">Enviar (castellà)</button>
-      <button type="button" class="btn-petit btn-secondari js-send"
-              data-invoice-id="${row.id}" data-lang="en">Enviar (anglès)</button>
-      <button type="button" class="btn-petit btn-secondari js-send"
-              data-invoice-id="${row.id}" data-lang="it">Enviar (italià)</button>
-    </div>
-  `,
+      render: (_: unknown, row: Factura) => `
+        <div class="btn-group separat">
+          <button class="btn-petit btn-secondari js-send" data-invoice-id="${row.id}" data-lang="ca">CA</button>
+          <button class="btn-petit btn-secondari js-send" data-invoice-id="${row.id}" data-lang="es">ES</button>
+          <button class="btn-petit btn-secondari js-send" data-invoice-id="${row.id}" data-lang="en">EN</button>
+          <button class="btn-petit btn-secondari js-send" data-invoice-id="${row.id}" data-lang="it">IT</button>
+        </div>
+      `,
     },
   ];
 
@@ -169,14 +157,14 @@ export async function taulaFacturacioClients() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Factura) => `
-    <a href="https://${window.location.hostname}/gestio/comptabilitat/modifica-factura/${row.id}">
-      <button class="btn-petit">Modifica</button>
-    </a>`,
+        <a href="https://${window.location.hostname}/gestio/comptabilitat/modifica-factura/${row.id}">
+          <button class="btn-petit">Modifica</button>
+        </a>`,
     });
   }
 
   renderDynamicTable({
-    url: API_URLS.GET.FACTURACIO_CLIENTS,
+    url: API_URLS.GET.FACTURACIO_CLIENTS(emissorId),
     containerId: 'taulaLlistatFactures',
     columns,
     filterKeys: ['clientEmpresa', 'clientCognoms'],
@@ -184,29 +172,25 @@ export async function taulaFacturacioClients() {
   });
 
   const container = document.getElementById('taulaLlistatFactures');
+  renderTitolEmissor(emissorId);
+
   container?.addEventListener('click', (ev) => {
     const target = ev.target as HTMLElement;
-    // Descargar PDF
+
     const btnPdf = target.closest<HTMLButtonElement>('.js-pdf');
     if (btnPdf) {
-      const idStr = btnPdf.dataset.invoiceId;
-      const lang = (btnPdf.dataset.lang || '').toLowerCase() as 'ca' | 'es' | 'en' | 'it';
-      const fname = btnPdf.dataset.fileName || undefined;
-      if (!idStr || !['ca', 'es', 'en', 'it'].includes(lang)) return;
-      const idNum = Number(idStr);
-      if (!Number.isInteger(idNum) || idNum <= 0) return;
-      void generatePDF(idNum, lang, fname, btnPdf);
+      const idNum = Number(btnPdf.dataset.invoiceId);
+      const lang = btnPdf.dataset.lang as 'ca' | 'es' | 'en' | 'it';
+      if (!idNum || !lang) return;
+      void generatePDF(idNum, lang);
       return;
     }
 
-    // Enviar por email
     const btnSend = target.closest<HTMLButtonElement>('.js-send');
     if (btnSend) {
-      const idStr = btnSend.dataset.invoiceId;
-      const lang = (btnSend.dataset.lang || '').toLowerCase() as 'ca' | 'es' | 'en' | 'it';
-      if (!idStr || !['ca', 'es', 'en', 'it'].includes(lang)) return;
-      const idNum = Number(idStr);
-      if (!Number.isInteger(idNum) || idNum <= 0) return;
+      const idNum = Number(btnSend.dataset.invoiceId);
+      const lang = btnSend.dataset.lang as 'ca' | 'es' | 'en' | 'it';
+      if (!idNum || !lang) return;
       void sendInvoiceEmail(idNum, lang, btnSend);
       return;
     }

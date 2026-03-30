@@ -29,7 +29,11 @@ $routes = [
     APP_GESTIO . $url['comptabilitat'] . '/llistat-clients' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-clients.php'),
     APP_GESTIO . $url['comptabilitat'] . '/nou-client' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-client.php'),
     APP_GESTIO . $url['comptabilitat'] . '/modifica-client/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-client.php'),
-    APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-clients.php'),
+
+    APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients-partita-iva' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-clients.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients-autonom-irlanda' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-clients.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients-hispantic' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-clients.php'),
+
     APP_GESTIO . $url['comptabilitat'] . '/nova-factura' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-client.php'),
     APP_GESTIO . $url['comptabilitat'] . '/modifica-factura/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-client.php'),
     APP_GESTIO . $url['comptabilitat'] . '/fitxa-factura-client/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'detalls-factura-client.php'),

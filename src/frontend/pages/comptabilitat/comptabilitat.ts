@@ -15,8 +15,15 @@ export function comptabilitat() {
   const pageType = getPageType(url);
   const id = parseInt(pageType[3], 10);
 
-  if (pageType[2] === 'facturacio-clients') {
-    taulaFacturacioClients();
+  if (pageType[2] === 'facturacio-clients-partita-iva') {
+    const emissor = 3;
+    taulaFacturacioClients(emissor);
+  } else if (pageType[2] === 'facturacio-clients-autonom-irlanda') {
+    const emissor = 2;
+    taulaFacturacioClients(emissor);
+  } else if (pageType[2] === 'facturacio-clients-hispantic') {
+    const emissor = 1;
+    taulaFacturacioClients(emissor);
   } else if (pageType[2] === 'nova-factura') {
     formFacturaClient(false);
   } else if (pageType[2] === 'modifica-factura') {

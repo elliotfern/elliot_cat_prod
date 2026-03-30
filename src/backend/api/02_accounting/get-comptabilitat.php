@@ -130,19 +130,45 @@ if ($slug === 'clients') {
         );
     }
 
-    // GET : Llistat factures clients
-    // ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients"
+// GET : Llistat factures clients
+// ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients?emissor_id={id}"
 } else if ($slug === 'facturacioClients') {
 
+    $emissor_id = isset($_GET['emissor_id']) ? (int) $_GET['emissor_id'] : null;
+
     $sql = <<<SQL
-                SELECT ic.id, ic.idUser, ic.facConcepte, ic.facData, YEAR(ic.facData) AS yearInvoice, CONCAT('Any ', YEAR(ic.facData)) AS any, ic.facDueDate, ic.facSubtotal, ic.facFees, ic.facTotal, ic.facVAT, ic.facIva, ic.facEstat, ic.facPaymentType, vt.ivaPercen, ist.estat, pt.tipusNom, c.clientNom, c.clientCognoms, c.clientEmpresa
-                FROM %s AS ic
-                LEFT JOIN %s AS vt ON ic.facIva = vt.id
-                LEFT JOIN %s AS ist ON ist.id = ic.facEstat
-                LEFT JOIN %s AS pt ON ic.facPaymentType = pt.id
-                LEFT JOIN %s AS c ON ic.idUser = c.id
-                ORDER BY ic.id DESC
-            SQL;
+        SELECT 
+            ic.id,
+            ic.numero_factura,
+            ic.emissor_id,
+            ic.client_id,
+            ic.concepte,
+            ic.data_factura,
+            YEAR(ic.data_factura) AS yearInvoice,
+            CONCAT('Any ', YEAR(ic.data_factura)) AS any,
+            ic.data_venciment,
+            ic.base_imposable,
+            ic.despeses_extra,
+            ic.total_factura,
+            ic.import_iva,
+            ic.tipus_iva,
+            ic.estat,
+            ic.metode_pagament,
+            vt.ivaPercen,
+            ist.estat,
+            pt.tipusNom,
+            c.clientNom,
+            c.clientCognoms,
+            c.clientEmpresa
+        FROM %s AS ic
+        LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
+        LEFT JOIN %s AS ist ON ist.id = ic.estat
+        LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
+        LEFT JOIN %s AS c ON ic.client_id = c.id
+        WHERE (:emissor_id IS NULL OR ic.emissor_id = :emissor_id)
+        ORDER BY ic.id DESC
+    SQL;
+
     $query = sprintf(
         $sql,
         qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
@@ -154,7 +180,11 @@ if ($slug === 'clients') {
 
     try {
 
-        $result = $db->getData($query);
+        $params = [
+            'emissor_id' => $emissor_id
+        ];
+
+        $result = $db->getData($query, $params);
 
         if (empty($result)) {
             Response::error(
@@ -170,6 +200,7 @@ if ($slug === 'clients') {
             $result,
             200
         );
+
     } catch (PDOException $e) {
         Response::error(
             MissatgesAPI::error('errorBD'),

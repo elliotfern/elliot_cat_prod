@@ -32,9 +32,9 @@
 
             <h4 style="text-align: left;">Comptabilitat (ingressos):</h4>
             <ul class="llistat">
-              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients">Llistat de factures enviades a clients (Partita IVA Italia)</a></li>
-              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients">Llistat de factures enviades a clients (Autònom Irlanda)</a></li>
-              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients">Llistat de factures enviades a clients (HispanTIC LTD Irlanda)</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients-partita-iva">Llistat de factures enviades a clients (Partita IVA Italia)</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients-autonom-irlanda">Llistat de factures enviades a clients (Autònom Irlanda)</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-clients-hispantic">Llistat de factures enviades a clients (HispanTIC LTD Irlanda)</a></li>
 
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-anys">Facturació detallada per anys</a></li>
             </ul>
