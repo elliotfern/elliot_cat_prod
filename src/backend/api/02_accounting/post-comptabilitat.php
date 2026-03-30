@@ -237,22 +237,6 @@ if ($slug === 'clients') {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
     }
 
-    // Generar numero_factura
-    function generarNumeroFactura(PDO $conn): string
-    {
-        $year = date('Y');
-        $stmt = $conn->prepare("
-            SELECT numero_factura
-            FROM db_comptabilitat_facturacio_clients
-            WHERE numero_factura LIKE :yearPrefix
-            ORDER BY id DESC
-            LIMIT 1
-        ");
-        $stmt->execute([':yearPrefix' => "$year-%"]);
-        $ultima = $stmt->fetchColumn();
-        $seq = $ultima ? ((int)explode('-', $ultima)[1] + 1) : 1;
-        return sprintf('%s-%02d', $year, $seq);
-    }
 
     try {
         global $conn, $userUuid;
