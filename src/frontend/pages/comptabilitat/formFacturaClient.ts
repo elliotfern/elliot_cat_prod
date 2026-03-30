@@ -63,7 +63,7 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
     const idValue = document.querySelector('#id') as HTMLInputElement | null;
 
     if (idValue) {
-      idValue.value = String(data.factura.id);
+      idValue.value = String(data.id);
     }
 
     btnSubmit.textContent = 'Modificar dades';
