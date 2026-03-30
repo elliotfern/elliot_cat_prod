@@ -115,23 +115,24 @@ function i18nInvoice(string $lang): array
 
 function fetchInvoiceAndProducts(int $idInvoice): array
 {
-  // Nuevo endpoint que ya devuelve toda la info
-  $url = "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id={$idInvoice}";
-  $data = hacerLlamadaAPI($url);
+  $url  = "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id={$idInvoice}";
 
-  if (!$data || empty($data['id'])) {
+  $payload = hacerLlamadaAPI($url);
+
+  // la API ahora devuelve: ['factura'=>..., 'productes'=>...]
+  $obj  = $payload['factura'] ?? null;
+  $arr2 = $payload['productes'] ?? [];
+
+  if (!$obj || empty($obj['id'])) {
     throw new RuntimeException('Factura no trobada');
   }
 
-  $invoice = $data; // contiene datos de factura
-  $products = $data['products'] ?? [];
-
-  // Si viene un solo producto como objeto, lo convertimos a array
-  if (!is_array($products) || (is_array($products) && array_values($products) !== $products)) {
-    $products = [$products];
+  // asegurar que productes sea un array indexado
+  if (!is_array($arr2) || (is_array($arr2) && array_values($arr2) !== $arr2)) {
+    $arr2 = [$arr2];
   }
 
-  return [$invoice, $products];
+  return [$obj, $arr2];
 }
 
 function buildInvoiceHtml(array $obj, array $arr2, array $T): string
