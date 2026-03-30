@@ -67,8 +67,8 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
   await auxiliarSelect(data.client_id ?? 0, 'clients', 'client_id', 'clientEmpresa');
   await auxiliarSelect(data.tipus_iva ?? 0, 'tipusIVA', 'tipus_iva', 'ivaPercen');
   await auxiliarSelect(data.estat ?? 0, 'estatFacturacio', 'estat', 'estat');
-  await auxiliarSelect(data.metode_pagament ?? 0, 'tipusPagament', 'metode_pagament', 'tipusNom');
-  await auxiliarSelect(data.emissor_id ?? 0, 'emissors', 'emissor_id', 'emissor');
+  await auxiliarSelect(data.metode_pagament ?? 0, 'tipusPagament', 'metode_pagament', 'tipus_notes');
+  await auxiliarSelect(data.emissor_id ?? 0, 'emissors', 'emissor_id', 'nom');
 }
 
 /**
@@ -113,4 +113,48 @@ function preProcessFacturaFormData(rawData: Record<string, unknown>): Record<str
   }
 
   return data;
+}
+
+/**
+ * Añade funcionalidad de añadir productos a la factura
+ */
+export async function initProductesFactura() {
+  const addBtn = document.getElementById('addProducte') as HTMLButtonElement;
+  const tbody = document.querySelector('#tableProductesFactura tbody') as HTMLTableSectionElement;
+  if (!addBtn || !tbody) return;
+
+  // 1️⃣ Cargamos los productos desde la API
+  const productesResponse = await fetchDataGet<ApiResponse<{ id: number; producte: string }[]>>(API_URLS.GET.PRODUCTES, true);
+  const productes = productesResponse?.data ?? [];
+
+  // Función para crear una fila de producto
+  function crearFila(product?: { id: number; producte?: string; preu: number; notes: string }) {
+    const row = document.createElement('tr');
+
+    const optionsHTML = productes.map((p) => `<option value="${p.id}" ${product?.id === p.id ? 'selected' : ''}>${p.producte}</option>`).join('');
+
+    row.innerHTML = `
+      <td>
+        <select name="producte_id[]" class="form-select">
+          <option value="">Selecciona producte</option>
+          ${optionsHTML}
+        </select>
+      </td>
+      <td><input type="text" name="preu[]" class="form-control" value="${product?.preu ?? ''}" /></td>
+      <td><input type="text" name="notes[]" class="form-control" value="${product?.notes ?? ''}" /></td>
+      <td><button type="button" class="btn btn-danger btn-sm removeProducte">Eliminar</button></td>
+    `;
+
+    // Botón eliminar
+    row.querySelector('.removeProducte')?.addEventListener('click', () => row.remove());
+
+    tbody.appendChild(row);
+  }
+
+  // 2️⃣ Evento del botón "Afegir"
+  addBtn.addEventListener('click', () => crearFila());
+
+  // 3️⃣ Si ya tenemos productos en la factura (al editar), los renderizamos
+  const existingProducts: ProducteFactura[] = (window as any).facturaData?.productes ?? [];
+  existingProducts.forEach((p) => crearFila({ id: p.producte_id ?? 0, notes: p.notes, preu: p.preu }));
 }

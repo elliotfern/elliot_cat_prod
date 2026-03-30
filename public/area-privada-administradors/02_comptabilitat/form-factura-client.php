@@ -130,31 +130,3 @@
         </div>
     </form>
 </div>
-
-<!-- Script para añadir/eliminar productos dinámicamente -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const addBtn = document.getElementById('addProducte');
-        const tbody = document.querySelector('#tableProductesFactura tbody');
-
-        addBtn.addEventListener('click', function() {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-            <td>
-                <select name="producte_id[]" class="form-select">
-                    <option value="">Selecciona producte</option>
-                    <!-- Aquí cargarás los productos desde la base de datos -->
-                </select>
-            </td>
-            <td><input type="text" name="preu[]" class="form-control" /></td>
-            <td><input type="text" name="notes[]" class="form-control" /></td>
-            <td><button type="button" class="btn btn-danger btn-sm removeProducte">Eliminar</button></td>
-        `;
-            tbody.appendChild(row);
-
-            row.querySelector('.removeProducte').addEventListener('click', function() {
-                row.remove();
-            });
-        });
-    });
-</script>

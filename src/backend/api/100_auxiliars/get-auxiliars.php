@@ -842,7 +842,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     $sql = <<<SQL
             SELECT c.id, c.estat
             FROM %s AS c
-            ORDER BY c.estat ASC
+            ORDER BY c.ordre ASC
             SQL;
 
     $query = sprintf(
@@ -882,9 +882,9 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "tipusPagament") {
 
     $sql = <<<SQL
-            SELECT c.id, c.tipusNom
+            SELECT c.id, CONCAT(c.tipus, ' - ', c.notes) AS tipus_notes
             FROM %s AS c
-            ORDER BY c.tipusNom ASC
+            ORDER BY c.id ASC
             SQL;
 
     $query = sprintf(
