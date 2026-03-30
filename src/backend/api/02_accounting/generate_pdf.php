@@ -323,8 +323,12 @@ if ($slug === 'invoice-pdf') {
     $numeroFactura = $obj['numero_factura'] ?? $idInvoice;
 
     // Respuesta PDF al navegador con nombre bonito
+    $numeroFactura = $obj['numero_factura'] ?? $idInvoice;
+    // Limpiar nombre: quitar espacios, acentos y caracteres raros
+    $numeroFacturaClean = preg_replace('/[^A-Za-z0-9\-]/', '_', $numeroFactura);
+    $filename = "factura_{$numeroFacturaClean}_{$lang}.pdf";
     header('Content-Type: application/pdf');
-    header('Content-Disposition: inline; filename="factura_' . $numeroFactura . '_' . $lang . '.pdf"');
+    header('Content-Disposition: inline; filename="' . $filename . '"');
     header('Content-Length: ' . strlen($pdf));
     echo $pdf;
     exit;
@@ -435,7 +439,10 @@ if ($slug === 'invoice-email') {
     $mail->AltBody = strip_tags($subject . "\n" . $cta);
 
     $numeroFactura = $obj['numero_factura'] ?? $idInvoice; // fallback por si no existe
-    $filename = "factura_{$numeroFactura}_{$lang}.pdf";
+    // Limpiar nombre: quitar espacios, acentos y caracteres raros
+    $numeroFacturaClean = preg_replace('/[^A-Za-z0-9\-]/', '_', $numeroFactura);
+    $filename = "factura_{$numeroFacturaClean}_{$lang}.pdf";
+
     $mail->addStringAttachment($pdf, $filename, 'base64', 'application/pdf');
 
     $mail->send();
