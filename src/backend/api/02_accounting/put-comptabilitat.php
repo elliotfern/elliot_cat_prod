@@ -267,7 +267,7 @@ if ($slug === 'clients') {
 
         // --- Productos ---
         $conn->prepare("DELETE FROM db_comptabilitat_facturacio_clients_productes WHERE factura_id = :id")
-            ->execute([':id' => $id]);
+            ->execute([':id' => $numero_factura]);
 
         if (!empty($productes)) {
             $sqlProd = "INSERT INTO db_comptabilitat_facturacio_clients_productes
@@ -277,7 +277,7 @@ if ($slug === 'clients') {
 
             foreach ($productes as $p) {
                 $stmtProd->execute([
-                    ':factura_id' => $id,
+                    ':factura_id' => $numero_factura,
                     ':producte_id' => $toIntOrNull($p['producte_id'] ?? null),
                     ':descripcio' => $trimOrNull($p['descripcio'] ?? null),
                     ':preu'       => $toDecimal($p['preu'] ?? null),

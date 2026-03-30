@@ -17,6 +17,7 @@
 
         <div class="row g-3">
             <input type="hidden" id="id" name="id" value="" />
+            <input type="hidden" id="numero_factura" name="numero_factura" value="" />
 
             <!-- Selección de cliente -->
             <div class="col-md-4">

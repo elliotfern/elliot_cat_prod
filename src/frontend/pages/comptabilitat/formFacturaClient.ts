@@ -61,9 +61,11 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
     renderFormInputs(data);
 
     const idValue = document.querySelector('#id') as HTMLInputElement | null;
+    const idFactura = document.querySelector('#numero_factura') as HTMLInputElement | null;
 
-    if (idValue) {
+    if (idValue && idFactura) {
       idValue.value = String(data.id);
+      idFactura.value = String(data.numero_factura);
     }
 
     btnSubmit.textContent = 'Modificar dades';
@@ -94,9 +96,13 @@ function preProcessFacturaFormData(rawData: Record<string, any>): Record<string,
   // Tomamos el hidden input id
   const idInput = document.querySelector<HTMLInputElement>('#id');
   const idValue = idInput ? Number(idInput.value) : null;
+
+  const idInput2 = document.querySelector<HTMLInputElement>('#numero_factura');
+  const idValue2 = idInput2?.value || null;
+
   return {
     id: idValue, // ✅ aquí incluimos el id para el PUT
-    numero_factura: rawData.numero_factura ?? null,
+    numero_factura: idValue2,
     client_id: rawData.client_id ? Number(rawData.client_id) : null,
     concepte: rawData.concepte ?? null,
     data_factura: rawData.data_factura ?? null,
@@ -114,11 +120,11 @@ function preProcessFacturaFormData(rawData: Record<string, any>): Record<string,
     arxiu_url: rawData.arxiu_url ?? null,
     recurrent: rawData.recurrent ? 1 : 0,
     frequencia: rawData.recurrent ? rawData.frequencia || null : null,
-    productes: Array.isArray(rawData.producte_id)
-      ? rawData.producte_id.map((id, idx) => ({
-          producte_id: Number(id),
-          descripcio: (rawData.descripcio ?? [])[idx] ?? '',
-          preu: (rawData.preu ?? [])[idx] ? Number((rawData.preu ?? [])[idx]) : 0,
+    productes: Array.isArray(rawData.productes)
+      ? rawData.productes.map((p) => ({
+          producte_id: Number(p.producte_id),
+          descripcio: p.descripcio ?? '',
+          preu: Number(p.preu ?? 0),
         }))
       : [],
   };
