@@ -264,7 +264,6 @@ if ($slug === 'clients') {
                 e.nom AS emissorNom,
                 e.nif AS emissorNIF,
                 e.numero_iva AS emissorNumeroIVA,
-                e.pais AS emissorPais,
                 e.adreca AS emissorAdreca,
                 e.telefon AS emissorTelefon,
                 e.email AS emissorEmail
