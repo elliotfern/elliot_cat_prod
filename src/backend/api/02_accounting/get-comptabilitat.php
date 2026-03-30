@@ -244,6 +244,11 @@ if ($slug === 'clients') {
                 ic.tipus_iva,
                 ic.estat,
                 ic.metode_pagament,
+                ic.notes, 
+                ic.projecte_id,
+                ic.arxiu_url,
+                ic.recurrent,
+                ic.frequencia
                 vt.ivaPercen,
                 ist.estat AS estatNom,
                 pt.tipus AS tipusNom,
