@@ -286,6 +286,7 @@ if ($slug === 'clients') {
                 p.id,
                 p.factura_id,
                 pd.producte,
+                p.producte_id,
                 p.descripcio,
                 p.preu
             FROM %s AS p
