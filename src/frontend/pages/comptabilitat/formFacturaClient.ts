@@ -86,20 +86,21 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
 function preProcessFacturaFormData(rawData: Record<string, any>): Record<string, any> {
   return {
     numero_factura: rawData.numero_factura ?? null,
-    emissor_id: rawData.emissor_id ? Number(rawData.emissor_id) : null,
+
     client_id: rawData.client_id ? Number(rawData.client_id) : null,
     concepte: rawData.concepte ?? null,
     data_factura: rawData.data_factura ?? null,
     data_venciment: rawData.data_venciment ?? null,
-    base_imposable: rawData.base_imposable ? Number(rawData.base_imposable) : null,
-    despeses_extra: rawData.despeses_extra != null ? Number(rawData.despeses_extra) : null,
-    total_factura: rawData.total_factura ? Number(rawData.total_factura) : null,
-    import_iva: rawData.import_iva != null ? Number(rawData.import_iva) : null,
-    tipus_iva: rawData.tipus_iva ? Number(rawData.tipus_iva) : null,
-    estat: rawData.estat ? Number(rawData.estat) : null,
-    metode_pagament: rawData.metode_pagament ? Number(rawData.metode_pagament) : null,
+    base_imposable: rawData.base_imposable != null ? Number(rawData.base_imposable) : 0,
+    despeses_extra: rawData.despeses_extra != null ? Number(rawData.despeses_extra) : 0,
+    total_factura: rawData.total_factura != null ? Number(rawData.total_factura) : 0,
+    import_iva: rawData.import_iva != null ? Number(rawData.import_iva) : 0,
+    tipus_iva: rawData.tipus_iva != null ? Number(rawData.tipus_iva) : 0,
+    estat: rawData.estat != null ? Number(rawData.estat) : 0,
+    metode_pagament: rawData.metode_pagament != null ? Number(rawData.metode_pagament) : 0,
+    emissor_id: rawData.emissor_id != null ? Number(rawData.emissor_id) : 0,
+    projecte_id: rawData.projecte_id != null ? Number(rawData.projecte_id) : 0,
     notes: rawData.notes ?? null,
-    projecte_id: rawData.projecte_id ? Number(rawData.projecte_id) : null,
     arxiu_url: rawData.arxiu_url ?? null,
     recurrent: rawData.recurrent ? 1 : 0,
     frequencia: rawData.recurrent ? rawData.frequencia || null : null,
@@ -137,7 +138,7 @@ export async function initProductesFactura(existingProducts: ProducteFactura[] =
           ${optionsHTML}
         </select>
       </td>
-      <td><input type="text" name="preu[]" class="form-control" value="${product?.preu ?? ''}" /></td>
+      <td><input type="text" name="preu[]" class="form-control" value="${product?.preu != null ? product.preu : ''}" /></td>
       <td><input type="text" name="descripcio[]" class="form-control" value="${product?.descripcio ?? ''}" /></td>
       <td><button type="button" class="btn btn-danger btn-sm removeProducte">Eliminar</button></td>
     `;
