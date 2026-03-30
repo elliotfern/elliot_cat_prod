@@ -33,7 +33,7 @@ export const ENDPOINTS = {
   CLIENT: 'clientId',
   FACTURACIO_CLIENTS: 'facturacioClients',
   PDF_FACTURA: 'invoice-pdf',
-  FACTURA_CLIENT_ID: 'facturaId',
+  FACTURA_CLIENT_ID: 'facturaCompleta',
   FACTURA_CLIENT: 'facturaClient',
   FACTURA_CLIENT_PRODUCTE_ID: 'detallsFacturaProducteId',
   FACTURA_CLIENT_PRODUCTE: 'detallsFacturaClientProducte',
