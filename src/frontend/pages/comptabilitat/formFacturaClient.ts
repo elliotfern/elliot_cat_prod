@@ -54,6 +54,9 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
     if (!response || !response.data) return;
     data = response.data.factura; // <--- aquí extraemos solo el objeto factura
 
+    // Inicializar productos
+    initProductesFactura(response.data.productes ?? []);
+
     divTitol.innerHTML = `<h2>Modificació dades Factura client</h2>`;
     renderFormInputs(data);
     btnSubmit.textContent = 'Modificar dades';
@@ -62,6 +65,8 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
     divTitol.innerHTML = `<h2>Creació de nova factura</h2>`;
     btnSubmit.textContent = 'Inserir dades';
     form.addEventListener('submit', (event) => transmissioDadesDB(event, 'POST', 'formFacturaClient', API_URLS.POST.FACTURA_CLIENT, true, 'none', preProcessFacturaFormData));
+
+    initProductesFactura([]);
   }
 
   // Cargar selects
@@ -72,8 +77,6 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
   await auxiliarSelect(data.emissor_id ?? 0, 'emissors', 'emissor_id', 'nom');
   await auxiliarSelect(data.projecte_id ?? 0, 'projectes', 'projecte_id', 'name');
 
-  // Inicializar productos
-  initProductesFactura(data.productes ?? []);
   initRecurrentFrecuencia(data);
 }
 
@@ -89,9 +92,9 @@ function preProcessFacturaFormData(rawData: Record<string, any>): Record<string,
     data_factura: rawData.data_factura ?? null,
     data_venciment: rawData.data_venciment ?? null,
     base_imposable: rawData.base_imposable ? Number(rawData.base_imposable) : null,
-    despeses_extra: rawData.despeses_extra ? Number(rawData.despeses_extra) : null,
+    despeses_extra: rawData.despeses_extra != null ? Number(rawData.despeses_extra) : null,
     total_factura: rawData.total_factura ? Number(rawData.total_factura) : null,
-    import_iva: rawData.import_iva ? Number(rawData.import_iva) : null,
+    import_iva: rawData.import_iva != null ? Number(rawData.import_iva) : null,
     tipus_iva: rawData.tipus_iva ? Number(rawData.tipus_iva) : null,
     estat: rawData.estat ? Number(rawData.estat) : null,
     metode_pagament: rawData.metode_pagament ? Number(rawData.metode_pagament) : null,
