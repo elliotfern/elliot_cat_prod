@@ -294,9 +294,35 @@ if ($slug === 'clients') {
             qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
         );
 
-        $factura = $db->getData($queryFactura, [':id' => $id], true);
+        $result = $db->getData($queryFactura, [':id' => $id], true);
 
-        if (!$factura) {
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (!is_string($v)) return;
+
+            // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
+            $v = str_replace("\0", '', $v);
+
+            // Intentar normalizar a UTF-8 válido
+            // 1) Si ya es UTF-8 válido, lo deja igual
+            if (!mb_check_encoding($v, 'UTF-8')) {
+                // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
+                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) {
+                    $v = $v2;
+                } else {
+                    // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
+                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                    if ($v3 !== false) $v = $v3;
+                }
+            } else {
+                // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
+                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) $v = $v2;
+            }
+        });
+
+        if (!$result) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
             return;
         }
@@ -322,13 +348,13 @@ if ($slug === 'clients') {
             qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
         );
 
-        $productes = $db->getData($queryProductes, [':numero_factura' => $factura['numero_factura']], false);
+        $productes = $db->getData($queryProductes, [':numero_factura' => $result['numero_factura']], false);
 
         // 3️⃣ Devolvemos todo junto
         Response::success(
             MissatgesAPI::success('get'),
             [
-                'factura' => $factura,
+                'factura' => $result,
                 'productes' => $productes
             ],
             200
