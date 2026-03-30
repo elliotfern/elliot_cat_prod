@@ -5,8 +5,6 @@ import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
 interface ProducteFactura {
-  id: number;
-  factura_id: number;
   producte_id: number | null;
   notes: string;
   preu: number;
@@ -15,7 +13,7 @@ interface ProducteFactura {
 interface FitxaFactura {
   [key: string]: unknown;
   id: number;
-  numero_factura: number;
+  numero_factura: string;
   emissor_id: number | null;
   client_id: number;
   concepte: string;
@@ -51,7 +49,7 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
   let data: any = {};
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<any>>(API_URLS.GET.FACTURA_CLIENT_ID(id), true);
+    const response = await fetchDataGet<ApiResponse<FitxaFactura>>(API_URLS.GET.FACTURA_CLIENT_ID(id), true);
     if (!response || !response.data) return;
     data = response.data;
     divTitol.innerHTML = `<h2>Modificació dades Factura client</h2>`;
@@ -64,77 +62,66 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
     form.addEventListener('submit', (event) => transmissioDadesDB(event, 'POST', 'formFacturaClient', API_URLS.POST.FACTURA_CLIENT, true, 'none', preProcessFacturaFormData));
   }
 
+  // Cargar selects
   await auxiliarSelect(data.client_id ?? 0, 'clients', 'client_id', 'clientEmpresa');
   await auxiliarSelect(data.tipus_iva ?? 0, 'tipusIVA', 'tipus_iva', 'ivaPercen');
   await auxiliarSelect(data.estat ?? 0, 'estatFacturacio', 'estat', 'estat');
   await auxiliarSelect(data.metode_pagament ?? 0, 'tipusPagament', 'metode_pagament', 'tipus_notes');
   await auxiliarSelect(data.emissor_id ?? 0, 'emissors', 'emissor_id', 'nom');
 
-  (window as any).facturaData = data; // si es edición
-  await initProductesFactura();
+  // Inicializar productos
+  initProductesFactura(data.productes ?? []);
 }
 
 /**
- * Preprocesa los datos del formulario de factura
+ * Preprocesa los datos del formulario de factura antes de enviar
  */
-function preProcessFacturaFormData(rawData: Record<string, unknown>): Record<string, unknown> {
-  const data: Record<string, unknown> = {};
-
-  // Campos simples
-  data.numero_factura = rawData.numero_factura ? Number(rawData.numero_factura) : null;
-  data.emissor_id = rawData.emissor_id ? Number(rawData.emissor_id) : null;
-  data.client_id = rawData.client_id ? Number(rawData.client_id) : null;
-  data.concepte = rawData.concepte ?? null;
-  data.data_factura = rawData.data_factura ?? null;
-  data.data_venciment = rawData.data_venciment ?? null;
-  data.base_imposable = rawData.base_imposable ? Number(rawData.base_imposable) : null;
-  data.despeses_extra = rawData.despeses_extra ? Number(rawData.despeses_extra) : null;
-  data.total_factura = rawData.total_factura ? Number(rawData.total_factura) : null;
-  data.import_iva = rawData.import_iva ? Number(rawData.import_iva) : null;
-  data.tipus_iva = rawData.tipus_iva ? Number(rawData.tipus_iva) : null;
-  data.estat = rawData.estat ? Number(rawData.estat) : null;
-  data.metode_pagament = rawData.metode_pagament ? Number(rawData.metode_pagament) : null;
-  data.notes = rawData.notes ?? null;
-  data.projecte_id = rawData.projecte_id ? Number(rawData.projecte_id) : null;
-  data.arxiu_url = rawData.arxiu_url ?? null;
-  data.recurrent = rawData.recurrent ? Boolean(Number(rawData.recurrent)) : false;
-  data.frequencia = rawData.frequencia ?? null;
-
-  // Productos: convierte arrays de inputs en objetos
-  const producteIds = rawData.producte_id ?? [];
-  const notesArr = rawData.producte_notes ?? [];
-  const preusArr = rawData.producte_preu ?? [];
-
-  if (Array.isArray(producteIds) && Array.isArray(notesArr) && Array.isArray(preusArr)) {
-    data.productes = producteIds.map((id, idx) => ({
-      producte_id: Number(id),
-      notes: notesArr[idx] ?? '',
-      preu: preusArr[idx] ? Number(preusArr[idx]) : 0,
-    }));
-  } else {
-    data.productes = [];
-  }
-
-  return data;
+function preProcessFacturaFormData(rawData: Record<string, any>): Record<string, any> {
+  return {
+    numero_factura: rawData.numero_factura ?? null,
+    emissor_id: rawData.emissor_id ? Number(rawData.emissor_id) : null,
+    client_id: rawData.client_id ? Number(rawData.client_id) : null,
+    concepte: rawData.concepte ?? null,
+    data_factura: rawData.data_factura ?? null,
+    data_venciment: rawData.data_venciment ?? null,
+    base_imposable: rawData.base_imposable ? Number(rawData.base_imposable) : null,
+    despeses_extra: rawData.despeses_extra ? Number(rawData.despeses_extra) : null,
+    total_factura: rawData.total_factura ? Number(rawData.total_factura) : null,
+    import_iva: rawData.import_iva ? Number(rawData.import_iva) : null,
+    tipus_iva: rawData.tipus_iva ? Number(rawData.tipus_iva) : null,
+    estat: rawData.estat ? Number(rawData.estat) : null,
+    metode_pagament: rawData.metode_pagament ? Number(rawData.metode_pagament) : null,
+    notes: rawData.notes ?? null,
+    projecte_id: rawData.projecte_id ? Number(rawData.projecte_id) : null,
+    arxiu_url: rawData.arxiu_url ?? null,
+    recurrent: rawData.recurrent ? Boolean(Number(rawData.recurrent)) : false,
+    frequencia: rawData.frequencia ?? null,
+    productes: Array.isArray(rawData.producte_id)
+      ? rawData.producte_id.map((id, idx) => ({
+          producte_id: Number(id),
+          notes: (rawData.notes ?? [])[idx] ?? '',
+          preu: (rawData.preu ?? [])[idx] ? Number((rawData.preu ?? [])[idx]) : 0,
+        }))
+      : [],
+  };
 }
 
 /**
- * Añade funcionalidad de añadir productos a la factura
+ * Inicializa la tabla de productos y añade funcionalidad de añadir/eliminar
  */
-export async function initProductesFactura() {
+export async function initProductesFactura(existingProducts: ProducteFactura[] = []) {
   const addBtn = document.getElementById('addProducte') as HTMLButtonElement;
   const tbody = document.querySelector('#tableProductesFactura tbody') as HTMLTableSectionElement;
   if (!addBtn || !tbody) return;
 
-  // 1️⃣ Cargamos los productos desde la API
+  // Cargar productos desde API
   const productesResponse = await fetchDataGet<ApiResponse<{ id: number; producte: string }[]>>(API_URLS.GET.PRODUCTES, true);
   const productes = productesResponse?.data ?? [];
 
-  // Función para crear una fila de producto
-  function crearFila(product?: { id: number; producte?: string; preu: number; notes: string }) {
+  function crearFila(product?: ProducteFactura) {
     const row = document.createElement('tr');
 
-    const optionsHTML = productes.map((p) => `<option value="${p.id}" ${product?.id === p.id ? 'selected' : ''}>${p.producte}</option>`).join('');
+    const optionsHTML = productes.map((p) => `<option value="${p.id}" ${product?.producte_id === p.id ? 'selected' : ''}>${p.producte}</option>`).join('');
 
     row.innerHTML = `
       <td>
@@ -148,16 +135,14 @@ export async function initProductesFactura() {
       <td><button type="button" class="btn btn-danger btn-sm removeProducte">Eliminar</button></td>
     `;
 
-    // Botón eliminar
     row.querySelector('.removeProducte')?.addEventListener('click', () => row.remove());
 
     tbody.appendChild(row);
   }
 
-  // 2️⃣ Evento del botón "Afegir"
+  // Botón añadir
   addBtn.addEventListener('click', () => crearFila());
 
-  // 3️⃣ Si ya tenemos productos en la factura (al editar), los renderizamos
-  const existingProducts: ProducteFactura[] = (window as any).facturaData?.productes ?? [];
-  existingProducts.forEach((p) => crearFila({ id: p.producte_id ?? 0, notes: p.notes, preu: p.preu }));
+  // Renderizar productos existentes (al editar)
+  existingProducts.forEach((p) => crearFila(p));
 }

@@ -178,10 +178,10 @@ if ($slug === 'clients') {
         Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
     }
 
-    // Helpers (reutilizados)
+    // Helpers
     $trimOrNull = static function ($v): ?string {
         if ($v === null) return null;
-        $s = is_string($v) ? trim($v) : (string)$v;
+        $s = is_string($v) ? trim($v) : trim((string)$v);
         return $s === '' ? null : $s;
     };
     $toIntOrNull = static function ($v): ?int {
@@ -193,7 +193,7 @@ if ($slug === 'clients') {
     $toDecimal = static function ($v): ?string {
         if ($v === null) return null;
         $s = is_string($v) ? trim($v) : trim((string)$v);
-        $s = str_replace([' ', ' '], '', $s);
+        $s = str_replace([' ', "\u{00A0}"], '', $s);
         $s = str_replace(',', '.', $s);
         return preg_match('/^-?\d+(\.\d{1,4})?$/', $s) ? $s : null;
     };
@@ -217,7 +217,7 @@ if ($slug === 'clients') {
     $arxiuUrl        = $trimOrNull($data['arxiuUrl'] ?? null);
     $detallsProductes = $data['productes'] ?? [];
 
-    // Validación básica
+    // Validación
     $errors = [];
     if ($idFactura === null) $errors[] = ValidacioErrors::requerit('idFactura');
     if ($emissorId === null) $errors[] = ValidacioErrors::requerit('emissor_id');
@@ -225,6 +225,12 @@ if ($slug === 'clients') {
     if ($concepte === null)  $errors[] = ValidacioErrors::requerit('concepte');
     if ($dataFactura === null) $errors[] = ValidacioErrors::dataNoValida('dataFactura');
     if ($dataVenciment === null) $errors[] = ValidacioErrors::dataNoValida('dataVenciment');
+    if ($baseImposable === null) $errors[] = ValidacioErrors::requerit('baseImposable');
+    if ($totalFactura === null) $errors[] = ValidacioErrors::requerit('totalFactura');
+    if ($importIva === null) $errors[] = ValidacioErrors::requerit('importIva');
+    if ($tipusIva === null) $errors[] = ValidacioErrors::requerit('tipusIva');
+    if ($estat === null) $errors[] = ValidacioErrors::requerit('estat');
+    if ($metodePagament === null) $errors[] = ValidacioErrors::requerit('metodePagament');
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
@@ -297,86 +303,6 @@ if ($slug === 'clients') {
 
         $conn->commit();
         Response::success(MissatgesAPI::success('update'), ['id' => $idFactura], 200);
-    } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
-    }
-
-    // PUT : Modificar producto existente
-    // ruta => "https://elliot.cat/api/comptabilitat/put/producte"
-} else if ($slug === 'producte' && $_SERVER['REQUEST_METHOD'] === 'PUT') {
-
-    $raw  = file_get_contents('php://input');
-    $data = json_decode($raw, true);
-
-    if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
-        return;
-    }
-
-    // Helpers
-    $trimOrNull   = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
-    $toFloatOrNull = static fn($v): ?float => (is_numeric($v) ? (float)$v : null);
-    $toIntOrNull   = static fn($v): ?int   => (is_numeric($v) ? (int)$v : null);
-
-    // Datos
-    $id             = $toIntOrNull($data['id'] ?? null);
-    $producte       = $trimOrNull($data['producte'] ?? null);
-    $descripcio     = $trimOrNull($data['descripcio'] ?? null);
-    $actiu          = $toIntOrNull($data['actiu'] ?? 1) ?? 1;
-    $unitat         = $trimOrNull($data['unitat'] ?? null);
-    $preu_recomanat = $toFloatOrNull($data['preu_recomanat'] ?? null);
-
-    // Validación
-    $errors = [];
-    if ($id === null) {
-        $errors[] = ValidacioErrors::requerit('id');
-    }
-
-    if ($producte === null) {
-        $errors[] = ValidacioErrors::requerit('producte');
-    } elseif (mb_strlen($producte) > 255) {
-        $errors[] = ValidacioErrors::massaLlarg('producte', 255);
-    }
-
-    if ($descripcio !== null && mb_strlen($descripcio) > 1000) {
-        $errors[] = ValidacioErrors::massaLlarg('descripcio', 1000);
-    }
-
-    if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
-        return;
-    }
-
-    try {
-        $conn->beginTransaction();
-
-        $sql = "UPDATE db_comptabilitat_cataleg_productes
-                   SET producte = :producte,
-                       descripcio = :descripcio,
-                       actiu = :actiu,
-                       unitat = :unitat,
-                       preu_recomanat = :preu_recomanat
-                 WHERE id = :id";
-
-        $stmt = $conn->prepare($sql);
-
-        $stmt->bindValue(':producte', $producte, PDO::PARAM_STR);
-        $stmt->bindValue(':descripcio', $descripcio, $descripcio !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':actiu', $actiu, PDO::PARAM_INT);
-        $stmt->bindValue(':unitat', $unitat, $unitat !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':preu_recomanat', $preu_recomanat, $preu_recomanat !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-
-        $stmt->execute();
-
-        // Auditoría
-        $detalls = sprintf("Modificació producte: %s (ID: %d)", $producte, $id);
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_cataleg_productes', $id);
-
-        $conn->commit();
-
-        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
     } catch (Throwable $e) {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
