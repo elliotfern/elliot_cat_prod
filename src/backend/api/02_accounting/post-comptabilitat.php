@@ -195,10 +195,11 @@ if ($slug === 'clients') {
     }
 
     // Helpers
-    $trimOrNull = static fn($v): ?string => ($v === null) ? null : trim((string)$v) ?: null;
+    // Helpers corregidos para PHP 8+
+    $trimOrNull = static fn($v): ?string => ($v === null) ? null : (trim((string)$v) ?: null);
     $toIntOrNull = static fn($v): ?int => is_numeric($v) ? (int)$v : null;
     $dateOrNull = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
-    $toDecimal = static fn($v): ?string => ($v === null) ? null : preg_match('/^-?\d+(\.\d{1,4})?$/', str_replace(',', '.', str_replace([' ', "\u{00A0}"], '', (string)$v))) ? str_replace(',', '.', (string)$v) : null;
+    $toDecimal = static fn($v): ?string => ($v === null) ? null : (preg_match('/^-?\d+(\.\d{1,4})?$/', str_replace(',', '.', str_replace([' ', "\u{00A0}"], '', (string)$v))) ? str_replace(',', '.', (string)$v) : null);
 
     // Datos (nombres ya alineados con BD)
     $emissor_id      = $toIntOrNull($data['emissor_id'] ?? null);

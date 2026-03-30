@@ -45,15 +45,11 @@ if ($slug === 'clients') {
     }
 
     // Helpers (mismos que en POST)
-    $trimOrNull  = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
-    $toIntOrNull = static fn($v): ?int    => (is_numeric($v) ? (int)$v : null);
-    $uuidOrNull  = static function ($v): ?string {
-        if ($v === null || $v === '') return null;
-        $s = is_string($v) ? trim($v) : '';
-        if ($s === '' || preg_match('/^0{8}-0{4}-0{4}-0{4}-0{12}$/i', $s)) return null;
-        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s) ? strtolower($s) : null;
-    };
-    $dateOrNull  = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
+    // Helpers corregidos para PHP 8+
+    $trimOrNull = static fn($v): ?string => ($v === null) ? null : (trim((string)$v) ?: null);
+    $toIntOrNull = static fn($v): ?int => is_numeric($v) ? (int)$v : null;
+    $dateOrNull = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
+    $toDecimal = static fn($v): ?string => ($v === null) ? null : (preg_match('/^-?\d+(\.\d{1,4})?$/', str_replace(',', '.', str_replace([' ', "\u{00A0}"], '', (string)$v))) ? str_replace(',', '.', (string)$v) : null);
 
     // Datos (id requerido)
     $id             = (int)($data['id'] ?? 0);
