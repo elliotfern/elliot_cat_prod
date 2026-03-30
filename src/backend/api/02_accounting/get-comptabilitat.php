@@ -266,7 +266,7 @@ if ($slug === 'clients') {
                 e.numero_iva AS emissorNumeroIVA,
                 e.adreca AS emissorAdreca,
                 e.telefon AS emissorTelefon,
-                e.email AS emissorEmail
+                e.email AS emissorEmail,
                 pai.pais_ca AS emissorPais
             FROM %s AS ic
             LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
