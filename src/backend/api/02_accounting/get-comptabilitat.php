@@ -296,7 +296,7 @@ if ($slug === 'clients') {
 
         $queryProductes = sprintf(
             $sqlProductes,
-            qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTES_PRODUCTES, $pdo),
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo),
             qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
         );
 
