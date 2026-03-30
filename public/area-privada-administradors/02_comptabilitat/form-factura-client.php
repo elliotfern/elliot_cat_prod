@@ -13,87 +13,148 @@
         <div id="errText"></div>
     </div>
 
-    <form method="POST" action="" class="row g-3" id="formFacturaClient" data-success-redirect-template="/gestio/base-dades-persones/fitxa-persona/{slug}">
+    <form method="POST" action="" class="row g-3" id="formFacturaClient">
 
         <div class="row g-3">
             <input type="hidden" id="id" name="id" />
 
+            <!-- Selección de cliente -->
             <div class="col-md-4">
-                <label for="idUser">Company:</label>
-                <select class="form-select" name="idUser" id="idUser">
+                <label for="client_id">Client / Empresa:</label>
+                <select class="form-select" name="client_id" id="client_id">
+                </select>
+            </div>
+
+            <!-- Concepto de la factura -->
+            <div class="col-md-4">
+                <label for="concepte">Concepte factura:</label>
+                <input class="form-control" type="text" name="concepte" id="concepte" />
+                <label style="color:#dc3545;display:none" id="concepteCheck">* Invalid data</label>
+            </div>
+
+            <!-- Fecha factura -->
+            <div class="col-md-4">
+                <label for="data_factura">Data de la factura:</label>
+                <input class="form-control" type="date" name="data_factura" id="data_factura" />
+                <label style="color:#dc3545;display:none" id="dataFacturaCheck">* Missing data</label>
+            </div>
+
+            <!-- Fecha vencimiento -->
+            <div class="col-md-4">
+                <label for="data_venciment">Data de venciment:</label>
+                <input class="form-control" type="date" name="data_venciment" id="data_venciment" />
+                <label style="color:#dc3545;display:none" id="dataVencimentCheck">* Missing data</label>
+            </div>
+
+            <!-- Subtotal -->
+            <div class="col-md-4">
+                <label for="base_imposable">Import subtotal de la factura (sense IVA):</label>
+                <input class="form-control" type="text" name="base_imposable" id="base_imposable" />
+                <label style="color:#dc3545;display:none" id="baseImposableCheck">* Missing data</label>
+            </div>
+
+            <!-- Despesas extra / fees -->
+            <div class="col-md-4">
+                <label for="despeses_extra">Càrrecs extres:</label>
+                <input class="form-control" type="text" name="despeses_extra" id="despeses_extra" />
+                <label style="color:#dc3545;display:none" id="despesesExtraCheck">* Missing data</label>
+            </div>
+
+            <!-- Total factura -->
+            <div class="col-md-4">
+                <label for="total_factura">Import total:</label>
+                <input class="form-control" type="text" name="total_factura" id="total_factura" />
+                <label style="color:#dc3545;display:none" id="totalFacturaCheck">* Missing data</label>
+            </div>
+
+            <!-- IVA -->
+            <div class="col-md-4">
+                <label for="import_iva">Import IVA:</label>
+                <input class="form-control" type="text" name="import_iva" id="import_iva" />
+                <label style="color:#dc3545;display:none" id="importIvaCheck">* Missing data</label>
+            </div>
+
+            <div class="col-md-4">
+                <label for="tipus_iva">Tipus IVA:</label>
+                <select class="form-select" name="tipus_iva" id="tipus_iva">
                 </select>
             </div>
 
             <div class="col-md-4">
-                <label for="facConcepte">Invoice concept</label>
-                <input class="form-control" type="text" name="facConcepte" id="facConcepte" />
-                <label style="color:#dc3545;display:none" id="AutNomCheck">* Invalid data</label>
-            </div>
-
-            <div class="col-md-4">
-                <label for="facData">Invoice date:</label>
-                <input class="form-control" type="date" name="facData" id="facData" />
-                <label style="color:#dc3545;display:none" id="AutCognom1Check">* Missing data</label>
-            </div>
-
-            <div class="col-md-4">
-                <label for="facDueDate">Due Date:</label>
-                <input class="form-control" type="date" name="facDueDate" id="facDueDate" />
-                <label style="color:#dc3545;display:none" id="AutCognom1Check">* Missing data</label>
-            </div>
-
-            <div class="col-md-4">
-                <label for="facSubtotal">Invoice Subtotal (without VAT):</label>
-                <input class="form-control" type="text" name="facSubtotal" id="facSubtotal" />
-                <label style="color:#dc3545;display:none" id="AutWikipediaCheck">* Missing data</label>
-            </div>
-
-            <div class="col-md-4">
-                <label for="facFees">Fees (STRIPE):</label>
-                <input class="form-control" type="text" name="facFees" id="facFees" />
-                <label style="color:#dc3545;display:none" id="AutWikipediaCheck">* Missing data</label>
-            </div>
-
-            <div class="col-md-4">
-                <label for="facTotal">Invoice total:</label>
-                <input class="form-control" type="text" name="facTotal" id="facTotal" />
-                <label style="color:#dc3545;display:none" id="AutWikipediaCheck">* Missing data</label>
-            </div>
-
-            <div class="col-md-4">
-                <label for="facVAT">VAT amount:</label>
-                <input class="form-control" type="text" name="facVAT" id="facVAT" />
-                <label style="color:#dc3545;display:none" id="AutWikipediaCheck">* Missing data</label>
-            </div>
-
-            <div class="col-md-4">
-                <label for="facIva">Vat type:</label>
-                <select class="form-select" name="facIva" id="facIva">
+                <label for="metode_pagament">Mètode de pagament:</label>
+                <select class="form-select" name="metode_pagament" id="metode_pagament">
                 </select>
             </div>
 
             <div class="col-md-4">
-                <label for="facPaymentType">Payment method:</label>
-                <select class="form-select" name="facPaymentType" id="facPaymentType">
+                <label for="estat">Estat de la factura:</label>
+                <select class="form-select" name="estat" id="estat">
                 </select>
             </div>
 
             <div class="col-md-4">
-                <label for="facEstat">Invoice status:</label>
-                <select class="form-select" name="facEstat" id="facEstat">
+                <label for="emissorId">Emissor factura:</label>
+                <select class="form-select" name="emissorId" id="emissorId">
                 </select>
             </div>
 
+            <!-- Sección de detalle de productos -->
+            <div class="col-12" style="margin-top:25px">
+                <h4>Detall de Productes</h4>
+                <table class="table table-bordered" id="tableProductesFactura">
+                    <thead>
+                        <tr>
+                            <th>Producte</th>
+                            <th>Preu</th>
+                            <th>Notes</th>
+                            <th><button type="button" class="btn btn-sm btn-success" id="addProducte">Afegir</button></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las filas se generarán dinámicamente con JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Botón de envío -->
             <div class="container" style="margin-top:25px">
                 <div class="row">
                     <div class="col-6 text-left">
-
                     </div>
                     <div class="col-6 text-right derecha">
                         <button type="submit" class="btn btn-primary" id="btnFactura">Introduir dades</button>
                     </div>
                 </div>
             </div>
+
         </div>
     </form>
 </div>
+
+<!-- Script para añadir/eliminar productos dinámicamente -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addBtn = document.getElementById('addProducte');
+        const tbody = document.querySelector('#tableProductesFactura tbody');
+
+        addBtn.addEventListener('click', function() {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>
+                <select name="producte_id[]" class="form-select">
+                    <option value="">Selecciona producte</option>
+                    <!-- Aquí cargarás los productos desde la base de datos -->
+                </select>
+            </td>
+            <td><input type="text" name="preu[]" class="form-control" /></td>
+            <td><input type="text" name="notes[]" class="form-control" /></td>
+            <td><button type="button" class="btn btn-danger btn-sm removeProducte">Eliminar</button></td>
+        `;
+            tbody.appendChild(row);
+
+            row.querySelector('.removeProducte').addEventListener('click', function() {
+                row.remove();
+            });
+        });
+    });
+</script>

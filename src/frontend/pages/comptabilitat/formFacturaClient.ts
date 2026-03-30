@@ -4,20 +4,36 @@ import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
-interface Fitxa {
-  [key: string]: unknown;
-  status: string;
-  message: string;
+interface ProducteFactura {
   id: number;
-  espai_cat: string;
-  municipi: number;
-  comarca: number;
-  provincia: number;
-  comunitat: number;
-  idUser: number;
-  facIva: number;
-  facEstat: number;
-  facPaymentType: number;
+  factura_id: number;
+  producte_id: number | null;
+  notes: string;
+  preu: number;
+}
+
+interface FitxaFactura {
+  [key: string]: unknown;
+  id: number;
+  numero_factura: number;
+  emissor_id: number | null;
+  client_id: number;
+  concepte: string;
+  data_factura: string;
+  data_venciment: string;
+  base_imposable: number;
+  despeses_extra: number | null;
+  total_factura: number;
+  import_iva: number;
+  tipus_iva: number;
+  estat: number;
+  metode_pagament: number;
+  notes: string | null;
+  projecte_id: number | null;
+  arxiu_url: string | null;
+  recurrent: boolean;
+  frequencia: 'mensual' | 'trimestral' | 'anual' | null;
+  productes?: ProducteFactura[];
 }
 
 interface ApiResponse<T> {
@@ -27,45 +43,74 @@ interface ApiResponse<T> {
 }
 
 export async function formFacturaClient(isUpdate: boolean, id?: number) {
-  const form = document.getElementById('formFacturaClient');
+  const form = document.getElementById('formFacturaClient') as HTMLFormElement;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnFactura') as HTMLButtonElement;
-
-  let data: Partial<Fitxa> = {
-    comarca: 0,
-    provincia: 0,
-    comunitat: 0,
-    estat: 0,
-  };
-
   if (!divTitol || !btnSubmit || !form) return;
 
-  if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.FACTURA_CLIENT_ID(id), true);
+  let data: any = {};
 
+  if (id && isUpdate) {
+    const response = await fetchDataGet<ApiResponse<any>>(API_URLS.GET.FACTURA_CLIENT_ID(id), true);
     if (!response || !response.data) return;
     data = response.data;
-
     divTitol.innerHTML = `<h2>Modificació dades Factura client</h2>`;
-
     renderFormInputs(data);
-
     btnSubmit.textContent = 'Modificar dades';
-
-    form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formFacturaClient', API_URLS.PUT.FACTURA_CLIENT);
-    });
+    form.addEventListener('submit', (event) => transmissioDadesDB(event, 'PUT', 'formFacturaClient', API_URLS.PUT.FACTURA_CLIENT, true, 'none', preProcessFacturaFormData));
   } else {
     divTitol.innerHTML = `<h2>Creació de nova factura</h2>`;
     btnSubmit.textContent = 'Inserir dades';
-
-    form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formFacturaClient', API_URLS.POST.FACTURA_CLIENT, true);
-    });
+    form.addEventListener('submit', (event) => transmissioDadesDB(event, 'POST', 'formFacturaClient', API_URLS.POST.FACTURA_CLIENT, true, 'none', preProcessFacturaFormData));
   }
 
-  await auxiliarSelect(data.idUser ?? 0, 'clients', 'idUser', 'clientEmpresa');
-  await auxiliarSelect(data.facIva ?? 0, 'tipusIVA', 'facIva', 'ivaPercen');
-  await auxiliarSelect(data.facEstat ?? 0, 'estatFacturacio', 'facEstat', 'estat');
-  await auxiliarSelect(data.facPaymentType ?? 0, 'tipusPagament', 'facPaymentType', 'tipusNom');
+  await auxiliarSelect(data.client_id ?? 0, 'clients', 'client_id', 'clientEmpresa');
+  await auxiliarSelect(data.tipus_iva ?? 0, 'tipusIVA', 'tipus_iva', 'ivaPercen');
+  await auxiliarSelect(data.estat ?? 0, 'estatFacturacio', 'estat', 'estat');
+  await auxiliarSelect(data.metode_pagament ?? 0, 'tipusPagament', 'metode_pagament', 'tipusNom');
+  await auxiliarSelect(data.emissor_id ?? 0, 'emissors', 'emissor_id', 'emissor');
+}
+
+/**
+ * Preprocesa los datos del formulario de factura
+ */
+function preProcessFacturaFormData(rawData: Record<string, unknown>): Record<string, unknown> {
+  const data: Record<string, unknown> = {};
+
+  // Campos simples
+  data.numero_factura = rawData.numero_factura ? Number(rawData.numero_factura) : null;
+  data.emissor_id = rawData.emissor_id ? Number(rawData.emissor_id) : null;
+  data.client_id = rawData.client_id ? Number(rawData.client_id) : null;
+  data.concepte = rawData.concepte ?? null;
+  data.data_factura = rawData.data_factura ?? null;
+  data.data_venciment = rawData.data_venciment ?? null;
+  data.base_imposable = rawData.base_imposable ? Number(rawData.base_imposable) : null;
+  data.despeses_extra = rawData.despeses_extra ? Number(rawData.despeses_extra) : null;
+  data.total_factura = rawData.total_factura ? Number(rawData.total_factura) : null;
+  data.import_iva = rawData.import_iva ? Number(rawData.import_iva) : null;
+  data.tipus_iva = rawData.tipus_iva ? Number(rawData.tipus_iva) : null;
+  data.estat = rawData.estat ? Number(rawData.estat) : null;
+  data.metode_pagament = rawData.metode_pagament ? Number(rawData.metode_pagament) : null;
+  data.notes = rawData.notes ?? null;
+  data.projecte_id = rawData.projecte_id ? Number(rawData.projecte_id) : null;
+  data.arxiu_url = rawData.arxiu_url ?? null;
+  data.recurrent = rawData.recurrent ? Boolean(Number(rawData.recurrent)) : false;
+  data.frequencia = rawData.frequencia ?? null;
+
+  // Productos: convierte arrays de inputs en objetos
+  const producteIds = rawData.producte_id ?? [];
+  const notesArr = rawData.producte_notes ?? [];
+  const preusArr = rawData.producte_preu ?? [];
+
+  if (Array.isArray(producteIds) && Array.isArray(notesArr) && Array.isArray(preusArr)) {
+    data.productes = producteIds.map((id, idx) => ({
+      producte_id: Number(id),
+      notes: notesArr[idx] ?? '',
+      preu: preusArr[idx] ? Number(preusArr[idx]) : 0,
+    }));
+  } else {
+    data.productes = [];
+  }
+
+  return data;
 }

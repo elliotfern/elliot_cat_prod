@@ -209,82 +209,68 @@ if ($slug === 'clients') {
         );
     }
 
-    // GET : Llistat factures clients
-    // ruta => "https://elliot.cat/api/comptabilitat/get/facturaId?id=1"
-} else if ($slug === 'facturaId') {
-    $id = $_GET['id'];
-    $sql = <<<SQL
-                SELECT ic.id, ic.idUser, ic.facConcepte, ic.facData, YEAR(ic.facData) AS yearInvoice, CONCAT('Any ', YEAR(ic.facData)) AS any, ic.facDueDate, ic.facSubtotal, ic.facFees, ic.facTotal, ic.facVAT, ic.facIva, ic.facEstat, ic.facPaymentType, vt.ivaPercen, ist.estat, pt.tipusNom, c.clientNom, c.clientCognoms, c.clientEmpresa
-                FROM %s AS ic
-                LEFT JOIN %s AS vt ON ic.facIva = vt.id
-                LEFT JOIN %s AS ist ON ist.id = ic.facEstat
-                LEFT JOIN %s AS pt ON ic.facPaymentType = pt.id
-                LEFT JOIN %s AS c ON ic.idUser = c.id
-                WHERE ic.id = :id 
-                LIMIT 1
-            SQL;
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo)
-    );
+    // GET : Detall d'una factura amb productes
+    // ruta => "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id=1"
+} else if ($slug === 'facturaCompleta') {
 
-    try {
+    $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
 
-        $params = [':id' => $id];
-        $result = $db->getData($query, $params, true);
-
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
-
-        Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
-        );
-    } catch (PDOException $e) {
+    if (!$id) {
         Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
+            MissatgesAPI::error('missing_id'),
+            [],
+            400
         );
+        return;
     }
 
-    // GET : Llistat productes associats client
-    // ruta => "https://elliot.cat/api/comptabilitat/get/detallsFacturaClientId?id=1"
-} else if ($slug === 'detallsFacturaClientId') {
-    $id = $_GET['id'];
-
-    $sql = <<<SQL
-                SELECT p.id, p.factura_id, pd.producte, p.notes, p.preu
-                        FROM %s AS p
-                        LEFT JOIN %s AS pd ON pd.id = p.producte_id
-                        WHERE p.factura_id = :id
-                        GROUP BY p.id
-                        ORDER BY p.preu DESC
-            SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
-    );
-
     try {
+        // 1️⃣ Obtenemos la factura principal
+        $sqlFactura = <<<SQL
+            SELECT 
+                ic.id,
+                ic.client_id,
+                ic.concepte,
+                ic.emissor_id,
+                ic.data_factura,
+                YEAR(ic.data_factura) AS yearInvoice,
+                CONCAT('Any ', YEAR(ic.data_factura)) AS any,
+                ic.data_venciment,
+                ic.base_imposable,
+                ic.despeses_extra,
+                ic.total_factura,
+                ic.import_iva,
+                ic.tipus_iva,
+                ic.estat,
+                ic.metode_pagament,
+                vt.ivaPercen,
+                ist.estat AS estatNom,
+                pt.tipus AS tipusNom,
+                pt.notes AS metodeNotes,
+                c.clientNom,
+                c.clientCognoms,
+                c.clientEmpresa
+            FROM %s AS ic
+            LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
+            LEFT JOIN %s AS ist ON ist.id = ic.estat
+            LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
+            LEFT JOIN %s AS c ON ic.client_id = c.id
+            WHERE ic.id = :id
+            LIMIT 1
+        SQL;
 
-        $params = [':id' => $id];
-        $result = $db->getData($query, $params, false);
+        $queryFactura = sprintf(
+            $sqlFactura,
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
+            qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo)
+        );
 
-        if (empty($result)) {
+        $factura = $db->getData($queryFactura, [':id' => $id], true);
+
+        if (!$factura) {
             Response::error(
                 MissatgesAPI::error('not_found'),
                 [],
@@ -293,9 +279,35 @@ if ($slug === 'clients') {
             return;
         }
 
+        // 2️⃣ Obtenemos los productos asociados
+        $sqlProductes = <<<SQL
+            SELECT 
+                p.id,
+                p.factura_id,
+                pd.producte,
+                p.notes,
+                p.preu
+            FROM %s AS p
+            LEFT JOIN %s AS pd ON pd.id = p.producte_id
+            WHERE p.factura_id = :id
+            ORDER BY p.id ASC
+        SQL;
+
+        $queryProductes = sprintf(
+            $sqlProductes,
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo),
+            qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
+        );
+
+        $productes = $db->getData($queryProductes, [':id' => $id], false);
+
+        // 3️⃣ Devolvemos todo junto
         Response::success(
             MissatgesAPI::success('get'),
-            $result,
+            [
+                'factura' => $factura,
+                'productes' => $productes
+            ],
             200
         );
     } catch (PDOException $e) {

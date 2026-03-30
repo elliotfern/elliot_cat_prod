@@ -97,7 +97,7 @@ export async function taulaFacturacioClients(emissorId: number) {
       field: 'numero_factura',
       render: (_: unknown, row: Factura) =>
         `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/comptabilitat/fitxa-factura-client/${row.id}">
-          ${row.numero_factura}/${row.yearInvoice}
+          ${row.numero_factura}
         </a>`,
     },
     {

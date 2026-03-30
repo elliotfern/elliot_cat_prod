@@ -48,14 +48,7 @@ function markInvalidFields(form: HTMLFormElement, errors: unknown) {
   }
 }
 
-export async function transmissioDadesDB(
-  event: Event,
-  tipus: string,
-  formId: string,
-  urlAjax: string,
-  neteja?: boolean, // mantiene compatibilidad
-  successBehavior: SuccessBehavior = 'none' // 'none' | 'hide' | 'disable'
-): Promise<void> {
+export async function transmissioDadesDB(event: Event, tipus: string, formId: string, urlAjax: string, neteja?: boolean, successBehavior: SuccessBehavior = 'none', preProcessFormData?: (data: Record<string, unknown>) => Record<string, unknown>): Promise<void> {
   event.preventDefault();
 
   const form = document.getElementById(formId) as HTMLFormElement;
@@ -64,7 +57,7 @@ export async function transmissioDadesDB(
     return;
   }
 
-  // Crear un objeto para almacenar los datos del formulario
+  // Crear un objeto con los datos del formulario
   const formDataRaw = new FormData(form);
   const formData: Record<string, unknown> = {};
 
@@ -81,15 +74,14 @@ export async function transmissioDadesDB(
     }
   }
 
-  const jsonData = JSON.stringify(formData);
+  // Preprocesar datos si hay función específica
+  const finalData = preProcessFormData ? preProcessFormData(formData) : formData;
+  const jsonData = JSON.stringify(finalData);
 
   try {
     const response = await fetch(urlAjax, {
       method: tipus,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: jsonData,
     });
 
@@ -99,14 +91,10 @@ export async function transmissioDadesDB(
     const okTextDiv = document.getElementById('okText');
     const errMessageDiv = document.getElementById('errMessage');
     const errTextDiv = document.getElementById('errText');
-
     if (!okMessageDiv || !okTextDiv || !errMessageDiv || !errTextDiv) return;
 
-    // Si todo OK a nivel HTTP
     if (response.ok) {
-      // === SUCCESS de negocio ===
       if (data.status === 'success') {
-        // Limpia invalids si veníamos de un error previo
         markInvalidFields(form, null);
 
         missatgesBackend({
@@ -117,27 +105,17 @@ export async function transmissioDadesDB(
           altreContenidor: errMessageDiv,
         });
 
-        // === Comportamiento genérico en éxito ===
         const method = tipus.toUpperCase();
-        const shouldReset = neteja ?? method === 'POST'; // si no pasas 'neteja', por defecto resetea en POST
-
-        if (successBehavior === 'hide') {
-          form.hidden = true;
-          history.replaceState({}, document.title, window.location.pathname);
-        } else if (successBehavior === 'disable') {
+        const shouldReset = neteja ?? method === 'POST';
+        if (successBehavior === 'hide') form.hidden = true;
+        else if (successBehavior === 'disable') {
           form.querySelectorAll<HTMLElement>('input,select,textarea,button,[contenteditable],trix-editor').forEach((el) => el.setAttribute('disabled', 'true'));
-          history.replaceState({}, document.title, window.location.pathname);
-        } else if (shouldReset) {
-          resetForm(formId);
-        }
+        } else if (shouldReset) resetForm(formId);
 
-        // === CTA genérico "ver ficha" usando plantilla del form ===
         const template = (form.dataset as any).successRedirectTemplate as string | undefined;
         if (template && typeof data?.slug === 'string' && data.slug.length > 0) {
           const href = template.replace('{slug}', encodeURIComponent(data.slug));
           const actions = document.getElementById('successActions') || okMessageDiv;
-
-          // evita duplicados
           let btn = document.getElementById('createdViewBtn') as HTMLAnchorElement | null;
           if (!btn) {
             btn = document.createElement('a');
@@ -151,16 +129,12 @@ export async function transmissioDadesDB(
           btn.href = href;
         }
 
-        // Evento genérico
-        const ev = new CustomEvent('form:success', { detail: data });
-        form.dispatchEvent(ev);
+        form.dispatchEvent(new CustomEvent('form:success', { detail: data }));
       } else {
-        // === ERROR de negocio con HTTP 200 ===
         const missatge = `
           ${data.message ? `<p>${data.message}</p>` : ''}
           ${renderErrors(data.errors) || `<p>${Missatges.error.default}</p>`}
         `;
-
         missatgesBackend({
           tipus: 'error',
           missatge,
@@ -168,17 +142,13 @@ export async function transmissioDadesDB(
           text: errTextDiv,
           altreContenidor: okMessageDiv,
         });
-
-        // Marca campos inválidos si procede
         markInvalidFields(form, data.errors);
       }
     } else {
-      // === ERROR HTTP (400/500 etc) ===
       const missatge = `
         ${data.message ? `<p>${data.message}</p>` : ''}
         ${renderErrors(data.errors)}
       `;
-
       missatgesBackend({
         tipus: 'error',
         missatge,
@@ -186,14 +156,11 @@ export async function transmissioDadesDB(
         text: errTextDiv,
         altreContenidor: okMessageDiv,
       });
-
-      // Marca campos inválidos si procede
       markInvalidFields(form, data.errors);
     }
   } catch (error) {
     const errMessageDiv = document.getElementById('errMessage');
     const errTextDiv = document.getElementById('errText');
-
     if (!errMessageDiv || !errTextDiv) return;
 
     const errorMessage = typeof error === 'object' && error && 'message' in error ? String((error as { message: string }).message) : Missatges.error.xarxa;

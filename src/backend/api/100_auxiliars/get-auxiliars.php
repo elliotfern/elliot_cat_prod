@@ -1641,21 +1641,19 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
         );
     }
 
-    // Llistat complet articles historia es
-    // ruta GET => "/api/auxiliars/get/blogArticlesFr"
-} else if ($slug === 'blogArticlesFr') {
+    // Llistat EMissors factures
+    // ruta GET => "/api/auxiliars/get/emissors"
+} else if ($slug === 'emissors') {
 
     $sql = <<<SQL
-                SELECT id, post_title
+                SELECT id, nom
                 FROM %s
-                WHERE lang = 7
-                AND post_type = 'historia_oberta'
-                ORDER BY post_date DESC;
+                ORDER BY nom DESC;
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::BLOG, $pdo)
+        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
 
     );
 

@@ -170,8 +170,7 @@ if ($slug === 'clients') {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
-} else if ($slug === 'facturaClient') {
-
+} else if ($slug === 'facturaClient' && $_SERVER['REQUEST_METHOD'] === 'PUT') {
     $inputData = file_get_contents('php://input');
     $data = json_decode($inputData, true);
 
@@ -179,74 +178,53 @@ if ($slug === 'clients') {
         Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
     }
 
-    // Helpers
+    // Helpers (reutilizados)
     $trimOrNull = static function ($v): ?string {
         if ($v === null) return null;
-        if (is_string($v)) {
-            $s = trim($v);
-            return ($s === '') ? null : $s;
-        }
-        $s = trim((string)$v);
-        return ($s === '') ? null : $s;
+        $s = is_string($v) ? trim($v) : (string)$v;
+        return $s === '' ? null : $s;
     };
     $toIntOrNull = static function ($v): ?int {
-        return (is_numeric($v) ? (int)$v : null);
+        return (is_numeric($v) && (string)(int)$v === (string)$v) ? (int)$v : (is_numeric($v) ? (int)$v : null);
     };
     $dateOrNull = static function ($v): ?string {
-        if (!is_string($v)) return null;
-        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null; // YYYY-MM-DD
+        return is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null;
     };
-    // Normaliza cantidades: "1.234,56" o "1234.56" -> "1234.56"
     $toDecimal = static function ($v): ?string {
         if ($v === null) return null;
         $s = is_string($v) ? trim($v) : trim((string)$v);
-        if ($s === '') return null;
-        $s = str_replace([' ', "\u{00A0}"], '', $s);
+        $s = str_replace([' ', ' '], '', $s);
         $s = str_replace(',', '.', $s);
-        if (!preg_match('/^-?\d+(\.\d{1,4})?$/', $s)) return null; // ajusta decimales si necesitas
-        return $s;
+        return preg_match('/^-?\d+(\.\d{1,4})?$/', $s) ? $s : null;
     };
 
-    // Datos (id requerido)
-    $id              = $toIntOrNull($data['id'] ?? null);
-    $idUser          = $toIntOrNull($data['idUser'] ?? null);
-    $facConcepte     = $trimOrNull($data['facConcepte'] ?? null);
-    $facData         = $dateOrNull($data['facData'] ?? null);
-    $facDueDate      = $dateOrNull($data['facDueDate'] ?? null);
-    $facSubtotal     = $toDecimal($data['facSubtotal'] ?? null);
-    $facFees         = $toDecimal($data['facFees'] ?? null);
-    $facTotal        = $toDecimal($data['facTotal'] ?? null);
-    $facVAT          = $toDecimal($data['facVAT'] ?? null);
-    $facIva          = $toIntOrNull($data['facIva'] ?? null);
-    $facEstat        = $toIntOrNull($data['facEstat'] ?? null);
-    $facPaymentType  = $toIntOrNull($data['facPaymentType'] ?? null);
+    // Datos requeridos
+    $idFactura       = $toIntOrNull($data['idFactura'] ?? null);
+    $emissorId       = $toIntOrNull($data['emissorId'] ?? null);
+    $clientId        = $toIntOrNull($data['clientId'] ?? null);
+    $concepte        = $trimOrNull($data['concepte'] ?? null);
+    $dataFactura     = $dateOrNull($data['dataFactura'] ?? null);
+    $dataVenciment   = $dateOrNull($data['dataVenciment'] ?? null);
+    $baseImposable   = $toDecimal($data['baseImposable'] ?? null);
+    $despesesExtra   = $toDecimal($data['despesesExtra'] ?? 0);
+    $totalFactura    = $toDecimal($data['totalFactura'] ?? null);
+    $importIva       = $toDecimal($data['importIva'] ?? null);
+    $tipusIva        = $toIntOrNull($data['tipusIva'] ?? null);
+    $estat           = $toIntOrNull($data['estat'] ?? null);
+    $metodePagament  = $toIntOrNull($data['metodePagament'] ?? null);
+    $notes           = $trimOrNull($data['notes'] ?? null);
+    $projecteId      = $toIntOrNull($data['projecteId'] ?? null);
+    $arxiuUrl        = $trimOrNull($data['arxiuUrl'] ?? null);
+    $detallsProductes = $data['productes'] ?? [];
 
-    // Validación
+    // Validación básica
     $errors = [];
-    if ($id === null || $id <= 0)      $errors[] = ValidacioErrors::requerit('id');
-    if ($idUser === null)              $errors[] = ValidacioErrors::requerit('idUser');
-
-    if ($facConcepte === null)         $errors[] = ValidacioErrors::requerit('facConcepte');
-    elseif (mb_strlen($facConcepte) > 255) $errors[] = ValidacioErrors::massaLlarg('facConcepte', 255);
-
-    if ($facData === null)             $errors[] = ValidacioErrors::dataNoValida('facData');
-    if ($facDueDate === null)          $errors[] = ValidacioErrors::dataNoValida('facDueDate');
-
-    if ($facSubtotal === null)         $errors[] = ValidacioErrors::requerit('facSubtotal');
-    if ($facFees === null)             $errors[] = ValidacioErrors::requerit('facFees');
-    if ($facTotal === null)            $errors[] = ValidacioErrors::requerit('facTotal');
-    if ($facVAT === null)              $errors[] = ValidacioErrors::requerit('facVAT');
-
-    if ($facIva === null)              $errors[] = ValidacioErrors::requerit('facIva');
-    if ($facEstat === null)            $errors[] = ValidacioErrors::requerit('facEstat');
-    if ($facPaymentType === null)      $errors[] = ValidacioErrors::requerit('facPaymentType');
-
-    // Coherencia de fechas
-    if ($facData !== null && $facDueDate !== null) {
-        if (strtotime($facDueDate) < strtotime($facData)) {
-            $errors[] = "La data de venciment (facDueDate) no pot ser anterior a la data de factura (facData).";
-        }
-    }
+    if ($idFactura === null) $errors[] = ValidacioErrors::requerit('idFactura');
+    if ($emissorId === null) $errors[] = ValidacioErrors::requerit('emissorId');
+    if ($clientId === null)  $errors[] = ValidacioErrors::requerit('clientId');
+    if ($concepte === null)  $errors[] = ValidacioErrors::requerit('concepte');
+    if ($dataFactura === null) $errors[] = ValidacioErrors::dataNoValida('dataFactura');
+    if ($dataVenciment === null) $errors[] = ValidacioErrors::dataNoValida('dataVenciment');
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
@@ -254,349 +232,71 @@ if ($slug === 'clients') {
 
     try {
         global $conn, $userUuid;
-        /** @var PDO $conn */
         $conn->beginTransaction();
 
-        // Comprobar existencia
-        $chk = $conn->prepare("SELECT 1 FROM db_comptabilitat_facturacio_clients WHERE id = :id");
-        $chk->bindValue(':id', $id, PDO::PARAM_INT);
-        $chk->execute();
-        if (!$chk->fetchColumn()) {
-            $conn->rollBack();
-            Response::error(MissatgesAPI::error('not_found'), ["Factura id {$id} no existeix"], 404);
-        }
-
+        // Actualiza factura
         $sql = "UPDATE db_comptabilitat_facturacio_clients
-               SET idUser = :idUser,
-                   facConcepte = :facConcepte,
-                   facData = :facData,
-                   facDueDate = :facDueDate,
-                   facSubtotal = :facSubtotal,
-                   facFees = :facFees,
-                   facTotal = :facTotal,
-                   facVAT = :facVAT,
-                   facIva = :facIva,
-                   facEstat = :facEstat,
-                   facPaymentType = :facPaymentType
-             WHERE id = :id";
+                SET emissor_id = :emissor_id,
+                    client_id = :client_id,
+                    concepte = :concepte,
+                    data_factura = :data_factura,
+                    data_venciment = :data_venciment,
+                    base_imposable = :base_imposable,
+                    despeses_extra = :despeses_extra,
+                    total_factura = :total_factura,
+                    import_iva = :import_iva,
+                    tipus_iva = :tipus_iva,
+                    estat = :estat,
+                    metode_pagament = :metode_pagament,
+                    notes = :notes,
+                    projecte_id = :projecte_id,
+                    arxiu_url = :arxiu_url
+                WHERE id = :idFactura";
 
         $stmt = $conn->prepare($sql);
-
-        $stmt->bindValue(':id',            $id,           PDO::PARAM_INT);
-        $stmt->bindValue(':idUser',        $idUser,       PDO::PARAM_INT);
-        $stmt->bindValue(':facConcepte',   $facConcepte,  PDO::PARAM_STR);
-        $stmt->bindValue(':facData',       $facData,      PDO::PARAM_STR);
-        $stmt->bindValue(':facDueDate',    $facDueDate,   PDO::PARAM_STR);
-
-        // DECIMAL como string para no perder precisión
-        $stmt->bindValue(':facSubtotal',   $facSubtotal,  PDO::PARAM_STR);
-        $stmt->bindValue(':facFees',       $facFees,      PDO::PARAM_STR);
-        $stmt->bindValue(':facTotal',      $facTotal,     PDO::PARAM_STR);
-        $stmt->bindValue(':facVAT',        $facVAT,       PDO::PARAM_STR);
-
-        $stmt->bindValue(':facIva',        $facIva,       PDO::PARAM_INT);
-        $stmt->bindValue(':facEstat',      $facEstat,     PDO::PARAM_INT);
-        $stmt->bindValue(':facPaymentType', $facPaymentType, PDO::PARAM_INT);
-
+        $stmt->bindValue(':idFactura', $idFactura, PDO::PARAM_INT);
+        $stmt->bindValue(':emissor_id', $emissorId, PDO::PARAM_INT);
+        $stmt->bindValue(':client_id', $clientId, PDO::PARAM_INT);
+        $stmt->bindValue(':concepte', $concepte, PDO::PARAM_STR);
+        $stmt->bindValue(':data_factura', $dataFactura, PDO::PARAM_STR);
+        $stmt->bindValue(':data_venciment', $dataVenciment, PDO::PARAM_STR);
+        $stmt->bindValue(':base_imposable', $baseImposable, PDO::PARAM_STR);
+        $stmt->bindValue(':despeses_extra', $despesesExtra, PDO::PARAM_STR);
+        $stmt->bindValue(':total_factura', $totalFactura, PDO::PARAM_STR);
+        $stmt->bindValue(':import_iva', $importIva, PDO::PARAM_STR);
+        $stmt->bindValue(':tipus_iva', $tipusIva, PDO::PARAM_INT);
+        $stmt->bindValue(':estat', $estat, PDO::PARAM_INT);
+        $stmt->bindValue(':metode_pagament', $metodePagament, PDO::PARAM_INT);
+        $stmt->bindValue(':notes', $notes, PDO::PARAM_STR);
+        $stmt->bindValue(':projecte_id', $projecteId, PDO::PARAM_INT);
+        $stmt->bindValue(':arxiu_url', $arxiuUrl, PDO::PARAM_STR);
         $stmt->execute();
+
+        // Productos: eliminar antiguos y añadir nuevos
+        $conn->prepare("DELETE FROM db_comptabilitat_facturacio_clients_productes WHERE factura_id = :idFactura")
+            ->execute([':idFactura' => $idFactura]);
+
+        if (!empty($detallsProductes)) {
+            $sqlProd = "INSERT INTO db_comptabilitat_facturacio_clients_productes
+                        (factura_id, producte_id, notes, preu)
+                        VALUES (:factura_id, :producte_id, :notes, :preu)";
+            $stmtProd = $conn->prepare($sqlProd);
+
+            foreach ($detallsProductes as $p) {
+                $stmtProd->bindValue(':factura_id', $idFactura, PDO::PARAM_INT);
+                $stmtProd->bindValue(':producte_id', $toIntOrNull($p['producte_id'] ?? null), PDO::PARAM_INT);
+                $stmtProd->bindValue(':notes', $trimOrNull($p['notes'] ?? null), PDO::PARAM_STR);
+                $stmtProd->bindValue(':preu', $toDecimal($p['preu'] ?? null), PDO::PARAM_STR);
+                $stmtProd->execute();
+            }
+        }
 
         // Auditoría
-        $detalls = sprintf("Actualització factura id=%d client=%d concepte=%s data=%s", $id, $idUser, $facConcepte, $facData);
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_facturacio_clients', $id);
+        $detalls = sprintf("Actualització factura client=%d concepte=%s data=%s", $clientId, $concepte, $dataFactura);
+        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_facturacio_clients', $idFactura);
 
         $conn->commit();
-
-        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
-    } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
-    }
-} else if ($slug === 'detallsFacturaClientProducte') {
-
-    $inputData = file_get_contents('php://input');
-    $data = json_decode($inputData, true);
-
-    if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
-    }
-
-    // ------- Helpers (mismos criterios que en el POST) -------
-    $trimOrNull = static function ($v): ?string {
-        if ($v === null) return null;
-        if (is_string($v)) {
-            $s = trim($v);
-            return ($s === '') ? null : $s;
-        }
-        $s = trim((string)$v);
-        return ($s === '') ? null : $s;
-    };
-    $toIntOrNull = static function ($v): ?int {
-        if ($v === null) return null;
-        if (is_int($v)) return $v;
-        if (is_string($v) && preg_match('/^-?\d+$/', $v)) return (int)$v;
-        if (is_numeric($v)) return (int)$v;
-        return null;
-    };
-    // Normaliza "1.234,56" o "1234.56" -> "1234.56"
-    $toDecimal = static function ($v): ?string {
-        if ($v === null) return null;
-        $s = is_string($v) ? trim($v) : trim((string)$v);
-        if ($s === '') return null;
-        $s = str_replace(["\u{00A0}", ' '], '', $s);
-        if (strpos($s, '.') !== false && strpos($s, ',') !== false) {
-            $s = str_replace('.', '', $s);
-            $s = str_replace(',', '.', $s);
-        } else {
-            if (strpos($s, ',') !== false && strpos($s, '.') === false) {
-                $s = str_replace(',', '.', $s);
-            }
-        }
-        if (!preg_match('/^-?\d+(\.\d{1,4})?$/', $s)) return null;
-        return $s;
-    };
-
-    // ------- ID de la línea a actualizar -------
-    // Prioriza id en ruta (p.ej. /api/invoice-lines/{id}); si no, toma ?id=...
-    $id = null;
-    if (isset($routeParams[0]) && ctype_digit((string)$routeParams[0])) {
-        $id = (int)$routeParams[0];
-    } else {
-        $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-    }
-    if (!$id) {
-        Response::error(MissatgesAPI::error('validacio'), [ValidacioErrors::requerit('id')], 400);
-    }
-
-    // ------- Campos opcionales a actualizar (parciales) -------
-    $hasFacturaId  = array_key_exists('factura_id',  $data);
-    $hasProducteId = array_key_exists('producte_id', $data);
-    $hasNotes      = array_key_exists('notes',       $data);
-    $hasPreu       = array_key_exists('preu',        $data);
-
-    if (!$hasFacturaId && !$hasProducteId && !$hasNotes && !$hasPreu) {
-        Response::error(MissatgesAPI::error('validacio'), ['No hi ha cap camp per actualitzar'], 400);
-    }
-
-    $facturaId  = $hasFacturaId  ? $toIntOrNull($data['factura_id'])   : null;
-    $producteId = $hasProducteId ? $toIntOrNull($data['producte_id'])  : null;
-    $notesIn    = $hasNotes      ? $data['notes']                      : null;
-    $preuIn     = $hasPreu       ? $data['preu']                       : null;
-
-    $notes = $hasNotes ? $trimOrNull($notesIn) : null;
-
-    // preu: si viene clave con vacío -> NULL; si viene con contenido inválido -> error
-    $preuStr  = $hasPreu ? $trimOrNull($preuIn) : null;
-    $preuNorm = null;
-    if ($hasPreu) {
-        if ($preuStr !== null) {
-            $preuNorm = $toDecimal($preuStr);
-            if ($preuNorm === null) {
-                Response::error(MissatgesAPI::error('validacio'), [ValidacioErrors::formatNoValid('preu')], 400);
-            }
-        } // si $preuStr === null => se actualizará a NULL
-    }
-
-    // Validación básica de ids
-    $errors = [];
-    if ($hasFacturaId && $facturaId === null)   $errors[] = ValidacioErrors::formatNoValid('factura_id');
-    if ($hasProducteId && $producteId === null) $errors[] = ValidacioErrors::formatNoValid('producte_id');
-    if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
-    }
-
-    try {
-        global $conn, $userUuid;
-        /** @var PDO $conn */
-        $conn->beginTransaction();
-
-        // 1) Verifica que la línea exista (y bloquea fila)
-        $chk = $conn->prepare("SELECT id, factura_id FROM db_comptabilitat_facturacio_clients_productes WHERE id = :id FOR UPDATE");
-        $chk->bindValue(':id', $id, PDO::PARAM_INT);
-        $chk->execute();
-        $row = $chk->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
-            $conn->rollBack();
-            Response::error(MissatgesAPI::error('noTrobat'), ['La línia de factura no existeix'], 404);
-        }
-
-        // 2) (Opcional) verificar factura si se cambia
-        if ($hasFacturaId && $facturaId !== null) {
-            $checkInv = $conn->prepare("SELECT id FROM db_comptabilitat_facturacio_clients WHERE id = :id LIMIT 1");
-            $checkInv->bindValue(':id', $facturaId, PDO::PARAM_INT);
-            $checkInv->execute();
-            if (!$checkInv->fetchColumn()) {
-                $conn->rollBack();
-                Response::error(MissatgesAPI::error('validacio'), ['La factura indicada no existeix'], 404);
-            }
-        }
-
-        // 3) Construcción dinámica del UPDATE
-        $sets = [];
-        $params = [];
-
-        if ($hasFacturaId) {
-            $sets[] = 'factura_id = :factura_id';
-            if ($facturaId === null) {
-                $params[':factura_id'] = [null, PDO::PARAM_NULL];
-            } else {
-                $params[':factura_id'] = [$facturaId, PDO::PARAM_INT];
-            }
-        }
-
-        if ($hasProducteId) {
-            $sets[] = 'producte_id = :producte_id';
-            if ($producteId === null) {
-                $params[':producte_id'] = [null, PDO::PARAM_NULL];
-            } else {
-                $params[':producte_id'] = [$producteId, PDO::PARAM_INT];
-            }
-        }
-
-        if ($hasNotes) {
-            $sets[] = 'notes = :notes';
-            if ($notes === null) {
-                $params[':notes'] = [null, PDO::PARAM_NULL];
-            } else {
-                $params[':notes'] = [$notes, PDO::PARAM_STR];
-            }
-        }
-
-        if ($hasPreu) {
-            $sets[] = 'preu = :preu';
-            if ($preuStr === null) {
-                $params[':preu'] = [null, PDO::PARAM_NULL];
-            } else {
-                // guardamos el valor normalizado como texto
-                $params[':preu'] = [$preuNorm, PDO::PARAM_STR];
-            }
-        }
-
-        if (empty($sets)) {
-            // teóricamente no debería pasar
-            $conn->rollBack();
-            Response::error(MissatgesAPI::error('validacio'), ['No hi ha cap camp per actualitzar'], 400);
-        }
-
-        $sql = "UPDATE db_comptabilitat_facturacio_clients_productes
-                   SET " . implode(', ', $sets) . "
-                 WHERE id = :id";
-        $stmt = $conn->prepare($sql);
-
-        foreach ($params as $k => [$v, $type]) {
-            $stmt->bindValue($k, $v, $type);
-        }
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-
-        // 4) Auditoría
-        $detalls = sprintf(
-            "Actualització línia id=%d%s%s%s%s",
-            $id,
-            $hasFacturaId  ? " factura_id=" . var_export($facturaId, true)  : "",
-            $hasProducteId ? " producte_id=" . var_export($producteId, true) : "",
-            $hasNotes      ? " notes=" . var_export($notes, true)          : "",
-            $hasPreu       ? " preu=" . var_export($preuStr, true)         : ""
-        );
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_facturacio_clients_productes', $id);
-
-        $conn->commit();
-        Response::success(MissatgesAPI::success('update'), ['id' => (int)$id], 200);
-    } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
-    }
-
-    // PUT : Modificar emissor existent
-} else if ($slug === 'emissor') {
-
-    $raw  = file_get_contents('php://input');
-    $data = json_decode($raw, true);
-
-    if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
-    }
-
-    // Helpers
-    $trimOrNull  = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
-    $toIntOrNull = static fn($v): ?int    => (is_numeric($v) ? (int)$v : null);
-    $uuidOrNull  = static fn($v): ?string => (is_string($v) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $v)) ? strtolower($v) : null;
-
-    // Datos
-    $id         = $toIntOrNull($data['id'] ?? null);
-    $nom        = $trimOrNull($data['nom'] ?? null);
-    $nif        = $trimOrNull($data['nif'] ?? null);
-    $numero_iva = $trimOrNull($data['numero_iva'] ?? null);
-    $pais       = $uuidOrNull($data['pais'] ?? null);
-    $adreca     = $trimOrNull($data['adreca'] ?? null);
-    $telefon    = $trimOrNull($data['telefon'] ?? null);
-    $email      = $trimOrNull($data['email'] ?? null);
-
-    if (!$id) {
-        Response::error(MissatgesAPI::error('validacio'), ['ID invàlid'], 400);
-    }
-
-    // Validación
-    $errors = [];
-    if ($nom === null) {
-        $errors[] = ValidacioErrors::requerit('nom');
-    } elseif (mb_strlen($nom) > 255) {
-        $errors[] = ValidacioErrors::massaLlarg('nom', 255);
-    }
-
-    if ($nif !== null && mb_strlen($nif) > 20) {
-        $errors[] = ValidacioErrors::massaLlarg('nif', 20);
-    }
-    if ($numero_iva !== null && mb_strlen($numero_iva) > 20) {
-        $errors[] = ValidacioErrors::massaLlarg('numero_iva', 20);
-    }
-    if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = ValidacioErrors::invalid('email');
-    }
-    if ($telefon !== null && mb_strlen($telefon) > 20) {
-        $errors[] = ValidacioErrors::massaLlarg('telefon', 20);
-    }
-    if ($adreca !== null && mb_strlen($adreca) > 255) {
-        $errors[] = ValidacioErrors::massaLlarg('adreca', 255);
-    }
-
-    if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
-    }
-
-    try {
-        $conn->beginTransaction();
-
-        $sql = "UPDATE db_comptabilitat_emissors SET
-                    nom = :nom,
-                    nif = :nif,
-                    numero_iva = :numero_iva,
-                    pais = uuid_text_to_bin(NULLIF(:pais, '')),
-                    adreca = :adreca,
-                    telefon = :telefon,
-                    email = :email,
-                    updated_at = NOW()
-                WHERE id = :id";
-
-        $stmt = $conn->prepare($sql);
-
-        $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
-        $stmt->bindValue(':nif', $nif, $nif !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':numero_iva', $numero_iva, $numero_iva !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':pais', $pais, $pais !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':adreca', $adreca, $adreca !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':telefon', $telefon, $telefon !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':email', $email, $email !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-
-        $stmt->execute();
-
-        // Auditoría
-        $detalls = sprintf("Modificació emissor: %s (%s)", $nom, $email ?? '-');
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_emissors', $id);
-
-        $conn->commit();
-
-        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
+        Response::success(MissatgesAPI::success('update'), ['id' => $idFactura], 200);
     } catch (Throwable $e) {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
