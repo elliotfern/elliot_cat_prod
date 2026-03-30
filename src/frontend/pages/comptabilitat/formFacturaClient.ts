@@ -50,8 +50,10 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
 
   if (id && isUpdate) {
     const response = await fetchDataGet<ApiResponse<FitxaFactura>>(API_URLS.GET.FACTURA_CLIENT_ID(id), true);
+
     if (!response || !response.data) return;
-    data = response.data;
+    data = response.data.factura; // <--- aquí extraemos solo el objeto factura
+
     divTitol.innerHTML = `<h2>Modificació dades Factura client</h2>`;
     renderFormInputs(data);
     btnSubmit.textContent = 'Modificar dades';
