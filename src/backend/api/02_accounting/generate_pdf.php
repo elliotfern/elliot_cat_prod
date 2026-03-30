@@ -251,9 +251,13 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
   // Mensajes según método de pago
   $html .= '
     <div class="container">
-     <div style="text-align: center; font-size: 12px;"> 
-        Transacció sense IVA, realitzada d\'acord amb l\'article 1, apartats 54 a 89, de la Llei núm. 190 de 2014, modificada per la Llei núm. 208 de 2015 i la Llei núm. 145 de 2018 de la República Italiana.
-     </div>
+     <div style="text-align:center;">
+          <span style="font-size:10pt;">
+              Transacció sense IVA, realitzada d\'acord amb l\'article 1, apartats 54 a 89, 
+              de la Llei núm. 190 de 2014, modificada per la Llei núm. 208 de 2015 i la 
+              Llei núm. 145 de 2018 de la República Italiana.
+          </span>
+      </div>
 
       <div style="text-align:center;">
           <strong>' . htmlspecialchars($T['paid_by_bank_transfer']) . htmlspecialchars($tipusPagament) . '</strong><br>
