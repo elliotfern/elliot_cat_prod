@@ -137,26 +137,28 @@ function fetchInvoiceAndProducts(int $idInvoice): array
 
 function buildInvoiceHtml(array $obj, array $arr2, array $T): string
 {
-  $id_factura   = (int)$obj['id'];
-  $empresa      = $obj['empresa'] ?? '';
-  $nomClient    = $obj['nom'] ?? '';
-  $cognoms      = $obj['cognoms'] ?? '';
-  $adreca       = $obj['adreca'] ?? '';
-  $ciutat       = $obj['ciutat'] ?? '';
-  $provincia    = $obj['provincia'] ?? '';
-  $pais         = $obj['pais'] ?? '';
-  $nif          = $obj['nif'] ?? '';
-  $cp           = $obj['cp'] ?? '';
-  $any          = (int)($obj['year'] ?? date('Y'));
-  $facDate_net  = !empty($obj['dataFactura']) ? date('d/m/Y', strtotime($obj['dataFactura'])) : '';
-  $facDue_net   = !empty($obj['dataVenciment']) ? date('d/m/Y', strtotime($obj['dataVenciment'])) : '';
+  $id_factura   = $obj['numero_factura'];
+
+  $empresa      = $obj['clientEmpresa'] ?? '';
+  $nomClient    = $obj['clientNom'] ?? '';
+  $cognoms      = $obj['clientCognoms'] ?? '';
+  $adreca       = $obj['clientAdreca'] ?? '';
+  $ciutat       = $obj['clientCiutat'] ?? '';
+  $provincia    = $obj['clientProvincia'] ?? '';
+  $pais         = $obj['clientPais'] ?? '';
+  $nif          = $obj['clientNIF'] ?? '';
+  $cp           = $obj['clientCP'] ?? '';
+
+  $facDate_net  = !empty($obj['yearInvoice']) ? date('d/m/Y', strtotime($obj['yearInvoice'])) : '';
+  $facDue_net   = !empty($obj['data_venciment']) ? date('d/m/Y', strtotime($obj['data_venciment'])) : '';
+
   $pagament     = $obj['metodePagament'] ?? '';
   $tipusPagament     = $obj['tipusNom'] ?? '';
   $notesPagament     = $obj['metodeNotes'] ?? '';
 
-  $subTotal     = (float)($obj['subtotal'] ?? 0);
-  $facVAT       = (float)($obj['vat'] ?? 0);
-  $total        = (float)($obj['total'] ?? 0);
+  $subTotal     = (float)($obj['base_imposable'] ?? 0);
+  $facVAT       = (float)($obj['import_iva'] ?? 0);
+  $total        = (float)($obj['total_factura'] ?? 0);
 
   $emissorNom   = $obj['emissorNom'] ?? '';
   $emissorNIF   = $obj['emissorNIF'] ?? '';
@@ -173,7 +175,7 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
 
   $html = '<br><br><br><br><br>
   <div class="container">
-      <strong>' . htmlspecialchars($T['invoice_number']) . ': ' . $id_factura . '/' . $any . '</strong><br>
+      <strong>' . htmlspecialchars($T['invoice_number']) . ': ' . $id_factura . '</strong><br>
       ' . htmlspecialchars($T['invoice_date']) . ': ' . $facDate_net . '<br>
       ' . htmlspecialchars($T['due_date']) . ': ' . $facDue_net . '<br>
       ' . htmlspecialchars($T['payment_method']) . ': ' . htmlspecialchars($pagament) . '
@@ -223,8 +225,8 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
 
   foreach ($arr2 as $obj2) {
     if (!$obj2) continue;
-    $prod  = $obj2['nom'] ?? '';
-    $notes = $obj2['notes'] ?? '';
+    $prod  = $obj2['producte'] ?? '';
+    $notes = $obj2['descripcio'] ?? '';
     $preu  = isset($obj2['preu']) ? (float)$obj2['preu'] : 0.0;
 
     $line  = htmlspecialchars($prod);
@@ -280,7 +282,22 @@ class MYPDF extends TCPDF
     $this->SetFont('helvetica', 'I', 8);
     $this->Cell(0, 10, ($T['page'] ?? 'Page') . ' ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
     $this->Ln(4);
-    $this->Cell(0, 10, ($T['footer_owner'] ?? 'Elliot Fernandez') . ' — ' . ($T['footer_tax_ref'] ?? 'Tax reference number'), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+    $this->Cell(
+      0,
+      10,
+      ($T['footer_owner'] ?? 'Elliot Fernandez') . ' — ' .
+        ($T['footer_tax_ref'] ?? '') .
+        ($emissorNumeroIVA ?? 'Tax reference number'),
+      0,
+      false,
+      'C',
+      0,
+      '',
+      0,
+      false,
+      'T',
+      'M'
+    );
   }
 }
 

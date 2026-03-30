@@ -267,6 +267,7 @@ if ($slug === 'clients') {
                 e.adreca AS emissorAdreca,
                 e.telefon AS emissorTelefon,
                 e.email AS emissorEmail
+                pai.pais_ca AS emissorPais,
             FROM %s AS ic
             LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
             LEFT JOIN %s AS ist ON ist.id = ic.estat
@@ -276,6 +277,7 @@ if ($slug === 'clients') {
             LEFT JOIN %s AS pro ON pro.id = c.provincia_id
             LEFT JOIN %s AS pa ON pa.id = c.pais_id
             LEFT JOIN %s AS e ON e.id = ic.emissor_id
+            LEFT JOIN %s AS pai ON pai.id = e.pais
             WHERE ic.id = :id
             LIMIT 1
         SQL;
@@ -290,7 +292,8 @@ if ($slug === 'clients') {
             qi(Tables::DB_CIUTATS, $pdo),
             qi(Tables::DB_PROVINCIES, $pdo),
             qi(Tables::DB_PAISOS, $pdo),
-            qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
+            qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo),
+            qi(Tables::DB_PAISOS, $pdo),
         );
 
         $result = $db->getData($queryFactura, [':id' => $id], true);
