@@ -130,8 +130,8 @@ if ($slug === 'clients') {
         );
     }
 
-// GET : Llistat factures clients
-// ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients?emissor_id={id}"
+    // GET : Llistat factures clients
+    // ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients?emissor_id={id}"
 } else if ($slug === 'facturacioClients') {
 
     $emissor_id = isset($_GET['emissor_id']) ? (int) $_GET['emissor_id'] : null;
@@ -156,7 +156,8 @@ if ($slug === 'clients') {
             ic.metode_pagament,
             vt.ivaPercen,
             ist.estat,
-            pt.tipusNom,
+            pt.tipus AS tipusNom,
+            pt.notes,
             c.clientNom,
             c.clientCognoms,
             c.clientEmpresa
@@ -200,7 +201,6 @@ if ($slug === 'clients') {
             $result,
             200
         );
-
     } catch (PDOException $e) {
         Response::error(
             MissatgesAPI::error('errorBD'),
