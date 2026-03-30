@@ -289,7 +289,7 @@ if ($slug === 'clients') {
 
             foreach ($detallsProductes as $p) {
                 $stmtProd->execute([
-                    ':factura_id' => $newId,
+                    ':factura_id' => $numero_factura,
                     ':producte_id' => $toIntOrNull($p['producte_id'] ?? null),
                     ':descripcio' => $trimOrNull($p['descripcio'] ?? null),
                     ':preu' => $toDecimal($p['preu'] ?? null)

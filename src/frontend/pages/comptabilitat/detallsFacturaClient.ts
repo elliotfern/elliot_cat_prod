@@ -9,12 +9,6 @@ const API_URLS = {
   INVOICE_BY_ID: (id: string | number) => `${API_BASE}/comptabilitat/get/facturaCompleta?id=${id}`,
 };
 
-const MOD_URLS = {
-  EDIT_LINE: (invoiceId: string | number, lineId: string | number) => `${DOMAIN_WEB}/gestio/comptabilitat/modifica-producte-factura/${lineId}`,
-};
-
-const NEW_PRODUCT_URL = `${DOMAIN_WEB}/gestio/comptabilitat/nou-producte-factura`;
-
 // === Tipos ===
 interface ApiResponse<T> {
   status: 'success' | 'error' | string;
@@ -52,7 +46,7 @@ interface InvoiceLine {
   id: number;
   factura_id: number;
   producte: string;
-  notes: string | null;
+  descripcio: string | null;
   preu: number;
 }
 
@@ -102,6 +96,8 @@ async function fetchApiData<T>(url: string, init?: RequestInit): Promise<T> {
 function renderInvoiceHeader(container: HTMLElement, inv: Invoice): void {
   const client = inv.clientEmpresa?.trim() ? `<strong>${escHtml(inv.clientEmpresa)}</strong>` : [inv.clientNom, inv.clientCognoms].filter(Boolean).map(escHtml).join(' ') || '—';
 
+  const editUrl = `${DOMAIN_WEB}/gestio/comptabilitat/modifica-factura/${inv.id}`;
+
   container.innerHTML = `
     <div class="invoice-header">
       <h2 class="mb-1">Factura #${escHtml(String(inv.numero_factura))}</small></h2>
@@ -120,6 +116,15 @@ function renderInvoiceHeader(container: HTMLElement, inv: Invoice): void {
           <span class="d-block"><strong>IVA %:</strong> ${escHtml(String(inv.ivaPercen ?? '—'))}%</span>
         </div>
       </div>
+    </div>
+
+      <!-- Botón editar -->
+      <div>
+        <a href="${editUrl}" class="btn btn-primary">
+          ✏️ Modificar factura
+        </a>
+      </div>
+
     </div>
   `;
 }
@@ -152,17 +157,8 @@ function renderInvoiceAmounts(container: HTMLElement, inv: Invoice): void {
 }
 
 function renderProducts(container: HTMLElement, invoiceId: number, lines: InvoiceLine[]): void {
-  const addBtnHTML = `
-    <hr>
-    <div class="mb-3" style="margin-top:35px">
-      <a class="button btn-gran btn-secondari"
-         href="${NEW_PRODUCT_URL}">Afegir producte</a>
-    </div>
-  `;
-
   if (!lines.length) {
     container.innerHTML = `
-      ${addBtnHTML}
       <div class="alert alert-info">Aquesta factura no té línies de producte.</div>
       <div class="table-responsive"></div>
     `;
@@ -174,29 +170,21 @@ function renderProducts(container: HTMLElement, invoiceId: number, lines: Invoic
       (l) => `
     <tr data-line-id="${escHtml(l.id)}">
       <td class="align-middle">${escHtml(l.producte)}</td>
-      <td class="align-middle">${escHtml(l.notes || '')}</td>
+      <td class="align-middle">${escHtml(l.descripcio || '')}</td>
       <td class="align-middle text-end">${formatEUR(l.preu)}</td>
-      <td class="align-middle text-end">
-        <a class="btn btn-sm btn-outline-primary me-2 js-edit"
-           href="${escHtml(MOD_URLS.EDIT_LINE(invoiceId, l.id))}"
-           rel="noopener">Modifica</a>
-        <button class="btn btn-sm btn-outline-danger js-delete" type="button">Eliminar</button>
-      </td>
     </tr>
   `
     )
     .join('');
 
   container.innerHTML = `
-    ${addBtnHTML}
     <div class="table-responsive">
       <table class="table table-sm table-striped align-middle">
         <thead>
           <tr>
             <th style="width:40%">Producte</th>
-            <th style="width:40%">Notes</th>
+            <th style="width:40%">Descripció</th>
             <th class="text-end" style="width:10%">Preu</th>
-            <th class="text-end" style="width:10%">Accions</th>
           </tr>
         </thead>
         <tbody>
@@ -248,9 +236,6 @@ export async function detallsFacturaClients(rootSelector = '#invoiceRoot'): Prom
     } catch {
       productsEl.innerHTML = `
         <hr>
-        <div class="mb-3" style="margin-top:35px">
-          <a class="button btn-gran btn-secondari" href="${NEW_PRODUCT_URL}">Afegir producte</a>
-        </div>
         <div class="alert alert-warning">No s'han pogut carregar les línies de producte en aquest moment.</div>
       `;
     }
