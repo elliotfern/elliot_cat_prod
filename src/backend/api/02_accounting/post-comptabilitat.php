@@ -40,17 +40,18 @@ header("Access-Control-Allow-Methods: POST");
  * Genera el siguiente número de factura basado en el año.
  *
  * @param PDO $db Conexión PDO a la base de datos
- * @return string Número de factura en formato YYYY-SEQ (ej: 2026-01)
+ * @return string Número de factura en formato YYYY-SEQ-C (ej: 2026-01-C)
  */
 function generarNumeroFactura(PDO $db): string
 {
     $year = date('Y');
 
-    // Consulta la última factura del año
+    // Consulta la última factura del año de la serie C
     $stmt = $db->prepare("
         SELECT numero_factura
         FROM db_comptabilitat_facturacio_clients
         WHERE numero_factura LIKE :yearPrefix
+        AND numero_factura LIKE '%-C'
         ORDER BY id DESC
         LIMIT 1
     ");
@@ -59,7 +60,7 @@ function generarNumeroFactura(PDO $db): string
     $ultima = $stmt->fetchColumn();
 
     if ($ultima) {
-        // extraer la parte secuencial
+        // Extraer la parte secuencial
         $parts = explode('-', $ultima);
         $seq = (int)($parts[1] ?? 0);
         $seq++;
@@ -67,8 +68,8 @@ function generarNumeroFactura(PDO $db): string
         $seq = 1;
     }
 
-    // Formato con dos dígitos en la secuencia: 2026-01, 2026-02, ...
-    return sprintf('%s-%02d', $year, $seq);
+    // Formato con dos dígitos en la secuencia y sufijo C
+    return sprintf('%s-%02d-C', $year, $seq);
 }
 
 if ($slug === 'clients') {
