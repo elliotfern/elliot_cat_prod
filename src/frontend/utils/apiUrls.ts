@@ -111,7 +111,7 @@ export const API_URLS: ApiUrls = {
     PAIS_ID: (id: string) => `${API_WEB}/${ENDPOINTS.PAISOS}/${encodeURIComponent(id)}`,
     CLIENTS: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENTS}`,
     CLIENT_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENT}?id=${encodeURIComponent(id)}`,
-    FACTURACIO_CLIENTS: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURACIO_CLIENTS}?id=${encodeURIComponent(id)}`,
+    FACTURACIO_CLIENTS: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURACIO_CLIENTS}?emissor_id=${encodeURIComponent(id)}`,
     INVOICE_PDF: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PDF}/${ENDPOINTS.PDF_FACTURA}/${encodeURIComponent(id)}/${encodeURIComponent(lang)}`,
     FACTURA_CLIENT_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_ID}?id=${encodeURIComponent(id)}`,
     FACTURA_CLIENT_PRODUCTE_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE_ID}?id=$
