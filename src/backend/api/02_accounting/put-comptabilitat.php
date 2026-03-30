@@ -175,60 +175,44 @@ if ($slug === 'clients') {
     }
 
     // Helpers
-    $trimOrNull = static function ($v): ?string {
-        if ($v === null) return null;
-        $s = is_string($v) ? trim($v) : trim((string)$v);
-        return $s === '' ? null : $s;
-    };
-    $toIntOrNull = static function ($v): ?int {
-        return (is_numeric($v) && (string)(int)$v === (string)$v) ? (int)$v : (is_numeric($v) ? (int)$v : null);
-    };
-    $dateOrNull = static function ($v): ?string {
-        return is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) ? $v : null;
-    };
-    $toDecimal = static function ($v): ?string {
-        if ($v === null) return null;
-        $s = is_string($v) ? trim($v) : trim((string)$v);
-        $s = str_replace([' ', "\u{00A0}"], '', $s);
-        $s = str_replace(',', '.', $s);
-        return preg_match('/^-?\d+(\.\d{1,4})?$/', $s) ? $s : null;
-    };
+    $trimOrNull = static fn($v): ?string => $v === null ? null : (trim((string)$v) ?: null);
+    $toIntOrNull = static fn($v): ?int => is_numeric($v) ? (int)$v : null;
+    $dateOrNull = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
+    $toDecimal = static fn($v): ?string => $v === null ? null : (preg_match('/^-?\d+(\.\d{1,4})?$/', str_replace(',', '.', str_replace([' ', "\u{00A0}"], '', (string)$v))) ? str_replace(',', '.', (string)$v) : null);
 
-    // Datos requeridos
-    $idFactura       = $toIntOrNull($data['idFactura'] ?? null);
-    $emissorId       = $toIntOrNull($data['emissor_id'] ?? null);
-    $clientId        = $toIntOrNull($data['clientId'] ?? null);
-    $concepte        = $trimOrNull($data['concepte'] ?? null);
-    $dataFactura     = $dateOrNull($data['dataFactura'] ?? null);
-    $dataVenciment   = $dateOrNull($data['dataVenciment'] ?? null);
-    $baseImposable   = $toDecimal($data['baseImposable'] ?? null);
-    $despesesExtra   = $toDecimal($data['despesesExtra'] ?? 0);
-    $totalFactura    = $toDecimal($data['totalFactura'] ?? null);
-    $importIva       = $toDecimal($data['importIva'] ?? null);
-    $tipusIva        = $toIntOrNull($data['tipusIva'] ?? null);
-    $estat           = $toIntOrNull($data['estat'] ?? null);
-    $metodePagament  = $toIntOrNull($data['metodePagament'] ?? null);
-    $notes           = $trimOrNull($data['notes'] ?? null);
-    $projecteId      = $toIntOrNull($data['projecteId'] ?? null);
-    $arxiuUrl        = $trimOrNull($data['arxiuUrl'] ?? null);
-    $recurrent = isset($data['recurrent']) ? (int)$data['recurrent'] : 0;
-    $frequencia = $recurrent ? $trimOrNull($data['frequencia'] ?? null) : null;
-    $detallsProductes = $data['productes'] ?? [];
+    // --- Campos según la BD ---
+    $id             = $toIntOrNull($data['id'] ?? null);
+    $numero_factura = $trimOrNull($data['numero_factura'] ?? null);
+    $emissor_id     = $toIntOrNull($data['emissor_id'] ?? null);
+    $client_id      = $toIntOrNull($data['client_id'] ?? null);
+    $concepte       = $trimOrNull($data['concepte'] ?? null);
+    $data_factura   = $dateOrNull($data['data_factura'] ?? null);
+    $data_venciment = $dateOrNull($data['data_venciment'] ?? null);
+    $base_imposable = $toDecimal($data['base_imposable'] ?? null);
+    $despeses_extra = $toDecimal($data['despeses_extra'] ?? 0);
+    $total_factura  = $toDecimal($data['total_factura'] ?? null);
+    $import_iva     = $toDecimal($data['import_iva'] ?? null);
+    $tipus_iva      = $toIntOrNull($data['tipus_iva'] ?? null);
+    $estat          = $toIntOrNull($data['estat'] ?? null);
+    $metode_pagament = $toIntOrNull($data['metode_pagament'] ?? null);
+    $notes          = $trimOrNull($data['notes'] ?? null);
+    $projecte_id    = $toIntOrNull($data['projecte_id'] ?? null);
+    $arxiu_url      = $trimOrNull($data['arxiu_url'] ?? null);
+    $recurrent      = isset($data['recurrent']) ? (int)$data['recurrent'] : 0;
+    $frequencia     = $recurrent ? $trimOrNull($data['frequencia'] ?? null) : null;
+    $productes      = $data['productes'] ?? [];
 
-    // Validación
+    // --- Validación ---
     $errors = [];
-    if ($idFactura === null) $errors[] = ValidacioErrors::requerit('idFactura');
-    if ($emissorId === null) $errors[] = ValidacioErrors::requerit('emissor_id');
-    if ($clientId === null)  $errors[] = ValidacioErrors::requerit('clientId');
-    if ($concepte === null)  $errors[] = ValidacioErrors::requerit('concepte');
-    if ($dataFactura === null) $errors[] = ValidacioErrors::dataNoValida('dataFactura');
-    if ($dataVenciment === null) $errors[] = ValidacioErrors::dataNoValida('dataVenciment');
-    if ($baseImposable === null) $errors[] = ValidacioErrors::requerit('baseImposable');
-    if ($totalFactura === null) $errors[] = ValidacioErrors::requerit('totalFactura');
-    if ($importIva === null) $errors[] = ValidacioErrors::requerit('importIva');
-    if ($tipusIva === null) $errors[] = ValidacioErrors::requerit('tipusIva');
-    if ($estat === null) $errors[] = ValidacioErrors::requerit('estat');
-    if ($metodePagament === null) $errors[] = ValidacioErrors::requerit('metodePagament');
+    if ($id === null)             $errors[] = ValidacioErrors::requerit('id');
+    if ($client_id === null)      $errors[] = ValidacioErrors::requerit('client_id');
+    if ($data_factura === null)   $errors[] = ValidacioErrors::dataNoValida('data_factura');
+    if ($data_venciment === null) $errors[] = ValidacioErrors::dataNoValida('data_venciment');
+    if ($base_imposable === null) $errors[] = ValidacioErrors::requerit('base_imposable');
+    if ($total_factura === null)  $errors[] = ValidacioErrors::requerit('total_factura');
+    if ($import_iva === null)     $errors[] = ValidacioErrors::requerit('import_iva');
+    if ($tipus_iva === null)      $errors[] = ValidacioErrors::requerit('tipus_iva');
+    if ($metode_pagament === null) $errors[] = ValidacioErrors::requerit('metode_pagament');
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
@@ -238,7 +222,7 @@ if ($slug === 'clients') {
         global $conn, $userUuid;
         $conn->beginTransaction();
 
-        // Actualiza factura
+        // --- Update factura ---
         $sql = "UPDATE db_comptabilitat_facturacio_clients
                 SET emissor_id = :emissor_id,
                     client_id = :client_id,
@@ -257,54 +241,56 @@ if ($slug === 'clients') {
                     arxiu_url = :arxiu_url,
                     recurrent = :recurrent,
                     frequencia = :frequencia
-                WHERE id = :idFactura";
+                WHERE id = :id";
 
         $stmt = $conn->prepare($sql);
-        $stmt->bindValue(':idFactura', $idFactura, PDO::PARAM_INT);
-        $stmt->bindValue(':emissor_id', $emissorId, PDO::PARAM_INT);
-        $stmt->bindValue(':client_id', $clientId, PDO::PARAM_INT);
-        $stmt->bindValue(':concepte', $concepte, PDO::PARAM_STR);
-        $stmt->bindValue(':data_factura', $dataFactura, PDO::PARAM_STR);
-        $stmt->bindValue(':data_venciment', $dataVenciment, PDO::PARAM_STR);
-        $stmt->bindValue(':base_imposable', $baseImposable, PDO::PARAM_STR);
-        $stmt->bindValue(':despeses_extra', $despesesExtra, PDO::PARAM_STR);
-        $stmt->bindValue(':total_factura', $totalFactura, PDO::PARAM_STR);
-        $stmt->bindValue(':import_iva', $importIva, PDO::PARAM_STR);
-        $stmt->bindValue(':tipus_iva', $tipusIva, PDO::PARAM_INT);
-        $stmt->bindValue(':estat', $estat, PDO::PARAM_INT);
-        $stmt->bindValue(':metode_pagament', $metodePagament, PDO::PARAM_INT);
-        $stmt->bindValue(':notes', $notes, PDO::PARAM_STR);
-        $stmt->bindValue(':projecte_id', $projecteId, PDO::PARAM_INT);
-        $stmt->bindValue(':arxiu_url', $arxiuUrl, PDO::PARAM_STR);
-        $stmt->bindValue(':recurrent', $recurrent, PDO::PARAM_INT);
-        $stmt->bindValue(':frequencia', $frequencia, PDO::PARAM_STR);
-        $stmt->execute();
+        $stmt->execute([
+            ':id'             => $id,
+            ':emissor_id'     => $emissor_id,
+            ':client_id'      => $client_id,
+            ':concepte'       => $concepte,
+            ':data_factura'   => $data_factura,
+            ':data_venciment' => $data_venciment,
+            ':base_imposable' => $base_imposable,
+            ':despeses_extra' => $despeses_extra,
+            ':total_factura'  => $total_factura,
+            ':import_iva'     => $import_iva,
+            ':tipus_iva'      => $tipus_iva,
+            ':estat'          => $estat,
+            ':metode_pagament' => $metode_pagament,
+            ':notes'          => $notes,
+            ':projecte_id'    => $projecte_id,
+            ':arxiu_url'      => $arxiu_url,
+            ':recurrent'      => $recurrent,
+            ':frequencia'     => $frequencia,
+        ]);
 
-        // Productos: eliminar antiguos y añadir nuevos
-        $conn->prepare("DELETE FROM db_comptabilitat_facturacio_clients_productes WHERE factura_id = :idFactura")
-            ->execute([':idFactura' => $idFactura]);
+        // --- Productos ---
+        $conn->prepare("DELETE FROM db_comptabilitat_facturacio_clients_productes WHERE factura_id = :id")
+            ->execute([':id' => $id]);
 
-        if (!empty($detallsProductes)) {
+        if (!empty($productes)) {
             $sqlProd = "INSERT INTO db_comptabilitat_facturacio_clients_productes
                         (factura_id, producte_id, descripcio, preu)
                         VALUES (:factura_id, :producte_id, :descripcio, :preu)";
             $stmtProd = $conn->prepare($sqlProd);
 
-            foreach ($detallsProductes as $p) {
-                $stmtProd->bindValue(':factura_id', $idFactura, PDO::PARAM_INT);
-                $stmtProd->bindValue(':producte_id', $toIntOrNull($p['producte_id'] ?? null), PDO::PARAM_INT);
-                $stmtProd->bindValue(':descripcio', $trimOrNull($p['descripcio'] ?? null), PDO::PARAM_STR);
-                $stmtProd->bindValue(':preu', $toDecimal($p['preu'] ?? null), PDO::PARAM_STR);
-                $stmtProd->execute();
+            foreach ($productes as $p) {
+                $stmtProd->execute([
+                    ':factura_id' => $id,
+                    ':producte_id' => $toIntOrNull($p['producte_id'] ?? null),
+                    ':descripcio' => $trimOrNull($p['descripcio'] ?? null),
+                    ':preu'       => $toDecimal($p['preu'] ?? null),
+                ]);
             }
         }
 
-        // Auditoría
-        $detalls = sprintf("Actualització factura client=%d concepte=%s data=%s", $clientId, $concepte, $dataFactura);
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_facturacio_clients', $idFactura);
+        // --- Auditoría ---
+        $detalls = sprintf("Actualització factura client=%d concepte=%s data=%s", $client_id, $concepte, $data_factura);
+        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_facturacio_clients', $id);
 
         $conn->commit();
-        Response::success(MissatgesAPI::success('update'), ['id' => $idFactura], 200);
+        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
     } catch (Throwable $e) {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
