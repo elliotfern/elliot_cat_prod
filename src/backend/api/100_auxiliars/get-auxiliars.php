@@ -1296,7 +1296,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     }
 
     // Llistat Projectes
-    // ruta GET => "/api/cinema/get/auxiliars/projectes"
+    // ruta GET => "/api/auxiliars/projectes"
 } else if ($slug === "projectes") {
 
     $sql = <<<SQL

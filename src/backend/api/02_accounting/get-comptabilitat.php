@@ -286,7 +286,7 @@ if ($slug === 'clients') {
                 p.id,
                 p.factura_id,
                 pd.producte,
-                p.notes,
+                p.descripcio,
                 p.preu
             FROM %s AS p
             LEFT JOIN %s AS pd ON pd.id = p.producte_id

@@ -211,6 +211,8 @@ if ($slug === 'clients') {
     $notes           = $trimOrNull($data['notes'] ?? null);
     $projecteId      = $toIntOrNull($data['projecteId'] ?? null);
     $arxiuUrl        = $trimOrNull($data['arxiuUrl'] ?? null);
+    $recurrent = isset($data['recurrent']) ? (int)$data['recurrent'] : 0;
+    $frequencia = $recurrent ? $trimOrNull($data['frequencia'] ?? null) : null;
     $detallsProductes = $data['productes'] ?? [];
 
     // Validación
@@ -252,7 +254,9 @@ if ($slug === 'clients') {
                     metode_pagament = :metode_pagament,
                     notes = :notes,
                     projecte_id = :projecte_id,
-                    arxiu_url = :arxiu_url
+                    arxiu_url = :arxiu_url,
+                    recurrent = :recurrent,
+                    frequencia = :frequencia
                 WHERE id = :idFactura";
 
         $stmt = $conn->prepare($sql);
@@ -272,6 +276,8 @@ if ($slug === 'clients') {
         $stmt->bindValue(':notes', $notes, PDO::PARAM_STR);
         $stmt->bindValue(':projecte_id', $projecteId, PDO::PARAM_INT);
         $stmt->bindValue(':arxiu_url', $arxiuUrl, PDO::PARAM_STR);
+        $stmt->bindValue(':recurrent', $recurrent, PDO::PARAM_INT);
+        $stmt->bindValue(':frequencia', $frequencia, PDO::PARAM_STR);
         $stmt->execute();
 
         // Productos: eliminar antiguos y añadir nuevos
@@ -280,14 +286,14 @@ if ($slug === 'clients') {
 
         if (!empty($detallsProductes)) {
             $sqlProd = "INSERT INTO db_comptabilitat_facturacio_clients_productes
-                        (factura_id, producte_id, notes, preu)
-                        VALUES (:factura_id, :producte_id, :notes, :preu)";
+                        (factura_id, producte_id, descripcio, preu)
+                        VALUES (:factura_id, :producte_id, :descripcio, :preu)";
             $stmtProd = $conn->prepare($sqlProd);
 
             foreach ($detallsProductes as $p) {
                 $stmtProd->bindValue(':factura_id', $idFactura, PDO::PARAM_INT);
                 $stmtProd->bindValue(':producte_id', $toIntOrNull($p['producte_id'] ?? null), PDO::PARAM_INT);
-                $stmtProd->bindValue(':notes', $trimOrNull($p['notes'] ?? null), PDO::PARAM_STR);
+                $stmtProd->bindValue(':descripcio', $trimOrNull($p['descripcio'] ?? null), PDO::PARAM_STR);
                 $stmtProd->bindValue(':preu', $toDecimal($p['preu'] ?? null), PDO::PARAM_STR);
                 $stmtProd->execute();
             }

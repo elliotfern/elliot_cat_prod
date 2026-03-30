@@ -69,7 +69,7 @@ function generarNumeroFactura(PDO $db): string
     }
 
     // Formato con dos dígitos en la secuencia y sufijo C
-    return sprintf('%s-%02d-C', $year, $seq);
+    return sprintf('%s-%03d-C', $year, $seq);
 }
 
 if ($slug === 'clients') {
@@ -217,6 +217,9 @@ if ($slug === 'clients') {
     $notes           = $trimOrNull($data['notes'] ?? null);
     $projecte_id     = $toIntOrNull($data['projecte_id'] ?? null);
     $arxiu_url       = $trimOrNull($data['arxiu_url'] ?? null);
+    $recurrent = isset($data['recurrent']) ? (int)$data['recurrent'] : 0;
+    $frequencia = $recurrent ? $trimOrNull($data['frequencia'] ?? null) : null;
+
     $detallsProductes = $data['productes'] ?? [];
 
     // Validación
@@ -248,11 +251,11 @@ if ($slug === 'clients') {
         $sql = "INSERT INTO db_comptabilitat_facturacio_clients
               (numero_factura, emissor_id, client_id, concepte, data_factura, data_venciment,
                base_imposable, despeses_extra, total_factura, import_iva, tipus_iva, estat,
-               metode_pagament, notes, projecte_id, arxiu_url)
+               metode_pagament, notes, projecte_id, arxiu_url, recurrent, frequencia)
             VALUES
               (:numero_factura, :emissor_id, :client_id, :concepte, :data_factura, :data_venciment,
                :base_imposable, :despeses_extra, :total_factura, :import_iva, :tipus_iva, :estat,
-               :metode_pagament, :notes, :projecte_id, :arxiu_url)";
+               :metode_pagament, :notes, :projecte_id, :arxiu_url, :recurrent, :frequencia)";
 
         $stmt = $conn->prepare($sql);
         $stmt->execute([
@@ -271,22 +274,24 @@ if ($slug === 'clients') {
             ':metode_pagament' => $metode_pagament,
             ':notes' => $notes,
             ':projecte_id' => $projecte_id,
-            ':arxiu_url' => $arxiu_url
+            ':arxiu_url' => $arxiu_url,
+            ':recurrent' => $recurrent,
+            'frequencia' => $frequencia,
         ]);
         $newId = (int)$conn->lastInsertId();
 
         // Inserta productos
         if (!empty($detallsProductes)) {
             $sqlProd = "INSERT INTO db_comptabilitat_facturacio_clients_productes
-                        (factura_id, producte_id, notes, preu)
-                        VALUES (:factura_id, :producte_id, :notes, :preu)";
+                        (factura_id, producte_id, descripcio, preu)
+                        VALUES (:factura_id, :producte_id, :descripcio, :preu)";
             $stmtProd = $conn->prepare($sqlProd);
 
             foreach ($detallsProductes as $p) {
                 $stmtProd->execute([
                     ':factura_id' => $newId,
                     ':producte_id' => $toIntOrNull($p['producte_id'] ?? null),
-                    ':notes' => $trimOrNull($p['notes'] ?? null),
+                    ':descripcio' => $trimOrNull($p['descripcio'] ?? null),
                     ':preu' => $toDecimal($p['preu'] ?? null)
                 ]);
             }

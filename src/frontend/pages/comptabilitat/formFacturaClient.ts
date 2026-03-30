@@ -6,7 +6,7 @@ import { renderFormInputs } from '../../utils/renderInputsForm';
 
 interface ProducteFactura {
   producte_id: number | null;
-  notes: string;
+  descripcio: string;
   preu: number;
 }
 
@@ -68,9 +68,11 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
   await auxiliarSelect(data.estat ?? 0, 'estatFacturacio', 'estat', 'estat');
   await auxiliarSelect(data.metode_pagament ?? 0, 'tipusPagament', 'metode_pagament', 'tipus_notes');
   await auxiliarSelect(data.emissor_id ?? 0, 'emissors', 'emissor_id', 'nom');
+  await auxiliarSelect(data.projecte_id ?? 0, 'projectes', 'projecte_id', 'name');
 
   // Inicializar productos
   initProductesFactura(data.productes ?? []);
+  initRecurrentFrecuencia(data);
 }
 
 /**
@@ -94,12 +96,12 @@ function preProcessFacturaFormData(rawData: Record<string, any>): Record<string,
     notes: rawData.notes ?? null,
     projecte_id: rawData.projecte_id ? Number(rawData.projecte_id) : null,
     arxiu_url: rawData.arxiu_url ?? null,
-    recurrent: rawData.recurrent ? Boolean(Number(rawData.recurrent)) : false,
-    frequencia: rawData.frequencia ?? null,
+    recurrent: rawData.recurrent ? 1 : 0,
+    frequencia: rawData.recurrent ? rawData.frequencia || null : null,
     productes: Array.isArray(rawData.producte_id)
       ? rawData.producte_id.map((id, idx) => ({
           producte_id: Number(id),
-          notes: (rawData.notes ?? [])[idx] ?? '',
+          descripcio: (rawData.descripcio ?? [])[idx] ?? '',
           preu: (rawData.preu ?? [])[idx] ? Number((rawData.preu ?? [])[idx]) : 0,
         }))
       : [],
@@ -131,7 +133,7 @@ export async function initProductesFactura(existingProducts: ProducteFactura[] =
         </select>
       </td>
       <td><input type="text" name="preu[]" class="form-control" value="${product?.preu ?? ''}" /></td>
-      <td><input type="text" name="notes[]" class="form-control" value="${product?.notes ?? ''}" /></td>
+      <td><input type="text" name="descripcio[]" class="form-control" value="${product?.descripcio ?? ''}" /></td>
       <td><button type="button" class="btn btn-danger btn-sm removeProducte">Eliminar</button></td>
     `;
 
@@ -145,4 +147,28 @@ export async function initProductesFactura(existingProducts: ProducteFactura[] =
 
   // Renderizar productos existentes (al editar)
   existingProducts.forEach((p) => crearFila(p));
+}
+
+export function initRecurrentFrecuencia(data?: any) {
+  const checkbox = document.getElementById('recurrent') as HTMLInputElement;
+  const select = document.getElementById('frequencia') as HTMLSelectElement;
+
+  if (!checkbox || !select) return;
+
+  // Estado inicial (modo UPDATE)
+  if (data) {
+    checkbox.checked = Boolean(data.recurrent);
+    select.disabled = !checkbox.checked;
+    select.value = data.frequencia ?? '';
+  }
+
+  // Evento cambio checkbox
+  checkbox.addEventListener('change', () => {
+    if (checkbox.checked) {
+      select.disabled = false;
+    } else {
+      select.disabled = true;
+      select.value = ''; // limpiamos
+    }
+  });
 }

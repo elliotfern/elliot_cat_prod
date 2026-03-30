@@ -98,6 +98,39 @@
                 </select>
             </div>
 
+            <div class="col-md-12">
+                <label for="notes">Notes factura:</label>
+                <input class="form-control" type="text" name="notes" id="notes" />
+                <label style="color:#dc3545;display:none" id="notesCheck">* Missing data</label>
+            </div>
+
+            <div class="col-md-12">
+                <label for="arxiu_url">URL Factura:</label>
+                <input class="form-control" type="text" name="arxiu_url" id="arxiu_url" />
+                <label style="color:#dc3545;display:none" id="notesCheck">* Missing data</label>
+            </div>
+
+            <div class="col-md-4">
+                <label for="recurrent">Factura recurrent:</label>
+                <input type="checkbox" id="recurrent" name="recurrent" value="1" />
+            </div>
+
+            <div class="col-md-4">
+                <label for="frequencia">Freqüència:</label>
+                <select class="form-select" name="frequencia" id="frequencia" disabled>
+                    <option value="">Sense freqüència</option>
+                    <option value="mensual">Mensual</option>
+                    <option value="trimestral">Trimestral</option>
+                    <option value="anual">Anual</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="projecte_id">Projecte associat a la factura:</label>
+                <select class="form-select" name="projecte_id" id="projecte_id">
+                </select>
+            </div>
+
             <!-- Sección de detalle de productos -->
             <div class="col-12" style="margin-top:25px">
                 <h4>Detall de Productes</h4>
@@ -106,7 +139,7 @@
                         <tr>
                             <th>Producte</th>
                             <th>Preu</th>
-                            <th>Notes</th>
+                            <th>Descricpió</th>
                             <th><button type="button" class="btn btn-sm btn-success" id="addProducte">Afegir</button></th>
                         </tr>
                     </thead>
