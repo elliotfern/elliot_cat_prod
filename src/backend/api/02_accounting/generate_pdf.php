@@ -255,9 +255,9 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
     Transacció sense IVA, realitzada d\'acord amb l\'article 1, apartats 54 a 89, de la Llei núm. 190 de 2014, modificada per la Llei núm. 208 de 2015 i la Llei núm. 145 de 2018 de la República Italiana.
      </div>
 
-      <div style="text-align: center;"> <div style="text-align: center;">
-          <th scope="row">' . htmlspecialchars($T['paid_by_bank_transfer']) . htmlspecialchars($tipusPagament) . '</strong><br>
-        ' . htmlspecialchars($notesPagament) . '
+      <div style="text-align:center;">
+          <strong>' . htmlspecialchars($T['paid_by_bank_transfer']) . htmlspecialchars($tipusPagament) . '</strong><br>
+          ' . htmlspecialchars($notesPagament) . '
       </div>
     </div>';
 
@@ -317,6 +317,9 @@ if ($slug === 'invoice-pdf') {
   try {
     $T = i18nInvoice($lang);
     [$obj, $arr2] = fetchInvoiceAndProducts($idInvoice);
+
+    if (!is_array($arr2)) $arr2 = [];
+
     $pdf = generateInvoicePdfBinary($obj, $arr2, $T);
 
     // Número real de la factura
@@ -407,7 +410,7 @@ if ($slug === 'invoice-email') {
     ][$lang]) . '</p>
         </td></tr>
         <tr><td style="background:#f0f2f6;padding:16px;text-align:center;font-size:12px;color:#6b7280;">
-          Elliot Fernández - HispanTIC · Fiscal Tax Number: 9323971DA
+          Elliot Fernández - HispanTIC 
         </td></tr>
       </table>
     </td></tr>
