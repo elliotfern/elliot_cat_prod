@@ -34,9 +34,7 @@ function i18nInvoice(string $lang): array
       'total' => 'Total',
       'subtotal' => 'Subtotal',
       'vat' => 'IVA',
-      'paid_by_bank_transfer' => 'PAGAMENT PER TRANSFERÈNCIA BANCÀRIA',
-      'paid_with_stripe' => 'PAGAT AMB STRIPE (Targeta de crèdit/dèbit)',
-      'paid_bank_transfer' => 'PAGAT PER TRANSFERÈNCIA BANCÀRIA',
+      'paid_by_bank_transfer' => 'Pagament: ',
       'bank' => 'BANC',
       'iban' => 'IBAN',
       'bic' => 'BIC-SWIFT',
@@ -55,9 +53,7 @@ function i18nInvoice(string $lang): array
       'total' => 'Total',
       'subtotal' => 'Subtotal',
       'vat' => 'IVA',
-      'paid_by_bank_transfer' => 'PAGO POR TRANSFERENCIA BANCARIA',
-      'paid_with_stripe' => 'PAGADO CON STRIPE (Tarjeta crédito/débito)',
-      'paid_bank_transfer' => 'PAGADO POR TRANSFERENCIA BANCARIA',
+      'paid_by_bank_transfer' => 'Pago: ',
       'bank' => 'BANCO',
       'iban' => 'IBAN',
       'bic' => 'BIC-SWIFT',
@@ -76,9 +72,7 @@ function i18nInvoice(string $lang): array
       'total' => 'Total',
       'subtotal' => 'Subtotal',
       'vat' => 'VAT',
-      'paid_by_bank_transfer' => 'PAYMENT BY BANK TRANSFER',
-      'paid_with_stripe' => 'PAID WITH STRIPE (Credit/Debit card)',
-      'paid_bank_transfer' => 'PAID BY BANK TRANSFER',
+      'paid_by_bank_transfer' => 'Payment: ',
       'bank' => 'BANK',
       'iban' => 'IBAN',
       'bic' => 'BIC-SWIFT',
@@ -97,9 +91,7 @@ function i18nInvoice(string $lang): array
       'total' => 'Totale',
       'subtotal' => 'Subtotale',
       'vat' => 'IVA',
-      'paid_by_bank_transfer' => 'PAGAMENTO TRAMITE BONIFICO BANCARIO',
-      'paid_with_stripe' => 'PAGATO CON STRIPE (Carta di credito/debito)',
-      'paid_bank_transfer' => 'PAGATO TRAMITE BONIFICO BANCARIO',
+      'paid_by_bank_transfer' => 'Pagamento: ',
       'bank' => 'BANCA',
       'iban' => 'IBAN',
       'bic' => 'BIC-SWIFT',
@@ -262,9 +254,9 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
     <div style="text-align: center;"> 
     Transacció sense IVA, realitzada d\'acord amb l\'article 1, apartats 54 a 89, de la Llei núm. 190 de 2014, modificada per la Llei núm. 208 de 2015 i la Llei núm. 145 de 2018 de la República Italiana.
      </div>
-      <h5 style="text-align: center;">' . htmlspecialchars($T['paid_by_bank_transfer']) . '</h5>
+
       <div style="text-align: center;"> <div style="text-align: center;">
-        <strong>' . htmlspecialchars($tipusPagament) . '</strong><br>
+          <th scope="row">' . htmlspecialchars($T['paid_by_bank_transfer']) . htmlspecialchars($tipusPagament) . '</strong><br>
         ' . htmlspecialchars($notesPagament) . '
       </div>
     </div>';
@@ -327,9 +319,12 @@ if ($slug === 'invoice-pdf') {
     [$obj, $arr2] = fetchInvoiceAndProducts($idInvoice);
     $pdf = generateInvoicePdfBinary($obj, $arr2, $T);
 
-    // Respuesta PDF al navegador
+    // Número real de la factura
+    $numeroFactura = $obj['numero_factura'] ?? $idInvoice;
+
+    // Respuesta PDF al navegador con nombre bonito
     header('Content-Type: application/pdf');
-    header('Content-Disposition: inline; filename="factura_' . $idInvoice . '_' . $lang . '.pdf"');
+    header('Content-Disposition: inline; filename="factura_' . $numeroFactura . '_' . $lang . '.pdf"');
     header('Content-Length: ' . strlen($pdf));
     echo $pdf;
     exit;
@@ -439,7 +434,8 @@ if ($slug === 'invoice-email') {
     $mail->Body    = $emailHtml;
     $mail->AltBody = strip_tags($subject . "\n" . $cta);
 
-    $filename = "factura_{$idInvoice}_{$lang}.pdf";
+    $numeroFactura = $obj['numero_factura'] ?? $idInvoice; // fallback por si no existe
+    $filename = "factura_{$numeroFactura}_{$lang}.pdf";
     $mail->addStringAttachment($pdf, $filename, 'base64', 'application/pdf');
 
     $mail->send();
