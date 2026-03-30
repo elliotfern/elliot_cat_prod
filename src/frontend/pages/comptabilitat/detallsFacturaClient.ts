@@ -45,6 +45,7 @@ interface Invoice {
   clientNom: string | null;
   clientCognoms: string | null;
   clientEmpresa: string | null;
+  numero_factura: string;
 }
 
 interface InvoiceLine {
@@ -103,7 +104,7 @@ function renderInvoiceHeader(container: HTMLElement, inv: Invoice): void {
 
   container.innerHTML = `
     <div class="invoice-header">
-      <h2 class="mb-1">Factura #${escHtml(String(inv.id))} <small class="text-muted">(${escHtml(inv.any)})</small></h2>
+      <h2 class="mb-1">Factura #${escHtml(String(inv.numero_factura))}</small></h2>
       <p class="m-0"><strong>Concepte:</strong> ${escHtml(inv.concepte || '—')}</p>
       <p class="m-0"><strong>Client:</strong> ${client}</p>
       <div class="row mt-2">
@@ -134,7 +135,7 @@ function renderInvoiceAmounts(container: HTMLElement, inv: Invoice): void {
           <div>${formatEUR(inv.base_imposable)}</div>
         </div>
         <div class="col">
-          <div><strong>Taxes/Fees</strong></div>
+          <div><strong>Despeses extres</strong></div>
           <div>${formatEUR(inv.despeses_extra)}</div>
         </div>
         <div class="col">

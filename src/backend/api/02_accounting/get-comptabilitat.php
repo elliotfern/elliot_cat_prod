@@ -233,6 +233,7 @@ if ($slug === 'clients') {
                 ic.concepte,
                 ic.emissor_id,
                 ic.data_factura,
+                ic.numero_factura,
                 YEAR(ic.data_factura) AS yearInvoice,
                 CONCAT('Any ', YEAR(ic.data_factura)) AS any,
                 ic.data_venciment,
@@ -279,7 +280,7 @@ if ($slug === 'clients') {
             return;
         }
 
-        // 2️⃣ Obtenemos los productos asociados
+        // 2️⃣ Obtenemos los productos asociados POR NUMERO_FACTURA
         $sqlProductes = <<<SQL
             SELECT 
                 p.id,
@@ -289,17 +290,17 @@ if ($slug === 'clients') {
                 p.preu
             FROM %s AS p
             LEFT JOIN %s AS pd ON pd.id = p.producte_id
-            WHERE p.factura_id = :id
+            WHERE p.numero_factura = :numero_factura
             ORDER BY p.id ASC
         SQL;
 
         $queryProductes = sprintf(
             $sqlProductes,
-            qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo),
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTES_PRODUCTES, $pdo),
             qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
         );
 
-        $productes = $db->getData($queryProductes, [':id' => $id], false);
+        $productes = $db->getData($queryProductes, [':numero_factura' => $factura['numero_factura']], false);
 
         // 3️⃣ Devolvemos todo junto
         Response::success(
