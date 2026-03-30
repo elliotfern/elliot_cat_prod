@@ -169,7 +169,7 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
     .table, .table th, .table td { padding: 5px; border: 1px solid black; }
   </style>';
 
-  $html = '<br><br><br><br><br>
+  $html = '<br><br><br><br>
   <div class="container">
       <strong>' . htmlspecialchars($T['invoice_number']) . ': ' . $id_factura . '</strong><br>
       ' . htmlspecialchars($T['invoice_date']) . ': ' . $facDate_net . '<br>
@@ -262,7 +262,6 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
     <div style="text-align: center;"> 
     Transacció sense IVA, realitzada d\'acord amb l\'article 1, apartats 54 a 89, de la Llei núm. 190 de 2014, modificada per la Llei núm. 208 de 2015 i la Llei núm. 145 de 2018 de la República Italiana.
      </div>
-    <br> 
       <h5 style="text-align: center;">' . htmlspecialchars($T['paid_by_bank_transfer']) . '</h5>
       <div style="text-align: center;"> <div style="text-align: center;">
         <strong>' . htmlspecialchars($tipusPagament) . '</strong><br>
@@ -282,7 +281,7 @@ class MYPDF extends TCPDF
     $this->SetFont('helvetica', 'I', 8);
     $this->Cell(0, 10, ($T['page'] ?? 'Page') . ' ' . $this->getAliasNumPage() . '/' . $this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
     $this->Ln(4);
-    $this->Cell(0, 10, ($T['footer_owner'] ?? 'Elliot Fernandez') . ' — ' . ($T['footer_tax_ref']  ?? 'Tax reference number'), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+    $this->Cell(0, 10, ($T['footer_owner'] ?? 'Elliot Fernandez'), 0, false, 'C', 0, '', 0, false, 'T', 'M');
   }
 }
 
@@ -361,11 +360,11 @@ if ($slug === 'invoice-email') {
 
     // Asunto + HTML del email (simple y con logo)
     $subject = [
-      'ca' => "Factura #{$id_factura}/{$any}",
-      'es' => "Factura #{$id_factura}/{$any}",
-      'en' => "Invoice #{$id_factura}/{$any}",
-      'it' => "Fattura #{$id_factura}/{$any}",
-    ][$lang] ?? "Invoice #{$id_factura}/{$any}";
+      'ca' => "Factura #{$id_factura}",
+      'es' => "Factura #{$id_factura}",
+      'en' => "Invoice #{$id_factura}",
+      'it' => "Fattura #{$id_factura}",
+    ][$lang] ?? "Invoice #{$id_factura}";
 
     $logo = 'https://media.elliot.cat/img/img-hispantic/hispantic_logo.jpg';
     $cta  = "https://elliot.cat/api/comptabilitat/pdf/invoice-pdf/{$idInvoice}/{$lang}";
