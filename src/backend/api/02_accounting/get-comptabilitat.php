@@ -290,7 +290,7 @@ if ($slug === 'clients') {
                 p.preu
             FROM %s AS p
             LEFT JOIN %s AS pd ON pd.id = p.producte_id
-            WHERE p.numero_factura = :numero_factura
+            WHERE p.factura_id = :numero_factura
             ORDER BY p.id ASC
         SQL;
 
