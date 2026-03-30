@@ -248,7 +248,7 @@ if ($slug === 'clients') {
                 ic.projecte_id,
                 ic.arxiu_url,
                 ic.recurrent,
-                ic.frequencia
+                ic.frequencia,
                 vt.ivaPercen,
                 ist.estat AS estatNom,
                 pt.tipus AS tipusNom,
