@@ -3,7 +3,7 @@
 export function renderFormInputs<T extends Record<string, unknown>>(data: T): void {
   const ZERO_UUID = /^0{8}-0{4}-0{4}-0{4}-0{12}$/i;
 
-  const isNil = (v: unknown): boolean => v === null || v === undefined || v === '' || v === 0 || v === '0' || (typeof v === 'string' && ZERO_UUID.test(v));
+  const isNil = (v: unknown): boolean => v === null || v === undefined || v === '' || (typeof v === 'string' && ZERO_UUID.test(v));
 
   for (const [key, value] of Object.entries(data)) {
     // ¡NO usar querySelector(`#${key}`)! Evita '#0' inválidos
