@@ -222,7 +222,7 @@ if ($slug === 'clients') {
     };
 
     // Datos (requeridos)
-    $emissorId       = $toIntOrNull($data['emissorId'] ?? null);
+    $emissorId       = $toIntOrNull($data['emissor_id'] ?? null);
     $clientId        = $toIntOrNull($data['clientId'] ?? null);
     $concepte        = $trimOrNull($data['concepte'] ?? null);
     $dataFactura     = $dateOrNull($data['dataFactura'] ?? null);
@@ -241,7 +241,7 @@ if ($slug === 'clients') {
 
     // Validación
     $errors = [];
-    if ($emissorId === null) $errors[] = ValidacioErrors::requerit('emissorId');
+    if ($emissorId === null) $errors[] = ValidacioErrors::requerit('emissor_id');
     if ($clientId === null)  $errors[] = ValidacioErrors::requerit('clientId');
     if ($concepte === null)  $errors[] = ValidacioErrors::requerit('concepte');
     if ($dataFactura === null) $errors[] = ValidacioErrors::dataNoValida('dataFactura');

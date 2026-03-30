@@ -69,6 +69,9 @@ export async function formFacturaClient(isUpdate: boolean, id?: number) {
   await auxiliarSelect(data.estat ?? 0, 'estatFacturacio', 'estat', 'estat');
   await auxiliarSelect(data.metode_pagament ?? 0, 'tipusPagament', 'metode_pagament', 'tipus_notes');
   await auxiliarSelect(data.emissor_id ?? 0, 'emissors', 'emissor_id', 'nom');
+
+  (window as any).facturaData = data; // si es edición
+  await initProductesFactura();
 }
 
 /**
