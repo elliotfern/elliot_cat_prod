@@ -75,8 +75,8 @@ async function sendInvoiceEmail(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'i
 
 const EMISSORS: Record<number, string> = {
   1: 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
-  2: 'Autònom Irlanda (1 novembre 2022 - febrer 2026)',
-  3: 'Partita Iva Itàlia (mar 2026 - )',
+  2: 'Autònom Irlanda (1 novembre 2022 - 29 març 2026)',
+  3: 'Partita Iva Itàlia (30 març 2026 - )',
 };
 
 export function renderTitolEmissor(emissorId: number) {
