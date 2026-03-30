@@ -100,6 +100,18 @@ function preProcessFacturaFormData(rawData: Record<string, any>): Record<string,
   const idInput2 = document.querySelector<HTMLInputElement>('#numero_factura');
   const idValue2 = idInput2?.value || null;
 
+  // Recoger productos de la tabla
+  const producteIds = Array.from(document.querySelectorAll<HTMLInputElement | HTMLSelectElement>('select[name="producte_id[]"]')).map((el) => Number(el.value));
+  const descripcions = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="descripcio[]"]')).map((el) => el.value);
+  const preus = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="preu[]"]')).map((el) => Number(el.value));
+
+  // Mapear a array de objetos
+  const productes = producteIds.map((id, idx) => ({
+    producte_id: id,
+    descripcio: descripcions[idx] ?? '',
+    preu: preus[idx] ?? 0,
+  }));
+
   return {
     id: idValue, // ✅ aquí incluimos el id para el PUT
     numero_factura: idValue2,
@@ -120,13 +132,7 @@ function preProcessFacturaFormData(rawData: Record<string, any>): Record<string,
     arxiu_url: rawData.arxiu_url ?? null,
     recurrent: rawData.recurrent ? 1 : 0,
     frequencia: rawData.recurrent ? rawData.frequencia || null : null,
-    productes: Array.isArray(rawData.productes)
-      ? rawData.productes.map((p) => ({
-          producte_id: Number(p.producte_id),
-          descripcio: p.descripcio ?? '',
-          preu: Number(p.preu ?? 0),
-        }))
-      : [],
+    productes,
   };
 }
 
