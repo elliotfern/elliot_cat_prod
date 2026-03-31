@@ -46,7 +46,7 @@ export async function formProveidor(isUpdate: boolean, id?: number) {
     renderFormInputs(data);
 
     form.addEventListener('submit', (event) => {
-      transmissioDadesDB(event, 'PUT', 'formProducte', API_URLS.PUT.PROVEIDOR, true);
+      transmissioDadesDB(event, 'PUT', 'formProveidor', API_URLS.PUT.PROVEIDOR, true);
     });
   } else {
     // Creación
@@ -54,7 +54,7 @@ export async function formProveidor(isUpdate: boolean, id?: number) {
     btnSubmit.textContent = 'Crear Proveïdor';
 
     form.addEventListener('submit', (event) => {
-      transmissioDadesDB(event, 'POST', 'formProducte', API_URLS.POST.PROVEIDOR, true);
+      transmissioDadesDB(event, 'POST', 'formProveidor', API_URLS.POST.PROVEIDOR, true);
     });
   }
 }
