@@ -570,6 +570,120 @@ if ($slug === 'clients') {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+
+    // POST : Crear nova factura de despesa
+    // ruta => "/api/comptabilitat/post/despesa"
+} else if ($slug === "despesa") {
+
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+        return;
+    }
+
+    // Helpers
+    $trimOrNull  = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
+    $toFloatOrNull = static fn($v): ?float => is_numeric($v) ? (float)$v : null;
+    $toIntOrNull   = static fn($v): ?int => is_numeric($v) ? (int)$v : null;
+    $dateOrNull    = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
+
+    // Datos
+    $data_factura      = $dateOrNull($data['data'] ?? null);
+    $data_pagament     = $dateOrNull($data['data_pagament'] ?? null);
+    $concepte          = $trimOrNull($data['concepte'] ?? null);
+    $proveidor_id      = $toIntOrNull($data['proveidor_id'] ?? null);
+    $receptor_id       = $toIntOrNull($data['receptor_id'] ?? 0);
+    $base_imposable    = $toFloatOrNull($data['base_imposable'] ?? null);
+    $tipus_iva         = $toFloatOrNull($data['tipus_iva'] ?? 0);
+    $import_iva        = $toFloatOrNull($data['import_iva'] ?? 0);
+    $total             = $toFloatOrNull($data['total'] ?? null);
+    $metode_pagament   = $trimOrNull($data['metode_pagament'] ?? 'transferencia');
+    $pagat             = $toIntOrNull($data['pagat'] ?? 0);
+    $categoria_id      = $toIntOrNull($data['categoria_id'] ?? null);
+    $subcategoria_id   = $toIntOrNull($data['subcategoria_id'] ?? null);
+    $tipus_despesa     = $trimOrNull($data['tipus_despesa'] ?? 'professional');
+    $client_id         = $toIntOrNull($data['client_id'] ?? null);
+    $projecte_id       = $toIntOrNull($data['projecte_id'] ?? null);
+    $arxiu_url         = $trimOrNull($data['arxiu_url'] ?? null);
+    $deduible          = $toIntOrNull($data['deduible'] ?? 1);
+    $recurrent         = $toIntOrNull($data['recurrent'] ?? 0);
+    $frequencia        = $trimOrNull($data['frequencia'] ?? null);
+    $notes             = $trimOrNull($data['notes'] ?? null);
+
+    // Validación
+    $errors = [];
+    if ($data_factura === null) {
+        $errors[] = ValidacioErrors::requerit('data');
+    }
+    if ($concepte === null) {
+        $errors[] = ValidacioErrors::requerit('concepte');
+    } elseif (mb_strlen($concepte) > 255) {
+        $errors[] = ValidacioErrors::massaLlarg('concepte', 255);
+    }
+    if ($base_imposable === null) {
+        $errors[] = ValidacioErrors::requerit('base_imposable');
+    }
+    if ($total === null) {
+        $errors[] = ValidacioErrors::requerit('total');
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+        return;
+    }
+
+    try {
+        $conn->beginTransaction();
+
+        $sql = "INSERT INTO db_comptabilitat_despeses
+                (data, data_pagament, concepte, proveidor_id, receptor_id, base_imposable, tipus_iva, import_iva, total, 
+                 metode_pagament, pagat, categoria_id, subcategoria_id, tipus_despesa, client_id, projecte_id, arxiu_url, 
+                 deduible, recurrent, frequencia, notes)
+                VALUES
+                (:data, :data_pagament, :concepte, :proveidor_id, :receptor_id, :base_imposable, :tipus_iva, :import_iva, :total,
+                 :metode_pagament, :pagat, :categoria_id, :subcategoria_id, :tipus_despesa, :client_id, :projecte_id, :arxiu_url,
+                 :deduible, :recurrent, :frequencia, :notes)";
+
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bindValue(':data', $data_factura, PDO::PARAM_STR);
+        $stmt->bindValue(':data_pagament', $data_pagament ?? null, $data_pagament !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':concepte', $concepte, PDO::PARAM_STR);
+        $stmt->bindValue(':proveidor_id', $proveidor_id, PDO::PARAM_INT);
+        $stmt->bindValue(':receptor_id', $receptor_id, PDO::PARAM_INT);
+        $stmt->bindValue(':base_imposable', $base_imposable);
+        $stmt->bindValue(':tipus_iva', $tipus_iva);
+        $stmt->bindValue(':import_iva', $import_iva);
+        $stmt->bindValue(':total', $total);
+        $stmt->bindValue(':metode_pagament', $metode_pagament, PDO::PARAM_STR);
+        $stmt->bindValue(':pagat', $pagat, PDO::PARAM_INT);
+        $stmt->bindValue(':categoria_id', $categoria_id ?? null, $categoria_id !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+        $stmt->bindValue(':subcategoria_id', $subcategoria_id ?? null, $subcategoria_id !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+        $stmt->bindValue(':tipus_despesa', $tipus_despesa, PDO::PARAM_STR);
+        $stmt->bindValue(':client_id', $client_id ?? null, $client_id !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+        $stmt->bindValue(':projecte_id', $projecte_id ?? null, $projecte_id !== null ? PDO::PARAM_INT : PDO::PARAM_NULL);
+        $stmt->bindValue(':arxiu_url', $arxiu_url ?? null, $arxiu_url !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':deduible', $deduible, PDO::PARAM_INT);
+        $stmt->bindValue(':recurrent', $recurrent, PDO::PARAM_INT);
+        $stmt->bindValue(':frequencia', $frequencia ?? null, $frequencia !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':notes', $notes ?? null, $notes !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+
+        $stmt->execute();
+        $newId = (int)$conn->lastInsertId();
+
+        // Auditoría
+        $detalls = sprintf("Creació despesa: %s (%s)", $concepte, $proveidor_id);
+        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_despeses', $newId);
+
+        $conn->commit();
+
+        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+    } catch (Throwable $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

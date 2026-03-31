@@ -766,6 +766,83 @@ SQL;
             500
         );
     }
+
+    // GET : Detalls d'una factura de despesa per ID
+// ruta => https://elliot.cat/api/comptabilitat/get/despesa?id={id}
+} else if ($slug === 'despesa') {
+
+    $despesa_id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+
+    if (!$despesa_id) {
+        Response::error(
+            MissatgesAPI::error('missing_id'),
+            [],
+            400
+        );
+        return;
+    }
+
+    $sql = <<<SQL
+        SELECT 
+            id,
+            data,
+            data_pagament,
+            concepte,
+            proveidor_id,
+            receptor_id,
+            base_imposable,
+            tipus_iva,
+            import_iva,
+            total,
+            metode_pagament,
+            pagat,
+            categoria_id,
+            subcategoria_id,
+            tipus_despesa,
+            client_id,
+            projecte_id,
+            arxiu_url,
+            deduible,
+            recurrent,
+            frequencia,
+            notes,
+            created_at,
+            updated_at
+        FROM %s
+        WHERE id = :id
+        LIMIT 1
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo)
+    );
+
+    try {
+        $params = ['id' => $despesa_id];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result[0],
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

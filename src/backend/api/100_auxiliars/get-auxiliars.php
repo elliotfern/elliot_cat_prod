@@ -1682,6 +1682,281 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             500
         );
     }
+
+    // Llistat proveidors comptabilitat
+    // ruta GET => "/api/cinema/get/auxiliars/proveidors"
+} else if ($slug === "proveidors") {
+
+    $sql = <<<SQL
+            SELECT p.id, p.nom
+            FROM %s AS p
+            ORDER BY p.nom ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+    // Llistat categories despeses
+    // ruta GET => "/api/cinema/get/auxiliars/categories_despeses"
+} else if ($slug === "categories_despeses") {
+
+    $sql = <<<SQL
+            SELECT p.id, p.nom
+            FROM %s AS p
+            ORDER BY p.nom ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_CATEGORIES_DESPESA, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat sub-categories despeses
+    // ruta GET => "/api/cinema/get/auxiliars/sub_categories_despeses"
+} else if ($slug === "sub_categories_despeses") {
+
+    $sql = <<<SQL
+            SELECT p.id, p.nom
+            FROM %s AS p
+            ORDER BY p.nom ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_SUBCATEGORIES_DESPESA, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+
+    // Llistat sub-categories despeses
+    // ruta GET => "/api/cinema/get/auxiliars/sub_categories_despeses"
+} else if ($slug === "sub_categories_despeses") {
+
+    $sql = <<<SQL
+            SELECT p.id, p.nom
+            FROM %s AS p
+            ORDER BY p.nom ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_SUBCATEGORIES_DESPESA, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat mètodes pagament despeses
+    // ruta GET => "/api/cinema/get/auxiliars/metodes_pagament_despeses"
+} else if ($slug === "metodes_pagament_despeses") {
+
+    // Array estático de métodos de pago
+    $metodes = [
+        ['value' => 'transferencia', 'label' => 'Transferència'],
+        ['value' => 'targeta',       'label' => 'Targeta'],
+        ['value' => 'efectiu',       'label' => 'Efectiu'],
+        ['value' => 'domiciliacio',  'label' => 'Domiciliació'],
+        ['value' => 'altres',        'label' => 'Altres'],
+    ];
+
+    try {
+
+        if (empty($metodes)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $metodes,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat tipus de despeses
+    // ruta GET => "/api/cinema/get/auxiliars/tipus_despeses"
+} else if ($slug === "tipus_despeses") {
+
+    // Array estático de métodos de pago
+    $metodes = [
+        ['value' => 'professionl', 'label' => 'Professional'],
+        ['value' => 'personal',    'label' => 'Personal'],
+    ];
+
+    try {
+
+        if (empty($metodes)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $metodes,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat tipus de frequencies pagament
+    // ruta GET => "/api/cinema/get/auxiliars/frequencies"
+} else if ($slug === "tipus_despeses") {
+
+    // Array estático de métodos de pago
+    $metodes = [
+        ['value' => 'cap', 'label' => 'Cap'],
+        ['value' => 'mensual',    'label' => 'Mensual'],
+        ['value' => 'trimestral',    'label' => 'Trimestral'],
+        ['value' => 'anual',    'label' => 'Anual'],
+    ];
+
+    try {
+
+        if (empty($metodes)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $metodes,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

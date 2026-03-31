@@ -56,7 +56,7 @@ export function comptabilitat() {
   } else if (pageType[2] === 'modifica-producte') {
     formProducte(true, id);
   } else if (pageType[2] === 'facturacio-proveidors-partita-iva') {
-    const emissor = 2;
+    const emissor = 3;
     const tipus_despesa = 'professional';
     taulaDespeses(emissor, tipus_despesa);
   } else if (pageType[2] === 'facturacio-proveidors-autonom-irlanda') {
@@ -76,6 +76,10 @@ export function comptabilitat() {
   } else if (pageType[2] === 'nou-proveidor') {
     formProveidor(false);
   } else if (pageType[2] === 'modifica-proveidor') {
+    formProveidor(true, id);
+  } else if (pageType[2] === 'nova-factura-proveidor') {
+    formProveidor(false);
+  } else if (pageType[2] === 'modifica-factura-proveidor') {
     formProveidor(true, id);
   }
 }
