@@ -66,7 +66,7 @@ export function comptabilitat() {
     const tipus_despesa = 'professional';
     taulaDespeses(emissor, tipus_despesa);
   } else if (pageType[2] === 'facturacio-despeses-personals') {
-    const emissor = 1;
+    const emissor = 4;
     const tipus_despesa = 'personal';
     taulaDespeses(emissor, tipus_despesa);
   }
