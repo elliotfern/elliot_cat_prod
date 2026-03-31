@@ -71,6 +71,7 @@ export async function formDespesa(isUpdate: boolean, id?: number) {
 
   // --- Selects auxiliares ---
   await auxiliarSelect(record.proveidor_id ?? null, 'proveidors', 'proveidor_id', 'nom');
+  await auxiliarSelect(record.receptor_id ?? null, 'emissors', 'receptor_id', 'nom');
   await auxiliarSelect(record.categoria_id ?? null, 'categories_despeses', 'categoria_id', 'nom');
   await auxiliarSelect(record.subcategoria_id ?? null, 'sub_categories_despeses', 'subcategoria_id', 'nom');
   await auxiliarSelect(record.metode_pagament ?? null, 'metodes_pagament_despeses', 'metode_pagament', 'label');
