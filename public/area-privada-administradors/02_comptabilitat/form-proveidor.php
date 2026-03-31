@@ -13,7 +13,7 @@
         <div id="errText"></div>
     </div>
 
-    <form method="POST" action="" class="row g-3" id="formProveidor" data-success-redirect-template="/gestio/comptabilitat/fitxa-proveidor/{id}">
+    <form method="POST" action="" class="row g-3" id="formProveidor">
 
         <input type="hidden" id="id" name="id" />
 
