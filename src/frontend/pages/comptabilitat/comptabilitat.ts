@@ -1,6 +1,7 @@
 import { getPageType } from '../../utils/urlPath';
 import { detallsFacturaClients } from './detallsFacturaClient';
 import { formClient } from './formClient';
+import { formDespesa } from './formDespesa';
 import { formEmissor } from './formEmissor';
 import { formFacturaClient } from './formFacturaClient';
 import { formFacturaProducte } from './formFacturaProducte';
@@ -78,8 +79,8 @@ export function comptabilitat() {
   } else if (pageType[2] === 'modifica-proveidor') {
     formProveidor(true, id);
   } else if (pageType[2] === 'nova-factura-proveidor') {
-    formProveidor(false);
+    formDespesa(false);
   } else if (pageType[2] === 'modifica-factura-proveidor') {
-    formProveidor(true, id);
+    formDespesa(true, id);
   }
 }
