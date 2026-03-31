@@ -36,23 +36,8 @@ export async function taulaProveidors() {
     { header: 'NIF', field: 'nif' },
     { header: 'Adreça', field: 'adreca' },
     { header: 'Ciutat', field: 'ciutat' },
-    { header: 'Codi Postal', field: 'codi_postal' },
     { header: 'País', field: 'pais' },
-    { header: 'Telèfon', field: 'telefon' },
-    { header: 'Email', field: 'email' },
     { header: 'Web', field: 'web' },
-    { header: 'Contacte', field: 'contacte' },
-    { header: 'Notes', field: 'notes' },
-    {
-      header: 'Creat',
-      field: 'created_at',
-      render: (_: unknown, row: Proveidor) => (row.created_at ? new Date(row.created_at).toLocaleDateString() : ''),
-    },
-    {
-      header: 'Actualitzat',
-      field: 'updated_at',
-      render: (_: unknown, row: Proveidor) => (row.updated_at ? new Date(row.updated_at).toLocaleDateString() : ''),
-    },
   ];
 
   if (isAdmin) {
