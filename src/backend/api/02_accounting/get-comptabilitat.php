@@ -424,8 +424,9 @@ SQL;
     );
 
     try {
+
         $params = ['tipus_despesa' => $tipus_despesa];
-        if ($receptor_id) {
+        if ($receptor_id && $receptor_id != 4) {
             $params['receptor_id'] = $receptor_id;
         }
 
