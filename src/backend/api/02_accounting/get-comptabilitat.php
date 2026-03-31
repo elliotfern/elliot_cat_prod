@@ -404,16 +404,9 @@ if ($slug === 'clients') {
         LEFT JOIN %s AS c ON d.categoria_id = c.id
         LEFT JOIN %s AS s ON d.subcategoria_id = s.id
         WHERE d.tipus_despesa = :tipus_despesa
+        AND d.receptor_id = :receptor_id
+        ORDER BY d.data DESC
 SQL;
-
-    // filtramos receptor_id según la regla: 1,2,3 específicos o 4 = todos
-    if ($receptor_id && $receptor_id != 4) {
-        $sql .= " AND d.receptor_id = :receptor_id";
-    } else {
-        $sql .= " AND d.receptor_id IN (1,2,3)";
-    }
-
-    $sql .= " ORDER BY d.id DESC";
 
     $query = sprintf(
         $sql,
@@ -425,10 +418,10 @@ SQL;
 
     try {
 
-        $params = ['tipus_despesa' => $tipus_despesa];
-        if ($receptor_id && $receptor_id != 4) {
-            $params['receptor_id'] = $receptor_id;
-        }
+        $params = [
+            'tipus_despesa' => $tipus_despesa,
+            'receptor_id' => $receptor_id
+        ];
 
         $result = $db->getData($query, $params);
 
@@ -768,7 +761,7 @@ SQL;
     }
 
     // GET : Detalls d'una factura de despesa per ID
-// ruta => https://elliot.cat/api/comptabilitat/get/despesa?id={id}
+    // ruta => https://elliot.cat/api/comptabilitat/get/despesa?id={id}
 } else if ($slug === 'despesa') {
 
     $despesa_id = isset($_GET['id']) ? (int) $_GET['id'] : null;
