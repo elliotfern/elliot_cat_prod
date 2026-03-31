@@ -10,6 +10,7 @@ import { taulaDespeses } from './taulaFacturacioProveidors';
 import { taulaLlistatClients } from './taulaLlistatClients';
 import { taulaLlistatEmissors } from './taulaLlistatEmissors';
 import { taulaLlistatProductes } from './taulaLlistatProductes';
+import { taulaProveidors } from './taulaLlistatProveidors';
 
 export function comptabilitat() {
   const url = window.location.href;
@@ -69,5 +70,7 @@ export function comptabilitat() {
     const emissor = 4;
     const tipus_despesa = 'personal';
     taulaDespeses(emissor, tipus_despesa);
+  } else if (pageType[2] === 'llistat-proveidors') {
+    taulaProveidors();
   }
 }
