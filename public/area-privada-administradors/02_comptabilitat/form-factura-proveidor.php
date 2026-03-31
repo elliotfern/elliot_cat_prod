@@ -60,12 +60,12 @@
 
         <div class="col-md-3">
             <label for="import_iva">Import IVA (€):</label>
-            <input class="form-control" type="number" step="0.01" name="import_iva" id="import_iva" readonly />
+            <input class="form-control" type="number" step="0.01" name="import_iva" id="import_iva" />
         </div>
 
         <div class="col-md-3">
             <label for="total">Total (€):</label>
-            <input class="form-control" type="number" step="0.01" name="total" id="total" readonly />
+            <input class="form-control" type="number" step="0.01" name="total" id="total" />
         </div>
 
         <div class="col-md-6">
@@ -92,7 +92,7 @@
 
         <div class="col-md-6">
             <label for="categoria_id">Categoria:</label>
-            <select class="form-select" name="categoria_id" id="categoria_id" required>
+            <select class="form-select" name="categoria_id" id="categoria_id">
                 <option value="">-- Selecciona proveïdor --</option>
                 <!-- Opcions carregades per TS -->
             </select>
@@ -101,7 +101,7 @@
         <div class="col-md-6">
             <label for="subcategoria_id">Subcategoria:</label>
 
-            <select class="form-select" name="subcategoria_id" id="subcategoria_id" required>
+            <select class="form-select" name="subcategoria_id" id="subcategoria_id">
                 <option value="">-- Selecciona proveïdor --</option>
                 <!-- Opcions carregades per TS -->
             </select>
@@ -110,7 +110,7 @@
         <div class="col-md-6">
             <label for="client_id">Client (opcional):</label>
 
-            <select class="form-select" name="client_id" id="client_id" required>
+            <select class="form-select" name="client_id" id="client_id">
                 <option value="">-- Selecciona proveïdor --</option>
                 <!-- Opcions carregades per TS -->
             </select>
@@ -119,7 +119,7 @@
         <div class="col-md-6">
             <label for="projecte_id">Projecte (opcional):</label>
 
-            <select class="form-select" name="projecte_id" id="projecte_id" required>
+            <select class="form-select" name="projecte_id" id="projecte_id">
                 <option value="">-- Selecciona proveïdor --</option>
                 <!-- Opcions carregades per TS -->
             </select>
