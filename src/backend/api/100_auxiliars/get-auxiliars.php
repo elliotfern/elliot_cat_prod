@@ -1773,7 +1773,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     $sql = <<<SQL
             SELECT p.id, p.nom
             FROM %s AS p
-            ORDER BY p.nom ASC
+            ORDER BY p.ordre ASC
             SQL;
 
     $query = sprintf(
@@ -1924,7 +1924,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 
     // Llistat tipus de frequencies pagament
     // ruta GET => "/api/cinema/get/auxiliars/frequencies"
-} else if ($slug === "tipus_despeses") {
+} else if ($slug === "frequencies") {
 
     // Array estático de métodos de pago
     $metodes = [

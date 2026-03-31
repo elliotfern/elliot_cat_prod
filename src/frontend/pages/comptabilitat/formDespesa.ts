@@ -77,4 +77,5 @@ export async function formDespesa(isUpdate: boolean, id?: number) {
   await auxiliarSelect(record.tipus_despesa ?? null, 'tipus_despeses', 'tipus_despesa', 'label');
   await auxiliarSelect(record.frequencia ?? null, 'frequencies', 'frequencia', 'label');
   await auxiliarSelect(record.projecte_id ?? null, 'projectes', 'projecte_id', 'name');
+  await auxiliarSelect(record.client_id ?? null, 'clients', 'client_id', 'clientEmpresa');
 }
