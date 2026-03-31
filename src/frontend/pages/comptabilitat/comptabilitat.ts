@@ -6,6 +6,7 @@ import { formFacturaClient } from './formFacturaClient';
 import { formFacturaProducte } from './formFacturaProducte';
 import { formProducte } from './formProducte';
 import { taulaFacturacioClients } from './taulaFacturacioClients';
+import { taulaDespeses } from './taulaFacturacioProveidors';
 import { taulaLlistatClients } from './taulaLlistatClients';
 import { taulaLlistatEmissors } from './taulaLlistatEmissors';
 import { taulaLlistatProductes } from './taulaLlistatProductes';
@@ -52,5 +53,14 @@ export function comptabilitat() {
     formProducte(false);
   } else if (pageType[2] === 'modifica-producte') {
     formProducte(true, id);
+  } else if (pageType[2] === 'facturacio-proveidors-partita-iva') {
+    const emissor = 2;
+    taulaDespeses(emissor);
+  } else if (pageType[2] === 'facturacio-proveidors-autonom-irlanda') {
+    const emissor = 2;
+    taulaDespeses(emissor);
+  } else if (pageType[2] === 'facturacio-proveidors-hispantic') {
+    const emissor = 1;
+    taulaDespeses(emissor);
   }
 }

@@ -364,45 +364,87 @@ if ($slug === 'clients') {
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
-} else if (isset($_GET['type']) && $_GET['type'] == 'accounting-elliotfernandez-supplies-invoices') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT s.id, s.facEmpresa, s.facConcepte, s.facData, s.facSubtotal, s.facImportIva, s.facTotal, s.facIva, s.facPagament, c.id AS idEmpresa, c.empresaNom, c.empresaNIF, c.empresaDireccio, co.country, vt.ivaPercen, pt.tipusNom, cos.clientEmpresa
-                    FROM db_accounting_soletrade_invoices_suppliers AS s
-                    INNER JOIN db_accounting_hispantic_supplier_companies as c ON s.facEmpresa = c.id
-                    INNER JOIN db_countries AS co ON c.empresaPais = co.id
-                    INNER JOIN db_accounting_hispantic_vat_type AS vt ON s.facIva = vt.id
-                    INNER JOIN db_accounting_hispantic_payment_type AS pt ON s.facPagament = pt.id
-                    LEFT JOIN db_accounting_hispantic_costumers AS cos ON s.clientVinculat = cos.id
-                    ORDER BY s.facData DESC"
+
+    // GET : Llistat despeses
+    // ruta => "https://elliot.cat/api/comptabilitat/get/despeses?receptor_id={id}"
+} else if ($slug === 'despeses') {
+
+    $receptor_id = isset($_GET['receptor_id']) ? (int) $_GET['receptor_id'] : null;
+
+    $sql = <<<SQL
+        SELECT 
+            d.id,
+            d.data,
+            YEAR(d.data) AS yearDespesa,
+            CONCAT('Any ', YEAR(d.data)) AS any,
+            d.data_pagament,
+            d.concepte,
+            d.receptor_id,
+            d.proveidor_id,
+            d.base_imposable,
+            d.tipus_iva,
+            d.import_iva,
+            d.total,
+            d.metode_pagament,
+            d.pagat,
+            d.tipus_gast,
+            d.categoria_id,
+            d.subcategoria_id,
+            d.deduible,
+            d.recurrent,
+            d.frequencia,
+            d.notes,
+            p.nom AS proveidorNom,
+            p.id AS proveidorId,
+            c.nom AS nomCategoria,
+            s.nom AS nomSubCategoria
+        FROM %s AS d
+        LEFT JOIN %s AS p ON d.proveidor_id = p.id
+        LEFT JOIN %s AS c ON d.categoria_id = c.id
+        LEFT JOIN %s AS s ON d.subcategoria_id = s.id
+        WHERE d.receptor_id = :receptor_id
+        ORDER BY d.id DESC
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo),
+        qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CATEGORIES_DESPESA, $pdo),
+        qi(Tables::DB_COMPTABILITAT_SUBCATEGORIES_DESPESA, $pdo)
     );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+
+    try {
+
+        $params = [
+            'receptor_id' => $receptor_id
+        ];
+
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-    header('Content-Type: application/json');
-    echo json_encode($data);
-} else if (isset($_GET['type']) && $_GET['type'] == 'accounting-supplies-invoices') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT s.id, s.facEmpresa, s.facConcepte, s.facData, s.facSubtotal, s.facImportIva, s.facTotal, s.facIva, s.facPagament, s.loanDirectors, c.id AS idEmpresa, c.empresaNom, c.empresaNIF, c.empresaDireccio, co.country, vt.ivaPercen, pt.tipusNom
-            FROM db_accounting_hispantic_invoices_suppliers AS s
-            INNER JOIN db_accounting_hispantic_supplier_companies as c ON s.facEmpresa = c.id
-            INNER JOIN db_countries AS co ON c.empresaPais = co.id
-            INNER JOIN db_accounting_hispantic_vat_type AS vt ON s.facIva = vt.id
-            INNER JOIN db_accounting_hispantic_payment_type AS pt ON s.facPagament = pt.id
-            ORDER BY s.id ASC"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    header('Content-Type: application/json');
-    echo json_encode($data);
+
 
     // GET : Llistat d'emissors
     // ruta => "https://elliot.cat/api/comptabilitat/get/emissors"

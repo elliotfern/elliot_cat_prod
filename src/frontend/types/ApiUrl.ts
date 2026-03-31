@@ -38,6 +38,7 @@ export type ApiUrls = {
     EMISSOR_ID: (id: number) => string;
     PRODUCTES: string;
     PRODUCTE_ID: (id: number) => string;
+    DESPESES: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;

@@ -10,6 +10,10 @@
           <p>
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nou-client/'" class="button btn-gran btn-secondari">Afegir client</button>
 
+            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nou-proveidor/'" class="button btn-gran btn-secondari">Afegir proveidor</button>
+          </p>
+
+          <p>
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nou-pressupost/'" class="button btn-gran btn-secondari">Crear pressupost</button>
 
             <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nova-factura/'" class="button btn-gran btn-secondari">Crear factura clients</button>
@@ -27,7 +31,9 @@
 
             <h4 style="text-align: left;">Comptabilitat (despeses):</h4>
             <ul class="llistat">
-              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors">Llistat de factures rebudes</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors-partita-iva">Llistat de factures rebudes (Partita IVA Italia)</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors-autonom-irlanda">Llistat de factures rebudes (Autònom Irlanda)</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors-hispantic">Llistat de factures rebudes (HispanTIC LTD Irlanda)</a></li>
             </ul>
 
             <h4 style="text-align: left;">Comptabilitat (ingressos):</h4>

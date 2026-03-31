@@ -30,6 +30,13 @@ $routes = [
     APP_GESTIO . $url['comptabilitat'] . '/nou-client' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-client.php'),
     APP_GESTIO . $url['comptabilitat'] . '/modifica-client/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-client.php'),
 
+    // 02.2 Proveidors
+    APP_GESTIO . $url['comptabilitat'] . '/llistat-proveidors' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-proveidors.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/nou-proveidor' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-proveidor.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/modifica-proveidor/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-proveidor.php'),
+
+
+    // 02.3 Facturacio clients - ingressos
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients-partita-iva' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-clients.php'),
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients-autonom-irlanda' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-clients.php'),
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-clients-hispantic' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-clients.php'),
@@ -37,8 +44,14 @@ $routes = [
     APP_GESTIO . $url['comptabilitat'] . '/nova-factura' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-client.php'),
     APP_GESTIO . $url['comptabilitat'] . '/modifica-factura/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-client.php'),
     APP_GESTIO . $url['comptabilitat'] . '/fitxa-factura-client/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'detalls-factura-client.php'),
-    APP_GESTIO . $url['comptabilitat'] . '/nou-producte-factura' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-producte.php'),
-    APP_GESTIO . $url['comptabilitat'] . '/modifica-producte-factura/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-producte.php'),
+
+    // 02.4 Facturacio rebuda despeses
+    APP_GESTIO . $url['comptabilitat'] . '/facturacio-proveidors-partita-iva' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-proveidors.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/facturacio-proveidors-autonom-irlanda' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-proveidors.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/facturacio-proveidors-hispantic' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-proveidors.php'),
+
+    APP_GESTIO . $url['comptabilitat'] . '/nova-factura-proveidor' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-proveidor.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/modifica-factura-proveidor/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-proveidor.php'),
 
     // 02.Auxiliars
     APP_GESTIO . $url['comptabilitat'] . '/llistat-emissors' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-emissors.php'),

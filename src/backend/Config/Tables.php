@@ -39,9 +39,12 @@ final class Tables
     public const DB_COMPTABILITAT_FACTURACIO_ESTAT = 'db_comptabilitat_facturacio_estat';
     public const DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT = 'db_comptabilitat_facturacio_tipus_pagament';
     public const DB_COMPTABILITAT_CATALEG_PRODUCTES = 'db_comptabilitat_cataleg_productes';
-
-
     public const DB_COMPTABILITAT_EMISSORS = 'db_comptabilitat_emissors';
+    public const DB_COMPTABILITAT_DESPESES = ' db_comptabilitat_despeses';
+    public const DB_COMPTABILITAT_PROVEIDORS = 'db_comptabilitat_proveidors';
+    public const DB_COMPTABILITAT_CATEGORIES_DESPESA = 'db_comptabilitat_categories_despesa';
+    public const DB_COMPTABILITAT_SUBCATEGORIES_DESPESA = 'db_comptabilitat_subcategories_despesa';
+
 
     // Taules Auxiliars
     public const DB_TEMES = 'aux_temes';
