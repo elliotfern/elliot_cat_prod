@@ -1857,11 +1857,11 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 
     // Array estático de métodos de pago
     $metodes = [
-        ['value' => 'transferencia', 'label' => 'Transferència'],
-        ['value' => 'targeta',       'label' => 'Targeta'],
-        ['value' => 'efectiu',       'label' => 'Efectiu'],
-        ['value' => 'domiciliacio',  'label' => 'Domiciliació'],
-        ['value' => 'altres',        'label' => 'Altres'],
+        ['id' => 'transferencia', 'label' => 'Transferència'],
+        ['id' => 'targeta',       'label' => 'Targeta'],
+        ['id' => 'efectiu',       'label' => 'Efectiu'],
+        ['id' => 'domiciliacio',  'label' => 'Domiciliació'],
+        ['id' => 'altres',        'label' => 'Altres'],
     ];
 
     try {
@@ -1894,8 +1894,8 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 
     // Array estático de métodos de pago
     $metodes = [
-        ['value' => 'professionl', 'label' => 'Professional'],
-        ['value' => 'personal',    'label' => 'Personal'],
+        ['id' => 'professional', 'label' => 'Professional'],
+        ['id' => 'personal',    'label' => 'Personal'],
     ];
 
     try {
@@ -1928,10 +1928,10 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 
     // Array estático de métodos de pago
     $metodes = [
-        ['value' => 'cap', 'label' => 'Cap'],
-        ['value' => 'mensual',    'label' => 'Mensual'],
-        ['value' => 'trimestral',    'label' => 'Trimestral'],
-        ['value' => 'anual',    'label' => 'Anual'],
+        ['id' => 'cap', 'label' => 'Cap'],
+        ['id' => 'mensual',    'label' => 'Mensual'],
+        ['id' => 'trimestral',    'label' => 'Trimestral'],
+        ['id' => 'anual',    'label' => 'Anual'],
     ];
 
     try {
