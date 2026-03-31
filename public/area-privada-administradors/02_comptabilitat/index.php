@@ -34,6 +34,7 @@
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors-partita-iva">Llistat de factures rebudes (Partita IVA Italia)</a></li>
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors-autonom-irlanda">Llistat de factures rebudes (Autònom Irlanda)</a></li>
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-proveidors-hispantic">Llistat de factures rebudes (HispanTIC LTD Irlanda)</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/facturacio-despeses-personals">Llistat de factures rebudes (despeses personals)</a></li>
             </ul>
 
             <h4 style="text-align: left;">Comptabilitat (ingressos):</h4>

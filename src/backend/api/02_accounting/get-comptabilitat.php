@@ -366,10 +366,11 @@ if ($slug === 'clients') {
     }
 
     // GET : Llistat despeses
-    // ruta => "https://elliot.cat/api/comptabilitat/get/despeses?receptor_id={id}"
+    // ruta => "https://elliot.cat/api/comptabilitat/get/despeses?receptor_id={id}&tipus_despesa={personal|professional}"
 } else if ($slug === 'despeses') {
 
     $receptor_id = isset($_GET['receptor_id']) ? (int) $_GET['receptor_id'] : null;
+    $tipus_despesa = isset($_GET['tipus_despesa']) ? $_GET['tipus_despesa'] : null;
 
     $sql = <<<SQL
         SELECT 
@@ -387,7 +388,7 @@ if ($slug === 'clients') {
             d.total,
             d.metode_pagament,
             d.pagat,
-            d.tipus_gast,
+            d.tipus_despesa,
             d.categoria_id,
             d.subcategoria_id,
             d.deduible,
@@ -402,9 +403,17 @@ if ($slug === 'clients') {
         LEFT JOIN %s AS p ON d.proveidor_id = p.id
         LEFT JOIN %s AS c ON d.categoria_id = c.id
         LEFT JOIN %s AS s ON d.subcategoria_id = s.id
-        WHERE d.receptor_id = :receptor_id
-        ORDER BY d.id DESC
-    SQL;
+        WHERE d.tipus_despesa = :tipus_despesa
+SQL;
+
+    // filtramos receptor_id según la regla: 1,2,3 específicos o 4 = todos
+    if ($receptor_id && $receptor_id != 4) {
+        $sql .= " AND d.receptor_id = :receptor_id";
+    } else {
+        $sql .= " AND d.receptor_id IN (1,2,3)";
+    }
+
+    $sql .= " ORDER BY d.id DESC";
 
     $query = sprintf(
         $sql,
@@ -415,10 +424,10 @@ if ($slug === 'clients') {
     );
 
     try {
-
-        $params = [
-            'receptor_id' => $receptor_id
-        ];
+        $params = ['tipus_despesa' => $tipus_despesa];
+        if ($receptor_id) {
+            $params['receptor_id'] = $receptor_id;
+        }
 
         $result = $db->getData($query, $params);
 
@@ -437,14 +446,12 @@ if ($slug === 'clients') {
             200
         );
     } catch (PDOException $e) {
-
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
             500
         );
     }
-
 
     // GET : Llistat d'emissors
     // ruta => "https://elliot.cat/api/comptabilitat/get/emissors"

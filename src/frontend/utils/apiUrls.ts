@@ -132,7 +132,7 @@ export const API_URLS: ApiUrls = {
     EMISSOR_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.EMISSOR_ID}?id=${encodeURIComponent(id)}`,
     PRODUCTES: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PRODUCTES}`,
     PRODUCTE_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PRODUCTE_ID}?id=${encodeURIComponent(id)}`,
-    DESPESES: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.DESPESES}?receptor_id=${encodeURIComponent(id)}`,
+    DESPESES: (id: number, tipus_despesa: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.DESPESES}?receptor_id=${encodeURIComponent(id)}&tipus_despesa=${encodeURIComponent(tipus_despesa)}`,
   },
 
   POST: {

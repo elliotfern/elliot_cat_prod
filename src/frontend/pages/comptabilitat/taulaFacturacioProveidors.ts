@@ -18,7 +18,7 @@ export function renderTitolReceptor(receptorId: number) {
   container.innerHTML = `<h3>${titol}</h3>`;
 }
 
-export async function taulaDespeses(receptorId: number) {
+export async function taulaDespeses(receptorId: number, tipus_despesa: string) {
   const isAdmin = await getIsAdmin();
 
   const columns: TaulaDinamica<any>[] = [
@@ -51,14 +51,14 @@ export async function taulaDespeses(receptorId: number) {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: any) => `
-        <a href="https://${window.location.hostname}/gestio/comptabilitat/modifica-despesa/${row.id}">
+        <a href="https://${window.location.hostname}/gestio/comptabilitat/modifica-factura-proveidor/${row.id}">
           <button class="btn-petit">Modifica</button>
         </a>`,
     });
   }
 
   renderDynamicTable({
-    url: API_URLS.GET.DESPESES(receptorId),
+    url: API_URLS.GET.DESPESES(receptorId, tipus_despesa),
     containerId: 'taulaLlistatFacturesProveidors',
     columns,
     filterKeys: ['concepte', 'nomCategoria'],

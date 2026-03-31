@@ -50,6 +50,8 @@ $routes = [
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-proveidors-autonom-irlanda' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-proveidors.php'),
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-proveidors-hispantic' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-proveidors.php'),
 
+    APP_GESTIO . $url['comptabilitat'] . '/facturacio-despeses-personals' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-proveidors.php'),
+
     APP_GESTIO . $url['comptabilitat'] . '/nova-factura-proveidor' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-proveidor.php'),
     APP_GESTIO . $url['comptabilitat'] . '/modifica-factura-proveidor/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-proveidor.php'),
 

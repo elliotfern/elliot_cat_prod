@@ -55,12 +55,19 @@ export function comptabilitat() {
     formProducte(true, id);
   } else if (pageType[2] === 'facturacio-proveidors-partita-iva') {
     const emissor = 2;
-    taulaDespeses(emissor);
+    const tipus_despesa = 'professional';
+    taulaDespeses(emissor, tipus_despesa);
   } else if (pageType[2] === 'facturacio-proveidors-autonom-irlanda') {
     const emissor = 2;
-    taulaDespeses(emissor);
+    const tipus_despesa = 'professional';
+    taulaDespeses(emissor, tipus_despesa);
   } else if (pageType[2] === 'facturacio-proveidors-hispantic') {
     const emissor = 1;
-    taulaDespeses(emissor);
+    const tipus_despesa = 'professional';
+    taulaDespeses(emissor, tipus_despesa);
+  } else if (pageType[2] === 'facturacio-despeses-personals') {
+    const emissor = 1;
+    const tipus_despesa = 'personal';
+    taulaDespeses(emissor, tipus_despesa);
   }
 }
