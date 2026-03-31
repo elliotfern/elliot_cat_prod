@@ -5,6 +5,7 @@ import { formEmissor } from './formEmissor';
 import { formFacturaClient } from './formFacturaClient';
 import { formFacturaProducte } from './formFacturaProducte';
 import { formProducte } from './formProducte';
+import { formProveidor } from './formProveidor';
 import { taulaFacturacioClients } from './taulaFacturacioClients';
 import { taulaDespeses } from './taulaFacturacioProveidors';
 import { taulaLlistatClients } from './taulaLlistatClients';
@@ -72,5 +73,9 @@ export function comptabilitat() {
     taulaDespeses(emissor, tipus_despesa);
   } else if (pageType[2] === 'llistat-proveidors') {
     taulaProveidors();
+  } else if (pageType[2] === 'nou-proveidor') {
+    formProveidor(false);
+  } else if (pageType[2] === 'modifica-proveidor') {
+    formProveidor(true, id);
   }
 }
