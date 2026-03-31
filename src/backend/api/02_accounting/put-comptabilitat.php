@@ -295,6 +295,116 @@ if ($slug === 'clients') {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+} else if ($slug === 'proveidor') {
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+    }
+
+    // Helpers
+    $trimOrNull  = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
+    $toIntOrNull = static fn($v): ?int    => (is_numeric($v) ? (int)$v : null);
+
+    // Datos
+    $id         = $toIntOrNull($data['id'] ?? null);
+    $nom        = $trimOrNull($data['nom'] ?? null);
+    $nif        = $trimOrNull($data['nif'] ?? null);
+    $adreca     = $trimOrNull($data['adreca'] ?? null);
+    $ciutat     = $trimOrNull($data['ciutat'] ?? null);
+    $codi_postal = $trimOrNull($data['codi_postal'] ?? null);
+    $pais       = $trimOrNull($data['pais'] ?? null);
+    $telefon    = $trimOrNull($data['telefon'] ?? null);
+    $email      = $trimOrNull($data['email'] ?? null);
+    $web        = $trimOrNull($data['web'] ?? null);
+    $contacte   = $trimOrNull($data['contacte'] ?? null);
+    $notes      = $trimOrNull($data['notes'] ?? null);
+
+    // Validación
+    $errors = [];
+    if (!$id) {
+        $errors[] = ValidacioErrors::requerit('id');
+    }
+    if ($nom === null) {
+        $errors[] = ValidacioErrors::requerit('nom');
+    } elseif (mb_strlen($nom) > 255) {
+        $errors[] = ValidacioErrors::massaLlarg('nom', 255);
+    }
+    if ($nif !== null && mb_strlen($nif) > 20) {
+        $errors[] = ValidacioErrors::massaLlarg('nif', 20);
+    }
+    if ($codi_postal !== null && mb_strlen($codi_postal) > 20) {
+        $errors[] = ValidacioErrors::massaLlarg('codi_postal', 20);
+    }
+    if ($ciutat !== null && mb_strlen($ciutat) > 100) {
+        $errors[] = ValidacioErrors::massaLlarg('ciutat', 100);
+    }
+    if ($pais !== null && mb_strlen($pais) > 50) {
+        $errors[] = ValidacioErrors::massaLlarg('pais', 50);
+    }
+    if ($telefon !== null && mb_strlen($telefon) > 30) {
+        $errors[] = ValidacioErrors::massaLlarg('telefon', 30);
+    }
+    if ($email !== null && mb_strlen($email) > 100) {
+        $errors[] = ValidacioErrors::massaLlarg('email', 100);
+    }
+    if ($web !== null && mb_strlen($web) > 100) {
+        $errors[] = ValidacioErrors::massaLlarg('web', 100);
+    }
+    if ($contacte !== null && mb_strlen($contacte) > 100) {
+        $errors[] = ValidacioErrors::massaLlarg('contacte', 100);
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    }
+
+    try {
+        $conn->beginTransaction();
+
+        $sql = "UPDATE db_comptabilitat_proveidors SET
+                    nom = :nom,
+                    nif = :nif,
+                    adreca = :adreca,
+                    ciutat = :ciutat,
+                    codi_postal = :codi_postal,
+                    pais = :pais,
+                    telefon = :telefon,
+                    email = :email,
+                    web = :web,
+                    contacte = :contacte,
+                    notes = :notes,
+                    updated_at = CURRENT_TIMESTAMP()
+                WHERE id = :id";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
+        $stmt->bindValue(':nif', $nif ?? null, $nif !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':adreca', $adreca ?? null, $adreca !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':ciutat', $ciutat ?? null, $ciutat !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':codi_postal', $codi_postal ?? null, $codi_postal !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':pais', $pais ?? null, $pais !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':telefon', $telefon ?? null, $telefon !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':email', $email ?? null, $email !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':web', $web ?? null, $web !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':contacte', $contacte ?? null, $contacte !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':notes', $notes ?? null, $notes !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        // Auditoría
+        $detalls = sprintf("Modificació proveïdor: %s (%s)", $nom, $email ?? '-');
+        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_proveidors', $id);
+
+        $conn->commit();
+
+        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
+    } catch (Throwable $e) {
+        if ($conn->inTransaction()) $conn->rollBack();
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

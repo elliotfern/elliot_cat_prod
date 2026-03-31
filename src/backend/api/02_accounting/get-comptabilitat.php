@@ -699,6 +699,73 @@ SQL;
             500
         );
     }
+
+    // GET : Detalls d'un proveidor per ID
+    // ruta => https://elliot.cat/api/comptabilitat/get/proveidor?id={id}
+} else if ($slug === 'proveidor') {
+
+    $proveidor_id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+
+    if (!$proveidor_id) {
+        Response::error(
+            MissatgesAPI::error('missing_id'),
+            [],
+            400
+        );
+        return;
+    }
+
+    $sql = <<<SQL
+        SELECT 
+            id,
+            nom,
+            nif,
+            adreca,
+            ciutat,
+            codi_postal,
+            pais,
+            telefon,
+            email,
+            web,
+            contacte,
+            notes,
+            created_at,
+            updated_at
+        FROM %s
+        WHERE id = :id
+        LIMIT 1
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo)
+    );
+
+    try {
+        $params = ['id' => $proveidor_id];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result[0],
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

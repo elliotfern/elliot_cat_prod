@@ -40,6 +40,7 @@ export type ApiUrls = {
     PRODUCTE_ID: (id: number) => string;
     DESPESES: (id: number, tipus_despesa: string) => string;
     PROVEIDORS: string;
+    PROVEIDOR_ID: (id: number) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -68,6 +69,7 @@ export type ApiUrls = {
     HISTORIA_CURS_ARTICLE: string;
     EMISSOR: string;
     PRODUCTE: string;
+    PROVEIDOR: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -95,6 +97,7 @@ export type ApiUrls = {
     HISTORIA_CURS_ARTICLE: string;
     EMISSOR: string;
     PRODUCTE: string;
+    PROVEIDOR: string;
   };
   DELETE: {};
 };
