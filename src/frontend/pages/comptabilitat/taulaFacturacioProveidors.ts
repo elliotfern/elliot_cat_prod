@@ -8,6 +8,7 @@ const RECEPTORS: Record<number, string> = {
   1: 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
   2: 'Autònom Irlanda (1 novembre 2022 - 29 març 2026)',
   3: 'Partita Iva Itàlia (30 març 2026 - )',
+  4: 'Despeses personals',
 };
 
 export function renderTitolReceptor(receptorId: number) {

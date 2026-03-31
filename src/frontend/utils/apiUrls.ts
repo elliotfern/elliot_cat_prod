@@ -67,6 +67,7 @@ export const ENDPOINTS = {
   PRODUCTE_ID: 'producteId',
   PRODUCTE: 'producte',
   DESPESES: 'despeses',
+  PROVEIDORS: 'proveidors',
 } as const;
 
 // Mapa de recursos disponibles
@@ -133,6 +134,7 @@ export const API_URLS: ApiUrls = {
     PRODUCTES: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PRODUCTES}`,
     PRODUCTE_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PRODUCTE_ID}?id=${encodeURIComponent(id)}`,
     DESPESES: (id: number, tipus_despesa: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.DESPESES}?receptor_id=${encodeURIComponent(id)}&tipus_despesa=${encodeURIComponent(tipus_despesa)}`,
+    PROVEIDORS: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PROVEIDORS}`,
   },
 
   POST: {
