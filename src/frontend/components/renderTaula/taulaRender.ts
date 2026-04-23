@@ -91,7 +91,7 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   paginationNav.setAttribute('aria-label', 'Paginació');
 
   const pagination = document.createElement('ul');
-  pagination.className = 'pagination justify-content-center mt-3 flex-wrap';
+  pagination.className = 'pagination justify-content-center mt-3 flex-wrap gap-2 py-2';
   paginationNav.appendChild(pagination);
 
   // Crear el numero total de registres
