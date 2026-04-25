@@ -189,7 +189,11 @@ if ($slug === 'carrecsPersona') {
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Devolver los datos en formato JSON
-    echo json_encode($data);
+    echo json_encode([
+        "status" => "success",
+        "message" => "OK",
+        "data" => $data
+    ]);
 
     // 4. Esdeveniment
     // ruta GET => "/api/historia/get/esdeveniment?slug=revolucio-vellut"
@@ -249,7 +253,11 @@ if ($slug === 'carrecsPersona') {
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Devolver los datos en formato JSON
-    echo json_encode($data);
+    echo json_encode([
+        "status" => "success",
+        "message" => "OK",
+        "data" => $data
+    ]);
 
     // 3. Llistat de persones vinculades a un esdeveniment
     // ruta GET => "/api/historia/get/personesEsdeveniments?id=234"
