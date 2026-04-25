@@ -47,7 +47,7 @@ export async function taulaLlistatPersones() {
     },
     { header: 'País', field: 'paisAutor' },
 
-    { header: 'Grup', field: 'grup', render: (_: unknown, row: Persona) => `${row.grups.join(', ')}` },
+    { header: 'Grup', field: 'grup', render: (_: unknown, row: Persona) => `${row.grup.join(', ')}` },
     {
       header: 'Anys',
       field: 'yearBorn',
@@ -68,6 +68,6 @@ export async function taulaLlistatPersones() {
     containerId: 'taulaLlistatPersones',
     columns,
     filterKeys: ['nomComplet'],
-    filterByField: 'grups',
+    filterByField: 'grup',
   });
 }

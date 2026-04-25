@@ -10,7 +10,7 @@ export interface Persona {
   profession: string;
   cognoms: string;
   nom: string;
-  grup: number;
+  grup: string[];
   nameImg: string;
   professio_ca: string;
   grups: string[];
