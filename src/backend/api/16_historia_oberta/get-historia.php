@@ -88,7 +88,7 @@ if ($slug === 'carrecsPersona') {
     $etapaFiltro = isset($_GET['etapa']) ? $_GET['etapa'] : '';
     $subetapaFiltro = isset($_GET['subetapa']) ? $_GET['subetapa'] : '';
 
-    $query = "SELECT e.id, esdeNom, slug, esdeDataIDia, esdeDataIMes, esdeDataIAny, esdeDataFDia, esdeDataFMes, esdeDataFAny, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca
+    $query = "SELECT e.id, e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id
@@ -129,6 +129,32 @@ if ($slug === 'carrecsPersona') {
 
     // Recopilar los resultados
     $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+    array_walk_recursive($data, function (&$v) {
+        if (!is_string($v)) return;
+
+        // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
+        $v = str_replace("\0", '', $v);
+
+        // Intentar normalizar a UTF-8 válido
+        // 1) Si ya es UTF-8 válido, lo deja igual
+        if (!mb_check_encoding($v, 'UTF-8')) {
+            // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
+            $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
+            if ($v2 !== false) {
+                $v = $v2;
+            } else {
+                // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
+                $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                if ($v3 !== false) $v = $v3;
+            }
+        } else {
+            // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
+            $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            if ($v2 !== false) $v = $v2;
+        }
+    });
 
     // Devolver los datos y el total de eventos
     echo json_encode([
