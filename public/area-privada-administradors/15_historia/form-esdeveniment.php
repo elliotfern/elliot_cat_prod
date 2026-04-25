@@ -181,9 +181,6 @@ if ($modificaBtn === 1) {
                 h2Element.innerHTML = newContent;
 
                 document.getElementById('esdeNom').value = data.esdeNom;
-                document.getElementById('esdeNomCast').value = data.esdeNomCast;
-                document.getElementById('esdeNomEng').value = data.esdeNomEng;
-                document.getElementById('esdeNomIt').value = data.esdeNomIt;
                 document.getElementById('descripcio').value = data.descripcio;
 
                 document.getElementById('slug').value = data.slug;
