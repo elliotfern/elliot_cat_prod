@@ -16,7 +16,7 @@ export function persona() {
     formPersona(true, slug);
   } else if (pageType[2] === 'fitxa-persona') {
     //fitxaPersona('https://api.elliot.cat/api/persona/', pageType[3], 'persona', function (data) {});
-    fitxaPersona('/api/persones/get/persona?slug="', pageType[3], 'persona', function (data) {});
+    fitxaPersona('/api/persones/get/persona?slug=', pageType[3], 'persona', function (data) {});
   } else if (pageType[2] === 'nova-persona') {
     formPersona(false);
   } else if ([pageType[1], pageType[0]].includes('base-dades-persones')) {

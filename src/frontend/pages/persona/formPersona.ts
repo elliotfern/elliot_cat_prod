@@ -67,7 +67,7 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
 
   if (slug && isUpdate) {
     //const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PERSONA_DETALL_SLUG(slug), true);
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(`https://elliot.cat/api/persones/get/?persona=${slug}`, true);
+    const response = await fetchDataGet<ApiResponse<Fitxa>>(`https://elliot.cat/api/persones/get/persona?slug=${slug}`, true);
 
     if (!response || !response.data) return;
     data = response.data;

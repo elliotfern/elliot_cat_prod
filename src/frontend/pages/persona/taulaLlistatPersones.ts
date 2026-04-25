@@ -50,7 +50,7 @@ export async function taulaLlistatPersones() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Persona) =>
-        `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/base-dades-persones/modifica-persona/${row.id}">
+        `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/base-dades-persones/modifica-persona/${row.slug}">
           <button type="button" class="button btn-petit">Modifica</button>
         </a>`,
     });
