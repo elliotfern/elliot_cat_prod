@@ -329,7 +329,7 @@ $routes = [
     ],
 
     // 04. Persones
-    '/api/persones/get' => [
+    '/api/persones/get/{slug}' => [
         'view' => 'src/backend/api/04_persones/get-persones.php',
         'needs_session' => false,
         'header_footer' => false,

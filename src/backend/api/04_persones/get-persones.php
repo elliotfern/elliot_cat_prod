@@ -5,6 +5,7 @@ use App\Utils\Tables;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 
+$slug = $routeParams[0];
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -33,10 +34,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 // 1) Base de dades persones: Llistat complet
 // ruta GET => "https://elliot.cat/api/persones/get/llistatPersones"
-if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
-    global $conn;
+if ($slug === 'llistatPersones') {
 
-    // Consulta SQL base
+    $db = new Database();
+
     $query = "SELECT 
             LOWER(CONCAT_WS('-',
                 SUBSTR(HEX(a.id), 1, 8),
@@ -58,16 +59,32 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
             GROUP BY a.id
             ORDER BY a.cognoms;";
 
-    // Preparar y ejecutar la consulta
-    $stmt = $conn->prepare($query);
+    try {
+        $result = $db->getData($query);
 
-    $stmt->execute();
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            exit;
+        }
 
-    // Obtener los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (\Throwable $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+        exit;
+    }
 
-    // Enviar los resultados como JSON
-    echo json_encode($data);
 
     // ruta GET => "/api/persones/get/?persona=josep-fontana"
 } else if (isset($_GET['persona'])) {
