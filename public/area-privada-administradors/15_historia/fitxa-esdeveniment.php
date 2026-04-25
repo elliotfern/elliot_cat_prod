@@ -151,7 +151,7 @@ $slug = $routeParams[0];
     }
 
     // Llamar a la función fetchApiData con la URL de la API y el slug del libro
-    fetchApiData("/api/historia/get/?esdeveniment=<?php echo $slug; ?>");
+    fetchApiData("/api/historia/get/esdeveniment?slug=<?php echo $slug; ?>");
 
     function getMesCatalan(numero) {
         const mesos = [

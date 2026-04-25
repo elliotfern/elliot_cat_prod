@@ -196,14 +196,14 @@ if ($slug === 'carrecsPersona') {
 } else if ($slug === 'esdeveniment') {
     $slug = $_GET['slug'];
 
-    $query = "SELECT e.id, e.esdeNom, e.esdeNomCast, e.esdeNomEng, e.esdeNomIt, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, e.esSubEtapa, e.esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, e.descripcio, i.alt
+    $query = "SELECT e.id, e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, e.esSubEtapa, e.esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, e.descripcio, i.alt
     FROM db_historia_esdeveniments AS e
-    LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id
-    LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id
-    LEFT JOIN db_cities AS c ON e.esdeCiutat = c.id
-    LEFT JOIN db_countries AS co ON c.country = co.id
-    LEFT JOIN db_img AS i ON e.img = i.id
-    WHERE e.slug = :slug";
+    LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id 
+    LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id 
+    LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
+    LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id 
+    LEFT JOIN db_img AS i ON e.img = i.id 
+    WHERE e.slug =:slug";
 
     // Preparar la consulta
     $stmt = $conn->prepare($query);
