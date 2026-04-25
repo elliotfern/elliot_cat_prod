@@ -93,13 +93,14 @@ if ($slug === 'carrecsPersona') {
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id
     LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
-    LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id;";
+    LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id
+    WHERE 1=1";
 
-    if ($etapaFiltro) {
+    if (!empty($etapaFiltro)) {
         $query .= " AND p.id = :etapa";
     }
 
-    if ($subetapaFiltro) {
+    if (!empty($subetapaFiltro)) {
         $query .= " AND s.id = :subetapa";
     }
 
