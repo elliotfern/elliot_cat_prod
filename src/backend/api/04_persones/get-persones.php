@@ -50,7 +50,7 @@ if ($slug === 'llistatPersones') {
             a.any_naixement AS yearBorn, a.any_defuncio AS yearDie, 
             c.pais_ca,
             i.nameImg,
-            GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup
+            JSON_ARRAYAGG(DISTINCT g.grup_ca) AS grup
             FROM db_persones AS a
             LEFT JOIN db_geo_paisos AS c ON a.pais_autor_id = c.id
             LEFT JOIN db_img AS i ON a.img_id = i.id

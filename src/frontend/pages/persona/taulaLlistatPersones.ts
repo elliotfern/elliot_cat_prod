@@ -10,44 +10,36 @@ const pageType = getPageType(url);
 
 export async function taulaLlistatPersones() {
   const isAdmin = await getIsAdmin();
-  let slug: string = '';
-  let gestioUrl: string = '';
+
+  let gestioUrl = '';
 
   if (isAdmin) {
-    slug = pageType[3];
     gestioUrl = '/gestio';
-  } else {
-    slug = pageType[2];
   }
 
   const columns: TaulaDinamica<Persona>[] = [
-    /*{
-      header: '',
-      field: 'nameImg',
-      render: (_: unknown, row: Persona) => {
-        const detailUrl = `https://${window.location.host}${gestioUrl}/base-dades-persones/fitxa-persona/${row.slug}`;
-        const fullImgUrl = `https://media.elliot.cat/img/persona/${row.nameImg}.jpg`;
-
-        // Genera el enlace dinámico con la imagen
-        return `<a id="${row.id}" title="Persona" href="${detailUrl}">
-              <img src="${fullImgUrl}" style="height:70px">
-            </a>`;
-      },
-    },*/
     {
       header: 'Nom i cognoms',
       field: 'nom',
       render: (_: unknown, row: Persona) => {
-        // Genera el enlace dinámico sin la imagen
         return `<a id="${row.id}" title="${row.nomComplet}" 
                href="https://${window.location.hostname}${gestioUrl}/base-dades-persones/fitxa-persona/${row.slug}">
                ${row.nomComplet}
             </a>`;
       },
     },
+
     { header: 'País', field: 'paisAutor' },
 
-    { header: 'Grup', field: 'grup', render: (_: unknown, row: Persona) => `${row.grup.join(', ')}` },
+    {
+      header: 'Grup',
+      field: 'grup',
+      render: (_: unknown, row: Persona) => {
+        const grups = Array.isArray(row.grup) ? row.grup : [];
+        return grups.join(', ');
+      },
+    },
+
     {
       header: 'Anys',
       field: 'yearBorn',
@@ -59,15 +51,22 @@ export async function taulaLlistatPersones() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Persona) => `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/base-dades-persones/modifica-persona/${row.slug}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Persona) =>
+        `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/base-dades-persones/modifica-persona/${row.slug}">
+          <button type="button" class="button btn-petit">Modifica</button>
+        </a>`,
     });
   }
 
   renderDynamicTable({
     url: `https://elliot.cat/api/persones/get/llistatPersones`,
     containerId: 'taulaLlistatPersones',
+
     columns,
+
     filterKeys: ['nomComplet'],
+
+    // 👇 IMPORTANTE: ahora filtramos por string seguro
     filterByField: 'grup',
   });
 }
