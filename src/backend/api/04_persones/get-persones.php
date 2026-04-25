@@ -39,18 +39,28 @@ if ($slug === 'llistatPersones') {
     $db = new Database();
 
     $query = "SELECT 
-            LOWER(CONCAT_WS('-',
-                SUBSTR(HEX(a.id), 1, 8),
-                SUBSTR(HEX(a.id), 9, 4),
-                SUBSTR(HEX(a.id), 13, 4),
-                SUBSTR(HEX(a.id), 17, 4),
-                SUBSTR(HEX(a.id), 21)
-            )) AS id,
-            a.nom, a.cognoms, a.slug, 
-            a.any_naixement AS yearBorn, a.any_defuncio AS yearDie, 
-            c.pais_ca,
-            i.nameImg,
-            JSON_ARRAYAGG(DISTINCT g.grup_ca) AS grup
+                LOWER(CONCAT_WS('-',
+                    SUBSTR(HEX(a.id), 1, 8),
+                    SUBSTR(HEX(a.id), 9, 4),
+                    SUBSTR(HEX(a.id), 13, 4),
+                    SUBSTR(HEX(a.id), 17, 4),
+                    SUBSTR(HEX(a.id), 21)
+                )) AS id,
+                a.nom,
+                a.cognoms,
+                a.slug,
+                a.dia_naixement,
+                a.mes_naixement,
+                a.any_naixement,
+                a.dia_defuncio,
+                a.mes_defuncio,
+                a.any_defuncio,
+                c.pais_ca,
+                i.nameImg,
+                COALESCE(
+                    JSON_ARRAYAGG(g.grup_ca),
+                    JSON_ARRAY()
+                ) AS grup
             FROM db_persones AS a
             LEFT JOIN db_geo_paisos AS c ON a.pais_autor_id = c.id
             LEFT JOIN db_img AS i ON a.img_id = i.id
@@ -71,31 +81,27 @@ if ($slug === 'llistatPersones') {
             exit;
         }
 
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (!is_string($v)) return;
+        $result = $db->getData($query);
 
-            // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
-            $v = str_replace("\0", '', $v);
+        foreach ($result as &$row) {
 
-            // Intentar normalizar a UTF-8 válido
-            // 1) Si ya es UTF-8 válido, lo deja igual
-            if (!mb_check_encoding($v, 'UTF-8')) {
-                // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
-                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) {
-                    $v = $v2;
-                } else {
-                    // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
-                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                    if ($v3 !== false) $v = $v3;
-                }
-            } else {
-                // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
-                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) $v = $v2;
+            // 1. decode JSON grup (si DB lo devuelve como string)
+            if (is_string($row['grup'])) {
+                $decoded = json_decode($row['grup'], true);
+                $row['grup'] = is_array($decoded) ? $decoded : [];
             }
-        });
+
+            // 2. normalizar nulls
+            $row['any_naixement'] = $row['any_naixement'] ?? null;
+            $row['any_defuncio']  = $row['any_defuncio'] ?? null;
+
+            // 3. limpiar UTF-8 (mínimo necesario)
+            array_walk($row, function (&$v) {
+                if (is_string($v)) {
+                    $v = mb_convert_encoding($v, 'UTF-8', 'UTF-8');
+                }
+            });
+        }
 
         Response::success(
             MissatgesAPI::success('get'),

@@ -11,39 +11,30 @@ const pageType = getPageType(url);
 export async function taulaLlistatPersones() {
   const isAdmin = await getIsAdmin();
 
-  let gestioUrl = '';
-
-  if (isAdmin) {
-    gestioUrl = '/gestio';
-  }
-
   const columns: TaulaDinamica<Persona>[] = [
     {
       header: 'Nom i cognoms',
       field: 'nom',
       render: (_: unknown, row: Persona) => {
-        return `<a id="${row.id}" title="${row.nomComplet}" 
-               href="https://${window.location.hostname}${gestioUrl}/base-dades-persones/fitxa-persona/${row.slug}">
-               ${row.nomComplet}
+        return `<a id="${row.id}" title="${row.nom}" 
+               href="https://${window.location.hostname}/gestio/base-dades-persones/fitxa-persona/${row.slug}">
+               ${row.nom}  ${row.cognoms}
             </a>`;
       },
     },
 
-    { header: 'País', field: 'paisAutor' },
+    { header: 'País', field: 'pais_ca' },
 
     {
       header: 'Grup',
       field: 'grup',
-      render: (_: unknown, row: Persona) => {
-        const grups = Array.isArray(row.grup) ? row.grup : [];
-        return grups.join(', ');
-      },
+      render: (_: unknown, row: Persona) => (row.grup ?? []).join(', '),
     },
 
     {
       header: 'Anys',
-      field: 'yearBorn',
-      render: (_: unknown, row: Persona) => `${row.anys}`,
+      field: 'any_naixement',
+      render: (_: unknown, row: Persona) => `${row.any_naixement} - ${row.any_defuncio}`,
     },
   ];
 
@@ -52,7 +43,7 @@ export async function taulaLlistatPersones() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Persona) =>
-        `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/base-dades-persones/modifica-persona/${row.slug}">
+        `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/base-dades-persones/modifica-persona/${row.slug}">
           <button type="button" class="button btn-petit">Modifica</button>
         </a>`,
     });
@@ -61,10 +52,8 @@ export async function taulaLlistatPersones() {
   renderDynamicTable({
     url: `https://elliot.cat/api/persones/get/llistatPersones`,
     containerId: 'taulaLlistatPersones',
-
     columns,
-
-    filterKeys: ['nomComplet'],
+    filterKeys: ['cognoms'],
 
     // 👇 IMPORTANTE: ahora filtramos por string seguro
     filterByField: 'grup',

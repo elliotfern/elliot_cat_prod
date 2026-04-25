@@ -1,19 +1,16 @@
 export interface Persona {
   slug: string;
-  AutNom: string;
-  AutCognom1: string;
-  paisAutor: string;
-  country: string;
-  yearDie: string;
-  yearBorn: string;
-  id: number;
-  profession: string;
-  cognoms: string;
   nom: string;
+  cognoms: string;
+  pais_ca: string;
+  dia_naixement: number;
+  mes_naixement: number;
+  any_naixement: number;
+  dia_defuncio: number;
+  mes_defuncio: number;
+  any_defuncio: number;
+  id: string;
+  profession: string;
   grup: string[];
   nameImg: string;
-  professio_ca: string;
-  grups: string[];
-  nomComplet: string;
-  anys: string;
 }
