@@ -170,36 +170,35 @@ if ($modificaBtn === 1) {
     function formUpdateLlibre(slug) {
         let urlAjax = "/api/historia/get/esdeveniment?slug=" + slug;
 
-        fetch(urlAjax, {
-                method: "GET",
-            })
+        fetch(urlAjax)
             .then(response => response.json())
             .then(data => {
-                // Establecer valores en los campos del formulario
-                const newContent = "Esdeveniment: " + data.esdeNom;
-                const h2Element = document.getElementById('bookUpdateTitle');
-                h2Element.innerHTML = newContent;
+
+                document.getElementById('bookUpdateTitle').innerHTML =
+                    "Esdeveniment: " + data.esdeNom;
 
                 document.getElementById('esdeNom').value = data.esdeNom;
                 document.getElementById('descripcio').value = data.descripcio;
-
                 document.getElementById('slug').value = data.slug;
                 document.getElementById("id").value = data.id;
 
-                document.getElementById("esdeDataIAny").value = data.esdeDataIAny === 0 ? '' : data.esdeDataIAny;
-                document.getElementById("esdeDataFAny").value = data.esdeDataFAny === 0 ? '' : data.esdeDataFAny;
+                document.getElementById("esdeDataIAny").value =
+                    data.esdeDataIAny === 0 ? '' : data.esdeDataIAny;
 
-                // Llenar selects con opciones
-                selectOmplirDades("/api/auxiliars/get/ciutats", data.esSubEtapa, "ciutat");
-                selectOmplirDades("/api/historia/get/llistatSubEtapes", data.esSubEtapa, "nomSubEtapa");
-                selectOmplirDades("/api/auxiliars/get/calendariDies", data.esdeDataIDia, "dia");
-                selectOmplirDades("/api/auxiliars/get/calendariDies", data.esdeDataFDia, "dia");
-                selectOmplirDades("/api/auxiliars/get/calendariMesos", data.esdeDataIMes, "mes");
-                selectOmplirDades("/api/auxiliars/get/calendariMesos", data.esdeDataFMes, "mes");
+                document.getElementById("esdeDataFAny").value =
+                    data.esdeDataFAny === 0 ? '' : data.esdeDataFAny;
+
+                // selects corregidos
+                selectOmplirDades("/api/auxiliars/get/ciutats", data.esdeCiutat, "esdeCiutat", "ciutat");
+                selectOmplirDades("/api/historia/get/llistatSubEtapes", data.esSubEtapa, "esSubEtapa", "nomSubEtapa");
+                selectOmplirDades("/api/auxiliars/get/calendariDies", data.esdeDataIDia, "esdeDataIDia", "dia");
+                selectOmplirDades("/api/auxiliars/get/calendariDies", data.esdeDataFDia, "esdeDataFDia", "dia");
+                selectOmplirDades("/api/auxiliars/get/calendariMesos", data.esdeDataIMes, "esdeDataIMes", "mes");
+                selectOmplirDades("/api/auxiliars/get/calendariMesos", data.esdeDataFMes, "esdeDataFMes", "mes");
                 selectOmplirDades("/api/historia/get/llistatImatgesEsdeveniments", data.img, "img", "alt");
 
             })
-            .catch(error => console.error("Error al obtener los datos:", error));
+            .catch(error => console.error("Error:", error));
     }
 
     async function selectOmplirDades(url, selectedValue, selectId, textField) {
@@ -209,34 +208,42 @@ if ($modificaBtn === 1) {
                 throw new Error('Error en la sol·licitud AJAX');
             }
 
-            const data = await response.json();
-            const selectElement = document.getElementById(selectId);
-            if (!selectElement) {
-                console.error(`Select element with id ${selectId} not found`);
-                return;
-            }
+            const json = await response.json();
+            const data = json.data || [];
 
-            // Netejar les opcions actuals
+            const selectElement = document.getElementById(selectId);
+            if (!selectElement) return;
+
             selectElement.innerHTML = '';
 
-            // Afegir opció per defecte
+            // opción por defecto
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
             defaultOption.text = 'Selecciona una opció:';
-            defaultOption.disabled = false;
-            defaultOption.selected = !selectedValue; // si no hi ha valor seleccionat, aquesta es selecciona
+            defaultOption.selected = !selectedValue;
             selectElement.appendChild(defaultOption);
 
-            // Afegir les noves opcions
             data.forEach((item) => {
                 const option = document.createElement('option');
+
                 option.value = item.id;
-                option.text = item[textField];
-                if (item.id === selectedValue) {
+
+                // fallback seguro por si cambia el campo
+                option.text =
+                    item[textField] ??
+                    item.nom ??
+                    item.dia ??
+                    item.mes ??
+                    item.alt ??
+                    '';
+
+                if (String(item.id) === String(selectedValue)) {
                     option.selected = true;
                 }
+
                 selectElement.appendChild(option);
             });
+
         } catch (error) {
             console.error('Error:', error);
         }
