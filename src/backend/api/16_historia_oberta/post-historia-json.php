@@ -27,38 +27,17 @@ function slugify($text)
     return trim($text, '-');
 }
 
-function parseDateParts($dateStr)
-{
-    $dateStr = trim((string)$dateStr);
-
-    // Ej: "6 and 9 August 1945"
-    // simplificación: extraemos año primero
-    if (preg_match('/(\d{4})/', $dateStr, $m)) {
-        $year = (int)$m[1];
-    } else {
-        $year = 0;
-    }
-
-    return [
-        'anyI' => $year,
-        'anyF' => $year,
-        'mesI' => null,
-        'mesF' => null,
-        'diaI' => null,
-        'diaF' => null,
-    ];
-}
-
 if (isset($_GET['importDades'])) {
 
     $filePath = 'https://elliot.cat/dades.json';
 
-    if (!file_exists($filePath)) {
-        Response::error(MissatgesAPI::error('not_found'), ['file' => 'dades.json missing'], 404);
+    $json = @file_get_contents($filePath);
+
+    if ($json === false) {
+        Response::error(MissatgesAPI::error('not_found'), ['file' => 'dades.json not accessible'], 404);
         exit;
     }
 
-    $json = file_get_contents($filePath);
     $events = json_decode($json, true);
 
     if (!is_array($events)) {
@@ -120,8 +99,6 @@ if (isset($_GET['importDades'])) {
 
             $slug = slugify($nom);
 
-            $dates = parseDateParts($e['Dates'] ?? '');
-
             // imagen fija o null (según tu sistema)
             $img = 0;
 
@@ -130,13 +107,15 @@ if (isset($_GET['importDades'])) {
             $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
             $stmt->bindValue(':img', $img, PDO::PARAM_INT);
 
-            $stmt->bindValue(':esdeDataIDia', $dates['diaI'], PDO::PARAM_NULL);
-            $stmt->bindValue(':esdeDataIMes', $dates['mesI'], PDO::PARAM_NULL);
-            $stmt->bindValue(':esdeDataIAny', $dates['anyI'], PDO::PARAM_INT);
+            // 🔥 FECHAS DIRECTAS (SIN PARSING)
+            $stmt->bindValue(':esdeDataFDia', $e['esdeDataFDia'], $e['esdeDataFDia'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $stmt->bindValue(':esdeDataFMes', $e['esdeDataFMes'], $e['esdeDataFMes'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $stmt->bindValue(':esdeDataFAny', $e['esdeDataFAny'], PDO::PARAM_INT);
 
-            $stmt->bindValue(':esdeDataFDia', $dates['diaF'], PDO::PARAM_NULL);
-            $stmt->bindValue(':esdeDataFMes', $dates['mesF'], PDO::PARAM_NULL);
-            $stmt->bindValue(':esdeDataFAny', $dates['anyF'], PDO::PARAM_INT);
+            $stmt->bindValue(':esdeDataIDia', $e['esdeDataIDia'], $e['esdeDataIDia'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $stmt->bindValue(':esdeDataIMes', $e['esdeDataIMes'], $e['esdeDataIMes'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+            $stmt->bindValue(':esdeDataIAny', $e['esdeDataIAny'], PDO::PARAM_INT);
+
 
             $stmt->execute();
         }
