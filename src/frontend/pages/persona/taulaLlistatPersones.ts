@@ -34,7 +34,14 @@ export async function taulaLlistatPersones() {
     {
       header: 'Anys',
       field: 'any_naixement',
-      render: (_: unknown, row: Persona) => `${row.any_naixement} - ${row.any_defuncio}`,
+      render: (_: unknown, row: Persona) => {
+        const born = row.any_naixement ?? '';
+        const died = row.any_defuncio;
+
+        const diedText = died === null || died === 0 ? '' : ` - ${died}`;
+
+        return `${born}${diedText}`;
+      },
     },
   ];
 
@@ -43,7 +50,7 @@ export async function taulaLlistatPersones() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Persona) =>
-        `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/base-dades-persones/modifica-persona/${row.slug}">
+        `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/base-dades-persones/modifica-persona/${row.id}">
           <button type="button" class="button btn-petit">Modifica</button>
         </a>`,
     });
