@@ -26,7 +26,7 @@ class Tables
 
     public const CINEMA_ACTORS_PELICULES = '11_aux_cinema_actors_pelicules';
 
-    public const HISTORIA_ESDEVENIMENTS = ' db_historia_esdeveniments ';
+    public const HISTORIA_ESDEVENIMENTS = 'db_historia_esdeveniments';
 
     // Agrega aquí todas las tablas que necesites usar
 
