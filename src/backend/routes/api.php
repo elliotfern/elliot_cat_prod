@@ -286,6 +286,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/historia/post' => [
+        'view' => 'src/backend/api/16_historia_oberta/post-historia-json.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     '/api/historia/put/{slug}' => [
         'view' => 'src/backend/api/16_historia_oberta/put-historia.php',
         'needs_session' => false,
