@@ -3,7 +3,7 @@
     "target": "es2021",
     "lib": ["DOM", "DOM.Iterable", "ES2021"],
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -16,7 +16,7 @@
       },
 
  "include": [
-    "src",
+    "src"
   ], 
   "exclude": ["node_modules"],
   "scripts": {

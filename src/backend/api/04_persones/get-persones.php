@@ -38,19 +38,25 @@ if (isset($_GET['type']) && $_GET['type'] == 'llistatPersones') {
 
     // Consulta SQL base
     $query = "SELECT 
-            a.id, a.nom, a.cognoms, a.slug, 
-            a.anyNaixement AS yearBorn, a.anyDefuncio AS yearDie, 
-            c.pais_cat,
+            LOWER(CONCAT_WS('-',
+                SUBSTR(HEX(a.id), 1, 8),
+                SUBSTR(HEX(a.id), 9, 4),
+                SUBSTR(HEX(a.id), 13, 4),
+                SUBSTR(HEX(a.id), 17, 4),
+                SUBSTR(HEX(a.id), 21)
+            )) AS id,
+            a.nom, a.cognoms, a.slug, 
+            a.any_naixement AS yearBorn, a.any_defuncio AS yearDie, 
+            c.pais_ca,
             i.nameImg,
             GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup
             FROM db_persones AS a
-            LEFT JOIN db_countries AS c ON a.paisAutor = c.id
-            LEFT JOIN db_img AS i ON a.img = i.id
-            LEFT JOIN db_persones_grups_relacions AS rel ON a.id2 = rel.persona_id
+            LEFT JOIN db_geo_paisos AS c ON a.pais_autor_id = c.id
+            LEFT JOIN db_img AS i ON a.img_id = i.id
+            LEFT JOIN db_persones_grups_relacions AS rel ON a.id = rel.persona_id
             LEFT JOIN db_persones_grups AS g ON rel.grup_id = g.id
-            WHERE a.visibilitat = 1
             GROUP BY a.id
-            ORDER BY a.cognoms";
+            ORDER BY a.cognoms;";
 
     // Preparar y ejecutar la consulta
     $stmt = $conn->prepare($query);

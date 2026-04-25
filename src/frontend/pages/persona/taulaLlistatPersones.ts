@@ -64,7 +64,7 @@ export async function taulaLlistatPersones() {
   }
 
   renderDynamicTable({
-    url: `https://api.elliot.cat/api/persones`,
+    url: `https://elliot.cat/api/persones/get/llistatPersones`,
     containerId: 'taulaLlistatPersones',
     columns,
     filterKeys: ['nomComplet'],
