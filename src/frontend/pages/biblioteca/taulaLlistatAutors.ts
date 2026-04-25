@@ -17,16 +17,16 @@ export async function taulaLlistatAutors() {
       header: 'Autor/a',
       field: 'id',
       render: (_: unknown, row: Persona) => `<a href="${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-autor/${encodeURIComponent(row.slug)}">
-          ${row.AutNom} ${row.AutCognom1}
+          ${row.cognoms} ${row.cognoms}
         </a>`,
     },
-    { header: 'País', field: 'country' },
+    { header: 'País', field: 'pais_ca' },
     { header: 'Professió', field: 'grup' },
     {
       header: 'Dates',
-      field: 'yearDie',
+      field: 'any_defuncio',
       render: (_: unknown, row: Persona) => {
-        return `${!row.yearDie ? row.yearBorn : `${row.yearBorn} - ${row.yearDie}`}`;
+        return `${!row.any_defuncio ? row.any_naixement : `${row.any_naixement} - ${row.any_defuncio}`}`;
       },
     },
   ];
@@ -45,7 +45,7 @@ export async function taulaLlistatAutors() {
     url: `${API_BASE}/biblioteca/get/?type=totsAutors`,
     containerId: 'taulaLlistatAutors',
     columns,
-    filterKeys: ['AutCognom1'],
+    filterKeys: ['cognoms'],
     filterByField: 'grup',
 
     // ✅ NOMÉS aquí
