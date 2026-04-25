@@ -182,7 +182,7 @@ if ($modificaBtn === 1) {
 
 <script>
     function formUpdateLlibre(slug) {
-        let urlAjax = "/api/historia/get/?esdeveniment=" + slug;
+        let urlAjax = "/api/historia/get/esdeveniment?slug=" + slug;
 
         fetch(urlAjax, {
                 method: "GET",
