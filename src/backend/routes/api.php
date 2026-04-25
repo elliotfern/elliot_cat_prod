@@ -286,7 +286,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/historia/post' => [
+    '/api/historia/json' => [
         'view' => 'src/backend/api/16_historia_oberta/post-historia-json.php',
         'needs_session' => false,
         'header_footer' => false,
