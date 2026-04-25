@@ -73,11 +73,8 @@ try {
     $now = date('Y-m-d H:i:s');
 
     foreach ($events as $e) {
-
-        $nom = $e['Event'] ?? null;
-
-        $stmt->bindValue(':esdeNom', $nom, PDO::PARAM_STR);
-        $stmt->bindValue(':slug', slugify($nom), PDO::PARAM_STR);
+        $stmt->bindValue(':esdeNom', $e['esdeNom'], PDO::PARAM_STR);
+        $stmt->bindValue(':slug', slugify($e['esdeNom']), PDO::PARAM_STR);
         $stmt->bindValue(':img', 0, PDO::PARAM_INT);
 
         // fechas seguras (null-safe)
