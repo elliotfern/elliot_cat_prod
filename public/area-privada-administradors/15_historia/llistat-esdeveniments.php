@@ -110,7 +110,7 @@
     }
 
     function cargarEventosPorEtapa(etapa) {
-        fetch(`/api/historia/get/?llistatEsdeveniments&etapa=${etapa}`)
+        fetch(`/api/historia/get/llistatEsdeveniments?etapa=${etapa}`)
             .then(res => res.json())
             .then(data => renderTabla(data))
             .catch(() => mostrarErrorTabla());
@@ -121,7 +121,7 @@
         container.style.display = 'block';
         container.innerHTML = '<h4>Selecciona una Subetapa:</h4>';
 
-        fetch(`/api/historia/get/?subEtapesEtapa=${etapa}`)
+        fetch(`/api/historia/get/subEtapesEtapa?=${etapa}`)
             .then(res => res.json())
             .then(data => {
                 if (data.length === 0 || data.error === 'No rows found') {
@@ -143,7 +143,7 @@
     }
 
     function filtrarEventos(etapa, subetapa) {
-        fetch(`/api/historia/get/?llistatEsdeveniments&etapa=${etapa}&subetapa=${subetapa}`)
+        fetch(`/api/historia/get/llistatEsdeveniments?etapa=${etapa}&subetapa=${subetapa}`)
             .then(res => res.json())
             .then(data => renderTabla(data))
             .catch(() => mostrarErrorTabla());
