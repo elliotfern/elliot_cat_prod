@@ -86,7 +86,7 @@ export function historiaOberta() {
     if (form) {
       // Lanzar actualizador de datos
       form.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'formEsdeveniment', '/api/historia/post/?esdeveniment');
+        transmissioDadesDB(event, 'POST', 'formEsdeveniment', '/api/historia/post/esdeveniment');
       });
     }
   } else if (pageType[2] === 'modifica-esdeveniment') {
@@ -94,7 +94,7 @@ export function historiaOberta() {
     if (form) {
       // Lanzar actualizador de datos
       form.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'PUT', 'formEsdeveniment', '/api/historia/put/?esdeveniment');
+        transmissioDadesDB(event, 'PUT', 'formEsdeveniment', '/api/historia/put/esdeveniment');
       });
     }
   } else if (pageType[2] === 'modifica-esdeveniment-persona') {

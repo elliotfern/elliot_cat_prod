@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // a) Inserir esdeveniment
-if (isset($_GET['esdeveniment'])) {
+if ($slug === 'esdeveniment') {
 
     // Obtener el cuerpo de la solicitud PUT
     $input_data = file_get_contents("php://input");
@@ -49,9 +49,6 @@ if (isset($_GET['esdeveniment'])) {
     $hasError = false; // Inicializamos la variable $hasError como false
 
     $esdeNom       = !empty($data['esdeNom']) ? data_input($data['esdeNom']) : ($hasError = true);
-    $esdeNomCast   = !empty($data['esdeNomCast']) ? data_input($data['esdeNomCast']) : '';
-    $esdeNomEng    = !empty($data['esdeNomEng']) ? data_input($data['esdeNomEng']) : '';
-    $esdeNomIt     = !empty($data['esdeNomIt']) ? data_input($data['esdeNomIt']) : '';
     $slug          = !empty($data['slug']) ? data_input($data['slug']) : ($hasError = true);
     $esdeDataIDia  = isset($data['esdeDataIDia']) ? (int) $data['esdeDataIDia'] : null;
     $esdeDataIMes  = isset($data['esdeDataIMes']) ? (int) $data['esdeDataIMes'] : null;
@@ -72,9 +69,6 @@ if (isset($_GET['esdeveniment'])) {
         global $conn;
         $sql = "INSERT INTO db_historia_esdeveniments 
         SET esdeNom = :esdeNom, 
-            esdeNomCast = :esdeNomCast, 
-            esdeNomEng = :esdeNomEng, 
-            esdeNomIt = :esdeNomIt, 
             slug = :slug, 
             esdeDataIDia = :esdeDataIDia, 
             esdeDataIMes = :esdeDataIMes, 
@@ -92,9 +86,6 @@ if (isset($_GET['esdeveniment'])) {
         $stmt = $conn->prepare($sql);
 
         $stmt->bindParam(":esdeNom", $esdeNom, PDO::PARAM_STR);
-        $stmt->bindParam(":esdeNomCast", $esdeNomCast, PDO::PARAM_STR);
-        $stmt->bindParam(":esdeNomEng", $esdeNomEng, PDO::PARAM_STR);
-        $stmt->bindParam(":esdeNomIt", $esdeNomIt, PDO::PARAM_STR);
         $stmt->bindParam(":slug", $slug, PDO::PARAM_STR);
         $stmt->bindParam(":esdeDataIDia", $esdeDataIDia, PDO::PARAM_INT);
         $stmt->bindParam(":esdeDataIMes", $esdeDataIMes, PDO::PARAM_INT);

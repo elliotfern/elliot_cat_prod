@@ -22,13 +22,13 @@ if ($modificaBtn === 1) {
 ?>
     <script type="module">
         // Llenar selects con opciones
-        selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "esdeCiutat", "ciutat");
-        selectOmplirDades("/api/historia/get/?llistatSubEtapes", "", "esSubEtapa", "nomSubEtapa");
-        selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "esdeDataIDia", "dia");
-        selectOmplirDades("/api/biblioteca/get/?type=calendariDies", "", "esdeDataFDia", "dia");
-        selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", "", "esdeDataIMes", "mes");
-        selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", "", "esdeDataFMes", "mes");
-        selectOmplirDades("/api/historia/get/?llistatImatgesEsdeveniments", "", "img", "alt");
+        selectOmplirDades("/api/auxiliars/get/ciutats", "", "esdeCiutat", "ciutat");
+        selectOmplirDades("/api/historia/get/llistatSubEtapes", "", "esSubEtapa", "nomSubEtapa");
+        selectOmplirDades("/api/auxiliars/get/calendariDies", "", "esdeDataIDia", "dia");
+        selectOmplirDades("/api/auxiliars/get/calendariDies", "", "esdeDataFDia", "dia");
+        selectOmplirDades("/api/auxiliars/get/calendariMesos", "", "esdeDataIMes", "mes");
+        selectOmplirDades("/api/auxiliars/get/calendariMesos", "", "esdeDataFMes", "mes");
+        selectOmplirDades("/api/historia/get/llistatImatgesEsdeveniments", "", "img", "alt");
     </script>
 <?php
 }
@@ -73,20 +73,6 @@ if ($modificaBtn === 1) {
             <input class="form-control" type="text" name="esdeNom" id="esdeNom" value="">
         </div>
 
-        <div class="col-md-4">
-            <label>Esdeveniment (castellà):</label>
-            <input class="form-control" type="text" name="esdeNomCast" id="esdeNomCast" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Esdeveniment (anglès):</label>
-            <input class="form-control" type="text" name="esdeNomEng" id="esdeNomEng" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Esdeveniment (italià):</label>
-            <input class="form-control" type="text" name="esdeNomIt" id="esdeNomIt" value="">
-        </div>
 
         <div class="col-md-4">
             <label>Slug:</label>
@@ -207,13 +193,13 @@ if ($modificaBtn === 1) {
                 document.getElementById("esdeDataFAny").value = data.esdeDataFAny === 0 ? '' : data.esdeDataFAny;
 
                 // Llenar selects con opciones
-                selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.esdeCiutat, "esdeCiutat", "ciutat");
-                selectOmplirDades("/api/historia/get/?llistatSubEtapes", data.esSubEtapa, "esSubEtapa", "nomSubEtapa");
-                selectOmplirDades("/api/biblioteca/get/?type=calendariDies", data.esdeDataIDia, "esdeDataIDia", "dia");
-                selectOmplirDades("/api/biblioteca/get/?type=calendariDies", data.esdeDataFDia, "esdeDataFDia", "dia");
-                selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", data.esdeDataIMes, "esdeDataIMes", "mes");
-                selectOmplirDades("/api/biblioteca/get/?type=calendariMesos", data.esdeDataFMes, "esdeDataFMes", "mes");
-                selectOmplirDades("/api/historia/get/?llistatImatgesEsdeveniments", data.img, "img", "alt");
+                selectOmplirDades("/api/auxiliars/get/ciutats", data.esSubEtapa, "ciutat");
+                selectOmplirDades("/api/historia/get/llistatSubEtapes", data.esSubEtapa, "nomSubEtapa");
+                selectOmplirDades("/api/auxiliars/get/calendariDies", data.esdeDataIDia, "dia");
+                selectOmplirDades("/api/auxiliars/get/calendariDies", data.esdeDataFDia, "dia");
+                selectOmplirDades("/api/auxiliars/get/calendariMesos", data.esdeDataIMes, "mes");
+                selectOmplirDades("/api/auxiliars/get/calendariMesos", data.esdeDataFMes, "mes");
+                selectOmplirDades("/api/historia/get/llistatImatgesEsdeveniments", data.img, "img", "alt");
 
             })
             .catch(error => console.error("Error al obtener los datos:", error));
