@@ -121,7 +121,7 @@
         container.style.display = 'block';
         container.innerHTML = '<h4>Selecciona una Subetapa:</h4>';
 
-        fetch(`/api/historia/get/subEtapesEtapa?=${etapa}`)
+        fetch(`/api/historia/get/subEtapesEtapa?id=${etapa}`)
             .then(res => res.json())
             .then(data => {
                 if (data.length === 0 || data.error === 'No rows found') {
