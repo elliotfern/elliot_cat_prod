@@ -34,11 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 // a) Modificar esdeveniment
 if ($slug === 'esdeveniment') {
 
-    function uuidToBin($uuid)
-    {
-        return hex2bin(str_replace('-', '', $uuid));
-    }
-
     // Obtener el cuerpo de la solicitud PUT
     $input_data = file_get_contents("php://input");
 
