@@ -14,9 +14,10 @@ export function renderFiltros(container: HTMLElement) {
   const wrapper = document.createElement('div');
 
   wrapper.innerHTML = `
-    <h4>Selecciona una Etapa Històrica:</h4>
-    <div class="d-flex flex-wrap gap-2 mb-3" id="etapas"></div>
-    <div id="subetapas" class="mb-3"></div>
+  <h4>Selecciona una Etapa Històrica:</h4>
+  <div class="d-flex flex-wrap gap-2 mb-3" id="etapas"></div>
+
+  <div id="subetapas-container" class="mb-3"></div>
   `;
 
   const etapasDiv = wrapper.querySelector('#etapas')!;
@@ -30,11 +31,10 @@ export function renderFiltros(container: HTMLElement) {
       state.etapa = e.id;
       state.subetapa = null;
 
-      loadEventos();
       loadSubetapas();
+      loadEventos();
 
-      document.querySelectorAll('#etapas button').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
+      document.getElementById('subetapas-container')!.innerHTML = '';
     };
 
     etapasDiv.appendChild(btn);
