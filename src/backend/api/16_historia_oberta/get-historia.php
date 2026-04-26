@@ -88,7 +88,14 @@ if ($slug === 'carrecsPersona') {
     $etapaFiltro = isset($_GET['etapa']) ? $_GET['etapa'] : '';
     $subetapaFiltro = isset($_GET['subetapa']) ? $_GET['subetapa'] : '';
 
-    $query = "SELECT e.id, e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca
+    $query = "SELECT LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(e.id), 1, 8),
+        SUBSTR(HEX(e.id), 9, 4),
+        SUBSTR(HEX(e.id), 13, 4),
+        SUBSTR(HEX(e.id), 17, 4),
+        SUBSTR(HEX(e.id), 21)
+        )) AS id,
+     e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id

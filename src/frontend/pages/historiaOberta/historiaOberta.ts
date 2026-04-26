@@ -7,6 +7,7 @@ import { renderHistoriaObertaListPaged } from './llistatHistoriaObertaPaged';
 import { taulaLlistatCursosHistoria } from './llistatCursos';
 import { taulaArticlesCurs } from './fitxaCurs';
 import { formCursArticle } from './formCursArticle';
+import { initCronologia } from './cronologia/llistatEsdeveniments';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -46,6 +47,10 @@ export function historiaOberta() {
   if (pageType[2] === 'nou-curs-article') {
     const id = pageType[3] ?? '';
     void formCursArticle(false);
+  }
+
+  if (pageType[2] === 'llistat-esdeveniments') {
+    void initCronologia();
   }
 
   if (pageType[3] === 'modifica-article') {
