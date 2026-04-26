@@ -337,7 +337,7 @@ if ($slug === 'carrecsPersona') {
     LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
     LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id 
     LEFT JOIN db_img AS i ON e.img = i.id 
-    WHERE e.id =:id";
+    WHERE e.id = UUID_TO_BIN(:id, true)";
 
     // Preparar la consulta
     $stmt = $conn->prepare($query);
