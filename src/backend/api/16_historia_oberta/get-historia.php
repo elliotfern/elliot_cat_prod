@@ -241,7 +241,21 @@ if ($slug === 'carrecsPersona') {
 } else if ($slug === 'esdeveniment') {
     $slug = $_GET['slug'];
 
-    $query = "SELECT e.id, e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, e.esSubEtapa, e.esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, e.descripcio, i.alt
+    $query = "SELECT LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(e.id), 1, 8),
+        SUBSTR(HEX(e.id), 9, 4),
+        SUBSTR(HEX(e.id), 13, 4),
+        SUBSTR(HEX(e.id), 17, 4),
+        SUBSTR(HEX(e.id), 21)
+        )) AS id,
+        e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, e.esSubEtapa,
+            LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(e.esdeCiutat), 1, 8),
+        SUBSTR(HEX(e.esdeCiutat), 9, 4),
+        SUBSTR(HEX(e.esdeCiutat), 13, 4),
+        SUBSTR(HEX(e.esdeCiutat), 17, 4),
+        SUBSTR(HEX(e.esdeCiutat), 21)
+        )) AS esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, e.descripcio, i.alt
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id 
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id 
@@ -266,6 +280,107 @@ if ($slug === 'carrecsPersona') {
 
     // Recopilar los resultados
     $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+    array_walk_recursive($data, function (&$v) {
+        if (!is_string($v)) return;
+
+        // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
+        $v = str_replace("\0", '', $v);
+
+        // Intentar normalizar a UTF-8 válido
+        // 1) Si ya es UTF-8 válido, lo deja igual
+        if (!mb_check_encoding($v, 'UTF-8')) {
+            // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
+            $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
+            if ($v2 !== false) {
+                $v = $v2;
+            } else {
+                // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
+                $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                if ($v3 !== false) $v = $v3;
+            }
+        } else {
+            // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
+            $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            if ($v2 !== false) $v = $v2;
+        }
+    });
+
+    // Devolver los datos en formato JSON
+    echo json_encode($data);
+
+    // 4. Esdeveniment - pagina modifica
+    // ruta GET => "/api/historia/get/esdevenimentId?id=ewr23232412"
+} else if ($slug === 'esdevenimentId') {
+    $id = $_GET['id'];
+
+    $query = "SELECT LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(e.id), 1, 8),
+        SUBSTR(HEX(e.id), 9, 4),
+        SUBSTR(HEX(e.id), 13, 4),
+        SUBSTR(HEX(e.id), 17, 4),
+        SUBSTR(HEX(e.id), 21)
+        )) AS id, 
+    e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, e.esSubEtapa, 
+    LOWER(CONCAT_WS('-',
+        SUBSTR(HEX(e.esdeCiutat), 1, 8),
+        SUBSTR(HEX(e.esdeCiutat), 9, 4),
+        SUBSTR(HEX(e.esdeCiutat), 13, 4),
+        SUBSTR(HEX(e.esdeCiutat), 17, 4),
+        SUBSTR(HEX(e.esdeCiutat), 21)
+        )) AS esdeCiutat,
+        e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, e.descripcio, i.alt
+    FROM db_historia_esdeveniments AS e
+    LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id 
+    LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id 
+    LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
+    LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id 
+    LEFT JOIN db_img AS i ON e.img = i.id 
+    WHERE e.id =:id";
+
+    // Preparar la consulta
+    $stmt = $conn->prepare($query);
+
+    $stmt->bindParam(':id', $id, PDO::PARAM_STR);
+
+    // Ejecutar la consulta
+    $stmt->execute();
+
+    // Verificar si se encontraron resultados
+    if ($stmt->rowCount() === 0) {
+        echo json_encode(['error' => 'No rows found']);
+        exit;
+    }
+
+    // Recopilar los resultados
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+    array_walk_recursive($data, function (&$v) {
+        if (!is_string($v)) return;
+
+        // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
+        $v = str_replace("\0", '', $v);
+
+        // Intentar normalizar a UTF-8 válido
+        // 1) Si ya es UTF-8 válido, lo deja igual
+        if (!mb_check_encoding($v, 'UTF-8')) {
+            // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
+            $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
+            if ($v2 !== false) {
+                $v = $v2;
+            } else {
+                // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
+                $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                if ($v3 !== false) $v = $v3;
+            }
+        } else {
+            // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
+            $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+            if ($v2 !== false) $v = $v2;
+        }
+    });
 
     // Devolver los datos en formato JSON
     echo json_encode($data);

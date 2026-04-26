@@ -171,7 +171,7 @@ if ($modificaBtn === 1) {
 
 <script>
     function formUpdateLlibre(slug) {
-        let urlAjax = "/api/historia/get/esdeveniment?slug=" + slug;
+        let urlAjax = "/api/historia/get/esdevenimentId?id=" + slug;
 
         fetch(urlAjax)
             .then(response => response.json())
