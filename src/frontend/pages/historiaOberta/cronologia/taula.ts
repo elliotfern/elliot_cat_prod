@@ -44,7 +44,11 @@ export function pintarTabla() {
     .map(
       (e) => `
     <tr>
-      <td>${e.esdeNom}</td>
+    <td>
+        <a href="/gestio/historia/fitxa-esdeveniment/${e.slug}">
+           <strong>${e.esdeNom}</strong>
+        </a>
+      </td>
       <td>${e.ciutat}</td>
       <td>
         ${formatDataCatalana(e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny)}
