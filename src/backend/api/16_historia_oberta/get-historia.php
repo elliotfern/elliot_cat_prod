@@ -313,7 +313,15 @@ if ($slug === 'carrecsPersona') {
     // 4. Esdeveniment - pagina modifica
     // ruta GET => "/api/historia/get/esdevenimentId?id=ewr23232412"
 } else if ($slug === 'esdevenimentId') {
+
+    function uuidToBytes($uuid)
+    {
+        return hex2bin(str_replace('-', '', $uuid));
+    }
+
     $id = $_GET['id'];
+
+    $idBinary = uuidToBytes($id);
 
     $query = "SELECT LOWER(CONCAT_WS('-',
         SUBSTR(HEX(e.id), 1, 8),
@@ -337,12 +345,12 @@ if ($slug === 'carrecsPersona') {
     LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
     LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id 
     LEFT JOIN db_img AS i ON e.img = i.id 
-    WHERE e.id = UUID_TO_BIN(:id, true)";
+    WHERE e.id = :id";
 
     // Preparar la consulta
     $stmt = $conn->prepare($query);
 
-    $stmt->bindParam(':id', $id, PDO::PARAM_STR);
+    $stmt->bindParam(':id', $idBinary, PDO::PARAM_LOB);
 
     // Ejecutar la consulta
     $stmt->execute();
