@@ -95,7 +95,8 @@ if ($slug === 'carrecsPersona') {
         SUBSTR(HEX(e.id), 17, 4),
         SUBSTR(HEX(e.id), 21)
         )) AS id,
-     e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca
+     e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, s.nomSubEtapa, p.etapaNom, 
+      COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat, co.pais_ca
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id
