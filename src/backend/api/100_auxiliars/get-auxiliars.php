@@ -369,7 +369,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
             ) AS ciutat
             FROM %s AS c
             LEFT JOIN %s AS p ON c.pais_id = p.id
-            ORDER BY COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) ASC
+            ORDER BY ciutat COLLATE utf8mb4_unicode_ci ASC;
             SQL;
 
     $query = sprintf(
