@@ -1,4 +1,5 @@
 export interface Evento {
+  id: string;
   slug: string;
   esdeNom: string;
   ciutat: string;
