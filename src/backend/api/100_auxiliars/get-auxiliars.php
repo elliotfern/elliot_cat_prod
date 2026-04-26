@@ -436,7 +436,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "llistatCiutats") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat, c.ciutat_ca, c.ciutat_en, c.descripcio, uuid_bin_to_text(p.id) AS idPais, c.created_at, c.updated_at
+            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat, c.ciutat_ca, c.ciutat_en, c.descripcio, uuid_bin_to_text(p.id) AS idPais, c.created_at, c.updated_at, p.pais_ca
             FROM %s AS c
             LEFT JOIN %s AS p ON c.pais_id = p.id
             ORDER BY ciutat COLLATE utf8mb4_unicode_ci ASC;
