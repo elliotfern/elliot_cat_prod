@@ -31,8 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 }
 
 
-// a) Inserir pelicula
+// a) Modificar esdeveniment
 if ($slug === 'esdeveniment') {
+
+    function uuidToBin($uuid)
+    {
+        return hex2bin(str_replace('-', '', $uuid));
+    }
 
     // Obtener el cuerpo de la solicitud PUT
     $input_data = file_get_contents("php://input");
@@ -60,11 +65,13 @@ if ($slug === 'esdeveniment') {
     $esdeDataFMes  = isset($data['esdeDataFMes']) ? (int) $data['esdeDataFMes'] : null;
     $esdeDataFAny  = isset($data['esdeDataFAny']) ? (int) $data['esdeDataFAny'] : null;
     $esSubEtapa    = isset($data['esSubEtapa']) ? (int) $data['esSubEtapa'] : null;
-    $esdeCiutat    = !empty($data['esdeCiutat']) ? data_input($data['esdeCiutat']) : '';
-    $img           = !empty($data['img']) ? data_input($data['img']) : '';
-    $descripcio    = !empty($data['descripcio']) ? data_input($data['descripcio']) : '';
+    $esdeCiutat = !empty($data['esdeCiutat'])
+        ? uuidToBin(data_input($data['esdeCiutat']))
+        : null;
 
-    $id    = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
+    $img           = !empty($data['img']) ? data_input($data['img']) : '';
+
+    $id = !empty($data['id']) ? uuidToBin($data['id']) : ($hasError = true);
     $timestamp = date('Y-m-d');
     $dateModified = $timestamp;
 
@@ -82,7 +89,6 @@ if ($slug === 'esdeveniment') {
             esdeDataFAny = :esdeDataFAny, 
             esSubEtapa = :esSubEtapa,
             img = :img,
-            descripcio = :descripcio,
             esdeCiutat = :esdeCiutat,
             dateModified = :dateModified
         WHERE id = :id";
@@ -98,11 +104,10 @@ if ($slug === 'esdeveniment') {
         $stmt->bindParam(":esdeDataFMes", $esdeDataFMes, PDO::PARAM_INT);
         $stmt->bindParam(":esdeDataFAny", $esdeDataFAny, PDO::PARAM_INT);
         $stmt->bindParam(":esSubEtapa", $esSubEtapa, PDO::PARAM_INT);
-        $stmt->bindParam(":esdeCiutat", $esdeCiutat, PDO::PARAM_STR);
+        $stmt->bindParam(":esdeCiutat", $esdeCiutat, PDO::PARAM_LOB);
         $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-        $stmt->bindParam(":descripcio", $descripcio, PDO::PARAM_STR);
         $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
-        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+        $stmt->bindParam(":id", $id, PDO::PARAM_LOB);
 
         if ($stmt->execute()) {
             // response output

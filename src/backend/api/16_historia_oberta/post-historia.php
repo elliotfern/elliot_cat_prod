@@ -4,6 +4,7 @@ use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Config\Tables;
+use Ramsey\Uuid\Uuid;
 
 $slug = $routeParams[0] ?? '';
 
@@ -31,6 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 // a) Inserir esdeveniment
 if ($slug === 'esdeveniment') {
 
+    function uuidToBin($uuid)
+    {
+        return hex2bin(str_replace('-', '', $uuid));
+    }
+
     // Obtener el cuerpo de la solicitud PUT
     $input_data = file_get_contents("php://input");
 
@@ -57,18 +63,23 @@ if ($slug === 'esdeveniment') {
     $esdeDataFMes  = isset($data['esdeDataFMes']) ? (int) $data['esdeDataFMes'] : null;
     $esdeDataFAny  = isset($data['esdeDataFAny']) ? (int) $data['esdeDataFAny'] : null;
     $esSubEtapa    = isset($data['esSubEtapa']) ? (int) $data['esSubEtapa'] : null;
-    $esdeCiutat    = !empty($data['esdeCiutat']) ? data_input($data['esdeCiutat']) : '';
+    $esdeCiutat = !empty($data['esdeCiutat'])
+        ? uuidToBin(data_input($data['esdeCiutat']))
+        : null;
+
     $img           = !empty($data['img']) ? data_input($data['img']) : '';
-    $descripcio    = !empty($data['descripcio']) ? data_input($data['descripcio']) : '';
 
     $timestamp = date('Y-m-d');
     $dateCreated = $timestamp;
     $dateModified = $timestamp;
 
+    $id = Uuid::uuid7()->getBytes();
+
     if (!$hasError) {
         global $conn;
         $sql = "INSERT INTO db_historia_esdeveniments 
-        SET esdeNom = :esdeNom, 
+        SET id = :id,
+            esdeNom = :esdeNom, 
             slug = :slug, 
             esdeDataIDia = :esdeDataIDia, 
             esdeDataIMes = :esdeDataIMes, 
@@ -79,7 +90,6 @@ if ($slug === 'esdeveniment') {
             esSubEtapa = :esSubEtapa, 
             esdeCiutat = :esdeCiutat,
             img = :img,
-            descripcio = :descripcio,
             dateCreated = :dateCreated,
             dateModified = :dateModified";
 
@@ -94,11 +104,11 @@ if ($slug === 'esdeveniment') {
         $stmt->bindParam(":esdeDataFMes", $esdeDataFMes, PDO::PARAM_INT);
         $stmt->bindParam(":esdeDataFAny", $esdeDataFAny, PDO::PARAM_INT);
         $stmt->bindParam(":esSubEtapa", $esSubEtapa, PDO::PARAM_INT);
-        $stmt->bindParam(":esdeCiutat", $esdeCiutat, PDO::PARAM_STR);
+        $stmt->bindParam(":esdeCiutat", $esdeCiutat, PDO::PARAM_LOB);
         $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-        $stmt->bindParam(":descripcio", $descripcio, PDO::PARAM_STR);
         $stmt->bindParam(":dateCreated", $dateCreated, PDO::PARAM_STR);
         $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
+        $stmt->bindParam(":id", $id, PDO::PARAM_LOB);
 
         if ($stmt->execute()) {
             // response output
