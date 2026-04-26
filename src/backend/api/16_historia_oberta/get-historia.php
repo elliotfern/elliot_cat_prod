@@ -101,7 +101,7 @@ if ($slug === 'carrecsPersona') {
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id
     LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
     LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id
-    WHERE 1=1";
+    WHERE 1=1 ";
 
     if (!empty($etapaFiltro)) {
         $query .= " AND p.id = :etapa";
@@ -112,7 +112,7 @@ if ($slug === 'carrecsPersona') {
     }
 
     // Eliminar la parte LIMIT y OFFSET
-    $query .= "ORDER BY 
+    $query .= " ORDER BY 
     STR_TO_DATE(
         CONCAT(
             e.esdeDataIAny, '-',
