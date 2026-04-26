@@ -239,7 +239,7 @@ if ($slug === 'carrecsPersona') {
     // 4. Esdeveniment
     // ruta GET => "/api/historia/get/esdeveniment?slug=revolucio-vellut"
 } else if ($slug === 'esdeveniment') {
-    $slug = $_GET['slug'];
+    $esdeveniment = $_GET['slug'];
 
     $query = "SELECT LOWER(CONCAT_WS('-',
         SUBSTR(HEX(e.id), 1, 8),
@@ -267,19 +267,18 @@ if ($slug === 'carrecsPersona') {
     // Preparar la consulta
     $stmt = $conn->prepare($query);
 
-    $stmt->bindParam(':slug', $slug, PDO::PARAM_STR);
+    $stmt->bindParam(':slug', $esdeveniment, PDO::PARAM_STR);
 
     // Ejecutar la consulta
     $stmt->execute();
 
     // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$data) {
         echo json_encode(['error' => 'No rows found']);
         exit;
     }
-
-    // Recopilar los resultados
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
     array_walk_recursive($data, function (&$v) {
