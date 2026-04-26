@@ -32,7 +32,7 @@ export function pintarTabla() {
     <tr>
       <td>${e.esdeNom}</td>
       <td>${e.ciutat}</td>
-      <td>${e.esdeDataIAny}</td>
+      <td>${e.esdeDataIDia}/${e.esdeDataIMes}/${e.esdeDataIAny}</td>
       <td>${e.etapaNom}</td>
       <td>${e.nomSubEtapa}</td>
       <td>

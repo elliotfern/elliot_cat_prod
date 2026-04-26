@@ -1,6 +1,6 @@
 import { state } from '../../../types/Esdeveniment';
 import { getEventos, getSubetapas } from './api';
-import { renderFiltros } from './filtres';
+import { renderFiltros, setActiveEtapaUI } from './filtres';
 import { renderPaginacion } from './paginacio';
 import { renderSubetapas } from './renderSubEtapes';
 import { pintarTabla, renderTabla } from './taula';
@@ -30,6 +30,7 @@ export async function loadEventos() {
   renderTabla(container);
   pintarTabla();
   renderPaginacion(container); // 👈 luego lo añadimos
+  setActiveEtapaUI();
 }
 
 export async function loadSubetapas() {
