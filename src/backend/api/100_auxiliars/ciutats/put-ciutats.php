@@ -2,16 +2,8 @@
 
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
-use App\Config\Audit;
-use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
-
-/*
- * BACKEND DB CURRICULUM
- * FUNCIONS
- * @
- */
+use Ramsey\Uuid\Uuid;
 
 $conn = DatabaseConnection::getConnection();
 
@@ -19,7 +11,6 @@ if (!$conn) {
     die("No se pudo establecer conexión a la base de datos.");
 }
 
-// Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -30,55 +21,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
-// Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
     exit();
 }
 
-// Requiere ADMIN por token (user_type === 1)
 if (!isAuthenticatedAdmin()) {
     http_response_code(403);
     echo json_encode(['error' => 'No autoritzat (admin requerit)']);
     exit;
 }
 
-$userUuid = getAuthenticatedUserUuid(); // para auditoría, si la soportas
-
 $input = file_get_contents('php://input');
 $data  = json_decode($input, true);
+
 if (!is_array($data)) {
     Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
 }
 
-// Helpers
+// HELPERS
 $trimOrNull = static function ($v): ?string {
     if ($v === null) return null;
-    if (is_string($v)) {
-        $t = trim($v);
-        return ($t === '') ? null : $t;
-    }
-    $s = (string)$v;
-    $s = trim($s);
-    return $s === '' ? null : $s;
+    $t = trim((string)$v);
+    return $t === '' ? null : $t;
 };
-$reUUID = '~^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$~i';
 
-// Datos entrantes
-$id          = $trimOrNull($data['id'] ?? null);               // UUID texto (obligatorio)
-$ciutat      = $trimOrNull($data['ciutat'] ?? null);        // obligatori
-$ciutat_ca   = $trimOrNull($data['ciutat_ca'] ?? null);        // obligatori
-$ciutat_en   = $trimOrNull($data['ciutat_en'] ?? null);        // opcional
-$descripcio  = $trimOrNull($data['descripcio'] ?? null);       // opcional (TEXT)
-$pais_id     = $trimOrNull($data['pais_id'] ?? null);          // UUID texto opcional
+$reUUID = '~^[0-9a-f-]{36}$~i';
 
-// Validación
+// INPUT
+$id          = $trimOrNull($data['id'] ?? null);
+$ciutat      = $trimOrNull($data['ciutat'] ?? null);
+$ciutat_ca   = $trimOrNull($data['ciutat_ca'] ?? null);
+$ciutat_en   = $trimOrNull($data['ciutat_en'] ?? null);
+$descripcio  = $trimOrNull($data['descripcio'] ?? null);
+$pais_id     = $trimOrNull($data['pais_id'] ?? null);
+
+// VALIDATION
 $errors = [];
-if (!$id) {
-    $errors[] = 'Camp "id" requerit.';
-} elseif (!preg_match($reUUID, $id)) {
-    $errors[] = 'Camp "id" no és un UUID vàlid.';
+
+if (!$id || !preg_match($reUUID, $id)) {
+    $errors[] = 'Camp "id" no és vàlid.';
 }
 if (!$ciutat) {
     $errors[] = 'Camp "ciutat" requerit.';
@@ -86,6 +69,7 @@ if (!$ciutat) {
 if ($pais_id !== null && !preg_match($reUUID, $pais_id)) {
     $errors[] = 'Camp "pais_id" no és un UUID vàlid.';
 }
+
 if (!empty($errors)) {
     Response::error(MissatgesAPI::error('validacio'), $errors, 400);
 }
@@ -93,44 +77,46 @@ if (!empty($errors)) {
 try {
     $conn->beginTransaction();
 
-    // Comprobar existencia (id es BINARY(16) -> comparamos usando la funció)
-    $chk = $conn->prepare("SELECT 1 FROM db_geo_ciutats WHERE id = uuid_text_to_bin(:id) LIMIT 1");
-    $chk->bindValue(':id', $id, PDO::PARAM_STR);
+    // 🔥 convertir a BINARIO en PHP (coherente con POST)
+    $idBytes = Uuid::fromString($id)->getBytes();
+
+    // check existence
+    $chk = $conn->prepare("SELECT 1 FROM db_geo_ciutats WHERE id = :id LIMIT 1");
+    $chk->bindValue(':id', $idBytes, PDO::PARAM_LOB);
     $chk->execute();
+
     if (!$chk->fetchColumn()) {
         $conn->rollBack();
-        Response::error(MissatgesAPI::error('not_found'), ["Ciutat amb id {$id} no existeix"], 404);
+        Response::error(MissatgesAPI::error('not_found'), ["Ciutat no existeix"], 404);
     }
 
-    // UPDATE — convertir UUIDs texto -> binario en SQL; strings a NULL si vienen vacíos
+    // pais_id binario
+    $paisBytes = null;
+    if ($pais_id !== null) {
+        $paisBytes = Uuid::fromString($pais_id)->getBytes();
+    }
+
+    // UPDATE
     $sql = "UPDATE db_geo_ciutats
-               SET ciutat = :ciutat,
-                   ciutat_ca  = :ciutat_ca,
-                   ciutat_en  = :ciutat_en,
-                   descripcio = :descripcio,
-                   pais_id    = uuid_text_to_bin(NULLIF(:pais_id, '')),
-                   updated_at = UTC_TIMESTAMP()
-             WHERE id = uuid_text_to_bin(:id)";
+            SET ciutat = :ciutat,
+                ciutat_ca = :ciutat_ca,
+                ciutat_en = :ciutat_en,
+                descripcio = :descripcio,
+                pais_id = :pais_id,
+                updated_at = UTC_TIMESTAMP()
+            WHERE id = :id";
+
     $stmt = $conn->prepare($sql);
 
-    // id (WHERE)
-    $stmt->bindValue(':id', $id, PDO::PARAM_STR);
+    $stmt->bindValue(':id', $idBytes, PDO::PARAM_LOB);
 
-    // ciutat_ca (obligatorio)
-    $stmt->bindValue(':ciutat_ca', $ciutat_ca, PDO::PARAM_STR);
     $stmt->bindValue(':ciutat', $ciutat, PDO::PARAM_STR);
+    $stmt->bindValue(':ciutat_ca', $ciutat_ca, PDO::PARAM_STR);
 
-    // ciutat_en (nullable)
-    if ($ciutat_en === null) $stmt->bindValue(':ciutat_en', null, PDO::PARAM_NULL);
-    else                     $stmt->bindValue(':ciutat_en', $ciutat_en, PDO::PARAM_STR);
+    $stmt->bindValue(':ciutat_en', $ciutat_en, $ciutat_en === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':descripcio', $descripcio, $descripcio === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 
-    // descripcio (nullable)
-    if ($descripcio === null) $stmt->bindValue(':descripcio', null, PDO::PARAM_NULL);
-    else                      $stmt->bindValue(':descripcio', $descripcio, PDO::PARAM_STR);
-
-    // pais_id (nullable) — lo convertimos en SQL con uuid_text_to_bin(NULLIF(:pais_id,''))
-    if ($pais_id === null) $stmt->bindValue(':pais_id', null, PDO::PARAM_NULL);
-    else                   $stmt->bindValue(':pais_id', $pais_id, PDO::PARAM_STR);
+    $stmt->bindValue(':pais_id', $paisBytes, $paisBytes === null ? PDO::PARAM_NULL : PDO::PARAM_LOB);
 
     $stmt->execute();
 
@@ -143,5 +129,6 @@ try {
     );
 } catch (Throwable $e) {
     if ($conn->inTransaction()) $conn->rollBack();
+
     Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
 }
