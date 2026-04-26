@@ -112,7 +112,15 @@ if ($slug === 'carrecsPersona') {
     }
 
     // Eliminar la parte LIMIT y OFFSET
-    $query .= " ORDER BY e.esdeDataIAny ASC";
+    $query .= "ORDER BY 
+    STR_TO_DATE(
+        CONCAT(
+            e.esdeDataIAny, '-',
+            LPAD(COALESCE(e.esdeDataIMes, 1), 2, '0'), '-',
+            LPAD(COALESCE(e.esdeDataIDia, 1), 2, '0')
+        ),
+        '%Y-%m-%d'
+    ) ASC";
 
     // Preparar la consulta
     $stmt = $conn->prepare($query);
