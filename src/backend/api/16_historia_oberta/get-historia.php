@@ -255,7 +255,7 @@ if ($slug === 'carrecsPersona') {
         SUBSTR(HEX(e.esdeCiutat), 13, 4),
         SUBSTR(HEX(e.esdeCiutat), 17, 4),
         SUBSTR(HEX(e.esdeCiutat), 21)
-        )) AS esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, e.descripcio, i.alt
+        )) AS esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, i.alt
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id 
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id 
@@ -330,7 +330,7 @@ if ($slug === 'carrecsPersona') {
         SUBSTR(HEX(e.esdeCiutat), 17, 4),
         SUBSTR(HEX(e.esdeCiutat), 21)
         )) AS esdeCiutat,
-        e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, e.descripcio, i.alt
+        e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, i.alt
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id 
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id 

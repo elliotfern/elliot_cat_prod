@@ -139,11 +139,6 @@ if ($modificaBtn === 1) {
             </select>
         </div>
 
-        <div class="col-md-12">
-            <label>Descripció dels fets:</label>
-            <textarea id="descripcio" name="descripcio" rows="6" cols="50" value=""> </textarea>
-        </div>
-
         <div class="container" style="margin-top:25px">
             <div class="row">
                 <div class="col-6 text-left">
@@ -181,7 +176,6 @@ if ($modificaBtn === 1) {
                     "Esdeveniment: " + data.esdeNom;
 
                 document.getElementById('esdeNom').value = data.esdeNom;
-                document.getElementById('descripcio').value = data.descripcio;
                 document.getElementById('slug').value = data.slug;
                 document.getElementById("id").value = data.id;
 
