@@ -432,6 +432,76 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     }
 
     // GET : llistat ciutats
+    // URL: https://elliot.cat/api/auxiliars/get/llistatCiutats
+} else if ($slug === "llistatCiutats") {
+
+    $sql = <<<SQL
+            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat, c.ciutat_ca, c.ciutat_en, c.descripcio, uuid_bin_to_text(p.id) AS idPais, c.created_at, c.updated_at
+            FROM %s AS c
+            LEFT JOIN %s AS p ON c.pais_id = p.id
+            ORDER BY ciutat COLLATE utf8mb4_unicode_ci ASC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_CIUTATS, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
+        array_walk_recursive($result, function (&$v) {
+            if (!is_string($v)) return;
+
+            // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
+            $v = str_replace("\0", '', $v);
+
+            // Intentar normalizar a UTF-8 válido
+            // 1) Si ya es UTF-8 válido, lo deja igual
+            if (!mb_check_encoding($v, 'UTF-8')) {
+                // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
+                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) {
+                    $v = $v2;
+                } else {
+                    // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
+                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                    if ($v3 !== false) $v = $v3;
+                }
+            } else {
+                // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
+                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
+                if ($v2 !== false) $v = $v2;
+            }
+        });
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : llistat ciutats
     // URL: https://elliot.cat/api/auxiliars/get/ciutatId?id=33
 } else if ($slug === "ciutatId") {
 
