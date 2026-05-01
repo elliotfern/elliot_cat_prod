@@ -6,9 +6,12 @@ use App\Utils\MissatgesAPI;
 use App\Config\Tables;
 use App\Utils\Uuid;
 
+$db = new Database();
+$pdo = $db->getPdo();
+$slug = $routeParams[0];
+
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
@@ -17,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+
 // Check if the request method is GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('HTTP/1.1 405 Method Not Allowed');
@@ -24,22 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit();
 }
 
-// Verificar que el método de la solicitud sea GET
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    header('HTTP/1.1 405 Method Not Allowed');
-    echo json_encode(['error' => 'Method not allowed']);
-    exit();
-}
-
-$db = new Database();
-$pdo = $db->getPdo();
-$slug = $routeParams[0];
-
-
-// 1) AUXILIARS     0197B0881A27723C8CA798B4D2FE6C29
-
 // Llistat directors
-// ruta GET => "/api/auxiliars/get/?type=directors"
+// ruta GET => "/api/auxiliars/get/directors"
 if ($slug === 'directors') {
 
     $grup = '0197b0881a27723c8ca798b4d2fe6c29';
@@ -85,36 +75,45 @@ if ($slug === 'directors') {
         );
     }
 
-    // Llistat productors
-    // ruta GET => "/api/cinema/get/auxiliars/?type=productores"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'productores') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT p.id, p.productora
-            FROM 11_aux_cinema_productores AS p
-            ORDER BY p.productora ASC");
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
-
     // Llistat imatges pelicules
-    // ruta GET => "/api/cinema/get/auxiliars/?type=imgPelis"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'imgPelis') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT i.id, i.alt
-            FROM db_img AS i
+    // ruta GET => "/api/cinema/get/auxiliars/imgPelis"
+} else if ($slug === 'imgPelis') {
+    $sql = <<<SQL
+            SELECT i.id, i.alt
+            FROM %s AS i
             WHERE i.typeImg = 8
-            ORDER BY i.alt ASC");
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+            ORDER BY i.alt ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_IMATGES, $pdo),
+    );
+
+    try {
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-    echo json_encode($data);
 
     // Llistat imatges series
     // ruta GET => "/api/cinema/get/auxiliars/?type=imgSeries"

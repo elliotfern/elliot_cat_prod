@@ -191,30 +191,50 @@ if ($modificaBtn === 1) {
   async function auxiliarSelect(url, selectedValue, selectId, textField) {
     try {
       const response = await fetch(url);
+
       if (!response.ok) {
         throw new Error('Error en la sol·licitud AJAX');
       }
 
-      const data = await response.json();
+      const json = await response.json();
+
+      // 👇 AQUÍ ESTÁ LA CLAVE
+      const data = json.data;
+
+      if (!Array.isArray(data)) {
+        throw new Error('Formato de respuesta inválido');
+      }
+
       const selectElement = document.getElementById(selectId);
+
       if (!selectElement) {
         console.error(`Select element with id ${selectId} not found`);
         return;
       }
 
-      // Netejar les opcions actuals
+      // Limpiar opciones
       selectElement.innerHTML = '';
 
-      // Afegir les noves opcions
+      // (opcional) placeholder
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.text = '-- Selecciona --';
+      selectElement.appendChild(defaultOption);
+
+      // Añadir opciones
       data.forEach((item) => {
         const option = document.createElement('option');
         option.value = item.id;
-        option.text = item[textField];
-        if (item.id === selectedValue) {
+        option.text = item[textField] ?? '';
+
+        // 👇 importante: comparación segura
+        if (String(item.id) === String(selectedValue)) {
           option.selected = true;
         }
+
         selectElement.appendChild(option);
       });
+
     } catch (error) {
       console.error('Error:', error);
     }
