@@ -4,6 +4,7 @@ use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Config\Tables;
+use App\Utils\Uuid;
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -363,7 +364,7 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
 } else if ($slug === "ciutats") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(c.id) AS id, CONCAT(
+            SELECT c.id, CONCAT(
                 COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat),
                 IF(p.pais_ca IS NOT NULL, CONCAT(' (', p.pais_ca, ')'), '')
             ) AS ciutat
@@ -382,32 +383,6 @@ if (isset($_GET['type']) && $_GET['type'] == 'directors') {
     try {
 
         $result = $db->getData($query);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (!is_string($v)) return;
-
-            // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
-            $v = str_replace("\0", '', $v);
-
-            // Intentar normalizar a UTF-8 válido
-            // 1) Si ya es UTF-8 válido, lo deja igual
-            if (!mb_check_encoding($v, 'UTF-8')) {
-                // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
-                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) {
-                    $v = $v2;
-                } else {
-                    // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
-                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                    if ($v3 !== false) $v = $v3;
-                }
-            } else {
-                // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
-                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) $v = $v2;
-            }
-        });
 
         if (empty($result)) {
             Response::error(

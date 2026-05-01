@@ -2,6 +2,15 @@
 
 // Rutas principales sin idioma explícito (solo para el idioma por defecto)
 $routes = [
+    // Generador UUID V7
+    '/api/uuid' => [
+        'view' => 'src/backend/api/100_auxiliars/crear-uuid.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     // API: Registre usuari / Login
     '/api/auth/login' => [
         'view' => 'src/backend/api/00_auth/get/get-login.php',
@@ -294,14 +303,6 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/historia/uuid' => [
-        'view' => 'src/backend/api/16_historia_oberta/uuid-historia.php',
-        'needs_session' => false,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => true
-    ],
-
     '/api/historia/put/{slug}' => [
         'view' => 'src/backend/api/16_historia_oberta/put-historia.php',
         'needs_session' => false,
@@ -456,15 +457,6 @@ $routes = [
     // Generador PDF Curriculum
     '/api/curriculum/pdf' => [
         'view' => 'src/backend/api/20_curriculum/pdf-cv.php',
-        'needs_session' => false,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => true
-    ],
-
-    // Generador UUID V7
-    '/api/uuid' => [
-        'view' => 'src/backend/api/100_auxiliars/crear-uuid.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
