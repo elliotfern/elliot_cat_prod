@@ -21,7 +21,7 @@ if ($modificaBtn === 1) {
 } else {
 ?>
   <script type="module">
-    auxiliarSelect("/api/cinema/get/?directors", "", "director", "nomComplet");
+    auxiliarSelect("/api/cinema/get/directors", "", "director", "nomComplet");
     auxiliarSelect("/api/auxiliars/get/?type=imgPelis", "", "img", "alt");
     auxiliarSelect("/api/auxiliars/get/?type=generesPelis", "", "genere", "genere_ca");
     auxiliarSelect("/api/auxiliars/get/?type=llengues", "", "lang", "idioma_ca");

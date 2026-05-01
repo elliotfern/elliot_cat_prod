@@ -35,28 +35,55 @@ $db = new Database();
 $pdo = $db->getPdo();
 $slug = $routeParams[0];
 
-/*
- * BACKEND DB AUXILIARS
- * FUNCIONS
- * @
- */
 
+// 1) AUXILIARS     0197B0881A27723C8CA798B4D2FE6C29
 
-// 1) AUXILIARS
 // Llistat directors
 // ruta GET => "/api/auxiliars/get/?type=directors"
-if (isset($_GET['type']) && $_GET['type'] == 'directors') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT d.id, CONCAT(d.cognoms, ', ', d.nom) AS nomComplet
-            FROM 11_aux_cinema_directors AS d
-            ORDER BY d.cognoms ASC");
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+if ($slug === 'directors') {
+
+    $grup = '0197b088-1a27-723c-8ca7-98b4d2fe6c290';
+    $groupBin = Uuid::toBinary($grup);
+
+    $sql = <<<SQL
+            SELECT p.id, CONCAT(p.cognoms, ', ', p.nom) AS nomComplet
+            FROM %s p
+            INNER JOIN %s r ON r.persona_id = p.id
+            WHERE r.grup_id = :group_id;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_PERSONES_GRUPS_RELACIONS, $pdo),
+
+    );
+
+    try {
+        $params = [':group_id' => $groupBin];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-    echo json_encode($data);
 
     // Llistat productors
     // ruta GET => "/api/cinema/get/auxiliars/?type=productores"

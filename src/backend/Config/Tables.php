@@ -45,7 +45,6 @@ final class Tables
     public const DB_COMPTABILITAT_CATEGORIES_DESPESA = 'db_comptabilitat_categories_despesa';
     public const DB_COMPTABILITAT_SUBCATEGORIES_DESPESA = 'db_comptabilitat_subcategories_despesa';
 
-
     // Taules Auxiliars
     public const DB_TEMES = 'aux_temes';
     public const DB_SUBTEMES = 'aux_sub_temes';
@@ -69,4 +68,9 @@ final class Tables
     // Història
     public const DB_HISTORIA_OBERTA_ARTICLES = 'db_historia_oberta_articles';
     public const DB_HISTORIA_OBERTA_CURSOS = 'db_historia_oberta_cursos';
+
+    // Persones
+    public const DB_PERSONES = 'db_persones';
+    public const DB_PERSONES_GRUPS = 'db_persones_grups';
+    public const DB_PERSONES_GRUPS_RELACIONS = 'db_persones_grups_relacions';
 }

@@ -6,20 +6,36 @@ class Uuid
 {
     public static function toString(string $bin): string
     {
+        if (strlen($bin) !== 16) {
+            throw new \InvalidArgumentException('UUID binary must be 16 bytes');
+        }
+
         $hex = bin2hex($bin);
 
-        return sprintf(
+        return strtolower(sprintf(
             '%s-%s-%s-%s-%s',
             substr($hex, 0, 8),
             substr($hex, 8, 4),
             substr($hex, 12, 4),
             substr($hex, 16, 4),
             substr($hex, 20)
-        );
+        ));
     }
 
     public static function toBinary(string $uuid): string
     {
-        return hex2bin(str_replace('-', '', $uuid));
+        $uuid = str_replace('-', '', strtolower($uuid));
+
+        if (strlen($uuid) !== 32 || !ctype_xdigit($uuid)) {
+            throw new \InvalidArgumentException('Invalid UUID format');
+        }
+
+        $bin = hex2bin($uuid);
+
+        if ($bin === false) {
+            throw new \RuntimeException('UUID conversion failed');
+        }
+
+        return $bin;
     }
 }
