@@ -42,7 +42,7 @@ $slug = $routeParams[0];
 // ruta GET => "/api/auxiliars/get/?type=directors"
 if ($slug === 'directors') {
 
-    $grup = '0197b088-1a27-723c-8ca7-98b4d2fe6c290';
+    $grup = '0197b0881a27723c8ca798b4d2fe6c29';
     $groupBin = Uuid::toBinary($grup);
 
     $sql = <<<SQL
