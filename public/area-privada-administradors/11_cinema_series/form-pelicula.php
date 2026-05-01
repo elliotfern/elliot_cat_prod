@@ -21,7 +21,7 @@ if ($modificaBtn === 1) {
 } else {
 ?>
   <script type="module">
-    auxiliarSelect("/api/cinema/get/directors", "", "director", "nomComplet");
+    auxiliarSelect("/api/auxiliars/get/directors", "", "director", "nomComplet");
     auxiliarSelect("/api/auxiliars/get/?type=imgPelis", "", "img", "alt");
     auxiliarSelect("/api/auxiliars/get/?type=generesPelis", "", "genere", "genere_ca");
     auxiliarSelect("/api/auxiliars/get/?type=llengues", "", "lang", "idioma_ca");
@@ -178,7 +178,7 @@ if ($modificaBtn === 1) {
         document.getElementById("dataVista").value = data[0].dataVista;
 
         // Llenar selects con opciones
-        auxiliarSelect("/api/cinema/get/?directors", data[0].idDirector, "director", "nomComplet");
+        auxiliarSelect("/api/auxiliars/get/directors", data[0].idDirector, "director", "nomComplet");
         auxiliarSelect("/api/auxiliars/get/?type=imgPelis", data[0].idImg, "img", "alt");
         auxiliarSelect("/api/auxiliars/get/?type=generesPelis", data[0].idGen, "genere", "genere_ca");
         auxiliarSelect("/api/auxiliars/get/?type=llengues", data[0].lang, "lang", "idioma_ca");
