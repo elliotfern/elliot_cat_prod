@@ -2,23 +2,10 @@
 
 namespace App\Utils;
 
+use App\Utils\Uuid;
+
 class Response
 {
-    /**
-     * Campos que en tu sistema son UUID (BINARY(16))
-     */
-    private static array $uuidFields = [
-        'id',
-        'user_id',
-        'event_id',
-        'ciutat_id',
-        'pais_autor_id',
-        'ciutat_defuncio_id',
-        'provincia_id',
-        'pais_id',
-        'tema_id',
-
-    ];
 
     public static function success(string $message = '', $data = null, int $httpCode = 200): void
     {
@@ -49,36 +36,28 @@ class Response
      */
     private static function mapUuid($data)
     {
+        if (is_string($data)) {
+            return self::isBinaryUuid($data)
+                ? Uuid::toString($data)
+                : $data;
+        }
+
         if (!is_array($data)) {
             return $data;
         }
 
-        foreach ($data as &$row) {
+        foreach ($data as $key => &$value) {
 
-            if (!is_array($row)) {
+            if (self::isBinaryUuid($value)) {
+                $value = Uuid::toString($value);
                 continue;
             }
 
-            foreach ($row as $key => $value) {
-
-                if (
-                    in_array($key, self::$uuidFields, true) &&
-                    is_string($value) &&
-                    strlen($value) === 16
-                ) {
-                    $row[$key] = Uuid::toString($value);
-                }
-            }
-
-            // soporte futuro: arrays anidados
-            foreach ($row as $k => $v) {
-                if (is_array($v)) {
-                    $row[$k] = self::mapUuid($v);
-                }
+            if (is_array($value)) {
+                $value = self::mapUuid($value);
+                continue;
             }
         }
-
-        unset($row);
 
         return $data;
     }
@@ -133,5 +112,10 @@ class Response
 
         // fallback final
         return @iconv('UTF-8', 'UTF-8//IGNORE', $value) ?: $value;
+    }
+
+    private static function isBinaryUuid($value): bool
+    {
+        return is_string($value) && strlen($value) === 16;
     }
 }
