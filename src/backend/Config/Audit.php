@@ -4,6 +4,7 @@ namespace App\Config;
 
 use PDO;
 use PDOException;
+use App\Utils\Uuid;
 
 class Audit
 {
@@ -33,7 +34,7 @@ class Audit
 
         try {
             $stmt = $conn->prepare($sql);
-            $stmt->bindValue(':idUser', uuidToBin($userUuid), PDO::PARAM_STR);
+            $stmt->bindValue(':idUser', uuid::toBinary($userUuid), PDO::PARAM_STR);
             $stmt->bindParam(':operacio', $operacio, PDO::PARAM_STR);
             $stmt->bindParam(':detalls', $detalls, PDO::PARAM_STR);
             $stmt->bindParam(':taulaAfectada', $taulaAfectada, PDO::PARAM_STR);
