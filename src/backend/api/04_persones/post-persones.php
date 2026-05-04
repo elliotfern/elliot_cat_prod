@@ -1,6 +1,7 @@
 <?php
 
-use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\Uuid as ramsey;
+use App\Utils\Uuid;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
@@ -81,8 +82,8 @@ function insertPersonGroups(PDO $conn, string $personaIdBin, array $grupIds): vo
             throw new \RuntimeException("invalid_uuid grup_id: " . $gid);
         }
 
-        $relUuid = Uuid::uuid7();
-        $stmt->bindValue(':id', $relUuid->getBytes(), PDO::PARAM_LOB);
+        $relUuid = ramsey::uuid7()->getBytes();
+        $stmt->bindValue(':id', $relUuid, PDO::PARAM_LOB);
         $stmt->bindValue(':persona_id', $personaIdBin, PDO::PARAM_LOB);
         $stmt->bindValue(':grup_id', $gid, PDO::PARAM_STR);
 
@@ -128,16 +129,18 @@ if (isset($_GET['persona'])) {
     $any_defuncio     = optionalIntField($data, 'any_defuncio', $errors);
     $mes_defuncio     = optionalIntField($data, 'mes_defuncio', $errors);
     $dia_defuncio     = optionalIntField($data, 'dia_defuncio', $errors);
-    $img_id           = optionalIntField($data, 'img_id', $errors);
+
 
     // UUIDs (string) opcionales -> se convierten con UNHEX(REPLACE()) en SQL
     $pais_autor_id        = optionalField($data, 'pais_autor_id');
     $ciutat_naixement_id  = optionalField($data, 'ciutat_naixement_id');
     $ciutat_defuncio_id   = optionalField($data, 'ciutat_defuncio_id');
+    $img_id               = optionalField($data, 'img_id');
 
     if ($pais_autor_id !== null && !isUuid($pais_autor_id)) $errors['pais_autor_id'] = 'invalid_uuid';
     if ($ciutat_naixement_id !== null && !isUuid($ciutat_naixement_id)) $errors['ciutat_naixement_id'] = 'invalid_uuid';
     if ($ciutat_defuncio_id !== null && !isUuid($ciutat_defuncio_id)) $errors['ciutat_defuncio_id'] = 'invalid_uuid';
+    if ($img_id !== null && !isUuid($img_id)) $errors['img_id'] = 'invalid_uuid';
 
     // Grupos: array de UUIDs
     // Acepta 'grup_ids' (nuevo) o 'grups' (legacy / form)
@@ -176,11 +179,10 @@ if (isset($_GET['persona'])) {
     }
 
     // UUIDv7 persona
-    $uuid = Uuid::uuid7();
-    $uuidBytes  = $uuid->getBytes();   // BINARY(16)
-    $uuidString = $uuid->toString();   // para devolver al FE si quieres
+    $uuid = ramsey::uuid7();
+    $uuid_bin = $uuid->getBytes();
 
-    $created_at = date('Y-m-d H:i:s.u'); // datetime(6) (si tu DB no acepta micro, usa date('Y-m-d H:i:s'))
+    $created_at = (new DateTime())->format('Y-m-d H:i:s.u');
     $updated_at = $created_at;
 
     global $conn; // PDO
@@ -199,34 +201,42 @@ if (isset($_GET['persona'])) {
             exit;
         }
 
+        $pais_autor_bin = Uuid::toBinary($pais_autor_id);
+        $ciutat_naixement_bin = Uuid::toBinary($ciutat_naixement_id);
+        $ciutat_defuncio_bin = Uuid::toBinary($ciutat_defuncio_id);
+        $img_bin = Uuid::toBinary($img_id);
+
         // Insert persona
         $sql = "
-      INSERT INTO " . Tables::PERSONES . " (
-        id, nom, cognoms, slug,
-        sexe_id,
-        any_naixement, mes_naixement, dia_naixement,
-        any_defuncio, mes_defuncio, dia_defuncio,
-        pais_autor_id, img_id,
-        ciutat_naixement_id, ciutat_defuncio_id,
-        web, descripcio,
-        created_at, updated_at
-      ) VALUES (
-        :id, :nom, :cognoms, :slug,
-        :sexe_id,
-        :any_naixement, :mes_naixement, :dia_naixement,
-        :any_defuncio, :mes_defuncio, :dia_defuncio,
-        " . ($pais_autor_id !== null ? "UNHEX(REPLACE(:pais_autor_id, '-', ''))" : "NULL") . ",
-        :img_id,
-        " . ($ciutat_naixement_id !== null ? "UNHEX(REPLACE(:ciutat_naixement_id, '-', ''))" : "NULL") . ",
-        " . ($ciutat_defuncio_id !== null ? "UNHEX(REPLACE(:ciutat_defuncio_id, '-', ''))" : "NULL") . ",
-        :web, :descripcio,
-        :created_at, :updated_at
-      )
-    ";
+            INSERT INTO " . Tables::PERSONES . " (
+                id, nom, cognoms, slug,
+                sexe_id,
+                any_naixement, mes_naixement, dia_naixement,
+                any_defuncio, mes_defuncio, dia_defuncio,
+                pais_autor_id, img_id,
+                ciutat_naixement_id, ciutat_defuncio_id,
+                web, descripcio,
+                created_at, updated_at
+                ) VALUES (
+                    :id, :nom, :cognoms, :slug,
+                    :sexe_id,
+                    :any_naixement, :mes_naixement, :dia_naixement,
+                    :any_defuncio, :mes_defuncio, :dia_defuncio,
+                    :pais_autor_id,
+                    :img_id,
+                    :ciutat_naixement_id,
+                    :ciutat_defuncio_id,
+                    :web, :descripcio,
+                    :created_at, :updated_at
+                )";
 
         $stmt = $conn->prepare($sql);
 
-        $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
+        $stmt->bindValue(':id', $uuid_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':pais_autor_id', $pais_autor_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':ciutat_naixement_id', $ciutat_naixement_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':ciutat_defuncio_id', $ciutat_defuncio_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':img_id', $img_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
 
         if ($cognoms === null) $stmt->bindValue(':cognoms', null, PDO::PARAM_NULL);
@@ -251,14 +261,6 @@ if (isset($_GET['persona'])) {
             else $stmt->bindValue(":$k", (int)$v, PDO::PARAM_INT);
         }
 
-        if ($pais_autor_id !== null) $stmt->bindValue(':pais_autor_id', $pais_autor_id, PDO::PARAM_STR);
-
-        if ($img_id === null) $stmt->bindValue(':img_id', null, PDO::PARAM_NULL);
-        else $stmt->bindValue(':img_id', (int)$img_id, PDO::PARAM_INT);
-
-        if ($ciutat_naixement_id !== null) $stmt->bindValue(':ciutat_naixement_id', $ciutat_naixement_id, PDO::PARAM_STR);
-        if ($ciutat_defuncio_id !== null) $stmt->bindValue(':ciutat_defuncio_id', $ciutat_defuncio_id, PDO::PARAM_STR);
-
         if ($web === null) $stmt->bindValue(':web', null, PDO::PARAM_NULL);
         else $stmt->bindValue(':web', $web, PDO::PARAM_STR);
 
@@ -279,7 +281,7 @@ if (isset($_GET['persona'])) {
 
         // Insert relaciones grups
         if (!empty($grup_ids)) {
-            insertPersonGroups($conn, $uuidBytes, $grup_ids);
+            insertPersonGroups($conn, $uuid_bin, $grup_ids);
         }
 
         $conn->commit();
@@ -287,7 +289,7 @@ if (isset($_GET['persona'])) {
         Response::success(
             MissatgesAPI::success('create'),
             [
-                'id' => $uuidString,
+                'id' => $uuid->toString(),
                 'slug' => $slug,
             ],
             201
@@ -353,7 +355,7 @@ if (isset($_GET['persona'])) {
     }
 
     // UUIDv7
-    $uuid = Uuid::uuid7();
+    $uuid = ramsey::uuid7();
     $uuidBytes  = $uuid->getBytes();   // BINARY(16)
     $uuidString = $uuid->toString();   // devolver al FE
 
