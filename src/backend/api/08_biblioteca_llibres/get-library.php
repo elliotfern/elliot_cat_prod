@@ -407,7 +407,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             LEFT JOIN " . Tables::IMG . " AS i ON b.img_id = i.id
             LEFT JOIN " . Tables::LLIBRES_TIPUS . " AS t ON b.tipus_id = t.id
             LEFT JOIN " . Tables::LLIBRES_EDITORIALS . " AS e ON b.editorial_id = e.id
-            LEFT JOIN " . Tables::LLIBRES_ESTAT . " AS el ON b.estat = el.id
+            LEFT JOIN " . Tables::LLIBRES_ESTAT . " AS el ON b.estat_id = el.id
             LEFT JOIN " . Tables::AUX_IDIOMES . " AS id ON b.lang = id.id
             LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sub_tema ON sub_tema.id =  b.sub_tema_id
             LEFT JOIN " . Tables::AUX_TEMES . " AS tema ON sub_tema.tema_id = tema.id
