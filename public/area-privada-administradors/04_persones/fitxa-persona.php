@@ -1,3 +1,12 @@
+<?php
+
+use App\Utils\Url;
+
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+$urlModifica = Url::intranet('persones') . '/modifica-persona/' . urlencode($slug);
+?>
+
 <div class="container">
     <div id="barraNavegacioContenidor"></div>
     <main>
@@ -5,7 +14,7 @@
             <h1>Base de dades persones</h1>
             <h2><span id="nom"></span></h2>
 
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['persona']; ?>/modifica-persona/<?php echo $slug; ?>'" class="button btn-gran btn-secondari">Modifica fitxa</button>
+            <a href="<?php echo $urlModifica; ?>" class="button btn-gran btn-secondari">Modifica fitxa</a>
 
             <div class="dadesFitxa">
                 <strong>Aquesta fitxa ha estat creada el: </strong><span id="dateCreated"></span> <span id="dateModified"></span>
