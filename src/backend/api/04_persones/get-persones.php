@@ -119,33 +119,39 @@ if ($slug === 'llistatPersones') {
 
         $db = new Database();
 
-        $query = "SELECT 
-        a.id,
-        a.cognoms,
-        a.nom,
-        p.pais_ca,
-        a.any_naixement,
-        a.any_defuncio,
-        i.nameImg,
-        i.alt,
-        a.web,
-        a.created_at,
-        a.updated_at,
-        a.descripcio,
-        a.slug,
-        a.img_id,
-        a.sexe_id,
-        a.mes_naixement,
-        a.dia_naixement,
-        a.mes_defuncio,
-        a.dia_defuncio,
-        c1.ciutat_ca AS ciutatNaixement,
-        c2.ciutat_ca AS ciutatDefuncio,
-        g.id AS grup_id,
-        g.grup_ca AS grup_nom,
-        a.pais_autor_id AS pais_autor_id,
-        a.ciutat_defuncio_id AS ciutat_defuncio_id,
-        a.ciutat_naixement_id AS ciutat_naixement_id
+        // 🔥 IMPORTANTE: quitamos GROUP BY, quitamos GROUP_CONCAT
+        // y dejamos que salgan filas reales (1 por grupo)
+        $query = "
+        SELECT 
+            a.id,
+            a.cognoms,
+            a.nom,
+            p.pais_ca,
+            a.any_naixement,
+            a.any_defuncio,
+            i.nameImg,
+            i.alt,
+            a.web,
+            a.created_at,
+            a.updated_at,
+            a.descripcio,
+            a.slug,
+            a.img_id,
+            a.sexe_id,
+            a.mes_naixement,
+            a.dia_naixement,
+            a.mes_defuncio,
+            a.dia_defuncio,
+            c1.ciutat_ca AS ciutatNaixement,
+            c2.ciutat_ca AS ciutatDefuncio,
+
+            g.id AS grup_id,
+            g.grup_ca AS grup_nom,
+
+            a.pais_autor_id,
+            a.ciutat_defuncio_id,
+            a.ciutat_naixement_id
+
         FROM " . Tables::PERSONES . " AS a
         LEFT JOIN " . Tables::GEO_PAISOS . " AS p ON a.pais_autor_id = p.id
         LEFT JOIN " . Tables::IMG . " AS i ON a.img_id = i.id
@@ -153,13 +159,10 @@ if ($slug === 'llistatPersones') {
         LEFT JOIN " . Tables::GEO_CIUTATS . " AS c2 ON a.ciutat_defuncio_id = c2.id
         LEFT JOIN " . Tables::PERSONES_GRUPS_RELACIONS . " AS rel ON a.id = rel.persona_id
         LEFT JOIN " . Tables::PERSONES_GRUPS . " AS g ON rel.grup_id = g.id
-        WHERE a.slug = :slug
-        LIMIT 1";
+        WHERE a.slug = :slug";
 
         $params = [':slug' => $autorSlug];
 
-        // getData(..., true) si tu helper soporta "single row".
-        // Como tu ejemplo usa getData($query) a secas, lo hacemos igual:
         $rows = $db->getData($query, $params);
 
         if (empty($rows)) {
@@ -167,23 +170,28 @@ if ($slug === 'llistatPersones') {
             exit;
         }
 
+        // 🔵 base persona (solo una vez)
         $base = $rows[0];
 
+        // 🔥 reconstrucción correcta de grupos (sin GROUP_CONCAT)
         $grups = [];
 
         foreach ($rows as $r) {
+
             if (!empty($r['grup_id'])) {
-                $grups[] = [
+
+                $grups[$r['grup_id']] = [
                     'id' => Uuid::toString($r['grup_id']),
                     'nom' => $r['grup_nom']
                 ];
             }
         }
 
-        // eliminar campos sueltos
-        unset($base['grup_id'], $base['grup_nom']);
+        // reindex limpio
+        $base['grups'] = array_values($grups);
 
-        $base['grups'] = $grups;
+        // limpiar campos sueltos
+        unset($base['grup_id'], $base['grup_nom']);
 
         Response::success(
             MissatgesAPI::success('get'),
@@ -200,6 +208,7 @@ if ($slug === 'llistatPersones') {
         ]);
         exit;
     }
+
     // ruta GET => "/api/persones/get/?grupPersona={id}"
 } else if (isset($_GET['grupPersona'])) {
 
