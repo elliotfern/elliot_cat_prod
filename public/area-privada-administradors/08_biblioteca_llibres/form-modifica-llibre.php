@@ -22,10 +22,10 @@ if ($modificaBtn === 1) {
 ?>
   <script type="module">
     // Llenar selects con opciones
-    selectOmplirDades("/api/biblioteca/get/?type=imatgesLlibres", "", "img", "alt");
+    selectOmplirDades("/api/biblioteca/get/?type=imatgesLlibres", "", "img_id", "alt");
     selectOmplirDades("/api/biblioteca/get/?type=temes", "", "sub_tema_id", "tema_complet");
     selectOmplirDades("/api/biblioteca/get/?type=llengues", "", "lang", "idioma_ca");
-    selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", "", "estat", "estat");
+    selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", "", "estat_id", "estat");
     selectOmplirDades("/api/biblioteca/get/?type=editorials", "", "editorial_id", "editorial");
     selectOmplirDades("/api/biblioteca/get/?type=tipus", "", "tipus_id", "nomTipus");
     selectOmplirDades("/api/biblioteca/get/?type=grupLlibre", "", "grup", "nom");
@@ -65,7 +65,7 @@ if ($modificaBtn === 1) {
     <?php
     if ($modificaBtn === 1) {
     ?>
-      <input type="hidden" id="id" name="id" value="<?php echo $llibreId; ?>">
+      <input type="hidden" id="id" name="id" value="">
     <?php
     }
     ?>
@@ -87,7 +87,7 @@ if ($modificaBtn === 1) {
 
     <div class="col-md-4">
       <label>Imatge coberta:</label>
-      <select class="form-select" name="img" id="img" value="">
+      <select class="form-select" name="img_id" id="img_id" value="">
       </select>
     </div>
 
@@ -128,7 +128,7 @@ if ($modificaBtn === 1) {
 
     <div class="col-md-4">
       <label>Estat del llibre:</label>
-      <select class="form-select" name="estat" id="estat">
+      <select class="form-select" name="estat_id" id="estat_id">
       </select>
     </div>
 
@@ -192,12 +192,12 @@ if ($modificaBtn === 1) {
         // SELECTS (nombres según db_llibres)
         // OJO: según tu respuesta actual, editorial_id / tipus_id / sub_tema_id vienen como UUID string
         // y lang/img/estat como int.
-        selectOmplirDades("/api/biblioteca/get/?type=imatgesLlibres", data.img, "img", "alt");
+        selectOmplirDades("/api/biblioteca/get/?type=imatgesLlibres", data.img_id, "img_id", "alt");
         selectOmplirDades("/api/biblioteca/get/?type=editorials", data.editorial_id, "editorial_id", "editorial");
         selectOmplirDades("/api/biblioteca/get/?type=temes", data.sub_tema_id, "sub_tema_id", "tema_complet");
         selectOmplirDades("/api/biblioteca/get/?type=llengues", data.lang, "lang", "idioma_ca");
         selectOmplirDades("/api/biblioteca/get/?type=tipus", data.tipus_id, "tipus_id", "nomTipus");
-        selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", data.estat, "estat", "estat");
+        selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", data.estat_id, "estat_id", "estat");
         selectOmplirDades("/api/biblioteca/get/?type=grupLlibre", data.idGrup, "grup", "nom");
       })
       .catch(err => console.error("Error al obtener los datos:", err));
