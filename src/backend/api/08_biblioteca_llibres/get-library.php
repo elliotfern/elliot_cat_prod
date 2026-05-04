@@ -4,7 +4,8 @@ use App\Config\Database;
 use App\Utils\Tables;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\Uuid as ramsey;
+use App\Utils\Uuid;
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -57,7 +58,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         ");
 
         foreach ($result as $row) {
-            $uuid = Uuid::uuid7()->getBytes(); // UUIDv7 en binario
+            $uuid = ramsey::uuid7()->getBytes(); // UUIDv7 en binario
 
             $updateStmt->execute([
                 ':id' => $uuid,
@@ -92,13 +93,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             g.tema AS nomGenCat,
             sg.sub_tema,
             c.nom AS nom_grup,
-            LOWER(CONCAT_WS('-',
-                SUBSTR(HEX(c.id), 1, 8),
-                SUBSTR(HEX(c.id), 9, 4),
-                SUBSTR(HEX(c.id), 13, 4),
-                SUBSTR(HEX(c.id), 17, 4),
-                SUBSTR(HEX(c.id), 21)
-            )) AS idGrup
+            c.id AS grup_id
 
         FROM " . Tables::LLIBRES . " AS b
         LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sg ON b.sub_tema_id = sg.id
@@ -108,77 +103,64 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         WHERE b.tipus_id = UNHEX('0197ac5b7106704b96c60728ace151f3')
         ORDER BY b.titol_original ASC";
 
+        // 1) Libros
         $books = $db->getData($queryBooks);
-
-        // Sanititzar strings
-        array_walk_recursive($books, function (&$v) {
-            if (!is_string($v)) return;
-            $v = str_replace("\0", '', $v);
-            $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-        });
 
         if (empty($books)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
             exit;
         }
 
-        // 2) Autores por libro (N filas por libro)
-        $queryAuthors = "SELECT
-            LOWER(CONCAT_WS('-',
-                SUBSTR(HEX(la.llibre_id), 1, 8),
-                SUBSTR(HEX(la.llibre_id), 9, 4),
-                SUBSTR(HEX(la.llibre_id), 13, 4),
-                SUBSTR(HEX(la.llibre_id), 17, 4),
-                SUBSTR(HEX(la.llibre_id), 21)
-            )) AS llibre_id,
-
-            LOWER(CONCAT_WS('-',
-                SUBSTR(HEX(a.id), 1, 8),
-                SUBSTR(HEX(a.id), 9, 4),
-                SUBSTR(HEX(a.id), 13, 4),
-                SUBSTR(HEX(a.id), 17, 4),
-                SUBSTR(HEX(a.id), 21)
-            )) AS id,
-
-            a.nom,
-            a.cognoms,
-            a.slug
-
-        FROM " . Tables::LLIBRES_AUTORS . " AS la
-        INNER JOIN " . Tables::PERSONES . " AS a ON a.id = la.autor_id
-        INNER JOIN " . Tables::LLIBRES . " AS b ON b.id = la.llibre_id
-        WHERE b.tipus_id = UNHEX('0197ac5b7106704b96c60728ace151f3')
-        ORDER BY a.cognoms, a.nom";
-
-        $authors = $db->getData($queryAuthors);
-
-        array_walk_recursive($authors, function (&$v) {
-            if (!is_string($v)) return;
-            $v = str_replace("\0", '', $v);
-            $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-        });
-
-        // 3) Index autores por llibre_id
-        $authorsByBook = [];
-        foreach ($authors as $a) {
-            $bookId = $a['llibre_id'] ?? null;
-            if (!$bookId) continue;
-
-            $authorsByBook[$bookId][] = [
-                'id' => $a['id'] ?? null,
-                'nom' => $a['nom'] ?? null,
-                'cognoms' => $a['cognoms'] ?? null,
-                'slug' => $a['slug'] ?? null,
-            ];
-        }
-
-        // 4) Merge: añadir autors[] a cada libro
+        // normalizar libros (UUID primero)
         foreach ($books as &$b) {
-            $id = $b['id'] ?? null;
-            $b['autors'] = ($id && isset($authorsByBook[$id])) ? $authorsByBook[$id] : [];
+            $b['id'] = Uuid::toString($b['id']);
+            $b['grup_id'] = $b['grup_id'] ? Uuid::toString($b['grup_id']) : null;
         }
         unset($b);
 
+        // 2) Autores (MEJOR QUERY)
+        $queryAuthors = "
+            SELECT
+                la.llibre_id,
+                la.autor_id,
+                a.nom,
+                a.cognoms,
+                a.slug
+            FROM " . Tables::LLIBRES_AUTORS . " la
+            INNER JOIN " . Tables::PERSONES . " a ON a.id = la.autor_id
+        ";
+
+        // ejecutar
+        $authors = $db->getData($queryAuthors);
+
+        // normalizar autores
+        foreach ($authors as &$a) {
+            $a['llibre_id'] = Uuid::toString($a['llibre_id']);
+            $a['autor_id']  = Uuid::toString($a['autor_id']);
+        }
+        unset($a);
+
+        // 3) indexación
+        $authorsByBook = [];
+
+        foreach ($authors as $a) {
+            $bookId = $a['llibre_id'];
+
+            $authorsByBook[$bookId][] = [
+                'id' => $a['autor_id'],
+                'nom' => $a['nom'],
+                'cognoms' => $a['cognoms'],
+                'slug' => $a['slug'],
+            ];
+        }
+
+        // 4) merge final
+        foreach ($books as &$b) {
+            $b['autors'] = $authorsByBook[$b['id']] ?? [];
+        }
+        unset($b);
+
+        // response
         Response::success(MissatgesAPI::success('get'), $books, 200);
         exit;
     } catch (\Throwable $e) {
