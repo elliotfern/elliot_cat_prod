@@ -376,7 +376,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 b.tipus_id,
                 b.editorial_id,
                 b.sub_tema_id,
-                b.estat,
+                b.estat_id,
                 b.titol_original,
                 b.titol_catala,
                 b.slug as llibreSlug,
@@ -438,7 +438,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             'lang'        => $first['lang'],
             'img_id'         => $first['img_id'],
             'alt'         => $first['alt'],
-            'estat'       => $first['estat'],      // int
+            'estat_id'       => $first['estat_id'],      // int
             'nomEstat'    => $first['nomEstat'],   // texto
 
             'tipus_id'    => $first['tipus_id'],

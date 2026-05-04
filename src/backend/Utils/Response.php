@@ -21,6 +21,12 @@ class Response
         'tema_id',
         'grup_ids',
         'grup_id',
+        'tipus_id',
+        'sub_tema_id',
+        'idGrup',
+        'estat_id',
+        'editorial_id',
+
     ];
 
     public static function success(string $message = '', $data = null, int $httpCode = 200): void
