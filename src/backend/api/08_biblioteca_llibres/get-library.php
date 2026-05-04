@@ -84,14 +84,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
 
         // 1) Libros (1 fila por libro)
         $queryBooks = "SELECT
-            LOWER(CONCAT_WS('-',
-                SUBSTR(HEX(b.id), 1, 8),
-                SUBSTR(HEX(b.id), 9, 4),
-                SUBSTR(HEX(b.id), 13, 4),
-                SUBSTR(HEX(b.id), 17, 4),
-                SUBSTR(HEX(b.id), 21)
-            )) AS id,
-
+           b.id,
             b.titol_original,
             b.titol_catala,
             b.any,
@@ -293,7 +286,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
 
 
     // 3) Llistat autors
-    // ruta GET => "https://elliot.cat/api/biblioteca/get/authors"
+    // ruta GET => "https://elliot.cat/api/biblioteca/get/totsAutors"
 } else if (isset($_GET['type']) && in_array($_GET['type'], ['totsAutors', 'autors'], true)) {
 
     try {
@@ -302,19 +295,9 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
 
         $query =
             "SELECT 
-             LOWER(CONCAT_WS('-', 
-                SUBSTR(HEX(a.id), 1, 8),
-                SUBSTR(HEX(a.id), 9, 4),
-                SUBSTR(HEX(a.id), 13, 4),
-                SUBSTR(HEX(a.id), 17, 4),
-                SUBSTR(HEX(a.id), 21) )) AS id,
-            LOWER(CONCAT_WS('-', 
-                SUBSTR(HEX(c.id), 1, 8),
-                SUBSTR(HEX(c.id), 9, 4),
-                SUBSTR(HEX(c.id), 13, 4),
-                SUBSTR(HEX(c.id), 17, 4),
-                SUBSTR(HEX(c.id), 21) )) AS idCountry,
-            a.nom AS AutNom, a.cognoms AS AutCognom1, TRIM(CONCAT_WS(' ', a.nom, a.cognoms)) AS autor_nom_complet, a.slug, a.any_naixement AS yearBorn, a.any_defuncio AS yearDie, c.pais_ca AS country, i.nameImg,
+            a.id,
+            c.id AS idCountry,
+            a.nom, a.cognoms, TRIM(CONCAT_WS(' ', a.nom, a.cognoms)) AS autor_nom_complet, a.slug, a.any_naixement, a.any_defuncio, c.pais_ca, i.nameImg,
         GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup
         FROM " . Tables::PERSONES . " AS a
         LEFT JOIN " . Tables::GEO_PAISOS . " AS c ON a.pais_autor_id = c.id
@@ -334,36 +317,9 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
 
         $result = $db->getData($query, $params);
 
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (!is_string($v)) return;
-
-            // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
-            $v = str_replace("\0", '', $v);
-
-            // Intentar normalizar a UTF-8 válido
-            // 1) Si ya es UTF-8 válido, lo deja igual
-            if (!mb_check_encoding($v, 'UTF-8')) {
-                // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
-                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) {
-                    $v = $v2;
-                } else {
-                    // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
-                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                    if ($v3 !== false) $v = $v3;
-                }
-            } else {
-                // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
-                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) $v = $v2;
-            }
-        });
-
-
         if (empty($result)) {
             header('Content-Type: application/json; charset=utf-8');
-            Response::error(MissatgesAPI::error('not_found'), ['slug' => $slug], 404);
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
             exit;
         }
 

@@ -47,9 +47,4 @@ $urlModifica = Url::intranet('persones') . '/modifica-persona/' . urlencode($slu
 
     <hr>
 
-    <div class="table-responsive">
-        <h4><span id="subTaula"></span></h4>
-        <table id="taula1" class="table table-striped"></table>
-    </div>
-
 </div>

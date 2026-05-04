@@ -2,6 +2,7 @@ export interface Persona {
   slug: string;
   nom: string;
   cognoms: string;
+  autor_nom_complet: string;
   pais_ca: string;
   dia_naixement: number;
   mes_naixement: number;
