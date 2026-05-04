@@ -387,6 +387,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 b.lang,
                 b.img_id,
                 i.nameImg,
+                i.alt,
                 t.nomTipus,
                 e.editorial,
                 id.idioma_ca,
@@ -403,7 +404,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             FROM " . Tables::LLIBRES . " AS b
             LEFT JOIN " . Tables::LLIBRES_AUTORS . " AS la ON la.llibre_id = b.id
             LEFT JOIN " . Tables::PERSONES . " AS p ON p.id = la.autor_id
-            LEFT JOIN " . Tables::IMG . " AS i ON b.img = i.id
+            LEFT JOIN " . Tables::IMG . " AS i ON b.img_id = i.id
             LEFT JOIN " . Tables::LLIBRES_TIPUS . " AS t ON b.tipus_id = t.id
             LEFT JOIN " . Tables::LLIBRES_EDITORIALS . " AS e ON b.editorial_id = e.id
             LEFT JOIN " . Tables::LLIBRES_ESTAT . " AS el ON b.estat = el.id
@@ -436,6 +437,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             'dateModified' => $first['dateModified'],
             'lang'        => $first['lang'],
             'img_id'         => $first['img_id'],
+            'alt'         => $first['alt'],
             'estat'       => $first['estat'],      // int
             'nomEstat'    => $first['nomEstat'],   // texto
 
