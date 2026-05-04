@@ -10,41 +10,46 @@ $urlModifica = Url::intranet('persones') . '/modifica-persona/' . urlencode($slu
 <div class="container">
     <div id="barraNavegacioContenidor"></div>
 
-    <div class="container contingut">
-        <h1>Base de dades Persones</h1>
+    <h1>Base de dades Persones</h1>
 
-        <div id="isAdminButton" style="display: none;margin-bottom:25px">
-            <?php if (isUserAdmin()) : ?>
-                <p>
-                    <a href="<?php echo $urlModifica; ?>" class="button btn-gran btn-secondari">Modifica fitxa</a>
-                </p>
-            <?php endif; ?>
-        </div>
-
-        <div class="dadesFitxa" style="background-color: #D4D4D4;padding:15px; border-radius:10px;width:fit-content;">
-            <strong>Aquesta fitxa ha estat creada el: </strong><span id="dateCreated"></span> <span id="dateModified"></span>
-        </div>
-
-        <div class='fixaDades'>
-
-            <h2><span id="nom"></span></h2>
-
-            <div class='columna imatge'>
-                <img id="nameImg" src='' class='img-thumbnail' alt='Imatge' title='Imatge'>
-                <p><span id="alt"></span> </p>
-            </div>
-
-            <div class="columna">
-                <div class="quadre-detalls"></div>
-            </div>
-        </div>
-
-        <hr>
-        <div class="table-responsive">
-            <h4><span id="subTaula"></span></h4>
-            <div class="table-responsive">
-                <table id="taula1" class="table table-striped"></table>
-            </div>
-        </div>
+    <div id="isAdminButton" style="display: none;margin-bottom:25px">
+        <?php if (isUserAdmin()) : ?>
+            <p>
+                <a href="<?php echo $urlModifica; ?>" class="button btn-gran btn-secondari">Modifica fitxa</a>
+            </p>
+        <?php endif; ?>
     </div>
+
+    <div class="dadesFitxa bg-light p-3 rounded w-auto d-inline-block mb-3" style="background-color: #D4D4D4;padding:15px; border-radius:10px;width:fit-content;">
+        <strong>Aquesta fitxa ha estat creada el: </strong><span id="dateCreated"></span> <span id="dateModified"></span>
+    </div>
+
+    <!-- 🔥 FILA PRINCIPAL -->
+    <div class="row">
+
+        <!-- 🟦 TÍTOL OCUPA TOTA LA FILA -->
+        <div class="col-12">
+            <h2 class="mb-4" id="nom"></h2>
+        </div>
+
+        <!-- 🖼️ IMAGEN -->
+        <div class="col-12 col-md-4 text-center mb-3 mb-md-0">
+            <img id="nameImg" src="" class="img-fluid img-thumbnail" alt="Imatge" title="Imatge">
+            <p class="mt-2"><span id="alt"></span></p>
+        </div>
+
+        <!-- 📄 DETALLES -->
+        <div class="col-12 col-md-8">
+            <div class="quadre-detalls"></div>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <div class="table-responsive">
+        <h4><span id="subTaula"></span></h4>
+        <table id="taula1" class="table table-striped"></table>
+    </div>
+
 </div>
