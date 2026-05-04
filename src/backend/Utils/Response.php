@@ -7,6 +7,20 @@ use App\Utils\Uuid;
 class Response
 {
 
+    private static array $uuidFields = [
+        'id',
+        'img_id',
+        'pais_autor_id',
+        'ciutat_naixement_id',
+        'ciutat_defuncio_id',
+        'user_id',
+        'event_id',
+        'ciutat_id',
+        'provincia_id',
+        'pais_id',
+        'tema_id',
+    ];
+
     public static function success(string $message = '', $data = null, int $httpCode = 200): void
     {
         http_response_code($httpCode);
@@ -36,26 +50,20 @@ class Response
      */
     private static function mapUuid($data)
     {
-        if (is_string($data)) {
-            return self::isBinaryUuid($data)
-                ? Uuid::toString($data)
-                : $data;
-        }
-
         if (!is_array($data)) {
             return $data;
         }
 
         foreach ($data as $key => &$value) {
 
-            if (self::isBinaryUuid($value)) {
+            // SOLO si el campo es UUID real
+            if (in_array($key, self::$uuidFields, true) && is_string($value) && strlen($value) === 16) {
                 $value = Uuid::toString($value);
                 continue;
             }
 
             if (is_array($value)) {
                 $value = self::mapUuid($value);
-                continue;
             }
         }
 
