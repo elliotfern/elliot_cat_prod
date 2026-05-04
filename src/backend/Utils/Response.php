@@ -19,6 +19,8 @@ class Response
         'provincia_id',
         'pais_id',
         'tema_id',
+        'grup_ids',
+        'grup_id',
     ];
 
     public static function success(string $message = '', $data = null, int $httpCode = 200): void
