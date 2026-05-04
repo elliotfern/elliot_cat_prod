@@ -1,16 +1,14 @@
 <?php
 
-
 use App\Config\Database;
+use App\Utils\Tables;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Utils\Tables;
 use App\Utils\Uuid;
 
 /** @var array $routeParams */
-$slug = $routeParams[0] ??
-
-    $db = new Database();
+$slug = $routeParams[0] ?? null;
+$db = new Database();
 $pdo = $db->getPdo();
 
 // Configuración de cabeceras para aceptar JSON y responder JSON
