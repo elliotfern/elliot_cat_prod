@@ -51,6 +51,7 @@ interface PersonaView {
   cognoms: string;
 
   img: string;
+  alt: string;
 
   web: string;
   descripcio: string;
@@ -85,6 +86,7 @@ function mapPersona(api: PersonaApiData): PersonaView {
     cognoms: api.cognoms ?? '',
 
     img: api.nameImg ?? '',
+    alt: api.alt ?? '',
 
     web: api.web ?? '',
     descripcio: api.descripcio ?? '',
@@ -133,7 +135,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     const altElement = document.getElementById('alt');
     if (imgElement && altElement) {
       (imgElement as HTMLImageElement).src = `https://media.elliot.cat/img/persona/${persona.img}.jpg`;
-      altElement.innerHTML = `${persona.img}`;
+      altElement.innerHTML = `${persona.alt}`;
     }
 
     const nomElement = document.getElementById('nom');
@@ -271,7 +273,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
         value: persona.grupsText,
       },
       {
-        label: 'Pais: ',
+        label: 'Pais/Nacionalitat: ',
         value: persona.paisAutor,
       },
       {

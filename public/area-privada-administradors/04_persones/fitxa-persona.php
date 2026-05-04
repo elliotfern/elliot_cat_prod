@@ -11,8 +11,7 @@ $urlModifica = Url::intranet('persones') . '/modifica-persona/' . urlencode($slu
     <div id="barraNavegacioContenidor"></div>
 
     <div class="container contingut">
-        <h1>Base de dades persones</h1>
-        <h2><span id="nom"></span></h2>
+        <h1>Base de dades Persones</h1>
 
         <div id="isAdminButton" style="display: none;margin-bottom:25px">
             <?php if (isUserAdmin()) : ?>
@@ -27,6 +26,8 @@ $urlModifica = Url::intranet('persones') . '/modifica-persona/' . urlencode($slu
         </div>
 
         <div class='fixaDades'>
+
+            <h2><span id="nom"></span></h2>
 
             <div class='columna imatge'>
                 <img id="nameImg" src='' class='img-thumbnail' alt='Imatge' title='Imatge'>
