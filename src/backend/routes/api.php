@@ -95,7 +95,7 @@ $routes = [
 
     // API COMPTABILITAT ERP
     '/api/comptabilitat/get/{slug}' => [
-        'view' => 'src/backend/api/02_accounting/get-comptabilitat.php',
+        'view' => 'src/backend/api/02_comptabilitat/get-comptabilitat.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -103,7 +103,7 @@ $routes = [
     ],
 
     '/api/comptabilitat/post/{slug}' => [
-        'view' => 'src/backend/api/02_accounting/post-comptabilitat.php',
+        'view' => 'src/backend/api/02_comptabilitat/post-comptabilitat.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -111,7 +111,7 @@ $routes = [
     ],
 
     '/api/comptabilitat/put/{slug}' => [
-        'view' => 'src/backend/api/02_accounting/put-comptabilitat.php',
+        'view' => 'src/backend/api/02_comptabilitat/put-comptabilitat.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -119,7 +119,7 @@ $routes = [
     ],
 
     '/api/comptabilitat/pdf/{slug}/{id}/{lang}' => [
-        'view' => 'src/backend/api/02_accounting/generate_pdf.php',
+        'view' => 'src/backend/api/02_comptabilitat/generate_pdf.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,

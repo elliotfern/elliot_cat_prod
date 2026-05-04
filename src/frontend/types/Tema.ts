@@ -4,5 +4,4 @@ export interface Tema {
   idTema: number;
   genre: string;
   id: string;
-  tema_ca: string;
 }

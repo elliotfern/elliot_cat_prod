@@ -2,12 +2,16 @@
 
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
 use App\Config\Audit;
 use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
+use App\Utils\Uuid;
 
-$slug = $routeParams[0];
+/** @var array $routeParams */
+/** @var array $conn */
+$slug = $routeParams[0] ?? null;
+$pdo = $db->getPdo();
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
@@ -50,6 +54,12 @@ if ($slug === 'clients') {
     $toIntOrNull = static fn($v): ?int => is_numeric($v) ? (int)$v : null;
     $dateOrNull = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
     $toDecimal = static fn($v): ?string => ($v === null) ? null : (preg_match('/^-?\d+(\.\d{1,4})?$/', str_replace(',', '.', str_replace([' ', "\u{00A0}"], '', (string)$v))) ? str_replace(',', '.', (string)$v) : null);
+    $uuidOrNull  = static function ($v): ?string {
+        if ($v === null || $v === '') return null;
+        $s = is_string($v) ? trim($v) : '';
+        if ($s === '' || preg_match('/^0{8}-0{4}-0{4}-0{4}-0{12}$/i', $s)) return null;
+        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s) ? strtolower($s) : null;
+    };
 
     // Datos (id requerido)
     $id             = (int)($data['id'] ?? 0);
@@ -115,8 +125,14 @@ if ($slug === 'clients') {
             Response::error(MissatgesAPI::error('not_found'), ["Client id {$id} no existeix"], 404);
         }
 
-        $sql = "UPDATE db_comptabilitat_clients
-                   SET clientNom = :clientNom,
+        $ciutat_id = !empty($ciutat_id) ? uuid::toBinary($ciutat_id) : null;
+        $provincia_id = !empty($provincia_id) ? uuid::toBinary($provincia_id) : null;
+        $pais_id = !empty($pais_id) ? uuid::toBinary($pais_id) : null;
+
+        $table = qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo);
+        $sql = <<<SQL
+                UPDATE {$table}
+                    SET clientNom = :clientNom,
                        clientCognoms = :clientCognoms,
                        clientEmail = :clientEmail,
                        clientWeb = :clientWeb,
@@ -124,13 +140,14 @@ if ($slug === 'clients') {
                        clientEmpresa = :clientEmpresa,
                        clientAdreca = :clientAdreca,
                        clientCP = :clientCP,
-                       ciutat_id = uuid_text_to_bin(NULLIF(:ciutat_id, '')),
-                       provincia_id = uuid_text_to_bin(NULLIF(:provincia_id, '')),
-                       pais_id = uuid_text_to_bin(NULLIF(:pais_id, '')),
+                       ciutat_id = :ciutat_id,
+                       provincia_id = :provincia_id,
+                       pais_id = :pais_id,
                        clientTelefon = :clientTelefon,
                        clientStatus = :clientStatus,
                        clientRegistre = :clientRegistre
-                 WHERE id = :id";
+                    WHERE id = :id
+                SQL;
 
         $stmt = $conn->prepare($sql);
 
@@ -223,25 +240,25 @@ if ($slug === 'clients') {
         $conn->beginTransaction();
 
         // --- Update factura ---
-        $sql = "UPDATE db_comptabilitat_facturacio_clients
-                SET emissor_id = :emissor_id,
-                    client_id = :client_id,
-                    concepte = :concepte,
-                    data_factura = :data_factura,
-                    data_venciment = :data_venciment,
-                    base_imposable = :base_imposable,
-                    despeses_extra = :despeses_extra,
-                    total_factura = :total_factura,
-                    import_iva = :import_iva,
-                    tipus_iva = :tipus_iva,
-                    estat = :estat,
-                    metode_pagament = :metode_pagament,
-                    notes = :notes,
-                    projecte_id = :projecte_id,
-                    arxiu_url = :arxiu_url,
-                    recurrent = :recurrent,
-                    frequencia = :frequencia
-                WHERE id = :id";
+        $table = qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo);
+        $sql = <<<SQL
+                UPDATE {$table}
+                    SET clientNom = :clientNom,
+                       clientCognoms = :clientCognoms,
+                       clientEmail = :clientEmail,
+                       clientWeb = :clientWeb,
+                       clientNIF = :clientNIF,
+                       clientEmpresa = :clientEmpresa,
+                       clientAdreca = :clientAdreca,
+                       clientCP = :clientCP,
+                       ciutat_id = :ciutat_id,
+                       provincia_id = :provincia_id,
+                       pais_id = :pais_id,
+                       clientTelefon = :clientTelefon,
+                       clientStatus = :clientStatus,
+                       clientRegistre = :clientRegistre
+                    WHERE id = :id
+                SQL;
 
         $stmt = $conn->prepare($sql);
         $stmt->execute([
@@ -363,20 +380,24 @@ if ($slug === 'clients') {
     try {
         $conn->beginTransaction();
 
-        $sql = "UPDATE db_comptabilitat_proveidors SET
-                    nom = :nom,
-                    nif = :nif,
-                    adreca = :adreca,
-                    ciutat = :ciutat,
-                    codi_postal = :codi_postal,
-                    pais = :pais,
-                    telefon = :telefon,
-                    email = :email,
-                    web = :web,
-                    contacte = :contacte,
-                    notes = :notes,
-                    updated_at = CURRENT_TIMESTAMP()
-                WHERE id = :id";
+        $table = qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo);
+        $sql = <<<SQL
+                UPDATE {$table}
+                    SET 
+                        nom = :nom,
+                        nif = :nif,
+                        adreca = :adreca,
+                        ciutat = :ciutat,
+                        codi_postal = :codi_postal,
+                        pais = :pais,
+                        telefon = :telefon,
+                        email = :email,
+                        web = :web,
+                        contacte = :contacte,
+                        notes = :notes,
+                        updated_at = CURRENT_TIMESTAMP()
+                    WHERE id = :id
+                SQL;
 
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
@@ -479,30 +500,34 @@ if ($slug === 'clients') {
         }
 
         // UPDATE
-        $sql = "UPDATE db_comptabilitat_despeses SET
-                    data = :data,
-                    data_pagament = :data_pagament,
-                    concepte = :concepte,
-                    proveidor_id = :proveidor_id,
-                    receptor_id = :receptor_id,
-                    base_imposable = :base_imposable,
-                    tipus_iva = :tipus_iva,
-                    import_iva = :import_iva,
-                    total = :total,
-                    metode_pagament = :metode_pagament,
-                    pagat = :pagat,
-                    categoria_id = :categoria_id,
-                    subcategoria_id = :subcategoria_id,
-                    tipus_despesa = :tipus_despesa,
-                    client_id = :client_id,
-                    projecte_id = :projecte_id,
-                    arxiu_url = :arxiu_url,
-                    deduible = :deduible,
-                    recurrent = :recurrent,
-                    frequencia = :frequencia,
-                    notes = :notes,
-                    updated_at = CURRENT_TIMESTAMP()
-                WHERE id = :id";
+        $table = qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo);
+        $sql = <<<SQL
+                UPDATE {$table}
+                    SET 
+                        data = :data,
+                        data_pagament = :data_pagament,
+                        concepte = :concepte,
+                        proveidor_id = :proveidor_id,
+                        receptor_id = :receptor_id,
+                        base_imposable = :base_imposable,
+                        tipus_iva = :tipus_iva,
+                        import_iva = :import_iva,
+                        total = :total,
+                        metode_pagament = :metode_pagament,
+                        pagat = :pagat,
+                        categoria_id = :categoria_id,
+                        subcategoria_id = :subcategoria_id,
+                        tipus_despesa = :tipus_despesa,
+                        client_id = :client_id,
+                        projecte_id = :projecte_id,
+                        arxiu_url = :arxiu_url,
+                        deduible = :deduible,
+                        recurrent = :recurrent,
+                        frequencia = :frequencia,
+                        notes = :notes,
+                        updated_at = CURRENT_TIMESTAMP()
+                    WHERE id = :id
+                SQL;
 
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':data', $data_factura, PDO::PARAM_STR);
@@ -532,7 +557,7 @@ if ($slug === 'clients') {
 
         // Auditoría
         $detalls = sprintf("Actualització despesa: %s (%s)", $concepte, $proveidor_id);
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_despeses', $id, $prevData);
+        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_despeses', $id);
 
         $conn->commit();
 

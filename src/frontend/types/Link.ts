@@ -7,7 +7,7 @@ export interface Link {
   idioma_ca: string;
   web: string;
   dateModified: string;
-  tema_ca: string;
-  sub_tema_ca: string;
-  tipus_ca: string;
+  tema: string;
+  sub_tema: string;
+  tipus: string;
 }

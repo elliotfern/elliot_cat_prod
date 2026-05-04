@@ -4,11 +4,14 @@
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
+use App\Utils\Uuid;
 
-$db = new Database();
+/** @var array $routeParams */
+$slug = $routeParams[0] ??
+
+    $db = new Database();
 $pdo = $db->getPdo();
-$slug = $routeParams[0];
 
 // Configuración de cabeceras para aceptar JSON y responder JSON
 header("Content-Type: application/json");
@@ -27,9 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 if ($slug === 'llistatTemes') {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(t.id) AS id, tema_ca
+            SELECT t.id, tema
             FROM %s AS t
-            ORDER BY t.tema_ca ASC
+            ORDER BY t.tema ASC
             SQL;
 
     $query = sprintf(
@@ -69,7 +72,7 @@ if ($slug === 'llistatTemes') {
 } else if ($slug === 'llistatLinks') {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(l.id) AS id, l.nom, l.web, l.dateCreated, l.dateModified, st.tema_ca, s.sub_tema_ca, t.tipus_ca, i.idioma_ca
+            SELECT l.id, l.nom, l.web, l.dateCreated, l.dateModified, st.tema, s.sub_tema, t.tipus, i.idioma_ca
             FROM %s AS l
             LEFT JOIN %s AS s ON s.id = l.sub_tema_id
             LEFT JOIN %s AS st ON s.tema_id = st.id
@@ -117,12 +120,13 @@ if ($slug === 'llistatTemes') {
     // ruta GET => "/api/adreces/llistatLinksTemaId?id=11"
 } else if ($slug === 'llistatLinksTemaId') {
     $id = $_GET['id'];
+    $idBin = !empty($id) ? uuid::toBinary($id) : null;
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(st.id) AS id, st.sub_tema_ca, t.tema_ca
+            SELECT st.id, st.sub_tema, t.tema
             FROM %s AS st
             LEFT JOIN %s AS t ON st.tema_id = t.id
-            WHERE t.id = uuid_text_to_bin(:id)
+            WHERE t.id = :id
             SQL;
 
     $query = sprintf(
@@ -133,7 +137,7 @@ if ($slug === 'llistatTemes') {
 
     try {
 
-        $params = [':id' => $id];
+        $params = [':id' => $idBin];
         $result = $db->getData($query, $params, false);
 
         if (empty($result)) {
@@ -163,10 +167,10 @@ if ($slug === 'llistatTemes') {
 } else if ($slug === 'llistatSubTemes') {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(st.id) AS id, uuid_bin_to_text(st.tema_id) AS tema_id, st.sub_tema_ca, t.tema_ca
+            SELECT st.id, st.tema_id, st.sub_tema, t.tema
             FROM %s AS st
             LEFT JOIN %s AS t ON st.tema_id = t.id
-            ORDER BY st.sub_tema_ca ASC
+            ORDER BY st.sub_tema ASC
             SQL;
 
     $query = sprintf(
@@ -208,7 +212,7 @@ if ($slug === 'llistatTemes') {
     $id = $_GET['id'];
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(l.id) AS id, uuid_bin_to_text(l.sub_tema_id) AS sub_tema_id, l.web, l.nom, l.tipus, l.lang
+            SELECT l.id, l.sub_tema_id, l.web, l.nom, l.tipus, l.lang
             FROM db_links AS l
             WHERE l.id = uuid_text_to_bin(:id)
             SQL;
@@ -251,7 +255,7 @@ if ($slug === 'llistatTemes') {
     $id = $_GET['id'];
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(l.id) AS id, uuid_bin_to_text(l.sub_tema_id) AS sub_tema_id, l.web, l.nom, l.tipus, l.lang, l.dateCreated, l.dateModified, st.sub_tema_ca, t.tema_ca, lt.tipus_ca
+            SELECT l.id, l.sub_tema_id, l.web, l.nom, l.tipus, l.lang, l.dateCreated, l.dateModified, st.sub_tema, t.tema, lt.tipus
             FROM %s AS l
             LEFT JOIN %s AS st ON l.sub_tema_id = st.id
             LEFT JOIN %s AS t ON st.tema_id = t.id
@@ -270,10 +274,10 @@ if ($slug === 'llistatTemes') {
 
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(st.id) AS id, uuid_bin_to_text(st.tema_id) AS tema_id, st.sub_tema_ca, st.sub_tema_en, st.sub_tema_es, st.sub_tema_it, st.sub_tema_fr, t.tema_ca
+            SELECT st.id, st.tema_id, st.sub_tema, t.tema
             FROM %s AS st
             LEFT JOIN %s AS t ON st.tema_id = t.id
-            ORDER BY st.sub_tema_ca ASC
+            ORDER BY st.sub_tema ASC
             SQL;
 
     try {
@@ -309,7 +313,7 @@ if ($slug === 'llistatTemes') {
     $id = $_GET['id'];
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(st.id) AS id, uuid_bin_to_text(st.tema_id) AS tema_id, st.sub_tema_ca, st.sub_tema_en, st.sub_tema_es, st.sub_tema_it, st.sub_tema_fr
+            SELECT st.id, st.tema_id, st.sub_tema
             FROM %s AS st
             WHERE st.id = uuid_text_to_bin(:id)
             SQL;

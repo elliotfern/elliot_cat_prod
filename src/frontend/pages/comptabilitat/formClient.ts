@@ -38,7 +38,7 @@ function nilUuid(u: string | null | undefined): string | null {
 }
 
 // Si tu helper `first`:
-const first = <T>(d: T | T[] | null | undefined): T | null => (Array.isArray(d) ? d[0] ?? null : d ?? null);
+const first = <T>(d: T | T[] | null | undefined): T | null => (Array.isArray(d) ? (d[0] ?? null) : (d ?? null));
 
 export async function formClient(isUpdate: boolean, id?: number) {
   const form = document.getElementById('formClient') as HTMLFormElement | null;
@@ -82,6 +82,6 @@ export async function formClient(isUpdate: boolean, id?: number) {
   // --- Selects auxiliares (preselección segura) ---
   await auxiliarSelect(record.pais_id ?? null, 'paisos', 'pais_id', 'pais_ca');
   await auxiliarSelect(record.provincia_id ?? null, 'provincies', 'provincia_id', 'provincia_ca');
-  await auxiliarSelect(record.ciutat_id ?? null, 'ciutats', 'ciutat_id', 'ciutat_ca');
+  await auxiliarSelect(record.ciutat_id ?? null, 'ciutats', 'ciutat_id', 'ciutat');
   await auxiliarSelect(record.clientStatus ?? null, 'estatsClients', 'clientStatus', 'estat_ca');
 }

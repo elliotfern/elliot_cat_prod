@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
 
 $slug = $routeParams[0] ?? null;
 $db  = new Database();
@@ -247,7 +247,7 @@ if ($slug === 'llistatArticles') {
                 HEX(b.categoria) AS categoria_hex,
                 b.post_date,
                 b.post_modified,
-                t.tema_ca
+                t.tema
              FROM %s AS b
              LEFT JOIN %s AS t ON b.categoria = t.id
              %s
@@ -326,7 +326,7 @@ if ($slug === 'llistatArticles') {
     $sqlCats = sprintf(
         "SELECT DISTINCT
             HEX(t.id) AS hex,
-            t.tema_ca AS label
+            t.tema AS label
          FROM %s AS b
          INNER JOIN %s AS t ON b.categoria = t.id
          WHERE b.categoria IS NOT NULL
@@ -488,7 +488,7 @@ if ($slug === 'llistatArticles') {
             HEX(b.categoria) AS categoria_hex,
             b.post_date,
             b.post_modified,
-            t.tema_ca
+            t.tema
         FROM " . qi(Tables::BLOG, $pdo) . " AS b
         LEFT JOIN " . qi(Tables::DB_TEMES, $pdo) . " AS t ON b.categoria = t.id
         WHERE b.slug = :slug

@@ -7,8 +7,8 @@ export async function taulaLlistatTemes() {
   const columns: TaulaDinamica<Tema>[] = [
     {
       header: 'Tema',
-      field: 'tema_ca',
-      render: (_: unknown, row: Tema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-tema/${row.id}">${row.tema_ca}</a>`,
+      field: 'tema',
+      render: (_: unknown, row: Tema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-tema/${row.id}">${row.tema}</a>`,
     },
   ];
 
@@ -22,7 +22,7 @@ export async function taulaLlistatTemes() {
     url: `https://${window.location.host}/api/adreces/get/llistatTemes`,
     containerId: 'taulaLlistatTemes',
     columns,
-    filterKeys: ['tema_ca'],
-    filterByField: 'tema_ca',
+    filterKeys: ['tema'],
+    filterByField: 'tema',
   });
 }

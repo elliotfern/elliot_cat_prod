@@ -10,14 +10,14 @@ export async function taulaLlistatSubTemes() {
   const columns: TaulaDinamica<SubTema>[] = [
     {
       header: 'Subtema',
-      field: 'sub_tema_ca',
-      render: (_: unknown, row: SubTema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-subtema/${row.id}">${row.sub_tema_ca}</a>`,
+      field: 'sub_tema',
+      render: (_: unknown, row: SubTema) => `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-subtema/${row.id}">${row.sub_tema}</a>`,
     },
 
     {
       header: 'Tema',
-      field: 'tema_ca',
-      render: (_: unknown, row: SubTema) => `<a id="${row.tema_id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-tema/${row.tema_id}">${row.tema_ca}</a>`,
+      field: 'tema',
+      render: (_: unknown, row: SubTema) => `<a id="${row.tema_id}" href="${DOMAIN_WEB}/gestio/adreces/llistat-tema/${row.tema_id}">${row.tema}</a>`,
     },
   ];
 
@@ -31,7 +31,7 @@ export async function taulaLlistatSubTemes() {
     url: `https://${window.location.host}/api/adreces/get/llistatSubTemes`,
     containerId: 'taulaLlistatSubTemes',
     columns,
-    filterKeys: ['tema_ca'],
-    filterByField: 'tema_ca',
+    filterKeys: ['tema'],
+    filterByField: 'tema',
   });
 }

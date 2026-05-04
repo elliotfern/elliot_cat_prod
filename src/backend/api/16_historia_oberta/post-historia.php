@@ -3,8 +3,9 @@
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
-use Ramsey\Uuid\Uuid;
+use App\Utils\Tables;
+use Ramsey\Uuid\Uuid as RamseyUuid;
+use App\Utils\Uuid;
 
 $slug = $routeParams[0] ?? '';
 
@@ -59,7 +60,7 @@ if ($slug === 'esdeveniment') {
     $esdeDataFAny  = isset($data['esdeDataFAny']) ? (int) $data['esdeDataFAny'] : null;
     $esSubEtapa    = isset($data['esSubEtapa']) ? (int) $data['esSubEtapa'] : null;
     $esdeCiutat = !empty($data['esdeCiutat'])
-        ? uuidToBin(data_input($data['esdeCiutat']))
+        ? uuid::toBinary(data_input($data['esdeCiutat']))
         : null;
 
     $img           = !empty($data['img']) ? data_input($data['img']) : '';
@@ -68,7 +69,7 @@ if ($slug === 'esdeveniment') {
     $dateCreated = $timestamp;
     $dateModified = $timestamp;
 
-    $id = Uuid::uuid7()->getBytes();
+    $id = RamseyUuid::uuid7()->getBytes();
 
     if (!$hasError) {
         global $conn;

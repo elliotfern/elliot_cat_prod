@@ -5,7 +5,8 @@ declare(strict_types=1);
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
+use App\Utils\Uuid;
 
 $slug = $routeParams[0] ?? null;
 
@@ -58,7 +59,7 @@ if ($slug === 'createProjecte') {
         return;
     }
 
-    $userBin = uuidToBin($userUuid);
+    $userBin = uuid::toBinary($userUuid);
     if ($userBin === null) {
         Response::error(MissatgesAPI::error('validacio'), ['UUID invàlid'], 400);
         return;
@@ -244,7 +245,7 @@ if ($slug === 'createProjecte') {
         return;
     }
 
-    $userBin = uuidToBin($userUuid);
+    $userBin = uuid::toBinary($userUuid);
     if ($userBin === null) {
         Response::error(MissatgesAPI::error('validacio'), ['UUID invàlid'], 400);
         return;

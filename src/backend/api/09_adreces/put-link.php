@@ -2,21 +2,22 @@
 
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
 use App\Config\Audit;
 use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
-use Ramsey\Uuid\Uuid;
 
-$slug = $routeParams[0];
+/** @var array $conn */
+/** @var array $routeParams */
+$slug = $routeParams[0] ??
 
-/*
+  /*
  * BACKEND DB LINKS
  * FUNCIONS
  * @
  */
 
-$conn = DatabaseConnection::getConnection();
+  $conn = DatabaseConnection::getConnection();
 
 if (!$conn) {
   die("No se pudo establecer conexión a la base de datos.");
@@ -62,7 +63,7 @@ if ($slug === 'link') {
   } else {
     $idText = (string)$data['id'];
     if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $idText)) {
-      $errors[] = ValidacioErrors::format('id', 'uuid');
+      $errors[] = ValidacioErrors::format('id');
     }
   }
 
@@ -75,18 +76,18 @@ if ($slug === 'link') {
 
   // 🔎 Validacions bàsiques
   if ($web !== null && $web !== '' && !filter_var($web, FILTER_VALIDATE_URL)) {
-    $errors[] = ValidacioErrors::format('web', 'url');
+    $errors[] = ValidacioErrors::format('web');
   }
   if ($subTemaIdTxt !== null && $subTemaIdTxt !== '') {
     if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $subTemaIdTxt)) {
-      $errors[] = ValidacioErrors::format('sub_tema_id', 'uuid');
+      $errors[] = ValidacioErrors::format('sub_tema_id');
     }
   }
   if ($lang !== null && !is_int($lang)) {
-    $errors[] = ValidacioErrors::format('lang', 'int');
+    $errors[] = ValidacioErrors::format('lang');
   }
   if ($tipus !== null && !is_int($tipus)) {
-    $errors[] = ValidacioErrors::format('tipus', 'int');
+    $errors[] = ValidacioErrors::format('tipus');
   }
 
   // (Opcional) límites de longitud
@@ -215,18 +216,10 @@ if ($slug === 'link') {
   }
 
   // 📥 Campos opcionales (trim y null si vacío)
-  $tema_ca = array_key_exists('tema_ca', $data) ? trim((string)$data['tema_ca']) : null;
-  $tema_en = array_key_exists('tema_en', $data) ? trim((string)$data['tema_en']) : null;
-  $tema_es = array_key_exists('tema_es', $data) ? trim((string)$data['tema_es']) : null;
-  $tema_fr = array_key_exists('tema_fr', $data) ? trim((string)$data['tema_fr']) : null;
-  $tema_it = array_key_exists('tema_it', $data) ? trim((string)$data['tema_it']) : null;
+  $tema = array_key_exists('tema', $data) ? trim((string)$data['tema']) : null;
 
   // ✅ Debe venir al menos un campo tema_* (aunque sea para ponerlo a null)
-  $anyProvided = array_key_exists('tema_ca', $data)
-    || array_key_exists('tema_en', $data)
-    || array_key_exists('tema_es', $data)
-    || array_key_exists('tema_fr', $data)
-    || array_key_exists('tema_it', $data);
+  $anyProvided = array_key_exists('tema', $data);
 
   if (!$anyProvided) {
     $errors[] = ValidacioErrors::requerit('almenys_un_idioma');
@@ -239,11 +232,7 @@ if ($slug === 'link') {
       $errors[] = ValidacioErrors::massaLlarg($field, $maxLen);
     }
   };
-  if (array_key_exists('tema_ca', $data)) $checkLen($tema_ca, 'tema_ca');
-  if (array_key_exists('tema_en', $data)) $checkLen($tema_en, 'tema_en');
-  if (array_key_exists('tema_es', $data)) $checkLen($tema_es, 'tema_es');
-  if (array_key_exists('tema_fr', $data)) $checkLen($tema_fr, 'tema_fr');
-  if (array_key_exists('tema_it', $data)) $checkLen($tema_it, 'tema_it');
+  if (array_key_exists('tema', $data)) $checkLen($tema, 'tema');
 
   if (!empty($errors)) {
     Response::error(MissatgesAPI::error('validacio'), $errors, 400);
@@ -260,25 +249,9 @@ if ($slug === 'link') {
     return ($val === '') ? null : $val;
   };
 
-  if (array_key_exists('tema_ca', $data)) {
-    $setParts[] = 'tema_ca = :tema_ca';
-    $params[':tema_ca'] = $normalize($tema_ca);
-  }
-  if (array_key_exists('tema_en', $data)) {
-    $setParts[] = 'tema_en = :tema_en';
-    $params[':tema_en'] = $normalize($tema_en);
-  }
-  if (array_key_exists('tema_es', $data)) {
-    $setParts[] = 'tema_es = :tema_es';
-    $params[':tema_es'] = $normalize($tema_es);
-  }
-  if (array_key_exists('tema_fr', $data)) {
-    $setParts[] = 'tema_fr = :tema_fr';
-    $params[':tema_fr'] = $normalize($tema_fr);
-  }
-  if (array_key_exists('tema_it', $data)) {
-    $setParts[] = 'tema_it = :tema_it';
-    $params[':tema_it'] = $normalize($tema_it);
+  if (array_key_exists('tema', $data)) {
+    $setParts[] = 'tema = :tema';
+    $params[':tema'] = $normalize($tema);
   }
 
   if (empty($setParts)) {
@@ -370,16 +343,12 @@ if ($slug === 'link') {
 
   // Campos opcionales a actualizar
   $temaIdText = isset($data['tema_id']) ? trim((string)$data['tema_id']) : null;
-  $sub_ca     = array_key_exists('sub_tema_ca', $data) ? trim((string)$data['sub_tema_ca']) : null;
-  $sub_en     = array_key_exists('sub_tema_en', $data) ? trim((string)$data['sub_tema_en']) : null;
-  $sub_es     = array_key_exists('sub_tema_es', $data) ? trim((string)$data['sub_tema_es']) : null;
-  $sub_it     = array_key_exists('sub_tema_it', $data) ? trim((string)$data['sub_tema_it']) : null;
-  $sub_fr     = array_key_exists('sub_tema_fr', $data) ? trim((string)$data['sub_tema_fr']) : null;
+  $sub     = array_key_exists('sub_tema', $data) ? trim((string)$data['sub_tema']) : null;
 
   // Si se envía tema_id, validar formato UUID
   if ($temaIdText !== null && $temaIdText !== '') {
     if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $temaIdText)) {
-      $errors[] = ValidacioErrors::format('tema_id', 'uuid');
+      $errors[] = ValidacioErrors::format('tema_id');
     }
   }
 
@@ -390,20 +359,12 @@ if ($slug === 'link') {
       $errors[] = ValidacioErrors::massaLlarg($field, $maxLen);
     }
   };
-  $checkLen($sub_ca, 'sub_tema_ca');
-  $checkLen($sub_en, 'sub_tema_en');
-  $checkLen($sub_es, 'sub_tema_es');
-  $checkLen($sub_it, 'sub_tema_it');
-  $checkLen($sub_fr, 'sub_tema_fr');
+  $checkLen($sub, 'sub_tema');
 
   // Debe haber al menos 1 campo a actualizar
   $camposAActualizar = array_filter([
     'tema_id'      => $temaIdText,
-    'sub_tema_ca'  => $sub_ca,
-    'sub_tema_en'  => $sub_en,
-    'sub_tema_es'  => $sub_es,
-    'sub_tema_it'  => $sub_it,
-    'sub_tema_fr'  => $sub_fr,
+    'sub_tema'  => $sub,
   ], static fn($v) => $v !== null); // si no viene la clave, no se actualiza
 
   if (empty($camposAActualizar)) {
@@ -444,25 +405,9 @@ if ($slug === 'link') {
         $params[':tema_id'] = [$temaIdText, PDO::PARAM_STR];
       }
     }
-    if (array_key_exists('sub_tema_ca', $camposAActualizar)) {
-      $sets[] = "sub_tema_ca = :sub_tema_ca";
-      $params[':sub_tema_ca'] = [$sub_ca === '' ? null : $sub_ca, $sub_ca === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
-    }
-    if (array_key_exists('sub_tema_en', $camposAActualizar)) {
-      $sets[] = "sub_tema_en = :sub_tema_en";
-      $params[':sub_tema_en'] = [$sub_en === '' ? null : $sub_en, $sub_en === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
-    }
-    if (array_key_exists('sub_tema_es', $camposAActualizar)) {
-      $sets[] = "sub_tema_es = :sub_tema_es";
-      $params[':sub_tema_es'] = [$sub_es === '' ? null : $sub_es, $sub_es === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
-    }
-    if (array_key_exists('sub_tema_it', $camposAActualizar)) {
-      $sets[] = "sub_tema_it = :sub_tema_it";
-      $params[':sub_tema_it'] = [$sub_it === '' ? null : $sub_it, $sub_it === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
-    }
-    if (array_key_exists('sub_tema_fr', $camposAActualizar)) {
-      $sets[] = "sub_tema_fr = :sub_tema_fr";
-      $params[':sub_tema_fr'] = [$sub_fr === '' ? null : $sub_fr, $sub_fr === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
+    if (array_key_exists('sub_tema', $camposAActualizar)) {
+      $sets[] = "sub_tema = :sub_tema";
+      $params[':sub_tema'] = [$sub === '' ? null : $sub, $sub === '' ? PDO::PARAM_NULL : PDO::PARAM_STR];
     }
 
     if (empty($sets)) {

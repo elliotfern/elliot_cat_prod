@@ -171,20 +171,6 @@ function getAuthenticatedUserId(): ?string
     return getAuthFromToken()['user_id_uuid'];
 }
 
-function uuidToBin(?string $uuid): ?string
-{
-    if ($uuid === null || $uuid === '') return null;
-    $hex = str_replace('-', '', $uuid);
-    return hex2bin($hex);
-}
-
-function binToUuid(?string $bin): ?string
-{
-    if ($bin === null) return null;
-    $hex = bin2hex($bin);
-    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split($hex, 4));
-}
-
 function getData($query, $params = [], $single = false)
 {
     global $conn;
@@ -268,21 +254,33 @@ function sanitizeSlug($slug, $fieldName = 'slug')
  * Quote seguro para identificadores (tabla, esquema, columna, alias).
  * Soporta "schema.table AS t". No usar para valores.
  */
+/**
+ * Quote seguro para identificadores (tabla, esquema, columna, alias).
+ * Soporta "schema.table AS t". No usar para valores.
+ */
 function qi(string $identifier, PDO $pdo): string
 {
+    if (trim($identifier) === '') {
+        throw new InvalidArgumentException('Empty SQL identifier');
+    }
+
     $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-    $parts = preg_split('/\s+AS\s+|\s+as\s+/', $identifier, -1, PREG_SPLIT_NO_EMPTY);
-    $main  = $parts[0];
-    $alias = $parts[1] ?? null;
+
+    [$main, $alias] = array_pad(
+        preg_split('/\s+as\s+/i', trim($identifier), 2),
+        2,
+        null
+    );
 
     $quote = fn(string $id) => match ($driver) {
         'mysql' => '`' . str_replace('`', '``', $id) . '`',
         'pgsql' => '"' . str_replace('"', '""', $id) . '"',
-        default => $id, // fallback
+        default => $id,
     };
 
-    // Soporta schema.table o table.column si alguna vez lo usas en SELECT
     $dotQuoted = implode('.', array_map($quote, explode('.', $main)));
 
-    return $alias ? $dotQuoted . ' AS ' . $quote($alias) : $dotQuoted;
+    return $alias
+        ? $dotQuoted . ' AS ' . $quote($alias)
+        : $dotQuoted;
 }

@@ -2,13 +2,14 @@
 
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
 use App\Config\Audit;
 use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
 use Ramsey\Uuid\Uuid;
 
-$slug = $routeParams[0];
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
 
 /*
  * BACKEND DB LINKS
@@ -70,13 +71,13 @@ if ($slug === 'link') {
   if (empty($subTemaIdTxt)) {
     $errors[] = ValidacioErrors::requerit('sub_tema_id');
   } elseif (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $subTemaIdTxt)) {
-    $errors[] = ValidacioErrors::format('sub_tema_id', 'uuid');
+    $errors[] = ValidacioErrors::format('sub_tema_id');
   }
 
   if ($lang === null) {
     $errors[] = ValidacioErrors::requerit('lang');
   } elseif ($lang < 0) {
-    $errors[] = ValidacioErrors::format('lang', 'int_positiu');
+    $errors[] = ValidacioErrors::format('lang');
   }
 
   if ($tipus === null) {
@@ -88,7 +89,7 @@ if ($slug === 'link') {
   } else {
     // Validación simple de URL (permite http/https)
     if (!filter_var($web, FILTER_VALIDATE_URL)) {
-      $errors[] = ValidacioErrors::format('web', 'url');
+      $errors[] = ValidacioErrors::format('web');
     }
   }
 
@@ -191,20 +192,10 @@ if ($slug === 'link') {
   }
 
   // 📥 Campos opcionales (trim y null si vacío)
-  $tema_ca = isset($data['tema_ca']) ? trim((string)$data['tema_ca']) : null;
-  $tema_en = isset($data['tema_en']) ? trim((string)$data['tema_en']) : null;
-  $tema_es = isset($data['tema_es']) ? trim((string)$data['tema_es']) : null;
-  $tema_fr = isset($data['tema_fr']) ? trim((string)$data['tema_fr']) : null;
-  $tema_it = isset($data['tema_it']) ? trim((string)$data['tema_it']) : null;
+  $tema = isset($data['tema']) ? trim((string)$data['tema']) : null;
 
   // 🔎 Validació: almenys un idioma amb text
-  if (
-    ($tema_ca === null || $tema_ca === '') &&
-    ($tema_en === null || $tema_en === '') &&
-    ($tema_es === null || $tema_es === '') &&
-    ($tema_fr === null || $tema_fr === '') &&
-    ($tema_it === null || $tema_it === '')
-  ) {
+  if (($tema === null || $tema === '')) {
     $errors[] = ValidacioErrors::requerit('almenys_un_idioma');
   }
 
@@ -215,11 +206,7 @@ if ($slug === 'link') {
       $errors[] = ValidacioErrors::massaLlarg($field, $maxLen);
     }
   };
-  $checkLen($tema_ca, 'tema_ca');
-  $checkLen($tema_en, 'tema_en');
-  $checkLen($tema_es, 'tema_es');
-  $checkLen($tema_fr, 'tema_fr');
-  $checkLen($tema_it, 'tema_it');
+  $checkLen($tema, 'tema');
 
   if (!empty($errors)) {
     Response::error(MissatgesAPI::error('validacio'), $errors, 400);
@@ -227,19 +214,15 @@ if ($slug === 'link') {
 
   try {
     $sql = "INSERT INTO aux_temes (
-                id, tema_ca, tema_en, tema_es, tema_fr, tema_it
+                id, tema
             ) VALUES (
-                uuid_text_to_bin(:id), :tema_ca, :tema_en, :tema_es, :tema_fr, :tema_it
+                uuid_text_to_bin(:id), :tema
             )";
 
     $stmt = $conn->prepare($sql);
 
     $stmt->bindValue(':id', $idText, PDO::PARAM_STR);
-    $stmt->bindValue(':tema_ca', ($tema_ca === '' ? null : $tema_ca), $tema_ca === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmt->bindValue(':tema_en', ($tema_en === '' ? null : $tema_en), $tema_en === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmt->bindValue(':tema_es', ($tema_es === '' ? null : $tema_es), $tema_es === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmt->bindValue(':tema_fr', ($tema_fr === '' ? null : $tema_fr), $tema_fr === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmt->bindValue(':tema_it', ($tema_it === '' ? null : $tema_it), $tema_it === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':tema', ($tema === '' ? null : $tema), $tema === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
 
     $stmt->execute();
 
@@ -258,11 +241,7 @@ if ($slug === 'link') {
       [
         'id' => $idText, // retornem el UUID text
         'tema' => [
-          'ca' => $tema_ca,
-          'en' => $tema_en,
-          'es' => $tema_es,
-          'fr' => $tema_fr,
-          'it' => $tema_it,
+          'ca' => $tema,
         ],
       ],
       201
@@ -300,19 +279,9 @@ if ($slug === 'link') {
   }
 
   // Sub-temes (permès null; cal com a mínim un idioma amb text)
-  $sub_ca = isset($data['sub_tema_ca']) ? trim((string)$data['sub_tema_ca']) : null;
-  $sub_en = isset($data['sub_tema_en']) ? trim((string)$data['sub_tema_en']) : null;
-  $sub_es = isset($data['sub_tema_es']) ? trim((string)$data['sub_tema_es']) : null;
-  $sub_it = isset($data['sub_tema_it']) ? trim((string)$data['sub_tema_it']) : null;
-  $sub_fr = isset($data['sub_tema_fr']) ? trim((string)$data['sub_tema_fr']) : null;
+  $sub = isset($data['sub_tema']) ? trim((string)$data['sub_tema']) : null;
 
-  if (
-    ($sub_ca === null || $sub_ca === '') &&
-    ($sub_en === null || $sub_en === '') &&
-    ($sub_es === null || $sub_es === '') &&
-    ($sub_it === null || $sub_it === '') &&
-    ($sub_fr === null || $sub_fr === '')
-  ) {
+  if (($sub === null || $sub === '')) {
     $errors[] = ValidacioErrors::requerit('almenys_un_idioma');
   }
 
@@ -323,11 +292,7 @@ if ($slug === 'link') {
       $errors[] = ValidacioErrors::massaLlarg($field, $maxLen);
     }
   };
-  $checkLen($sub_ca, 'sub_tema_ca');
-  $checkLen($sub_en, 'sub_tema_en');
-  $checkLen($sub_es, 'sub_tema_es');
-  $checkLen($sub_it, 'sub_tema_it');
-  $checkLen($sub_fr, 'sub_tema_fr');
+  $checkLen($sub, 'sub_tema');
 
   if (!empty($errors)) {
     Response::error(MissatgesAPI::error('validacio'), $errors, 400);
@@ -337,7 +302,7 @@ if ($slug === 'link') {
   try {
     // ✅ Comprovem que el tema pare existeix
     $check = $conn->prepare("SELECT 1 FROM aux_temes WHERE id = uuid_text_to_bin(:tema_id) LIMIT 1");
-    $check->bindValue(':tema_id', $temaIdText, PDO::PARAM_STR);
+    $check->bindValue(':tema_id', $idText, PDO::PARAM_STR);
     $check->execute();
     if (!$check->fetchColumn()) {
       Response::error(
@@ -349,23 +314,19 @@ if ($slug === 'link') {
 
     // INSERT
     $sql = "INSERT INTO aux_sub_temes (
-                id, tema_id, sub_tema_ca, sub_tema_en, sub_tema_es, sub_tema_it, sub_tema_fr
+                id, tema_id, sub_tema
             ) VALUES (
                 uuid_text_to_bin(:id),
                 uuid_text_to_bin(:tema_id),
-                :sub_tema_ca, :sub_tema_en, :sub_tema_es, :sub_tema_it, :sub_tema_fr
+                :sub_tema
             )";
 
     $stmt = $conn->prepare($sql);
 
     $stmt->bindValue(':id', $idText, PDO::PARAM_STR);
-    $stmt->bindValue(':tema_id', $temaIdText, PDO::PARAM_STR);
+    $stmt->bindValue(':tema_id', $idText, PDO::PARAM_STR);
 
-    $stmt->bindValue(':sub_tema_ca', ($sub_ca === '' ? null : $sub_ca), $sub_ca === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmt->bindValue(':sub_tema_en', ($sub_en === '' ? null : $sub_en), $sub_en === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmt->bindValue(':sub_tema_es', ($sub_es === '' ? null : $sub_es), $sub_es === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmt->bindValue(':sub_tema_it', ($sub_it === '' ? null : $sub_it), $sub_it === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
-    $stmt->bindValue(':sub_tema_fr', ($sub_fr === '' ? null : $sub_fr), $sub_fr === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':sub_tema', ($sub === '' ? null : $sub), $sub === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
 
     $stmt->execute();
 
@@ -374,7 +335,7 @@ if ($slug === 'link') {
       $conn,
       $userUuid,
       'INSERT',
-      "Creació nou sub-tema ($idText) per tema $temaIdText",
+      "Creació nou sub-tema ($idText) per tema $idText",
       Tables::DB_SUBTEMES,
       $idText // si Audit espera binari, adapta-ho
     );
@@ -383,13 +344,9 @@ if ($slug === 'link') {
       MissatgesAPI::success('create'),
       [
         'id' => $idText,
-        'tema_id' => $temaIdText,
+        'tema_id' => $idText,
         'sub_tema' => [
-          'ca' => $sub_ca,
-          'en' => $sub_en,
-          'es' => $sub_es,
-          'it' => $sub_it,
-          'fr' => $sub_fr,
+          'ca' => $sub,
         ],
       ],
       201

@@ -6,7 +6,6 @@ use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use Ramsey\Uuid\Uuid;
 
-
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
 
@@ -97,8 +96,8 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             b.titol_catala,
             b.any,
             b.slug,
-            g.tema_ca AS nomGenCat,
-            sg.sub_tema_ca,
+            g.tema AS nomGenCat,
+            sg.sub_tema,
             c.nom AS nom_grup,
             LOWER(CONCAT_WS('-',
                 SUBSTR(HEX(c.id), 1, 8),
@@ -484,8 +483,8 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 e.editorial,
                 id.idioma_ca,
                 el.estat AS nomEstat,
-                sub_tema.sub_tema_ca,
-                tema.tema_ca,
+                sub_tema.sub_tema,
+                tema.tema,
                    -- autor (1 fila por autor)
                 LOWER(CONCAT_WS('-',
                     SUBSTR(HEX(p.id), 1, 8),
@@ -572,8 +571,8 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             'editorial'   => $first['editorial'],
             'idioma_ca'   => $first['idioma_ca'],
 
-            'sub_tema_ca' => $first['sub_tema_ca'],
-            'tema_ca'     => $first['tema_ca'],
+            'sub_tema' => $first['sub_tema'],
+            'tema'     => $first['tema'],
             'nom_grup'    => $first['nom_grup'],
             'idGrup'    => $first['idGrup'],
 
@@ -927,10 +926,10 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                     SUBSTR(HEX(t.id), 13, 4),
                     SUBSTR(HEX(t.id), 17, 4),
                     SUBSTR(HEX(t.id), 21) )) AS id,
-                    TRIM(CONCAT_WS(' - ', te.tema_ca, t.sub_tema_ca)) AS tema_complet
+                    TRIM(CONCAT_WS(' - ', te.tema, t.sub_tema)) AS tema_complet
                     FROM " . Tables::AUX_SUB_TEMES . " AS t
                     LEFT JOIN " . Tables::AUX_TEMES . " AS te ON t.tema_id = te.id
-                    ORDER BY te.tema_ca ASC";
+                    ORDER BY te.tema ASC";
 
         $result = $db->getData($query);
 

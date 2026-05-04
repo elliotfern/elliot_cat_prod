@@ -39,8 +39,8 @@ type BookData = {
   estat: string | null;
   nomEstat: string;
 
-  sub_tema_ca: string;
-  tema_ca: string;
+  sub_tema: string;
+  tema: string;
 
   // NUEVO: array de autores
   autors?: AutorData[];
@@ -176,8 +176,8 @@ export function fetchApiDataLlibre(url: string) {
       renderGrup(data);
 
       // Campos legacy (algunos ya no existen)
-      setText('genere_cat', data.tema_ca ?? '');
-      setText('sub_genere_cat', data.sub_tema_ca ?? '');
+      setText('genere_cat', data.tema ?? '');
+      setText('sub_genere_cat', data.sub_tema ?? '');
       setText('any', data.any);
       setText('editorial', data.editorial);
       setText('idioma_ca', data.idioma_ca);

@@ -5,7 +5,8 @@ declare(strict_types=1);
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
+use App\Utils\Uuid;
 
 $slug = $routeParams[0] ?? null;
 
@@ -61,12 +62,12 @@ if ($slug === 'esdeveniment') {
     $esdeDataFAny  = isset($data['esdeDataFAny']) ? (int) $data['esdeDataFAny'] : null;
     $esSubEtapa    = isset($data['esSubEtapa']) ? (int) $data['esSubEtapa'] : null;
     $esdeCiutat = !empty($data['esdeCiutat'])
-        ? uuidToBin(data_input($data['esdeCiutat']))
+        ? uuid::toBinary(data_input($data['esdeCiutat']))
         : null;
 
     $img           = !empty($data['img']) ? data_input($data['img']) : '';
 
-    $id = !empty($data['id']) ? uuidToBin($data['id']) : ($hasError = true);
+    $id = !empty($data['id']) ? uuid::toBinary($data['id']) : ($hasError = true);
     $timestamp = date('Y-m-d');
     $dateModified = $timestamp;
 

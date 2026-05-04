@@ -41,8 +41,8 @@ export async function taulaLlistatLlibres() {
       field: 'nomGenCat',
       render: (_: unknown, row: Llibre) => {
         const nomGenCat = row.nomGenCat ?? '';
-        const sub = (row as any).sub_tema_ca ?? (row as any).sub_genere_cat ?? '';
-        // Si ya tienes sub_tema_ca (nuevo endpoint) mejor
+        const sub = (row as any).sub_tema ?? (row as any).sub_genere_cat ?? '';
+        // Si ya tienes sub_tema (nuevo endpoint) mejor
         const text = sub ? `${nomGenCat} (${sub})` : `${nomGenCat}`;
         return text;
       },

@@ -47,7 +47,7 @@ type BlogArticle = {
   post_title: string;
   slug: string;
   post_date: string;
-  tema_ca?: string | null;
+  tema?: string | null;
   categoria_hex?: string | null; // ve del backend: HEX(b.categoria)
   lang?: number | null; // idioma ID
   post_status?: string | null; // 'publish' | 'draft' ...
@@ -302,7 +302,7 @@ export async function renderBlogListPaged(): Promise<void> {
       .map((row) => {
         const href = buildArticleUrl(row.slug, row.lang);
         const title = escapeHtml(row.post_title || '(Sense títol)');
-        const cat = escapeHtml((row.tema_ca ?? 'Sense categoria') || 'Sense categoria');
+        const cat = escapeHtml((row.tema ?? 'Sense categoria') || 'Sense categoria');
         const dateLabel = escapeHtml(formatDateCa(row.post_date));
         const statusBadge = isAdmin ? renderStatusBadge(row.post_status) : '';
 

@@ -17,28 +17,8 @@
 
 
         <div class="col-md-4">
-            <label>Nom tema (Català):</label>
-            <input class="form-control" type="text" name="tema_ca" id="tema_ca" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Nom tema (castellà):</label>
-            <input class="form-control" type="text" name="tema_es" id="tema_es" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Nom tema (Anglès):</label>
-            <input class="form-control" type="text" name="tema_en" id="tema_en" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Nom tema (Francès):</label>
-            <input class="form-control" type="text" name="tema_fr" id="tema_fr" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Nom tema (Italià):</label>
-            <input class="form-control" type="text" name="tema_it" id="tema_it" value="">
+            <label>Nom tema:</label>
+            <input class="form-control" type="text" name="tema" id="tema" value="">
         </div>
 
         <div class="col-md-4">

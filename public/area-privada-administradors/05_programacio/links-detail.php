@@ -1,14 +1,16 @@
 <?php
 
-$id = $routeParams[0];
+/** @var array $routeParams */
+/** @var array $conn */
+$id = $routeParams[0] ?? null;
 
-$stmt = $conn->prepare("SELECT t.tema_ca
+$stmt = $conn->prepare("SELECT t.tema
     FROM aux_temes AS t
     WHERE t.id=$id");
 $stmt->execute();
 $data = $stmt->fetchAll();
 foreach ($data as $row) {
-  $topic = $row['tema_ca'];
+  $topic = $row['tema'];
 }
 
 echo '<div class="container">';

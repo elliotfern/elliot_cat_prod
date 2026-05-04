@@ -12,6 +12,12 @@ class Response
         'user_id',
         'event_id',
         'ciutat_id',
+        'pais_autor_id',
+        'ciutat_defuncio_id',
+        'provincia_id',
+        'pais_id',
+        'tema_id',
+
     ];
 
     public static function success(string $message = '', $data = null, int $httpCode = 200): void

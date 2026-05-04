@@ -22,28 +22,8 @@
         </div>
 
         <div class="col-md-4">
-            <label>Nom tema (Català):</label>
-            <input class="form-control" type="text" name="sub_tema_ca" id="sub_tema_ca" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Nom tema (castellà):</label>
-            <input class="form-control" type="text" name="sub_tema_es" id="sub_tema_es" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Nom tema (Anglès):</label>
-            <input class="form-control" type="text" name="sub_tema_en" id="sub_tema_en" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Nom tema (Francès):</label>
-            <input class="form-control" type="text" name="sub_tema_fr" id="sub_tema_fr" value="">
-        </div>
-
-        <div class="col-md-4">
-            <label>Nom tema (Italià):</label>
-            <input class="form-control" type="text" name="sub_tema_it" id="sub_tema_it" value="">
+            <label>Nom sub-tema:</label>
+            <input class="form-control" type="text" name="sub_tema" id="sub_tema" value="">
         </div>
 
         <div class="col-md-4">

@@ -3,12 +3,14 @@
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
 use App\Utils\Uuid;
+
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
 
 $db = new Database();
 $pdo = $db->getPdo();
-$slug = $routeParams[0];
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -81,7 +83,7 @@ if ($slug === 'directors') {
     $sql = <<<SQL
             SELECT i.id, i.alt
             FROM %s AS i
-            WHERE i.typeImg = 8
+            WHERE i.typeImg = :img
             ORDER BY i.alt ASC
             SQL;
 
@@ -91,7 +93,9 @@ if ($slug === 'directors') {
     );
 
     try {
-        $result = $db->getData($query);
+        $img = 8;
+        $params = [':img' => $img];
+        $result = $db->getData($query, $params);
 
         if (empty($result)) {
             Response::error(
@@ -116,20 +120,47 @@ if ($slug === 'directors') {
     }
 
     // Llistat imatges series
-    // ruta GET => "/api/cinema/get/auxiliars/?type=imgSeries"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'imgSeries') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT i.id, i.alt
-            FROM db_img AS i
-            WHERE i.typeImg = 7
-            ORDER BY i.alt ASC");
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+    // ruta GET => "/api/cinema/get/auxiliars/imgSeries"
+} elseif ($slug === 'imgSeries') {
+
+    $sql = <<<SQL
+            SELECT i.id, i.alt
+            FROM %s AS i
+            WHERE i.typeImg = :img
+            ORDER BY i.alt ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_IMATGES, $pdo),
+    );
+
+    try {
+        $img = 7;
+        $params = [':img' => $img];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-    echo json_encode($data);
 
     // Llistat generes pelicules
     // ruta GET => "/api/cinema/get/auxiliars/?type=generesPelis"
@@ -186,7 +217,7 @@ if ($slug === 'directors') {
 } else if ($slug === "pais" || $slug === "paisos") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(p.id) AS id, p.pais_ca
+            SELECT p.id, p.pais_ca
             FROM %s AS p
             ORDER BY p.pais_ca ASC
             SQL;
@@ -228,7 +259,7 @@ if ($slug === 'directors') {
 } else if ($slug === "provincies") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(p.id) AS id, p.provincia_ca
+            SELECT p.id, p.provincia_ca
             FROM %s AS p
             ORDER BY p.provincia_ca ASC
             SQL;
@@ -437,7 +468,7 @@ if ($slug === 'directors') {
 } else if ($slug === "llistatCiutats") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(c.id) AS id, c.ciutat, c.ciutat_ca, c.ciutat_en, c.descripcio, uuid_bin_to_text(p.id) AS idPais, c.created_at, c.updated_at, p.pais_ca
+            SELECT c.id, c.ciutat, c.ciutat_ca, c.ciutat_en, c.descripcio, p.id AS idPais, c.created_at, c.updated_at, p.pais_ca
             FROM %s AS c
             LEFT JOIN %s AS p ON c.pais_id = p.id
             ORDER BY ciutat COLLATE utf8mb4_unicode_ci ASC;
@@ -516,12 +547,12 @@ if ($slug === 'directors') {
 
     $sql = <<<SQL
         SELECT
-          uuid_bin_to_text(c.id) AS id,
+          c.id,
           c.ciutat,
           c.ciutat_ca,
           c.ciutat_en,
           c.descripcio,
-          uuid_bin_to_text(c.pais_id) AS pais_id
+          c.pais_id
         FROM %s AS c
         WHERE c.id = uuid_text_to_bin(:id)
         LIMIT 1
@@ -1082,9 +1113,9 @@ if ($slug === 'directors') {
 } else if ($slug === "subtemes") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(s.id) AS id, s.sub_tema_ca
+            SELECT s.id, s.sub_tema
             FROM %s AS s
-            ORDER BY s.sub_tema_ca ASC
+            ORDER BY s.sub_tema ASC
             SQL;
 
     $query = sprintf(
@@ -1124,9 +1155,9 @@ if ($slug === 'directors') {
 } else if ($slug === "temes") {
 
     $sql = <<<SQL
-            SELECT uuid_bin_to_text(s.id) AS id, s.tema_ca
+            SELECT s.id, s.tema
             FROM %s AS s
-            ORDER BY s.tema_ca ASC
+            ORDER BY s.tema ASC
             SQL;
 
     $query = sprintf(
@@ -1166,9 +1197,9 @@ if ($slug === 'directors') {
 } else if ($slug === "tipusLinks") {
 
     $sql = <<<SQL
-            SELECT s.id, s.tipus_ca
+            SELECT s.id, s.tipus
             FROM %s AS s
-            ORDER BY s.tipus_ca ASC
+            ORDER BY s.tipus ASC
             SQL;
 
     $query = sprintf(

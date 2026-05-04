@@ -4,7 +4,7 @@ use App\Config\DatabaseConnection;
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
 
 $db = new Database();
 $pdo = $db->getPdo();

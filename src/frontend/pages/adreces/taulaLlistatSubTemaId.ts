@@ -16,11 +16,11 @@ export async function taulaLlistatSubTemaId(id: string) {
       field: 'nom',
       render: (_: unknown, row: Link) => `<a id="${row.id}" href="${row.web}" target="_blank">${row.nom}</a>`,
     },
-    { header: 'Categoría', field: 'tema_ca' },
+    { header: 'Categoría', field: 'tema' },
 
-    { header: 'Tema', field: 'sub_tema_ca' },
+    { header: 'Tema', field: 'sub_tema' },
 
-    { header: 'Tipus', field: 'tipus_ca' },
+    { header: 'Tipus', field: 'tipus' },
 
     { header: 'Última actualització', field: 'dateModified', render: (_: unknown, row: Link) => formatData(row.dateModified) },
   ];
@@ -38,6 +38,6 @@ export async function taulaLlistatSubTemaId(id: string) {
     containerId: 'taulaLlistatSubTemaId',
     columns,
     filterKeys: ['nom'], // cercador
-    filterByField: 'sub_tema_ca',
+    filterByField: 'sub_tema',
   });
 }

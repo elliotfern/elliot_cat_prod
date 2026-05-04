@@ -78,7 +78,7 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
   async function fillSelects(current: Partial<BlogArticleFitxa>) {
     await Promise.all([
       // Categoria (binary16): normalment aquí tindràs una taula de categories/temes amb uuid + nom
-      auxiliarSelect(current.categoria ?? '', 'temes', 'categoria', 'tema_ca'),
+      auxiliarSelect(current.categoria ?? '', 'temes', 'categoria', 'tema'),
 
       // Idiomes (int): taula d'idiomes amb id + nom
       auxiliarSelect(current.lang ?? 1, 'llengues', 'lang', 'idioma_ca'),

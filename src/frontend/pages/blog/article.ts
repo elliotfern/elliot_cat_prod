@@ -15,7 +15,7 @@ type BlogArticleDetail = {
   slug: string;
   post_date: string;
   post_modified?: string | null;
-  tema_ca?: string | null;
+  tema?: string | null;
   lang?: number | null;
   post_status?: string | null;
 };
@@ -114,7 +114,7 @@ export async function renderBlogArticleView(slug: string, tipus: ArticleScope): 
     const title = escapeHtml(a.post_title || '(Sense títol)');
     const excerpt = (a.post_excerpt ?? '').trim();
     const contentHtml = decorateLinksInHtml(a.post_content ?? '').trim();
-    const cat = escapeHtml((a.tema_ca ?? 'Sense categoria') || 'Sense categoria');
+    const cat = escapeHtml((a.tema ?? 'Sense categoria') || 'Sense categoria');
     const dateLabel = escapeHtml(formatDateCa(a.post_date));
 
     const editButton = isAdmin

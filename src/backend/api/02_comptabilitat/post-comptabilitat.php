@@ -2,12 +2,16 @@
 
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
 use App\Config\Audit;
 use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
+use App\Utils\Uuid;
 
-$slug = $routeParams[0];
+/** @var array $routeParams */
+/** @var array $conn */
+$slug = $routeParams[0] ?? null;
+$pdo = $db->getPdo();
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
@@ -45,18 +49,24 @@ header("Access-Control-Allow-Methods: POST");
 function generarNumeroFactura(PDO $db): string
 {
     $year = date('Y');
+    $yearPrefix = "$year-%";
 
-    // Consulta la última factura del año de la serie C
-    $stmt = $db->prepare("
+    $table = qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $db);
+
+    $sql = <<<SQL
         SELECT numero_factura
-        FROM db_comptabilitat_facturacio_clients
+        FROM {$table}
         WHERE numero_factura LIKE :yearPrefix
         AND numero_factura LIKE '%-C'
         ORDER BY id DESC
         LIMIT 1
-    ");
-    $yearPrefix = "$year-%";
-    $stmt->execute([':yearPrefix' => $yearPrefix]);
+        SQL;
+
+    $stmt = $db->prepare($sql);
+    $stmt->execute([
+        ':yearPrefix' => $yearPrefix
+    ]);
+
     $ultima = $stmt->fetchColumn();
 
     if ($ultima) {
@@ -139,21 +149,24 @@ if ($slug === 'clients') {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
     }
 
+    $ciutat_id = !empty($ciutat_id) ?  Uuid::toBinary($ciutat_id) : null;
+    $provincia_id = !empty($provincia_id) ? Uuid::toBinary($provincia_id) : null;
+    $pais_id = !empty($pais_id) ?  Uuid::toBinary($pais_id) : null;
+
     try {
 
         $conn->beginTransaction();
+        $table = qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo);
 
-        $sql = "INSERT INTO db_comptabilitat_clients
-                   (clientNom, clientCognoms, clientEmail, clientWeb, clientNIF, clientEmpresa, clientAdreca, clientCP,
-                    ciutat_id, provincia_id, pais_id, clientTelefon, clientStatus, clientRegistre)
-                VALUES
-                   (:clientNom, :clientCognoms, :clientEmail, :clientWeb, :clientNIF, :clientEmpresa, :clientAdreca, :clientCP,
-                    uuid_text_to_bin(NULLIF(:ciutat_id, '')),
-                    uuid_text_to_bin(NULLIF(:provincia_id, '')),
-                    uuid_text_to_bin(NULLIF(:pais_id, '')),
-                    :clientTelefon, :clientStatus, :clientRegistre)";
+        $sql = <<<SQL
+            INSERT INTO {$table}
+            (clientNom, clientCognoms, clientEmail, clientWeb, clientNIF, clientEmpresa, clientAdreca, clientCP,
+                ciutat_id, provincia_id, pais_id, clientTelefon, clientStatus, clientRegistre)
+            VALUES
+            (:clientNom, :clientCognoms, :clientEmail, :clientWeb, :clientNIF, :clientEmpresa, :clientAdreca, :clientCP, :ciutat_id, :provincia_id,:pais_id, :clientTelefon, :clientStatus, :clientRegistre)
+            SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $db->getPdo()->prepare($sql);
 
         $stmt->bindValue(':clientNom', $clientNom, PDO::PARAM_STR);
         $stmt->bindValue(':clientCognoms', $clientCognoms, $clientCognoms !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
@@ -248,14 +261,18 @@ if ($slug === 'clients') {
         $numero_factura = generarNumeroFactura($conn);
 
         // Inserta factura
-        $sql = "INSERT INTO db_comptabilitat_facturacio_clients
-              (numero_factura, emissor_id, client_id, concepte, data_factura, data_venciment,
-               base_imposable, despeses_extra, total_factura, import_iva, tipus_iva, estat,
-               metode_pagament, notes, projecte_id, arxiu_url, recurrent, frequencia)
-            VALUES
-              (:numero_factura, :emissor_id, :client_id, :concepte, :data_factura, :data_venciment,
-               :base_imposable, :despeses_extra, :total_factura, :import_iva, :tipus_iva, :estat,
-               :metode_pagament, :notes, :projecte_id, :arxiu_url, :recurrent, :frequencia)";
+        $table = qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo);
+
+        $sql = <<<SQL
+                INSERT INTO {$table}
+                (numero_factura, emissor_id, client_id, concepte, data_factura, data_venciment,
+                base_imposable, despeses_extra, total_factura, import_iva, tipus_iva, estat,
+                metode_pagament, notes, projecte_id, arxiu_url, recurrent, frequencia)
+                VALUES
+                (:numero_factura, :emissor_id, :client_id, :concepte, :data_factura, :data_venciment,
+                :base_imposable, :despeses_extra, :total_factura, :import_iva, :tipus_iva, :estat,
+                :metode_pagament, :notes, :projecte_id, :arxiu_url, :recurrent, :frequencia)
+                SQL;
 
         $stmt = $conn->prepare($sql);
         $stmt->execute([
@@ -276,15 +293,22 @@ if ($slug === 'clients') {
             ':projecte_id' => $projecte_id,
             ':arxiu_url' => $arxiu_url,
             ':recurrent' => $recurrent,
-            'frequencia' => $frequencia,
+            ':frequencia' => $frequencia,
         ]);
         $newId = (int)$conn->lastInsertId();
 
         // Inserta productos
         if (!empty($detallsProductes)) {
-            $sqlProd = "INSERT INTO db_comptabilitat_facturacio_clients_productes
-                        (factura_id, producte_id, descripcio, preu)
-                        VALUES (:factura_id, :producte_id, :descripcio, :preu)";
+
+            $table = qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo);
+
+            $sqlProd = <<<SQL
+                INSERT INTO {$table}
+                (factura_id, producte_id, descripcio, preu)
+                VALUES
+                (:factura_id, :producte_id, :descripcio, :preu)
+                SQL;
+
             $stmtProd = $conn->prepare($sqlProd);
 
             foreach ($detallsProductes as $p) {
@@ -374,10 +398,15 @@ if ($slug === 'clients') {
     try {
         $conn->beginTransaction();
 
-        $sql = "INSERT INTO db_comptabilitat_emissors
-                   (nom, nif, numero_iva, pais, adreca, telefon, email, created_at, updated_at)
+        $table = qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo);
+        $pais = !empty($pais) ? uuid::toBinary($pais) : null;
+
+        $sql = <<<SQL
+                INSERT INTO {$table}
+                 (nom, nif, numero_iva, pais, adreca, telefon, email, created_at, updated_at)
                 VALUES
-                   (:nom, :nif, :numero_iva, uuid_text_to_bin(NULLIF(:pais, '')), :adreca, :telefon, :email, NOW(), NOW())";
+                 (:nom, :nif, :numero_iva, :pais, :adreca, :telefon, :email, NOW(), NOW());
+                SQL;
 
         $stmt = $conn->prepare($sql);
 
@@ -404,7 +433,7 @@ if ($slug === 'clients') {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
-    // POST : Crear nuevo producto
+    // POST : Crear nou producte
     // ruta => "https://elliot.cat/api/comptabilitat/post/producte"
 } else if ($slug === 'producte' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -448,10 +477,13 @@ if ($slug === 'clients') {
     try {
         $conn->beginTransaction();
 
-        $sql = "INSERT INTO db_comptabilitat_cataleg_productes
-                   (producte, descripcio, actiu, unitat, preu_recomanat)
+        $table = qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo);
+        $sql = <<<SQL
+                INSERT INTO {$table}
+                  (producte, descripcio, actiu, unitat, preu_recomanat)
                 VALUES
-                   (:producte, :descripcio, :actiu, :unitat, :preu_recomanat)";
+                  (:producte, :descripcio, :actiu, :unitat, :preu_recomanat)
+                SQL;
 
         $stmt = $conn->prepare($sql);
 
@@ -538,10 +570,13 @@ if ($slug === 'clients') {
     try {
         $conn->beginTransaction();
 
-        $sql = "INSERT INTO db_comptabilitat_proveidors
-                   (nom, nif, adreca, ciutat, codi_postal, pais, telefon, email, web, contacte, notes)
+        $table = qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo);
+        $sql = <<<SQL
+                INSERT INTO {$table}
+                    (nom, nif, adreca, ciutat, codi_postal, pais, telefon, email, web, contacte, notes)
                 VALUES
-                   (:nom, :nif, :adreca, :ciutat, :codi_postal, :pais, :telefon, :email, :web, :contacte, :notes)";
+                  (:nom, :nif, :adreca, :ciutat, :codi_postal, :pais, :telefon, :email, :web, :contacte, :notes)
+                SQL;
 
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
@@ -637,14 +672,17 @@ if ($slug === 'clients') {
     try {
         $conn->beginTransaction();
 
-        $sql = "INSERT INTO db_comptabilitat_despeses
-                (data, data_pagament, concepte, proveidor_id, receptor_id, base_imposable, tipus_iva, import_iva, total, 
+        $table = qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo);
+        $sql = <<<SQL
+                INSERT INTO {$table}
+                    (data, data_pagament, concepte, proveidor_id, receptor_id, base_imposable, tipus_iva, import_iva, total, 
                  metode_pagament, pagat, categoria_id, subcategoria_id, tipus_despesa, client_id, projecte_id, arxiu_url, 
                  deduible, recurrent, frequencia, notes)
                 VALUES
-                (:data, :data_pagament, :concepte, :proveidor_id, :receptor_id, :base_imposable, :tipus_iva, :import_iva, :total,
+                   (:data, :data_pagament, :concepte, :proveidor_id, :receptor_id, :base_imposable, :tipus_iva, :import_iva, :total,
                  :metode_pagament, :pagat, :categoria_id, :subcategoria_id, :tipus_despesa, :client_id, :projecte_id, :arxiu_url,
-                 :deduible, :recurrent, :frequencia, :notes)";
+                 :deduible, :recurrent, :frequencia, :notes)
+                SQL;
 
         $stmt = $conn->prepare($sql);
 

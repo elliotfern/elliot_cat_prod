@@ -3,9 +3,11 @@
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\Tables;
+use App\Utils\Tables;
 
-$slug = $routeParams[0];
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+
 $db = new Database();
 $pdo = $db->getPdo();
 
@@ -35,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 if ($slug === 'clients') {
 
     $sql = <<<SQL
-            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, uuid_bin_to_text(c.ciutat_id) AS ciutat_id, uuid_bin_to_text(c.provincia_id) AS provincia_id, uuid_bin_to_text(c.pais_id) AS pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.clientStatus, s.estatNom
+            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, c.ciutat_id, c.provincia_id, c.pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.clientStatus, s.estatNom
             FROM %s AS c
             LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
             LEFT JOIN %s AS co ON c.pais_id = co.id
@@ -85,7 +87,7 @@ if ($slug === 'clients') {
 
     $id = $_GET['id'];
     $sql = <<<SQL
-            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, uuid_bin_to_text(c.ciutat_id) AS ciutat_id, uuid_bin_to_text(c.provincia_id) AS provincia_id, uuid_bin_to_text(c.pais_id) AS pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.clientStatus, s.estatNom
+            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, c.ciutat_id, c.provincia_id, c.pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.clientStatus, s.estatNom
             FROM %s AS c
             LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
             LEFT JOIN %s AS co ON c.pais_id = co.id
@@ -298,32 +300,6 @@ if ($slug === 'clients') {
 
         $result = $db->getData($queryFactura, [':id' => $id], true);
 
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (!is_string($v)) return;
-
-            // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
-            $v = str_replace("\0", '', $v);
-
-            // Intentar normalizar a UTF-8 válido
-            // 1) Si ya es UTF-8 válido, lo deja igual
-            if (!mb_check_encoding($v, 'UTF-8')) {
-                // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
-                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) {
-                    $v = $v2;
-                } else {
-                    // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
-                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                    if ($v3 !== false) $v = $v3;
-                }
-            } else {
-                // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
-                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) $v = $v2;
-            }
-        });
-
         if (!$result) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
             return;
@@ -457,7 +433,7 @@ SQL;
             e.nom, 
             e.nif, 
             e.numero_iva, 
-            uuid_bin_to_text(e.pais) as pais_id, 
+            e.pais as pais_id, 
             p.pais_ca,
             e.adreca, 
             e.telefon, 
@@ -506,7 +482,7 @@ SQL;
     $emissor_id = (int) $_GET['id'];
 
     $sql = <<<SQL
-        SELECT e.id, e.nom, e.nif, e.numero_iva, uuid_bin_to_text(e.pais) AS pais, p.pais_ca, e.adreca, e.telefon, e.email
+        SELECT e.id, e.nom, e.nif, e.numero_iva, e.pais, p.pais_ca, e.adreca, e.telefon, e.email
         FROM %s AS e
         LEFT JOIN %s AS p ON e.pais = p.id
         WHERE e.id = :emissor_id

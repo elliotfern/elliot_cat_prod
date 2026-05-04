@@ -4,7 +4,7 @@
 declare(strict_types=1);
 
 use App\Config\Database;
-use App\Config\Tables;
+use App\Utils\Tables;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailException;
