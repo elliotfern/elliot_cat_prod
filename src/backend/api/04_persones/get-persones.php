@@ -140,10 +140,7 @@ if ($slug === 'llistatPersones') {
         a.dia_defuncio,
         c1.ciutat_ca AS ciutatNaixement,
         c2.ciutat_ca AS ciutatDefuncio,
-        GROUP_CONCAT(g.id)
-            ORDER BY g.grup_ca
-            SEPARATOR ','
-        ) AS grup_ids,
+        GROUP_CONCAT(DISTINCT g.id ORDER BY g.grup_ca SEPARATOR ',') AS grup_ids,
         GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup,
         a.pais_autor_id AS pais_autor_id,
         a.ciutat_defuncio_id AS ciutat_defuncio_id,
