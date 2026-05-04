@@ -372,41 +372,11 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         $db = new Database();
 
         $query = "SELECT 
-                LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(b.id), 1, 8),
-                    SUBSTR(HEX(b.id), 9, 4),
-                    SUBSTR(HEX(b.id), 13, 4),
-                    SUBSTR(HEX(b.id), 17, 4),
-                    SUBSTR(HEX(b.id), 21)
-                    )) AS id,
-                 LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(b.tipus_id), 1, 8),
-                    SUBSTR(HEX(b.tipus_id), 9, 4),
-                    SUBSTR(HEX(b.tipus_id), 13, 4),
-                    SUBSTR(HEX(b.tipus_id), 17, 4),
-                    SUBSTR(HEX(b.tipus_id), 21)
-                    )) AS tipus_id,
-                LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(b.editorial_id), 1, 8),
-                    SUBSTR(HEX(b.editorial_id), 9, 4),
-                    SUBSTR(HEX(b.editorial_id), 13, 4),
-                    SUBSTR(HEX(b.editorial_id), 17, 4),
-                    SUBSTR(HEX(b.editorial_id), 21)
-                    )) AS editorial_id,
-                LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(b.sub_tema_id), 1, 8),
-                    SUBSTR(HEX(b.sub_tema_id), 9, 4),
-                    SUBSTR(HEX(b.sub_tema_id), 13, 4),
-                    SUBSTR(HEX(b.sub_tema_id), 17, 4),
-                    SUBSTR(HEX(b.sub_tema_id), 21)
-                    )) AS sub_tema_id,
-                LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(b.estat), 1, 8),
-                    SUBSTR(HEX(b.estat), 9, 4),
-                    SUBSTR(HEX(b.estat), 13, 4),
-                    SUBSTR(HEX(b.estat), 17, 4),
-                    SUBSTR(HEX(b.estat), 21)
-                    )) AS estat,
+                b.id,
+                b.tipus_id,
+                b.editorial_id,
+                b.sub_tema_id,
+                b.estat,
                 b.titol_original,
                 b.titol_catala,
                 b.slug as llibreSlug,
@@ -415,7 +385,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 b.dateCreated,
                 b.dateModified,
                 b.lang,
-                b.img,
+                b.img_id,
                 i.nameImg,
                 t.nomTipus,
                 e.editorial,
@@ -423,25 +393,12 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
                 el.estat AS nomEstat,
                 sub_tema.sub_tema,
                 tema.tema,
-                   -- autor (1 fila por autor)
-                LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(p.id), 1, 8),
-                    SUBSTR(HEX(p.id), 9, 4),
-                    SUBSTR(HEX(p.id), 13, 4),
-                    SUBSTR(HEX(p.id), 17, 4),
-                    SUBSTR(HEX(p.id), 21)
-                )) AS autor_id,
+                p.id AS autor_id,
                 p.nom AS autor_nom,
                 p.cognoms AS autor_cognoms,
                 p.slug AS autor_slug,
                 c.nom AS nom_grup,
-                 LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(c.id), 1, 8),
-                    SUBSTR(HEX(c.id), 9, 4),
-                    SUBSTR(HEX(c.id), 13, 4),
-                    SUBSTR(HEX(c.id), 17, 4),
-                    SUBSTR(HEX(c.id), 21)
-                    )) AS idGrup
+                c.id AS idGrup
 
             FROM " . Tables::LLIBRES . " AS b
             LEFT JOIN " . Tables::LLIBRES_AUTORS . " AS la ON la.llibre_id = b.id
@@ -459,24 +416,6 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         $params = [':slug' => $slug];
 
         $rows = $db->getData($query, $params);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($rows, function (&$v) {
-            if (!is_string($v)) return;
-            $v = str_replace("\0", '', $v);
-
-            if (!mb_check_encoding($v, 'UTF-8')) {
-                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) $v = $v2;
-                else {
-                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                    if ($v3 !== false) $v = $v3;
-                }
-            } else {
-                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) $v = $v2;
-            }
-        });
 
         if (empty($rows)) {
             header('Content-Type: application/json; charset=utf-8');
@@ -496,7 +435,7 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             'dateCreated' => $first['dateCreated'],
             'dateModified' => $first['dateModified'],
             'lang'        => $first['lang'],
-            'img'         => $first['img'],
+            'img_id'         => $first['img_id'],
             'estat'       => $first['estat'],      // int
             'nomEstat'    => $first['nomEstat'],   // texto
 

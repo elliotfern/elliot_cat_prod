@@ -28,7 +28,7 @@ type BookData = {
   dateModified: string | null;
 
   lang: number | string;
-  img: number | string;
+  img_id: string;
   nameImg: string;
 
   nomTipus: string | null;
