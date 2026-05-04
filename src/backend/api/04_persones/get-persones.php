@@ -105,7 +105,7 @@ if ($slug === 'llistatPersones') {
         exit;
     }
 
-    // ruta GET => "/api/persones/get/persona/slug/josep-fontana"
+    // ruta GET => "/api/persones/get/persona?slug=josep-fontana"
 } else if ($slug === 'persona') {
 
     $autorSlug = $_GET['slug'] ?? null;

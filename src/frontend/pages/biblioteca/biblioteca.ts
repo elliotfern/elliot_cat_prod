@@ -43,7 +43,7 @@ export async function biblioteca() {
 
     const columnes = isAdmin ? ['Titol', 'Any', 'Accions'] : ['Titol', 'Any'];
 
-    fitxaPersona('/api/persones/get/?persona=', slug, 'biblioteca-autor', function (data) {
+    fitxaPersona('/api/persones/get/persona?slug=', slug, 'biblioteca-autor', function (data) {
       construirTaula('taula1', '/api/biblioteca/get/?type=autorLlibres&id=', data.id, columnes, function (fila, columna) {
         if (columna.toLowerCase() === 'titol') {
           const href = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-llibre/${encodeURIComponent(fila['slug'])}`;
