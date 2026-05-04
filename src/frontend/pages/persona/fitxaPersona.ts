@@ -28,7 +28,6 @@ interface PersonaApiData {
 
   slug: string;
   idImg: number | null;
-  idSexe: number | null;
 
   mes_naixement: number | null;
   dia_naixement: number | null;
@@ -40,48 +39,44 @@ interface PersonaApiData {
   idCiutatNaixement: number | null;
   idCiutatDefuncio: number | null;
 
-  grup_ids: string[]; // ya viene como array
-  grup: string | null; // "Autor/a"
+  grups: { id: string; nom: string }[];
+  sexe_id: number | null;
 }
 
-// Shape “legacy” (lo que tu código está intentando usar)
-interface PersonaLegacy {
+interface PersonaView {
   id: string;
   slug: string;
 
   nom: string;
   cognoms: string;
 
+  img: string;
+
   web: string;
   descripcio: string;
 
-  // imagen legacy
-  img: string; // usas persona.img para construir URL
-
-  // fechas legacy
   dateCreated: string | null;
   dateModified: string | null;
 
-  // nacimiento/defunción legacy
-  anyNaixement: string; // tu código hace parseInt(...)
-  anyDefuncio: string | null;
+  anyNaixement?: number | null;
+  anyDefuncio?: number | null;
 
-  mesNaixement: string;
-  diaNaixement: string;
-  mesDefuncio: string;
-  diaDefuncio: string;
+  mesNaixement?: number | null;
+  diaNaixement?: number | null;
 
-  // campos legacy usados abajo
-  genere: string; // en tu HTML lo pones como "Gènere"
-  paisAutor: string; // en tu HTML lo pones como "Pais"
+  mesDefuncio?: number | null;
+  diaDefuncio?: number | null;
 
   ciutatNaixement: string | null;
   ciutatDefuncio: string | null;
 
-  grup_ids: string[]; // mejor como array (no string)
+  paisAutor: string;
+
+  sexe: string; // ✅ separado
+  grupsText: string; // ✅ separado
 }
 
-function mapPersona(api: PersonaApiData): PersonaLegacy {
+function mapPersona(api: PersonaApiData): PersonaView {
   return {
     id: api.id,
     slug: api.slug,
@@ -89,34 +84,33 @@ function mapPersona(api: PersonaApiData): PersonaLegacy {
     nom: api.nom ?? '',
     cognoms: api.cognoms ?? '',
 
+    img: api.nameImg ?? '',
+
     web: api.web ?? '',
     descripcio: api.descripcio ?? '',
 
-    // en tu API ahora viene nameImg (slug de imagen)
-    img: api.nameImg ?? '',
-
-    // en tu API son created_at / updated_at
     dateCreated: api.created_at ?? null,
     dateModified: api.updated_at ?? null,
 
-    // tu código espera strings parseables
-    anyNaixement: api.any_naixement != null ? String(api.any_naixement) : '',
-    anyDefuncio: api.any_defuncio != null ? String(api.any_defuncio) : null,
+    anyNaixement: api.any_naixement ?? null,
+    anyDefuncio: api.any_defuncio ?? null,
 
-    mesNaixement: api.mes_naixement != null ? String(api.mes_naixement) : '0',
-    diaNaixement: api.dia_naixement != null ? String(api.dia_naixement) : '0',
+    mesNaixement: api.mes_naixement ?? null,
+    diaNaixement: api.dia_naixement ?? null,
 
-    mesDefuncio: api.mes_defuncio != null ? String(api.mes_defuncio) : '0',
-    diaDefuncio: api.dia_defuncio != null ? String(api.dia_defuncio) : '0',
-
-    // antes tenías "genere" / "paisAutor"
-    genere: api.grup ?? '', // si esto no es “género” realmente, cambia a lo que toque
-    paisAutor: api.pais_ca ?? '',
+    mesDefuncio: api.mes_defuncio ?? null,
+    diaDefuncio: api.dia_defuncio ?? null,
 
     ciutatNaixement: api.ciutatNaixement ?? null,
     ciutatDefuncio: api.ciutatDefuncio ?? null,
 
-    grup_ids: Array.isArray(api.grup_ids) ? api.grup_ids : [],
+    paisAutor: api.pais_ca ?? '',
+
+    // ✅ SEXO correcto
+    sexe: api.sexe_id === 1 ? 'Home' : api.sexe_id === 2 ? 'Dona' : '',
+
+    // ✅ GRUPOS correctos
+    grupsText: Array.isArray(api.grups) ? api.grups.map((g) => g.nom).join(', ') : '',
   };
 }
 
@@ -170,13 +164,13 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     }
 
     // 3. Naixement (tu código ya funciona con el mapper)
-    const anyNaixement = parseInt(persona.anyNaixement, 10);
-    const diaNaixement = parseInt(persona.diaNaixement, 10);
-    const mesNaixement = parseInt(persona.mesNaixement, 10);
+    const anyNaixement = persona.anyNaixement ?? 0;
+    const diaNaixement = persona.diaNaixement ?? 0;
+    const mesNaixement = persona.mesNaixement ?? 0;
 
-    const anyDefuncio2 = persona.anyDefuncio ? parseInt(persona.anyDefuncio, 10) : null;
-    const diaDefuncio = parseInt(persona.diaDefuncio, 10);
-    const mesDefuncio = parseInt(persona.mesDefuncio, 10);
+    const anyDefuncio2 = persona.anyDefuncio ?? 0;
+    const diaDefuncio = persona.diaDefuncio ?? 0;
+    const mesDefuncio = persona.mesDefuncio ?? 0;
 
     // ... el resto de tu función igual (persona.genere, persona.paisAutor, etc.)
     // Verificamos si el día o el mes son 0 o null, y en ese caso asignamos un string vacío ""
@@ -190,7 +184,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
       dataNaixement = `${diaMostrar} ${mesosCatala[parseInt(mesMostrar) - 1]} ${anyNaixement}`;
     }
 
-    const anyDefuncio: number | null = persona.anyDefuncio !== null ? parseInt(persona.anyDefuncio, 10) : null;
+    const anyDefuncio = persona.anyDefuncio ?? 0;
     const anyActual = new Date().getFullYear();
 
     // calcul de l'edat
@@ -269,12 +263,25 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     // Luego el resto
     parrafosHTML.push(
       {
-        label: 'Professió / grup: ',
-        value: persona.genere,
+        label: 'Sexe: ',
+        value: persona.sexe,
       },
-      { label: 'Pais: ', value: persona.paisAutor },
-      { label: 'Pàgina Viquipèdia: ', value: `<a href="${persona.web}" target="_blank" title="Web">Enllaç extern</a>` },
-      { label: 'Biografia: ', value: persona.descripcio || 'No disponible' }
+      {
+        label: 'Professió / grup: ',
+        value: persona.grupsText,
+      },
+      {
+        label: 'Pais: ',
+        value: persona.paisAutor,
+      },
+      {
+        label: 'Pàgina Viquipèdia: ',
+        value: `<a href="${persona.web}" target="_blank">Enllaç extern</a>`,
+      },
+      {
+        label: 'Biografia: ',
+        value: persona.descripcio || 'No disponible',
+      }
     );
 
     // Recorremos el array y agregamos cada párrafo al div
