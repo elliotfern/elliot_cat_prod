@@ -4,6 +4,7 @@ use App\Config\Database;
 use App\Utils\Tables;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
+use App\Utils\Uuid;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
@@ -140,8 +141,8 @@ if ($slug === 'llistatPersones') {
         a.dia_defuncio,
         c1.ciutat_ca AS ciutatNaixement,
         c2.ciutat_ca AS ciutatDefuncio,
-        GROUP_CONCAT(DISTINCT g.id ORDER BY g.grup_ca SEPARATOR ',') AS grup_ids,
-        GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup,
+        g.id AS grup_id,
+        g.grup_ca AS grup_nom,
         a.pais_autor_id AS pais_autor_id,
         a.ciutat_defuncio_id AS ciutat_defuncio_id,
         a.ciutat_naixement_id AS ciutat_naixement_id
@@ -153,7 +154,6 @@ if ($slug === 'llistatPersones') {
         LEFT JOIN " . Tables::PERSONES_GRUPS_RELACIONS . " AS rel ON a.id = rel.persona_id
         LEFT JOIN " . Tables::PERSONES_GRUPS . " AS g ON rel.grup_id = g.id
         WHERE a.slug = :slug
-        GROUP BY a.id
         LIMIT 1";
 
         $params = [':slug' => $autorSlug];
@@ -167,15 +167,29 @@ if ($slug === 'llistatPersones') {
             exit;
         }
 
-        // Como viene LIMIT 1, nos quedamos con la primera fila
-        $result = $rows[0];
+        $base = $rows[0];
 
-        // Convertir grup_ids CSV a array
-        $result['grup_ids'] = !empty($result['grup_ids'])
-            ? array_values(array_filter(explode(',', $result['grup_ids'])))
-            : [];
+        $grups = [];
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        foreach ($rows as $r) {
+            if (!empty($r['grup_id'])) {
+                $grups[] = [
+                    'id' => Uuid::toString($r['grup_id']),
+                    'nom' => $r['grup_nom']
+                ];
+            }
+        }
+
+        // eliminar campos sueltos
+        unset($base['grup_id'], $base['grup_nom']);
+
+        $base['grups'] = $grups;
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $base,
+            200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
