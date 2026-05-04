@@ -1,4 +1,7 @@
 <?php
+
+use Ramsey\Uuid\Uuid;
+
 /*
  * BACKEND LIBRARY
  * FUNCIONES INSERTAR LIBRO
@@ -108,11 +111,18 @@ try {
     $alt = !empty($_POST['alt']) ? data_input($_POST['alt']) : ($hasError = true);
     $dateCreated = date('Y-m-d');
 
+    // 🔑 UUID v7 (binary 16)
+    $id = Uuid::uuid7()->getBytes();
+
     // Usar una conexión global para PDO
     global $conn;
-    $sql = "INSERT INTO db_img (nameImg, typeImg, alt, nom, dateCreated) 
-            VALUES (:nameImg, :typeImg, :alt, :nom, :dateCreated)";
+    $sql = "INSERT INTO db_img
+             (id, nameImg, typeImg, alt, nom, dateCreated) 
+            VALUES 
+            (:id, :nameImg, :typeImg, :alt, :nom, :dateCreated)";
     $stmt = $conn->prepare($sql);
+
+    $stmt->bindParam(":id", $id, PDO::PARAM_LOB); // binary 16
     $stmt->bindParam(":nameImg", $nameImg, PDO::PARAM_STR);
     $stmt->bindParam(":nom", $nom, PDO::PARAM_STR);
     $stmt->bindParam(":typeImg", $type, PDO::PARAM_INT);
