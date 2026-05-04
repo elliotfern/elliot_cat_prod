@@ -1,6 +1,7 @@
 <?php
 
-use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\Uuid as ramseny;
+use App\Utils\Uuid;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
@@ -78,6 +79,9 @@ if (isset($_GET['llibre'])) {
   if (!isUuid($editorial_id)) $errors['editorial_id'] = 'invalid_uuid';
   if (!isUuid($sub_tema_id)) $errors['sub_tema_id'] = 'invalid_uuid';
   if (!isUuid($grup)) $errors['grup'] = 'invalid_uuid';
+  if ($img_id && !isUuid($img_id)) {
+    $errors['img_id'] = 'invalid_uuid';
+  }
 
   if (!empty($errors)) {
     Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
@@ -89,9 +93,15 @@ if (isset($_GET['llibre'])) {
   $dateModified = null;
 
   // Generar UUIDv7
-  $uuid = Uuid::uuid7();
+  $uuid = ramseny::uuid7();
   $uuidBytes = $uuid->getBytes();   // para BINARY(16)
-  $uuidString = $uuid->toString();  // para devolver al frontend si quieres
+  $uuidString = Uuid::toBinary($uuid);
+  $tipus_id_bin = Uuid::toBinary($tipus_id);
+  $editorial_id_bin = Uuid::toBinary($editorial_id);
+  $sub_tema_id_bin = Uuid::toBinary($sub_tema_id);
+  $estat_id_bin = Uuid::toBinary($estat_id);
+  $grup_bin = Uuid::toBinary($grup);
+  $img_id_bin = Uuid::toBinary($img_id);
 
   global $conn;
 
@@ -100,14 +110,20 @@ if (isset($_GET['llibre'])) {
               tipus_id, editorial_id, sub_tema_id, estat_id,
               lang, img_id, dateCreated, dateModified, grup
           ) VALUES (
-              :id, :titol_original, :titol_catala, :slug, :any,
-              UNHEX(REPLACE(:tipus_id, '-', '')),
-              UNHEX(REPLACE(:editorial_id, '-', '')),
-              UNHEX(REPLACE(:sub_tema_id, '-', '')),
-              UNHEX(REPLACE(:estat_id, '-', '')),
-              :lang, :img_id,
-              :dateCreated, :dateModified,
-              UNHEX(REPLACE(:grup, '-', ''))
+              :id,
+              :titol_original, 
+              :titol_catala,
+              :slug,
+              :any,
+              :tipus_id,
+              :editorial_id,
+              :sub_tema_id, 
+              :estat_id,
+              :lang,
+              :img_id,
+              :dateCreated,
+              :dateModified,
+              :grup
           )";
 
   try {
@@ -120,23 +136,16 @@ if (isset($_GET['llibre'])) {
     $stmt->bindValue(':titol_catala', $titol_catala, PDO::PARAM_STR);
     $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
     $stmt->bindValue(':any', (int)$any, PDO::PARAM_INT);
-
-    $stmt->bindValue(':tipus_id', $tipus_id, PDO::PARAM_STR);
-    $stmt->bindValue(':editorial_id', $editorial_id, PDO::PARAM_STR);
-    $stmt->bindValue(':sub_tema_id', $sub_tema_id, PDO::PARAM_STR);
-
     $stmt->bindValue(':lang', (int)$lang, PDO::PARAM_INT);
-    $stmt->bindValue(':estat_id', (int)$estat_id, PDO::PARAM_INT);
-
-    if ($img_id === null || $img_id === '') {
-      $stmt->bindValue(':img_id', null, PDO::PARAM_NULL);
-    } else {
-      $stmt->bindValue(':img_id', (int)$img_id, PDO::PARAM_INT);
-    }
-
     $stmt->bindValue(':dateCreated', $dateCreated, PDO::PARAM_STR);
     $stmt->bindValue(':dateModified', $dateModified, PDO::PARAM_NULL);
-    $stmt->bindValue(':grup', $grup, PDO::PARAM_STR);
+
+    $stmt->bindValue(':tipus_id', $tipus_id_bin, PDO::PARAM_LOB);
+    $stmt->bindValue(':editorial_id', $editorial_id_bin, PDO::PARAM_LOB);
+    $stmt->bindValue(':sub_tema_id', $sub_tema_id_bin, PDO::PARAM_LOB);
+    $stmt->bindValue(':estat_id', $estat_id_bin, PDO::PARAM_LOB);
+    $stmt->bindValue(':img_id', $img_id_bin, PDO::PARAM_LOB);
+    $stmt->bindValue(':grup', $grup_bin, PDO::PARAM_LOB);
 
     if ($stmt->execute()) {
       Response::success(
@@ -326,7 +335,7 @@ if (isset($_GET['llibre'])) {
   }
 
   // Generar UUIDv7
-  $uuid = Uuid::uuid7();
+  $uuid = ramseny::uuid7();
   $uuidBytes = $uuid->getBytes();   // para BINARY(16)
   $uuidString = $uuid->toString();  // para devolver al frontend si quieres
 
