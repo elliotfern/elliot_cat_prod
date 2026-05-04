@@ -372,7 +372,7 @@ $routes = [
 
 
     // 17. VIATGES
-    '/api/viatges/get' => [
+    '/api/viatges/get/{slug}' => [
         'view' => 'src/backend/api/17_viatges/get-viatges.php',
         'needs_session' => false,
         'header_footer' => false,

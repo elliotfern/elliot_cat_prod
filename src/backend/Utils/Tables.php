@@ -27,8 +27,8 @@ class Tables
     public const CINEMA_ACTORS_PELICULES = '11_aux_cinema_actors_pelicules';
 
     public const HISTORIA_ESDEVENIMENTS = 'db_historia_esdeveniments';
-    
-     // 02 - Comptabilitat
+
+    // 02 - Comptabilitat
     public const DB_COMPTABILITAT_CLIENTS = 'db_comptabilitat_clients';
     public const DB_COMPTABILITAT_CLIENTS_ESTAT = 'db_comptabilitat_clients_estat';
     public const DB_COMPTABILITAT_FACTURACIO_CLIENTS = 'db_comptabilitat_facturacio_clients';
@@ -96,6 +96,9 @@ class Tables
     public const DB_PERSONES = 'db_persones';
     public const DB_PERSONES_GRUPS = 'db_persones_grups';
     public const DB_PERSONES_GRUPS_RELACIONS = 'db_persones_grups_relacions';
+
+    // VIATGES
+    public const DB_VIATGES = 'db_viatges_llistat';
 
     // Agrega aquí todas las tablas que necesites usar
 
