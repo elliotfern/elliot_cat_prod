@@ -142,9 +142,8 @@ if ($slug === 'llistatPersones') {
             a.dia_naixement,
             a.mes_defuncio,
             a.dia_defuncio,
-            c1.ciutat_ca AS ciutatNaixement,
-            c2.ciutat_ca AS ciutatDefuncio,
-
+            COALESCE(NULLIF(c1.ciutat_ca, ''), c1.ciutat) AS ciutatNaixement,
+            COALESCE(NULLIF(c2.ciutat_ca, ''), c2.ciutat) AS ciutatDefuncio,
             g.id AS grup_id,
             g.grup_ca AS grup_nom,
 
