@@ -28,112 +28,8 @@ function isUuid($s)
   return is_string($s) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s);
 }
 
-
-// a) Inserir autor
-if (isset($_GET['autor'])) {
-
-  // Obtener el cuerpo de la solicitud PUT
-  $input_data = file_get_contents("php://input");
-
-  // Decodificar los datos JSON
-  $data = json_decode($input_data, true);
-
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
-  }
-
-  // Generar UUID v7 (requiere PHP >= 8.1)
-  $id = Uuid::uuid7()->getBytes(); // BINARY(16) para MySQL
-
-  // Ahora puedes acceder a los datos como un array asociativo
-  $hasError = false;
-
-  $grup = !empty($data['grup']) ? data_input($data['grup']) : ($hasError = true);
-  $nom = !empty($data['nom']) ? data_input($data['nom']) : ($hasError = true);
-  $cognoms = isset($data['cognoms']) ? data_input($data['cognoms']) : ($hasError = false);
-  $slug = !empty($data['slug']) ? data_input($data['slug']) : ($hasError = true);
-  $ocupacio = !empty($data['ocupacio']) ? data_input($data['ocupacio']) : ($hasError = true);
-  $anyNaixement = !empty($data['anyNaixement']) ? data_input($data['anyNaixement']) : ($hasError = true);
-  $anyDefuncio = isset($data['anyDefuncio']) ? data_input($data['anyDefuncio']) : ($hasError = false);
-  $paisAutor = !empty($data['paisAutor']) ? data_input($data['paisAutor']) : ($hasError = true);
-  $img = !empty($data['img']) ? data_input($data['img']) : ($hasError = true);
-  $web = !empty($data['web']) ? data_input($data['web']) : ($hasError = false);
-
-  $sexe = !empty($data['sexe']) ? data_input($data['sexe']) : ($hasError = true);
-  $mesNaixement = !empty($data['mesNaixement']) ? data_input($data['mesNaixement']) : ($hasError = false);
-  $diaNaixement = !empty($data['diaNaixement']) ? data_input($data['diaNaixement']) : ($hasError = false);
-  $mesDefuncio = !empty($data['mesDefuncio']) ? data_input($data['mesDefuncio']) : ($hasError = false);
-  $diaDefuncio = !empty($data['diaDefuncio']) ? data_input($data['diaDefuncio']) : ($hasError = false);
-  $ciutatNaixement = !empty($data['ciutatNaixement']) ? data_input($data['ciutatNaixement']) : ($hasError = false);
-  $ciutatDefuncio = !empty($data['ciutatDefuncio']) ? data_input($data['ciutatDefuncio']) : ($hasError = false);
-  $descripcio = !empty($data['descripcio']) ? data_input($data['descripcio']) : ($hasError = true);
-  $descripcioCast = !empty($data['descripcioCast']) ? data_input($data['descripcioCast']) : ($hasError = false);
-  $descripcioEng = !empty($data['descripcioEng']) ? data_input($data['descripcioEng']) : ($hasError = false);
-  $descripcioIt = !empty($data['descripcioIt']) ? data_input($data['descripcioIt']) : ($hasError = false);
-
-  $timestamp = date('Y-m-d');
-  $dateCreated = $timestamp;
-  $dateModified = $timestamp;
-
-  if (!$hasError) {
-    try {
-      global $conn;
-      $sql = "INSERT INTO db_persones 
-      (id, nom, cognoms, anyNaixement, anyDefuncio, paisAutor, img, web, descripcio, ocupacio, dateModified, dateCreated, slug, grup, sexe, mesNaixement, diaNaixement, mesDefuncio, diaDefuncio, ciutatNaixement, ciutatDefuncio, descripcioCast, descripcioEng, descripcioIt) 
-      VALUES 
-      (:id, :nom, :cognoms, :anyNaixement, :anyDefuncio, :paisAutor, :img, :web, :descripcio, :ocupacio, :dateModified, :dateCreated, :slug, :grup, :sexe, :mesNaixement, :diaNaixement, :mesDefuncio, :diaDefuncio, :ciutatNaixement, :ciutatDefuncio, :descripcioCast, :descripcioEng, :descripcioIt)";
-      $stmt = $conn->prepare($sql);
-
-      $stmt->bindParam(":nom", $nom, PDO::PARAM_STR);
-      $stmt->bindParam(":cognoms", $cognoms, PDO::PARAM_STR);
-      $stmt->bindParam(":slug", $slug, PDO::PARAM_STR);
-      $stmt->bindParam(":anyNaixement", $anyNaixement, PDO::PARAM_INT);
-      $stmt->bindParam(":anyDefuncio", $anyDefuncio, PDO::PARAM_INT);
-      $stmt->bindParam(":paisAutor", $paisAutor, PDO::PARAM_INT);
-      $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-      $stmt->bindParam(":web", $web, PDO::PARAM_STR);
-      $stmt->bindParam(":ocupacio", $ocupacio, PDO::PARAM_INT);
-      $stmt->bindParam(":dateCreated", $dateCreated, PDO::PARAM_STR);
-      $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
-      $stmt->bindParam(":grup", $grup, PDO::PARAM_INT);
-      $stmt->bindParam(":sexe", $sexe, PDO::PARAM_INT);
-      $stmt->bindParam(":mesNaixement", $mesNaixement, PDO::PARAM_INT);
-      $stmt->bindParam(":diaNaixement", $diaNaixement, PDO::PARAM_INT);
-      $stmt->bindParam(":mesDefuncio", $mesDefuncio, PDO::PARAM_INT);
-      $stmt->bindParam(":diaDefuncio", $diaDefuncio, PDO::PARAM_INT);
-      $stmt->bindParam(":ciutatNaixement", $ciutatNaixement, PDO::PARAM_STR);
-      $stmt->bindParam(":ciutatDefuncio", $ciutatDefuncio, PDO::PARAM_STR);
-      $stmt->bindParam(":descripcio", $descripcio, PDO::PARAM_STR);
-      $stmt->bindParam(":descripcioCast", $descripcioCast, PDO::PARAM_STR);
-      $stmt->bindParam(":descripcioEng", $descripcioEng, PDO::PARAM_STR);
-      $stmt->bindParam(":descripcioIt", $descripcioIt, PDO::PARAM_STR);
-      $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-      if ($stmt->execute()) {
-        $response['status'] = 'success';
-      } else {
-        $response['status'] = 'error';
-        $response['message'] = 'Hubo un problema con la base de datos.';
-      }
-    } catch (PDOException $e) {
-      $response['status'] = 'error';
-      $response['message'] = $e->getMessage();
-    }
-  } else {
-    $response['status'] = 'error';
-    $response['message'] = 'Errores de validación.';
-  }
-
-  header("Content-Type: application/json");
-  echo json_encode($response);
-
-
-  // INSERIR NOU LLIBRE
-} else if (isset($_GET['llibre'])) {
+// INSERIR NOU LLIBRE
+if (isset($_GET['llibre'])) {
 
   // Leer JSON
   $input_data = file_get_contents("php://input");
@@ -173,10 +69,10 @@ if (isset($_GET['autor'])) {
   $editorial_id = requireField($data, 'editorial_id', $errors);  // UUID string
   $sub_tema_id  = requireField($data, 'sub_tema_id', $errors);   // UUID string
   $grup  = requireField($data, 'grup', $errors);   // UUID string
+  $estat_id        = requireField($data, 'estat_id', $errors);   // UUID string
+  $img_id          = optionalField($data, 'img_id');   // UUID string
 
   $lang         = requireField($data, 'lang', $errors);          // int
-  $estat        = requireField($data, 'estat', $errors);         // int
-  $img          = optionalField($data, 'img');                   // int|null
 
   if (!isUuid($tipus_id)) $errors['tipus_id'] = 'invalid_uuid';
   if (!isUuid($editorial_id)) $errors['editorial_id'] = 'invalid_uuid';
@@ -201,15 +97,15 @@ if (isset($_GET['autor'])) {
 
   $sql = "INSERT INTO " . Tables::LLIBRES . " (
               id, titol_original, titol_catala, slug, any,
-              tipus_id, editorial_id, sub_tema_id, estat,
-              lang, img, dateCreated, dateModified, grup
+              tipus_id, editorial_id, sub_tema_id, estat_id,
+              lang, img_id, dateCreated, dateModified, grup
           ) VALUES (
               :id, :titol_original, :titol_catala, :slug, :any,
               UNHEX(REPLACE(:tipus_id, '-', '')),
               UNHEX(REPLACE(:editorial_id, '-', '')),
               UNHEX(REPLACE(:sub_tema_id, '-', '')),
-              UNHEX(REPLACE(:estat, '-', '')),
-              :lang, :img,
+              UNHEX(REPLACE(:estat_id, '-', '')),
+              :lang, :img_id,
               :dateCreated, :dateModified,
               UNHEX(REPLACE(:grup, '-', ''))
           )";
@@ -230,12 +126,12 @@ if (isset($_GET['autor'])) {
     $stmt->bindValue(':sub_tema_id', $sub_tema_id, PDO::PARAM_STR);
 
     $stmt->bindValue(':lang', (int)$lang, PDO::PARAM_INT);
-    $stmt->bindValue(':estat', (int)$estat, PDO::PARAM_INT);
+    $stmt->bindValue(':estat_id', (int)$estat_id, PDO::PARAM_INT);
 
-    if ($img === null || $img === '') {
-      $stmt->bindValue(':img', null, PDO::PARAM_NULL);
+    if ($img_id === null || $img_id === '') {
+      $stmt->bindValue(':img_id', null, PDO::PARAM_NULL);
     } else {
-      $stmt->bindValue(':img', (int)$img, PDO::PARAM_INT);
+      $stmt->bindValue(':img_id', (int)$img_id, PDO::PARAM_INT);
     }
 
     $stmt->bindValue(':dateCreated', $dateCreated, PDO::PARAM_STR);

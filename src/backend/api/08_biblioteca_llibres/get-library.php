@@ -638,14 +638,6 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
 
         $result = $db->getData($query);
 
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (is_string($v)) {
-                // Converteix a UTF-8 vàlid (ignora bytes trencats)
-                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            }
-        });
-
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
             exit; // IMPORTANTE
