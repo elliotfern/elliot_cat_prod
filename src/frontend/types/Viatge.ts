@@ -2,7 +2,7 @@ export interface Viatge {
   slug: string;
   viatge: string;
   descripcio: string;
-  pais_cat: string;
+  pais_ca: string;
   dataInici: string;
   dataFi?: string;
   id: number;

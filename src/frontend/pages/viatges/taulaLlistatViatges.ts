@@ -19,7 +19,7 @@ export async function taulaLlistatViatges() {
       render: (_: unknown, row: Viatge) => `<a href="https://${window.location.host}${gestioUrl}/viatges/fitxa-viatge/${row.slug}">${row.viatge}</a>`,
     },
     { header: 'Descripció', field: 'descripcio' },
-    { header: 'País', field: 'pais_cat' },
+    { header: 'País', field: 'pais_ca' },
     {
       header: 'Data',
       field: 'dataInici',
@@ -43,10 +43,10 @@ export async function taulaLlistatViatges() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/viatges/get/?llistatViatges`,
+    url: `https://${window.location.host}/api/viatges/get/llistatViatges`,
     containerId: 'taulaLlistatViatges',
     columns,
     filterKeys: ['viatge', 'descripcio'],
-    filterByField: 'pais_cat',
+    filterByField: 'pais_ca',
   });
 }
