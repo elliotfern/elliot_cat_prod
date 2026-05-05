@@ -325,7 +325,7 @@ if ($slug === 'totsLlibres') {
             qi(Tables::LLIBRES_AUTORS, $pdo)
         );
 
-        $params = [':id' => $idBin];
+        $params = [':autor_id' => $idBin];
         $result = $db->getData($sql, $params, false);
 
         if (empty($result)) {
@@ -355,56 +355,71 @@ if ($slug === 'totsLlibres') {
     // ruta GET => "/api/biblioteca/get/?llibreSlug=el-por-bien-del-imperio"
 } else if (isset($_GET['llibreSlug'])) {
 
-    $slug = (string) $_GET['llibreSlug'];
+    $slugLlibre = $_GET['llibreSlug'];
+    $slugLlibreBin = Uuid::toBinary($slugLlibre);
 
     try {
-        $db = new Database();
 
-        $query = "SELECT 
-                b.id,
-                b.tipus_id,
-                b.editorial_id,
-                b.sub_tema_id,
-                b.estat_id,
-                b.titol_original,
-                b.titol_catala,
-                b.slug as llibreSlug,
-                b.slug,
-                b.any,
-                b.dateCreated,
-                b.dateModified,
-                b.lang,
-                b.img_id,
-                i.nameImg,
-                i.alt,
-                t.nomTipus,
-                e.editorial,
-                id.idioma_ca,
-                el.estat AS nomEstat,
-                sub_tema.sub_tema,
-                tema.tema,
-                p.id AS autor_id,
-                p.nom AS autor_nom,
-                p.cognoms AS autor_cognoms,
-                p.slug AS autor_slug,
-                c.nom AS nom_grup,
-                c.id AS idGrup
+        $sql = <<<SQL
+                SELECT 
+                    b.id,
+                    b.tipus_id,
+                    b.editorial_id,
+                    b.sub_tema_id,
+                    b.estat_id,
+                    b.titol_original,
+                    b.titol_catala,
+                    b.slug AS llibreSlug,
+                    b.slug,
+                    b.any,
+                    b.dateCreated,
+                    b.dateModified,
+                    b.lang,
+                    b.img_id,
+                    i.nameImg,
+                    i.alt,
+                    t.nomTipus,
+                    e.editorial,
+                    id.idioma_ca,
+                    el.estat AS nomEstat,
+                    sub_tema.sub_tema,
+                    tema.tema,
+                    p.id AS autor_id,
+                    p.nom AS autor_nom,
+                    p.cognoms AS autor_cognoms,
+                    p.slug AS autor_slug,
+                    c.nom AS nom_grup,
+                    c.id AS idGrup
+                FROM %s AS b
+                LEFT JOIN %s AS la ON la.llibre_id = b.id
+                LEFT JOIN %s AS p ON p.id = la.autor_id
+                LEFT JOIN %s AS i ON b.img_id = i.id
+                LEFT JOIN %s AS t ON b.tipus_id = t.id
+                LEFT JOIN %s AS e ON b.editorial_id = e.id
+                LEFT JOIN %s AS el ON b.estat_id = el.id
+                LEFT JOIN %s AS id ON b.lang = id.id
+                LEFT JOIN %s AS sub_tema ON sub_tema.id = b.sub_tema_id
+                LEFT JOIN %s AS tema ON sub_tema.tema_id = tema.id
+                LEFT JOIN %s AS c ON b.grup = c.id
+                WHERE b.slug = :slug
+                SQL;
 
-            FROM " . Tables::LLIBRES . " AS b
-            LEFT JOIN " . Tables::LLIBRES_AUTORS . " AS la ON la.llibre_id = b.id
-            LEFT JOIN " . Tables::PERSONES . " AS p ON p.id = la.autor_id
-            LEFT JOIN " . Tables::IMG . " AS i ON b.img_id = i.id
-            LEFT JOIN " . Tables::LLIBRES_TIPUS . " AS t ON b.tipus_id = t.id
-            LEFT JOIN " . Tables::LLIBRES_EDITORIALS . " AS e ON b.editorial_id = e.id
-            LEFT JOIN " . Tables::LLIBRES_ESTAT . " AS el ON b.estat_id = el.id
-            LEFT JOIN " . Tables::AUX_IDIOMES . " AS id ON b.lang = id.id
-            LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sub_tema ON sub_tema.id =  b.sub_tema_id
-            LEFT JOIN " . Tables::AUX_TEMES . " AS tema ON sub_tema.tema_id = tema.id
-            LEFT JOIN " . Tables::LLIBRES_GRUP . " AS c ON b.grup = c.id
-            WHERE b.slug = :slug";
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES, $pdo),
+            qi(Tables::LLIBRES_AUTORS, $pdo),
+            qi(Tables::PERSONES, $pdo),
+            qi(Tables::IMG, $pdo),
+            qi(Tables::LLIBRES_TIPUS, $pdo),
+            qi(Tables::LLIBRES_EDITORIALS, $pdo),
+            qi(Tables::LLIBRES_ESTAT, $pdo),
+            qi(Tables::AUX_IDIOMES, $pdo),
+            qi(Tables::AUX_SUB_TEMES, $pdo),
+            qi(Tables::AUX_TEMES, $pdo),
+            qi(Tables::LLIBRES_GRUP, $pdo)
+        );
 
-        $params = [':slug' => $slug];
-
+        $params = [':slug' => $slugLlibreBin];
         $rows = $db->getData($query, $params);
 
         if (empty($rows)) {
