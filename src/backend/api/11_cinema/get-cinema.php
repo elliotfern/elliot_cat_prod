@@ -70,12 +70,12 @@ if ($slug === "pelicules") {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, g.genere, tv.producer, c.pais_ca, tv.img, tv.slug, d.slug
+                SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, g.genere, c.pais_ca, tv.slug, d.slug
                 FROM %s AS tv
-                INNER JOIN %s AS d ON tv.director = d.id
-                INNER JOIN %s AS c ON tv.country = c.id
-                INNER JOIN %s AS id ON tv.lang = id.id
-                LEFT JOIN %s AS g ON tv.genre = g.id
+                LEFT JOIN %s AS d ON tv.director_id = d.id
+                LEFT JOIN %s AS c ON tv.pais_id = c.id
+                LEFT JOIN %s AS id ON tv.lang = id.id
+                LEFT JOIN %s AS g ON tv.genere_id = g.id
                 ORDER BY tv.startYear DESC;
             SQL;
 
