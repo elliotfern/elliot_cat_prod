@@ -1,26 +1,29 @@
 <?php
 
-$slug = $routeParams[0];
+use App\Config\Database;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Utils\Tables;
+use App\Utils\AdminMiddleware;
 
-// Obtener el parámetro id de la URL
-$id = isset($_GET['id']) ? $_GET['id'] : null;
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
 
-if ($id) {
-    $id = sanitizeNumeros($id);
+$db = new Database();
+$pdo = $db->getPdo();
+
+// Configuración de cabeceras para aceptar JSON y responder JSON
+header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: GET");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    http_response_code(204);
+    exit;
 }
 
-// Obtener el parámetro slug de la URL
-$param = isset($_GET['slug']) ? $_GET['slug'] : null;
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
-if ($param) {
-    $param = sanitizeSlug($param);
-}
-
-// Definir el dominio permitido
-$allowedOrigin = APP_DOMAIN;
-
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
 
 // Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -29,13 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit();
 }
 
-// Configuración de cabeceras para aceptar JSON y responder JSON
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: $allowedOrigin ");
-header("Access-Control-Allow-Methods: GET");
-
-
-// $result = getData($query, ['id' => $idMunicipio], true);
 
 // GET : llistat de pelicules
 // URL: https://elliot.cat/api/cinema/get/pelicules
@@ -70,13 +66,13 @@ if ($slug === "pelicules") {
     // GET : llistat de sèries tv
     // URL: https://elliot.cat/api/cinema/get/series
 } else if ($slug === "series") {
-    $query = "SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca AS lang, g.genere_ca AS genre, tv.producer, c.pais_cat AS country, tv.img, tv.slug, d.slug AS slugDirector
+    $query = "SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, g.genere, tv.producer, c.pais_ca, tv.img, tv.slug, d.slug AS slugDirector
             FROM 11_db_cinema_series_tv AS tv
             INNER JOIN db_persones AS d ON tv.director = d.id
-            INNER JOIN db_countries AS c ON tv.country = c.id
+            INNER JOIN db_geo_paisos AS c ON tv.country = c.id
             INNER JOIN aux_idiomes AS id ON tv.lang = id.id
             LEFT JOIN 11_aux_cinema_generes AS g ON tv.genre = g.id
-            ORDER BY tv.startYear DESC";
+            ORDER BY tv.startYear DESC;";
 
     $result = getData($query);
     echo json_encode($result);

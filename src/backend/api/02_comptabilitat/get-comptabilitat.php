@@ -4,6 +4,7 @@ use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Utils\AdminMiddleware;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
@@ -36,11 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // ruta => "https://elliot.cat/api/comptabilitat/get/clients"
 if ($slug === 'clients') {
 
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $sql = <<<SQL
             SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, c.ciutat_id, c.provincia_id, c.pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.clientStatus, s.estatNom
@@ -91,12 +88,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/clientId"
 } else if ($slug === 'clientId') {
 
-
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $id = $_GET['id'];
     $sql = <<<SQL
@@ -149,12 +141,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients?emissor_id={id}"
 } else if ($slug === 'facturacioClients') {
 
-
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $emissor_id = isset($_GET['emissor_id']) ? (int) $_GET['emissor_id'] : null;
 
@@ -235,12 +222,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id=1"
 } else if ($slug === 'facturaCompleta') {
 
-
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
     $pdf = isset($_GET['pdf']) ? true : false; // Parámetro opcional
@@ -372,12 +354,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/despeses?receptor_id={id}&tipus_despesa={personal|professional}"
 } else if ($slug === 'despeses') {
 
-
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $receptor_id = isset($_GET['receptor_id']) ? (int) $_GET['receptor_id'] : null;
     $tipus_despesa = isset($_GET['tipus_despesa']) ? $_GET['tipus_despesa'] : null;
@@ -461,12 +438,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/emissors"
 } else if ($slug === 'emissors') {
 
-
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $sql = <<<SQL
         SELECT 
@@ -520,11 +492,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/emissorId?id={id}"
 } else if ($slug === 'emissorId' && isset($_GET['id'])) {
 
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $emissor_id = (int) $_GET['id'];
 
@@ -572,12 +540,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/productes"
 } else if ($slug === 'productes') {
 
-
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $sql = <<<SQL
         SELECT 
@@ -628,12 +591,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/producteId?id={id}"
 } else if ($slug === 'producteId' && isset($_GET['id'])) {
 
-
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $producte_id = (int) $_GET['id'];
 
@@ -680,11 +638,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/proveidors"
 } else if ($slug === 'proveidors') {
 
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $sql = <<<SQL
         SELECT 
@@ -740,11 +694,7 @@ SQL;
     // ruta => https://elliot.cat/api/comptabilitat/get/proveidor?id={id}
 } else if ($slug === 'proveidor') {
 
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $proveidor_id = isset($_GET['id']) ? (int) $_GET['id'] : null;
 
@@ -813,11 +763,7 @@ SQL;
     // ruta => https://elliot.cat/api/comptabilitat/get/despesa?id={id}
 } else if ($slug === 'despesa') {
 
-    if (!isAuthenticatedAdmin()) {
-        http_response_code(403);
-        echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-        exit;
-    }
+    AdminMiddleware::handle();
 
     $despesa_id = isset($_GET['id']) ? (int) $_GET['id'] : null;
 
@@ -895,5 +841,5 @@ SQL;
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
     echo json_encode(['error' => 'Something get wrong']);
-    exit();
+    return;
 }

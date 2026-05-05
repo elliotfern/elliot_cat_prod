@@ -28,6 +28,7 @@ class MissatgesAPI
             'errorBD' => "S'ha produït un error a la base de dades.",
             'errorEndPoint' => "Aquesta operació no és vàlida.",
             'duplicat' => "Ja existeix un valor a la base de dades amb el mateix nom.",
+            'admin' => "Accés no autoritzat (admin requerit)",
         ];
         return $messages[$key] ?? $messages['default'];
     }
