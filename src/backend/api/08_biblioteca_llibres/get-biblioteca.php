@@ -356,7 +356,6 @@ if ($slug === 'totsLlibres') {
 } else if ($slug === 'llibreSlug') {
 
     $slugLlibre = $_GET['llibre'];
-    $slugLlibreBin = Uuid::toBinary($slugLlibre);
 
     try {
 
@@ -419,7 +418,7 @@ if ($slug === 'totsLlibres') {
             qi(Tables::LLIBRES_GRUP, $pdo)
         );
 
-        $params = [':slug' => $slugLlibreBin];
+        $params = [':slug' => $slugLlibre];
         $rows = $db->getData($query, $params);
 
         if (empty($rows)) {
@@ -482,7 +481,6 @@ if ($slug === 'totsLlibres') {
             ];
         }
 
-        header('Content-Type: application/json; charset=utf-8');
         Response::success(MissatgesAPI::success('get'), $result, 200);
         exit;
     } catch (\Throwable $e) {
