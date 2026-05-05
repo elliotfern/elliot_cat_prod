@@ -485,32 +485,6 @@ if ($slug === 'directors') {
 
         $result = $db->getData($query);
 
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (!is_string($v)) return;
-
-            // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
-            $v = str_replace("\0", '', $v);
-
-            // Intentar normalizar a UTF-8 válido
-            // 1) Si ya es UTF-8 válido, lo deja igual
-            if (!mb_check_encoding($v, 'UTF-8')) {
-                // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
-                $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) {
-                    $v = $v2;
-                } else {
-                    // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
-                    $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                    if ($v3 !== false) $v = $v3;
-                }
-            } else {
-                // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
-                $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                if ($v2 !== false) $v = $v2;
-            }
-        });
-
         if (empty($result)) {
             Response::error(
                 MissatgesAPI::error('not_found'),
@@ -533,7 +507,7 @@ if ($slug === 'directors') {
         );
     }
 
-    // GET : llistat ciutats
+    // GET : Ciutat ID informació
     // URL: https://elliot.cat/api/auxiliars/get/ciutatId?id=33
 } else if ($slug === "ciutatId") {
 
@@ -586,7 +560,6 @@ if ($slug === 'directors') {
     // URL: https://elliot.cat/api/auxiliars/get/perfilsCV
 } else if ($slug === "perfilsCV") {
 
-    $db = new Database();
     $query = "SELECT p.id, p.nom_complet
             FROM db_curriculum_perfil AS p
             ORDER BY p.nom_complet ASC";
@@ -621,7 +594,6 @@ if ($slug === 'directors') {
     // URL: https://elliot.cat/api/auxiliars/get/imatgesEmpreses
 } else if ($slug === "imatgesEmpreses") {
 
-    $db = new Database();
     $query = "SELECT 
 	      	i.id, i.nameImg, i.nom
             FROM db_img AS i
@@ -658,7 +630,6 @@ if ($slug === 'directors') {
     // URL: https://elliot.cat/api/auxiliars/get/experiencies
 } else if ($slug === "experiencies") {
 
-    $db = new Database();
     $query = "SELECT e.id, e.empresa
               FROM db_curriculum_experiencia_professional AS e
               ORDER BY e.empresa ASC";
@@ -680,7 +651,6 @@ if ($slug === 'directors') {
     // URL: https://elliot.cat/api/auxiliars/get/educacions
 } else if ($slug === "educacions") {
 
-    $db = new Database();
     $query = "SELECT e.id, CONCAT(institucio, ' · ', data_inici) AS institucio_periode
               FROM db_curriculum_educacio AS e
               ORDER BY e.id ASC";
@@ -702,7 +672,6 @@ if ($slug === 'directors') {
     // URL: https://elliot.cat/api/auxiliars/get/auxiliarImatgesAutor
 } else if ($slug === "auxiliarImatgesAutor") {
 
-    $db = new Database();
     $query = "SELECT 
 	      	i.id, i.nom AS alt
             FROM db_img AS i
