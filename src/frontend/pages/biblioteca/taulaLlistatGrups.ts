@@ -33,7 +33,7 @@ export async function taulaLlistatGrups() {
   }
 
   renderDynamicTable<Llibre>({
-    url: `${API_BASE}/biblioteca/get/?type=grupLlibre`,
+    url: `${API_BASE}/biblioteca/get/grupLlibre`,
     containerId: 'taulaLlistatGrups',
     columns,
     filterKeys: ['nom'],
