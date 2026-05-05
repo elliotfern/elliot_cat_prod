@@ -127,8 +127,8 @@ $routes = [
     ],
 
     // 08. BIBLIOTECA
-    '/api/biblioteca/get' => [
-        'view' => 'src/backend/api/08_biblioteca_llibres/get-library.php',
+    '/api/biblioteca/get/{slug}' => [
+        'view' => 'src/backend/api/08_biblioteca_llibres/get-biblioteca.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,

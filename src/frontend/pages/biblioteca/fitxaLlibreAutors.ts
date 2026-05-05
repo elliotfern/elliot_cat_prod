@@ -262,7 +262,7 @@ export async function initLlibreAutorsPage(llibreSlug: string) {
   try {
     hideAlerts();
 
-    const res = await fetch(`/api/biblioteca/get/?type=llibreAutors&slug=${encodeURIComponent(llibreSlug)}`, {
+    const res = await fetch(`/api/biblioteca/get/llibreAutors&slug=${encodeURIComponent(llibreSlug)}`, {
       headers: { Accept: 'application/json' },
     });
 

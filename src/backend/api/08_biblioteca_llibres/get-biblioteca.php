@@ -7,9 +7,13 @@ use App\Utils\MissatgesAPI;
 use Ramsey\Uuid\Uuid as ramsey;
 use App\Utils\Uuid;
 
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+$db = new Database();
+$pdo = $db->getPdo();
+
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
-
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
@@ -18,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+
 // Check if the request method is GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('HTTP/1.1 405 Method Not Allowed');
@@ -25,67 +30,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit();
 }
 
+// API GET Llistat llibres
+// https://elliot.cat/api/biblioteca/totsLlibres
+if ($slug === 'totsLlibres') {
 
-if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
-
-    // Seleccionar registros que aún no tienen UUID (id NULL o en blanco)
-    $query = "SELECT id, persona_id, grup_id FROM db_persones_grups_relacions";
+    $tipusId = Uuid::toBinary('0197ac5b7106704b96c60728ace151f3');
 
     try {
 
-        // Configuración de PDO
-        $db = new Database();
-
-        $params = [];
-        $result = $db->getData($query, $params, false);
-
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            exit;
-        }
-
-        // Preparar statement de actualización
-        global $conn;
-        // Preparar statement de actualización
-        $updateStmt = $conn->prepare("UPDATE db_persones_grups_relacions
-            SET id = :id
-            WHERE persona_id = :persona_id AND
-            grup_id = :grup_id
-        ");
-
-        foreach ($result as $row) {
-            $uuid = ramsey::uuid7()->getBytes(); // UUIDv7 en binario
-
-            $updateStmt->execute([
-                ':id' => $uuid,
-                ':persona_id' => $row['persona_id'],
-                ':grup_id' => $row['grup_id'],
-            ]);
-        }
-
-        echo "IDs actualizados con éxito.\n";
-    } catch (\Throwable $e) {
-        Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
-        );
-        exit;
-    }
-
-    // 2) Llistat llibres
-    // ruta GET => "https://elliot.cat/api/biblioteca/get/?type?totsLlibres"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'totsLlibres')) {
-    try {
-        $db = new Database();
-
-        // 1) Libros (1 fila por libro)
-        $queryBooks = "SELECT
-           b.id,
+        $sql = <<<SQL
+        SELECT
+            b.id,
             b.titol_original,
             b.titol_catala,
             b.any,
@@ -94,17 +49,27 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
             sg.sub_tema,
             c.nom AS nom_grup,
             c.id AS grup_id
+        FROM %s AS b
+        LEFT JOIN %s AS sg ON b.sub_tema_id = sg.id
+        LEFT JOIN %s AS g ON sg.tema_id = g.id
+        LEFT JOIN %s AS be ON b.editorial_id = be.id
+        LEFT JOIN %s AS c ON b.grup = c.id
+        WHERE b.tipus_id = :tipus_id
+        ORDER BY b.titol_original ASC
+        SQL;
 
-        FROM " . Tables::LLIBRES . " AS b
-        LEFT JOIN " . Tables::AUX_SUB_TEMES . " AS sg ON b.sub_tema_id = sg.id
-        LEFT JOIN " . Tables::AUX_TEMES . " AS g ON sg.tema_id = g.id
-        LEFT JOIN " . Tables::LLIBRES_EDITORIALS . " AS be ON b.editorial_id = be.id
-        LEFT JOIN " . Tables::LLIBRES_GRUP . " AS c ON b.grup = c.id
-        WHERE b.tipus_id = UNHEX('0197ac5b7106704b96c60728ace151f3')
-        ORDER BY b.titol_original ASC";
+        $queryBooks = sprintf(
+            $sql,
+            qi(Tables::LLIBRES, $pdo),
+            qi(Tables::AUX_SUB_TEMES, $pdo),
+            qi(Tables::AUX_TEMES, $pdo),
+            qi(Tables::LLIBRES_EDITORIALS, $pdo),
+            qi(Tables::LLIBRES_GRUP, $pdo)
+        );
 
         // 1) Libros
-        $books = $db->getData($queryBooks);
+        $params = [':tipus_id' => $tipusId];
+        $books = $db->getData($queryBooks, $params);
 
         if (empty($books)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -119,16 +84,22 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
         unset($b);
 
         // 2) Autores (MEJOR QUERY)
-        $queryAuthors = "
+        $sql = <<<SQL
             SELECT
                 la.llibre_id,
                 la.autor_id,
                 a.nom,
                 a.cognoms,
                 a.slug
-            FROM " . Tables::LLIBRES_AUTORS . " la
-            INNER JOIN " . Tables::PERSONES . " a ON a.id = la.autor_id
-        ";
+            FROM %s AS la
+            INNER JOIN %s AS a ON a.id = la.autor_id
+            SQL;
+
+        $queryAuthors = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_AUTORS, $pdo),
+            qi(Tables::PERSONES, $pdo)
+        );
 
         // ejecutar
         $authors = $db->getData($queryAuthors);
@@ -176,73 +147,66 @@ if ((isset($_GET['type']) && $_GET['type'] == 'convertirId')) {
     }
 
     // 2) Llistat llibre Autors
-    // ruta GET => "https://elliot.cat/api/biblioteca/get/?type?llibreAutors"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'llibreAutors')) {
+    // ruta GET => "https://elliot.cat/api/biblioteca/get/llibreAutors"
+} else if ($slug === 'llibreAutors') {
 
-    header('Content-Type: application/json; charset=utf-8');
+    $autorSlug = trim((string)($_GET['slug'] ?? ''));
 
-    $slug = trim((string)($_GET['slug'] ?? ''));
     if ($slug === '') {
         Response::error(MissatgesAPI::error('bad_request'), ['slug' => 'required'], 400);
         exit;
     }
 
-    $sanitize = function (&$data): void {
-        if (!is_array($data)) return;
-        array_walk_recursive($data, function (&$v) {
-            if (!is_string($v)) return;
-            $v = str_replace("\0", '', $v);
-            $v = @iconv('UTF-8', 'UTF-8//IGNORE', $v) ?: $v;
-        });
-    };
-
     try {
-        $db = new Database();
 
-        $qBook = "
-            SELECT
-                LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(b.id), 1, 8),
-                    SUBSTR(HEX(b.id), 9, 4),
-                    SUBSTR(HEX(b.id), 13, 4),
-                    SUBSTR(HEX(b.id), 17, 4),
-                    SUBSTR(HEX(b.id), 21)
-                )) AS id,
-                b.slug,
-                b.titol_original
-            FROM " . Tables::LLIBRES . " AS b
-            WHERE b.slug = :slug
-            LIMIT 1
-        ";
+        $qBook = <<<SQL
+                SELECT
+                    b.id,
+                    b.slug,
+                    b.titol_original
+                FROM %s AS b
+                WHERE b.slug = :slug
+                LIMIT 1
+                SQL;
 
-        $book = $db->getOne($qBook, [':slug' => $slug]);
+        $query = sprintf(
+            $qBook,
+            qi(Tables::LLIBRES, $pdo),
+        );
+
+        // ejecutar
+        // 1) Libros
+        $params = [':slug' => $autorSlug];
+        $book = $db->getData($query, $params);
 
         if (!$book) {
             Response::error(MissatgesAPI::error('not_found'), ['slug' => $slug], 404);
             exit;
         }
-        $sanitize($book);
 
-        $qAuthors = "SELECT
-                la.id AS rel_id,
-                LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(a.id), 1, 8),
-                    SUBSTR(HEX(a.id), 9, 4),
-                    SUBSTR(HEX(a.id), 13, 4),
-                    SUBSTR(HEX(a.id), 17, 4),
-                    SUBSTR(HEX(a.id), 21)
-                )) AS id,
-                a.nom,
-                a.cognoms,
-                a.slug
-            FROM " . Tables::LLIBRES_AUTORS . " AS la
-            INNER JOIN " . Tables::LLIBRES . " AS b ON b.id = la.llibre_id
-            INNER JOIN " . Tables::PERSONES . " AS a ON a.id = la.autor_id
-            WHERE b.slug = :slug
-            ORDER BY a.cognoms ASC, a.nom ASC";
+        $qAuthors = <<<SQL
+                        SELECT
+                        la.id AS rel_id,
+                        a.id AS id,
+                        a.nom,
+                        a.cognoms,
+                        a.slug
+                        FROM %s AS la
+                        INNER JOIN %s  AS b ON b.id = la.llibre_id
+                        INNER JOIN %s  AS a ON a.id = la.autor_id
+                        WHERE b.slug = :slug
+                        ORDER BY a.cognoms ASC, a.nom ASC
+                SQL;
 
-        $authors = $db->getAll($qAuthors, [':slug' => $slug]);
-        $sanitize($authors);
+        $query = sprintf(
+            $qAuthors,
+            qi(Tables::LLIBRES_AUTORS, $pdo),
+            qi(Tables::LLIBRES, $pdo),
+            qi(Tables::PERSONES, $pdo),
+        );
+
+        $params = [':slug' => $autorSlug];
+        $authors = $db->getData($query, $params);
 
         Response::success(
             MissatgesAPI::success('get'),

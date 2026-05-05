@@ -75,7 +75,7 @@ export async function taulaLlistatLlibres() {
   }
 
   renderDynamicTable<Llibre>({
-    url: `${API_BASE}/biblioteca/get/?type=totsLlibres`,
+    url: `${API_BASE}/biblioteca/get/totsLlibres`,
     containerId: 'taulaLlistatLlibres',
     columns,
     filterKeys: ['titol_original'],
