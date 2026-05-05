@@ -65,7 +65,7 @@ export async function biblioteca() {
     taulaLlistatGrups();
   } else if (pageType[2] === 'fitxa-llibre') {
     const slug = pageType[3];
-    fetchApiDataLlibre(`/api/biblioteca/get/?llibreSlug=${slug}`);
+    fetchApiDataLlibre(`/api/biblioteca/get/llibreSlug?llibre=${slug}`);
   } else if (pageType[2] === 'fitxa-llibre-autors') {
     const slug = pageType[3];
     initLlibreAutorsPage(slug);

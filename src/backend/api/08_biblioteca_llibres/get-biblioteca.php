@@ -352,10 +352,10 @@ if ($slug === 'totsLlibres') {
     }
 
     // 6) Book page
-    // ruta GET => "/api/biblioteca/get/?llibreSlug=el-por-bien-del-imperio"
-} else if (isset($_GET['llibreSlug'])) {
+    // ruta GET => "/api/biblioteca/get/llibreSlug?llibre=el-por-bien-del-imperio"
+} else if ($slug === 'llibreSlug') {
 
-    $slugLlibre = $_GET['llibreSlug'];
+    $slugLlibre = $_GET['llibre'];
     $slugLlibreBin = Uuid::toBinary($slugLlibre);
 
     try {
