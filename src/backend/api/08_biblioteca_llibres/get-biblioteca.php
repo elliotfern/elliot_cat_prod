@@ -233,48 +233,61 @@ if ($slug === 'totsLlibres') {
 
     // 3) Llistat autors
     // ruta GET => "https://elliot.cat/api/biblioteca/get/totsAutors"
-} else if (isset($_GET['type']) && in_array($_GET['type'], ['totsAutors', 'autors'], true)) {
+} else if ($slug === 'totsAutors') {
 
     try {
-        $db = new Database();
-        $autorGroupUuid = '0197b088-1a25-72c4-8b5b-d7e2ee27de7c';
+        $autorGroupUuidBin = Uuid::toBinary('0197b088-1a25-72c4-8b5b-d7e2ee27de7c');
 
-        $query =
-            "SELECT 
-            a.id,
-            c.id AS idCountry,
-            a.nom, a.cognoms, TRIM(CONCAT_WS(' ', a.nom, a.cognoms)) AS autor_nom_complet, a.slug, a.any_naixement, a.any_defuncio, c.pais_ca, i.nameImg,
-        GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup
-        FROM " . Tables::PERSONES . " AS a
-        LEFT JOIN " . Tables::GEO_PAISOS . " AS c ON a.pais_autor_id = c.id
-        LEFT JOIN " . Tables::IMG . " AS i ON a.img_id = i.id
-        LEFT JOIN " . Tables::PERSONES_GRUPS_RELACIONS . " AS rel ON a.id = rel.persona_id
-        LEFT JOIN " . Tables::PERSONES_GRUPS . " AS g ON rel.grup_id = g.id
-        WHERE EXISTS (
-            SELECT 1
-            FROM " . Tables::PERSONES_GRUPS_RELACIONS . " r2
-            WHERE r2.persona_id = a.id
-            AND r2.grup_id = UNHEX(REPLACE(:autor_grup_uuid, '-', ''))
-        )
-        GROUP BY a.id
-        ORDER BY a.cognoms";
+        $query = <<<SQL
+            SELECT 
+                a.id,
+                c.id AS idCountry,
+                a.nom,
+                a.cognoms,
+                TRIM(CONCAT_WS(' ', a.nom, a.cognoms)) AS autor_nom_complet,
+                a.slug,
+                a.any_naixement,
+                a.any_defuncio,
+                c.pais_ca,
+                i.nameImg,
+                GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup
+            FROM %s AS a
+            LEFT JOIN %s AS c ON a.pais_autor_id = c.id
+            LEFT JOIN %s AS i ON a.img_id = i.id
+            LEFT JOIN %s AS rel ON a.id = rel.persona_id
+            LEFT JOIN %s AS g ON rel.grup_id = g.id
+            WHERE EXISTS (
+                SELECT 1
+                FROM %s r2
+                WHERE r2.persona_id = a.id
+                AND r2.grup_id = :autor_grup_id
+            )
+            GROUP BY a.id
+            ORDER BY a.cognoms
+        SQL;
 
-        $params = [':autor_grup_uuid' => $autorGroupUuid];
+        $sql = sprintf(
+            $query,
+            qi(Tables::PERSONES, $pdo),
+            qi(Tables::GEO_PAISOS, $pdo),
+            qi(Tables::IMG, $pdo),
+            qi(Tables::PERSONES_GRUPS_RELACIONS, $pdo),
+            qi(Tables::PERSONES_GRUPS, $pdo),
+            qi(Tables::PERSONES_GRUPS_RELACIONS, $pdo)
+        );
 
+        $params = [':autor_grup_uuid' => $autorGroupUuidBin];
         $result = $db->getData($query, $params);
 
         if (empty($result)) {
-            header('Content-Type: application/json; charset=utf-8');
             Response::error(MissatgesAPI::error('not_found'), [], 404);
             exit;
         }
 
-        header('Content-Type: application/json; charset=utf-8');
         Response::success(MissatgesAPI::success('get'), $result, 200);
         exit;
     } catch (\Throwable $e) {
         http_response_code(500);
-        header('Content-Type: application/json; charset=utf-8');
         json_encode([
             'error' => 'Internal error',
             'message' => $e->getMessage(),
@@ -285,22 +298,35 @@ if ($slug === 'totsLlibres') {
     }
 
     // 4) Authors page > list of books
-    // ruta GET => "https://control.elliotfern/api/library/authors/books/9"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'autorLlibres') && (isset($_GET['id']))) {
-    $db = new Database();
+    // ruta GET => "https://elliot.cat/api/biblioteca/get/autorLlibres?id=998889"
+} else if ($slug === 'autorLlibres') {
 
     // Quitar guiones del UUID
-    $id = str_replace('-', '', $_GET['id']);
-
-    $query = "SELECT b.any, b.titol_original AS titol, b.titol_catala, b.slug
-                FROM db_llibres AS b
-                LEFT JOIN db_llibres_autors AS la ON b.id = la.llibre_id
-                WHERE la.autor_id = UNHEX(:id)
-                ORDER BY b.any ASC";
+    $id = $_GET['id'];
+    $idBin = Uuid::toBinary($id);
 
     try {
-        $params = [':id' => $id];
-        $result = $db->getData($query, $params, false);
+
+        $query = <<<SQL
+                    SELECT 
+                        b.any,
+                        b.titol_original AS titol,
+                        b.titol_catala,
+                        b.slug
+                    FROM %s AS b
+                    LEFT JOIN %s AS la ON b.id = la.llibre_id
+                    WHERE la.autor_id = :autor_id
+                    ORDER BY b.any ASC
+                    SQL;
+
+        $sql = sprintf(
+            $query,
+            qi(Tables::LLIBRES, $pdo),
+            qi(Tables::LLIBRES_AUTORS, $pdo)
+        );
+
+        $params = [':id' => $idBin];
+        $result = $db->getData($sql, $params, false);
 
         if (empty($result)) {
             Response::error(
@@ -324,7 +350,6 @@ if ($slug === 'totsLlibres') {
         );
         exit;
     }
-
 
     // 6) Book page
     // ruta GET => "/api/biblioteca/get/?llibreSlug=el-por-bien-del-imperio"
