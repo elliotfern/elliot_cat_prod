@@ -66,16 +66,53 @@ if ($slug === "pelicules") {
     // GET : llistat de sèries tv
     // URL: https://elliot.cat/api/cinema/get/series
 } else if ($slug === "series") {
-    $query = "SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, g.genere, tv.producer, c.pais_ca, tv.img, tv.slug, d.slug AS slugDirector
-            FROM 11_db_cinema_series_tv AS tv
-            INNER JOIN db_persones AS d ON tv.director = d.id
-            INNER JOIN db_geo_paisos AS c ON tv.country = c.id
-            INNER JOIN aux_idiomes AS id ON tv.lang = id.id
-            LEFT JOIN 11_aux_cinema_generes AS g ON tv.genre = g.id
-            ORDER BY tv.startYear DESC;";
 
-    $result = getData($query);
-    echo json_encode($result);
+    AdminMiddleware::handle();
+
+    $sql = <<<SQL
+                SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, g.genere, tv.producer, c.pais_ca, tv.img, tv.slug, d.slug
+                FROM %s AS tv
+                INNER JOIN %s AS d ON tv.director = d.id
+                INNER JOIN %s AS c ON tv.country = c.id
+                INNER JOIN %s AS id ON tv.lang = id.id
+                LEFT JOIN %s AS g ON tv.genre = g.id
+                ORDER BY tv.startYear DESC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_SERIES_TV, $pdo),
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo),
+        qi(Tables::CINEMA_GENERES, $pdo)
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // GET : fitxa sèrie tv
     // URL: https://elliot.cat/api/cinema/get/serie?slug=benvinguts-a-la-familia
