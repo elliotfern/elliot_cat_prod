@@ -117,7 +117,7 @@ $slug = $routeParams[0] ?? '';
         const slug = document.getElementById('llibre_slug')?.value || '';
         if (!slug) return;
 
-        const res = await fetch(`/api/biblioteca/get/?llibreSlug=${encodeURIComponent(slug)}`, {
+        const res = await fetch(`/api/biblioteca/get/llibreSlug?llibre=${encodeURIComponent(slug)}`, {
             headers: {
                 'Accept': 'application/json'
             }

@@ -496,28 +496,27 @@ if ($slug === 'totsLlibres') {
     }
 
     // 10) image author
-    // ruta GET => "/api/biblioteca/?type=auxiliarImatgesAutor"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'auxiliarImatgesAutor')) {
+    // ruta GET => "/api/biblioteca/get/auxiliarImatgesAutor"
+} else if ($slug == 'auxiliarImatgesAutor') {
 
     try {
+        $sql = <<<SQL
+                    SELECT 
+                        i.id,
+                        CONCAT(i.nom, ' (', t.name, ')') AS alt
+                    FROM %s AS i
+                    LEFT JOIN %s AS t ON i.typeImg = t.id
+                    WHERE i.typeImg IN (1, 5, 9, 14)
+                    ORDER BY i.nom
+                    SQL;
 
-        $db = new Database();
-
-        $query = "SELECT i.id, CONCAT(i.nom, ' (', t.name, ')') AS alt
-            FROM db_img AS i
-            LEFT JOIN db_img_type AS t ON i.typeImg = t.id
-            WHERE i.typeImg IN (1, 5, 9, 14)
-            ORDER BY i.nom";
+        $query = sprintf(
+            $sql,
+            qi(Tables::DB_IMATGES, $pdo),
+            qi(Tables::DB_IMATGES_TIPUS, $pdo)
+        );
 
         $result = $db->getData($query);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (is_string($v)) {
-                // Converteix a UTF-8 vàlid (ignora bytes trencats)
-                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            }
-        });
 
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -537,32 +536,25 @@ if ($slug === 'totsLlibres') {
     }
 
     // 10) ruta estat del llibre
-    // ruta GET => "/api/biblioteca/auxiliars/?estatLlibre"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'estatLlibre')) {
+    // ruta GET => "/api/biblioteca/get/estatLlibre"
+} else if ($slug === 'estatLlibre') {
 
     try {
-        $db = new Database();
 
-        $query = "SELECT 
-           LOWER(CONCAT_WS('-', 
-                SUBSTR(HEX(e.id), 1, 8),
-                SUBSTR(HEX(e.id), 9, 4),
-                SUBSTR(HEX(e.id), 13, 4),
-                SUBSTR(HEX(e.id), 17, 4),
-                SUBSTR(HEX(e.id), 21) )) AS id,
+        $sql = <<<SQL
+        SELECT 
+            e.id,
             e.estat
-            FROM " . Tables::LLIBRES_ESTAT . " AS e
-            ORDER BY e.estat";
+        FROM %s AS e
+        ORDER BY e.estat
+        SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_ESTAT, $pdo)
+        );
 
         $result = $db->getData($query);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (is_string($v)) {
-                // Converteix a UTF-8 vàlid (ignora bytes trencats)
-                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            }
-        });
 
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -582,32 +574,25 @@ if ($slug === 'totsLlibres') {
     }
 
     // 10) ruta grup llibre
-    // ruta GET => "/api/biblioteca/auxiliars/?grupLlibre"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'grupLlibre')) {
+    // ruta GET => "/api/biblioteca/get/grupLlibre"
+} else if ($slug === 'grupLlibre') {
 
     try {
-        $db = new Database();
 
-        $query = "SELECT 
-           LOWER(CONCAT_WS('-', 
-                SUBSTR(HEX(e.id), 1, 8),
-                SUBSTR(HEX(e.id), 9, 4),
-                SUBSTR(HEX(e.id), 13, 4),
-                SUBSTR(HEX(e.id), 17, 4),
-                SUBSTR(HEX(e.id), 21) )) AS id,
-            e.nom
-            FROM " . Tables::LLIBRES_GRUP . " AS e
-            ORDER BY e.nom";
+        $sql = <<<SQL
+                SELECT 
+                    e.id,
+                    e.nom
+                FROM %s AS e
+                ORDER BY e.nom
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_GRUP, $pdo)
+        );
 
         $result = $db->getData($query);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (is_string($v)) {
-                // Converteix a UTF-8 vàlid (ignora bytes trencats)
-                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            }
-        });
 
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -627,16 +612,22 @@ if ($slug === 'totsLlibres') {
     }
 
     // 11) Llibre imatge
-    // ruta GET => "/api/biblioteca/auxiliars/?type=imatgesLlibres"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'imatgesLlibres')) {
+    // ruta GET => "/api/biblioteca/get/imatgesLlibres"
+} else if ($slug === 'imatgesLlibres') {
 
     try {
-        $db = new Database();
 
-        $query = "SELECT i.id, i.alt
-                FROM db_img AS i
+        $sql = <<<SQL
+                SELECT i.id, i.alt
+                FROM %s AS i
                 WHERE i.typeImg = 2
-                ORDER BY i.alt ASC";
+                ORDER BY i.alt ASC
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::DB_IMATGES, $pdo)
+        );
 
         $result = $db->getData($query);
 
@@ -658,32 +649,23 @@ if ($slug === 'totsLlibres') {
     }
 
     // 11) Editorials
-    // ruta GET => "/api/biblioteca/auxiliars/?type=editorials"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'editorials')) {
+    // ruta GET => "/api/biblioteca/get/editorials"
+} else if ($slug === 'editorials') {
 
     try {
-        $db = new Database();
 
-        $query =
-            "SELECT LOWER(CONCAT_WS('-',
-                SUBSTR(HEX(e.id), 1, 8),
-                SUBSTR(HEX(e.id), 9, 4),
-                SUBSTR(HEX(e.id), 13, 4),
-                SUBSTR(HEX(e.id), 17, 4),
-                SUBSTR(HEX(e.id), 21)
-                )) AS id, e.editorial
-                FROM " . Tables::LLIBRES_EDITORIALS . " AS e
-                ORDER BY e.editorial ASC";
+        $sql = <<<SQL
+                SELECT e.id AS id, e.editorial
+                FROM %s AS e
+                ORDER BY e.editorial ASC
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_EDITORIALS, $pdo)
+        );
 
         $result = $db->getData($query);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (is_string($v)) {
-                // Converteix a UTF-8 vàlid (ignora bytes trencats)
-                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            }
-        });
 
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -703,25 +685,22 @@ if ($slug === 'totsLlibres') {
     }
 
     // 11) Gèneres
-    // ruta GET => "/api/biblioteca/auxiliars/?type=llengues"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'llengues')) {
+    // ruta GET => "/api/biblioteca/get/llengues"
+} else if ($slug === 'llengues') {
 
     try {
-        $db = new Database();
+        $sql = <<<SQL
+                SELECT l.id, l.idioma_ca 
+                FROM %s AS l
+                ORDER BY l.idioma_ca ASC
+                SQL;
 
-        $query =  "SELECT l.id, l.idioma_ca 
-                    FROM " . Tables::AUX_IDIOMES . " AS l
-                    ORDER BY l.idioma_ca ASC";
+        $query = sprintf(
+            $sql,
+            qi(Tables::AUX_IDIOMES, $pdo)
+        );
 
         $result = $db->getData($query);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (is_string($v)) {
-                // Converteix a UTF-8 vàlid (ignora bytes trencats)
-                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            }
-        });
 
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -741,31 +720,23 @@ if ($slug === 'totsLlibres') {
     }
 
     // 11) Gèneres
-    // ruta GET => "/api/biblioteca/auxiliars/?type=tipus"
-} else if ((isset($_GET['type']) && $_GET['type'] == 'tipus')) {
+    // ruta GET => "/api/biblioteca/get/tipus"
+} else if ($slug === 'tipus') {
 
     try {
-        $db = new Database();
 
-        $query = "SELECT LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(t.id), 1, 8),
-                    SUBSTR(HEX(t.id), 9, 4),
-                    SUBSTR(HEX(t.id), 13, 4),
-                    SUBSTR(HEX(t.id), 17, 4),
-                    SUBSTR(HEX(t.id), 21)
-                    )) AS id, t.nomTipus
-                    FROM " . Tables::LLIBRES_TIPUS . " AS t
-                    ORDER BY t.nomTipus ASC";
+        $sql = <<<SQL
+                SELECT t.id AS id, t.nomTipus
+                FROM %s AS t
+                ORDER BY t.nomTipus ASC
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_TIPUS, $pdo)
+        );
 
         $result = $db->getData($query);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (is_string($v)) {
-                // Converteix a UTF-8 vàlid (ignora bytes trencats)
-                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            }
-        });
 
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -786,33 +757,27 @@ if ($slug === 'totsLlibres') {
 
 
     // 11) genere llibre
-    // ruta GET => "/api/biblioteca/auxiliars/?type=temes"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'temes')) {
+    // ruta GET => "/api/biblioteca/get/temes"
+} else if ($slug === 'temes') {
 
     try {
-        $db = new Database();
 
-        $query = "SELECT 
-                LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(t.id), 1, 8),
-                    SUBSTR(HEX(t.id), 9, 4),
-                    SUBSTR(HEX(t.id), 13, 4),
-                    SUBSTR(HEX(t.id), 17, 4),
-                    SUBSTR(HEX(t.id), 21) )) AS id,
+        $sql = <<<SQL
+                    SELECT 
+                    t.id AS id,
                     TRIM(CONCAT_WS(' - ', te.tema, t.sub_tema)) AS tema_complet
-                    FROM " . Tables::AUX_SUB_TEMES . " AS t
-                    LEFT JOIN " . Tables::AUX_TEMES . " AS te ON t.tema_id = te.id
-                    ORDER BY te.tema ASC";
+                    FROM %s AS t
+                    LEFT JOIN %s AS te ON t.tema_id = te.id
+                    ORDER BY te.tema ASC
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::AUX_SUB_TEMES, $pdo),
+            qi(Tables::AUX_TEMES, $pdo)
+        );
 
         $result = $db->getData($query);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (is_string($v)) {
-                // Converteix a UTF-8 vàlid (ignora bytes trencats)
-                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            }
-        });
 
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -832,33 +797,23 @@ if ($slug === 'totsLlibres') {
     }
 
     // 12) classificació grup persona
-    // ruta GET => "/api/biblioteca/auxiliars/?type=grup"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'grup')) {
+    // ruta GET => "/api/biblioteca/get/grup"
+} else if ($slug === 'grup') {
 
     try {
-        $db = new Database();
 
-        $query = "SELECT 
-                LOWER(CONCAT_WS('-',
-                    SUBSTR(HEX(id), 1, 8),
-                    SUBSTR(HEX(id), 9, 4),
-                    SUBSTR(HEX(id), 13, 4),
-                    SUBSTR(HEX(id), 17, 4),
-                    SUBSTR(HEX(id), 21)
-                )) AS id,
-                grup_ca
-              FROM " . Tables::PERSONES_GRUPS . "
-              ORDER BY grup_ca ASC";
+        $sql = <<<SQL
+                SELECT g.id, g.grup_ca
+                FROM %s AS g
+                ORDER BY g.grup_ca ASC
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::PERSONES_GRUPS, $pdo),
+        );
 
         $result = $db->getData($query);
-
-        // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-        array_walk_recursive($result, function (&$v) {
-            if (is_string($v)) {
-                // Converteix a UTF-8 vàlid (ignora bytes trencats)
-                $v = iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            }
-        });
 
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -878,12 +833,40 @@ if ($slug === 'totsLlibres') {
     }
 
     // 11) sexe
-    // ruta GET => "/api/biblioteca/auxiliars/?type=sexe"
-} elseif ((isset($_GET['type']) && $_GET['type'] == 'sexe')) {
+    // ruta GET => "/api/biblioteca/get/sexe"
+} else if ($slug === 'sexe') {
 
-    $query = "SELECT s.id, s.genereCa
-                    FROM aux_persones_genere AS s
-                    ORDER BY s.genereCa ASC";
+    try {
+
+        $sql = <<<SQL
+                    SELECT s.id, s.genereCa
+                    FROM %s AS s
+                    ORDER BY s.genereCa ASC
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::DB_PERSONES_GENERES, $pdo),
+        );
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

@@ -96,6 +96,7 @@ class Tables
     public const DB_PERSONES = 'db_persones';
     public const DB_PERSONES_GRUPS = 'db_persones_grups';
     public const DB_PERSONES_GRUPS_RELACIONS = 'db_persones_grups_relacions';
+    public const DB_PERSONES_GENERES = 'aux_persones_genere';
 
     // VIATGES
     public const DB_VIATGES = 'db_viatges_llistat';

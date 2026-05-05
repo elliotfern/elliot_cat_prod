@@ -22,13 +22,13 @@ if ($modificaBtn === 1) {
 ?>
   <script type="module">
     // Llenar selects con opciones
-    selectOmplirDades("/api/biblioteca/get/?type=imatgesLlibres", "", "img_id", "alt");
-    selectOmplirDades("/api/biblioteca/get/?type=temes", "", "sub_tema_id", "tema_complet");
-    selectOmplirDades("/api/biblioteca/get/?type=llengues", "", "lang", "idioma_ca");
-    selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", "", "estat_id", "estat");
-    selectOmplirDades("/api/biblioteca/get/?type=editorials", "", "editorial_id", "editorial");
-    selectOmplirDades("/api/biblioteca/get/?type=tipus", "", "tipus_id", "nomTipus");
-    selectOmplirDades("/api/biblioteca/get/?type=grupLlibre", "", "grup", "nom");
+    selectOmplirDades("/api/biblioteca/get/imatgesLlibres", "", "img_id", "alt");
+    selectOmplirDades("/api/biblioteca/get/temes", "", "sub_tema_id", "tema_complet");
+    selectOmplirDades("/api/biblioteca/get/llengues", "", "lang", "idioma_ca");
+    selectOmplirDades("/api/biblioteca/get/estatLlibre", "", "estat_id", "estat");
+    selectOmplirDades("/api/biblioteca/get/editorials", "", "editorial_id", "editorial");
+    selectOmplirDades("/api/biblioteca/get/tipus", "", "tipus_id", "nomTipus");
+    selectOmplirDades("/api/biblioteca/get/grupLlibre", "", "grup", "nom");
   </script>
 <?php
 }
@@ -159,7 +159,7 @@ if ($modificaBtn === 1) {
 
 <script>
   function formUpdateLlibre(slug) {
-    const urlAjax = "/api/biblioteca/get/?llibreSlug=" + encodeURIComponent(slug);
+    const urlAjax = "/api/biblioteca/get/llibreSlug?llibre=" + encodeURIComponent(slug);
 
     fetch(urlAjax, {
         method: "GET"
@@ -192,13 +192,13 @@ if ($modificaBtn === 1) {
         // SELECTS (nombres según db_llibres)
         // OJO: según tu respuesta actual, editorial_id / tipus_id / sub_tema_id vienen como UUID string
         // y lang/img/estat como int.
-        selectOmplirDades("/api/biblioteca/get/?type=imatgesLlibres", data.img_id, "img_id", "alt");
-        selectOmplirDades("/api/biblioteca/get/?type=editorials", data.editorial_id, "editorial_id", "editorial");
-        selectOmplirDades("/api/biblioteca/get/?type=temes", data.sub_tema_id, "sub_tema_id", "tema_complet");
-        selectOmplirDades("/api/biblioteca/get/?type=llengues", data.lang, "lang", "idioma_ca");
-        selectOmplirDades("/api/biblioteca/get/?type=tipus", data.tipus_id, "tipus_id", "nomTipus");
-        selectOmplirDades("/api/biblioteca/get/?type=estatLlibre", data.estat_id, "estat_id", "estat");
-        selectOmplirDades("/api/biblioteca/get/?type=grupLlibre", data.idGrup, "grup", "nom");
+        selectOmplirDades("/api/biblioteca/get/imatgesLlibres", data.img_id, "img_id", "alt");
+        selectOmplirDades("/api/biblioteca/get/editorials", data.editorial_id, "editorial_id", "editorial");
+        selectOmplirDades("/api/biblioteca/get/temes", data.sub_tema_id, "sub_tema_id", "tema_complet");
+        selectOmplirDades("/api/biblioteca/get/llengues", data.lang, "lang", "idioma_ca");
+        selectOmplirDades("/api/biblioteca/get/tipus", data.tipus_id, "tipus_id", "nomTipus");
+        selectOmplirDades("/api/biblioteca/get/estatLlibre", data.estat_id, "estat_id", "estat");
+        selectOmplirDades("/api/biblioteca/get/grupLlibre", data.idGrup, "grup", "nom");
       })
       .catch(err => console.error("Error al obtener los datos:", err));
   }
