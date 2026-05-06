@@ -38,10 +38,21 @@ export function renderFitxaInformacio(data: EspaiData): HTMLElement {
     .join('');
 
   // HTML principal de la fitxa
+  const hasImage = typeof data.nameImg === 'string' && data.nameImg.trim() !== '';
+
   wrapper.innerHTML = `
     <div class='columna imatge'>
-      <img src='https://media.elliot.cat/img/${data.tipusImatge}/${data.nameImg}.jpg' class='img-thumbnail' alt='Imatge' title='Imatge'>
-      <p><span style="font-size:12px">${data.alt}</span></p>
+      ${
+        hasImage
+          ? `
+            <img src='https://media.elliot.cat/img/${data.tipusImatge}/${data.nameImg}.jpg'
+                class='img-thumbnail'
+                alt='Imatge'
+                title='Imatge'>
+            <p><span style="font-size:12px">${data.alt ?? ''}</span></p>
+          `
+          : ''
+      }
     </div>
 
     <div class="columna">

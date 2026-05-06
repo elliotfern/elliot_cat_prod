@@ -7,7 +7,7 @@
 
      <div id="modificaBoto"></div>
 
-     <div class="dadesFitxa" id="dadesFitxa" style="background-color: #D4D4D4;padding:15px; border-radius:10px;width:fit-content;"></div>
+     <div class="dadesFitxa" id="dadesFitxa" style="margin-top:20px;margin-bottom:25px;background-color: #D4D4D4;padding:15px; border-radius:10px;width:fit-content;"></div>
 
      <div id="dadesContainer"></div>
 
