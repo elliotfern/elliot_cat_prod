@@ -39,6 +39,44 @@ if ($slug === 'espai') {
         exit;
     }
 
+    function parseCoordinate($value): ?float
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        // Normalizar coma decimal europea
+        $value = str_replace(',', '.', trim($value));
+
+        // Si ya es decimal válido → devolver directamente
+        if (is_numeric($value)) {
+            return (float)$value;
+        }
+
+        // Normalizar símbolos DMS
+        $value = str_replace(["′", "’"], "'", $value);
+        $value = str_replace(["″", '"'], '"', $value);
+
+        // Regex DMS
+        if (preg_match('/(\d+)[^\d]+(\d+)[^\d]+([\d\.]+)[^\d]*([NSEW])/i', $value, $m)) {
+
+            $deg = (float)$m[1];
+            $min = (float)$m[2];
+            $sec = (float)$m[3];
+            $dir = strtoupper($m[4]);
+
+            $decimal = $deg + ($min / 60) + ($sec / 3600);
+
+            if ($dir === 'S' || $dir === 'W') {
+                $decimal *= -1;
+            }
+
+            return $decimal;
+        }
+
+        throw new InvalidArgumentException("Formato de coordenada inválido: " . $value);
+    }
+
     // Helpers
     function requireField(array $data, string $key, array &$errors)
     {
@@ -70,8 +108,6 @@ if ($slug === 'espai') {
     $ciutat_id = requireField($data, 'ciutat_id', $errors); // UUID
     $img_id    = optionalField($data, 'img_id'); // UUID
 
-    $lat = optionalField($data, 'coordinades_latitud');
-    $lon = optionalField($data, 'coordinades_longitud');
 
     if (!is_numeric($tipus_id)) {
         $errors['tipus_id'] = 'invalid_int';
@@ -83,6 +119,31 @@ if ($slug === 'espai') {
 
     if ($img_id && !isUuid($img_id)) {
         $errors['img_id'] = 'invalid_uuid';
+    }
+
+    try {
+        $lat = isset($data['coordinades_latitud'])
+            ? parseCoordinate($data['coordinades_latitud'])
+            : null;
+
+        $lon = isset($data['coordinades_longitud'])
+            ? parseCoordinate($data['coordinades_longitud'])
+            : null;
+    } catch (\Throwable $e) {
+        Response::error(
+            MissatgesAPI::error('invalid_data'),
+            ['coordenades' => 'invalid_format'],
+            400
+        );
+        exit;
+    }
+
+    if ($lat !== null && ($lat < -90 || $lat > 90)) {
+        $errors['coordinades_latitud'] = 'out_of_range';
+    }
+
+    if ($lon !== null && ($lon < -180 || $lon > 180)) {
+        $errors['coordinades_longitud'] = 'out_of_range';
     }
 
     if (!empty($errors)) {
