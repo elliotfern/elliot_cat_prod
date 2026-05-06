@@ -13,7 +13,7 @@ export async function fitxaViatge() {
 
   const response = await fetch(`https://${window.location.host}/api/viatges/get/fitxaViatgeDetalls?viatge=${slug}`);
   const json = await response.json();
-  const result = json.data[0]; // 👈 aquí está la clave
+  const result = json.data;
 
   const data = {
     nameImg: result.nameImg,
