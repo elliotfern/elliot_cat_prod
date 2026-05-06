@@ -386,7 +386,7 @@ if ($slug === 'llistatVisitesEspai') {
     $sql = <<<SQL
             SELECT v.id, v.viatge, v.slug, v.dateCreated, v.dateModified, c.pais_ca, i.nameImg, i.alt, v.dataInici, v.dataFi, v.descripcio
             FROM %s AS v
-            INNER JOIN %s AS c ON v.pais_id = c.id
+            LEFT JOIN %s AS c ON v.pais_id = c.id
             LEFT JOIN %s AS i ON v.img_id = i.id
             WHERE v.slug = :slug
             SQL;
