@@ -236,4 +236,104 @@ if ($slug === 'espai') {
         );
         exit;
     }
+    // b) Actualitzar espai visitat
+} else if ($slug === 'espaiVisitat') {
+
+    AdminMiddleware::handle();
+
+    // Leer JSON
+    $input_data = file_get_contents("php://input");
+    $data = json_decode($input_data, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+        exit;
+    }
+
+    // Validación
+    $errors = [];
+
+    $id = requireField($data, 'id', $errors); // UUID registro
+
+    $espai_id  = requireField($data, 'espai_id', $errors);
+    $viatge_id = requireField($data, 'viatge_id', $errors);
+    $dataVisita = requireField($data, 'dataVisita', $errors);
+
+    if (!isUuid($id)) {
+        $errors['id'] = 'invalid_uuid';
+    }
+
+    if (!isUuid($espai_id)) {
+        $errors['espai_id'] = 'invalid_uuid';
+    }
+
+    if (!isUuid($viatge_id)) {
+        $errors['viatge_id'] = 'invalid_uuid';
+    }
+
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataVisita)) {
+        $errors['dataVisita'] = 'invalid_date';
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+        exit;
+    }
+
+    // Convertir a binary
+    $id_bin        = Uuid::toBinary($id);
+    $espai_id_bin  = Uuid::toBinary($espai_id);
+    $viatge_id_bin = Uuid::toBinary($viatge_id);
+
+    $sql = "UPDATE " . Tables::DB_VIATGES_ESPAIS_VISITATS . " SET
+                espai_id = :espai_id,
+                viatge_id = :viatge_id,
+                dataVisita = :dataVisita
+            WHERE id = :id";
+
+    try {
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->bindValue(':id', $id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':espai_id', $espai_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':viatge_id', $viatge_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':dataVisita', $dataVisita, PDO::PARAM_STR);
+
+        $stmt->execute();
+
+        // ⚠️ IMPORTANTE: no uses rowCount como 404 falso
+        $checkSql = "SELECT 1 FROM " . Tables::DB_VIATGES_ESPAIS_VISITATS . " WHERE id = :id LIMIT 1";
+        $checkStmt = $pdo->prepare($checkSql);
+        $checkStmt->bindValue(':id', $id_bin, PDO::PARAM_LOB);
+        $checkStmt->execute();
+
+        if (!$checkStmt->fetchColumn()) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                ['id' => $id],
+                404
+            );
+            exit;
+        }
+
+        Response::success(
+            MissatgesAPI::success('update'),
+            [
+                'id' => $id,
+                'espai_id' => $espai_id,
+                'viatge_id' => $viatge_id
+            ],
+            200
+        );
+        exit;
+    } catch (\Throwable $e) {
+        Response::error(
+            MissatgesAPI::error('internal_error'),
+            [
+                'message' => $e->getMessage(),
+            ],
+            500
+        );
+        exit;
+    }
 }

@@ -735,6 +735,48 @@ if ($slug === 'directors') {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
+    // 4. Viatges: espais
+    // ruta GET => "/api/viatges/get/espais"
+} else if ($slug === 'espais') {
+
+    $query = "SELECT t.id, t.nom
+    FROM db_viatge_espais AS t
+    ORDER BY t.nom ASC";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    // 4. Viatges
+    // ruta GET => "/api/viatges/get/viatges"
+} else if ($slug === 'viatges') {
+
+    $query = "SELECT t.id, t.viatge
+    FROM db_viatge_llistat AS t
+    ORDER BY t.viatge ASC";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
     // GET : llistat grups persones
     // URL: https://elliot.cat/api/auxiliars/get/grups
 } else if ($slug === "grups") {

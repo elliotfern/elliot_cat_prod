@@ -217,6 +217,53 @@ if ($slug === 'llistatVisitesEspai') {
         );
     }
 
+    // 3. Endpoint GET Espai Visitat (per intranet)
+    // ruta GET => "/api/viatges/get/fitxaEspaiVisitat?espai=5777454564"
+} else if ($slug === 'fitxaEspaiVisitat') {
+    $id = $_GET['espai'];
+    $id_bin = uuid::toBinary($id);
+
+    AdminMiddleware::handle();
+
+    $sql = <<<SQL
+                SELECT e.id, e.espai_id, e.viatge_id, e.dataVisita
+                FROM %s AS e
+                WHERE e.id = :espai
+                LIMIT 1
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_VIATGES_ESPAIS_VISITATS, $pdo)
+    );
+
+    try {
+
+        $params = [':espai' => $id_bin];
+        $result = $db->getData($query, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // 6. Llistat de viatges
     // ruta GET => "/api/viatges/get/?llistatViatges"
 } else if ($slug === 'llistatViatges') {

@@ -8,6 +8,7 @@ import { fitxaViatge } from './fitxaViatge';
 import { taulaLlistatEspais } from './taulaLlistatEspais';
 import { taulaLlistatEspaisVisitats } from './taulaLlistatEspaisVisitats';
 import { formEspai } from './formEspai';
+import { formEspaiVisitat } from './formEspaiVisitat';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -31,5 +32,10 @@ export function viatges() {
     const slug = pageType[3];
     fitxaEspai(slug); // se ejecuta cuando Leaflet está cargado
     taulaLlistatVisitesEspais();
+  } else if (pageType[2] === 'modifica-espai-visitat') {
+    const slug = pageType[3];
+    formEspaiVisitat(true, slug);
+  } else if (pageType[2] === 'nou-espai-visitat') {
+    formEspaiVisitat(false);
   }
 }

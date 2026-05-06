@@ -25,6 +25,32 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+// Helpers
+// Helpers
+function requireField(array $data, string $key, array &$errors)
+{
+    if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+        $errors[$key] = 'required';
+        return null;
+    }
+    return data_input($data[$key]);
+}
+
+function optionalField(array $data, string $key)
+{
+    return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
+        ? data_input($data[$key])
+        : null;
+}
+
+function isUuid($s)
+{
+    return is_string($s) && preg_match(
+        '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
+        $s
+    );
+}
+
 // a) Inserir espai
 if ($slug === 'espai') {
 
@@ -75,23 +101,6 @@ if ($slug === 'espai') {
         }
 
         throw new InvalidArgumentException("Formato de coordenada inválido: " . $value);
-    }
-
-    // Helpers
-    function requireField(array $data, string $key, array &$errors)
-    {
-        if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
-            $errors[$key] = 'required';
-            return null;
-        }
-        return data_input($data[$key]);
-    }
-
-    function optionalField(array $data, string $key)
-    {
-        return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
-            ? data_input($data[$key])
-            : null;
     }
 
     // Validación
@@ -223,6 +232,107 @@ if ($slug === 'espai') {
                 [
                     'id' => $uuidString,
                     'slug' => $slug_input
+                ],
+                201
+            );
+            exit;
+        }
+
+        Response::error(
+            MissatgesAPI::error('db_error'),
+            [
+                'sqlState' => $stmt->errorCode(),
+                'info' => $stmt->errorInfo(),
+            ],
+            500
+        );
+        exit;
+    } catch (\Throwable $e) {
+        Response::error(
+            MissatgesAPI::error('internal_error'),
+            [
+                'message' => $e->getMessage(),
+            ],
+            500
+        );
+        exit;
+    }
+
+    // a) Inserir espai visitat
+} else if ($slug === 'espaiVisitat') {
+
+    AdminMiddleware::handle();
+
+    // Leer JSON
+    $input_data = file_get_contents("php://input");
+    $data = json_decode($input_data, true);
+
+    if (!is_array($data)) {
+        Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+        exit;
+    }
+
+    // Validación
+    $errors = [];
+
+    $espai_id  = requireField($data, 'espai_id', $errors);   // UUID
+    $viatge_id = requireField($data, 'viatge_id', $errors);  // UUID
+    $dataVisita = requireField($data, 'dataVisita', $errors); // YYYY-MM-DD
+
+    if (!isUuid($espai_id)) {
+        $errors['espai_id'] = 'invalid_uuid';
+    }
+
+    if (!isUuid($viatge_id)) {
+        $errors['viatge_id'] = 'invalid_uuid';
+    }
+
+    // Validar fecha simple
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataVisita)) {
+        $errors['dataVisita'] = 'invalid_date';
+    }
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+        exit;
+    }
+
+    // UUID v7
+    $uuid = ramsey::uuid7();
+    $uuidBytes = $uuid->getBytes();
+    $uuidString = Uuid::toString($uuidBytes);
+
+    // Convertir a binary
+    $espai_id_bin  = Uuid::toBinary($espai_id);
+    $viatge_id_bin = Uuid::toBinary($viatge_id);
+
+    $sql = "INSERT INTO " . Tables::DB_VIATGES_ESPAIS_VISITATS . " (
+                id,
+                espai_id,
+                viatge_id,
+                dataVisita
+            ) VALUES (
+                :id,
+                :espai_id,
+                :viatge_id,
+                :dataVisita
+            )";
+
+    try {
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
+        $stmt->bindValue(':espai_id', $espai_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':viatge_id', $viatge_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':dataVisita', $dataVisita, PDO::PARAM_STR);
+
+        if ($stmt->execute()) {
+            Response::success(
+                MissatgesAPI::success('create'),
+                [
+                    'id' => $uuidString,
+                    'espai_id' => $espai_id,
+                    'viatge_id' => $viatge_id
                 ],
                 201
             );
