@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // ruta GET => "/api/viatges/get/llistatVisitesEspai"
 if ($slug === 'llistatVisitesEspai') {
 
-AdminMiddleware::handle();
+    AdminMiddleware::handle();
 
     $espai = $_GET['espai'];
 
@@ -36,7 +36,7 @@ AdminMiddleware::handle();
                 SELECT v.id, vl.slug, vl.viatge, v.dataVisita
                 FROM %s AS v
                 INNER JOIN %s AS vl ON v.viatge_id = vl.id
-                INNER JOIN db_travel_places AS p ON v.espai_id = p.id
+                INNER JOIN %s AS p ON v.espai_id = p.id
                 WHERE p.slug = :slug
                 ORDER BY v.dataVisita ASC;
             SQL;
@@ -45,12 +45,13 @@ AdminMiddleware::handle();
         $sql,
         qi(Tables::DB_VIATGES_ESPAIS_VISITATS, $pdo),
         qi(Tables::DB_VIATGES, $pdo),
-        qi(Tables::DB_IDIOMES, $pdo),
+        qi(Tables::DB_VIATGES_ESPAIS, $pdo),
     );
 
     try {
 
-        $result = $db->getData($query);
+        $params = [':slug' => $espai];
+        $result = $db->getData($query, $params);
 
         if (empty($result)) {
             Response::error(
