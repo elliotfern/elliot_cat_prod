@@ -94,7 +94,8 @@ if ($slug === 'llistatVisitesEspai') {
         $sql,
         qi(Tables::DB_VIATGES_ESPAIS, $pdo),
         qi(Tables::DB_VIATGES, $pdo),
-        qi(Tables::DB_VIATGES_ESPAIS_TIPUS, $pdo)
+        qi(Tables::DB_VIATGES_ESPAIS_TIPUS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo)
     );
 
     try {
