@@ -268,6 +268,8 @@ if ($slug === 'llistatVisitesEspai') {
     // ruta GET => "/api/viatges/get/?llistatViatges"
 } else if ($slug === 'llistatViatges') {
 
+    AdminMiddleware::handle();
+
     $sql = <<<SQL
             SELECT l.id, l.viatge, l.descripcio, l.dataInici, l.dataFi, l.slug, l.pais_id, c.pais_ca
             FROM %s AS l
@@ -309,7 +311,10 @@ if ($slug === 'llistatVisitesEspai') {
 
     // 6. Llistat espais visitats durant un viatge determinat
     // ruta GET => "/api/viatges/get/?llistatEspaisViatge=perpinya"
-} else if (isset($_GET['llistatEspaisViatge'])) {
+} else if ($slug === 'llistatEspaisViatge') {
+
+    AdminMiddleware::handle();
+
     $slug = $_GET['llistatEspaisViatge'];
 
     $query = "SELECT p.nom, p.id, v.dataVisita, c.ciutat, p.slug
@@ -325,7 +330,7 @@ if ($slug === 'llistatVisitesEspai') {
     // 7. Detalls fitxa espai
     // ruta GET => "/api/viatges/get/fitxaEspaiDetalls?espai=perpinya"
 } else if ($slug === 'fitxaEspaiDetalls') {
-
+    AdminMiddleware::handle();
     $espai = $_GET['espai'];
 
     $sql = <<<SQL
@@ -375,7 +380,8 @@ if ($slug === 'llistatVisitesEspai') {
     // 7. Detalls fitxa Viatge
     // ruta GET => "/api/viatges/get/fitxaViatgeDetalls?viatge=perpinya"
 } else if ($slug === 'fitxaViatgeDetalls') {
-    $viatge = $_GET['fitxaViatgeDetalls'];
+    AdminMiddleware::handle();
+    $viatge = $_GET['viatge'];
 
     $sql = <<<SQL
             SELECT v.id, v.viatge, v.slug, v.dateCreated, v.dateModified, c.pais_ca, i.nameImg, i.alt, v.dataInici, v.dataFi, v.descripcio
