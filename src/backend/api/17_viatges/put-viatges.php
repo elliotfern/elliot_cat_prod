@@ -27,6 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 
 // a) Actualitzar espai
 if ($slug === 'espai') {
+    $id = $_GET['espai'];
+    $id_bin = uuid::toBinary($id);
 
     AdminMiddleware::handle();
 
@@ -108,7 +110,6 @@ if ($slug === 'espai') {
     $dateModified = date('Y-m-d');
 
     // Convertir a binary
-    $id_bin = Uuid::toBinary($id);
     $ciutat_id_bin = Uuid::toBinary($ciutat_id);
     $img_id_bin = $img_id ? Uuid::toBinary($img_id) : null;
 

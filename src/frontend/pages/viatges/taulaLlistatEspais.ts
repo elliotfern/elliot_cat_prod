@@ -21,7 +21,7 @@ export async function taulaLlistatEspais() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Espai) => `
-        <a href="https://${window.location.host}/gestio/viatges/modifica-espai/${row.slug}">
+        <a href="https://${window.location.host}/gestio/viatges/modifica-espai/${row.id}">
             <button class="btn-petit">Modifica</button>
         </a>`,
     });

@@ -171,16 +171,17 @@ if ($slug === 'llistatVisitesEspai') {
     }
 
     // 3. Endpoint GET Espai (per intranet)
-    // ruta GET => "/api/viatges/get/fitxaEspai?espai=palau-reial"
+    // ruta GET => "/api/viatges/get/fitxaEspai?espai=5777454564"
 } else if ($slug === 'fitxaEspai') {
-    $espai = $_GET['espai'];
+    $id = $_GET['espai'];
+    $id_bin = uuid::toBinary($id);
 
     AdminMiddleware::handle();
 
     $sql = <<<SQL
                 SELECT p.id, p.nom, p.slug, p.any_fundacio, p.descripcio, p.tipus_id, p.web, p.ciutat_id, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified, p.img_id
                 FROM %s AS p
-                WHERE p.slug = :espai
+                WHERE p.id = :espai
                 LIMIT 1
             SQL;
 
@@ -191,7 +192,7 @@ if ($slug === 'llistatVisitesEspai') {
 
     try {
 
-        $params = [':espai' => $espai];
+        $params = [':espai' => $id_bin];
         $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
