@@ -6,6 +6,7 @@ import { fitxaEspai } from './fitxaEspai';
 import { taulaLlistatVisitesEspais } from './taulaLlistatVisitesEspais';
 import { fitxaViatge } from './fitxaViatge';
 import { taulaLlistatEspais } from './taulaLlistatEspais';
+import { taulaLlistatEspaisVisitats } from './taulaLlistatEspaisVisitats';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -32,7 +33,7 @@ export function viatges() {
   } else if ([pageType[1], pageType[2]].includes('llistat-espais')) {
     taulaLlistatEspais();
   } else if ([pageType[1], pageType[2]].includes('llistat-espais-visitats')) {
-    taulaLlistatViatges();
+    taulaLlistatEspaisVisitats();
   } else if ([pageType[1], pageType[2]].includes('fitxa-viatge')) {
     fitxaViatge();
     taulaLlistatEspaisViatges();

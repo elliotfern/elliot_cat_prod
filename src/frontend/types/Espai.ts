@@ -4,4 +4,6 @@ export interface Espai {
   dataVisita: string;
   id: number;
   ciutat: string;
+  viatge: string;
+  viatgeSlug: string;
 }

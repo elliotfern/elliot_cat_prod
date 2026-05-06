@@ -122,6 +122,54 @@ if ($slug === 'llistatVisitesEspai') {
         );
     }
 
+    // 2. Llistat espais visitats
+    // ruta GET => "/api/viatges/get/llistatEspaisVisitats"
+} else if ($slug === 'llistatEspaisVisitats') {
+
+    AdminMiddleware::handle();
+
+    $sql = <<<SQL
+                SELECT 
+                ev.id, ev.espai_id, ev.viatge_id, ev.dataVisita, e.id as idEspai, e.nom, e.slug, v.viatge, v.slug AS viatgeSlug
+                FROM %s AS ev
+                LEFT JOIN %s AS e ON ev.espai_id = e.id
+                LEFT JOIN %s AS v ON ev.viatge_id = v.id
+                ORDER BY ev.dataVisita ASC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_VIATGES_ESPAIS_VISITATS, $pdo),
+        qi(Tables::DB_VIATGES_ESPAIS, $pdo),
+        qi(Tables::DB_VIATGES, $pdo)
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
 
     // 3. Fitxa espai
     // ruta GET => "/api/viatges/get/?fitxaEspai=palau-reial"
