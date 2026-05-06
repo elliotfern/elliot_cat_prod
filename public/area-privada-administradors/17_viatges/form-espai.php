@@ -33,7 +33,7 @@
 
         <div class="col-md-4">
             <label>Web:</label>
-            <input class="form-control" type="text" name="eeb" id="web" value="">
+            <input class="form-control" type="text" name="web" id="web" value="">
         </div>
 
         <div class="col-md-4">

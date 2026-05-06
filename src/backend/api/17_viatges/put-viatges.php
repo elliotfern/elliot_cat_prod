@@ -203,7 +203,12 @@ if ($slug === 'espai') {
 
         $stmt->execute();
 
-        if ($stmt->rowCount() === 0) {
+        $checkSql = "SELECT 1 FROM " . Tables::DB_VIATGES_ESPAIS . " WHERE id = :id LIMIT 1";
+        $checkStmt = $pdo->prepare($checkSql);
+        $checkStmt->bindValue(':id', $id_bin, PDO::PARAM_LOB);
+        $checkStmt->execute();
+
+        if (!$checkStmt->fetchColumn()) {
             Response::error(
                 MissatgesAPI::error('not_found'),
                 ['id' => $id],
