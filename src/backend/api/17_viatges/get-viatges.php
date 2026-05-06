@@ -86,7 +86,7 @@ if ($slug === 'llistatVisitesEspai') {
                 FROM %s AS e
                 LEFT JOIN %s AS t ON e.tipus_id = t.id
                 LEFT JOIN %s AS c ON e.ciutat_id = c.id
-                ORDER BY n.nom ASC;
+                ORDER BY e.nom ASC;
             SQL;
 
     $query = sprintf(
