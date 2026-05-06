@@ -209,6 +209,9 @@ $routes = [
     // 17. Viatges
     APP_GESTIO . $url['viatges'] => route(APP_INTRANET_DIR . APP_VIATGES_DIR . 'index.php'),
     APP_GESTIO . $url['viatges'] . '/llistat-viatges' => route(APP_INTRANET_DIR . APP_VIATGES_DIR . 'llistat-viatges.php'),
+    APP_GESTIO . $url['viatges'] . '/llistat-espais' => route(APP_INTRANET_DIR . APP_VIATGES_DIR . 'llistat-espais.php'),
+    APP_GESTIO . $url['viatges'] . '/llistat-espais-visitats' => route(APP_INTRANET_DIR . APP_VIATGES_DIR . 'llistat-espais-visitats.php'),
+
     APP_GESTIO . $url['viatges'] . '/fitxa-viatge/{slug}' => route(APP_INTRANET_DIR . APP_VIATGES_DIR . 'fitxa-viatge.php'),
     APP_GESTIO . $url['viatges'] . '/fitxa-espai/{slug}' => route(APP_INTRANET_DIR . APP_VIATGES_DIR . 'fitxa-espai.php'),
     APP_GESTIO . $url['viatges'] . '/modifica-espai/{slug}' => route(APP_INTRANET_DIR . APP_VIATGES_DIR . 'form-espai.php'),

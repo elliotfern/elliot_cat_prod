@@ -75,6 +75,55 @@ if ($slug === 'llistatVisitesEspai') {
         );
     }
 
+    // 2. Llistat espais
+    // ruta GET => "/api/viatges/get/llistatEspais"
+} else if ($slug === 'llistatEspais') {
+
+    AdminMiddleware::handle();
+
+    $sql = <<<SQL
+                SELECT e.id, e.nom, e.slug, e.any_fundacio, e.descripcio, e.tipus_id, e.web, e.ciutat_id, e.img_id, e.coordinades_latitud, e.coordinades_longitud, e.dateCreated, e.dateModified, v.viatge, v.dataInici, v.dataFi, t.tipus, c.ciutat
+                FROM %s AS e
+                LEFT JOIN %s AS v ON e.viatge_id = v.id
+                LEFT JOIN %s AS t ON e.tipus_id = t.id
+                LEFT JOIN %s AS c ON e.ciutat_id = c.id
+                ORDER BY n.nom ASC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_VIATGES_ESPAIS, $pdo),
+        qi(Tables::DB_VIATGES, $pdo),
+        qi(Tables::DB_VIATGES_ESPAIS_TIPUS, $pdo)
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+
     // 3. Fitxa espai
     // ruta GET => "/api/viatges/get/?fitxaEspai=palau-reial"
 } else if (isset($_GET['fitxaEspai'])) {

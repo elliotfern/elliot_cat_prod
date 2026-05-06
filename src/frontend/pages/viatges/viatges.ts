@@ -5,6 +5,7 @@ import { taulaLlistatEspaisViatges } from './taulaLlistatEspaisViatge';
 import { fitxaEspai } from './fitxaEspai';
 import { taulaLlistatVisitesEspais } from './taulaLlistatVisitesEspais';
 import { fitxaViatge } from './fitxaViatge';
+import { taulaLlistatEspais } from './taulaLlistatEspais';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -27,6 +28,10 @@ export function viatges() {
       });
     }
   } else if ([pageType[1], pageType[2]].includes('llistat-viatges')) {
+    taulaLlistatViatges();
+  } else if ([pageType[1], pageType[2]].includes('llistat-espais')) {
+    taulaLlistatEspais();
+  } else if ([pageType[1], pageType[2]].includes('llistat-espais-visitats')) {
     taulaLlistatViatges();
   } else if ([pageType[1], pageType[2]].includes('fitxa-viatge')) {
     fitxaViatge();

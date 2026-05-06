@@ -20,6 +20,7 @@
                 <ul class="llistat">
                     <li> <a href="<?php echo APP_INTRANET . $url['viatges']; ?>/llistat-viatges">Llistat de viatges</a></li>
                     <li><a href="<?php echo APP_INTRANET . $url['viatges']; ?>/llistat-espais">Llistat d'espais</a></li>
+                    <li><a href="<?php echo APP_INTRANET . $url['viatges']; ?>/llistat-espais-visitats">Llistat d'espais visitats</a></li>
                 </ul>
             </div>
 
