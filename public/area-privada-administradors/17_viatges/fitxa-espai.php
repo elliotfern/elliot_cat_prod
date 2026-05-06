@@ -2,12 +2,12 @@
 
 
  <div class="container contingut">
-     <h1>Viatges</h1>
+     <h1>Base de dades Viatges</h1>
      <h2><span id="titolPagina"></span></h2>
 
      <div id="modificaBoto"></div>
 
-     <div class="dadesFitxa" id="dadesFitxa"></div>
+     <div class="dadesFitxa" id="dadesFitxa" style="background-color: #D4D4D4;padding:15px; border-radius:10px;width:fit-content;"></div>
 
      <div id="dadesContainer"></div>
 

@@ -4,19 +4,8 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css'; // Importar el CSS de Leaflet
 
-export async function fitxaEspai() {
+export async function fitxaEspai(slug: string) {
   const isAdmin = await getIsAdmin();
-  const url = window.location.href;
-  const pageType = getPageType(url);
-  let slug: string = '';
-  let gestioUrl: string = '';
-
-  if (isAdmin) {
-    slug = pageType[3];
-    gestioUrl = '/gestio';
-  } else {
-    slug = pageType[2];
-  }
 
   const response = await fetch(`https://${window.location.host}/api/viatges/get/fitxaEspaiDetalls?espai=${slug}`);
   const json = await response.json();
@@ -49,7 +38,7 @@ export async function fitxaEspai() {
 
     // Evento click (mejor que inline onclick)
     button.addEventListener('click', () => {
-      window.location.href = `/gestio/modifica-espai/${result.id}`;
+      window.location.href = `/gestio/viatges/modifica-espai/${result.id}`;
     });
 
     // Limpiar por si acaso

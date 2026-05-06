@@ -28,7 +28,8 @@ export function viatges() {
     fitxaViatge();
     taulaLlistatEspaisViatges();
   } else if ([pageType[1], pageType[2]].includes('fitxa-espai')) {
-    fitxaEspai(); // se ejecuta cuando Leaflet está cargado
+    const slug = pageType[3];
+    fitxaEspai(slug); // se ejecuta cuando Leaflet está cargado
     taulaLlistatVisitesEspais();
   }
 }
