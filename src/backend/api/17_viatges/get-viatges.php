@@ -5,6 +5,7 @@ use App\Utils\Tables;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Uuid;
+use App\Utils\AdminMiddleware;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
@@ -24,36 +25,54 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // 1. Visites realizades en un espai
-// ruta GET => "/api/viatges/get/?llistatVisitesEspai"
-if (isset($_GET['llistatVisitesEspai'])) {
-    $slug = $_GET['llistatVisitesEspai'];
+// ruta GET => "/api/viatges/get/llistatVisitesEspai"
+if ($slug === 'llistatVisitesEspai') {
 
-    $query = "SELECT v.id, vl.slug, vl.viatge AS nom, v.dataVisita AS any1
-    FROM db_travel_places_visited AS v
-    INNER JOIN db_viatges_llistat AS vl ON v.idViatge = vl.id
-    INNER JOIN db_travel_places AS p ON v.espId = p.id
-    WHERE p.slug = :slug
-    ORDER BY v.dataVisita ASC";
+AdminMiddleware::handle();
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $espai = $_GET['espai'];
 
-    $stmt->bindParam(':slug', $slug, PDO::PARAM_STR);
+    $sql = <<<SQL
+                SELECT v.id, vl.slug, vl.viatge, v.dataVisita
+                FROM %s AS v
+                INNER JOIN %s AS vl ON v.viatge_id = vl.id
+                INNER JOIN db_travel_places AS p ON v.espai_id = p.id
+                WHERE p.slug = :slug
+                ORDER BY v.dataVisita ASC;
+            SQL;
 
-    // Ejecutar la consulta
-    $stmt->execute();
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_VIATGES_ESPAIS_VISITATS, $pdo),
+        qi(Tables::DB_VIATGES, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo),
+    );
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
 
     // 3. Fitxa espai
     // ruta GET => "/api/viatges/get/?fitxaEspai=palau-reial"

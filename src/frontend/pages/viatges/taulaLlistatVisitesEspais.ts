@@ -48,7 +48,7 @@ export async function taulaLlistatVisitesEspais() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/viatges/get/?llistatVisitesEspai=${slug}`,
+    url: `https://${window.location.host}/api/viatges/get/llistatVisitesEspai?espai=${slug}`,
     containerId: 'taulaLlistatVisites',
     columns,
     filterKeys: ['nom'],

@@ -102,6 +102,8 @@ class Tables
 
     // VIATGES
     public const DB_VIATGES = 'db_viatges_llistat';
+    public const DB_VIATGES_ESPAIS_VISITATS = 'db_viatges_espais_visitats';
+    public const DB_VIATGES_ESPAIS = 'db_viatges_espais';
 
     // Agrega aquí todas las tablas que necesites usar
 
