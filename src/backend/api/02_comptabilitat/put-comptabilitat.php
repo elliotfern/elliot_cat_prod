@@ -5,12 +5,14 @@ use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Config\Audit;
 use App\Utils\ValidacioErrors;
+use App\Config\Database;
 use App\Config\DatabaseConnection;
 use App\Utils\Uuid;
 
 /** @var array $routeParams */
 /** @var array $conn */
 $slug = $routeParams[0] ?? null;
+$db = new Database();
 $pdo = $db->getPdo();
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
