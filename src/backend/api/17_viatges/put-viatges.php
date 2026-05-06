@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 }
 
 
+
 // a) Actualitzar espai
 if ($slug === 'espai') {
     $id = $_GET['id'];
@@ -39,6 +40,11 @@ if ($slug === 'espai') {
     if (!is_array($data)) {
         Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
         exit;
+    }
+
+    function isUuid($s)
+    {
+        return is_string($s) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s);
     }
 
     // Helpers
