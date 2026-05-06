@@ -23,8 +23,8 @@ export async function taulaLlistatVisitesEspais() {
   const columns: TaulaDinamica<VisitaEspai>[] = [
     {
       header: 'Viatge',
-      field: 'nom',
-      render: (_: unknown, row: VisitaEspai) => `<a href="${window.location.origin}${gestioUrl}/viatges/fitxa-viatge/${row.slug}">${row.nom}</a>`,
+      field: 'viatge',
+      render: (_: unknown, row: VisitaEspai) => `<a href="${window.location.origin}${gestioUrl}/viatges/fitxa-viatge/${row.slug}">${row.viatge}</a>`,
     },
     {
       header: 'Data',

@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 // 1. Visites realizades en un espai
-// ruta GET => "/api/viatges/get/llistatVisitesEspai"
+// ruta GET => "/api/viatges/get/llistatVisitesEspai?espai=napoli"
 if ($slug === 'llistatVisitesEspai') {
 
     AdminMiddleware::handle();
