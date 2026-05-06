@@ -28,8 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 
 // a) Actualitzar espai
 if ($slug === 'espai') {
-    $id = $_GET['id'];
-    $id_bin = uuid::toBinary($id);
 
     AdminMiddleware::handle();
 
@@ -105,6 +103,7 @@ if ($slug === 'espai') {
     // Validación
     $errors = [];
 
+    $id         = requireField($data, 'id', $errors); // UUID string
     $nom        = requireField($data, 'nom', $errors);
     $slug_input = requireField($data, 'slug', $errors);
     $descripcio = requireField($data, 'descripcio', $errors);
@@ -164,6 +163,7 @@ if ($slug === 'espai') {
     // Convertir a binary
     $ciutat_id_bin = Uuid::toBinary($ciutat_id);
     $img_id_bin = $img_id ? Uuid::toBinary($img_id) : null;
+    $id_bin = uuid::toBinary($id);
 
     $sql = "UPDATE " . Tables::DB_VIATGES_ESPAIS . " SET
                 nom = :nom,

@@ -57,7 +57,7 @@ export async function formEspai(isUpdate: boolean, slug?: string) {
     }
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formEspai', `https://elliot.cat/api/viatges/put/espai?id=${id}`);
+      transmissioDadesDB(event, 'PUT', 'formEspai', `https://elliot.cat/api/viatges/put/espai`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nou Espai</h2>`;
