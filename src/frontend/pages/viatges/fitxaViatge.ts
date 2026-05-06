@@ -8,17 +8,12 @@ export async function fitxaViatge() {
   const url = window.location.href;
   const pageType = getPageType(url);
   let slug: string = '';
-  let gestioUrl: string = '';
 
-  if (isAdmin) {
-    slug = pageType[3];
-    gestioUrl = '/gestio';
-  } else {
-    slug = pageType[2];
-  }
+  slug = pageType[3];
 
-  const response = await fetch(`https://${window.location.host}/api/viatges/get/?fitxaViatgeDetalls=${slug}`);
-  const result = await response.json();
+  const response = await fetch(`https://${window.location.host}/api/viatges/get/fitxaViatgeDetalls?viatge=${slug}`);
+  const json = await response.json();
+  const result = json.data[0]; // 👈 aquí está la clave
 
   const data = {
     nameImg: result.nameImg,
@@ -27,7 +22,7 @@ export async function fitxaViatge() {
     details: {
       Titol: result.viatge,
       Descripció: result.descripcio,
-      País: result.pais_cat,
+      País: result.pais_ca,
       'Data inici': formatDataCatala(result.dataInici),
       'Data fi': formatDataCatala(result.dataFi),
       'Data de creació': result.dateCreated,

@@ -373,13 +373,49 @@ if ($slug === 'llistatVisitesEspai') {
     }
 
     // 7. Detalls fitxa Viatge
-    // ruta GET => "/api/viatges/get/?fitxaViatgeDetalls=perpinya"
-} else if (isset($_GET['fitxaViatgeDetalls'])) {
-    $slug = $_GET['fitxaViatgeDetalls'];
+    // ruta GET => "/api/viatges/get/fitxaViatgeDetalls?viatge=perpinya"
+} else if ($slug === 'fitxaViatgeDetalls') {
+    $viatge = $_GET['fitxaViatgeDetalls'];
 
-    $query = "SELECT v.id, v.viatge, v.slug, v.dateCreated, v.dateModified, c.pais_cat, i.nameImg, i.alt, v.dataInici, v.dataFi, v.descripcio
-    FROM db_viatges_llistat AS v
-    INNER JOIN db_countries AS c ON c.id = v.pais
-    LEFT JOIN db_img AS i ON v.img = i.id
-    WHERE v.slug = :slug";
+    $sql = <<<SQL
+            SELECT v.id, v.viatge, v.slug, v.dateCreated, v.dateModified, c.pais_ca, i.nameImg, i.alt, v.dataInici, v.dataFi, v.descripcio
+            FROM %s AS v
+            INNER JOIN %s AS c ON v.pais_id = c.id
+            LEFT JOIN %s AS i ON v.img_id = i.id
+            WHERE v.slug = :slug
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_VIATGES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_IMATGES, $pdo),
+    );
+
+    try {
+
+        $params = [':slug' => $viatge];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 }
