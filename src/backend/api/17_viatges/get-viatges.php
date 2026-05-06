@@ -35,8 +35,8 @@ if ($slug === 'llistatVisitesEspai') {
     $sql = <<<SQL
                 SELECT v.id, vl.slug, vl.viatge, v.dataVisita
                 FROM %s AS v
-                INNER JOIN %s AS vl ON v.viatge_id = vl.id
-                INNER JOIN %s AS p ON v.espai_id = p.id
+                LEFT JOIN %s AS vl ON v.viatge_id = vl.id
+                LEFT JOIN %s AS p ON v.espai_id = p.id
                 WHERE p.slug = :slug
                 ORDER BY v.dataVisita ASC;
             SQL;
