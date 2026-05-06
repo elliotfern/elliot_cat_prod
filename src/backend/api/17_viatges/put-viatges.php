@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 
 // a) Actualitzar espai
 if ($slug === 'espai') {
-    $id = $_GET['espai'];
+    $id = $_GET['id'];
     $id_bin = uuid::toBinary($id);
 
     AdminMiddleware::handle();
