@@ -164,7 +164,7 @@ $habilitats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Experiència professional
 $sql = <<<SQL
-            SELECT e.id, e.empresa, e.empresa_url, e.data_inici, e.data_fi, e.is_current, i.nameImg, c.ciutat, co.pais_en AS pais_cat
+            SELECT e.id, e.empresa, e.empresa_url, e.data_inici, e.data_fi, e.is_current, i.nameImg, c.ciutat, co.pais_en AS pais_ca
             FROM %s AS e
             LEFT JOIN %s i ON e.logo_empresa = i.id
             LEFT JOIN %s c ON e.empresa_localitzacio = c.id
@@ -210,7 +210,7 @@ $sql = <<<SQL
                 (SELECT ciutat_ca FROM %s WHERE id = e.institucio_localitzacio LIMIT 1) AS ciutat,
                 (SELECT pais_ca FROM %s WHERE id = 
                 (SELECT pais_ca FROM %s WHERE id = e.institucio_localitzacio LIMIT 1)
-                LIMIT 1) AS pais_cat
+                LIMIT 1) AS pais_ca
             FROM %s e
             ORDER BY e.posicio DESC
         SQL;
