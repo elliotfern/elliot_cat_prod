@@ -18,7 +18,7 @@ export async function fitxaEspai() {
     slug = pageType[2];
   }
 
-  const response = await fetch(`https://${window.location.host}/api/viatges/get/?fitxaEspaiDetalls=${slug}`);
+  const response = await fetch(`https://${window.location.host}/api/viatges/get/fitxaEspaiDetalls?espai=${slug}`);
   const result = await response.json();
 
   const data = {
@@ -28,12 +28,12 @@ export async function fitxaEspai() {
     details: {
       Titol: result.nom,
       Ciutat: result.ciutat,
-      Fundació: result.EspFundacio,
-      'Tipus espai': result.TipusNom,
-      Web: result.EspWeb,
+      Fundació: result.any_fundacio,
+      'Tipus espai': result.tipus,
+      Web: result.web,
       'Data de creació': result.dateCreated,
       'Última modificació': result.dateModified,
-      Descripció: result.EspDescripcio,
+      Descripció: result.descripcio,
     },
   };
 
