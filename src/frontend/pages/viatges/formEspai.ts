@@ -1,9 +1,7 @@
 import { fetchDataGet } from '../../services/api/fetchData';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
-import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-import { setTrixHTML } from '../../utils/setTrix';
 
 interface Fitxa {
   [key: string]: unknown;
@@ -44,13 +42,11 @@ export async function formEspai(isUpdate: boolean, slug?: string) {
 
     if (!response || !response.data) return;
     data = response.data;
+    console.log(data);
 
     divTitol.innerHTML = `<h2>Modificació dades Espai</h2>`;
 
     renderFormInputs(data);
-
-    // Carga robusta en Trix (después de que Trix se haya inicializado)
-    await setTrixHTML('descripcio', data.descripcio);
 
     btnSubmit.textContent = 'Modificar dades';
     const id = (data.id ?? '').toString();

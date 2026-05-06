@@ -170,7 +170,7 @@ if ($slug === 'llistatVisitesEspai') {
         );
     }
 
-    // 3. Fitxa espai
+    // 3. Endpoint GET Espai (per intranet)
     // ruta GET => "/api/viatges/get/fitxaEspai?espai=palau-reial"
 } else if ($slug === 'fitxaEspai') {
     $espai = $_GET['espai'];
@@ -178,21 +178,14 @@ if ($slug === 'llistatVisitesEspai') {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT p.id, p.nom, p.slug, p.any_fundacio, p.descripcio, p.tipus_id, p.web, p.ciutat_id, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified, p.img_id,
-                a.tipus, i.nameImg AS img, i.alt, c.ciutat
+                SELECT p.id, p.nom, p.slug, p.any_fundacio, p.descripcio, p.tipus_id, p.web, p.ciutat_id, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified, p.img_id
                 FROM %s AS p
-                LEFT JOIN %s AS c ON p.ciutat_id = c.id
-                LEFT JOIN %s AS a ON p.tipus_id = a.id
-                LEFT JOIN %s AS i ON p.img_id = i.id
                 WHERE p.slug = :espai
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::DB_VIATGES_ESPAIS, $pdo),
-        qi(Tables::DB_CIUTATS, $pdo),
-        qi(Tables::DB_VIATGES_ESPAIS_TIPUS, $pdo),
-        qi(Tables::DB_IMATGES, $pdo)
+        qi(Tables::DB_VIATGES_ESPAIS, $pdo)
     );
 
     try {
