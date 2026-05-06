@@ -25,6 +25,27 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 }
 
 
+function isUuid($s)
+{
+    return is_string($s) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s);
+}
+
+// Helpers
+function requireField(array $data, string $key, array &$errors)
+{
+    if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+        $errors[$key] = 'required';
+        return null;
+    }
+    return data_input($data[$key]);
+}
+
+function optionalField(array $data, string $key)
+{
+    return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
+        ? data_input($data[$key])
+        : null;
+}
 
 // a) Actualitzar espai
 if ($slug === 'espai') {
@@ -76,28 +97,6 @@ if ($slug === 'espai') {
         }
 
         throw new InvalidArgumentException("Formato de coordenada inválido: " . $value);
-    }
-
-    function isUuid($s)
-    {
-        return is_string($s) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s);
-    }
-
-    // Helpers
-    function requireField(array $data, string $key, array &$errors)
-    {
-        if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
-            $errors[$key] = 'required';
-            return null;
-        }
-        return data_input($data[$key]);
-    }
-
-    function optionalField(array $data, string $key)
-    {
-        return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
-            ? data_input($data[$key])
-            : null;
     }
 
     // Validación
