@@ -8,17 +8,17 @@ use Ramsey\Uuid\Uuid;
 global $conn;
 
 while (true) {
-    $stmt = $conn->query('SELECT id FROM db_img');
+    $stmt = $conn->query('SELECT id FROM db_viatges_llistat');
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     if (!$rows) break;
 
-    $upd = $conn->prepare('UPDATE db_img SET uuid = :uuid WHERE id = :id');
+    $upd = $conn->prepare('UPDATE db_viatges_llistat SET id2 = :id2 WHERE id = :id');
 
     foreach ($rows as $row) {
-        $uuid = Uuid::uuid7()->getBytes(); // UUIDv7 en binario
+        $id2 = Uuid::uuid7()->getBytes(); // UUIDv7 en binario
         // ——— Elige UNA de las dos líneas según tu columna:
         // $upd->bindValue(':uuid', $uuid->toBinary(), PDO::PARAM_LOB); // BINARY(16)
-        $upd->bindValue(':uuid', $uuid, PDO::PARAM_STR);   // CHAR(36)
+        $upd->bindValue(':id2', $id2, PDO::PARAM_STR);   // CHAR(36)
 
         $upd->bindValue(':id', (int)$row['id'], PDO::PARAM_INT);
         $upd->execute();
