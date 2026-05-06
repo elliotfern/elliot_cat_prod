@@ -28,9 +28,9 @@ export async function taulaLlistatVisitesEspais() {
     },
     {
       header: 'Data',
-      field: 'any1',
+      field: 'dataVisita',
       render: (_: unknown, row: VisitaEspai) => {
-        const inici = formatDataCatala(row.any1);
+        const inici = formatDataCatala(row.dataVisita);
         return `${inici}`;
       },
     },
@@ -41,7 +41,7 @@ export async function taulaLlistatVisitesEspais() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: VisitaEspai) => `
-        <a href="https://${window.location.host}/gestio/viatges/modifica-viatge/${row.id}">
+        <a href="https://${window.location.host}/gestio/viatges/modifica-espai-visitat/${row.id}">
             <button class="btn-petit">Modifica</button>
         </a>`,
     });

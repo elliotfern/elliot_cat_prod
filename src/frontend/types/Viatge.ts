@@ -11,4 +11,5 @@ export interface Viatge {
 export interface VisitaEspai extends Viatge {
   nom: string;
   any1: string;
+  dataVisita: string;
 }
