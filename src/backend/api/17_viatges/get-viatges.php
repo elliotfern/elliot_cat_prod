@@ -310,22 +310,58 @@ if ($slug === 'llistatVisitesEspai') {
     }
 
     // 6. Llistat espais visitats durant un viatge determinat
-    // ruta GET => "/api/viatges/get/?llistatEspaisViatge=perpinya"
+    // ruta GET => "/api/viatges/get/llistatEspaisViatge?viatge=perpinya"
 } else if ($slug === 'llistatEspaisViatge') {
 
     AdminMiddleware::handle();
 
-    $slug = $_GET['llistatEspaisViatge'];
+    $viatge = $_GET['viatge'];
 
-    $query = "SELECT p.nom, p.id, v.dataVisita, c.ciutat, p.slug
-            FROM db_travel_places_visited AS v
-            INNER JOIN db_viatges_llistat AS l ON v.idViatge = l.id
-            INNER JOIN db_travel_places AS p ON p.id = v.espId
-            INNER JOIN db_cities AS c ON c.id = idCiutat
+    $sql = <<<SQL
+            SELECT p.nom, p.id, v.dataVisita, c.ciutat, p.slug
+            FROM %s AS v
+            LEFT JOIN %s AS l ON v.viatge_id = l.id
+            LEFT JOIN %s AS p ON v.espai_id = p.id
+            LEFT JOIN %s AS c ON p.ciutat_id = c.id
             WHERE l.slug = :slug
             GROUP BY p.id
-            ORDER BY v.dataVisita";
+            ORDER BY v.dataVisita
+            SQL;
 
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_VIATGES_ESPAIS_VISITATS, $pdo),
+        qi(Tables::DB_VIATGES, $pdo),
+        qi(Tables::DB_VIATGES_ESPAIS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo),
+    );
+
+    try {
+
+        $params = [':slug' => $viatge];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // 7. Detalls fitxa espai
     // ruta GET => "/api/viatges/get/fitxaEspaiDetalls?espai=perpinya"
@@ -401,7 +437,7 @@ if ($slug === 'llistatVisitesEspai') {
     try {
 
         $params = [':slug' => $viatge];
-        $result = $db->getData($query, $params);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(
