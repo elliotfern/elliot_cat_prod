@@ -719,7 +719,7 @@ if ($slug === 'directors') {
 } else if ($slug === 'llistatTipusEspais') {
 
     $query = "SELECT t.id, t.tipus
-    FROM db_viatge_espais_tipus AS t
+    FROM db_viatges_espais_tipus AS t
     ORDER BY t.tipus ASC";
 
     try {

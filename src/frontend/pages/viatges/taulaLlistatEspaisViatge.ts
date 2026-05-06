@@ -42,7 +42,7 @@ export async function taulaLlistatEspaisViatges() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Espai) => `
-         <a href="https://${window.location.host}/gestio/viatges/modifica-viatge/${row.id}"><button class="btn-petit">Modifica</button></a>`,
+         <a href="https://${window.location.host}/gestio/viatges/modifica-espai/${row.id}"><button class="btn-petit">Modifica</button></a>`,
     });
   }
 
