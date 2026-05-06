@@ -82,9 +82,8 @@ if ($slug === 'llistatVisitesEspai') {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT e.id, e.nom, e.slug, e.any_fundacio, e.descripcio, e.tipus_id, e.web, e.ciutat_id, e.img_id, e.coordinades_latitud, e.coordinades_longitud, e.dateCreated, e.dateModified, v.viatge, v.dataInici, v.dataFi, t.tipus, c.ciutat
+                SELECT e.id, e.nom, e.slug, e.any_fundacio, e.descripcio, e.tipus_id, e.web, e.ciutat_id, e.img_id, e.coordinades_latitud, e.coordinades_longitud, e.dateCreated, e.dateModified, t.tipus, c.ciutat
                 FROM %s AS e
-                LEFT JOIN %s AS v ON e.viatge_id = v.id
                 LEFT JOIN %s AS t ON e.tipus_id = t.id
                 LEFT JOIN %s AS c ON e.ciutat_id = c.id
                 ORDER BY n.nom ASC;
@@ -93,7 +92,6 @@ if ($slug === 'llistatVisitesEspai') {
     $query = sprintf(
         $sql,
         qi(Tables::DB_VIATGES_ESPAIS, $pdo),
-        qi(Tables::DB_VIATGES, $pdo),
         qi(Tables::DB_VIATGES_ESPAIS_TIPUS, $pdo),
         qi(Tables::DB_CIUTATS, $pdo)
     );
