@@ -19,21 +19,22 @@ export async function fitxaEspai() {
   }
 
   const response = await fetch(`https://${window.location.host}/api/viatges/get/fitxaEspaiDetalls?espai=${slug}`);
-  const result = await response.json();
+  const json = await response.json();
+  const result = json.data[0]; // 👈 aquí está la clave
 
   const data = {
-    nameImg: result.nameImg,
-    alt: result.alt,
+    nameImg: result.nameImg ?? '',
+    alt: result.alt ?? '',
     tipusImatge: 'viatge-espai',
     details: {
-      Titol: result.nom,
-      Ciutat: result.ciutat,
-      Fundació: result.any_fundacio,
-      'Tipus espai': result.tipus,
-      Web: result.web,
-      'Data de creació': result.dateCreated,
-      'Última modificació': result.dateModified,
-      Descripció: result.descripcio,
+      Titol: result.nom ?? '',
+      Ciutat: result.ciutat ?? '—',
+      Fundació: result.any_fundacio ?? '',
+      'Tipus espai': result.tipus ?? '',
+      Web: result.web ?? '',
+      'Data de creació': result.dateCreated ?? '',
+      'Última modificació': result.dateModified ?? '',
+      Descripció: result.descripcio ?? '',
     },
   };
 
@@ -51,21 +52,22 @@ export async function fitxaEspai() {
       iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
       shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
     });
-    const lat = result.coordinades_latitud; // Latitud
-    const lon = result.coordinades_longitud; // Longitud
 
-    // Crear el mapa y centrarlo en las coordenadas
-    const map = L.map('dadesMapa').setView([lat, lon], 17); // 13 es el nivel de zoom
+    const lat = parseFloat(result.coordinades_latitud);
+    const lon = parseFloat(result.coordinades_longitud);
 
-    // Añadir capa de OpenStreetMap al mapa
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+    if (!isNaN(lat) && !isNaN(lon)) {
+      const map = L.map('dadesMapa').setView([lat, lon], 17);
 
-    // Añadir un marcador en las coordenadas
-    L.marker([lat, lon]).addTo(map).bindPopup(`<b>${result.nom}</b><br>${result.ciutat}`).openPopup();
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
 
-    // Ajustar el tamaño del mapa si el contenedor cambia o no es visible inicialmente
-    map.invalidateSize();
+      L.marker([lat, lon]).addTo(map).bindPopup(`<b>${result.nom}</b><br>${result.ciutat}`).openPopup();
+
+      map.invalidateSize();
+    } else {
+      containerMapa.innerHTML = '<p>Sense coordenades disponibles</p>';
+    }
   }
 }
