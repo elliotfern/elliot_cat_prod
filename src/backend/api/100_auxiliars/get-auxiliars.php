@@ -740,7 +740,7 @@ if ($slug === 'directors') {
 } else if ($slug === 'espais') {
 
     $query = "SELECT t.id, t.nom
-    FROM db_viatge_espais AS t
+    FROM db_viatges_espais AS t
     ORDER BY t.nom ASC";
 
     try {
@@ -761,7 +761,7 @@ if ($slug === 'directors') {
 } else if ($slug === 'viatges') {
 
     $query = "SELECT t.id, t.viatge
-    FROM db_viatge_llistat AS t
+    FROM db_viatges_llistat AS t
     ORDER BY t.viatge ASC";
 
     try {
