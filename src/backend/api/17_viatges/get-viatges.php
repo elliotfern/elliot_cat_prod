@@ -171,25 +171,56 @@ if ($slug === 'llistatVisitesEspai') {
     }
 
     // 3. Fitxa espai
-    // ruta GET => "/api/viatges/get/?fitxaEspai=palau-reial"
-} else if (isset($_GET['fitxaEspai'])) {
-    $slug = $_GET['fitxaEspai'];
+    // ruta GET => "/api/viatges/get/fitxaEspai?espai=palau-reial"
+} else if ($slug === 'fitxaEspai') {
+    $espai = $_GET['espai'];
 
-    $query = "SELECT p.id, p.nom, p.EspNomCast, p.EspNomEng, p.slug, p.EspNomIt, p.EspFundacio, p.EspDescripcio, p.EspDescripcioCast, p.EspDescripcioEng, p.EspDescripcioIt, p.EspTipus, p.EspWeb, p.idCiutat, c.ciutat, a.TipusNom, p.img AS idImg, i.nom AS img, i.alt, i.nameImg, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified
-    FROM db_travel_places AS p
-    INNER JOIN db_cities AS c ON c.id = p.idCiutat
-    INNER JOIN db_travel_accommodation_type AS a ON p.EspTipus = a.id
-    LEFT JOIN db_img AS i ON p.img = i.id
-    WHERE p.slug = :slug";
+    AdminMiddleware::handle();
 
+    $sql = <<<SQL
+                SELECT p.id, p.nom, p.slug, p.any_fundacio, p.descripcio, p.tipus_id, p.web, p.ciutat_id, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified, p.img_id,
+                a.tipus, i.nameImg AS img, i.alt, c.ciutat
+                FROM %s AS p
+                LEFT JOIN %s AS c ON p.ciutat_id = c.id
+                LEFT JOIN %s AS a ON p.tipus_id = a.id
+                LEFT JOIN %s AS i ON p.img_id = i.id
+                WHERE p.slug = :espai
+            SQL;
 
-    // 4. Imatges espais
-    // ruta GET => "/api/viatges/get/?llistatTipusEspais"
-} else if (isset($_GET['llistatTipusEspais'])) {
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_VIATGES_ESPAIS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo),
+        qi(Tables::DB_VIATGES_ESPAIS_TIPUS, $pdo),
+        qi(Tables::DB_IMATGES, $pdo)
+    );
 
-    $query = "SELECT t.id, t.TipusNom
-    FROM db_travel_accommodation_type AS t";
+    try {
 
+        $params = [':espai' => $espai];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // 6. Llistat de viatges
     // ruta GET => "/api/viatges/get/?llistatViatges"
@@ -309,23 +340,4 @@ if ($slug === 'llistatVisitesEspai') {
     INNER JOIN db_countries AS c ON c.id = v.pais
     LEFT JOIN db_img AS i ON v.img = i.id
     WHERE v.slug = :slug";
-
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
-    $stmt->bindParam(':slug', $slug, PDO::PARAM_STR);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
-    }
-
-    // Recopilar los resultados
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
 }

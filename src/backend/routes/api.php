@@ -380,7 +380,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/viatges/post' => [
+    '/api/viatges/post/{slug}' => [
         'view' => 'src/backend/api/17_viatges/post-viatges.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -388,7 +388,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/viatges/put' => [
+    '/api/viatges/put/{slug}' => [
         'view' => 'src/backend/api/17_viatges/put-viatges.php',
         'needs_session' => false,
         'header_footer' => false,

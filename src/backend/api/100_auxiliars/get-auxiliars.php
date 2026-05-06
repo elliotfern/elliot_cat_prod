@@ -691,6 +691,50 @@ if ($slug === 'directors') {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
+    // GET : Auxiliar imatges Viatges i espais
+    // URL: https://elliot.cat/api/auxiliars/get/auxiliarImatgesEspais
+} else if ($slug === "auxiliarImatgesEspais") {
+
+    $query = "SELECT 
+	      	i.id, i.nom AS alt
+            FROM db_img AS i
+            WHERE i.typeImg IN (11, 17)
+            ORDER BY i.nom ASC";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    // 4. Imatges espais
+    // ruta GET => "/api/viatges/get/?llistatTipusEspais"
+} else if ($slug === 'llistatTipusEspais') {
+
+    $query = "SELECT t.id, t.tipus
+    FROM db_viatge_espais_tipus AS t
+    ORDER BY t.tipus ASC";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
     // GET : llistat grups persones
     // URL: https://elliot.cat/api/auxiliars/get/grups
 } else if ($slug === "grups") {

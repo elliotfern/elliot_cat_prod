@@ -7,27 +7,17 @@ import { taulaLlistatVisitesEspais } from './taulaLlistatVisitesEspais';
 import { fitxaViatge } from './fitxaViatge';
 import { taulaLlistatEspais } from './taulaLlistatEspais';
 import { taulaLlistatEspaisVisitats } from './taulaLlistatEspaisVisitats';
+import { formEspai } from './formEspai';
 
 const url = window.location.href;
 const pageType = getPageType(url);
 
 export function viatges() {
   if (pageType[2] === 'modifica-espai') {
-    const autor = document.getElementById('formEspai');
-    if (autor) {
-      // Lanzar actualizador de datos
-      autor.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'PUT', 'formEspai', '/api/viatges/put/?espai');
-      });
-    }
+    const slug = pageType[3];
+    formEspai(true, slug);
   } else if (pageType[2] === 'nou-espai') {
-    const autor = document.getElementById('formEspai');
-    if (autor) {
-      // Lanzar actualizador de datos
-      autor.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'formEspai', '/api/viatges/post/?espai');
-      });
-    }
+    formEspai(false);
   } else if ([pageType[1], pageType[2]].includes('llistat-viatges')) {
     taulaLlistatViatges();
   } else if ([pageType[1], pageType[2]].includes('llistat-espais')) {
