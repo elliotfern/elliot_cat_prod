@@ -105,8 +105,6 @@ if ($slug === 'espai') {
     // Validación
     $errors = [];
 
-    $id = requireField($data, 'id', $errors); // UUID string
-
     $nom        = requireField($data, 'nom', $errors);
     $slug_input = requireField($data, 'slug', $errors);
     $descripcio = requireField($data, 'descripcio', $errors);
@@ -117,10 +115,6 @@ if ($slug === 'espai') {
     $tipus_id  = requireField($data, 'tipus_id', $errors); // INT
     $ciutat_id = requireField($data, 'ciutat_id', $errors); // UUID
     $img_id    = optionalField($data, 'img_id'); // UUID
-
-    if (!isUuid($id)) {
-        $errors['id'] = 'invalid_uuid';
-    }
 
     if (!is_numeric($tipus_id)) {
         $errors['tipus_id'] = 'invalid_int';
