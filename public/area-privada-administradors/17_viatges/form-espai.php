@@ -79,7 +79,7 @@
                         ← Tornar enrere
                     </button>
                 </div>
-                <div class="col-6 text-right derecha">
+                <div class="col-6 text-end">
                     <button type="submit" id="btnEspai" class="btn btn-primary">
                         Desa dades
                     </button>

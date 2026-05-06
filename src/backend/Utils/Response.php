@@ -26,6 +26,8 @@ class Response
         'idGrup',
         'estat_id',
         'editorial_id',
+        'espai_id',
+        'viatge_id',
 
     ];
 
