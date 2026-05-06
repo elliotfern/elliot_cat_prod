@@ -181,6 +181,7 @@ if ($slug === 'llistatVisitesEspai') {
                 SELECT p.id, p.nom, p.slug, p.any_fundacio, p.descripcio, p.tipus_id, p.web, p.ciutat_id, p.coordinades_longitud, p.coordinades_latitud, p.dateCreated, p.dateModified, p.img_id
                 FROM %s AS p
                 WHERE p.slug = :espai
+                LIMIT 1
             SQL;
 
     $query = sprintf(
@@ -191,7 +192,7 @@ if ($slug === 'llistatVisitesEspai') {
     try {
 
         $params = [':espai' => $espai];
-        $result = $db->getData($query, $params);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(
