@@ -12,44 +12,42 @@
         <div id="errText"></div>
     </div>
 
-    <form method="POST" action="" class="row g-3" id="formEspai">
+    <form method="POST" action="" class="row g-3" id="formViatgeEspai">
 
-        <input type="hidden" name="id" id="id" value="">
+        <input type="hidden" name="id" id="id">
 
+        <!-- ESPAI -->
         <div class="col-md-4">
-            <label>Espai:</label>
-            <select class="form-select" name="espai_id" id="espai_id" value="">
-            </select>
+            <label for="espai_id" class="form-label">Espai</label>
+            <select class="form-select" name="espai_id" id="espai_id"></select>
         </div>
 
+        <!-- VIATGE -->
         <div class="col-md-4">
-            <label>Viatge:</label>
-            <select class="form-select" name="viatge_id" id="viatge_id" value="">
-            </select>
+            <label for="viatge_id" class="form-label">Viatge</label>
+            <select class="form-select" name="viatge_id" id="viatge_id"></select>
         </div>
 
+        <!-- DATA VISITA -->
         <div class="col-md-4">
-            <label>Data visita:</label>
-            <input class="form-control" type="date" name="dataVisita" id="dataVisita" value="">
+            <label for="dataVisita" class="form-label">Data visita</label>
+            <input class="form-control" type="date" name="dataVisita" id="dataVisita">
         </div>
 
+        <!-- BOTONES -->
+        <div class="col-12">
+            <div class="d-flex justify-content-between mt-3">
 
-        <div class="container">
-            <div class="row">
-                <div class="col-6 text-left">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        onclick="history.back()">
-                        ← Tornar enrere
-                    </button>
-                </div>
-                <div class="col-6 text-end">
-                    <button type="submit" id="btnEspai" class="btn btn-primary">
-                        Desa dades
-                    </button>
-                </div>
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    ← Tornar enrere
+                </button>
+
+                <button type="submit" id="btnEspai" class="btn btn-primary">
+                    Desa dades
+                </button>
+
             </div>
         </div>
+
     </form>
 </div>

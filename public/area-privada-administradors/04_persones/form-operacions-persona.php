@@ -1,5 +1,4 @@
-<div class="barraNavegacio">
-</div>
+<div class="barraNavegacio"></div>
 
 <div class="container-fluid form">
 
@@ -12,119 +11,126 @@
 
   <div class="alert alert-danger" id="errMessage" style="display:none" role="alert">
     <div id="errText"></div>
-
   </div>
 
-  <form method="POST" action="" class="row g-3" id="formPersona" data-success-redirect-template="/gestio/base-dades-persones/fitxa-persona/{slug}">
+  <form method="POST" action="" class="row g-3" id="formPersona"
+    data-success-redirect-template="/gestio/base-dades-persones/fitxa-persona/{slug}">
 
-    <input type="hidden" name="id" id="id" value="">
+    <input type="hidden" name="id" id="id">
 
+    <!-- NOM -->
     <div class="col-md-4">
-      <label>Nom:</label>
-      <input class="form-control" type="text" name="nom" id="nom" value="">
+      <label for="nom" class="form-label">Nom</label>
+      <input class="form-control" type="text" name="nom" id="nom">
     </div>
 
+    <!-- COGNOMS -->
     <div class="col-md-4">
-      <label>Cognoms:</label>
-      <input class="form-control" type="text" name="cognoms" id="cognoms" value="">
+      <label for="cognoms" class="form-label">Cognoms</label>
+      <input class="form-control" type="text" name="cognoms" id="cognoms">
     </div>
 
+    <!-- SLUG -->
     <div class="col-md-4">
-      <label>Slug:</label>
-      <input class="form-control" type="text" name="slug" id="slug" value="">
+      <label for="slug" class="form-label">Slug</label>
+      <input class="form-control" type="text" name="slug" id="slug">
     </div>
 
+    <!-- SEXE -->
     <div class="col-md-4">
-      <label>Gènere:</label>
+      <label for="sexe_id" class="form-label">Gènere</label>
       <select class="form-select" name="sexe_id" id="sexe_id"></select>
     </div>
 
+    <!-- WEB -->
     <div class="col-md-4">
-      <label>Pàgina web:</label>
-      <input class="form-control" type="url" name="web" id="web" value="">
+      <label for="web" class="form-label">Pàgina web</label>
+      <input class="form-control" type="url" name="web" id="web">
     </div>
 
     <div class="col-md-4"></div>
 
+    <!-- NAIXEMENT -->
     <div class="col-md-4">
-      <label>Dia de naixement:</label>
+      <label for="dia_naixement" class="form-label">Dia naixement</label>
       <select class="form-select" name="dia_naixement" id="dia_naixement"></select>
     </div>
 
     <div class="col-md-4">
-      <label>Mes de naixement:</label>
+      <label for="mes_naixement" class="form-label">Mes naixement</label>
       <select class="form-select" name="mes_naixement" id="mes_naixement"></select>
     </div>
 
     <div class="col-md-4">
-      <label>Any de naixement:</label>
-      <input class="form-control" type="text" name="any_naixement" id="any_naixement" value="">
+      <label for="any_naixement" class="form-label">Any naixement</label>
+      <input class="form-control" type="text" name="any_naixement" id="any_naixement">
     </div>
 
+    <!-- DEFUNCIÓ -->
     <div class="col-md-4">
-      <label>Dia de defunció:</label>
+      <label for="dia_defuncio" class="form-label">Dia defunció</label>
       <select class="form-select" name="dia_defuncio" id="dia_defuncio"></select>
     </div>
 
     <div class="col-md-4">
-      <label>Mes de defunció:</label>
+      <label for="mes_defuncio" class="form-label">Mes defunció</label>
       <select class="form-select" name="mes_defuncio" id="mes_defuncio"></select>
     </div>
 
     <div class="col-md-4">
-      <label>Any de defunció:</label>
-      <input class="form-control" type="text" name="any_defuncio" id="any_defuncio" value="">
+      <label for="any_defuncio" class="form-label">Any defunció</label>
+      <input class="form-control" type="text" name="any_defuncio" id="any_defuncio">
     </div>
 
+    <!-- CIUTATS -->
     <div class="col-md-4">
-      <label>Ciutat naixement:</label>
+      <label for="ciutat_naixement_id" class="form-label">Ciutat naixement</label>
       <select class="form-select" name="ciutat_naixement_id" id="ciutat_naixement_id"></select>
     </div>
 
     <div class="col-md-4">
-      <label>Ciutat defunció:</label>
+      <label for="ciutat_defuncio_id" class="form-label">Ciutat defunció</label>
       <select class="form-select" name="ciutat_defuncio_id" id="ciutat_defuncio_id"></select>
     </div>
 
+    <!-- PAÍS -->
     <div class="col-md-4">
-      <label>País:</label>
+      <label for="pais_autor_id" class="form-label">País</label>
       <select class="form-select" name="pais_autor_id" id="pais_autor_id"></select>
     </div>
 
+    <!-- IMATGE -->
     <div class="col-md-4">
-      <label>Imatge:</label>
+      <label for="img_id" class="form-label">Imatge</label>
       <select class="form-select" name="img_id" id="img_id"></select>
     </div>
 
+    <!-- GRUPS -->
     <div class="col-md-4">
-      <label for="grups">Classificació grups (professió):</label>
-      <select name="grup_ids[]" id="grup_ids" multiple required></select>
+      <label for="grup_ids" class="form-label">Classificació (professió)</label>
+      <select class="form-select" name="grup_ids[]" id="grup_ids" multiple required></select>
     </div>
 
-    <div class="col-md-4"></div>
-    <div class="col-md-4"></div>
+    <!-- TRIX -->
+    <div class="col-12">
+      <label for="descripcio" class="form-label">Descripció</label>
 
-    <div class="col-complet">
-      <label for="descripcio" class="form-label">Descripció:</label>
       <input id="descripcio" name="descripcio" type="hidden">
-      <trix-editor input="descripcio" class="trix-editor"></trix-editor>
+      <trix-editor input="descripcio" class="form-control"></trix-editor>
     </div>
 
-    <div class="container">
-      <div class="row">
-        <div class="col-6 text-left">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            onclick="history.back()">
-            ← Tornar enrere
-          </button>
-        </div>
-        <div class="col-6 text-right derecha">
-          <button type="submit" id="btnPersona" class="btn btn-primary">
-            Actualitza persona
-          </button>
-        </div>
+    <!-- BOTONES -->
+    <div class="col-12">
+      <div class="d-flex justify-content-between mt-3">
+
+        <button type="button" class="btn btn-secondary" onclick="history.back()">
+          ← Tornar enrere
+        </button>
+
+        <button type="submit" id="btnPersona" class="btn btn-primary">
+          Actualitza persona
+        </button>
+
       </div>
     </div>
 

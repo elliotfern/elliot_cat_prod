@@ -14,66 +14,62 @@
 
     <form method="POST" action="" class="row g-3" id="formViatge">
 
-        <input type="hidden" name="id" id="id" value="">
+        <input type="hidden" name="id" id="id">
 
         <!-- VIATGE -->
         <div class="col-md-6">
-            <label>Nom viatge:</label>
-            <input class="form-control" type="text" name="viatge" id="viatge" value="">
+            <label for="viatge" class="form-label">Nom viatge</label>
+            <input class="form-control" type="text" name="viatge" id="viatge">
         </div>
 
         <!-- SLUG -->
         <div class="col-md-6">
-            <label>Slug:</label>
-            <input class="form-control" type="text" name="slug" id="slug" value="">
+            <label for="slug" class="form-label">Slug</label>
+            <input class="form-control" type="text" name="slug" id="slug">
         </div>
 
         <!-- DESCRIPCIÓ -->
-        <div class="col-md-12">
-            <label>Descripció:</label>
+        <div class="col-12">
+            <label for="descripcio" class="form-label">Descripció</label>
             <textarea class="form-control" name="descripcio" id="descripcio" rows="6"></textarea>
         </div>
 
         <!-- PAÍS -->
         <div class="col-md-4">
-            <label>País:</label>
+            <label for="pais_id" class="form-label">País</label>
             <select class="form-select" name="pais_id" id="pais_id"></select>
         </div>
 
-        <!-- DATES -->
+        <!-- DATA INICI -->
         <div class="col-md-4">
-            <label>Data inici:</label>
+            <label for="dataInici" class="form-label">Data inici</label>
             <input class="form-control" type="date" name="dataInici" id="dataInici">
         </div>
 
+        <!-- DATA FI -->
         <div class="col-md-4">
-            <label>Data fi:</label>
+            <label for="dataFi" class="form-label">Data fi</label>
             <input class="form-control" type="date" name="dataFi" id="dataFi">
         </div>
 
         <!-- IMATGE -->
         <div class="col-md-4">
-            <label>Imatge:</label>
+            <label for="img_id" class="form-label">Imatge</label>
             <select class="form-select" name="img_id" id="img_id"></select>
         </div>
 
-        <!-- BOTONS -->
-        <div class="container">
-            <div class="row">
-                <div class="col-6 text-start">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        onclick="history.back()">
-                        ← Tornar enrere
-                    </button>
-                </div>
+        <!-- BOTONES -->
+        <div class="col-12">
+            <div class="d-flex justify-content-between mt-3">
 
-                <div class="col-6 text-end">
-                    <button type="submit" id="btnViatge" class="btn btn-primary">
-                        Desa dades
-                    </button>
-                </div>
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    ← Tornar enrere
+                </button>
+
+                <button type="submit" id="btnViatge" class="btn btn-primary">
+                    Desa dades
+                </button>
+
             </div>
         </div>
 
