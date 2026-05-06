@@ -11,7 +11,7 @@ export async function taulaLlistatEspais() {
     {
       header: 'Espai',
       field: 'nom',
-      render: (_: unknown, row: Espai) => `<a href="https://${window.location.host}/gestio/viatges/fitxa-espai/${row.id}">${row.nom}</a>`,
+      render: (_: unknown, row: Espai) => `<a href="https://${window.location.host}/gestio/viatges/fitxa-espai/${row.slug}">${row.nom}</a>`,
     },
     { header: 'Ciutat', field: 'ciutat' },
   ];

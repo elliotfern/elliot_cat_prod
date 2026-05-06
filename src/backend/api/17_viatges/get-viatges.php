@@ -134,7 +134,7 @@ if ($slug === 'llistatVisitesEspai') {
                 FROM %s AS ev
                 LEFT JOIN %s AS e ON ev.espai_id = e.id
                 LEFT JOIN %s AS v ON ev.viatge_id = v.id
-                ORDER BY ev.dataVisita ASC;
+                ORDER BY ev.dataVisita DESC;
             SQL;
 
     $query = sprintf(
