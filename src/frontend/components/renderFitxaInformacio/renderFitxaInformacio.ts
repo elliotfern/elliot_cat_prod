@@ -32,8 +32,10 @@ export function renderFitxaInformacio(data: EspaiData): HTMLElement {
   // Construcción del bloque de detalles genéricos
   const detailHtml = Object.entries(details)
     .map(([label, value]) => {
-      const isUrl = value.startsWith('http');
-      return `<p><strong>${label}: </strong> ${isUrl ? `<a href="${value}" target="_blank">web</a>` : value}</p>`;
+      const safeValue = value ?? '';
+      const isUrl = typeof safeValue === 'string' && safeValue.startsWith('http');
+
+      return `<p><strong>${label}: </strong> ${isUrl ? `<a href="${safeValue}" target="_blank">web</a>` : safeValue}</p>`;
     })
     .join('');
 
