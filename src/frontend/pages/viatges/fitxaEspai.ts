@@ -38,6 +38,27 @@ export async function fitxaEspai() {
     },
   };
 
+  const containerBoto = document.getElementById('modificaBoto');
+
+  if (isAdmin && containerBoto && result?.id) {
+    // Crear botón
+    const button = document.createElement('button');
+
+    button.textContent = 'Modifica fitxa';
+    button.className = 'button btn-gran btn-secondari';
+
+    // Evento click (mejor que inline onclick)
+    button.addEventListener('click', () => {
+      window.location.href = `/gestio/modifica-espai/${result.id}`;
+    });
+
+    // Limpiar por si acaso
+    containerBoto.innerHTML = '';
+
+    // Insertar botón
+    containerBoto.appendChild(button);
+  }
+
   const container = document.getElementById('dadesContainer');
   if (container) {
     container.innerHTML = ''; // limpiar contenido previo
