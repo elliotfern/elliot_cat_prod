@@ -2,7 +2,7 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { isLang } from '../../utils/locales/getLangPrefix';
 import { DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
 
-// Función para capitalizar la primera letra de cada palabra
+// Capitalizar
 function capitalizeWords(str: string) {
   return str
     .replace(/-/g, ' ')
@@ -14,81 +14,92 @@ function capitalizeWords(str: string) {
 export async function barraNavegacio() {
   const isAdmin = await getIsAdmin();
 
-  const baseAdminUrl = INTRANET_WEB;
-  const baseUserUrl = DOMAIN_WEB;
+  const url = new URL(window.location.href);
+  let parts = url.pathname.split('/').filter(Boolean);
 
-  // ✅ Partimos de pathname (sin dominio), más fiable
-  let parts = window.location.pathname.split('/').filter(Boolean);
-
-  // ✅ Detectar si realmente estamos en /gestio (aunque isAdmin sea true)
   const inGestio = parts[0] === 'gestio';
 
-  // ✅ En público: quitar el prefijo de idioma si existe
-  // Ej: /ca/historia/article/foo -> quitamos "ca"
-  if (!inGestio && isLang(parts[0])) {
-    parts = parts.slice(1);
-  }
-
-  // Base para construir links
-  const baseUrl = inGestio ? baseAdminUrl : baseUserUrl;
-
-  // ✅ En público, si hay idioma, lo conservamos como prefijo en las URLs del breadcrumb
-  // Ej: /ca/historia/... => prefix="/ca"
-  const langPrefix = !inGestio && isLang(window.location.pathname.split('/').filter(Boolean)[0]) ? `/${window.location.pathname.split('/').filter(Boolean)[0]}` : '';
-
-  // ✅ Contenedor con estilo Bootstrap
-  let breadcrumbHtml = `
-    <nav class="breadcrumb mb-3 p-2 rounded bg-light border" aria-label="breadcrumb">
-      <ol class="breadcrumb mb-0">
-  `;
-
-  // Primer item
+  // 🔧 Normalizar partes (quitamos prefijos estructurales)
   if (inGestio) {
-    breadcrumbHtml += `<li class="breadcrumb-item"><a href="${baseAdminUrl}">Intranet</a></li>`;
-  } else {
-    // en público, el "inicio" debería respetar idioma (si existe)
-    const homeHref = `${baseUserUrl}${langPrefix}/homepage`;
-    breadcrumbHtml += `<li class="breadcrumb-item"><a href="${homeHref}">Inici</a></li>`;
+    parts = parts.slice(1); // quitar "gestio"
   }
 
-  // Items restantes
+  let langPrefix = '';
+
+  if (!inGestio && parts.length && isLang(parts[0])) {
+    langPrefix = `/${parts[0]}`;
+    parts = parts.slice(1); // quitar idioma
+  }
+
+  // Base URL limpia
+  const baseUrl = inGestio ? INTRANET_WEB : DOMAIN_WEB;
+
+  // Filtrado de partes
   const filteredParts = parts.filter((p, index) => {
-    // eliminar "fitxa"
     if (p.includes('fitxa')) return false;
-
-    // eliminar "article" cuando viene después de blog
-    if (!inGestio && p === 'article' && parts[index - 1] === 'blog') {
-      return false;
-    }
-
+    if (!inGestio && p === 'article' && parts[index - 1] === 'blog') return false;
     return true;
   });
 
+  // Construcción breadcrumb
+  const nav = document.createElement('nav');
+  nav.className = 'breadcrumb mb-3 p-2 rounded bg-light border';
+  nav.setAttribute('aria-label', 'breadcrumb');
+
+  const ol = document.createElement('ol');
+  ol.className = 'breadcrumb mb-0';
+
+  // 🏠 Home
+  const homeLi = document.createElement('li');
+  homeLi.className = 'breadcrumb-item';
+
+  const homeLink = document.createElement('a');
+
+  if (inGestio) {
+    homeLink.href = INTRANET_WEB;
+    homeLink.textContent = 'Intranet';
+  } else {
+    homeLink.href = `${DOMAIN_WEB}${langPrefix}/homepage`;
+    homeLink.textContent = 'Inici';
+  }
+
+  homeLi.appendChild(homeLink);
+  ol.appendChild(homeLi);
+
+  // 🔗 Breadcrumb dinámico
   filteredParts.forEach((part, index) => {
+    const li = document.createElement('li');
     const label = capitalizeWords(part);
-
-    // Construimos URL acumulada:
-    // - gestio: https://elliot.cat/gestio/...
-    // - público: https://elliot.cat/{lang}/...
-    const accum = filteredParts.slice(0, index + 1).join('/');
-    const href = inGestio ? `${baseUrl}/${accum}` : `${baseUrl}${langPrefix}/${accum}`;
-
     const isLast = index === filteredParts.length - 1;
 
+    li.className = 'breadcrumb-item';
+
     if (isLast) {
-      breadcrumbHtml += `<li class="breadcrumb-item active" aria-current="page">${label}</li>`;
+      li.classList.add('active');
+      li.setAttribute('aria-current', 'page');
+      li.textContent = label;
     } else {
-      breadcrumbHtml += `<li class="breadcrumb-item"><a href="${href}">${label}</a></li>`;
+      const link = document.createElement('a');
+
+      const accumPath = filteredParts.slice(0, index + 1).join('/');
+
+      const fullPath = inGestio ? `/gestio/${accumPath}` : `${langPrefix}/${accumPath}`;
+
+      link.href = new URL(fullPath, baseUrl).toString();
+      link.textContent = label;
+
+      li.appendChild(link);
     }
+
+    ol.appendChild(li);
   });
 
-  breadcrumbHtml += `
-      </ol>
-    </nav>
-  `;
+  nav.appendChild(ol);
 
-  const elementHTML = document.getElementById('barraNavegacioContenidor');
-  if (elementHTML) {
-    elementHTML.innerHTML = breadcrumbHtml;
+  // Render
+  const container = document.getElementById('barraNavegacioContenidor');
+  if (container) {
+    container.innerHTML = '';
+    container.appendChild(nav);
   }
 }
