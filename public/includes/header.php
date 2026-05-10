@@ -17,6 +17,8 @@ $favicon = "/public/img/icon.png";
   <link rel="profile" href="http://gmpg.org/xfn/11">
   <link rel="shortcut icon" href="<?php echo $favicon; ?>">
   <title>Elliot Fernandez - Full stack developer</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>

@@ -1,8 +1,6 @@
 import 'trix/dist/trix.css';
 import 'trix';
 import './estils/style.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import { getPageType } from './utils/urlPath';
 import { cinema } from './pages/cinema/funcions';

@@ -34,7 +34,6 @@
   },
   "homepage": "https://github.com/elliotfern/elliotfern-intranet#readme",
   "dependencies": {
-    "bootstrap": "^5.3.8",
     "choices.js": "^11.1.0",
     "leaflet": "^1.9.4",
     "trix": "^2.1.15"
