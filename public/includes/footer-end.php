@@ -8,7 +8,6 @@ if (is_file($verFile)) {
 }
 ?>
 
-<script src="/dist/runtime.js?v=<?= htmlspecialchars($ver, ENT_QUOTES) ?>"></script>
 <script src="/dist/main.js?v=<?= htmlspecialchars($ver, ENT_QUOTES) ?>"></script>
 
 </body>
