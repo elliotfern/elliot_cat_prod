@@ -1,5 +1,5 @@
 <?php
-$verFile = dirname(__DIR__) . '/version.txt'; // public/includes -> public/version.txt
+$verFile = dirname(__DIR__) . '/version.txt';
 $ver = 'dev';
 
 if (is_file($verFile)) {
@@ -7,7 +7,10 @@ if (is_file($verFile)) {
     if ($ver === '') $ver = 'dev';
 }
 ?>
+
+<script src="/dist/runtime.js?v=<?= htmlspecialchars($ver, ENT_QUOTES) ?>"></script>
 <script src="/dist/main.js?v=<?= htmlspecialchars($ver, ENT_QUOTES) ?>"></script>
+
 </body>
 
 </html>

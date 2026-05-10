@@ -41,12 +41,6 @@ export default (env, argv) => {
       runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
-        cacheGroups: {
-          defaultVendors: {
-            test: /[\\/]node_modules[\\/]/,
-            chunks: 'all',
-          },
-        },
       },
     },
 
