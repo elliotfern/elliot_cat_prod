@@ -7,7 +7,7 @@ if (is_file($verFile)) {
     if ($ver === '') $ver = 'dev';
 }
 ?>
-<script type="module" src="/dist/main.js?v=<?= htmlspecialchars($ver, ENT_QUOTES) ?>"></script>
+<script src="/dist/main.js?v=<?= htmlspecialchars($ver, ENT_QUOTES) ?>"></script>
 </body>
 
 </html>
