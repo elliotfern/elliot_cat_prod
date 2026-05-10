@@ -1,35 +1,25 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
+const path = require('path');
 
-// Obtener el directorio actual
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-export default (env, argv) => {
-  const isProd = argv.mode === 'production';
-
+module.exports = (env, argv) => {
   return {
-    entry: './src/frontend/main.ts', // Punt d'entrada principal
+    entry: './src/frontend/main.ts',
+
     output: {
       filename: '[name].js',
       path: path.resolve(__dirname, 'dist'),
       clean: true,
     },
+
     resolve: {
       extensions: ['.ts', '.js'],
     },
+
     module: {
       rules: [
         {
           test: /\.ts$/,
           exclude: /node_modules/,
-          use: {
-            loader: 'ts-loader',
-            options: {
-              compilerOptions: {
-                sourceMap: false,
-              },
-            },
-          },
+          use: 'ts-loader',
         },
         {
           test: /\.css$/,
@@ -37,6 +27,7 @@ export default (env, argv) => {
         },
       ],
     },
+
     optimization: {
       runtimeChunk: 'single',
       splitChunks: {

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "/src/frontend/main.ts",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "webpack --mode development",
     "build": "webpack --mode production",
