@@ -47,7 +47,7 @@ jobs:
       - name: Show footer-end.php line
         run: |
           echo "---- footer-end.php (bundle line) ----"
-          grep -n "bundle.js?v=" public/includes/footer-end.php || true
+          grep -n "main.js?v=" public/includes/footer-end.php || true
 
       # 5) SSH setup
       - name: Start SSH agent
@@ -91,10 +91,10 @@ jobs:
             cat /home/epgylzqu/elliotfern.com/public/version.txt || true
 
             echo \"---- footer-end.php on server (bundle line) ----\"
-            grep -n \"bundle.js?v=\" /home/epgylzqu/elliotfern.com/public/includes/footer-end.php || true
+            grep -n 'dist/' public/includes/footer-end.php || true
 
-            echo \"---- bundle.js info ----\"
-            ls -lh /home/epgylzqu/elliotfern.com/public/dist/bundle.js || true
+            echo \"---- main.js info ----\"
+            ls -lh /home/epgylzqu/elliotfern.com/public/dist/ || true
           '"
 
       # 8) Composer install on server

@@ -7,9 +7,10 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowJs": true,
+    "allowJs": false,
     "outDir": "./dist",
     "rootDir": "./src/",
+    "sourceMap": false,
 
     "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "src/frontend/types"]
@@ -20,10 +21,5 @@
     "src/types/**/*.d.ts"
   ], 
   "exclude": ["node_modules"],
-  "scripts": {
-      "build": "webpack --config ./node_modules/ts-node/register ./webpack.config.ts --mode production",
-      "dev": "webpack serve --config webpack.config.ts --mode development",
-      "start": "npm run dev"
-  }
 }
 
