@@ -29,7 +29,6 @@ module.exports = (env, argv) => {
     },
 
     optimization: {
-      runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
       },
