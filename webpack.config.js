@@ -26,6 +26,9 @@ export default {
       },
     ],
   },
-  mode: 'development', // Mode de produccio
+  scripts: {
+    dev: 'webpack --mode development',
+    build: 'webpack --mode production',
+  },
   devtool: 'source-map',
 };

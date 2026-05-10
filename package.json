@@ -11,11 +11,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
     "@types/eslint": "^9.6.1",
     "@types/leaflet": "^1.9.17",
-    "babel-loader": "^8.0.0",
     "css-loader": "^7.1.2",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.2",
@@ -28,7 +25,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://elliotfern: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@github.com/elliotfern/elliotfern-intranet.git"
+    "url": "git+https://github.com/elliotfern/elliotfern-intranet.git"
   },
   "keywords": [],
   "bugs": {
