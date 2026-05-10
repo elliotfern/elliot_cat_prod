@@ -8,7 +8,7 @@ if (is_file($verFile)) {
 }
 ?>
 
-<script src="/dist/main.js?v=<?= htmlspecialchars($ver, ENT_QUOTES) ?>"></script>
+<script src="/dist/bundle.js?v=<?= htmlspecialchars($ver, ENT_QUOTES) ?>"></script>
 
 </body>
 

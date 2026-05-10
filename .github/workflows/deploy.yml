@@ -47,7 +47,7 @@ jobs:
       - name: Show footer-end.php line
         run: |
           echo "---- footer-end.php (bundle line) ----"
-          grep -n "main.js?v=" public/includes/footer-end.php || true
+          grep -n "bundle.js?v=" public/includes/footer-end.php || true
 
       # 5) SSH setup
       - name: Start SSH agent
