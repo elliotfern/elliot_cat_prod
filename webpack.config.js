@@ -38,12 +38,12 @@ export default (env, argv) => {
       ],
     },
     optimization: {
+      runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
         cacheGroups: {
-          vendors: {
+          defaultVendors: {
             test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
             chunks: 'all',
           },
         },
