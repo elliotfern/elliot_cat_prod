@@ -111,17 +111,12 @@ function initAuthorUI() {
 
 export async function formLlibre(isUpdate: boolean, slug?: string) {
   console.log('FORM INIT');
+
+  let data: Partial<Fitxa> = { id: '' };
+
   const form = document.getElementById('formLlibre');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btn') as HTMLButtonElement;
-
-  let data: Partial<Fitxa> = {
-    comarca: 0,
-    provincia: 0,
-    comunitat: 0,
-    estat: 0,
-    id: '',
-  };
 
   if (!divTitol || !btnSubmit || !form) return;
 
@@ -132,8 +127,14 @@ export async function formLlibre(isUpdate: boolean, slug?: string) {
   if (slug && isUpdate) {
     console.log('ENTER SLUG:', slug, isUpdate);
     const response = await fetch(`https://elliot.cat/api/biblioteca/get/llibreSlug?llibre=${slug}`);
-    const data = await response.json();
-    console.log(data);
+
+    const responseData = await response.json();
+
+    if (!responseData || !responseData.data) return;
+
+    data = responseData.data;
+
+    renderFormInputs(data);
 
     if (!response || !data) return;
 
@@ -142,7 +143,7 @@ export async function formLlibre(isUpdate: boolean, slug?: string) {
     const fileInput = document.getElementById('img_upload') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
 
-    renderFormInputs(data);
+    renderFormInputs(responseData);
 
     const container = document.getElementById('autorsContainer');
     if (container) container.innerHTML = '';

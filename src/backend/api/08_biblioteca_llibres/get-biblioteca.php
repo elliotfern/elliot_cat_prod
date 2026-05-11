@@ -276,8 +276,8 @@ if ($slug === 'totsLlibres') {
             qi(Tables::PERSONES_GRUPS_RELACIONS, $pdo)
         );
 
-        $params = [':autor_grup_uuid' => $autorGroupUuidBin];
-        $result = $db->getData($query, $params);
+        $params = [':autor_grup_id' => $autorGroupUuidBin];
+        $result = $db->getData($sql, $params);
 
         if (empty($result)) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
@@ -288,7 +288,7 @@ if ($slug === 'totsLlibres') {
         exit;
     } catch (\Throwable $e) {
         http_response_code(500);
-        json_encode([
+        echo json_encode([
             'error' => 'Internal error',
             'message' => $e->getMessage(),
             'file' => $e->getFile(),
