@@ -89,7 +89,6 @@ if ($slug === 'llibre') {
   // OPTIONAL
   $titol_catala = optionalField($data, 'titol_catala');
 
-  if (!isUuid($id)) $errors['id'] = 'invalid_uuid';
   if (!isUuid($tipus_id)) $errors['tipus_id'] = 'invalid_uuid';
   if (!isUuid($editorial_id)) $errors['editorial_id'] = 'invalid_uuid';
   if (!isUuid($sub_tema_id)) $errors['sub_tema_id'] = 'invalid_uuid';
