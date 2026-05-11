@@ -4,8 +4,14 @@
   <h2>Base de dades: Biblioteca</h2>
   <h4 id="titolForm"></h4>
 
-  <div class="alert alert-success" id="missatgeOk" style="display:none"></div>
-  <div class="alert alert-danger" id="missatgeErr" style="display:none"></div>
+  <div id="okMessage" class="alert alert-success" style="display:none">
+    <span id="okText"></span>
+  </div>
+
+  <div id="errMessage" class="alert alert-danger" style="display:none">
+    <span id="errText"></span>
+  </div>
+
 
   <form id="formLlibre" class="row g-3">
 

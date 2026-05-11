@@ -92,29 +92,31 @@ if ($slug === 'llibre') {
 
   $img_id_bin = null;
 
+  $img_id_bin = null;
+
+  // 1) caso upload
   if ($hasImage) {
-    try {
-      $file = $_FILES['img_upload'];
 
-      $nom = pathinfo($file['name'], PATHINFO_FILENAME);
-      $alt = $nom;
+    $file = $_FILES['img_upload'];
+    $nom = pathinfo($file['name'], PATHINFO_FILENAME);
+    $alt = $nom;
 
-      $img_uuid = ImageService::createFromUpload(
-        $file,
-        2,
-        $nom,
-        $alt,
-        $conn
-      );
+    $img_uuid = ImageService::createFromUpload(
+      $file,
+      2,
+      $nom,
+      $alt,
+      $conn
+    );
 
-      $img_id_bin = Uuid::toBinary($img_uuid);
-    } catch (\Throwable $e) {
-      Response::error(
-        MissatgesAPI::error('upload_error'),
-        ['message' => $e->getMessage()],
-        400
-      );
-      exit;
+    $img_id_bin = Uuid::toBinary($img_uuid);
+  }
+
+  // 2) caso selección existente (IMPORTANTE)
+  elseif (!empty($data['img_id'])) {
+
+    if (isUuid($data['img_id'])) {
+      $img_id_bin = Uuid::toBinary($data['img_id']);
     }
   }
 
