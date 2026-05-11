@@ -12,6 +12,9 @@
     <span id="errText"></span>
   </div>
 
+  <div class="progress mt-2" style="display:none" id="uploadProgress">
+    <div id="uploadProgressBar" class="progress-bar" style="width:0%">0%</div>
+  </div>
 
   <form id="formLlibre" class="row g-3">
 

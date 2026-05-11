@@ -46,50 +46,140 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
 
   const hasFileInput = form.querySelector('input[type="file"]') !== null;
 
+  const okMessageDiv = document.getElementById('okMessage');
+  const okTextDiv = document.getElementById('okText');
+  const errMessageDiv = document.getElementById('errMessage');
+  const errTextDiv = document.getElementById('errText');
+
+  if (!okMessageDiv || !okTextDiv || !errMessageDiv || !errTextDiv) return;
+
+  // =========================================================
+  // 🟢 UPLOAD CON PROGRESO (IMÁGENES)
+  // =========================================================
+  if (hasFileInput) {
+    const formData = new FormData(form);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open(tipus, urlAjax, true);
+    xhr.setRequestHeader('Accept', 'application/json');
+
+    const wrap = document.getElementById('uploadProgress') as HTMLElement | null;
+    const bar = document.getElementById('uploadProgressBar') as HTMLElement | null;
+
+    if (wrap) wrap.style.display = 'block';
+
+    if (bar) {
+      bar.style.width = '0%';
+      bar.textContent = '0%';
+    }
+
+    // 👉 PROGRESO
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable) return;
+
+      const percent = Math.round((event.loaded / event.total) * 100);
+
+      const bar = document.getElementById('uploadProgressBar') as HTMLElement | null;
+      if (bar) {
+        bar.style.width = `${percent}%`;
+        bar.textContent = `${percent}%`;
+      }
+    };
+
+    xhr.onload = () => {
+      const wrap = document.getElementById('uploadProgress') as HTMLElement | null;
+      const bar = document.getElementById('uploadProgressBar') as HTMLElement | null;
+
+      if (bar) {
+        bar.style.width = '100%';
+        bar.textContent = '100%';
+      }
+
+      setTimeout(() => {
+        if (wrap) wrap.style.display = 'none';
+        if (bar) {
+          bar.style.width = '0%';
+          bar.textContent = '0%';
+        }
+      }, 500);
+
+      const data = JSON.parse(xhr.responseText);
+
+      if (xhr.status >= 200 && xhr.status < 300 && data.status === 'success') {
+        markInvalidFields(form, null);
+
+        missatgesBackend({
+          tipus: 'success',
+          missatge: data.message || Missatges.success.default,
+          contenidor: okMessageDiv,
+          text: okTextDiv,
+          altreContenidor: errMessageDiv,
+        });
+
+        if (successBehavior === 'hide') {
+          form.hidden = true;
+        } else if (successBehavior === 'disable') {
+          form.querySelectorAll('input,select,textarea,button,[contenteditable],trix-editor').forEach((el) => el.setAttribute('disabled', 'true'));
+        } else if (neteja ?? true) {
+          resetForm(formId);
+        }
+
+        form.dispatchEvent(new CustomEvent('form:success', { detail: data }));
+      } else {
+        missatgesBackend({
+          tipus: 'error',
+          missatge: data.message || Missatges.error.default,
+          contenidor: errMessageDiv,
+          text: errTextDiv,
+          altreContenidor: okMessageDiv,
+        });
+
+        markInvalidFields(form, data.errors);
+      }
+    };
+
+    xhr.onerror = () => {
+      missatgesBackend({
+        tipus: 'error',
+        missatge: Missatges.error.xarxa,
+        contenidor: errMessageDiv,
+        text: errTextDiv,
+        altreContenidor: okMessageDiv,
+      });
+    };
+
+    xhr.send(formData);
+    return;
+  }
+
+  // =========================================================
+  // 🔵 JSON NORMAL (SIN IMÁGENES)
+  // =========================================================
   let body: BodyInit;
   let headers: HeadersInit = {
     Accept: 'application/json',
+    'Content-Type': 'application/json',
   };
 
-  if (hasFileInput) {
-    // =========================
-    // 🟢 MODE FORMDATA (UPLOADS)
-    // =========================
-    const formData = new FormData(form);
+  const formDataRaw = new FormData(form);
+  const formData: Record<string, unknown> = {};
 
-    // opcional: normalització simple (manté compatibilitat arrays)
-    const normalized = new FormData();
-    for (const [key, value] of formData.entries()) {
-      normalized.append(key, value);
+  for (const [rawKey, value] of formDataRaw.entries()) {
+    const isArrayKey = rawKey.endsWith('[]');
+    const key = isArrayKey ? rawKey.slice(0, -2) : rawKey;
+
+    if (isArrayKey) {
+      const arr = (formData[key] as FormDataEntryValue[] | undefined) ?? [];
+      arr.push(value);
+      formData[key] = arr;
+    } else {
+      formData[key] = value;
     }
-
-    body = normalized;
-    // ❗ NO Content-Type en FormData
-  } else {
-    // =========================
-    // 🔵 MODE JSON (LEGACY)
-    // =========================
-    const formDataRaw = new FormData(form);
-    const formData: Record<string, unknown> = {};
-
-    for (const [rawKey, value] of formDataRaw.entries()) {
-      const isArrayKey = rawKey.endsWith('[]');
-      const key = isArrayKey ? rawKey.slice(0, -2) : rawKey;
-
-      if (isArrayKey) {
-        const arr = (formData[key] as FormDataEntryValue[] | undefined) ?? [];
-        arr.push(value);
-        formData[key] = arr;
-      } else {
-        formData[key] = value;
-      }
-    }
-
-    const finalData = preProcessFormData ? preProcessFormData(formData) : formData;
-
-    body = JSON.stringify(finalData);
-    headers['Content-Type'] = 'application/json';
   }
+
+  const finalData = preProcessFormData ? preProcessFormData(formData) : formData;
+
+  body = JSON.stringify(finalData);
 
   try {
     const response = await fetch(urlAjax, {
@@ -99,13 +189,6 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
     });
 
     const data = await response.json();
-
-    const okMessageDiv = document.getElementById('okMessage');
-    const okTextDiv = document.getElementById('okText');
-    const errMessageDiv = document.getElementById('errMessage');
-    const errTextDiv = document.getElementById('errText');
-
-    if (!okMessageDiv || !okTextDiv || !errMessageDiv || !errTextDiv) return;
 
     if (response.ok && data.status === 'success') {
       markInvalidFields(form, null);
@@ -124,43 +207,16 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
       if (successBehavior === 'hide') {
         form.hidden = true;
       } else if (successBehavior === 'disable') {
-        form.querySelectorAll<HTMLElement>('input,select,textarea,button,[contenteditable],trix-editor').forEach((el) => el.setAttribute('disabled', 'true'));
+        form.querySelectorAll('input,select,textarea,button,[contenteditable],trix-editor').forEach((el) => el.setAttribute('disabled', 'true'));
       } else if (shouldReset) {
         resetForm(formId);
       }
 
-      const template = (form.dataset as any).successRedirectTemplate as string | undefined;
-
-      if (template && typeof data?.slug === 'string' && data.slug.length > 0) {
-        const href = template.replace('{slug}', encodeURIComponent(data.slug));
-
-        const actions = document.getElementById('successActions') || okMessageDiv;
-
-        let btn = document.getElementById('createdViewBtn') as HTMLAnchorElement | null;
-
-        if (!btn) {
-          btn = document.createElement('a');
-          btn.id = 'createdViewBtn';
-          btn.className = 'btn btn-primary mt-2';
-          btn.target = '_self';
-          btn.rel = 'noopener';
-          btn.textContent = 'Veure fitxa';
-          actions.appendChild(btn);
-        }
-
-        btn.href = href;
-      }
-
       form.dispatchEvent(new CustomEvent('form:success', { detail: data }));
     } else {
-      const missatge = `
-        ${data.message ? `<p>${data.message}</p>` : ''}
-        ${renderErrors(data.errors) || `<p>${Missatges.error.default}</p>`}
-      `;
-
       missatgesBackend({
         tipus: 'error',
-        missatge,
+        missatge: data.message || Missatges.error.default,
         contenidor: errMessageDiv,
         text: errTextDiv,
         altreContenidor: okMessageDiv,
@@ -169,16 +225,9 @@ export async function transmissioDadesDB(event: Event, tipus: string, formId: st
       markInvalidFields(form, data.errors);
     }
   } catch (error) {
-    const errMessageDiv = document.getElementById('errMessage');
-    const errTextDiv = document.getElementById('errText');
-
-    if (!errMessageDiv || !errTextDiv) return;
-
-    const errorMessage = typeof error === 'object' && error && 'message' in error ? String((error as { message: string }).message) : Missatges.error.xarxa;
-
     missatgesBackend({
       tipus: 'error',
-      missatge: errorMessage,
+      missatge: Missatges.error.xarxa,
       contenidor: errMessageDiv,
       text: errTextDiv,
     });
