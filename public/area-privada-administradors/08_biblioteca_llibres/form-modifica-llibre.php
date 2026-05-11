@@ -78,14 +78,19 @@
 
     <hr>
 
-    <div class="col-md-6">
+    <div class="col-md-">
       <label>Imatge coberta existent:</label>
       <select class="form-select" name="img_id" id="img_id"></select>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-">
       <label>O puja una nova imatge:</label>
       <input class="form-control" type="file" name="img_upload" id="img_upload" accept="image/*">
+    </div>
+
+    <div class="col-md-">
+      <label>Nom Imatge:</label>
+      <input class="form-control" type="text" name="alt" id="alt"></select>
     </div>
 
     <hr>

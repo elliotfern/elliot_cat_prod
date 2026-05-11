@@ -99,16 +99,28 @@
       <select class="form-select" name="pais_autor_id" id="pais_autor_id"></select>
     </div>
 
-    <!-- IMATGE -->
-    <div class="col-md-4">
-      <label for="img_id" class="form-label">Imatge</label>
-      <select class="form-select" name="img_id" id="img_id"></select>
-    </div>
 
     <!-- GRUPS -->
     <div class="col-md-4">
       <label for="grup_ids" class="form-label">Classificació (professió)</label>
       <select class="form-select" name="grup_ids[]" id="grup_ids" multiple required></select>
+    </div>
+
+    <hr>
+    <!-- IMATGE -->
+    <div class="col-md-">
+      <label>Imatge coberta existent:</label>
+      <select class="form-select" name="img_id" id="img_id"></select>
+    </div>
+
+    <div class="col-md-">
+      <label>O puja una nova imatge:</label>
+      <input class="form-control" type="file" name="img_upload" id="img_upload" accept="image/*">
+    </div>
+
+    <div class="col-md-">
+      <label>Nom Imatge:</label>
+      <input class="form-control" type="text" name="alt" id="alt"></select>
     </div>
 
     <!-- TRIX -->

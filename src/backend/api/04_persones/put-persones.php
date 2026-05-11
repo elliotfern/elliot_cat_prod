@@ -5,6 +5,9 @@ use App\Utils\Uuid;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Utils\ImageService;
+
+global $conn;
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -15,11 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
-
-if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
-    Response::error(MissatgesAPI::error('method_not_allowed'), [], 405);
-    exit;
-}
 
 function isUuid($s)
 {
@@ -107,8 +105,13 @@ if (isset($_GET['persona'])) {
         exit;
     }
 
-    $input = file_get_contents("php://input");
-    $data = json_decode($input, true);
+    $isMultipart = !empty($_FILES) || strpos($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/form-data') !== false;
+
+    if ($isMultipart) {
+        $data = $_POST;
+    } else {
+        $data = json_decode(file_get_contents("php://input"), true);
+    }
 
     if (!is_array($data)) {
         Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
@@ -138,7 +141,6 @@ if (isset($_GET['persona'])) {
     $pais_autor_id = optionalField($data, 'pais_autor_id');
     $ciutat_naixement_id = optionalField($data, 'ciutat_naixement_id');
     $ciutat_defuncio_id = optionalField($data, 'ciutat_defuncio_id');
-    $img_id = optionalField($data, 'img_id');
 
     if ($pais_autor_id !== '__MISSING__' && $pais_autor_id !== null && !isUuid($pais_autor_id)) {
         $errors['pais_autor_id'] = 'invalid_uuid';
@@ -149,8 +151,29 @@ if (isset($_GET['persona'])) {
     if ($ciutat_defuncio_id !== '__MISSING__' && $ciutat_defuncio_id !== null && !isUuid($ciutat_defuncio_id)) {
         $errors['ciutat_defuncio_id'] = 'invalid_uuid';
     }
-    if ($img_id !== '__MISSING__' && $img_id !== null && !isUuid($img_id)) {
-        $errors['img_id'] = 'invalid_uuid';
+
+    $hasImage = !empty($_FILES['img_upload']) && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK;
+    if ($hasImage) {
+
+        $file = $_FILES['img_upload'];
+
+        $nom = pathinfo($file['name'], PATHINFO_FILENAME);
+
+        $alt = !empty($_POST['alt'])
+            ? data_input($_POST['alt'])
+            : $nom;
+
+        $img_uuid = ImageService::createFromUpload(
+            $file,
+            18,
+            $nom,
+            $alt,
+            $conn
+        );
+
+        $img_id_bin = Uuid::toBinary($img_uuid);
+    } else if (!empty($data['img_id']) && isUuid($data['img_id'])) {
+        $img_id_bin = Uuid::toBinary($data['img_id']);
     }
 
     // groups
@@ -265,12 +288,12 @@ if (isset($_GET['persona'])) {
             }
         }
 
-        if ($img_id !== '__MISSING__') {
-            if ($img_id === null) {
+        if ($img_id_bin !== '__MISSING__') {
+            if ($img_id_bin === null) {
                 $set[] = "img_id = NULL";
             } else {
                 $set[] = "img_id = :img_id";
-                $bind[] = [':img_id', Uuid::toBinary($img_id), PDO::PARAM_LOB];
+                $bind[] = [':img_id', $img_id_bin, PDO::PARAM_LOB];
             }
         }
 

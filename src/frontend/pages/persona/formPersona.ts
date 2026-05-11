@@ -89,7 +89,7 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
 
     form.addEventListener('submit', function (event) {
       //transmissioDadesDB(event, 'PUT', 'formPersona', API_URLS.PUT.PERSONA(id));
-      transmissioDadesDB(event, 'PUT', 'formPersona', `https://elliot.cat/api/persones/put/?persona=${id}`);
+      transmissioDadesDB(event, 'POST', 'formPersona', `https://elliot.cat/api/persones/put/?persona=${id}`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nova Persona</h2>`;

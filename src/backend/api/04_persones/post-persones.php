@@ -5,6 +5,9 @@ use App\Utils\Uuid;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Utils\ImageService;
+
+global $conn;
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -100,8 +103,13 @@ function insertPersonGroups(PDO $conn, string $personaIdBin, array $grupIds): vo
 // -------------------------
 if (isset($_GET['persona'])) {
 
-    $input = file_get_contents("php://input");
-    $data = json_decode($input, true);
+    $isMultipart = !empty($_FILES) || strpos($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/form-data') !== false;
+
+    if ($isMultipart) {
+        $data = $_POST;
+    } else {
+        $data = json_decode(file_get_contents("php://input"), true);
+    }
 
     if (!is_array($data)) {
         Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
@@ -135,12 +143,37 @@ if (isset($_GET['persona'])) {
     $pais_autor_id        = optionalField($data, 'pais_autor_id');
     $ciutat_naixement_id  = optionalField($data, 'ciutat_naixement_id');
     $ciutat_defuncio_id   = optionalField($data, 'ciutat_defuncio_id');
-    $img_id               = optionalField($data, 'img_id');
 
     if ($pais_autor_id !== null && !isUuid($pais_autor_id)) $errors['pais_autor_id'] = 'invalid_uuid';
     if ($ciutat_naixement_id !== null && !isUuid($ciutat_naixement_id)) $errors['ciutat_naixement_id'] = 'invalid_uuid';
     if ($ciutat_defuncio_id !== null && !isUuid($ciutat_defuncio_id)) $errors['ciutat_defuncio_id'] = 'invalid_uuid';
-    if ($img_id !== null && !isUuid($img_id)) $errors['img_id'] = 'invalid_uuid';
+
+    // IMATGE
+    $img_id_bin = null;
+
+    $hasImage = !empty($_FILES['img_upload']) && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK;
+
+    if ($hasImage) {
+
+        $file = $_FILES['img_upload'];
+        $nom = pathinfo($file['name'], PATHINFO_FILENAME);
+
+        $alt = !empty($data['alt'])
+            ? data_input($data['alt'])
+            : $nom;
+
+        $img_uuid = ImageService::createFromUpload(
+            $file,
+            18, // PERSONA / AVATAR
+            $nom,
+            $alt,
+            $conn
+        );
+
+        $img_id_bin = Uuid::toBinary($img_uuid);
+    } elseif (!empty($data['img_id']) && isUuid($data['img_id'])) {
+        $img_id_bin = Uuid::toBinary($data['img_id']);
+    }
 
     // Grupos: array de UUIDs
     // Acepta 'grup_ids' (nuevo) o 'grups' (legacy / form)
@@ -204,7 +237,6 @@ if (isset($_GET['persona'])) {
         $pais_autor_bin = Uuid::toBinary($pais_autor_id);
         $ciutat_naixement_bin = Uuid::toBinary($ciutat_naixement_id);
         $ciutat_defuncio_bin = Uuid::toBinary($ciutat_defuncio_id);
-        $img_bin = Uuid::toBinary($img_id);
 
         // Insert persona
         $sql = "
@@ -236,7 +268,7 @@ if (isset($_GET['persona'])) {
         $stmt->bindValue(':pais_autor_id', $pais_autor_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':ciutat_naixement_id', $ciutat_naixement_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':ciutat_defuncio_id', $ciutat_defuncio_bin, PDO::PARAM_LOB);
-        $stmt->bindValue(':img_id', $img_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':img_id', $img_id_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
 
         if ($cognoms === null) $stmt->bindValue(':cognoms', null, PDO::PARAM_NULL);

@@ -97,9 +97,15 @@ if ($slug === 'llibre') {
   // 1) caso upload
   if ($hasImage) {
 
+
+
     $file = $_FILES['img_upload'];
+
     $nom = pathinfo($file['name'], PATHINFO_FILENAME);
-    $alt = $nom;
+
+    $alt = !empty($data['img'])
+      ? data_input($data['img'])
+      : $nom;
 
     $img_uuid = ImageService::createFromUpload(
       $file,
