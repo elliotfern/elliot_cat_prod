@@ -38,16 +38,27 @@ interface ApiResponse<T> {
 let autorsList: { id: string; autor_nom_complet: string }[] = [];
 
 async function loadAutors() {
-  const response = await fetch('https://elliot.cat/api/biblioteca/get/totsAutors', {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-    },
-  });
+  try {
+    const response = await fetch('https://elliot.cat/api/biblioteca/get/totsAutors', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    });
 
-  const data = await response.json();
+    if (!response.ok) {
+      console.error('Error loading autors:', response.status);
+      autorsList = [];
+      return;
+    }
 
-  autorsList = Array.isArray(data) ? data : (data?.data ?? []);
+    const data = await response.json();
+
+    autorsList = Array.isArray(data) ? data : (data?.data ?? []);
+  } catch (e) {
+    console.error('loadAutors failed:', e);
+    autorsList = [];
+  }
 }
 
 function createAuthorSelect(selectedValue: string | null = null) {
@@ -99,6 +110,7 @@ function initAuthorUI() {
 }
 
 export async function formLlibre(isUpdate: boolean, slug?: string) {
+  console.log('FORM INIT');
   const form = document.getElementById('formLlibre');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btn') as HTMLButtonElement;
@@ -113,13 +125,19 @@ export async function formLlibre(isUpdate: boolean, slug?: string) {
 
   if (!divTitol || !btnSubmit || !form) return;
 
-  await loadAutors();
+  const autorsPromise = loadAutors();
+  //const bookPromise = fetchLibro();
+
+  await autorsPromise;
+  //await bookPromise;
 
   if (slug && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(`https://elliot.cat/api/biblioteca/get/llibreSlug?llibre=${slug}`, true);
+    console.log('ENTER SLUG:', slug, isUpdate);
+    const response = await fetch(`https://elliot.cat/api/biblioteca/get/llibreSlug?llibre=${slug}`);
+    const data = await response.json();
+    console.log(data);
 
-    if (!response || !response.data) return;
-    data = response.data;
+    if (!response || !data) return;
 
     divTitol.innerHTML = `<h2>Modificació dades Llibre</h2>`;
 
