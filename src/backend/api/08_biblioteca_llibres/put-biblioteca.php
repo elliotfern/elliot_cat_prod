@@ -4,6 +4,12 @@ use App\Utils\Uuid;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Config\Database;
+
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+$db = new Database();
+$pdo = $db->getPdo();
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');

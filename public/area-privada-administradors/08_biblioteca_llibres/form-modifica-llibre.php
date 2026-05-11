@@ -1,74 +1,15 @@
-<?php
-// Obtener la URL completa
-$url2 = $_SERVER['REQUEST_URI'];
-$parsedUrl = parse_url($url2);
-$path = $parsedUrl['path'];
-$segments = explode("/", trim($path, "/"));
+<div class="barraNavegacio"></div>
 
-if ($segments[2] === "modifica-llibre") {
-  $modificaBtn = 1;
-  $slug = $routeParams[0];
-} else {
-  $modificaBtn = 2;
-}
+<div class="container form">
+  <h2>Base de dades: Biblioteca</h2>
+  <h4 id="bookUpdateTitle"></h4>
 
-if ($modificaBtn === 1) {
-?>
-  <script type="module">
-    formUpdateLlibre("<?php echo $slug; ?>");
-  </script>
-<?php
-} else {
-?>
-  <script type="module">
-    // Llenar selects con opciones
-    selectOmplirDades("/api/biblioteca/get/imatgesLlibres", "", "img_id", "alt");
-    selectOmplirDades("/api/biblioteca/get/temes", "", "sub_tema_id", "tema_complet");
-    selectOmplirDades("/api/biblioteca/get/llengues", "", "lang", "idioma_ca");
-    selectOmplirDades("/api/biblioteca/get/estatLlibre", "", "estat_id", "estat");
-    selectOmplirDades("/api/biblioteca/get/editorials", "", "editorial_id", "editorial");
-    selectOmplirDades("/api/biblioteca/get/tipus", "", "tipus_id", "nomTipus");
-    selectOmplirDades("/api/biblioteca/get/grupLlibre", "", "grup", "nom");
-  </script>
-<?php
-}
-?>
+  <div class="alert alert-success" id="missatgeOk" style="display:none"></div>
+  <div class="alert alert-danger" id="missatgeErr" style="display:none"></div>
 
-<div class="barraNavegacio">
-  <h6><a href="<?php echo APP_INTRANET; ?>">Intranet</a> > <a href="<?php echo APP_INTRANET . $url['biblioteca']; ?>">Biblioteca</a> > <a href="<?php echo APP_INTRANET . $url['biblioteca']; ?>/llistat-llibres">Llibres </a></h6>
-</div>
+  <form id="formLlibre" class="row g-3">
 
-<div class="container-fluid form">
-  <?php
-  if ($modificaBtn === 1) {
-  ?>
-    <h2>Modificar les dades del llibre</h2>
-    <h4 id="bookUpdateTitle"></h4>
-  <?php
-  } else {
-  ?>
-    <h2>Creació d'un nou llibre</h2>
-  <?php
-  }
-  ?>
-
-  <div class="alert alert-success" id="okMessage" style="display:none" role="alert">
-    <div id="okText"></div>
-  </div>
-
-  <div class="alert alert-danger" id="errMessage" style="display:none" role="alert">
-    <div id="errText"></div>
-  </div>
-
-  <form id="modificaLlibre" class="row g-3" novalidate>
-    <?php $timestamp = date('Y-m-d'); ?>
-    <?php
-    if ($modificaBtn === 1) {
-    ?>
-      <input type="hidden" id="id" name="id" value="">
-    <?php
-    }
-    ?>
+    <input type="hidden" id="id" name="id" value="">
 
     <div class="col-md-4">
       <label>Títol llibre en llengua original:</label>
@@ -83,12 +24,6 @@ if ($modificaBtn === 1) {
     <div class="col-md-4">
       <label>Slug:</label>
       <input class="form-control" type="text" name="slug" id="slug" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Imatge coberta:</label>
-      <select class="form-select" name="img_id" id="img_id" value="">
-      </select>
     </div>
 
     <div class="col-md-4">
@@ -132,118 +67,42 @@ if ($modificaBtn === 1) {
       </select>
     </div>
 
-    <div class="container" style="margin-top:25px">
+    <hr>
+
+    <div class="col-md-6">
+      <label>Imatge coberta existent:</label>
+      <select class="form-select" name="img_id" id="img_id"></select>
+    </div>
+
+    <div class="col-md-6">
+      <label>O puja una nova imatge:</label>
+      <input class="form-control" type="file" name="img_upload" id="img_upload" accept="image/*">
+    </div>
+
+    <hr>
+    <h4>Autor/a o autors/es del llibre:</h4>
+    <div class="col-md-6">
+      <label>Autors:</label>
+
+      <div id="autorsContainer"></div>
+
+      <button type="button" class="btn btn-sm btn-secondary mt-2" id="addAutorBtn">
+        + Afegir autor
+      </button>
+    </div>
+
+    <div class="container" style="margin-top:20px">
       <div class="row">
         <div class="col-6 text-left">
-          <a href="#" onclick="window.history.back()" class="btn btn-secondary">Tornar enrere</a>
+          <a class="btn btn-secondary" href="<?php echo APP_INTRANET . $url['biblioteca']; ?>/llibre-autors/<?php echo htmlspecialchars($slug); ?>">Tornar</a>
         </div>
         <div class="col-6 text-right derecha">
-          <?php
-          if ($modificaBtn === 1) {
-          ?>
-            <button type="submit" class="btn btn-primary">Modifica llibre</button>
-          <?php
-          } else {
-          ?>
-            <button type="submit" class="btn btn-primary">Crea nou llibre</button>
-          <?php
-          }
-          ?>
-
+          <button id="btn" type="submit" class="btn btn-primary">Afegir</button>
         </div>
       </div>
     </div>
   </form>
-
 </div>
 
-<script>
-  function formUpdateLlibre(slug) {
-    const urlAjax = "/api/biblioteca/get/llibreSlug?llibre=" + encodeURIComponent(slug);
 
-    fetch(urlAjax, {
-        method: "GET"
-      })
-      .then(r => r.json())
-      .then(json => {
-        const data = json && json.data ? json.data : json; // compat si algún día no viene wrapper
-
-        // Título arriba
-        const h2Element = document.getElementById('bookUpdateTitle');
-        if (h2Element) h2Element.innerHTML = "Títol del llibre: " + (data.titol_original ?? '');
-
-        // Campos reales de db_llibres
-        const titolEl = document.getElementById('titol_original');
-        if (titolEl) titolEl.value = data.titol_original ?? '';
-
-        const titolCa = document.getElementById('titol_catala');
-        if (titolCa) titolCa.value = data.titol_catala ?? '';
-
-
-        const slugEl = document.getElementById('slug');
-        if (slugEl) slugEl.value = data.slug ?? '';
-
-        const anyEl = document.getElementById('any');
-        if (anyEl) anyEl.value = data.any ?? '';
-
-        const idEl = document.getElementById('id');
-        if (idEl) idEl.value = data.id ?? '';
-
-        // SELECTS (nombres según db_llibres)
-        // OJO: según tu respuesta actual, editorial_id / tipus_id / sub_tema_id vienen como UUID string
-        // y lang/img/estat como int.
-        selectOmplirDades("/api/biblioteca/get/imatgesLlibres", data.img_id, "img_id", "alt");
-        selectOmplirDades("/api/biblioteca/get/editorials", data.editorial_id, "editorial_id", "editorial");
-        selectOmplirDades("/api/biblioteca/get/temes", data.sub_tema_id, "sub_tema_id", "tema_complet");
-        selectOmplirDades("/api/biblioteca/get/llengues", data.lang, "lang", "idioma_ca");
-        selectOmplirDades("/api/biblioteca/get/tipus", data.tipus_id, "tipus_id", "nomTipus");
-        selectOmplirDades("/api/biblioteca/get/estatLlibre", data.estat_id, "estat_id", "estat");
-        selectOmplirDades("/api/biblioteca/get/grupLlibre", data.idGrup, "grup", "nom");
-      })
-      .catch(err => console.error("Error al obtener los datos:", err));
-  }
-
-  async function selectOmplirDades(url, selectedValue, selectId, textField) {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Error en la sol·licitud AJAX');
-
-      const json = await response.json();
-      const items = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
-
-      const selectElement = document.getElementById(selectId);
-      if (!selectElement) {
-        console.error(`Select element with id ${selectId} not found`);
-        return;
-      }
-
-      selectElement.innerHTML = '';
-
-      const placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.textContent = '— Selecciona —';
-      selectElement.appendChild(placeholder);
-
-      const selectedStr = selectedValue == null ? '' : String(selectedValue);
-
-      items.forEach((item) => {
-        const option = document.createElement('option');
-
-        // Normalmente tu API devuelve item.id (UUID string o int)
-        option.value = item.id != null ? String(item.id) : '';
-
-        let label = '';
-        if (typeof textField === 'function') label = textField(item);
-        else label = item && item[textField] != null ? String(item[textField]) : '';
-
-        option.textContent = label;
-
-        if (option.value === selectedStr) option.selected = true;
-
-        selectElement.appendChild(option);
-      });
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
-</script>
+</div>

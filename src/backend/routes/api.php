@@ -135,7 +135,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/biblioteca/put' => [
+    '/api/biblioteca/put/{slug}' => [
         'view' => 'src/backend/api/08_biblioteca_llibres/put-biblioteca.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -143,7 +143,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/biblioteca/post' => [
+    '/api/biblioteca/post/{slug}' => [
         'view' => 'src/backend/api/08_biblioteca_llibres/post-biblioteca.php',
         'needs_session' => false,
         'header_footer' => false,

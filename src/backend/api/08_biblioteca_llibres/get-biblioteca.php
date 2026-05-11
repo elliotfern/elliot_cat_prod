@@ -362,15 +362,15 @@ if ($slug === 'totsLlibres') {
         $sql = <<<SQL
                 SELECT 
                     b.id,
+                    b.titol_original,
+                    b.titol_catala,
                     b.tipus_id,
                     b.editorial_id,
                     b.sub_tema_id,
                     b.estat_id,
-                    b.titol_original,
-                    b.titol_catala,
-                    b.slug AS llibreSlug,
                     b.slug,
                     b.any,
+                    b.grup,
                     b.dateCreated,
                     b.dateModified,
                     b.lang,
@@ -611,78 +611,8 @@ if ($slug === 'totsLlibres') {
         exit;
     }
 
-    // 11) Llibre imatge
-    // ruta GET => "/api/biblioteca/get/imatgesLlibres"
-} else if ($slug === 'imatgesLlibres') {
 
-    try {
 
-        $sql = <<<SQL
-                SELECT i.id, i.alt
-                FROM %s AS i
-                WHERE i.typeImg = 2
-                ORDER BY i.alt ASC
-                SQL;
-
-        $query = sprintf(
-            $sql,
-            qi(Tables::DB_IMATGES, $pdo)
-        );
-
-        $result = $db->getData($query);
-
-        if (empty($result)) {
-            Response::error(MissatgesAPI::error('not_found'), [], 404);
-            exit; // IMPORTANTE
-        }
-
-        Response::success(MissatgesAPI::success('get'), $result, 200);
-    } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode([
-            'error' => 'Internal error',
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-        ]);
-        exit;
-    }
-
-    // 11) Editorials
-    // ruta GET => "/api/biblioteca/get/editorials"
-} else if ($slug === 'editorials') {
-
-    try {
-
-        $sql = <<<SQL
-                SELECT e.id AS id, e.editorial
-                FROM %s AS e
-                ORDER BY e.editorial ASC
-                SQL;
-
-        $query = sprintf(
-            $sql,
-            qi(Tables::LLIBRES_EDITORIALS, $pdo)
-        );
-
-        $result = $db->getData($query);
-
-        if (empty($result)) {
-            Response::error(MissatgesAPI::error('not_found'), [], 404);
-            exit; // IMPORTANTE
-        }
-
-        Response::success(MissatgesAPI::success('get'), $result, 200);
-    } catch (\Throwable $e) {
-        http_response_code(500);
-        echo json_encode([
-            'error' => 'Internal error',
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-        ]);
-        exit;
-    }
 
     // 11) Gèneres
     // ruta GET => "/api/biblioteca/get/llengues"

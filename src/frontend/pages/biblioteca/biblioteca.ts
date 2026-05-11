@@ -10,27 +10,17 @@ import { initAdminButtons, initLlibreAutorsPage } from './fitxaLlibreAutors';
 import { getLangPrefix } from '../../utils/locales/getLangPrefix';
 import { DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
 import { taulaLlistatGrups } from './taulaLlistatGrups';
+import { formLlibre } from './formLlibre';
 
 const url = window.location.href;
 const pageType = getPageType(url);
 
 export async function biblioteca() {
   if (pageType[2] === 'modifica-llibre') {
-    const llibre = document.getElementById('modificaLlibre');
-    if (llibre) {
-      // Lanzar actualizador de datos
-      llibre.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'PUT', 'modificaLlibre', '/api/biblioteca/put/?llibre');
-      });
-    }
+    const slug = pageType[3];
+    formLlibre(true, slug);
   } else if (pageType[2] === 'nou-llibre') {
-    const llibre = document.getElementById('modificaLlibre');
-    if (llibre) {
-      // Lanzar actualizador de datos
-      llibre.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'modificaLlibre', '/api/biblioteca/post/?llibre');
-      });
-    }
+    formLlibre(false);
   } else if ([pageType[1], pageType[2]].includes('fitxa-autor')) {
     const isAdmin = await getIsAdmin();
     const url = window.location.href;

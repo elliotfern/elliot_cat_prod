@@ -212,6 +212,188 @@ if ($slug === 'directors') {
         );
     }
 
+    // Llistat Estat llibre
+    // ruta GET => "/api/cinema/get/auxiliars/?type=estatLlibre"
+} else if ($slug === "estatLlibre") {
+
+    $db = new Database();
+    $query = "SELECT i.id, i.estat
+            FROM db_llibres_estats AS i
+            ORDER BY i.estat ASC";
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat Editorials
+    // ruta GET => "/api/auxiliars/get/editorials"
+} else if ($slug === 'editorials') {
+
+    try {
+
+        $sql = <<<SQL
+                SELECT e.id AS id, e.editorial
+                FROM %s AS e
+                ORDER BY e.editorial ASC
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_EDITORIALS, $pdo)
+        );
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
+
+
+    // Llistat Tipus llibre
+    // ruta GET => "/api/auxiliars/get/tipusLlibre"
+} else if ($slug === "tipusLlibre") {
+
+    $db = new Database();
+    $query = "SELECT i.id, i.nomTipus
+            FROM db_llibres_tipus AS i
+            ORDER BY i.nomTipus ASC";
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // 10) ruta grup llibre
+    // ruta GET => "/api/biblioteca/get/grupLlibre"
+} else if ($slug === 'grupLlibre') {
+
+    try {
+
+        $sql = <<<SQL
+                SELECT 
+                    e.id,
+                    e.nom
+                FROM %s AS e
+                ORDER BY e.nom
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_GRUP, $pdo)
+        );
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
+
+    // 11) Llibre imatge
+    // ruta GET => "/api/biblioteca/get/imatgesLlibres"
+} else if ($slug === 'imatgesLlibres') {
+
+    try {
+
+        $sql = <<<SQL
+                SELECT i.id, i.alt
+                FROM %s AS i
+                WHERE i.typeImg = 2
+                ORDER BY i.alt ASC
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::DB_IMATGES, $pdo)
+        );
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            exit; // IMPORTANTE
+        }
+
+        Response::success(MissatgesAPI::success('get'), $result, 200);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
+
     // Llistat paisos
     // ruta GET => "/api/cinema/get/auxiliars/paisos"
 } else if ($slug === "pais" || $slug === "paisos") {
