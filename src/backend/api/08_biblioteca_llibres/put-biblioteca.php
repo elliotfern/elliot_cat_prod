@@ -25,12 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
 
-// Only PUT
-if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
-  header('HTTP/1.1 405 Method Not Allowed');
-  echo json_encode(['error' => 'Method not allowed']);
-  exit();
-}
 
 function isUuid($s)
 {

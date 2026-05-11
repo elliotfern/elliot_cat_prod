@@ -165,7 +165,8 @@ export async function formLlibre(isUpdate: boolean, slug?: string) {
     }
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formLlibre', `https://elliot.cat/api/biblioteca/put/llibre`);
+      // Lo mandamos por POST porque PUT no funciona bien con ficheros
+      transmissioDadesDB(event, 'POST', 'formLlibre', `https://elliot.cat/api/biblioteca/put/llibre`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nou Llibre</h2>`;
