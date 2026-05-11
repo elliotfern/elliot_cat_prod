@@ -2,7 +2,7 @@
 
 <div class="container form">
   <h2>Base de dades: Biblioteca</h2>
-  <h4 id="bookUpdateTitle"></h4>
+  <h4 id="titolForm"></h4>
 
   <div class="alert alert-success" id="missatgeOk" style="display:none"></div>
   <div class="alert alert-danger" id="missatgeErr" style="display:none"></div>

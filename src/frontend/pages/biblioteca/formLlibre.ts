@@ -126,10 +126,8 @@ export async function formLlibre(isUpdate: boolean, slug?: string) {
   if (!divTitol || !btnSubmit || !form) return;
 
   const autorsPromise = loadAutors();
-  //const bookPromise = fetchLibro();
 
   await autorsPromise;
-  //await bookPromise;
 
   if (slug && isUpdate) {
     console.log('ENTER SLUG:', slug, isUpdate);
