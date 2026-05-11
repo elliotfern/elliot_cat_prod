@@ -40,6 +40,24 @@ function isUuid($s)
   );
 }
 
+// Helpers
+function requireField(array $data, string $key, array &$errors)
+{
+  if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+    $errors[$key] = 'required';
+    return null;
+  }
+  return data_input($data[$key]);
+}
+
+function optionalField(array $data, string $key)
+{
+  return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
+    ? data_input($data[$key])
+    : null;
+}
+
+
 // ==============================
 // PUT LLIBRE
 // ==============================
@@ -106,9 +124,7 @@ if ($slug === 'llibre') {
     );
 
     $img_id_bin = Uuid::toBinary($img_uuid);
-  }
-
-  elseif (!empty($data['img_id']) && isUuid($data['img_id'])) {
+  } elseif (!empty($data['img_id']) && isUuid($data['img_id'])) {
     $img_id_bin = Uuid::toBinary($data['img_id']);
   }
 
@@ -187,7 +203,6 @@ if ($slug === 'llibre') {
       200
     );
     exit;
-
   } catch (\Throwable $e) {
 
     Response::error(
