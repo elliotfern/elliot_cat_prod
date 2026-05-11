@@ -94,7 +94,7 @@
     <div class="container" style="margin-top:20px">
       <div class="row">
         <div class="col-6 text-left">
-          <a class="btn btn-secondary" href="<?php echo APP_INTRANET . $url['biblioteca']; ?>/llibre-autors/<?php echo htmlspecialchars($slug); ?>">Tornar</a>
+          <a class="btn btn-secondary" href="">Tornar</a>
         </div>
         <div class="col-6 text-right derecha">
           <button id="btn" type="submit" class="btn btn-primary">Afegir</button>

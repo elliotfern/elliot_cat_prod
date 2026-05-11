@@ -143,8 +143,6 @@ export async function formLlibre(isUpdate: boolean, slug?: string) {
     const fileInput = document.getElementById('img_upload') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
 
-    renderFormInputs(responseData);
-
     const container = document.getElementById('autorsContainer');
     if (container) container.innerHTML = '';
 
@@ -167,14 +165,22 @@ export async function formLlibre(isUpdate: boolean, slug?: string) {
     }
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formLlibre', `https://elliot.cat/api/biblioteca/put/?llibre`);
+      transmissioDadesDB(event, 'PUT', 'formLlibre', `https://elliot.cat/api/biblioteca/put/llibre`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nou Llibre</h2>`;
     btnSubmit.textContent = 'Inserir dades';
 
+    const container = document.getElementById('autorsContainer');
+    if (container) container.innerHTML = '';
+
+    initAuthorUI();
+
+    // crear primer select vacío
+    createAuthorSelect();
+
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formLlibre', 'https://elliot.cat/api/biblioteca/post/?llibre', true);
+      transmissioDadesDB(event, 'POST', 'formLlibre', 'https://elliot.cat/api/biblioteca/post/llibre', true);
     });
   }
 

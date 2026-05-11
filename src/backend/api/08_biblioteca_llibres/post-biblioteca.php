@@ -6,11 +6,13 @@ use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Config\Database;
+use App\Utils\ImageService;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
 $db = new Database();
 $pdo = $db->getPdo();
+global $conn;
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -38,14 +40,21 @@ function isUuid($s)
 // INSERIR NOU LLIBRE
 if ($slug === 'llibre') {
 
-  // Leer JSON
-  $input_data = file_get_contents("php://input");
-  $data = json_decode($input_data, true);
+  $isMultipart = !empty($_FILES) || strpos($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/form-data') !== false;
+
+  if ($isMultipart) {
+    $data = $_POST;
+  } else {
+    $input_data = file_get_contents("php://input");
+    $data = json_decode($input_data, true);
+  }
 
   if (!is_array($data)) {
-    Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+    Response::error(MissatgesAPI::error('bad_request'), ['data' => 'invalid'], 400);
     exit;
   }
+
+
 
   // Helpers
   function requireField(array $data, string $key, array &$errors)
@@ -77,7 +86,37 @@ if ($slug === 'llibre') {
   $sub_tema_id  = requireField($data, 'sub_tema_id', $errors);   // UUID string
   $grup  = requireField($data, 'grup', $errors);   // UUID string
   $estat_id        = requireField($data, 'estat_id', $errors);   // UUID string
-  $img_id          = optionalField($data, 'img_id');   // UUID string
+  $newImgId = null;
+  // detectar si viene imagen
+  $hasImage = !empty($_FILES['img_upload']) && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK;
+
+  $img_id_bin = null;
+
+  if ($hasImage) {
+    try {
+      $file = $_FILES['img_upload'];
+
+      $nom = pathinfo($file['name'], PATHINFO_FILENAME);
+      $alt = $nom;
+
+      $img_uuid = ImageService::createFromUpload(
+        $file,
+        2,
+        $nom,
+        $alt,
+        $conn
+      );
+
+      $img_id_bin = Uuid::toBinary($img_uuid);
+    } catch (\Throwable $e) {
+      Response::error(
+        MissatgesAPI::error('upload_error'),
+        ['message' => $e->getMessage()],
+        400
+      );
+      exit;
+    }
+  }
 
   $lang         = requireField($data, 'lang', $errors);          // int
 
@@ -85,9 +124,6 @@ if ($slug === 'llibre') {
   if (!isUuid($editorial_id)) $errors['editorial_id'] = 'invalid_uuid';
   if (!isUuid($sub_tema_id)) $errors['sub_tema_id'] = 'invalid_uuid';
   if (!isUuid($grup)) $errors['grup'] = 'invalid_uuid';
-  if ($img_id && !isUuid($img_id)) {
-    $errors['img_id'] = 'invalid_uuid';
-  }
 
   if (!empty($errors)) {
     Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
@@ -107,9 +143,6 @@ if ($slug === 'llibre') {
   $sub_tema_id_bin = Uuid::toBinary($sub_tema_id);
   $estat_id_bin = Uuid::toBinary($estat_id);
   $grup_bin = Uuid::toBinary($grup);
-  $img_id_bin = Uuid::toBinary($img_id);
-
-  global $conn;
 
   $sql = "INSERT INTO " . Tables::LLIBRES . " (
               id, titol_original, titol_catala, slug, any,
@@ -154,6 +187,38 @@ if ($slug === 'llibre') {
     $stmt->bindValue(':grup', $grup_bin, PDO::PARAM_LOB);
 
     if ($stmt->execute()) {
+
+      // ===============================
+      // AUTORS (RELACIÓN LLIBRE)
+      // ===============================
+
+      $autors = $data['autors'] ?? [];
+
+      if (!is_array($autors)) {
+        $autors = [];
+      }
+
+      if (!empty($autors)) {
+
+        $sqlAutor = "
+          INSERT IGNORE INTO " . Tables::LLIBRES_AUTORS . "
+          (llibre_id, autor_id)
+          VALUES
+          (:llibre_id, :autor_uuid)
+      ";
+
+        $stmtAutor = $conn->prepare($sqlAutor);
+
+        foreach ($autors as $autorId) {
+
+          if (!isUuid($autorId)) continue;
+
+          $stmtAutor->execute([
+            ':llibre_id' => $uuidBytes,
+            ':autor_uuid' => Uuid::toBinary($autorId),
+          ]);
+        }
+      }
       Response::success(
         MissatgesAPI::success('create'),
         [
@@ -221,7 +286,6 @@ if ($slug === 'llibre') {
   }
 
   try {
-    global $conn;
 
     // 1) Obtener llibre_id (BINARY(16)) por slug
     $qBook = "SELECT id FROM " . Tables::LLIBRES . " WHERE slug = :slug LIMIT 1";
@@ -274,6 +338,7 @@ if ($slug === 'llibre') {
 
     if ($stmt->execute()) {
       $relId = (int)$conn->lastInsertId();
+
 
       Response::success(
         MissatgesAPI::success('create'),
@@ -344,8 +409,6 @@ if ($slug === 'llibre') {
   $uuid = ramseny::uuid7();
   $uuidBytes = $uuid->getBytes();   // para BINARY(16)
   $uuidString = $uuid->toString();  // para devolver al frontend si quieres
-
-  global $conn;
 
   $sql = "INSERT INTO " . Tables::LLIBRES_GRUP . " (
               id, nom
