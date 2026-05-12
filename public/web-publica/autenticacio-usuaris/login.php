@@ -1,28 +1,50 @@
-<div class="pantallaLogin">
-  <div class="card" style="max-width: 400px;">
-    <div class="card-body">
-      <div class="container">
-        <h3>Accés àrea d'usuaris</h3>
-        <div class="alert alert-success" id="loginMessageOk" style="display:none" role="alert">
-        </div>
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
 
-        <div class="alert alert-danger" id="loginMessageErr" style="display:none" role="alert">
-        </div>
+  <div class="card shadow-lg border-0"
+    style="max-width: 420px; width: 100%; background-color: #bda966; border: 1px solid #615328;">
 
-        <form action="" method="post" id="loginForm">
-          <label for="email">E-mail</label>
-          <input type="text" name="email" id="email" class="form-ample-100">
-          <br>
+    <div class="card-body p-4">
 
-          <label for="password">Contrasenya</label>
-          <input type="password" name="password" id="password" class="form-ample-100">
-          <br>
-          <button name="login" id="btnLogin" class="btn-color-negre">Entra</button>
-        </form>
+      <h3 class="mb-4 text-center">Accés àrea d'usuaris</h3>
 
+      <div class="alert alert-success d-none" id="loginMessageOk" role="alert">
+        <div id="okText"></div>
       </div>
-      <a href="<?php echo BASE_URL; ?>/nou-usuari">No estàs registrat al web? Clica aquí per crear un nou usuari</a>
-    </div>
+      <div class="alert alert-danger d-none" id="loginMessageErr" role="alert">
+        <div id="errText"></div>
+      </div>
 
+      <form action="" method="post" id="loginForm">
+
+        <!-- EMAIL -->
+        <div class="mb-3">
+          <label for="email" class="form-label fw-medium">E-mail</label>
+          <input type="email" name="email" id="email" class="form-control" required>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="mb-3">
+          <label for="password" class="form-label fw-medium">Contrasenya</label>
+          <input type="password" name="password" id="password" class="form-control" required>
+        </div>
+
+        <!-- BUTTON -->
+        <div class="d-grid">
+          <button type="submit" id="btnLogin" class="btn btn-dark">
+            Entra
+          </button>
+        </div>
+
+      </form>
+
+      <hr class="my-4">
+
+      <a class="d-block text-center small"
+        href="<?php echo BASE_URL; ?>/nou-usuari">
+        No estàs registrat? Crea un nou usuari
+      </a>
+
+    </div>
   </div>
+
 </div>
