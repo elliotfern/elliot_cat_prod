@@ -10,15 +10,9 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 */
 
 /* HEADER */
-@import './loginPage.css';
-@import './taules.css';
+@import './contenidor.css';
 @import './formulari.css';
-@import './botons.css';
-@import './header.css';
-@import './footer.css';
-@import './fitxa_dades.css';
-@import url('https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css');
-
+@import './loginPage.css';
 body {
   font-family:
     system-ui,
@@ -45,20 +39,6 @@ body {
   padding-top: var(--topOffset, 0px);
 }
 
-#siteHeader {
-  z-index: 1050;
-}
-
-/* si tu intranetNav es fixed o sticky, mantenlo por debajo */
-#intranetNav {
-  z-index: 1040;
-}
-
-a:link,
-a:visited,
-a:hover {
-  text-decoration: underline;
-}
 
 body {
   padding-top: 72px;
@@ -66,12 +46,4 @@ body {
 
 :root {
   --headerH: 72px;
-}
-
-a.link-external i {
-  opacity: 0.8;
-}
-
-a.link-internal i {
-  opacity: 0.5;
 }
