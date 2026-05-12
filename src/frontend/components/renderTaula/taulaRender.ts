@@ -72,18 +72,18 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
   // Crear input de búsqueda
   const searchInput = document.createElement('input');
-  searchInput.style.marginBottom = '15px';
+  searchInput.className = 'form-control mb-3';
   searchInput.placeholder = 'Cercar...';
 
   // Crear contenedor de botones de filtro
   const buttonContainer = document.createElement('div');
-  buttonContainer.className = 'filter-buttons';
+  buttonContainer.className = 'd-flex flex-wrap gap-2 mb-3';
 
   // Crear tabla y elementos relacionados
   const table = document.createElement('table');
-  table.classList.add('table', 'table-striped');
+  table.classList.add('table', 'table-striped', 'table-hover', 'table-bordered', 'align-middle');
   const thead = document.createElement('thead');
-  thead.classList.add('table-primary');
+  thead.classList.add('table-light');
   const tbody = document.createElement('tbody');
 
   // Paginacio
@@ -91,14 +91,12 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   paginationNav.setAttribute('aria-label', 'Paginació');
 
   const pagination = document.createElement('ul');
-  pagination.className = 'pagination justify-content-center mt-3 flex-wrap gap-2 py-2';
+  pagination.className = 'pagination justify-content-center mt-3';
   paginationNav.appendChild(pagination);
 
   // Crear el numero total de registres
   const totalRecords = document.createElement('div');
-  totalRecords.className = 'total-records';
-  totalRecords.style.marginTop = '15px';
-  totalRecords.style.fontSize = '12px';
+  totalRecords.className = 'text-muted small mt-2';
 
   table.append(thead, tbody);
 
@@ -196,7 +194,7 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
     const allButton = document.createElement('button');
     allButton.textContent = 'Tots';
-    allButton.className = 'filter-btn';
+    allButton.className = 'btn btn-outline-primary btn-sm filter-btn';
     allButton.onclick = () => {
       activeButtonFilter = null;
       updateActiveButton(allButton);
@@ -207,7 +205,8 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
     uniqueValues.forEach((value) => {
       const button = document.createElement('button');
       button.textContent = String(value);
-      button.className = 'filter-btn';
+      button.className = 'btn btn-primary btn-sm filter-btn';
+
       button.onclick = () => {
         activeButtonFilter = value;
         updateActiveButton(button);
@@ -221,7 +220,11 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
   function updateActiveButton(activeButton: HTMLButtonElement) {
     const buttons = buttonContainer.querySelectorAll('.filter-btn');
-    buttons.forEach((btn) => btn.classList.remove('active'));
+
+    buttons.forEach((btn) => {
+      btn.classList.remove('active');
+    });
+
     activeButton.classList.add('active');
   }
 
@@ -275,15 +278,21 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   searchInput.addEventListener('input', applyFilters);
 
   // Render inicial
+  const tableWrapper = document.createElement('div');
+  tableWrapper.className = 'table-responsive';
+
+  tableWrapper.appendChild(table);
+
   container.innerHTML = '';
   container.appendChild(searchInput);
   if (filterByField) {
     container.appendChild(buttonContainer);
     renderFilterButtons();
   }
-  container.appendChild(table);
+
+  container.appendChild(tableWrapper);
   container.appendChild(totalRecords);
-  container.appendChild(pagination);
+  container.appendChild(paginationNav);
 
   applyFilters(); // inicia renderizado con filtros aplicados
 }
