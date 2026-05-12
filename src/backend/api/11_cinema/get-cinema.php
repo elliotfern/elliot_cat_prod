@@ -140,7 +140,8 @@ if ($slug === "pelicules") {
         qi(Tables::DB_PERSONES, $pdo),
         qi(Tables::DB_PAISOS, $pdo),
         qi(Tables::DB_IMATGES, $pdo),
-        qi(Tables::DB_IDIOMES, $pdo)
+        qi(Tables::DB_IDIOMES, $pdo),
+        qi(Tables::CINEMA_GENERES, $pdo)
     );
 
     try {
