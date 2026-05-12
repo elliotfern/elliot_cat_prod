@@ -88,7 +88,7 @@ function renderAutors(data: BookData) {
   if (!el) return;
 
   const basePrefix = isInGestio() ? 'gestio' : getLangPrefix();
-  const base = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-autor/`;
+  const base = `${DOMAIN_WEB}/${basePrefix}/base-dades-persones/fitxa-persona/`;
 
   // 1) Preferimos array autors[]
   const autors = Array.isArray(data.autors) ? data.autors.filter((a) => a && a.slug) : [];
@@ -135,9 +135,8 @@ function renderGrup(data: BookData) {
 
   // 4) Pintar 1 o N con etiqueta
   const etiqueta = 'Llibre desat a la col·lecció';
-  const href = `${base}${encodeURIComponent(data.idGrup)}`;
 
-  el.innerHTML = `<strong>${etiqueta}:</strong> <a href="${href}">${grup}</a>`;
+  el.innerHTML = `<strong>${etiqueta}:</strong> ${grup}`;
 }
 
 // Función para realizar la solicitud a la API
