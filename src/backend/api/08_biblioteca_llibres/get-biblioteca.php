@@ -443,6 +443,7 @@ if ($slug === 'totsLlibres') {
             'alt'         => $first['alt'],
             'estat_id'       => $first['estat_id'],      // int
             'nomEstat'    => $first['nomEstat'],   // texto
+            'grup'    => $first['grup'],
 
             'tipus_id'    => $first['tipus_id'],
             'editorial_id' => $first['editorial_id'],
