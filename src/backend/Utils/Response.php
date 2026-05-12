@@ -21,6 +21,7 @@ class Response
         'tema_id',
         'grup_ids',
         'grup_id',
+        'grup',
         'tipus_id',
         'sub_tema_id',
         'idGrup',
