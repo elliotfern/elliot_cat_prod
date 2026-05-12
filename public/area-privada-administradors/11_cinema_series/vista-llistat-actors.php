@@ -57,22 +57,22 @@
           data.forEach(author => {
             html += `<tr>
             <td class="text-center">
-              <a id="${author.id}" title="Author page" href="https://${window.location.host}/gestio/cinema/fitxa-actor/${author.slug}">
-                <img src="https://media.elliot.cat/img/cinema-actor/${author.img}.jpg" style="height:70px">
+              <a id="${author.data.id}" title="Author page" href="https://${window.location.host}/gestio/cinema/fitxa-actor/${author.data.slug}">
+                <img src="https://media.elliot.cat/img/cinema-actor/${author.nameImg}.jpg" style="height:70px">
               </a>
             </td>
             <td>
-              <a id="${author.id}" title="Author page" href="https://${window.location.host}/gestio/cinema/fitxa-actor/${author.slug}">
-                ${author.nom} ${author.cognoms}
+              <a id="${author.data.id}" title="Author page" href="https://${window.location.host}/gestio/cinema/fitxa-actor/${author.data.slug}">
+                ${author.data.nom} ${author.data.cognoms}
               </a>
             </td>
             
-            <td>${!author.anyDefuncio ? author.anyNaixement : `${author.anyNaixement} - ${author.anyDefuncio}`}</td>
+            <td>${!author.data.anyDefuncio ? author.data.anyNaixement : `${author.data.anyNaixement} - ${author.data.anyDefuncio}`}</td>
 
-            <td>${author.country}</td>
+            <td>${author.data.pais_ca}</td>
            
             <td>
-              <a href="https://${window.location.host}/gestio/persona/modifica-persona/${author.slug}">
+              <a href="https://${window.location.host}/gestio/persona/modifica-persona/${author.data.slug}">
                 <button type="button" class="btn btn-sm btn-warning">Modifica</button>
               </a>
             </td>

@@ -1,19 +1,21 @@
 <?php
 
 use App\Config\Database;
+use App\Utils\Tables;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Utils\Tables;
+use App\Utils\Uuid;
 use App\Utils\AdminMiddleware;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
-
 $db = new Database();
 $pdo = $db->getPdo();
 
+// Siempre JSON
+header('Content-Type: application/json; charset=utf-8');
+
 // Configuración de cabeceras para aceptar JSON y responder JSON
-header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: GET");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -177,15 +179,51 @@ if ($slug === "pelicules") {
     // ruta GET => "/api/cinema/get/?actors"
 } else if ($slug === "actors") {
 
-    $query = "SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais_cat AS country, i.nameImg AS img, a.anyNaixement, a.anyDefuncio, a.slug
-    FROM db_persones AS a
-    LEFT JOIN db_countries AS c ON a.paisAutor = c.id
-    LEFT JOIN db_img AS i ON a.img = i.id
-    WHERE grup = '3'
-    ORDER BY a.cognoms ASC";
+    AdminMiddleware::handle();
 
-    $result = getData($query);
-    echo json_encode($result);
+    $sql = <<<SQL
+                SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais_ca, i.nameImg, a.anyNaixement, a.anyDefuncio, a.slug
+                FROM %s AS a
+                LEFT JOIN %s AS c ON a.pais_id = c.id
+                LEFT JOIN db_img AS i ON a.img_id = i.id
+                WHERE grup = :grup
+                ORDER BY a.cognoms ASC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_IMATGES, $pdo),
+    );
+
+    try {
+        $id_grup = '0197b0881a27723c8ca798b4d32a01ee';
+        $id_grup_bin = uuid::toBinary($id_grup);
+        $params = [':grup' => $id_grup_bin];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // 1) Llistat directors
     // ruta GET => "/api/cinema/get/?directors"
