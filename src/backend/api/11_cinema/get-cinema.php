@@ -182,7 +182,7 @@ if ($slug === "pelicules") {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais_ca, i.nameImg, a.anyNaixement, a.anyDefuncio, a.slug
+                SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais_ca, i.nameImg, a.any_naixement, a.any_defuncio, a.slug
                 FROM %s AS a
                 LEFT JOIN %s AS c ON a.pais_id = c.id
                 LEFT JOIN db_img AS i ON a.img_id = i.id
