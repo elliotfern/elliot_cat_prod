@@ -1,17 +1,15 @@
-<div class="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+<div class="min-vh-100 d-flex align-items-center justify-content-center">
 
   <div class="card shadow-lg border-0"
-    style="max-width: 420px; width: 100%; background-color: #bda966; border: 1px solid #615328;">
+    style="max-width: 420px; width: 100%; background-color: #c0af77; border: 1px solid #615328;">
 
     <div class="card-body p-4">
 
       <h3 class="mb-4 text-center">Accés àrea d'usuaris</h3>
 
-      <div class="alert alert-success d-none" id="loginMessageOk" role="alert">
-        <div id="okText"></div>
+      <div class="alert alert-success d-none" id="okMessage" role="alert">
       </div>
-      <div class="alert alert-danger d-none" id="loginMessageErr" role="alert">
-        <div id="errText"></div>
+      <div class="alert alert-danger d-none" id="errMessage" role="alert">
       </div>
 
       <form action="" method="post" id="loginForm">

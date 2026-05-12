@@ -6,8 +6,8 @@ export async function loginApi(event: Event) {
   const emailInput = document.getElementById('email') as HTMLInputElement;
   const passwordInput = document.getElementById('password') as HTMLInputElement;
 
-  const loginMessageOk = document.getElementById('loginMessageOk');
-  const loginMessageErr = document.getElementById('loginMessageErr');
+  const loginMessageOk = document.getElementById('okMessage');
+  const loginMessageErr = document.getElementById('errMessage');
 
   if (emailInput && passwordInput) {
     const email = emailInput.value;
