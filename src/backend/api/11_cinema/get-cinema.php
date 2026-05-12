@@ -186,7 +186,7 @@ if ($slug === "pelicules") {
                 FROM %s AS a
                 INNER JOIN %s g ON a.id = g.persona_id
                 LEFT JOIN %s AS c ON a.pais_id = c.id
-                LEFT JOIN db_img AS i ON a.img_id = i.id
+                LEFT JOIN %s AS i ON a.img_id = i.id
                 WHERE g.grup_id = :grup
                 ORDER BY a.cognoms ASC;
             SQL;
@@ -194,6 +194,7 @@ if ($slug === "pelicules") {
     $query = sprintf(
         $sql,
         qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_PERSONES_GRUPS_RELACIONS, $pdo),
         qi(Tables::DB_PAISOS, $pdo),
         qi(Tables::DB_IMATGES, $pdo),
     );
