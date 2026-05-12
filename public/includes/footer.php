@@ -1,5 +1,5 @@
 </div>
-<div class="container-fluid footer" style="background-color: black;color:white">
+<div class="container-fluid footer" style="background-color: black;color:white;padding-top:50px;padding-bottom:50px">
     <!-- Menú del pie de página -->
     <div class="footer-elliotfern d-flex justify-content-center flex-wrap">
         <div class="menu-separacio mx-3">
@@ -37,7 +37,7 @@
             title="Creative Commons">
             <img
                 class="mx-auto"
-                src="https://media.elliotfern.com/img/elliotfern-icon/domini-public.gif"
+                src="https://media.elliot.cat/img/elliotfern-icon/domini-public.gif"
                 alt="Public Domain"
                 title="Public Domain"
                 width="88"
