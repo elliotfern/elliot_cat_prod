@@ -359,7 +359,7 @@ if (isset($_GET['persona'])) {
 
     // -------------------------
     // PUT update persona/autor
-    // ruta: ?persona&id=UUID
+    // ruta: ?grupPersona
     // -------------------------
 } else if (isset($_GET['grupPersona'])) {
 
@@ -383,31 +383,15 @@ if (isset($_GET['persona'])) {
 
     // Requeridos (NOT NULL)
     $grup_ca = $data['grup_ca'];
-    $grup_es = $data['grup_es'];
-    $grup_en = $data['grup_en'];
-    $grup_it = $data['grup_it'];
-    $grup_fr = $data['grup_fr'];
 
     // Normaliza
     $grup_ca = is_string($grup_ca) ? trim($grup_ca) : $grup_ca;
-    $grup_es = is_string($grup_es) ? trim($grup_es) : $grup_es;
-    $grup_en = is_string($grup_en) ? trim($grup_en) : $grup_en;
-    $grup_it = is_string($grup_it) ? trim($grup_it) : $grup_it;
-    $grup_fr = is_string($grup_fr) ? trim($grup_fr) : $grup_fr;
 
     if ($grup_ca === '') $errors['grup_ca'] = 'required';
-    if ($grup_es === '') $errors['grup_es'] = 'required';
-    if ($grup_en === '') $errors['grup_en'] = 'required';
-    if ($grup_it === '') $errors['grup_it'] = 'required';
-    if ($grup_fr === '') $errors['grup_fr'] = 'required';
 
     // (Opcional) límite FE (maxlength=150)
     $maxLen = 150;
     if (is_string($grup_ca) && mb_strlen($grup_ca) > $maxLen) $errors['grup_ca'] = 'too_long';
-    if (is_string($grup_es) && mb_strlen($grup_es) > $maxLen) $errors['grup_es'] = 'too_long';
-    if (is_string($grup_en) && mb_strlen($grup_en) > $maxLen) $errors['grup_en'] = 'too_long';
-    if (is_string($grup_it) && mb_strlen($grup_it) > $maxLen) $errors['grup_it'] = 'too_long';
-    if (is_string($grup_fr) && mb_strlen($grup_fr) > $maxLen) $errors['grup_fr'] = 'too_long';
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
@@ -421,9 +405,9 @@ if (isset($_GET['persona'])) {
         $conn->beginTransaction();
 
         // 1) comprobar que existe
-        $qChk = "SELECT 1 FROM " . Tables::PERSONES_GRUPS . " WHERE id = UNHEX(REPLACE(:id, '-', '')) LIMIT 1";
+        $qChk = "SELECT 1 FROM " . Tables::PERSONES_GRUPS . " WHERE id = :id LIMIT 1";
         $stChk = $conn->prepare($qChk);
-        $stChk->bindValue(':id', $id, PDO::PARAM_STR);
+        $stChk->bindValue(':id', uuid::toBinary($id), PDO::PARAM_STR);
         $stChk->execute();
 
         if (!$stChk->fetchColumn()) {
@@ -436,23 +420,15 @@ if (isset($_GET['persona'])) {
         $sql = "
             UPDATE " . Tables::PERSONES_GRUPS . "
             SET
-                grup_ca = :grup_ca,
-                grup_es = :grup_es,
-                grup_en = :grup_en,
-                grup_it = :grup_it,
-                grup_fr = :grup_fr
-            WHERE id = UNHEX(REPLACE(:id, '-', ''))
+                grup_ca = :grup_ca
+            WHERE id = :id
             LIMIT 1
         ";
 
         $stmt = $conn->prepare($sql);
 
-        $stmt->bindValue(':id', $id, PDO::PARAM_STR);
+        $stmt->bindValue(':id', uuid::toBinary($id), PDO::PARAM_STR);
         $stmt->bindValue(':grup_ca', $grup_ca, PDO::PARAM_STR);
-        $stmt->bindValue(':grup_es', $grup_es, PDO::PARAM_STR);
-        $stmt->bindValue(':grup_en', $grup_en, PDO::PARAM_STR);
-        $stmt->bindValue(':grup_it', $grup_it, PDO::PARAM_STR);
-        $stmt->bindValue(':grup_fr', $grup_fr, PDO::PARAM_STR);
 
         if (!$stmt->execute()) {
             $conn->rollBack();

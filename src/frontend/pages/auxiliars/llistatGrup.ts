@@ -38,7 +38,7 @@ export async function taulaLlistatGrupsPersones(): Promise<void> {
   }
 
   renderDynamicTable({
-    url: `https://elliot.cat/api/persones/get/?grupPersones`,
+    url: `https://elliot.cat/api/persones/get/grupPersones`,
     containerId: 'taulaLlistatGrupsPersones',
     columns,
     filterKeys: ['grup_ca'],

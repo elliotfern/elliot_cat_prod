@@ -155,7 +155,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
 
     if (dateElement2 && persona.dateModified && persona.dateCreated) {
       const dateObj = new Date(persona.dateModified);
-      if (persona.dateModified === '0000-00-00' || persona.dateModified === persona.dateCreated) {
+      if (!persona.dateModified || persona.dateModified === persona.dateCreated) {
         dateElement2.textContent = '';
       } else {
         const day = dateObj.getDate();
@@ -300,39 +300,49 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
 
     const quadreProfessio = document.querySelector('.quadre-professio') as HTMLElement;
 
+    if (!quadreProfessio) return;
+
     if (quadreProfessio) {
       quadreProfessio.innerHTML = '';
 
-      const grups = persona.grupsText.split(',').map((g) => g.trim());
+      const normalizeGroup = (g: string) => g.trim().replace(/^["']|["']$/g, '');
+
+      const grups = persona.grupsText.split(',').map((g) => normalizeGroup(g));
+
+      const fragment = document.createDocumentFragment();
 
       for (const grup of grups) {
         const content = await renderProfessioBlock(grup, persona);
+        if (!content) continue;
 
-        if (content) {
-          if (typeof content === 'string') {
-            quadreProfessio.innerHTML += content;
-          } else {
-            quadreProfessio.appendChild(content);
-          }
+        if (typeof content === 'string') {
+          const div = document.createElement('div');
+          div.innerHTML = content;
+          fragment.appendChild(div);
+        } else {
+          fragment.appendChild(content);
         }
       }
+
+      quadreProfessio.appendChild(fragment);
     }
   } catch (error) {
     console.error('Error al parsear JSON:', error); // Muestra el error de parsing
   }
 }
 
+const professionRenderers = new Map<string, (p: PersonaView) => any>([
+  ['Historiador/a', renderHistoriador],
+  ['Escriptor/a', renderHistoriador],
+  ['Politòleg/a', renderHistoriador],
+  ['Filòsof/a', renderHistoriador],
+  ['Sociòleg/a', renderHistoriador],
+  ['Periodista', renderHistoriador],
+]);
+
 async function renderProfessioBlock(grup: string, persona: PersonaView) {
-  switch (grup) {
-    case 'Actor/a':
-    // return renderActor(persona);
-
-    case 'Historiador/a':
-      return renderHistoriador(persona);
-
-    default:
-      return null;
-  }
+  const renderer = professionRenderers.get(grup);
+  return renderer ? renderer(persona) : null;
 }
 
 async function renderHistoriador(persona: PersonaView) {

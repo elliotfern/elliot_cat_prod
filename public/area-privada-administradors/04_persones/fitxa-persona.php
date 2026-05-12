@@ -15,7 +15,7 @@ $urlModifica = Url::intranet('persones') . '/modifica-persona/' . urlencode($slu
     <?php if (isUserAdmin()) : ?>
         <p>
             <a
-                href="<?php echo $urlModifica; ?>/nova-persona/"
+                href="<?php echo $urlModifica; ?>/"
                 class="btn btn-secondary btn-sm">
                 Modifica fitxa
             </a>

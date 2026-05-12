@@ -354,32 +354,16 @@ if (isset($_GET['persona'])) {
 
     // Requeridos (NOT NULL en la tabla)
     $grup_ca = requireField($data, 'grup_ca', $errors);
-    $grup_es = requireField($data, 'grup_es', $errors);
-    $grup_en = requireField($data, 'grup_en', $errors);
-    $grup_it = requireField($data, 'grup_it', $errors);
-    $grup_fr = requireField($data, 'grup_fr', $errors);
 
     // Normaliza (trim) y valida vacío
     $grup_ca = is_string($grup_ca) ? trim($grup_ca) : $grup_ca;
-    $grup_es = is_string($grup_es) ? trim($grup_es) : $grup_es;
-    $grup_en = is_string($grup_en) ? trim($grup_en) : $grup_en;
-    $grup_it = is_string($grup_it) ? trim($grup_it) : $grup_it;
-    $grup_fr = is_string($grup_fr) ? trim($grup_fr) : $grup_fr;
 
     if ($grup_ca === '') $errors['grup_ca'] = 'required';
-    if ($grup_es === '') $errors['grup_es'] = 'required';
-    if ($grup_en === '') $errors['grup_en'] = 'required';
-    if ($grup_it === '') $errors['grup_it'] = 'required';
-    if ($grup_fr === '') $errors['grup_fr'] = 'required';
 
     // (Opcional) límite lógico FE (tu input tiene maxlength=150)
     // Aquí solo lo aplico si quieres evitar strings enormes en TEXT:
     $maxLen = 150;
     if (is_string($grup_ca) && mb_strlen($grup_ca) > $maxLen) $errors['grup_ca'] = 'too_long';
-    if (is_string($grup_es) && mb_strlen($grup_es) > $maxLen) $errors['grup_es'] = 'too_long';
-    if (is_string($grup_en) && mb_strlen($grup_en) > $maxLen) $errors['grup_en'] = 'too_long';
-    if (is_string($grup_it) && mb_strlen($grup_it) > $maxLen) $errors['grup_it'] = 'too_long';
-    if (is_string($grup_fr) && mb_strlen($grup_fr) > $maxLen) $errors['grup_fr'] = 'too_long';
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
@@ -412,10 +396,10 @@ if (isset($_GET['persona'])) {
         $sql = "
             INSERT INTO db_persones_grups (
                 id,
-                grup_ca, grup_es, grup_en, grup_it, grup_fr
+                grup_ca
             ) VALUES (
                 :id,
-                :grup_ca, :grup_es, :grup_en, :grup_it, :grup_fr
+                :grup_ca
             )
         ";
 
@@ -423,10 +407,6 @@ if (isset($_GET['persona'])) {
 
         $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
         $stmt->bindValue(':grup_ca', $grup_ca, PDO::PARAM_STR);
-        $stmt->bindValue(':grup_es', $grup_es, PDO::PARAM_STR);
-        $stmt->bindValue(':grup_en', $grup_en, PDO::PARAM_STR);
-        $stmt->bindValue(':grup_it', $grup_it, PDO::PARAM_STR);
-        $stmt->bindValue(':grup_fr', $grup_fr, PDO::PARAM_STR);
 
         if (!$stmt->execute()) {
             $conn->rollBack();
