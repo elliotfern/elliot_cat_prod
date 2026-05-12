@@ -134,6 +134,7 @@ const professionRenderers = new Map<string, (p: PersonaView) => Promise<HTMLElem
   ['Sociòleg/a', renderHistoriador],
   ['Periodista', renderHistoriador],
   ['Economista', renderHistoriador],
+  ['Enginyer/a informàtic', renderHistoriador],
   ['Actor/a', renderActor],
 ]);
 
