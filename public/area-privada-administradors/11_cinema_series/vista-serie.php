@@ -62,7 +62,7 @@ $slug = $routeParams[0];
 </div>
 
 <script>
-  connexioApiGetDades("/api/cinema/get/serie?slug=", "<?php echo $slug; ?>")
+  connexioApiGetDades("/api/cinema/get/serie?serieSlug=", "<?php echo $slug; ?>")
   actorsDeLaSerie("<?php echo $slug; ?>");
 
   async function connexioApiGetDades(url, id) {

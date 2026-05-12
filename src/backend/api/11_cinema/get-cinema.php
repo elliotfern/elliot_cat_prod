@@ -117,20 +117,59 @@ if ($slug === "pelicules") {
     }
 
     // GET : fitxa sèrie tv
-    // URL: https://elliot.cat/api/cinema/get/serie?slug=benvinguts-a-la-familia
+    // URL: https://elliot.cat/api/cinema/get/serie?serieSlug=benvinguts-a-la-familia
 } else if ($slug === "serie") {
-    $query = "SELECT tv.id, tv.name, tv.startYear, tv.endYear, tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, tv.genre, tv.producer, c.pais_cat, img.nameImg, g.genere_ca, tv.descripcio, d.id AS idDirector, d.slug AS slugDirector, c.id AS idPais, img.id AS idImg, id.id As idLang, g.id AS idGen, pr.id AS idProductora, pr.productora, tv.dateCreated, tv.dateModified, tv.slug
-            FROM 11_db_cinema_series_tv AS tv
-            INNER JOIN db_persones AS d ON tv.director = d.id
-            INNER JOIN db_countries AS c ON tv.country = c.id
-            LEFT JOIN db_img AS img ON tv.img = img.id
-            INNER JOIN aux_idiomes AS id ON tv.lang = id.id
-            LEFT JOIN 11_aux_cinema_generes AS g ON tv.genre = g.id
-            LEFT JOIN 11_aux_cinema_productores AS pr ON tv.producer = pr.id
-            WHERE tv.slug = :slug";
 
-    $result = getData($query, ['slug' => $param], true);
-    echo json_encode($result);
+    $serie = $_GET['serieSlug'];
+    AdminMiddleware::handle();
+
+    $sql = <<<SQL
+                SELECT tv.id, tv.name, tv.startYear, tv.endYear, tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, tv.genre, c.pais_ca, img.nameImg, g.genere_ca, tv.descripcio, d.id AS idDirector, d.slug AS slugDirector, c.id AS idPais, img.id AS idImg, id.id As idLang, g.id AS idGen, tv.dateCreated, tv.dateModified, tv.slug
+                FROM %s AS tv
+                INNER JOIN %s AS d ON tv.director = d.id
+                INNER JOIN %s AS c ON tv.country = c.id
+                LEFT JOIN %s AS img ON tv.img = img.id
+                INNER JOIN %s AS id ON tv.lang = id.id
+                LEFT JOIN %s AS g ON tv.genre = g.id
+                WHERE tv.slug = :slug;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_SERIES_TV, $pdo),
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_IMATGES, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo)
+    );
+
+    try {
+
+        $params = [':slug' => $serie];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
 
     // GET : fitxa pel·lícula
     // URL: https://elliot.cat/api/cinema/get/pelicula?slug=io-capitano
