@@ -225,18 +225,27 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     // ==========================
     // EDAD
     // ==========================
-    const now = new Date();
-    const anyActual = now.getFullYear();
+    let edad = 0;
 
-    let edad = anyActual - anyNaixement;
+    if (anyNaixement) {
+      // Persona fallecida
+      if (anyDefuncio) {
+        edad = anyDefuncio - anyNaixement;
 
-    if (!anyDefuncio) {
-      if (now.getMonth() < mesNaixement - 1 || (now.getMonth() === mesNaixement - 1 && now.getDate() < diaNaixement)) {
-        edad--;
-      }
-    } else {
-      if (mesDefuncio < mesNaixement || (mesDefuncio === mesNaixement && diaDefuncio < diaNaixement)) {
-        edad--;
+        // Ajuste si murió antes de cumplir años
+        if (mesDefuncio < mesNaixement || (mesDefuncio === mesNaixement && diaDefuncio < diaNaixement)) {
+          edad--;
+        }
+      } else {
+        // Persona viva
+        const now = new Date();
+
+        edad = now.getFullYear() - anyNaixement;
+
+        // Ajuste si aún no ha cumplido años este año
+        if (now.getMonth() + 1 < mesNaixement || (now.getMonth() + 1 === mesNaixement && now.getDate() < diaNaixement)) {
+          edad--;
+        }
       }
     }
 
