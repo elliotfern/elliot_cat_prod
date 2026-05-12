@@ -463,7 +463,7 @@ async function renderActor(persona: PersonaView) {
                   </a>
                 </td>
 
-                <td>${p.role ?? ''}</td>
+                <td>${p.rol ?? ''}</td>
 
                 <td>${p.anyInici ?? ''}</td>
 
