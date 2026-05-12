@@ -285,7 +285,7 @@ if ($slug === "pelicules") {
 
 
     // 2) Llistat pelicules per actor
-    // ruta GET => "/api/cinema/get/actor-pelicules?actor=nao-albert"
+    // ruta GET => "/api/cinema/get/actor-pelicules?actor=id"
 } else if ($slug === "actor-pelicules") {
     $actor = $_GET['actor'];
     AdminMiddleware::handle();
@@ -295,7 +295,7 @@ if ($slug === "pelicules") {
                 FROM %s AS p
                 LEFT JOIN %s AS sa ON p.id = sa.idMovie
                 LEFT JOIN %s AS pe ON pe.id = sa.idActor2
-                WHERE pe.slug = :slug
+                WHERE sa.idActor2 = :id
                 ORDER BY p.pelicula ASC;
             SQL;
 
@@ -307,7 +307,7 @@ if ($slug === "pelicules") {
     );
 
     try {
-        $params = [':slug' => $actor];
+        $params = [':id' => uuid::toBinary($actor)];
         $result = $db->getData($query, $params);
 
         if (empty($result)) {
@@ -334,7 +334,7 @@ if ($slug === "pelicules") {
 
 
     // 2) Llistat series tv per actor
-    // ruta GET => "/api/cinema/get/actor-series?actor=nao-albert"
+    // ruta GET => "/api/cinema/get/actor-series?actor=id"
 } else if ($slug === "actor-series") {
 
     $actor = $_GET['actor'];
@@ -345,7 +345,7 @@ if ($slug === "pelicules") {
                 FROM %s AS s
                 LEFT JOIN %s AS sa ON s.id = sa.idSerie
                 LEFT JOIN %s AS pe ON pe.id = sa.actor_id 
-                WHERE pe.slug = :slug
+                WHERE sa.actor_id = :id
                 ORDER BY s.name ASC
             SQL;
 
@@ -357,7 +357,7 @@ if ($slug === "pelicules") {
     );
 
     try {
-        $params = [':slug' => $actor];
+        $params = [':id' => uuid::toBinary($actor)];
         $result = $db->getData($query, $params);
 
         if (empty($result)) {
