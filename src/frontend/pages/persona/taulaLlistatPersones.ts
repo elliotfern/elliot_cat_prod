@@ -48,7 +48,7 @@ export async function taulaLlistatPersones() {
       field: 'id',
       render: (_: unknown, row: Persona) =>
         `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/base-dades-persones/modifica-persona/${row.slug}">
-          <button type="button" class="button btn-petit">Modifica</button>
+          <button type="button" class="btn btn-warning btn-sm">Modifica</button>
         </a>`,
     });
 
@@ -58,7 +58,7 @@ export async function taulaLlistatPersones() {
       render: (_: unknown, row: Persona) => `
          <button 
            type="button"
-           class="btn-petit delete-button"
+           class="delete-button btn btn-danger btn-sm"
            data-id="${row.id}" 
            data-url="https://elliot.cat/api/persones/delete/persona?id=${row.id}"
            data-reload-callback="${reloadKey}"
