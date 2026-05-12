@@ -283,11 +283,11 @@ $slug = $routeParams[0];
                     <a
                       id="actor-${actor.idActor}"
                       title="Actor"
-                      href="${window.location.origin}/gestio/cinema/fitxa-actor/${actor.slug}"
+                      href="${window.location.origin}/gestio/base-dades-persones/fitxa-persona/${actor.slug}"
                     >
 
                       <img
-                        src="https://media.elliot.cat/img/cinema-actor/${actor.nameImg}.jpg"
+                        src="https://media.elliot.cat/img/persona/${actor.nameImg}.jpg"
                         width="100"
                         height="auto"
                       >
@@ -299,7 +299,7 @@ $slug = $routeParams[0];
                     <a
                       id="actor-${actor.idActor}"
                       title="Actor"
-                      href="${window.location.origin}/gestio/cinema/fitxa-actor/${actor.slug}"
+                      href="${window.location.origin}/gestio/base-dades-persones/fitxa-persona/${actor.slug}"
                     >
 
                       ${actor.nom} ${actor.cognoms}
