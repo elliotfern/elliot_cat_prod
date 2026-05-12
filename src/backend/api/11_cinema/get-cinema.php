@@ -198,7 +198,7 @@ if ($slug === "pelicules") {
                 SELECT a.nom, a.cognoms, a.id AS idActor, sa.role, img.nameImg, sa.id AS idCast, a.slug
                 FROM %s AS s
                 LEFT JOIN %s AS sa on s.id = sa.idSerie
-                LEFT JOIN %s AS a ON a.id = sa.idActor2
+                LEFT JOIN %s AS a ON a.id = sa.actor_id
                 LEFT JOIN %s AS img ON a.img = img.id
                 WHERE s.slug = :slug;
             SQL;
@@ -264,7 +264,7 @@ if ($slug === "pelicules") {
     echo json_encode($result);
 
     // 1) Llistat actors
-    // ruta GET => "/api/cinema/get/?actors"
+    // ruta GET => "/api/cinema/get/actors"
 } else if ($slug === "actors") {
 
     AdminMiddleware::handle();
