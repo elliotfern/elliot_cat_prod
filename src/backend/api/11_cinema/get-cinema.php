@@ -283,48 +283,104 @@ if ($slug === "pelicules") {
     $result = getData($query, ['id' => $id]);
     echo json_encode($result);
 
-    // 2) Fitxa autor
-    // ruta GET => "/api/cinema/get/?actor=nao-albert"
-} else if ($slug === "actor") {
-
-    $query = "SELECT
-	p.id, p.nom, p.cognoms, p.slug, p.ocupacio, p.anyNaixement, p.anyDefuncio, p.paisAutor, p.img, p.web, p.descripcio, p.dateCreated, p.dateModified, i.nameImg, c.pais_cat, professio_ca
-    FROM db_persones AS p
-    LEFT JOIN db_img AS i ON p.img = i.id
-    LEFT JOIN db_countries AS c ON p.paisAutor = c.id
-    LEFT JOIN aux_professions AS pro ON pro.id = p.ocupacio
-    WHERE slug = :slug";
-
-    $result = getData($query, ['slug' => $param], true);
-    echo json_encode($result);
 
     // 2) Llistat pelicules per actor
-    // ruta GET => "/api/cinema/get/?actor-pelicules=nao-albert"
+    // ruta GET => "/api/cinema/get/actor-pelicules?actor=nao-albert"
 } else if ($slug === "actor-pelicules") {
+    $actor = $_GET['actor'];
+    AdminMiddleware::handle();
 
-    $query = "SELECT p.pelicula AS titol, sa.role, p.any AS anyInici, p.slug
-        FROM 11_db_pelicules AS p
-        LEFT JOIN 11_aux_cinema_actors_pelicules AS sa ON p.id = sa.idMovie
-        LEFT JOIN db_persones AS pe ON pe.id = sa.idActor 
-        WHERE pe.slug = :slug
-        ORDER BY p.pelicula ASC";
+    $sql = <<<SQL
+                SELECT p.pelicula AS titol, sa.role, p.any AS anyInici, p.slug
+                FROM %s AS p
+                LEFT JOIN %s AS sa ON p.id = sa.idMovie
+                LEFT JOIN %s AS pe ON pe.id = sa.idActor 
+                WHERE pe.slug = :slug
+                ORDER BY p.pelicula ASC;
+            SQL;
 
-    $result = getData($query, ['slug' => $param]);
-    echo json_encode($result);
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_PELICULES, $pdo),
+        qi(Tables::CINEMA_ACTORS_PELICULES, $pdo),
+        qi(Tables::DB_PERSONES, $pdo)
+    );
+
+    try {
+        $params = [':slug' => $actor];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
 
     // 2) Llistat series tv per actor
-    // ruta GET => "/api/cinema/get/?actor-series=nao-albert"
+    // ruta GET => "/api/cinema/get/actor-series?actor=nao-albert"
 } else if ($slug === "actor-series") {
 
-    $query = "SELECT s.name AS titol, sa.role, s.startYear AS anyInici, s.endYear AS anyFi, s.slug
-        FROM 11_db_cinema_series_tv AS s
-        LEFT JOIN 11_aux_cinema_actors_seriestv AS sa ON s.id = sa.idSerie
-        LEFT JOIN db_persones AS pe ON pe.id = sa.idActor 
-        WHERE pe.slug = :slug
-        ORDER BY s.name ASC";
+    $actor = $_GET['actor'];
+    AdminMiddleware::handle();
 
-    $result = getData($query, ['slug' => $param]);
-    echo json_encode($result);
+    $sql = <<<SQL
+                SELECT s.name AS titol, sa.role, s.startYear AS anyInici, s.endYear AS anyFi, s.slug
+                FROM %s AS s
+                LEFT JOIN %s AS sa ON s.id = sa.idSerie
+                LEFT JOIN %s AS pe ON pe.id = sa.idActor 
+                WHERE pe.slug = :slug
+                ORDER BY s.name ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_SERIES_TV, $pdo),
+        qi(Tables::CINEMA_ACTORS_SERIES, $pdo),
+        qi(Tables::DB_PERSONES, $pdo)
+    );
+
+    try {
+        $params = [':slug' => $actor];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // 2) Actor-pelicula
     // ruta GET => "/api/cinema/get/?actorPelicula=35"
