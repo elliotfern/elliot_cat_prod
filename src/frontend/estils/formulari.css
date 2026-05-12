@@ -28,9 +28,42 @@
   color: white;
 }
 
-.trix-editor {
-  background-color: #ffffff !important;
-  min-height: 200px!important;;
-  max-height: 600px!important;;
+trix-editor {
+  border: none;
+  outline: none;
+  min-height: 280px;
+  max-height: 650px;
   overflow-y: auto;
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Arial,
+    sans-serif;
+  letter-spacing: 0.1px;
+}
+
+trix-editor:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+trix-toolbar {
+  border: none;
+  background: transparent;
+  margin-bottom: 0.5rem;
+}
+
+trix-toolbar .trix-button-group {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
