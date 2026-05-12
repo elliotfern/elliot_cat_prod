@@ -11,7 +11,7 @@ $urlModifica = Url::intranet('persones') . '/modifica-persona/' . urlencode($slu
 
 <h1>Base de dades Persones</h1>
 
-<div id="isAdminButton" style="display: none;margin-bottom:25px">
+<div id="isAdminButton" style="display: none;">
     <?php if (isUserAdmin()) : ?>
         <p>
             <a

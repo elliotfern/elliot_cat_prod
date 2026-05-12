@@ -16,7 +16,7 @@ export async function taulaLlistatAutors() {
     {
       header: 'Autor/a',
       field: 'id',
-      render: (_: unknown, row: Persona) => `<a href="${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-autor/${encodeURIComponent(row.slug)}">
+      render: (_: unknown, row: Persona) => `<a href="${DOMAIN_WEB}/${basePrefix}/base-dades-persones/fitxa-persona/${encodeURIComponent(row.slug)}">
           ${row.autor_nom_complet}
         </a>`,
     },

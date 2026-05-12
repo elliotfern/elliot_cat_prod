@@ -349,8 +349,6 @@ async function renderHistoriador(persona: PersonaView) {
   const wrapper = document.createElement('div');
 
   wrapper.innerHTML = `
-    <hr class="my-4">
-
     <h4 class="mb-3">📚 Llibres publicats</h4>
 
     <div class="table-responsive">
