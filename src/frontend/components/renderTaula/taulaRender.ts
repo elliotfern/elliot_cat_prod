@@ -72,7 +72,7 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
   // Crear input de búsqueda
   const searchInput = document.createElement('input');
-  searchInput.className = 'form-control mb-3';
+  searchInput.className = 'form-control w-30 mb-3';
   searchInput.placeholder = 'Cercar...';
 
   // Crear contenedor de botones de filtro

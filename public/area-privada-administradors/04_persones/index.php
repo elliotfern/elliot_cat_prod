@@ -8,7 +8,7 @@
             <p>
                 <a
                     href="<?php echo APP_INTRANET . $url['persona']; ?>/nova-persona/"
-                    class="btn btn-secondary btn-lg">
+                    class="btn btn-secondary btn-sm">
                     Afegir autor
                 </a>
             </p>

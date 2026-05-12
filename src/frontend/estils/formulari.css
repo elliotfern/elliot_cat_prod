@@ -30,5 +30,7 @@
 
 .trix-editor {
   background-color: #ffffff !important;
-  height: 250px !important;
+  min-height: 200px!important;;
+  max-height: 600px!important;;
+  overflow-y: auto;
 }
