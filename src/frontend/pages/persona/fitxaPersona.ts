@@ -288,6 +288,7 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
 
     quadreProfessio.innerHTML = '';
 
+    // normalizar grupos
     const grups = Array.from(
       new Set(
         persona.grupsText
@@ -297,16 +298,21 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
       )
     );
 
-    const rendered = new Set<string>();
+    // 🔥 clave: evitar render duplicado por función, no por grupo
+    const rendered = new Set<Function>();
 
     for (const grup of grups) {
       const renderer = professionRenderers.get(grup);
+
       if (!renderer) continue;
 
-      if (rendered.has(grup)) continue;
-      rendered.add(grup);
+      // 🔥 dedupe por función real
+      if (rendered.has(renderer)) continue;
+
+      rendered.add(renderer);
 
       const content = await renderer(persona);
+
       if (!content) continue;
 
       if (typeof content === 'string') {
