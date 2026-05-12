@@ -1,15 +1,12 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { formatData } from '../../utils/formataData';
-import { getPageType } from '../../utils/urlPath';
+import { registerDeleteCallback, initDeleteHandlers } from '../../components/renderTaula/handleDelete';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Persona } from '../../types/Persona';
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
 export async function taulaLlistatPersones() {
   const isAdmin = await getIsAdmin();
+  const reloadKey = 'reload-taula-usuaris';
 
   const columns: TaulaDinamica<Persona>[] = [
     {
@@ -54,6 +51,21 @@ export async function taulaLlistatPersones() {
           <button type="button" class="button btn-petit">Modifica</button>
         </a>`,
     });
+
+    columns.push({
+      header: '',
+      field: 'id',
+      render: (_: unknown, row: Persona) => `
+         <button 
+           type="button"
+           class="btn-petit"
+           data-id="${row.id}" 
+           data-url="https://elliot.cat/api/persones/delete/persona?id=${row.id}"
+           data-reload-callback="${reloadKey}"
+         >
+           Elimina
+         </button>`,
+    });
   }
 
   renderDynamicTable({
@@ -65,4 +77,10 @@ export async function taulaLlistatPersones() {
     // 👇 IMPORTANTE: ahora filtramos por string seguro
     filterByField: 'grup',
   });
+
+  // Registra el callback con una clave única
+  registerDeleteCallback(reloadKey, () => taulaLlistatPersones());
+
+  // Inicia el listener una sola vez
+  initDeleteHandlers();
 }

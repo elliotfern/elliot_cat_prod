@@ -164,7 +164,7 @@ if (isset($_GET['persona'])) {
 
         $img_uuid = ImageService::createFromUpload(
             $file,
-            18, // PERSONA / AVATAR
+            1, // PERSONA / AVATAR
             $nom,
             $alt,
             $conn

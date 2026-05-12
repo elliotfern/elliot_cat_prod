@@ -13,6 +13,10 @@
     <div id="errText"></div>
   </div>
 
+  <div class="progress mt-2" style="display:none" id="uploadProgress">
+    <div id="uploadProgressBar" class="progress-bar" style="width:0%">0%</div>
+  </div>
+
   <form method="POST" action="" class="row g-3" id="formPersona"
     data-success-redirect-template="/gestio/base-dades-persones/fitxa-persona/{slug}">
 

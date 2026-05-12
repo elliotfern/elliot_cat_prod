@@ -370,6 +370,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/persones/delete/{slug}' => [
+        'view' => 'src/backend/api/04_persones/delete-persones.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 
     // 17. VIATGES
     '/api/viatges/get/{slug}' => [
