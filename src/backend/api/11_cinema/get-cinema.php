@@ -185,7 +185,7 @@ if ($slug === "pelicules") {
                 SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais_ca, i.nameImg, a.any_naixement, a.any_defuncio, a.slug
                 FROM %s AS a
                 INNER JOIN %s g ON a.id = g.persona_id
-                LEFT JOIN %s AS c ON a.pais_id = c.id
+                LEFT JOIN %s AS c ON a.pais_autor_id = c.id
                 LEFT JOIN %s AS i ON a.img_id = i.id
                 WHERE g.grup_id = :grup
                 ORDER BY a.cognoms ASC;
