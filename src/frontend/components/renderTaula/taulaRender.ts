@@ -83,7 +83,7 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   const table = document.createElement('table');
   table.classList.add('table', 'table-striped', 'table-hover', 'table-bordered', 'align-middle');
   const thead = document.createElement('thead');
-  thead.classList.add('table-light');
+  thead.classList.add('table-dark');
   const tbody = document.createElement('tbody');
 
   // Paginacio
