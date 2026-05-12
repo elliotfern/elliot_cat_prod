@@ -58,7 +58,7 @@ export async function taulaLlistatPersones() {
       render: (_: unknown, row: Persona) => `
          <button 
            type="button"
-           class="btn-petit"
+           class="btn-petit delete-button"
            data-id="${row.id}" 
            data-url="https://elliot.cat/api/persones/delete/persona?id=${row.id}"
            data-reload-callback="${reloadKey}"
