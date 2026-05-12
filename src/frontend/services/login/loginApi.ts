@@ -31,7 +31,6 @@ export async function loginApi(event: Event) {
   };
 
   try {
-    // 1️⃣ LOGIN
     const response = await fetch('https://api.elliot.cat/api/login', {
       method: 'POST',
       headers: {
@@ -43,41 +42,23 @@ export async function loginApi(event: Event) {
 
     const data = await response.json();
 
-    if (!response.ok || data.status !== 'success') {
-      const apiMsg = data.message || "Error d'autenticació";
+    // ❌ ERROR
+    if (!response.ok || data.success !== true) {
+      const msg = data.message || "Error d'autenticació";
 
-      const extraErrors = Array.isArray(data.errors) && data.errors.length ? `<br><small>${data.errors.join('<br>')}</small>` : '';
+      const extra = Array.isArray(data.errors) && data.errors.length ? `<br><small>${data.errors.join('<br>')}</small>` : '';
 
-      showError(apiMsg + extraErrors);
+      showError(msg + extra);
       return;
     }
 
-    // 2️⃣ LOGIN OK
+    // ✅ SUCCESS
     showSuccess(data.message || 'Accés permès');
 
-    // 3️⃣ CONSULTAR USUARI DESDE COOKIE
-    setTimeout(async () => {
-      try {
-        const meResponse = await fetch('https://elliot.cat/api/auth/get/?me', {
-          method: 'GET',
-          credentials: 'include',
-        });
+    setTimeout(() => {
+      const redirect = data.user_type === 1 ? '/gestio/admin' : '/usuaris';
 
-        const me = await meResponse.json();
-
-        if (!me.authenticated) {
-          window.location.href = '/usuaris';
-          return;
-        }
-
-        // 4️⃣ REDIRECCIÓN SEGÚN ROL
-        const redirectUrl = me.user_type === 1 ? '/gestio/admin' : '/usuaris';
-
-        window.location.href = redirectUrl;
-      } catch (e) {
-        // fallback seguro
-        window.location.href = '/usuaris';
-      }
+      window.location.href = redirect;
     }, 800);
   } catch (error) {
     showError('Error de connexió amb el servidor');
