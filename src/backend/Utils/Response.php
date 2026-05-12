@@ -29,7 +29,9 @@ class Response
         'editorial_id',
         'espai_id',
         'viatge_id',
-
+        'director_id',
+        'genere_id',
+        'lang_id'
     ];
 
     public static function success(string $message = '', $data = null, int $httpCode = 200): void

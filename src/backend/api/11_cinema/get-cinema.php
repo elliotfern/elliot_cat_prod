@@ -126,12 +126,12 @@ if ($slug === "pelicules") {
     $sql = <<<SQL
                 SELECT tv.id, tv.name, tv.slug, tv.startYear, tv.endYear, tv.season, tv.chapter, tv.director_id, tv.lang, tv.genere_id, tv.pais_id, tv.img_id, tv.descripcio, tv.dateCreated,
                 tv.dateModified,
-                d.nom, d.cognoms, id.idioma_ca, c.pais_ca, img.nameImg, g.genere_ca, d.id AS idDirector, d.slug AS slugDirector, c.id AS idPais, img.id AS idImg, id.id As idLang, g.id AS idGen, tv.dateCreated, tv.dateModified, tv.slug
+                d.nom, d.cognoms, id.idioma_ca, c.pais_ca, img.nameImg, g.genere, d.id AS idDirector, d.slug AS slugDirector
                 FROM %s AS tv
-                INNER JOIN %s AS d ON tv.director_id = d.id
-                INNER JOIN %s AS c ON tv.pais_id = c.id
+                LEFT JOIN %s AS d ON tv.director_id = d.id
+                LEFT JOIN %s AS c ON tv.pais_id = c.id
                 LEFT JOIN %s AS img ON tv.img_id = img.id
-                INNER JOIN %s AS id ON tv.lang = id.id
+                LEFT JOIN %s AS id ON tv.lang = id.id
                 LEFT JOIN %s AS g ON tv.genere_id = g.id
                 WHERE tv.slug = :slug;
             SQL;
