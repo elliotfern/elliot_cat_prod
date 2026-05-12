@@ -68,7 +68,7 @@
                 <a 
                   id="${author.id}"
                   title="Author page"
-                  href="https://${window.location.host}/gestio/base-dades-persones/fitxa-persona${author.slug}"
+                  href="https://${window.location.host}/gestio/base-dades-persones/fitxa-persona/${author.slug}"
                 >
                   <img 
                     src="https://media.elliot.cat/img/persona/${author.nameImg}.jpg"
@@ -81,7 +81,7 @@
                 <a 
                   id="${author.id}"
                   title="Author page"
-                  href="https://${window.location.host}/gestio/base-dades-persones/${author.slug}"
+                  href="https://${window.location.host}/gestio/base-dades-persones/fitxa-persona/${author.slug}"
                 >
                   ${author.nom} ${author.cognoms}
                 </a>
