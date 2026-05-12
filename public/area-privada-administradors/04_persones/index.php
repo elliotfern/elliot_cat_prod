@@ -1,20 +1,18 @@
-<div class="container">
-
     <div id="barraNavegacioContenidor"></div>
 
-    <main>
-        <div class="container contingut">
+    <div class="container">
 
-            <h1>Base de dades: Persones</h1>
+        <h1>Base de dades: Persones</h1>
 
-            <?php if (isUserAdmin()) : ?>
-                <p>
-                    <button onclick="window.location.href='<?php echo APP_INTRANET . $url['persona']; ?>/nova-persona/'" class="button btn-gran btn-secondari">Afegir autor</button>
-                </p>
-            <?php endif; ?>
+        <?php if (isUserAdmin()) : ?>
+            <p>
+                <a
+                    href="<?php echo APP_INTRANET . $url['persona']; ?>/nova-persona/"
+                    class="btn btn-secondary btn-lg">
+                    Afegir autor
+                </a>
+            </p>
+        <?php endif; ?>
 
-            <div id="taulaLlistatPersones"></div>
-
-        </div>
-    </main>
-</div>
+        <div id="taulaLlistatPersones"></div>
+    </div>
