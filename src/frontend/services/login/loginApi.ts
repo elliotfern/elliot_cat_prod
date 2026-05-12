@@ -1,53 +1,64 @@
-import { getIsAdmin } from '../auth/isAdmin';
-
 export async function loginApi(event: Event) {
   event.preventDefault();
 
   const emailInput = document.getElementById('email') as HTMLInputElement;
   const passwordInput = document.getElementById('password') as HTMLInputElement;
 
-  const loginMessageOk = document.getElementById('okMessage');
-  const loginMessageErr = document.getElementById('errMessage');
+  const okBox = document.getElementById('okMessage');
+  const errBox = document.getElementById('errMessage');
 
-  if (emailInput && passwordInput) {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+  if (!emailInput || !passwordInput) return;
 
-    try {
-      const response = await fetch('https://api.elliot.cat/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // 👈 Necesario para que la cookie JWT se guarde
-        body: JSON.stringify({ email, password }), // ✅ Campo correcto
-      });
+  const email = emailInput.value;
+  const password = passwordInput.value;
 
-      const data = await response.json();
+  try {
+    const response = await fetch('https://api.elliot.cat/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (response.ok && data.success) {
-        if (loginMessageOk && loginMessageErr) {
-          loginMessageOk.style.display = 'block';
-          loginMessageOk.innerHTML = data.message;
-          loginMessageErr.style.display = 'none';
-        }
+    const data = await response.json();
 
-        setTimeout(() => {
-          window.location.href = data.user_type === 1 ? '/gestio/admin' : '/usuaris';
-        }, 2000);
-      } else {
-        if (loginMessageOk && loginMessageErr) {
-          loginMessageErr.style.display = 'block';
-          loginMessageErr.innerHTML = data.message || "Error d'autenticació";
-          loginMessageOk.style.display = 'none';
-        }
-      }
-    } catch (error) {
-      if (loginMessageErr && loginMessageOk) {
-        loginMessageErr.style.display = 'block';
-        loginMessageErr.innerHTML = 'Error del servidor';
-        loginMessageOk.style.display = 'none';
-      }
+    const showError = (msg: string) => {
+      if (!errBox || !okBox) return;
+      errBox.classList.remove('d-none');
+      errBox.innerHTML = msg;
+      okBox.classList.add('d-none');
+    };
+
+    const showSuccess = (msg: string) => {
+      if (!errBox || !okBox) return;
+      okBox.classList.remove('d-none');
+      okBox.innerHTML = msg;
+      errBox.classList.add('d-none');
+    };
+
+    // ❌ ERROR
+    if (!response.ok || data.status !== 'success') {
+      const apiMsg = data.message || 'Error d’autenticació';
+
+      const extraErrors = Array.isArray(data.errors) && data.errors.length ? `<br><small>${data.errors.join('<br>')}</small>` : '';
+
+      showError(apiMsg + extraErrors);
+      return;
+    }
+
+    // ✅ OK
+    showSuccess(data.message || 'Accés permès');
+
+    setTimeout(() => {
+      window.location.href = data.user_type === 1 ? '/gestio/admin' : '/usuaris';
+    }, 1500);
+  } catch (error) {
+    if (errBox && okBox) {
+      errBox.classList.remove('d-none');
+      errBox.innerHTML = 'Error de connexió amb el servidor';
+      okBox.classList.add('d-none');
     }
   }
 }
