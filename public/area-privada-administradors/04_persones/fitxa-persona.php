@@ -49,3 +49,5 @@ $urlModifica = Url::intranet('persones') . '/modifica-persona/' . urlencode($slu
 </div>
 
 <hr>
+
+<div class="quadre-professio"></div>

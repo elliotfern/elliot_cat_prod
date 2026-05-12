@@ -297,7 +297,101 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
       p.appendChild(span);
       quadreDetalls.appendChild(p);
     });
+
+    const quadreProfessio = document.querySelector('.quadre-professio') as HTMLElement;
+
+    if (quadreProfessio) {
+      quadreProfessio.innerHTML = '';
+
+      const grups = persona.grupsText.split(',').map((g) => g.trim());
+
+      for (const grup of grups) {
+        const content = await renderProfessioBlock(grup, persona);
+
+        if (content) {
+          if (typeof content === 'string') {
+            quadreProfessio.innerHTML += content;
+          } else {
+            quadreProfessio.appendChild(content);
+          }
+        }
+      }
+    }
   } catch (error) {
     console.error('Error al parsear JSON:', error); // Muestra el error de parsing
   }
+}
+
+async function renderProfessioBlock(grup: string, persona: PersonaView) {
+  switch (grup) {
+    case 'Actor/a':
+    // return renderActor(persona);
+
+    case 'Historiador/a':
+      return renderHistoriador(persona);
+
+    default:
+      return null;
+  }
+}
+
+async function renderHistoriador(persona: PersonaView) {
+  const res = await fetch(`/api/persones/${persona.id}/historiador`);
+
+  if (!res.ok) return null;
+
+  const json = await res.json();
+
+  if (json.status !== 'success' || !Array.isArray(json.data)) return null;
+
+  const llibres = json.data;
+
+  const wrapper = document.createElement('div');
+
+  wrapper.innerHTML = `
+    <hr class="my-4">
+
+    <h4 class="mb-3">📚 Llibres publicats</h4>
+
+    <div class="table-responsive">
+      <table class="table table-sm table-striped table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Títol</th>
+            <th>Any</th>
+            <th class="text-end">Accions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${llibres
+            .map(
+              (l: any) => `
+            <tr>
+              <td>
+                <a href="https://elliot.cat/gestio/biblioteca/fitxa-llibre/${l.slug}">
+                  ${l.titol}
+                </a>
+              </td>
+
+              <td>${l.any ?? ''}</td>
+
+              <td class="text-end">
+                <a 
+                  href="https://elliot.cat/gestio/biblioteca/modifica-llibre/${l.slug}"
+                  class="btn btn-sm btn-outline-warning"
+                >
+                  Modifica
+                </a>
+              </td>
+            </tr>
+          `
+            )
+            .join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  return wrapper;
 }
