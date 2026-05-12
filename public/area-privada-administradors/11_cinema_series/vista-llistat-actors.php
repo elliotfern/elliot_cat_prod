@@ -68,10 +68,10 @@
                 <a 
                   id="${author.id}"
                   title="Author page"
-                  href="https://${window.location.host}/gestio/cinema/fitxa-actor/${author.slug}"
+                  href="https://${window.location.host}/gestio/base-dades-persones/fitxa-persona${author.slug}"
                 >
                   <img 
-                    src="https://media.elliot.cat/img/cinema-actor/${author.nameImg}.jpg"
+                    src="https://media.elliot.cat/img/persona/${author.nameImg}.jpg"
                     style="height:70px"
                   >
                 </a>
@@ -81,7 +81,7 @@
                 <a 
                   id="${author.id}"
                   title="Author page"
-                  href="https://${window.location.host}/gestio/cinema/fitxa-actor/${author.slug}"
+                  href="https://${window.location.host}/gestio/base-dades-persones/${author.slug}"
                 >
                   ${author.nom} ${author.cognoms}
                 </a>
@@ -98,7 +98,7 @@
               <td>${author.pais_ca ?? ''}</td>
 
               <td>
-                <a href="https://${window.location.host}/gestio/persona/modifica-persona/${author.slug}">
+                <a href="https://${window.location.host}/gestio/base-dades-persones/modifica-persona/${author.slug}">
                   <button type="button" class="btn btn-sm btn-warning">
                     Modifica
                   </button>
