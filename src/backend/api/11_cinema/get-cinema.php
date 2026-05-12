@@ -124,8 +124,7 @@ if ($slug === "pelicules") {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT tv.id, tv.name, tv.slug, tv.startYear, tv.endYear, tv.season, tv.chapter, tv.director_id, tv.lang, tv.genere_id, tv.pais_id, tv.img_id, tv.descripcio, tv.dateCreated,
-                tv.dateModified,
+                SELECT tv.id, tv.name, tv.slug, tv.startYear, tv.endYear, tv.season, tv.chapter, tv.director_id, tv.lang, tv.genere_id, tv.pais_id, tv.img_id, tv.descripcio, tv.dateCreated, tv.dateModified,
                 d.nom, d.cognoms, id.idioma_ca, c.pais_ca, img.nameImg, g.genere, d.id AS idDirector, d.slug AS slugDirector
                 FROM %s AS tv
                 LEFT JOIN %s AS d ON tv.director_id = d.id
@@ -190,8 +189,56 @@ if ($slug === "pelicules") {
     echo json_encode($result);
 
     // GET : Actors que participen en una serie determinada
-    // URL: "https://elliot.cat/api/cinema/get/actors-serie?slug=benvinguts-a-la-familia"
+    // URL: "https://elliot.cat/api/cinema/get/actors-serie?serie=id"
 } else if ($slug === "actors-serie") {
+    $serie = $_GET['serie'];
+    AdminMiddleware::handle();
+
+    $sql = <<<SQL
+                SELECT a.nom, a.cognoms, a.id AS idActor, sa.role, img.nameImg, sa.id AS idCast, a.slug
+                FROM %s AS s
+                LEFT JOIN %s AS sa on s.id = sa.idSerie
+                LEFT JOIN %s AS a ON a.id = sa.idActor2
+                LEFT JOIN %s AS img ON a.img = img.id
+                WHERE s.slug = :slug;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_SERIES_TV, $pdo),
+        qi(Tables::CINEMA_ACTORS_SERIES, $pdo),
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_IMATGES, $pdo)
+    );
+
+    try {
+
+        $params = [':slug' => $serie];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+
     $query = "SELECT a.nom, a.cognoms, a.id AS idActor, sa.role, img.nameImg, sa.id AS idCast, a.slug
         FROM 11_db_cinema_series_tv AS s
         LEFT JOIN 11_aux_cinema_actors_seriestv AS sa on s.id = sa.idSerie
@@ -199,8 +246,7 @@ if ($slug === "pelicules") {
         LEFT JOIN db_img AS img ON a.img = img.id
         WHERE s.slug = :slug";
 
-    $result = getData($query, ['slug' => $param], true);
-    echo json_encode($result);
+
 
     // 2) Actors que participen en una pelicula
     // ruta GET => "/api/cinema/get/?actors-pelicula=35"

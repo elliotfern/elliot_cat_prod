@@ -62,13 +62,23 @@ $slug = $routeParams[0];
 </div>
 
 <script>
-  connexioApiGetDades("/api/cinema/get/serie?serieSlug=", "<?php echo $slug; ?>")
+  connexioApiGetDades(
+    "/api/cinema/get/serie?serieSlug=",
+    "<?php echo $slug; ?>"
+  );
+
   actorsDeLaSerie("<?php echo $slug; ?>");
 
+  // =========================================
+  // FITXA SÈRIE
+  // =========================================
+
   async function connexioApiGetDades(url, id) {
+
     const urlAjax = `${url}${id}`;
 
     try {
+
       const response = await fetch(urlAjax, {
         method: 'GET'
       });
@@ -77,120 +87,164 @@ $slug = $routeParams[0];
         throw new Error('Error en la sol·licitud AJAX');
       }
 
-      const data = await response.json();
+      const json = await response.json();
 
-      // Asegúrate de que data sea un objeto o array adecuado
-      const data2 = Array.isArray(data) ? data[0] : data;
+      // 🔥 NUEVO FORMATO API
+      const data2 = json.data?.[0];
+
+      if (!data2) {
+        throw new Error('No hi ha dades de la sèrie');
+      }
 
       for (let key in data2) {
-        if (data2.hasOwnProperty(key)) {
-          let value = data2[key];
 
-          // Buscar el elemento `<span>` con el ID correspondiente
-          const element = document.getElementById(key);
-          if (element) {
-            // Verificar que el elemento es un `<span>` antes de modificar
-            if (element.tagName === 'SPAN') {
-              // Decodificar HTML si es necesario y asignar solo el texto
-              element.textContent = value; // Solo reemplazar el contenido del `span`
-            }
+        if (!data2.hasOwnProperty(key)) continue;
+
+        let value = data2[key];
+
+        // =========================================
+        // SPANS
+        // =========================================
+
+        const element = document.getElementById(key);
+
+        if (element && element.tagName === 'SPAN') {
+          element.textContent = value ?? '';
+        }
+
+        // =========================================
+        // IMAGEN
+        // =========================================
+
+        if (key === 'nameImg') {
+
+          const img = document.getElementById('img');
+
+          if (img && value) {
+            img.src = `https://media.elliot.cat/img/cinema-serie/${value}.jpg`;
           }
+        }
 
-          // Actualizar el DOM con la información recibida
-          if (key === 'nameImg') {
-            document.getElementById('img').src = `https://media.elliot.cat/img/cinema-serie/${data2['nameImg']}.jpg`;
+        // =========================================
+        // DIRECTOR
+        // =========================================
+
+        if (key === 'nom' || key === 'cognoms') {
+
+          const directorUrl = document.getElementById('directorUrl');
+
+          if (
+            directorUrl &&
+            directorUrl.tagName === 'A' &&
+            data2['slugDirector']
+          ) {
+
+            directorUrl.href =
+              `${window.location.origin}/gestio/cinema/fitxa-director/${data2['slugDirector']}`;
           }
+        }
 
-          // Casos especiales: Director/a
-          if (key === 'nom' || key === 'cognoms') {
-            const directorUrl = document.getElementById('directorUrl');
-            if (directorUrl && directorUrl.tagName === 'A') {
-              directorUrl.href = `${window.location.origin}/gestio/cinema/fitxa-director/${data2['slugDirector']}`; // Añadir la URL del director
-            }
+        // =========================================
+        // DATE CREATED
+        // =========================================
+
+        if (key === 'dateCreated') {
+
+          const dateElement = document.getElementById('dateCreated');
+
+          if (dateElement && value) {
+
+            const dateObj = new Date(value);
+
+            const day = dateObj.getDate();
+            const month = dateObj.getMonth() + 1;
+            const year = dateObj.getFullYear();
+
+            dateElement.textContent = `${day}/${month}/${year}`;
           }
+        }
 
-          // Anys naixement i defuncio
-          if (key === 'anyNaixement' || key === 'anyDefuncio') {
-            const dateElement = document.getElementById(key);
-            if (dateElement && dateElement.tagName === 'SPAN') {
-              const anyNaixement = parseInt(data2['anyNaixement'], 10);
-              const anyDefuncio = data2['anyDefuncio'] ? parseInt(data2['anyDefuncio'], 10) : null;
-              const anyActual = new Date().getFullYear();
+        // =========================================
+        // DATE MODIFIED
+        // =========================================
 
-              let edad;
+        if (key === 'dateModified') {
 
-              if (!anyDefuncio) {
-                edad = anyActual - anyNaixement; // Calcula la edad actual si sigue vivo
-              } else {
-                edad = anyDefuncio - anyNaixement; // Calcula la edad en caso de fallecimiento
-              }
+          const dateElement = document.getElementById('dateModified');
 
-              dateElement.innerHTML = `${anyNaixement} - ${anyDefuncio || ""} (${edad} anys)`;
-            }
-          }
+          if (dateElement) {
 
-          // Anys naixement i defuncio
-          if (key === 'dateCreated') {
-            const dateElement = document.getElementById('dateCreated');
-            if (dateElement && dateElement.tagName === 'SPAN') {
+            if (
+              value === '0000-00-00' ||
+              value === null ||
+              value === ''
+            ) {
+
+              dateElement.textContent = '';
+
+            } else {
+
               const dateObj = new Date(value);
+
               const day = dateObj.getDate();
-              const month = dateObj.getMonth() + 1; // Los meses van de 0 a 11
+              const month = dateObj.getMonth() + 1;
               const year = dateObj.getFullYear();
 
-              dateElement.textContent = `${day}/${month}/${year}`;
+              dateElement.innerHTML =
+                `| <strong>Darrera modificació:</strong> ${day}/${month}/${year}`;
             }
           }
+        }
 
-          if (key === 'dateModified') {
-            const dateElement = document.getElementById('dateModified');
+        // =========================================
+        // START YEAR / END YEAR
+        // =========================================
 
-            // Verifica si el valor es distinto de '0000-00-00' y si la fecha es válida
-            if (dateElement && dateElement.tagName === 'SPAN') {
-              const dateObj = new Date(value);
+        if (key === 'startYear') {
 
-              // Verifica si la fecha es válida
-              if (data2['dateModified'] == '0000-00-00') {
-                dateElement.textContent = ''; // No mostrar nada si no es válida
-              } else {
-                const day = dateObj.getDate();
-                const month = dateObj.getMonth() + 1;
-                const year = dateObj.getFullYear();
+          const dateElement = document.getElementById('startYear');
 
-                dateElement.innerHTML = `| <strong> Darrera modificació: </strong> ${day}/${month}/${year}`;
+          if (!dateElement) continue;
 
-              }
-            }
-          }
+          const startYear = data2['startYear'];
+          const endYear = data2['endYear'];
 
-          // Anys naixement i defuncio
-          if (key === 'startYear') {
-            const dateElement = document.getElementById('startYear');
-            if (data2['endYear'] === null || data2['endYear'] === 0) {
-              const startYear = data2['startYear'];
-              dateElement.innerHTML = `<strong>En emissió: </strong>des de l'any ${startYear}`;
-            } else if (data2['startYear'] === data2['endYear']) {
-              const startYear = data2['startYear'];
-              dateElement.innerHTML = `<strong>Any emissió: </strong> ${startYear}`;
-            } else {
-              const endYear = data2['endYear'];
-              const startYear = data2['startYear'];
-              dateElement.innerHTML = `<strong>Anys emissió: </strong>${startYear} / ${endYear}`;
-            }
+          if (endYear === null || endYear === 0) {
+
+            dateElement.innerHTML =
+              `<strong>En emissió:</strong> des de l'any ${startYear}`;
+
+          } else if (startYear === endYear) {
+
+            dateElement.innerHTML =
+              `<strong>Any emissió:</strong> ${startYear}`;
+
+          } else {
+
+            dateElement.innerHTML =
+              `<strong>Anys emissió:</strong> ${startYear} / ${endYear}`;
           }
         }
       }
 
     } catch (error) {
-      console.error('Error al parsear JSON:', error); // Muestra el error de parsing
+
+      console.error('Error al parsear JSON:', error);
     }
   }
 
+  // =========================================
+  // ACTORS DE LA SÈRIE
+  // =========================================
+
   async function actorsDeLaSerie(id) {
-    const urlAjax = `/api/cinema/get/?llistat-actors-serie=${id}`;
-    const container = document.getElementById("actors-container"); // Un contenedor para meter la tabla o el mensaje
+
+    const urlAjax = `/api/cinema/get/actors-serie?serie=${id}`;
+
+    const container = document.getElementById("actors-container");
 
     try {
+
       const response = await fetch(urlAjax, {
         method: "GET",
       });
@@ -199,53 +253,99 @@ $slug = $routeParams[0];
         throw new Error(`Error en la petición: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const json = await response.json();
 
-      if (data.length > 0) {
+      // 🔥 NUEVO FORMATO API
+      const actors = json.data ?? [];
+
+      if (actors.length > 0) {
+
         const tableHTML = `
-        <table class="table table-striped" id="actors">
-          <thead class="table-primary">
-            <tr>
-              <th></th>
-              <th>Actor</th>
-              <th>Personatge</th>
-              <th></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            ${data.map(actor => `
+          <table class="table table-striped" id="actors">
+
+            <thead class="table-primary">
               <tr>
-                <td>
-                  <a id="actor-${actor.idActor}" title="Actor" href="${window.location.origin}/gestio/cinema/fitxa-actor/${actor.slug}">
-                    <img src="https://media.elliot.cat/img/cinema-actor/${actor.nameImg}.jpg" width="100" height="auto">
-                  </a>
-                </td>
-                <td>
-                  <a id="actor-${actor.idActor}" title="Actor" href="${window.location.origin}/gestio/cinema/fitxa-actor/${actor.slug}">
-                    ${actor.nom} ${actor.cognoms}
-                  </a>
-                </td>
-                <td>${actor.role}</td>
-                <td>
-                  <a href="${window.location.origin}/gestio/cinema/modifica-actor-serie/${actor.idCast}" class="btn btn-secondary btn-sm modificar-link">Modificar</a>
-                </td>
-                <td>
-                  <button type="button">Elimina</button>
-                </td>
+                <th></th>
+                <th>Actor</th>
+                <th>Personatge</th>
+                <th></th>
+                <th></th>
               </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      `;
+            </thead>
+
+            <tbody>
+
+              ${actors.map(actor => `
+
+                <tr>
+
+                  <td>
+                    <a
+                      id="actor-${actor.idActor}"
+                      title="Actor"
+                      href="${window.location.origin}/gestio/cinema/fitxa-actor/${actor.slug}"
+                    >
+
+                      <img
+                        src="https://media.elliot.cat/img/cinema-actor/${actor.nameImg}.jpg"
+                        width="100"
+                        height="auto"
+                      >
+
+                    </a>
+                  </td>
+
+                  <td>
+                    <a
+                      id="actor-${actor.idActor}"
+                      title="Actor"
+                      href="${window.location.origin}/gestio/cinema/fitxa-actor/${actor.slug}"
+                    >
+
+                      ${actor.nom} ${actor.cognoms}
+
+                    </a>
+                  </td>
+
+                  <td>${actor.role ?? ''}</td>
+
+                  <td>
+                    <a
+                      href="${window.location.origin}/gestio/cinema/modifica-actor-serie/${actor.idCast}"
+                      class="btn btn-secondary btn-sm modificar-link"
+                    >
+                      Modificar
+                    </a>
+                  </td>
+
+                  <td>
+                    <button type="button" class="btn btn-danger btn-sm">
+                      Elimina
+                    </button>
+                  </td>
+
+                </tr>
+
+              `).join("")}
+
+            </tbody>
+
+          </table>
+        `;
 
         container.innerHTML = tableHTML;
 
       } else {
-        container.innerHTML = `<p class="text-muted">No hi ha actors assignats a aquesta sèrie.</p>`;
+
+        container.innerHTML = `
+          <p class="text-muted">
+            No hi ha actors assignats a aquesta sèrie.
+          </p>
+        `;
       }
 
     } catch (error) {
+
       console.error("Error al obtener los actores:", error);
     }
   }
