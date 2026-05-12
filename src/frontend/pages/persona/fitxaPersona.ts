@@ -93,6 +93,9 @@ function mapPersona(api: PersonaApiData): PersonaView {
     web: api.web ?? '',
     descripcio: api.descripcio ?? '',
 
+    // ==========================
+    // FECHAS SISTEMA (IMPORTANTE)
+    // ==========================
     dateCreated: api.created_at ?? null,
     dateModified: api.updated_at ?? null,
 
@@ -108,6 +111,9 @@ function mapPersona(api: PersonaApiData): PersonaView {
     ciutatNaixement: api.ciutatNaixement ?? null,
     ciutatDefuncio: api.ciutatDefuncio ?? null,
 
+    // ==========================
+    // EXTRA INFO
+    // ==========================
     paisAutor: api.pais_ca ?? '',
 
     sexe: api.sexe_id === 1 ? 'Home' : api.sexe_id === 2 ? 'Dona' : '',
@@ -161,6 +167,85 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     }
 
     // ==========================
+    // FECHAS DE CREACIÓN / MODIFICACIÓN
+    // ==========================
+    const dateElement = document.getElementById('dateCreated');
+    const dateElement2 = document.getElementById('dateModified');
+
+    if (dateElement && persona.dateCreated) {
+      const d = new Date(persona.dateCreated);
+      dateElement.textContent = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+    }
+
+    if (dateElement2 && persona.dateModified) {
+      const isSame = persona.dateModified === persona.dateCreated || persona.dateModified === '0000-00-00';
+
+      if (!isSame) {
+        const d = new Date(persona.dateModified);
+        dateElement2.innerHTML = `| <strong>Darrera modificació:</strong> ${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+      } else {
+        dateElement2.textContent = '';
+      }
+    }
+
+    // ==========================
+    // NACIMIENTO / DEFUNCIÓN
+    // ==========================
+    const mesosCatala = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
+
+    const anyNaixement = persona.anyNaixement ?? 0;
+    const diaNaixement = persona.diaNaixement ?? 0;
+    const mesNaixement = persona.mesNaixement ?? 0;
+
+    const anyDefuncio = persona.anyDefuncio ?? 0;
+    const diaDefuncio = persona.diaDefuncio ?? 0;
+    const mesDefuncio = persona.mesDefuncio ?? 0;
+
+    const diaN = diaNaixement || '';
+    const mesN = mesNaixement || '';
+
+    let dataNaixement = anyNaixement.toString();
+    if (diaN && mesN) {
+      dataNaixement = `${diaN} ${mesosCatala[mesN - 1]} ${anyNaixement}`;
+    }
+
+    const diaD = diaDefuncio || '';
+    const mesD = mesDefuncio || '';
+
+    let dataDefuncio = '';
+    if (anyDefuncio) {
+      dataDefuncio = anyDefuncio.toString();
+      if (diaD && mesD) {
+        dataDefuncio = `${diaD} ${mesosCatala[mesD - 1]} ${anyDefuncio}`;
+      }
+    }
+
+    // ==========================
+    // EDAD
+    // ==========================
+    const now = new Date();
+    const anyActual = now.getFullYear();
+
+    let edad = anyActual - anyNaixement;
+
+    if (!anyDefuncio) {
+      if (now.getMonth() < mesNaixement - 1 || (now.getMonth() === mesNaixement - 1 && now.getDate() < diaNaixement)) {
+        edad--;
+      }
+    } else {
+      if (mesDefuncio < mesNaixement || (mesDefuncio === mesNaixement && diaDefuncio < diaNaixement)) {
+        edad--;
+      }
+    }
+
+    // ==========================
+    // CIUDADES
+    // ==========================
+    const ciutatNaixement = persona.ciutatNaixement ? ` (${persona.ciutatNaixement})` : '';
+
+    const ciutatDefuncio = persona.ciutatDefuncio ? ` (${persona.ciutatDefuncio})` : '';
+
+    // ==========================
     // DETALLES
     // ==========================
     const quadreDetalls = document.querySelector('.quadre-detalls') as HTMLElement;
@@ -169,29 +254,18 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
     const parrafosHTML: { label: string; value: string }[] = [];
 
     parrafosHTML.push({
-      label: 'Sexe: ',
-      value: persona.sexe,
+      label: 'Naixement: ',
+      value: `${dataNaixement} ${ciutatNaixement} ${!anyDefuncio ? `- ${edad} anys` : ''}`,
     });
 
-    parrafosHTML.push({
-      label: 'Professió / grup: ',
-      value: persona.grupsText,
-    });
+    if (anyDefuncio) {
+      parrafosHTML.push({
+        label: 'Defunció: ',
+        value: `${dataDefuncio} ${ciutatDefuncio} - ${edad} anys`,
+      });
+    }
 
-    parrafosHTML.push({
-      label: 'Pais/Nacionalitat: ',
-      value: persona.paisAutor,
-    });
-
-    parrafosHTML.push({
-      label: 'Pàgina Viquipèdia: ',
-      value: `<a href="${persona.web}" target="_blank">Enllaç extern</a>`,
-    });
-
-    parrafosHTML.push({
-      label: 'Biografia: ',
-      value: persona.descripcio || 'No disponible',
-    });
+    parrafosHTML.push({ label: 'Sexe: ', value: persona.sexe }, { label: 'Professió / grup: ', value: persona.grupsText }, { label: 'País/Nacionalitat: ', value: persona.paisAutor }, { label: 'Pàgina Viquipèdia: ', value: `<a href="${persona.web}" target="_blank">Enllaç extern</a>` }, { label: 'Biografia: ', value: persona.descripcio || 'No disponible' });
 
     parrafosHTML.forEach((item) => {
       const p = document.createElement('p');
@@ -203,12 +277,11 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
 
       p.appendChild(strong);
       p.appendChild(span);
-
       quadreDetalls.appendChild(p);
     });
 
     // ==========================
-    // PROFESIÓN BLOCKS (FIX DUPLICADOS)
+    // PROFESIONES
     // ==========================
     const quadreProfessio = document.querySelector('.quadre-professio') as HTMLElement;
     if (!quadreProfessio) return;
@@ -224,20 +297,16 @@ export async function fitxaPersona(url: string, id: string, tipus: string, callb
       )
     );
 
-    const rendered = new Set<string>(); // 🔥 evita duplicados por renderer
+    const rendered = new Set<string>();
 
     for (const grup of grups) {
       const renderer = professionRenderers.get(grup);
-
       if (!renderer) continue;
 
-      // si ya renderizó ese tipo → skip
-      if (rendered.has(renderer.name)) continue;
-
-      rendered.add(renderer.name);
+      if (rendered.has(grup)) continue;
+      rendered.add(grup);
 
       const content = await renderer(persona);
-
       if (!content) continue;
 
       if (typeof content === 'string') {
