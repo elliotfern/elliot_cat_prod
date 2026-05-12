@@ -291,10 +291,10 @@ if ($slug === "pelicules") {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT p.pelicula AS titol, sa.role, p.any AS anyInici, p.slug
+                SELECT p.pelicula AS titol, sa.rol, p.any AS anyInici, p.slug
                 FROM %s AS p
                 LEFT JOIN %s AS sa ON p.id = sa.idMovie
-                LEFT JOIN %s AS pe ON pe.id = sa.idActor 
+                LEFT JOIN %s AS pe ON pe.id = sa.idActor2
                 WHERE pe.slug = :slug
                 ORDER BY p.pelicula ASC;
             SQL;
@@ -344,7 +344,7 @@ if ($slug === "pelicules") {
                 SELECT s.name AS titol, sa.role, s.startYear AS anyInici, s.endYear AS anyFi, s.slug
                 FROM %s AS s
                 LEFT JOIN %s AS sa ON s.id = sa.idSerie
-                LEFT JOIN %s AS pe ON pe.id = sa.idActor 
+                LEFT JOIN %s AS pe ON pe.id = sa.actor_id 
                 WHERE pe.slug = :slug
                 ORDER BY s.name ASC
             SQL;
