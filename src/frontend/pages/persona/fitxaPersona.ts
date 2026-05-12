@@ -336,7 +336,7 @@ async function renderProfessioBlock(grup: string, persona: PersonaView) {
 }
 
 async function renderHistoriador(persona: PersonaView) {
-  const res = await fetch(`/api/persones/${persona.id}/historiador`);
+  const res = await fetch(`/api/biblioteca/get/autorLlibres?id=${persona.id}`);
 
   if (!res.ok) return null;
 
