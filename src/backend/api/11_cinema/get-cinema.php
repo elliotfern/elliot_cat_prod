@@ -199,7 +199,7 @@ if ($slug === "pelicules") {
                 FROM %s AS s
                 LEFT JOIN %s AS sa on s.id = sa.idSerie
                 LEFT JOIN %s AS a ON a.id = sa.actor_id
-                LEFT JOIN %s AS img ON a.img = img.id
+                LEFT JOIN %s AS img ON a.img_id = img.id
                 WHERE s.slug = :slug;
             SQL;
 
