@@ -25,7 +25,7 @@
     });
 
     function obtenirPelicules() {
-      let urlAjax = "/api/cinema/get/";
+      let urlAjax = "/api/cinema/get/series";
 
       fetch(urlAjax, {
           method: "GET",
