@@ -8,11 +8,11 @@ use Ramsey\Uuid\Uuid;
 global $conn;
 
 while (true) {
-    $stmt = $conn->query('SELECT id FROM db_viatges_espais_visitats');
+    $stmt = $conn->query('SELECT id FROM aux_idiomes');
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     if (!$rows) break;
 
-    $upd = $conn->prepare('UPDATE db_viatges_espais_visitats SET id2 = :id2 WHERE id = :id');
+    $upd = $conn->prepare('UPDATE aux_idiomes SET id2 = :id2 WHERE id = :id');
 
     foreach ($rows as $row) {
         $id2 = Uuid::uuid7()->getBytes(); // UUIDv7 en binario
