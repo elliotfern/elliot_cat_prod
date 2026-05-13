@@ -19,10 +19,10 @@ $slug = $routeParams[0];
     <?php endif; ?>
   </div>
 
-  <div class='fitxaPeli'></div>
+  <div id='fitxaPeli'></div>
 
   <hr>
 
-  <div class='taulaActors'></div>
+  <div id='taulaActors'></div>
 
 </div>

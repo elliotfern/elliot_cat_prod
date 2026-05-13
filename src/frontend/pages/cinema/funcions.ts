@@ -18,7 +18,8 @@ export async function cinema() {
       });
     }
   } else if (slug === 'fitxa-pelicula') {
-    fitxaPelicula(idSlug);
+    const url = 'https://elliot.cat/api/cinema/get/pelicula?peliSlug=';
+    fitxaPelicula(url, idSlug);
   } else if (pageType[2] === 'modifica-serie') {
     const serie = document.getElementById('modificarSerie');
     if (serie) {
