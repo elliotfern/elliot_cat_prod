@@ -185,7 +185,13 @@ if (isset($_GET['persona'])) {
     }
 
     if ($hasGrups && is_array($grup_ids)) {
+
         foreach ($grup_ids as $i => $gid) {
+
+            if (empty($gid)) {
+                continue; // 👈 clave
+            }
+
             if (!isUuid($gid)) {
                 $errors["grup_ids.$i"] = 'invalid_uuid';
             }
@@ -328,8 +334,13 @@ if (isset($_GET['persona'])) {
         if ($hasGrups) {
             deletePersonGroups($conn, $personaIdBin);
 
-            if (!empty($grup_ids)) {
-                insertPersonGroups($conn, $personaIdBin, $grup_ids);
+            if (is_array($grup_ids)) {
+
+                $grup_ids = array_values(array_filter($grup_ids));
+
+                if (!empty($grup_ids)) {
+                    insertPersonGroups($conn, $personaIdBin, $grup_ids);
+                }
             }
         }
 
