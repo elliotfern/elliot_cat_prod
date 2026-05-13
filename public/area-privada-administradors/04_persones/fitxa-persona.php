@@ -6,4 +6,4 @@
 
 <hr>
 
-<div class="quadre-extra">
+<div class="quadre-extra"></div>

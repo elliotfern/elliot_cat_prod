@@ -36,6 +36,20 @@ function safeDate(date?: string | null): string {
   return date ? formatData(date) : '';
 }
 
+function calcularEdad(persona: PersonaView): number | null {
+  if (!persona.anyNaixement) return null;
+
+  // Fallecida
+  if (persona.anyDefuncio && persona.anyDefuncio > 0) {
+    return persona.anyDefuncio - persona.anyNaixement;
+  }
+
+  // Viva
+  const now = new Date();
+
+  return now.getFullYear() - persona.anyNaixement;
+}
+
 // -------------------------
 // 1. API → VIEW
 // -------------------------
@@ -75,6 +89,11 @@ export function mapPersona(api: PersonaApi): PersonaView {
 // -------------------------
 export function mapPersonaToFitxa(persona: PersonaView) {
   const fullName = `${persona.nom} ${persona.cognoms}`.trim();
+  const edad = calcularEdad(persona);
+
+  const naixement = persona.anyNaixement ? `${persona.anyNaixement}${persona.ciutatNaixement ? ` (${persona.ciutatNaixement})` : ''}${edad && !persona.anyDefuncio ? ` - ${edad} anys` : ''}` : '';
+
+  const defuncio = persona.anyDefuncio && persona.anyDefuncio > 0 ? `${persona.anyDefuncio}${persona.ciutatDefuncio ? ` (${persona.ciutatDefuncio})` : ''}${edad ? ` - ${edad} anys` : ''}` : '';
 
   return {
     title: fullName,
@@ -88,6 +107,15 @@ export function mapPersonaToFitxa(persona: PersonaView) {
 
     fields: [
       { label: 'Nom complet', value: fullName },
+      {
+        label: 'Naixement',
+        value: naixement,
+      },
+
+      {
+        label: 'Defunció',
+        value: defuncio,
+      },
       { label: 'País', value: persona.paisAutor },
       { label: 'Ciutat naixement', value: persona.ciutatNaixement ?? '' },
       { label: 'Ciutat defunció', value: persona.ciutatDefuncio ?? '' },
