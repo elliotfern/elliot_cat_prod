@@ -29,7 +29,7 @@ export async function taulaLlistatPelicules() {
       header: 'Director/a',
       field: 'cognoms',
       render: (_: unknown, row: Pelicula) => {
-        return `${row.nom} ${row.cognoms}`;
+        return `<a id="${row.id}" title="Fitxa director" href="https://${window.location.hostname}/estio/base-dades-persones/fitxa-persona/${row.slug}">${row.nom} ${row.cognoms}</a>`;
       },
     },
     { header: 'País', field: 'pais_ca' },

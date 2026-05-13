@@ -62,8 +62,7 @@ if ($slug === "pelicules") {
     );
 
     try {
-        $params = [':id' => uuid::toBinary($actor)];
-        $result = $db->getData($query, $params);
+        $result = $db->getData($query, [], false);
 
         if (empty($result)) {
             Response::error(
