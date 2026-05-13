@@ -164,7 +164,7 @@ if ($modificaBtn === 1) {
 
 <script>
   function formUpdate(id) {
-    let urlAjax = "/api/cinema/get/serieIntranet?=id" + id;
+    let urlAjax = "/api/cinema/get/serieIntranet?id=" + id;
 
     fetch(urlAjax, {
         method: "GET",
