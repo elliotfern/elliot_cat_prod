@@ -1,6 +1,5 @@
-import { mapPeliculaToFitxa } from "../../components/mappers/pelicula";
-import { renderFitxa } from "../../utils/renderFitxa";
-
+import { mapPeliculaToFitxa } from '../../components/mappers/pelicula';
+import { renderFitxa } from '../../utils/renderFitxa';
 
 export async function fitxaPelicula(baseUrl: string, slug: string) {
   const urlAjax = `${baseUrl}${slug}`;

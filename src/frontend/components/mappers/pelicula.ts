@@ -16,14 +16,18 @@ interface PeliculaApi {
   idioma_ca: string | null;
 
   genere: string | null;
-
-  dateCreated: string;
-  dateModified: string;
-
+  createdAt?: string | undefined;
+  updatedAt?: string | undefined;
+  dateCreated?: string | undefined;
+  dateModified?: string | undefined;
   nom: string | null;
   cognoms: string | null;
 
   slugDirector: string | null;
+}
+
+function safeDate(date?: string | null): string {
+  return date ? formatData(date) : '';
 }
 
 export function mapPeliculaToFitxa(api: PeliculaApi) {
@@ -75,7 +79,7 @@ export function mapPeliculaToFitxa(api: PeliculaApi) {
 
     description: api.descripcio ?? '',
 
-    createdAt: api.dateCreated ? formatData(api.dateCreated) : undefined,
-    updatedAt: api.dateModified ? formatData(api.dateModified) : undefined,
+    createdAt: safeDate(api.createdAt),
+    updatedAt: safeDate(api.updatedAt),
   };
 }
