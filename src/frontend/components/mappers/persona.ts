@@ -123,6 +123,43 @@ export function mapPersonaToFitxa(persona: PersonaView) {
 
   const defuncio = dataDefuncio && persona.anyDefuncio ? `${dataDefuncio}${persona.ciutatDefuncio ? ` (${persona.ciutatDefuncio})` : ''}${edad ? ` - ${edad} anys` : ''}` : '';
 
+  const fields = [
+    {
+      label: 'Nom complet',
+      value: fullName,
+    },
+
+    {
+      label: 'Dades de naixement',
+      value: naixement,
+    },
+  ];
+
+  // SOLO SI EXISTE DEFUNCIÓN
+  if (defuncio) {
+    fields.push({
+      label: 'Dades de defunció',
+      value: defuncio,
+    });
+  }
+
+  fields.push(
+    {
+      label: 'País/nacionalitat',
+      value: persona.paisAutor,
+    },
+
+    {
+      label: 'Gènere',
+      value: persona.sexe,
+    },
+
+    {
+      label: 'Més informació',
+      value: persona.web ? `<a href="${persona.web}" target="_blank">Enllaç extern</a>` : '',
+    }
+  );
+
   return {
     title: fullName,
 
@@ -133,25 +170,7 @@ export function mapPersonaToFitxa(persona: PersonaView) {
         }
       : undefined,
 
-    fields: [
-      { label: 'Nom complet', value: fullName },
-      {
-        label: 'Naixement',
-        value: naixement,
-      },
-
-      {
-        label: 'Defunció',
-        value: defuncio,
-      },
-      { label: 'País', value: persona.paisAutor },
-      { label: 'Sexe', value: persona.sexe },
-      {
-        label: 'Web',
-        value: persona.web ? `<a href="${persona.web}" target="_blank">Enllaç extern</a>` : '',
-      },
-    ],
-
+    fields,
     description: persona.descripcio ?? '',
     dateCreated: safeDate(persona.dateCreated),
     dateModified: safeDate(persona.dateModified),
