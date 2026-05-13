@@ -39,11 +39,14 @@ body {
   padding-top: var(--topOffset, 0px);
 }
 
-
 body {
   padding-top: 72px;
 }
 
 :root {
   --headerH: 72px;
+}
+
+.fitxa-wrapper {
+  width: 100%;
 }

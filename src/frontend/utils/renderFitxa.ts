@@ -1,3 +1,5 @@
+import { formatData } from './formataData';
+
 type FitxaFieldType = 'text' | 'html' | 'link';
 
 interface FitxaField {
@@ -39,7 +41,7 @@ export function renderFitxa(options: RenderFitxaOptions) {
   }
 
   container.innerHTML = `
-    <div class="container-fluid">
+    <div class="fitxa-wrapper">
 
     ${
       options.editButton
@@ -61,13 +63,13 @@ export function renderFitxa(options: RenderFitxaOptions) {
              ? `
             <div id=dadesCreacio" class="mt-3 text-muted small bg-light p-3 rounded mb-3 d-inline-block">
 
-                Aquesta fitxa ha estat creada el:
+                <strong>Aquesta fitxa ha estat creada el: </strong>
                 ${options.createdAt}
 
                 ${
                   options.updatedAt
                     ? `
-                    | <strong>Darrera modificació:</strong>
+                    | <strong>Darrera modificació: </strong>
                     ${options.updatedAt}
                     `
                     : ''

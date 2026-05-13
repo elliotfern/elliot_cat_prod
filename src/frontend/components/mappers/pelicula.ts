@@ -1,3 +1,5 @@
+import { formatData } from '../../utils/formataData';
+
 interface PeliculaApi {
   id: string;
   pelicula: string;
@@ -73,7 +75,7 @@ export function mapPeliculaToFitxa(api: PeliculaApi) {
 
     description: api.descripcio ?? '',
 
-    createdAt: api.dateCreated,
-    updatedAt: api.dateModified,
+    createdAt: api.dateCreated ? formatData(api.dateCreated) : undefined,
+    updatedAt: api.dateModified ? formatData(api.dateModified) : undefined,
   };
 }
