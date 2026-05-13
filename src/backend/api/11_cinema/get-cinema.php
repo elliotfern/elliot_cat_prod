@@ -39,16 +39,53 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // URL: https://elliot.cat/api/cinema/get/pelicules
 if ($slug === "pelicules") {
 
-    $query = "SELECT c.id, c.pelicula, c.pelicula_es, c.any, c.dataVista, d.nom, d.cognoms, p.pais_cat, g.genere_ca, i.idioma_ca, c.slug
-            FROM 11_db_pelicules AS c
-            LEFT JOIN db_persones AS d ON c.director = d.id
-            LEFT JOIN db_countries AS p ON c.pais = p.id
-            LEFT JOIN 11_aux_cinema_generes AS g ON c.genere = g.id
-            LEFT JOIN aux_idiomes AS i ON c.lang = i.id
-            ORDER BY c.any DESC";
+    AdminMiddleware::handle();
 
-    $result = getData($query);
-    echo json_encode($result);
+    $sql = <<<SQL
+                SELECT c.id, c.pelicula, c.pelicula_ca, c.any, d.nom, d.cognoms, p.pais_ca, g.genere, i.idioma_ca, c.slug
+                FROM %s AS c
+                LEFT JOIN %s AS d ON c.director_id = d.id
+                LEFT JOIN %s AS p ON c.pais_id = p.id
+                LEFT JOIN %s AS g ON c.genere_id = g.id
+                LEFT JOIN %s AS i ON c.idioma_id = i.id
+                ORDER BY c.any DESC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_PELICULES, $pdo),
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::CINEMA_GENERES, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo)
+
+    );
+
+    try {
+        $params = [':id' => uuid::toBinary($actor)];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // GET : llistat de gèneres
     // URL: https://elliot.cat/api/cinema/get/generes
@@ -381,9 +418,9 @@ if ($slug === "pelicules") {
     $sql = <<<SQL
                 SELECT p.pelicula AS titol, sa.rol, p.any AS anyInici, p.slug
                 FROM %s AS p
-                LEFT JOIN %s AS sa ON p.id = sa.idMovie
+                LEFT JOIN %s AS sa ON p.id = sa.pelicula_id
                 LEFT JOIN %s AS pe ON pe.id = sa.actor_id
-                WHERE sa.idActor2 = :id
+                WHERE sa.actor_id = :id
                 ORDER BY p.pelicula ASC;
             SQL;
 

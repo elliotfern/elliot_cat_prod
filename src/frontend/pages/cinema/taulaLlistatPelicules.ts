@@ -18,7 +18,6 @@ export async function taulaLlistatPelicules() {
   } else {
     slug = pageType[2];
   }
-
   const columns: TaulaDinamica<Pelicula>[] = [
     {
       header: 'Pel·lícula',
@@ -33,8 +32,8 @@ export async function taulaLlistatPelicules() {
         return `${row.nom} ${row.cognoms}`;
       },
     },
-    { header: 'País', field: 'pais_cat' },
-    { header: 'Gènere', field: 'genere_ca' },
+    { header: 'País', field: 'pais_ca' },
+    { header: 'Gènere', field: 'genere' },
   ];
 
   if (isAdmin) {
@@ -50,6 +49,6 @@ export async function taulaLlistatPelicules() {
     containerId: 'taulaLlistatPelicules',
     columns,
     filterKeys: ['nom', 'cognoms', 'pelicula'],
-    filterByField: 'pais_cat',
+    filterByField: 'pais_ca',
   });
 }

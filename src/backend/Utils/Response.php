@@ -10,6 +10,7 @@ class Response
     private static array $uuidFields = [
         'id',
         'img_id',
+        'imatge_id',
         'pais_autor_id',
         'ciutat_naixement_id',
         'ciutat_defuncio_id',
@@ -31,7 +32,8 @@ class Response
         'viatge_id',
         'director_id',
         'genere_id',
-        'lang_id'
+        'lang_id',
+        'idioma_id',
     ];
 
     public static function success(string $message = '', $data = null, int $httpCode = 200): void
