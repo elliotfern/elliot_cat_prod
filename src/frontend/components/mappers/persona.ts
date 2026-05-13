@@ -13,6 +13,11 @@ export interface PersonaApi {
 
   any_naixement: number | null;
   any_defuncio: number | null;
+  mes_naixement?: number | null;
+  dia_naixement?: number | null;
+
+  mes_defuncio?: number | null;
+  dia_defuncio?: number | null;
 
   ciutatNaixement: string | null;
   ciutatDefuncio: string | null;
@@ -36,6 +41,8 @@ function safeDate(date?: string | null): string {
   return date ? formatData(date) : '';
 }
 
+const mesosCatala = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
+
 function calcularEdad(persona: PersonaView): number | null {
   if (!persona.anyNaixement) return null;
 
@@ -48,6 +55,18 @@ function calcularEdad(persona: PersonaView): number | null {
   const now = new Date();
 
   return now.getFullYear() - persona.anyNaixement;
+}
+
+function formatDataPersona(any?: number | null, mes?: number | null, dia?: number | null): string {
+  if (!any || any === 0) return '';
+
+  // Si existe día y mes
+  if (dia && mes && mes > 0) {
+    return `${dia} ${mesosCatala[mes - 1]} ${any}`;
+  }
+
+  // Solo año
+  return String(any);
 }
 
 // -------------------------
@@ -72,6 +91,11 @@ export function mapPersona(api: PersonaApi): PersonaView {
 
     anyNaixement: api.any_naixement ?? null,
     anyDefuncio: api.any_defuncio ?? null,
+    mesNaixement: api.mes_naixement ?? null,
+    diaNaixement: api.dia_naixement ?? null,
+
+    mesDefuncio: api.mes_defuncio ?? null,
+    diaDefuncio: api.dia_defuncio ?? null,
 
     ciutatNaixement: api.ciutatNaixement ?? null,
     ciutatDefuncio: api.ciutatDefuncio ?? null,
@@ -91,9 +115,13 @@ export function mapPersonaToFitxa(persona: PersonaView) {
   const fullName = `${persona.nom} ${persona.cognoms}`.trim();
   const edad = calcularEdad(persona);
 
-  const naixement = persona.anyNaixement ? `${persona.anyNaixement}${persona.ciutatNaixement ? ` (${persona.ciutatNaixement})` : ''}${edad && !persona.anyDefuncio ? ` - ${edad} anys` : ''}` : '';
+  const dataNaixement = formatDataPersona(persona.anyNaixement, persona.mesNaixement, persona.diaNaixement);
 
-  const defuncio = persona.anyDefuncio && persona.anyDefuncio > 0 ? `${persona.anyDefuncio}${persona.ciutatDefuncio ? ` (${persona.ciutatDefuncio})` : ''}${edad ? ` - ${edad} anys` : ''}` : '';
+  const dataDefuncio = formatDataPersona(persona.anyDefuncio, persona.mesDefuncio, persona.diaDefuncio);
+
+  const naixement = dataNaixement ? `${dataNaixement}${persona.ciutatNaixement ? ` (${persona.ciutatNaixement})` : ''}${edad && !persona.anyDefuncio ? ` - ${edad} anys` : ''}` : '';
+
+  const defuncio = dataDefuncio && persona.anyDefuncio ? `${dataDefuncio}${persona.ciutatDefuncio ? ` (${persona.ciutatDefuncio})` : ''}${edad ? ` - ${edad} anys` : ''}` : '';
 
   return {
     title: fullName,
@@ -117,8 +145,6 @@ export function mapPersonaToFitxa(persona: PersonaView) {
         value: defuncio,
       },
       { label: 'País', value: persona.paisAutor },
-      { label: 'Ciutat naixement', value: persona.ciutatNaixement ?? '' },
-      { label: 'Ciutat defunció', value: persona.ciutatDefuncio ?? '' },
       { label: 'Sexe', value: persona.sexe },
       {
         label: 'Web',
