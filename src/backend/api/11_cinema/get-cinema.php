@@ -382,7 +382,7 @@ if ($slug === "pelicules") {
                 SELECT p.pelicula AS titol, sa.rol, p.any AS anyInici, p.slug
                 FROM %s AS p
                 LEFT JOIN %s AS sa ON p.id = sa.idMovie
-                LEFT JOIN %s AS pe ON pe.id = sa.idActor2
+                LEFT JOIN %s AS pe ON pe.id = sa.actor_id
                 WHERE sa.idActor2 = :id
                 ORDER BY p.pelicula ASC;
             SQL;

@@ -29,7 +29,7 @@ class Tables
     public const CINEMA_ACTORS_SERIES = '11_aux_cinema_actors_seriestv';
     public const CINEMA_GENERES = '11_aux_cinema_generes';
     public const CINEMA_PELICULES = 'db_cinema_pelicules';
-    public const CINEMA_ACTORS_PELICULES = '11_aux_cinema_actors_pelicules';
+    public const CINEMA_ACTORS_PELICULES = 'db_cinema_pelicules_actors';
     public const CINEMA_ACTORS_DIRECTORS = '11_aux_cinema_actors_pelicules';
 
     public const HISTORIA_ESDEVENIMENTS = 'db_historia_esdeveniments';
