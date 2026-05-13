@@ -34,6 +34,7 @@ class Response
         'genere_id',
         'lang_id',
         'idioma_id',
+        'actor_id',
     ];
 
     public static function success(string $message = '', $data = null, int $httpCode = 200): void

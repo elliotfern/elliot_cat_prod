@@ -193,6 +193,57 @@ if ($slug === "pelicules") {
         );
     }
 
+    // GET : fitxa sèrie tv
+    // URL: https://elliot.cat/api/cinema/get/serieIntranet?id=333523523
+} else if ($slug === "serieIntranet") {
+
+    $id = $_GET['id'];
+    AdminMiddleware::handle();
+
+    $sql = <<<SQL
+                SELECT tv.id, tv.name, tv.slug, tv.startYear, tv.endYear, tv.season, tv.chapter, tv.director_id, tv.idioma_id, tv.genere_id, tv.pais_id, tv.img_id, tv.descripcio, tv.dateCreated, tv.dateModified
+                FROM %s AS tv
+                WHERE tv.id = :id;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_SERIES_TV, $pdo),
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_IMATGES, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo),
+        qi(Tables::CINEMA_GENERES, $pdo)
+    );
+
+    try {
+
+        $params = [':id' => uuid::toBinary($id)];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+
 
     // GET : fitxa pel·lícula
     // URL: https://elliot.cat/api/cinema/get/pelicula?peliSlug=io-capitano
@@ -256,7 +307,7 @@ if ($slug === "pelicules") {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT a.nom, a.cognoms, a.id AS idActor, sa.role, img.nameImg, sa.id AS idCast, a.slug
+                SELECT a.nom, a.cognoms, a.id AS actor_id, sa.role, img.nameImg, sa.id, a.slug
                 FROM %s AS s
                 LEFT JOIN %s AS sa on s.id = sa.serie_id
                 LEFT JOIN %s AS a ON a.id = sa.actor_id

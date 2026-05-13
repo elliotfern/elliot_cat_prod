@@ -98,7 +98,7 @@ $slug = $routeParams[0];
 
                   <td>
                     <a
-                      href="${window.location.origin}/gestio/cinema/modifica-actor-serie/${actor.idCast}"
+                      href="${window.location.origin}/gestio/cinema/modifica-actor-serie/${actor.id}"
                       class="btn btn-secondary btn-sm modificar-link"
                     >
                       Modificar
