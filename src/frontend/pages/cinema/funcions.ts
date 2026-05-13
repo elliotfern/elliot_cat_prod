@@ -18,27 +18,15 @@ export async function cinema() {
         transmissioDadesDB(event, 'PUT', 'peli', '/api/cinema/put/?type=pelicula');
       });
     }
-  } else if (slug === 'fitxa-pelicula') {
-    const url = 'https://elliot.cat/api/cinema/get/pelicula?peliSlug=';
-    fitxaPelicula(url, idSlug);
-  } else if (slug === 'fitxa-serie') {
-    const url = 'https://elliot.cat/api/cinema/get/serie?serieSlug=';
-    fitxaSerie(url, idSlug);
   } else if (pageType[2] === 'modifica-serie') {
-    const serie = document.getElementById('modificarSerie');
-    if (serie) {
-      // Lanzar actualizador de datos
-      serie.addEventListener('submit', function (event) {
+    
         transmissioDadesDB(event, 'PUT', 'modificarSerie', '/api/cinema/put/?serie');
-      });
-    }
+
+
   } else if (pageType[2] === 'nova-serie') {
-    const serie = document.getElementById('modificarSerie');
-    if (serie) {
-      // Lanzar actualizador de datos
-      serie.addEventListener('submit', function (event) {
+  
         transmissioDadesDB(event, 'POST', 'modificarSerie', '/api/cinema/post/?serie');
-      });
+     
     }
   } else if (pageType[2] === 'modifica-pelicula') {
     const serie = document.getElementById('modificarPeli');
@@ -90,5 +78,11 @@ export async function cinema() {
     }
   } else if (slug === 'llistat-pelicules') {
     taulaLlistatPelicules();
+  } else if (slug === 'fitxa-pelicula') {
+    const url = 'https://elliot.cat/api/cinema/get/pelicula?peliSlug=';
+    fitxaPelicula(url, idSlug);
+  } else if (slug === 'fitxa-serie') {
+    const url = 'https://elliot.cat/api/cinema/get/serie?serieSlug=';
+    fitxaSerie(url, idSlug);
   }
 }

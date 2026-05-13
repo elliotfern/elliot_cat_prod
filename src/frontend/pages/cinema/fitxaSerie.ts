@@ -36,7 +36,7 @@ export async function fitxaSerie(baseUrl: string, slug: string) {
       editButton: {
         basePath: 'cinema',
         action: 'modifica-serie',
-        id: apiData.slug,
+        id: apiData.id,
         label: 'Modifica sèrie',
       },
     });

@@ -25,7 +25,7 @@ class Tables
     public const IMG = 'db_img';
 
 
-    public const CINEMA_SERIES_TV = '11_db_cinema_series_tv';
+    public const CINEMA_SERIES_TV = 'db_cinema_seriestv';
     public const CINEMA_ACTORS_SERIES = '11_aux_cinema_actors_seriestv';
     public const CINEMA_GENERES = 'db_cinema_generes';
 
