@@ -28,7 +28,7 @@ $slug = $routeParams[0];
 
     const urlAjax = `/api/cinema/get/actors-serie?serie=${id}`;
 
-    const container = document.getElementById("actors-container");
+    const container = document.getElementById("taulaActors");
 
     try {
 
