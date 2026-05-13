@@ -2,6 +2,7 @@ import { getPageType } from '../../utils/urlPath';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { taulaLlistatPelicules } from './taulaLlistatPelicules';
 import { fitxaPelicula } from './fitxaPelicula';
+import { fitxaSerie } from './fitxaSerie';
 
 export async function cinema() {
   const url = window.location.href;
@@ -20,6 +21,9 @@ export async function cinema() {
   } else if (slug === 'fitxa-pelicula') {
     const url = 'https://elliot.cat/api/cinema/get/pelicula?peliSlug=';
     fitxaPelicula(url, idSlug);
+  } else if (slug === 'fitxa-serie') {
+    const url = 'https://elliot.cat/api/cinema/get/serie?serieSlug=';
+    fitxaSerie(url, idSlug);
   } else if (pageType[2] === 'modifica-serie') {
     const serie = document.getElementById('modificarSerie');
     if (serie) {

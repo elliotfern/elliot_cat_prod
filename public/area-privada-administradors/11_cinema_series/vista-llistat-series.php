@@ -1,121 +1,81 @@
-<div class="container">
-
   <div id="barraNavegacioContenidor"></div>
 
-  <main>
-    <div class="container contingut">
+  <div class="container">
 
-      <h1>Arts escèniques, cinema i televisió: llistat pel·lícules</h1>
+    <h1>Arts escèniques, cinema i televisió: llistat sères tv</h1>
 
-      <div id="isAdminButton" style="display: none;">
-        <?php if (isset($_COOKIE['user_id']) && $_COOKIE['user_id'] === '1') : ?>
-          <p>
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['cinema']; ?>/nova-serie/'" class="button btn-gran btn-secondari">Afegir sèrie tv</button>
+    <p>
+      <button onclick="window.location.href='<?php echo APP_INTRANET . $url['cinema']; ?>/nova-serie/'" class="button btn-gran btn-secondari">Afegir sèrie tv</button>
+    </p>
 
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['persona']; ?>/nova-persona/'" class="button btn-gran btn-secondari">Afegir actor/a</button>
-          </p>
-        <?php endif; ?>
+
+    <div class="container-fluid">
+      <div class="row gap-3 justify-content-center llibresContainer" id="seriesContainer">
+        <!-- aqui es mostren les pelicules -->
       </div>
+    </div>
 
-      <!-- Campo de búsqueda -->
-      <div class="input-group mb-3 quadre-cercador">
-        <input type="text" class="form-control" placeholder="Cercar per llibre o per autor" id="searchInput">
-        <button class="btn btn-outline-secondary" type="button" onclick="cercarLlibres()">Cercar</button>
-      </div>
+  </div>
 
-      <!-- Botones para seleccionar el tipo de contacto -->
-      <div class="btn-group" role="group" aria-label="Tipus de llibre" style="margin-bottom:25px">
-        <button type="button" class="btn btn-outline-primary active" data-tipus="10">Totes les pel·lícules</button>
-        <button type="button" class="btn btn-outline-primary" data-tipus="1">1. Drama</button>
-        <button type="button" class="btn btn-outline-primary" data-tipus="6">6. Ciències aplicades</button>
-        <button type="button" class="btn btn-outline-primary" data-tipus="8">8. Literatura</button>
-        <button type="button" class="btn btn-outline-primary" data-tipus="9">9. Història.Geografia</button>
-      </div>
+  <script>
+    // Escuchar el evento de entrada en el campo de búsqueda
 
-
-      <div class="container-fluid">
-        <div class="row gap-3 justify-content-center llibresContainer" id="seriesContainer">
-          <!-- aqui es mostren les pelicules -->
-        </div>
-
-
-      </div>
-  </main>
-</div>
-
-<script>
-  // Escuchar el evento de entrada en el campo de búsqueda
-  document.getElementById("searchInput").addEventListener("input", cercarLlibres);
-
-  document.addEventListener("DOMContentLoaded", function() {
-    obtenirPelicules(10); // Mostrar todas las películas al cargar
-
-    // Manejar clic en los botones de tipo de contacto
-    document.querySelectorAll("button[data-tipus]").forEach((button) => {
-      button.addEventListener("click", function() {
-        let tipus = this.getAttribute("data-tipus");
-        obtenirPelicules(tipus);
-
-        // Remover la clase 'active' de todos los botones
-        document.querySelectorAll("button[data-tipus]").forEach((btn) => btn.classList.remove("active"));
-        // Agregar la clase 'active' solo al botón clicado
-        this.classList.add("active");
-      });
+    document.addEventListener("DOMContentLoaded", function() {
+      obtenirPelicules(); // Mostrar todas las películas al cargar
     });
-  });
 
-  function obtenirPelicules(tipus) {
-    let urlAjax = "/api/cinema/get/";
+    function obtenirPelicules() {
+      let urlAjax = "/api/cinema/get/";
 
-    if (tipus === 10) {
-      urlAjax += "series";
+      fetch(urlAjax, {
+          method: "GET",
+        })
+        .then((response) => response.json())
+        .then((response) => {
+          try {
+            const data = response.data;
+
+            let pelicules = "";
+
+            data.forEach((pelicula) => {
+              pelicules += `
+          <div class="col-sm-4 col-md-4 card">
+            <h6>
+              <span style="background-color:black;color:white;padding:5px;">
+                ${pelicula.genere ?? ''}
+              </span>
+            </h6>
+
+            <h3 class="links-contactes" style="margin-top: 15px;">
+              <a href="${window.location.origin}/gestio/cinema/fitxa-serie/${pelicula.slug}">
+                ${pelicula.name}
+              </a>
+            </h3>
+
+            <p class="links-contactes autor">
+              <strong>Director/a:</strong>
+              <a href="${window.location.origin}/gestio/base-dades-persones/fitxa-persona/${pelicula.slugDirector}">
+                ${pelicula.nom ?? ''} ${pelicula.cognoms ?? ''}
+              </a>
+            </p>
+
+            <p><strong>Any: </strong> ${pelicula.startYear ?? ''}</p>
+            <p><strong>País: </strong> ${pelicula.country ?? ''}</p>
+            <p><strong>Idioma original: </strong> ${pelicula.lang ?? ''}</p>
+
+            <button onclick="window.location.href='${window.location.origin}/gestio/cinema/modifica-serie/${pelicula.slug}'" class="button btn-petit">
+              Modificar
+            </button>
+          </div>
+        `;
+            });
+
+            document.getElementById("seriesContainer").innerHTML = pelicules;
+
+          } catch (error) {
+            console.error("Error al parsear JSON:", error);
+          }
+        })
+        .catch((error) => console.error("Error en la petición:", error));
     }
-
-    fetch(urlAjax, {
-        method: "GET",
-      })
-      .then((response) => response.json())
-      .then((data) => {
-        try {
-          let pelicules = "";
-          data.forEach((pelicula) => {
-            pelicules += `
-             <div class="col-sm-4 col-md-4 card">
-              <h6><span style="background-color:black;color:white;padding:5px;">${pelicula.genre}</span></h6>
-              <h3 class="links-contactes" style="margin-top: 15px;">
-                <a href="${window.location.origin}/gestio/cinema/fitxa-serie/${pelicula.slug}" title="Fitxa de la pel·lícula">${pelicula.name}</a>
-              </h3>
-              <p class="links-contactes autor"><strong>Director/a:</strong> 
-                <a href="${window.location.origin}/gestio/cinema/fitxa-director/${pelicula.slugDirector}">${pelicula.nom} ${pelicula.cognoms}</a>
-              </p>
-              <p><strong>Any: </strong> ${pelicula.startYear}</p>
-              <p><strong>País: </strong> ${pelicula.country}</p>
-              <p><strong>Idioma original: </strong> ${pelicula.lang}</p>
-               <button onclick="window.location.href='${window.location.origin}/gestio/cinema/modifica-serie/${pelicula.slug}'" class="button btn-petit">Modificar</button>
-            </div>`;
-          });
-          document.getElementById("seriesContainer").innerHTML = pelicules;
-        } catch (error) {
-          console.error("Error al parsear JSON:", error);
-        }
-      })
-      .catch((error) => console.error("Error en la petición:", error));
-  }
-
-  // Función para buscar libros
-  function cercarLlibres() {
-    let textoBusqueda = normalizeText(document.getElementById("searchInput").value);
-
-    document.querySelectorAll("#llibresContainer .quadre").forEach((quadre) => {
-      let titol = normalizeText(quadre.querySelector("h3").textContent);
-      let autor = normalizeText(quadre.querySelector(".autor")?.textContent || "");
-
-      quadre.style.display = titol.includes(textoBusqueda) || autor.includes(textoBusqueda) ? "block" : "none";
-    });
-  }
-
-  // Asegurar que la función normalizeText existe
-  function normalizeText(text) {
-    return text ? text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
-  }
-</script>
+  </script>
