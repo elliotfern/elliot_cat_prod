@@ -202,8 +202,7 @@ if ($slug === "pelicules") {
     $peli = $_GET['peliSlug'];
 
     $sql = <<<SQL
-
-                SELECT p.id, p.pelicula, p.slug, p.pelicula_ca, p.any, p.descripcio, p.dateCreated, p.dateModified, d.nom, d.cognoms, id.idioma_ca, c.pais_ca, img.nameImg, g.genere, d.id AS idDirector, c.id AS idPais, img.id AS idImg, id.id As idLang, g.id AS idGen, d.slug AS slugDirector
+                SELECT p.id, p.pelicula, p.slug, p.pelicula_ca, p.any, p.descripcio, p.dateCreated, p.dateModified, p.director_id, p.genere_id, p.pais_id, p.idioma_id, p.imatge_id, d.nom, d.cognoms, id.idioma_ca, c.pais_ca, img.nameImg, g.genere, d.slug AS slugDirector
                 FROM %s AS p
                 LEFT JOIN %s AS d ON p.director_id = d.id
                 LEFT JOIN %s AS c ON p.pais_id = c.id

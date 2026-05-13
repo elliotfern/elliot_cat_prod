@@ -1,14 +1,9 @@
 import { getPageType } from '../../utils/urlPath';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
-import { fitxaPersona } from '../../pages/persona/fitxaPersona';
-import { construirTaula } from '../../services/api/construirTaula';
 import { taulaLlistatAutors } from './taulaLlistatAutors';
-import { getIsAdmin } from '../../services/auth/isAdmin';
 import { taulaLlistatLlibres } from './taulaLlistatLlibres';
 import { fetchApiDataLlibre } from './fitxaLlibre';
 import { initAdminButtons, initLlibreAutorsPage } from './fitxaLlibreAutors';
-import { getLangPrefix } from '../../utils/locales/getLangPrefix';
-import { DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
 import { taulaLlistatGrups } from './taulaLlistatGrups';
 import { formLlibre } from './formLlibre';
 
@@ -21,32 +16,6 @@ export async function biblioteca() {
     formLlibre(true, slug);
   } else if (pageType[2] === 'nou-llibre') {
     formLlibre(false);
-  } else if ([pageType[1], pageType[2]].includes('fitxa-autor')) {
-    const isAdmin = await getIsAdmin();
-    const url = window.location.href;
-    const pageType = getPageType(url);
-
-    const slug = pageType[3] || '';
-
-    // ✅ Admin => /gestio ; Públic => /{lang}
-    const basePrefix = isAdmin ? 'gestio' : getLangPrefix();
-
-    const columnes = isAdmin ? ['Titol', 'Any', 'Accions'] : ['Titol', 'Any'];
-
-    fitxaPersona('/api/persones/get/persona?slug=', slug, 'biblioteca-autor', function (data) {
-      construirTaula('taula1', '/api/biblioteca/get/autorLlibres?id=', data.id, columnes, function (fila, columna) {
-        if (columna.toLowerCase() === 'titol') {
-          const href = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-llibre/${encodeURIComponent(fila['slug'])}`;
-          return `<a href="${href}">${fila['titol']}</a>`;
-        } else if (columna.toLowerCase() === 'accions') {
-          if (!isAdmin) return ''; // ✅ acciones solo admin
-          const href = `${INTRANET_WEB}/biblioteca/modifica-llibre/${encodeURIComponent(fila['slug'])}`;
-          return `<button onclick="window.location.href='${href}'" class="button btn-petit">Modificar</button>`;
-        } else {
-          return fila[columna.toLowerCase()];
-        }
-      });
-    });
   } else if ([pageType[1], pageType[2]].includes('llistat-autors')) {
     taulaLlistatAutors();
   } else if ([pageType[1], pageType[2]].includes('llistat-llibres')) {
