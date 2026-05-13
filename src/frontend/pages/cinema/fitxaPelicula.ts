@@ -31,8 +31,8 @@ export async function fitxaPelicula(baseUrl: string, slug: string) {
       fields: fitxa.fields,
       description: fitxa.description,
       descriptionTitle: 'Crítica de la pel·lícula',
-      createdAt: fitxa.createdAt,
-      updatedAt: fitxa.updatedAt,
+      dateCreated: fitxa.dateCreated,
+      dateModified: fitxa.dateModified,
       editButton: {
         basePath: 'cinema',
         action: 'modifica-pelicula',

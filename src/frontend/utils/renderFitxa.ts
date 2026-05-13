@@ -22,8 +22,8 @@ interface RenderFitxaOptions {
   fields: FitxaField[];
   description?: string;
   descriptionTitle?: string;
-  createdAt: string;
-  updatedAt: string;
+  dateCreated: string;
+  dateModified: string;
   editButton?: {
     basePath: string; // ej: "cinema", "persones"
     action: string; // ej: "modifica-pelicula", "modifica-persona"
@@ -59,18 +59,18 @@ export function renderFitxa(options: RenderFitxaOptions) {
     }
 
          ${
-           options.createdAt
+           options.dateCreated
              ? `
             <div id=dadesCreacio" class="mt-3 text-muted small bg-light p-3 rounded mb-3 d-inline-block">
 
                 <strong>Aquesta fitxa ha estat creada el: </strong>
-                ${options.createdAt}
+                ${options.dateCreated}
 
                 ${
-                  options.updatedAt
+                  options.dateModified
                     ? `
                     | <strong>Darrera modificació: </strong>
-                    ${options.updatedAt}
+                    ${options.dateModified}
                     `
                     : ''
                 }

@@ -5,24 +5,16 @@ interface PeliculaApi {
   pelicula: string;
   pelicula_ca: string | null;
   slug: string;
-
   any: string | number | null;
-
   descripcio: string | null;
-
   nameImg: string | null;
-
   pais_ca: string | null;
   idioma_ca: string | null;
-
   genere: string | null;
-  createdAt?: string | undefined;
-  updatedAt?: string | undefined;
   dateCreated?: string | undefined;
   dateModified?: string | undefined;
   nom: string | null;
   cognoms: string | null;
-
   slugDirector: string | null;
 }
 
@@ -79,7 +71,7 @@ export function mapPeliculaToFitxa(api: PeliculaApi) {
 
     description: api.descripcio ?? '',
 
-    createdAt: safeDate(api.createdAt),
-    updatedAt: safeDate(api.updatedAt),
+    dateCreated: safeDate(api.dateCreated),
+    dateModified: safeDate(api.dateModified),
   };
 }
