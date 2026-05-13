@@ -9,19 +9,29 @@
     </p>
 
 
-    <div class="container-fluid">
-      <div class="row gap-3 justify-content-center llibresContainer" id="seriesContainer">
-        <!-- aqui es mostren les pelicules -->
-      </div>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle" id="seriesTable">
+        <thead class="table-dark">
+          <tr>
+            <th>Nom</th>
+            <th>Gènere</th>
+            <th>Director/a</th>
+            <th>Any</th>
+            <th>País</th>
+            <th>Idioma</th>
+            <th class="text-end">Accions</th>
+          </tr>
+        </thead>
+        <tbody id="seriesContainer">
+        </tbody>
+      </table>
     </div>
 
   </div>
 
   <script>
-    // Escuchar el evento de entrada en el campo de búsqueda
-
     document.addEventListener("DOMContentLoaded", function() {
-      obtenirPelicules(); // Mostrar todas las películas al cargar
+      obtenirPelicules();
     });
 
     function obtenirPelicules() {
@@ -35,42 +45,51 @@
           try {
             const data = response.data;
 
-            let pelicules = "";
+            let rows = "";
 
-            data.forEach((pelicula) => {
-              pelicules += `
-          <div class="col-sm-4 col-md-4 card">
-            <h6>
-              <span style="background-color:black;color:white;padding:5px;">
-                ${pelicula.genere ?? ''}
-              </span>
-            </h6>
+            data.forEach((serie) => {
+              const slug = serie.slug ?? "#";
+              const slugDirector = serie.slugDirector ?? "#";
 
-            <h3 class="links-contactes" style="margin-top: 15px;">
-              <a href="${window.location.origin}/gestio/cinema/fitxa-serie/${pelicula.slug}">
-                ${pelicula.name}
-              </a>
-            </h3>
+              rows += `
+            <tr>
 
-            <p class="links-contactes autor">
-              <strong>Director/a:</strong>
-              <a href="${window.location.origin}/gestio/base-dades-persones/fitxa-persona/${pelicula.slugDirector}">
-                ${pelicula.nom ?? ''} ${pelicula.cognoms ?? ''}
-              </a>
-            </p>
+              <td>
+                <a href="${window.location.origin}/gestio/cinema/fitxa-serie/${slug}">
+                  ${serie.name ?? ''}
+                </a>
+              </td>
 
-            <p><strong>Any: </strong> ${pelicula.startYear ?? ''}</p>
-            <p><strong>País: </strong> ${pelicula.country ?? ''}</p>
-            <p><strong>Idioma original: </strong> ${pelicula.lang ?? ''}</p>
+              <td>
+                <span class="badge bg-dark">
+                  ${serie.genere ?? ''}
+                </span>
+              </td>
 
-            <button onclick="window.location.href='${window.location.origin}/gestio/cinema/modifica-serie/${pelicula.slug}'" class="button btn-petit">
-              Modificar
-            </button>
-          </div>
-        `;
+              <td>
+                <a href="${window.location.origin}/gestio/base-dades-persones/fitxa-persona/${slugDirector}">
+                  ${serie.nom ?? ''} ${serie.cognoms ?? ''}
+                </a>
+              </td>
+
+              <td>${serie.startYear ?? ''}</td>
+              <td>${serie.country ?? ''}</td>
+              <td>${serie.lang ?? ''}</td>
+
+              <td class="text-end">
+                <button
+                  onclick="window.location.href='${window.location.origin}/gestio/cinema/modifica-serie/${slug}'"
+                  class="button btn-petit"
+                >
+                  Modificar
+                </button>
+              </td>
+
+            </tr>
+          `;
             });
 
-            document.getElementById("seriesContainer").innerHTML = pelicules;
+            document.getElementById("seriesContainer").innerHTML = rows;
 
           } catch (error) {
             console.error("Error al parsear JSON:", error);

@@ -93,7 +93,7 @@ if ($slug === "pelicules") {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, g.genere, c.pais_ca, tv.slug, d.slug
+                SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, g.genere, c.pais_ca, tv.slug, d.slug AS slugDirector
                 FROM %s AS tv
                 LEFT JOIN %s AS d ON tv.director_id = d.id
                 LEFT JOIN %s AS c ON tv.pais_id = c.id
