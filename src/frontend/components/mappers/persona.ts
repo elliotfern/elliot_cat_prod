@@ -154,6 +154,15 @@ export function mapPersonaToFitxa(persona: PersonaView) {
       value: persona.sexe,
     },
 
+    ...(persona.grups.length
+      ? [
+          {
+            label: 'Grups',
+            value: persona.grups.map((g) => `<span class="badge bg-secondary me-1 mb-1">${g}</span>`).join(''),
+          },
+        ]
+      : []),
+
     {
       label: 'Més informació',
       value: persona.web ? `<a href="${persona.web}" target="_blank">Enllaç extern</a>` : '',
