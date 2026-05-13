@@ -29,7 +29,7 @@ export async function taulaLlistatPelicules() {
       header: 'Director/a',
       field: 'cognoms',
       render: (_: unknown, row: Pelicula) => {
-        return `<a id="${row.id}" title="Fitxa director" href="https://${window.location.hostname}/estio/base-dades-persones/fitxa-persona/${row.slug}">${row.nom} ${row.cognoms}</a>`;
+        return `<a id="${row.id}" title="Fitxa director" href="https://${window.location.hostname}/estio/base-dades-persones/fitxa-persona/${row.director_slug}">${row.nom} ${row.cognoms}</a>`;
       },
     },
     { header: 'País', field: 'pais_ca' },
@@ -40,7 +40,7 @@ export async function taulaLlistatPelicules() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Pelicula) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/modifica-pelicula/${row.slug}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Pelicula) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/modifica-pelicula/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 

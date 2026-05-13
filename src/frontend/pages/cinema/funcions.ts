@@ -30,11 +30,11 @@ export async function cinema() {
       });
     }
   } else if ([pageType[1], pageType[2]].includes('fitxa-pelicula')) {
-    connexioApiDades('/api/cinema/get/pelicula?slug=', slug, 'img', 'cinema-pelicula', function (data) {
+    connexioApiDades('/api/cinema/get/pelicula?peliSlug=', slug, 'img', 'cinema-pelicula', function (data) {
       // Actualiza el atributo href del enlace con el idDirector
       const directorUrl = document.getElementById('directorUrl') as HTMLAnchorElement;
       if (directorUrl) {
-        directorUrl.href = `${window.location.origin}/gestio/cinema/fitxa-director/${data.slugDirector}`;
+        directorUrl.href = `${window.location.origin}/gestio/base-dades-persones/fitxa-persona/${data.slugDirector}`;
       }
     });
 

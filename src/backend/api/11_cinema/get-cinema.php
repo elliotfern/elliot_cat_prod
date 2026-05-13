@@ -42,7 +42,7 @@ if ($slug === "pelicules") {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT c.id, c.pelicula, c.pelicula_ca, c.any, d.nom, d.cognoms, p.pais_ca, g.genere, i.idioma_ca, c.slug
+                SELECT c.id, c.pelicula, c.pelicula_ca, c.any, d.nom, d.cognoms, p.pais_ca, g.genere, i.idioma_ca, c.slug, d.slug AS director_slug
                 FROM %s AS c
                 LEFT JOIN %s AS d ON c.director_id = d.id
                 LEFT JOIN %s AS p ON c.pais_id = p.id
@@ -85,21 +85,6 @@ if ($slug === "pelicules") {
             500
         );
     }
-
-    // GET : llistat de gèneres
-    // URL: https://elliot.cat/api/cinema/get/generes
-} else if ($slug === "generes") {
-    $query = "SELECT c.id, c.pelicula, c.pelicula_es, c.any, c.dataVista, d.nom, d.cognoms, p.pais_cat, g.genere_ca, i.idioma_ca, c.slug
-            FROM 11_db_pelicules AS c
-            INNER JOIN 11_aux_cinema_directors AS d ON c.director = d.id
-            INNER JOIN db_countries AS p ON c.pais = p.id
-            LEFT JOIN 11_aux_cinema_generes AS g ON c.genere = g.id
-            LEFT JOIN aux_idiomes AS i ON c.lang = i.id
-            WHERE c.genere = $idGen
-            ORDER BY c.any DESC";
-
-    $result = getData($query);
-    echo json_encode($result);
 
     // GET : llistat de sèries tv
     // URL: https://elliot.cat/api/cinema/get/series
@@ -210,19 +195,60 @@ if ($slug === "pelicules") {
 
 
     // GET : fitxa pel·lícula
-    // URL: https://elliot.cat/api/cinema/get/pelicula?slug=io-capitano
+    // URL: https://elliot.cat/api/cinema/get/pelicula?peliSlug=io-capitano
 } else if ($slug === "pelicula") {
-    $query = "SELECT p.id, p.pelicula, p.slug, p.pelicula_es, p.any, p.descripcio, p.dataVista, p.dateCreated, p.dateModified, d.nom, d.cognoms, id.idioma_ca, c.pais_cat, img.nameImg, g.genere_ca, d.id AS idDirector, c.id AS idPais, img.id AS idImg, id.id As idLang, g.id AS idGen, d.slug AS slugDirector
-            FROM 11_db_pelicules AS p
-            LEFT JOIN db_persones AS d ON p.director = d.id
-            LEFT JOIN db_countries AS c ON p.pais = c.id
-            LEFT JOIN db_img AS img ON p.img = img.id
-            LEFT JOIN aux_idiomes AS id ON p.lang = id.id
-            LEFT JOIN 11_aux_cinema_generes AS g ON p.genere = g.id
-            WHERE p.slug = :slug";
 
-    $result = getData($query, ['slug' => $param], true);
-    echo json_encode($result);
+    AdminMiddleware::handle();
+    $peli = $_GET['peliSlug'];
+
+    $sql = <<<SQL
+
+                SELECT p.id, p.pelicula, p.slug, p.pelicula_ca, p.any, p.descripcio, p.dateCreated, p.dateModified, d.nom, d.cognoms, id.idioma_ca, c.pais_ca, img.nameImg, g.genere, d.id AS idDirector, c.id AS idPais, img.id AS idImg, id.id As idLang, g.id AS idGen, d.slug AS slugDirector
+                FROM %s AS p
+                LEFT JOIN %s AS d ON p.director_id = d.id
+                LEFT JOIN %s AS c ON p.pais_id = c.id
+                LEFT JOIN %s AS img ON p.img_id = img.id
+                LEFT JOIN %s AS id ON p.idioma_id = id.id
+                LEFT JOIN %s AS g ON p.genere_id = g.id
+                WHERE p.slug = :slug;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_PELICULES, $pdo),
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_IMATGES, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo),
+        qi(Tables::CINEMA_GENERES, $pdo)
+
+    );
+
+    try {
+        $params = [':slug' => $peli];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // GET : Actors que participen en una serie determinada
     // URL: "https://elliot.cat/api/cinema/get/actors-serie?serie=id"

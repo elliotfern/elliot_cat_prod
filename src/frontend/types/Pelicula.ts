@@ -7,4 +7,5 @@ interface Pelicula {
   pais_ca: string;
   genere: string;
   any: string;
+  director_slug: string;
 }
