@@ -29,8 +29,6 @@ header("Access-Control-Allow-Origin: https://elliot.cat");
 // RUTA PARA ACTUALIZAR PELICULA
 // ruta GET => "/api/cinema/put/?pelicula"
 if (isset($_GET['pelicula'])) {
-  // e) Actualitzar pelicula
-
   AdminMiddleware::handle();
 
   $db->beginTransaction();
@@ -39,21 +37,32 @@ if (isset($_GET['pelicula'])) {
 
     /**
      * =========================
-     * INPUT ID
+     * VALIDAR ID PRINCIPAL
      * =========================
      */
-    $idText = $_GET['id'] ?? null;
+    $idText = $_POST['id'] ?? null;
 
     if (!isUuid($idText)) {
-      Response::error(
-        MissatgesAPI::error('invalid_id'),
-        [],
-        400
-      );
-      return;
+      throw new Exception("Invalid pelicula id");
     }
 
     $idBin = Uuid::toBinary($idText);
+
+    /**
+     * =========================
+     * VALIDACIONES UUIDS RELACIONALES
+     * =========================
+     */
+    foreach (['director_id', 'idioma_id', 'genere_id', 'pais_id'] as $field) {
+      if (!isset($_POST[$field]) || !isUuid($_POST[$field])) {
+        throw new Exception("Invalid UUID: " . $field);
+      }
+    }
+
+    $director_id = Uuid::toBinary($_POST['director_id']);
+    $idioma_id   = Uuid::toBinary($_POST['idioma_id']);
+    $genere_id   = Uuid::toBinary($_POST['genere_id']);
+    $pais_id     = Uuid::toBinary($_POST['pais_id']);
 
     /**
      * =========================
@@ -66,24 +75,16 @@ if (isset($_GET['pelicula'])) {
       : null;
 
     $slugText = data_input($_POST['slug']);
-
     $any = (int) $_POST['any'];
-
-    $director_id = Uuid::toBinary($_POST['director_id']);
-    $idioma_id = Uuid::toBinary($_POST['idioma_id']);
-    $genere_id = Uuid::toBinary($_POST['genere_id']);
-    $pais_id = Uuid::toBinary($_POST['pais_id']);
-
     $descripcio = data_input($_POST['descripcio']);
 
     /**
      * =========================
-     * IMATGE (OPCIONAL UPDATE)
+     * IMATGE OPCIONAL
      * =========================
      */
-
-    $updateImg = false;
     $imatge_id_bin = null;
+    $updateImg = false;
 
     if (!empty($_FILES['img_upload']) && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK) {
 
@@ -102,11 +103,20 @@ if (isset($_GET['pelicula'])) {
         $conn
       );
 
+      if (!isUuid($img_uuid)) {
+        throw new Exception("Invalid image UUID generated");
+      }
+
       $imatge_id_bin = Uuid::toBinary($img_uuid);
       $updateImg = true;
     }
 
-    error_log("PAYLOAD: " . print_r($_POST, true));
+    /**
+     * =========================
+     * DEBUG (TEMPORAL)
+     * =========================
+     */
+    error_log("UPDATE PELICULA ID: " . $idText);
 
     /**
      * =========================
@@ -114,20 +124,20 @@ if (isset($_GET['pelicula'])) {
      * =========================
      */
     $sql = <<<SQL
-            UPDATE %s SET
-                pelicula = :pelicula,
-                pelicula_ca = :pelicula_ca,
-                slug = :slug,
-                any = :any,
-                director_id = :director_id,
-                idioma_id = :idioma_id,
-                genere_id = :genere_id,
-                pais_id = :pais_id,
-                descripcio = :descripcio,
-                dateModified = NOW()
-        SQL;
+      UPDATE %s SET
+        pelicula = :pelicula,
+        pelicula_ca = :pelicula_ca,
+        slug = :slug,
+        any = :any,
+        director_id = :director_id,
+        idioma_id = :idioma_id,
+        genere_id = :genere_id,
+        pais_id = :pais_id,
+        descripcio = :descripcio,
+        dateModified = NOW()
+    SQL;
 
-    if ($imatge_id_bin !== null) {
+    if ($updateImg) {
       $sql .= ", imatge_id = :imatge_id";
     }
 
@@ -148,7 +158,7 @@ if (isset($_GET['pelicula'])) {
       ':id' => $idBin
     ];
 
-    if ($imatge_id_bin !== null) {
+    if ($updateImg) {
       $params[':imatge_id'] = $imatge_id_bin;
     }
 
@@ -159,13 +169,12 @@ if (isset($_GET['pelicula'])) {
 
     /**
      * =========================
-     * UPDATE ACTORS (REPLACE STRATEGY)
+     * ACTORS (REPLACE SAFE)
      * =========================
      */
     $actors = $_POST['actors'] ?? [];
     $roles  = $_POST['roles'] ?? [];
 
-    // 1) borrar relacions antigues
     $sqlDelete = sprintf(
       "DELETE FROM %s WHERE pelicula_id = :id",
       qi(Tables::CINEMA_ACTORS_PELICULES, $pdo)
@@ -175,20 +184,19 @@ if (isset($_GET['pelicula'])) {
       ':id' => $idBin
     ]);
 
-    // 2) insertar noves relacions
     $sqlActor = <<<SQL
-            INSERT INTO %s (
-                id,
-                pelicula_id,
-                actor_id,
-                role
-            ) VALUES (
-                :id,
-                :pelicula_id,
-                :actor_id,
-                :role
-            )
-        SQL;
+      INSERT INTO %s (
+        id,
+        pelicula_id,
+        actor_id,
+        role
+      ) VALUES (
+        :id,
+        :pelicula_id,
+        :actor_id,
+        :role
+      )
+    SQL;
 
     $queryActor = sprintf(
       $sqlActor,
@@ -201,7 +209,11 @@ if (isset($_GET['pelicula'])) {
         continue;
       }
 
-      $role = $roles[$i] ?? '';
+      if (!isset($roles[$i])) {
+        $roles[$i] = '';
+      }
+
+      $actorBin = Uuid::toBinary($actorId);
 
       $id_rel = ramsey::uuid7()->toString();
       $id_rel_bin = Uuid::toBinary($id_rel);
@@ -209,8 +221,8 @@ if (isset($_GET['pelicula'])) {
       $db->execute($queryActor, [
         ':id' => $id_rel_bin,
         ':pelicula_id' => $idBin,
-        ':actor_id' => Uuid::toBinary($actorId),
-        ':role' => $role
+        ':actor_id' => $actorBin,
+        ':role' => data_input($roles[$i])
       ]);
     }
 
@@ -225,7 +237,7 @@ if (isset($_GET['pelicula'])) {
 
     $db->rollBack();
 
-    error_log("ERROR API PELICULA UPDATE: " . $e->getMessage());
+    error_log("ERROR UPDATE PELICULA: " . $e->getMessage());
 
     Response::error(
       MissatgesAPI::error('errorBD'),
@@ -237,6 +249,7 @@ if (isset($_GET['pelicula'])) {
       500
     );
   }
+
 
   // RUTA PARA ACTUALIZAR SERIE TV
   // ruta PUT => "/api/cinema/put/?serie"
