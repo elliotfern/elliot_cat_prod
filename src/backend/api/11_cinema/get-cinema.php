@@ -382,7 +382,7 @@ if ($slug === "pelicules") {
         $actors = $db->getData(
             $queryActors,
             [
-                ':serie_id' => Uuid::toBinary($id)
+                ':pelicula_id' => Uuid::toBinary($id)
             ]
         );
 
