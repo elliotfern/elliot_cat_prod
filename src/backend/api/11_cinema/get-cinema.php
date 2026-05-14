@@ -302,6 +302,113 @@ if ($slug === "pelicules") {
         );
     }
 
+    // GET : fitxa pelicula Intranet
+    // URL: https://elliot.cat/api/cinema/get/peliculaIntranet?id=333523523
+} else if ($slug === "peliculaIntranet") {
+
+    $id = $_GET['id'];
+    AdminMiddleware::handle();
+
+    /**
+     * =========================
+     * QUERY PRINCIPAL PELICULA
+     * =========================
+     */
+
+    $sql = <<<SQL
+        SELECT id, pelicula, pelicula_ca, slug, director_id, genere_id, pais_id, idioma_id, imatge_id, any, descripcio, dateCreated, dateModified
+        FROM %s
+        WHERE id = :id
+        LIMIT 1
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_PELICULES, $pdo)
+    );
+
+    try {
+
+        $params = [
+            ':id' => Uuid::toBinary($id)
+        ];
+
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+
+            return;
+        }
+
+        /**
+         * getData devuelve array
+         * queremos solo 1 registro
+         */
+
+        $serie = $result[0];
+
+        /**
+         * =========================
+         * QUERY ACTORS
+         * =========================
+         */
+
+        $sqlActors = <<<SQL
+            SELECT
+                p.id,
+                p.nom,
+                p.cognoms,
+                p.slug,
+                s.role
+
+            FROM %s AS s
+            INNER JOIN %s AS p ON p.id = s.actor_id
+            WHERE s.pelicula_id = :pelicula_id
+            ORDER BY p.cognoms ASC, p.nom ASC
+        SQL;
+
+        $queryActors = sprintf(
+            $sqlActors,
+            qi(Tables::CINEMA_ACTORS_PELICULES, $pdo),
+            qi(Tables::DB_PERSONES, $pdo)
+        );
+
+        $actors = $db->getData(
+            $queryActors,
+            [
+                ':serie_id' => Uuid::toBinary($id)
+            ]
+        );
+
+        /**
+         * Afegim actors a la resposta
+         */
+
+        $serie['actors'] = $actors;
+
+        /**
+         * RESPONSE
+         */
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $serie,
+            200
+        );
+    } catch (PDOException $e) {
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
     // GET : fitxa pel·lícula
     // URL: https://elliot.cat/api/cinema/get/pelicula?peliSlug=io-capitano
 } else if ($slug === "pelicula") {
@@ -408,19 +515,55 @@ if ($slug === "pelicules") {
     }
 
     // 2) Actors que participen en una pelicula
-    // ruta GET => "/api/cinema/get/?actors-pelicula=35"
-} elseif (isset($_GET['actors-pelicula'])) {
-} else if ($slug === "actors-serie") {
-    $query = "SELECT a.nom, a.cognoms, a.id AS idActor, sa.role, img.nameImg, sa.id AS idCast, a.slug
-        FROM 11_db_pelicules AS s
-        INNER JOIN 11_aux_cinema_actors_pelicules AS sa on s.id = sa.idMovie
-        LEFT JOIN db_persones AS a ON a.id = sa.idActor
-        LEFT JOIN db_img AS img ON a.img = img.id
-        WHERE s.slug = :slug
-        ORDER BY a.cognoms ASC";
+    // ruta GET => "/api/cinema/get/actors-pelicula?peli=id"
+} elseif ($slug === 'actors-pelicula') {
 
-    $result = getData($query, ['slug' => $param], true);
-    echo json_encode($result);
+    $peli = $_GET['peli'];
+    AdminMiddleware::handle();
+
+    $sql = <<<SQL
+                SELECT a.nom, a.cognoms, a.id AS actor_id, sa.role, img.nameImg, sa.id, a.slug
+                FROM %s AS s
+                LEFT JOIN %s AS sa on s.id = sa.pelicula_id
+                LEFT JOIN %s AS a ON a.id = sa.actor_id
+                LEFT JOIN %s AS img ON a.img_id = img.id
+                WHERE s.slug = :peli;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_PELICULES, $pdo),
+        qi(Tables::CINEMA_ACTORS_PELICULES, $pdo),
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_IMATGES, $pdo)
+    );
+
+    try {
+
+        $params = [':peli' => $peli];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // 1) Llistat actors
     // ruta GET => "/api/cinema/get/actors"
