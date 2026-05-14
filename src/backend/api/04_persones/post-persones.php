@@ -156,16 +156,16 @@ if (isset($_GET['persona'])) {
     if ($hasImage) {
 
         $file = $_FILES['img_upload'];
-        $nom = pathinfo($file['name'], PATHINFO_FILENAME);
+        $nomImatge = pathinfo($file['name'], PATHINFO_FILENAME);
 
         $alt = !empty($data['alt'])
             ? data_input($data['alt'])
-            : $nom;
+            : $nomImatge;
 
         $img_uuid = ImageService::createFromUpload(
             $file,
             1, // PERSONA / AVATAR
-            $nom,
+            $nomImatge,
             $alt,
             $conn
         );
