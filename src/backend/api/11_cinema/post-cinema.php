@@ -1,9 +1,25 @@
 <?php
-/*
- * BACKEND CINEMA
- * FUNCIONS INSERT
- * 
- */
+
+use Ramsey\Uuid\Uuid as ramsey;
+use App\Utils\Uuid;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Utils\Tables;
+use App\Config\Database;
+use App\Utils\ImageService;
+use App\Utils\AdminMiddleware;
+
+$db = new Database();
+$pdo = $db->getPdo();
+global $conn;
+
+function isUuid($s)
+{
+  return is_string($s) && preg_match(
+    '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
+    $s
+  );
+}
 
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -85,142 +101,174 @@ if (isset($_GET['pelicula'])) {
     echo json_encode($response);
   }
 
-  // a) Inserir Actor en pelicula
-} elseif (isset($_GET['actorSerie'])) {
-
-  // Obtener el cuerpo de la solicitud PUT
-  $input_data = file_get_contents("php://input");
-
-  // Decodificar los datos JSON
-  $data = json_decode($input_data, true);
-
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
-  }
-
-  // Ahora puedes acceder a los datos como un array asociativo
-  $hasError = false; // Inicializamos la variable $hasError como false
-
-  $idSerie = !empty($data['idSerie']) ? data_input($data['idSerie']) : ($hasError = true);
-  $idActor = !empty($data['idActor']) ? data_input($data['idActor']) : ($hasError = true);
-  $role = !empty($data['role']) ? data_input($data['role']) : ($hasError = true);
-
-  if (!$hasError) {
-    global $conn;
-    $sql = "INSERT INTO 11_aux_cinema_actors_seriestv SET idActor=:idActor, idSerie=:idSerie, role=:role";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(":idActor", $idActor, PDO::PARAM_INT);
-    $stmt->bindParam(":idSerie", $idSerie, PDO::PARAM_INT);
-    $stmt->bindParam(":role", $role, PDO::PARAM_STR);
-
-    if ($stmt->execute()) {
-      // response output
-      $response['status'] = 'success';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    } else {
-      // response output - data error
-      $response['status'] = 'error';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    }
-  } else {
-    // response output - data error
-    $response['status'] = 'error';
-
-    header("Content-Type: application/json");
-    echo json_encode($response);
-  }
-
   // c) Crear nova serie
-} elseif (isset($_GET['serie'])) {
+} else if (isset($_GET['serie'])) {
 
-  // Obtener el cuerpo de la solicitud PUT
-  $input_data = file_get_contents("php://input");
+  AdminMiddleware::handle();
 
-  // Decodificar los datos JSON
-  $data = json_decode($input_data, true);
+  $db->beginTransaction();
 
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
-  }
+  try {
 
-  // Ahora puedes acceder a los datos como un array asociativo
-  $hasError = false; // Inicializamos la variable $hasError como false
+    /**
+     * =========================
+     * CREATE ID (UUID v7)
+     * =========================
+     */
+    $id = ramsey::uuid7()->toString();
+    $idBin = Uuid::toBinary($id);
 
-  $name = !empty($data['name']) ? data_input($data['name']) : ($hasError = true);
-  $slug = !empty($data['slug']) ? data_input($data['slug']) : ($hasError = true);
-  $startYear = !empty($data['startYear']) ? data_input($data['startYear']) : ($hasError = true);
-  $endYear = !empty($data['endYear']) ? data_input($data['endYear']) : ($hasError = false);
-  $season = !empty($data['season']) ? data_input($data['season']) : ($hasError = true);
-  $chapter = !empty($data['chapter']) ? data_input($data['chapter']) : ($hasError = true);
-  $director = !empty($data['director']) ? data_input($data['director']) : ($hasError = true);
-  $lang = !empty($data['lang']) ? data_input($data['lang']) : ($hasError = true);
-  $genre = !empty($data['genre']) ? data_input($data['genre']) : ($hasError = true);
-  $producer = !empty($data['producer']) ? data_input($data['producer']) : ($hasError = true);
-  $country = !empty($data['country']) ? data_input($data['country']) : ($hasError = true);
-  $img = !empty($data['img']) ? data_input($data['img']) : ($hasError = true);
-  $descripcio = !empty($data['descripcio']) ? data_input($data['descripcio']) : ($hasError = true);
+    /**
+     * =========================
+     * INPUT PRINCIPAL
+     * =========================
+     */
+    $name = data_input($_POST['name']);
+    $slugText = data_input($_POST['slug']);
 
-  $dateCreated = date('Y-m-d');
-  $dateModified = date('Y-m-d');
+    $startYear = (int) $_POST['startYear'];
+    $endYear = !empty($_POST['endYear']) ? (int) $_POST['endYear'] : null;
 
-  if (!$hasError) {
+    $season = (int) $_POST['season'];
+    $chapter = (int) $_POST['chapter'];
 
-    global $conn;
-    $sql = "INSERT INTO 11_db_cinema_series_tv SET name=:name, startYear=:startYear, endYear=:endYear, season=:season, chapter=:chapter, director=:director, lang=:lang, genre=:genre, producer=:producer, country=:country, img=:img, descripcio=:descripcio, dateCreated=:dateCreated, dateModified=:dateModified, slug=:slug";
+    $director_id = Uuid::toBinary($_POST['director_id']);
+    $idioma_id = Uuid::toBinary($_POST['idioma_id']);
+    $genere_id = Uuid::toBinary($_POST['genere_id']);
+    $pais_id = Uuid::toBinary($_POST['pais_id']);
 
-    $stmt = $conn->prepare($sql);
+    $descripcio = data_input($_POST['descripcio']);
 
-    $stmt->bindParam(":name", $name, PDO::PARAM_STR);
-    $stmt->bindParam(":startYear", $startYear, PDO::PARAM_INT);
-    $stmt->bindParam(":endYear", $endYear, PDO::PARAM_INT);
-    $stmt->bindParam(":season", $season, PDO::PARAM_INT);
-    $stmt->bindParam(":chapter", $chapter, PDO::PARAM_INT);
-    $stmt->bindParam(":director", $director, PDO::PARAM_INT);
-    $stmt->bindParam(":lang", $lang, PDO::PARAM_INT);
-    $stmt->bindParam(":genre", $genre, PDO::PARAM_INT);
-    $stmt->bindParam(":producer", $producer, PDO::PARAM_INT);
-    $stmt->bindParam(":country", $country, PDO::PARAM_INT);
-    $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-    $stmt->bindParam(":descripcio", $descripcio, PDO::PARAM_STR);
-    $stmt->bindParam(":slug", $slug, PDO::PARAM_STR);
-    $stmt->bindParam(":dateCreated", $dateCreated, PDO::PARAM_STR);
-    $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
+    /**
+     * =========================
+     * IMATGE (OPCIONAL)
+     * =========================
+     */
+    $img_id_bin = null;
 
-    if ($stmt->execute()) {
-      // response output
-      $response['status'] = 'success';
+    $hasImage = !empty($_FILES['img_upload'])
+      && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK;
 
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    } else {
-      // response output - data error
-      $response['status'] = 'error';
+    if ($hasImage) {
 
-      header("Content-Type: application/json");
-      echo json_encode($response);
+      $file = $_FILES['img_upload'];
+
+      $nom = pathinfo($file['name'], PATHINFO_FILENAME);
+
+      $alt = !empty($_POST['alt'])
+        ? data_input($_POST['alt'])
+        : $nom;
+
+      $img_uuid = ImageService::createFromUpload(
+        $file,
+        1,
+        $nom,
+        $alt,
+        $conn
+      );
+
+      $img_id_bin = Uuid::toBinary($img_uuid);
     }
-  } else {
-    // response output - data error
-    $response['status'] = 'error';
 
-    header("Content-Type: application/json");
-    echo json_encode($response);
+    /**
+     * =========================
+     * INSERT SERIE
+     * =========================
+     */
+    $sql = <<<SQL
+            INSERT INTO %s (
+                id, name, slug,
+                startYear, endYear,
+                season, chapter,
+                director_id, idioma_id, genere_id, pais_id,
+                img_id, descripcio,
+                dateCreated, dateModified
+            ) VALUES (
+                :id, :name, :slug,
+                :startYear, :endYear,
+                :season, :chapter,
+                :director_id, :idioma_id, :genere_id, :pais_id,
+                :img_id, :descripcio,
+                NOW(), NOW()
+            )
+        SQL;
+
+    $query = sprintf($sql, qi(Tables::CINEMA_SERIES_TV, $pdo));
+
+    $db->execute($query, [
+      ':id' => $idBin,
+      ':name' => $name,
+      ':slug' => $slugText,
+      ':startYear' => $startYear,
+      ':endYear' => $endYear,
+      ':season' => $season,
+      ':chapter' => $chapter,
+      ':director_id' => $director_id,
+      ':idioma_id' => $idioma_id,
+      ':genere_id' => $genere_id,
+      ':pais_id' => $pais_id,
+      ':img_id' => $img_id_bin,
+      ':descripcio' => $descripcio
+    ]);
+
+    /**
+     * =========================
+     * INSERT ACTORS RELATION
+     * =========================
+     */
+    $actors = $_POST['actors'] ?? [];
+    $roles  = $_POST['roles'] ?? [];
+
+
+    $sqlActor = <<<SQL
+            INSERT INTO %s (
+                id, serie_id, actor_id, role
+            ) VALUES (
+                :id, :serie_id, :actor_id, :role
+            )
+        SQL;
+
+    $queryActor = sprintf(
+      $sqlActor,
+      qi(Tables::CINEMA_ACTORS_SERIES, $pdo)
+    );
+
+    foreach ($actors as $i => $actorId) {
+
+      if (!isUuid($actorId)) continue;
+
+      $role = $roles[$i] ?? '';
+      $id_rel = ramsey::uuid7()->toString();
+      $id_rel_bin = Uuid::toBinary($id_rel);
+
+      $db->execute($queryActor, [
+        ':id' => $id_rel_bin,
+        ':serie_id' => $idBin,
+        ':actor_id' => Uuid::toBinary($actorId),
+        ':role' => $role
+      ]);
+    }
+
+    $db->commit();
+
+    Response::success(
+      MissatgesAPI::success('create'),
+      ['id' => $id],
+      200
+    );
+  } catch (PDOException $e) {
+
+    $db->rollBack();
+
+    Response::error(
+      MissatgesAPI::error('errorBD'),
+      [$e->getMessage()],
+      500
+    );
   }
 
   // a) Inserir Actor en pelicula
-} elseif (isset($_GET['actorPelicula'])) {
+} else if (isset($_GET['actorPelicula'])) {
 
   // Obtener el cuerpo de la solicitud PUT
   $input_data = file_get_contents("php://input");

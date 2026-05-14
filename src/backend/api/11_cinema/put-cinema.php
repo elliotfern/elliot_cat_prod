@@ -1,304 +1,219 @@
 <?php
-/*
- * BACKEND CINEMA
- * FUNCIONS UPDATE
- * @update_book_ajax
- */
 
+use Ramsey\Uuid\Uuid as ramsey;
+use App\Utils\Uuid;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Utils\Tables;
+use App\Config\Database;
+use App\Utils\ImageService;
+use App\Utils\AdminMiddleware;
+
+$db = new Database();
+$pdo = $db->getPdo();
+global $conn;
+
+function isUuid($s)
+{
+  return is_string($s) && preg_match(
+    '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
+    $s
+  );
+}
 
 // Configuración de cabeceras para aceptar JSON y responder JSON
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: https://elliot.cat");
-header("Access-Control-Allow-Methods: PUT");
 
-
-// Check if the request method is POST
-if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
-  header('HTTP/1.1 405 Method Not Allowed');
-  echo json_encode(['error' => 'Method not allowed']);
-  exit();
-}
 
 // RUTA PARA ACTUALIZAR PELICULA
 // ruta GET => "/api/cinema/put/?pelicula"
 if (isset($_GET['pelicula'])) {
-  // Obtener el cuerpo de la solicitud PUT
-  $input_data = file_get_contents("php://input");
-
-  // Decodificar los datos JSON
-  $data = json_decode($input_data, true);
-
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
-  }
-
-  // Inicializar un array para los errores
-  $errors = [];
-
-  // Validación de los datos recibidos
-
-
-  // Si hay errores, devolver una respuesta con los errores
-  if (!empty($errors)) {
-    http_response_code(400); // Bad Request
-    echo json_encode(["errors" => $errors]);
-    exit;
-  }
-
-  $id = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
-  $pelicula = !empty($data['pelicula']) ? data_input($data['pelicula']) : ($hasError = true);
-  $slug = !empty($data['slug']) ? data_input($data['slug']) : ($hasError = true);
-  $pelicula_es = !empty($data['pelicula_es']) ? data_input($data['pelicula_es']) : ($hasError = true);
-  $director = !empty($data['director']) ? data_input($data['director']) : ($hasError = true);
-  $any = !empty($data['any']) ? data_input($data['any']) : ($hasError = true);
-  $genere = !empty($data['genere']) ? data_input($data['genere']) : ($hasError = true);
-  $pais = !empty($data['pais']) ? data_input($data['pais']) : ($hasError = true);
-  $lang = !empty($data['lang']) ? data_input($data['lang']) : ($hasError = true);
-  $img = !empty($data['img']) ? data_input($data['img']) : ($hasError = true);
-  $descripcio = !empty($data['descripcio']) ? data_input($data['descripcio']) : ($hasError = true);
-  $dataVista = !empty($data['dataVista']) ? data_input($data['dataVista']) : ($hasError = true);
-
-  $timestamp = date('Y-m-d');
-  $dateModified = $timestamp;
-
-  if (!$hasError) {
-
-    global $conn;
-    $sql = "UPDATE 11_db_pelicules SET pelicula=:pelicula, pelicula_es=:pelicula_es, director=:director, any=:any, genere=:genere, img=:img, pais=:pais, lang=:lang, dataVista=:dataVista, dateModified=:dateModified, descripcio=:descripcio, slug=:slug WHERE id=:id";
-
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(":pelicula", $pelicula, PDO::PARAM_STR);
-    $stmt->bindParam(":pelicula_es", $pelicula_es, PDO::PARAM_STR);
-    $stmt->bindParam(":director", $director, PDO::PARAM_INT);
-    $stmt->bindParam(":any", $any, PDO::PARAM_STR);
-    $stmt->bindParam(":genere", $genere, PDO::PARAM_INT);
-    $stmt->bindParam(":pais", $pais, PDO::PARAM_INT);
-    $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-    $stmt->bindParam(":lang", $lang, PDO::PARAM_STR);
-    $stmt->bindParam(":dataVista", $dataVista, PDO::PARAM_STR);
-    $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
-    $stmt->bindParam(":descripcio", $descripcio, PDO::PARAM_STR);
-    $stmt->bindParam(":slug", $slug, PDO::PARAM_STR);
-    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-    if ($stmt->execute()) {
-      // response output
-      $response['status'] = 'success';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    } else {
-      // response output - data error
-      $response['status'] = 'error bd';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    }
-  } else {
-    // response output - data error
-    $response['status'] = 'error';
-
-    header("Content-Type: application/json");
-    echo json_encode($response);
-  }
 
 
   // RUTA PARA ACTUALIZAR SERIE TV
   // ruta PUT => "/api/cinema/put/?serie"
-} elseif (isset($_GET['serie'])) {
+} else if (isset($_GET['serie'])) {
 
-  // Obtener el cuerpo de la solicitud PUT
-  $input_data = file_get_contents("php://input");
+  AdminMiddleware::handle();
 
-  // Decodificar los datos JSON
-  $data = json_decode($input_data, true);
+  $db->beginTransaction();
 
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
-  }
+  try {
 
-  // Ahora puedes acceder a los datos como un array asociativo
-  $hasError = false; // Inicializamos la variable $hasError como false
+    $id = $_POST['id'];
 
-
-  // Ahora puedes acceder a los datos como un array asociativo
-  $hasError = false; // Inicializamos la variable $hasError como false
-
-  $name          = !empty($data['name'])         ? data_input($data['name'])         : ($hasError = true);
-  $slug          = !empty($data['slug'])         ? data_input($data['slug'])         : ($hasError = true);
-  $startYear     = !empty($data['startYear'])    ? data_input($data['startYear'])    : ($hasError = true);
-  $endYear       = !empty($data['endYear'])      ? data_input($data['endYear'])      : ($hasError = false);
-  $season        = !empty($data['season'])       ? data_input($data['season'])       : ($hasError = true);
-  $chapter       = !empty($data['chapter'])      ? data_input($data['chapter'])      : ($hasError = true);
-  $director      = !empty($data['director'])     ? data_input($data['director'])     : ($hasError = true);
-  $lang          = !empty($data['lang'])         ? data_input($data['lang'])         : ($hasError = true);
-  $genre         = !empty($data['genre'])        ? data_input($data['genre'])        : ($hasError = true);
-  $producer      = !empty($data['producer'])     ? data_input($data['producer'])     : ($hasError = true);
-  $country       = !empty($data['country'])      ? data_input($data['country'])      : ($hasError = true);
-  $img           = !empty($data['img'])          ? data_input($data['img'])          : ($hasError = true);
-  $descripcio    = !empty($data['descripcio'])   ? data_input($data['descripcio'])   : ($hasError = true);
-  $id = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
-
-  $dateModified = date('Y-m-d');
-
-  if (!$hasError) {
-
-    global $conn;
-    $sql = "UPDATE 11_db_cinema_series_tv SET name=:name, startYear=:startYear, endYear=:endYear, season=:season, chapter=:chapter, director=:director, lang=:lang, img=:img, genre=:genre, producer=:producer, country=:country, dateModified=:dateModified, descripcio=:descripcio, slug=:slug WHERE id=:id";
-
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(":name", $name, PDO::PARAM_STR);
-    $stmt->bindParam(":startYear", $startYear, PDO::PARAM_STR);
-    $stmt->bindParam(":endYear", $endYear, PDO::PARAM_STR);
-    $stmt->bindParam(":season", $season, PDO::PARAM_INT);
-    $stmt->bindParam(":chapter", $chapter, PDO::PARAM_INT);
-    $stmt->bindParam(":director", $director, PDO::PARAM_INT);
-    $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-    $stmt->bindParam(":lang", $lang, PDO::PARAM_INT);
-    $stmt->bindParam(":genre", $genre, PDO::PARAM_INT);
-    $stmt->bindParam(":producer", $producer, PDO::PARAM_INT);
-    $stmt->bindParam(":country", $country, PDO::PARAM_INT);
-    $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
-    $stmt->bindParam(":descripcio", $descripcio, PDO::PARAM_STR);
-    $stmt->bindParam(":slug", $slug, PDO::PARAM_STR);
-    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-    if ($stmt->execute()) {
-      // response output
-      $response['status'] = 'success';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    } else {
-      // response output - data error
-      $response['status'] = 'error bd';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
+    if (!isUuid($id)) {
+      Response::error("ID invalid", [], 400);
+      return;
     }
-  } else {
-    // response output - data error
-    $response['status'] = 'error /hasError/ dades';
 
-    header("Content-Type: application/json");
-    echo json_encode($response);
-  }
+    $idBin = Uuid::toBinary($id);
 
-  // a) Inserir Actor en pelicula
-} elseif (isset($_GET['actorPelicula'])) {
+    /**
+     * =========================
+     * INPUT
+     * =========================
+     */
+    $name = data_input($_POST['name']);
+    $slugText = data_input($_POST['slug']);
 
-  // Obtener el cuerpo de la solicitud PUT
-  $input_data = file_get_contents("php://input");
+    $startYear = (int) $_POST['startYear'];
+    $endYear = !empty($_POST['endYear']) ? (int) $_POST['endYear'] : null;
 
-  // Decodificar los datos JSON
-  $data = json_decode($input_data, true);
+    $season = (int) $_POST['season'];
+    $chapter = (int) $_POST['chapter'];
 
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
-  }
+    $director_id = Uuid::toBinary($_POST['director_id']);
+    $idioma_id = Uuid::toBinary($_POST['idioma_id']);
+    $genere_id = Uuid::toBinary($_POST['genere_id']);
+    $pais_id = Uuid::toBinary($_POST['pais_id']);
 
-  // Ahora puedes acceder a los datos como un array asociativo
-  $hasError = false; // Inicializamos la variable $hasError como false
+    $descripcio = data_input($_POST['descripcio']);
 
-  $idMovie = !empty($data['idMovie']) ? data_input($data['idMovie']) : ($hasError = true);
-  $idActor = !empty($data['idActor']) ? data_input($data['idActor']) : ($hasError = true);
-  $role = !empty($data['role']) ? data_input($data['role']) : ($hasError = true);
-  $id = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
+    /**
+     * =========================
+     * IMATGE
+     * =========================
+     */
+    $img_id_bin = '__MISSING__';
 
-  if (!$hasError) {
+    if (!empty($_FILES['img_upload']) && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK) {
 
-    global $conn;
+      $file = $_FILES['img_upload'];
 
-    $sql = "UPDATE 11_aux_cinema_actors_pelicules SET idActor=:idActor, idMovie=:idMovie, role=:role WHERE id=:id";
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(":idActor", $idActor, PDO::PARAM_INT);
-    $stmt->bindParam(":idMovie", $idMovie, PDO::PARAM_INT);
-    $stmt->bindParam(":role", $role, PDO::PARAM_STR);
-    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+      $nom = pathinfo($file['name'], PATHINFO_FILENAME);
 
-    if ($stmt->execute()) {
-      // response output
-      $response['status'] = 'success';
+      $alt = !empty($_POST['alt'])
+        ? data_input($_POST['alt'])
+        : $nom;
 
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    } else {
-      // response output - data error
-      $response['status'] = 'error';
+      $img_uuid = ImageService::createFromUpload(
+        $file,
+        1,
+        $nom,
+        $alt,
+        $conn
+      );
 
-      header("Content-Type: application/json");
-      echo json_encode($response);
+      $img_id_bin = Uuid::toBinary($img_uuid);
+    } else if (!empty($_POST['img_id']) && isUuid($_POST['img_id'])) {
+
+      $img_id_bin = Uuid::toBinary($_POST['img_id']);
     }
-  }
 
-  // a) Inserir Actor en pelicula
-} elseif (isset($_GET['actorSerie'])) {
+    /**
+     * =========================
+     * UPDATE SERIE
+     * =========================
+     */
+    $sql = <<<SQL
+            UPDATE %s SET
+                name = :name,
+                slug = :slug,
+                startYear = :startYear,
+                endYear = :endYear,
+                season = :season,
+                chapter = :chapter,
+                director_id = :director_id,
+                idioma_id = :idioma_id,
+                genere_id = :genere_id,
+                pais_id = :pais_id,
+                descripcio = :descripcio,
+                dateModified = NOW()
+        SQL;
 
-  // Obtener el cuerpo de la solicitud PUT
-  $input_data = file_get_contents("php://input");
+    $params = [
+      ':id' => $idBin,
+      ':name' => $name,
+      ':slug' => $slugText,
+      ':startYear' => $startYear,
+      ':endYear' => $endYear,
+      ':season' => $season,
+      ':chapter' => $chapter,
+      ':director_id' => $director_id,
+      ':idioma_id' => $idioma_id,
+      ':genere_id' => $genere_id,
+      ':pais_id' => $pais_id,
+      ':descripcio' => $descripcio
+    ];
 
-  // Decodificar los datos JSON
-  $data = json_decode($input_data, true);
-
-  // Verificar si se recibieron datos
-  if ($data === null) {
-    // Error al decodificar JSON
-    header('HTTP/1.1 400 Bad Request');
-    echo json_encode(['error' => 'Error decoding JSON data']);
-    exit();
-  }
-
-  // Ahora puedes acceder a los datos como un array asociativo
-  $hasError = false; // Inicializamos la variable $hasError como false
-
-  $idSerie = !empty($data['idSerie']) ? data_input($data['idSerie']) : ($hasError = true);
-  $idActor = !empty($data['idActor']) ? data_input($data['idActor']) : ($hasError = true);
-  $role = !empty($data['role']) ? data_input($data['role']) : ($hasError = true);
-  $id = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
-
-  if (!$hasError) {
-
-    global $conn;
-    $sql = "UPDATE 11_aux_cinema_actors_seriestv SET idActor=:idActor, idSerie=:idSerie, role=:role WHERE id=:id";
-
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(":idActor", $idActor, PDO::PARAM_INT);
-    $stmt->bindParam(":idSerie", $idSerie, PDO::PARAM_INT);
-    $stmt->bindParam(":role", $role, PDO::PARAM_STR);
-    $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-    if ($stmt->execute()) {
-      // response output
-      $response['status'] = 'success';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
-    } else {
-      // response output - data error
-      $response['status'] = 'error';
-
-      header("Content-Type: application/json");
-      echo json_encode($response);
+    if ($img_id_bin !== '__MISSING__') {
+      $sql .= ", img_id = :img_id";
+      $params[':img_id'] = $img_id_bin;
     }
-  } else {
-    // response output - data error
-    $response['status'] = 'error';
 
-    header("Content-Type: application/json");
-    echo json_encode($response);
+    $sql .= " WHERE id = :id";
+
+    $query = sprintf($sql, qi(Tables::CINEMA_SERIES_TV, $pdo));
+
+    $db->execute($query, $params);
+
+    /**
+     * =========================
+     * RELACIONS ACTORS
+     * =========================
+     */
+    $db->execute(
+      "DELETE FROM %s WHERE serie_id = :id",
+      [
+        qi(Tables::CINEMA_ACTORS_SERIES, $pdo),
+        ':id' => $idBin
+      ]
+    );
+
+    $actors = $_POST['actors'] ?? [];
+    $roles  = $_POST['roles'] ?? [];
+
+
+    $sqlActor = <<<SQL
+            INSERT INTO %s (
+                id, serie_id, actor_id, role
+            ) VALUES (
+                :id, :serie_id, :actor_id, :role
+            )
+        SQL;
+
+    $queryActor = sprintf(
+      $sqlActor,
+      qi(Tables::CINEMA_ACTORS_SERIES, $pdo)
+    );
+
+    foreach ($actors as $i => $actorId) {
+
+      if (!isUuid($actorId)) continue;
+
+      $role = $roles[$i] ?? '';
+      $id_rel = ramsey::uuid7()->toString();
+      $id_rel_bin = Uuid::toBinary($id_rel);
+
+      $db->execute($queryActor, [
+        ':id' => $id_rel_bin,
+        ':serie_id' => $idBin,
+        ':actor_id' => Uuid::toBinary($actorId),
+        ':role' => $role
+      ]);
+    }
+
+    $db->commit();
+
+    Response::success(
+      MissatgesAPI::success('update'),
+      ['id' => $id],
+      200
+    );
+  } catch (PDOException $e) {
+
+    $db->rollBack();
+
+    Response::error(
+      MissatgesAPI::error('errorBD'),
+      [$e->getMessage()],
+      500
+    );
   }
+
+
 
   // si no coincideix cap endopoint, error
 } else {

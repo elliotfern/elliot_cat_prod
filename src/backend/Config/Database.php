@@ -201,4 +201,23 @@ class Database
             return false;
         }
     }
+    public function beginTransaction(): bool
+    {
+        return $this->conn->beginTransaction();
+    }
+
+    public function commit(): bool
+    {
+        return $this->conn->commit();
+    }
+
+    public function rollBack(): bool
+    {
+        return $this->conn->rollBack();
+    }
+
+    public function inTransaction(): bool
+    {
+        return $this->conn->inTransaction();
+    }
 }
