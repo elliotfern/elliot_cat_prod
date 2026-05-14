@@ -152,6 +152,9 @@ if (isset($_GET['pelicula'])) {
       $params[':imatge_id'] = $imatge_id_bin;
     }
 
+    error_log("SQL: " . $query);
+    error_log("PARAMS: " . print_r($params, true));
+
     $db->execute($query, $params);
 
     /**
