@@ -36,7 +36,7 @@ export function mapSerieToFitxa(api: SerieApi) {
 
     image: api.nameImg
       ? {
-          src: `https://media.elliot.cat/img/cinema-pelicula/${api.nameImg}.jpg`,
+          src: `https://media.elliot.cat/img/cinema-serie/${api.nameImg}.jpg`,
           alt: api.name,
         }
       : undefined,
