@@ -36,7 +36,7 @@ export async function fitxaPelicula(baseUrl: string, slug: string) {
       editButton: {
         basePath: 'cinema',
         action: 'modifica-pelicula',
-        id: apiData.slug,
+        id: apiData.id,
         label: 'Modifica pel·lícula',
       },
     });

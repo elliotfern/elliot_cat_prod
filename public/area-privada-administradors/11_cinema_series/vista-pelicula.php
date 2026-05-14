@@ -25,7 +25,7 @@ $slug = $routeParams[0];
 
   async function actorsPeli(id) {
 
-    const urlAjax = `/api/cinema/get/actors-pelicula?peli="${id}`;
+    const urlAjax = `/api/cinema/get/actors-pelicula?peli=${id}`;
 
     const container = document.getElementById("taulaActors");
 
