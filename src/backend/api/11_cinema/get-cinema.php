@@ -219,11 +219,7 @@ if ($slug === "pelicules") {
             tv.idioma_id,
             tv.genere_id
             tv.pais_id,
-            CASE
-                WHEN tv.img_id IS NOT NULL
-                THEN tv.img_id
-                ELSE NULL
-            END AS img_id,
+            tv.img_id,
             tv.descripcio,
             tv.dateCreated,
             tv.dateModified

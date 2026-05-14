@@ -1,6 +1,6 @@
 <div class="barraNavegacioContenidor"></div>
 
-<div class="container">
+<div class="container form">
 
   <h2>Base de dades de sèries de televisió</h2>
 
