@@ -164,20 +164,45 @@ if ($slug === 'directors') {
 
     // Llistat generes pelicules
     // ruta GET => "/api/cinema/get/auxiliars/?type=generesPelis"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'generesPelis') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare("SELECT g.id, g.genere_ca
-            FROM 11_aux_cinema_generes AS g
-            ORDER BY g.genere_ca ASC");
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
+} elseif ($slug === 'generesPelis') {
 
-    // Llistat idiomes pelicules
+    $sql = <<<SQL
+                SELECT g.id, g.genere
+                FROM %s AS g
+                ORDER BY g.genere ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::CINEMA_GENERES, $pdo),
+    );
+
+    try {
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat idiomes
     // ruta GET => "/api/cinema/get/auxiliars/?type=llengues"
 } else if ($slug === "llengues") {
 
@@ -872,6 +897,29 @@ if ($slug === 'directors') {
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
+    // GET : llistat Educacions
+    // URL: https://elliot.cat/api/auxiliars/get/auxiliarImatgesSeries
+} else if ($slug === "auxiliarImatgesSeries") {
+
+    $query = "SELECT 
+	      	i.id, i.nom AS alt
+            FROM db_img AS i
+            WHERE i.typeImg = 7
+            ORDER BY i.nom ASC";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(MissatgesAPI::success('get'), $row, 200);
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
 
     // GET : Auxiliar imatges Viatges i espais
     // URL: https://elliot.cat/api/auxiliars/get/auxiliarImatgesEspais

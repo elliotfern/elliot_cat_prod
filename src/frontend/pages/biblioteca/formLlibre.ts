@@ -1,4 +1,3 @@
-import { fetchDataGet } from '../../services/api/fetchData';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';

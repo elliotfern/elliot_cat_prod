@@ -200,50 +200,125 @@ if ($slug === "pelicules") {
     $id = $_GET['id'];
     AdminMiddleware::handle();
 
+    /**
+     * =========================
+     * QUERY PRINCIPAL SÈRIE TV
+     * =========================
+     */
+
     $sql = <<<SQL
-                SELECT tv.id, tv.name, tv.slug, tv.startYear, tv.endYear, tv.season, tv.chapter, tv.director_id, tv.idioma_id, tv.genere_id, tv.pais_id, tv.img_id, tv.descripcio, tv.dateCreated, tv.dateModified
-                FROM %s AS tv
-                WHERE tv.id = :id;
-            SQL;
+        SELECT
+            tv.id,
+            tv.name,
+            tv.slug,
+            tv.startYear,
+            tv.endYear,
+            tv.season,
+            tv.chapter,
+            tv.director_id,
+            tv.idioma_id,
+            tv.genere_id
+            tv.pais_id,
+            CASE
+                WHEN tv.img_id IS NOT NULL
+                THEN tv.img_id
+                ELSE NULL
+            END AS img_id,
+            tv.descripcio,
+            tv.dateCreated,
+            tv.dateModified
+        FROM %s AS tv
+        WHERE tv.id = :id
+        LIMIT 1
+    SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::CINEMA_SERIES_TV, $pdo),
-        qi(Tables::DB_PERSONES, $pdo),
-        qi(Tables::DB_PAISOS, $pdo),
-        qi(Tables::DB_IMATGES, $pdo),
-        qi(Tables::DB_IDIOMES, $pdo),
-        qi(Tables::CINEMA_GENERES, $pdo)
+        qi(Tables::CINEMA_SERIES_TV, $pdo)
     );
 
     try {
 
-        $params = [':id' => uuid::toBinary($id)];
+        $params = [
+            ':id' => Uuid::toBinary($id)
+        ];
+
         $result = $db->getData($query, $params);
 
         if (empty($result)) {
+
             Response::error(
                 MissatgesAPI::error('not_found'),
                 [],
                 404
             );
+
             return;
         }
 
+        /**
+         * getData devuelve array
+         * queremos solo 1 registro
+         */
+
+        $serie = $result[0];
+
+        /**
+         * =========================
+         * QUERY ACTORS
+         * =========================
+         */
+
+        $sqlActors = <<<SQL
+            SELECT
+                p.id,
+                p.nom,
+                p.cognoms,
+                p.slug,
+                sa.role
+
+            FROM %s AS sa
+            INNER JOIN %s AS p ON p.id = sa.actor_id
+            WHERE sa.serie_id = :serie_id
+            ORDER BY p.cognoms ASC, p.nom ASC
+        SQL;
+
+        $queryActors = sprintf(
+            $sqlActors,
+            qi(Tables::CINEMA_ACTORS_SERIES, $pdo),
+            qi(Tables::DB_PERSONES, $pdo)
+        );
+
+        $actors = $db->getData(
+            $queryActors,
+            [
+                ':serie_id' => Uuid::toBinary($id)
+            ]
+        );
+
+        /**
+         * Afegim actors a la resposta
+         */
+
+        $serie['actors'] = $actors;
+
+        /**
+         * RESPONSE
+         */
+
         Response::success(
             MissatgesAPI::success('get'),
-            $result,
+            $serie,
             200
         );
     } catch (PDOException $e) {
+
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
             500
         );
     }
-
-
 
     // GET : fitxa pel·lícula
     // URL: https://elliot.cat/api/cinema/get/pelicula?peliSlug=io-capitano
@@ -417,19 +492,6 @@ if ($slug === "pelicules") {
         );
     }
 
-    // 1) Llistat directors
-    // ruta GET => "/api/cinema/get/?directors"
-} else if ($slug === "directors") {
-
-    $query = "SELECT a.id, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, i.nameImg, c.pais_cat, a.slug, a.anyNaixement, a.anyDefuncio 
-            FROM db_persones AS a
-            LEFT JOIN db_img AS i ON a.img = i.id
-            LEFT JOIN db_countries AS c ON a.paisAutor = c.id
-            WHERE grup = '2'
-            ORDER BY a.cognoms ASC";
-
-    $result = getData($query);
-    echo json_encode($result);
 
     // 1) Fitxa director
     // ruta GET => "/api/cinema/get/?director=?arron-sorkin"
