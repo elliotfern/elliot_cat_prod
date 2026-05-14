@@ -208,21 +208,7 @@ if ($slug === "pelicules") {
 
     $sql = <<<SQL
         SELECT
-            tv.id,
-            tv.name,
-            tv.slug,
-            tv.startYear,
-            tv.endYear,
-            tv.season,
-            tv.chapter,
-            tv.director_id,
-            tv.idioma_id,
-            tv.genere_id
-            tv.pais_id,
-            tv.img_id,
-            tv.descripcio,
-            tv.dateCreated,
-            tv.dateModified
+            tv.id, tv.name, tv.slug, tv.startYear, tv.endYear, tv.season, tv.chapter, tv.director_id, tv.idioma_id, tv.genere_id, tv.pais_id, tv.img_id, tv.descripcio, tv.dateCreated, tv.dateModified
         FROM %s AS tv
         WHERE tv.id = :id
         LIMIT 1
