@@ -81,30 +81,23 @@ if (isset($_GET['pelicula'])) {
      * IMATGE (OPCIONAL UPDATE)
      * =========================
      */
+    $updateImg = false;
     $imatge_id_bin = null;
 
-    $hasImage = !empty($_FILES['img_upload'])
-      && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK;
-
-    if ($hasImage) {
+    if (!empty($_FILES['img_upload']) && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK) {
 
       $file = $_FILES['img_upload'];
 
-      $nom = pathinfo($file['name'], PATHINFO_FILENAME);
-
-      $alt = !empty($_POST['alt'])
-        ? data_input($_POST['alt'])
-        : $nom;
-
       $img_uuid = ImageService::createFromUpload(
         $file,
-        7,
+        8,
         $nom,
         $alt,
         $conn
       );
 
       $imatge_id_bin = Uuid::toBinary($img_uuid);
+      $updateImg = true;
     }
 
     /**

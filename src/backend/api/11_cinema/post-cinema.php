@@ -88,7 +88,7 @@ if (isset($_GET['pelicula'])) {
 
       $img_uuid = ImageService::createFromUpload(
         $file,
-        7,
+        8,
         $nom,
         $alt,
         $conn
