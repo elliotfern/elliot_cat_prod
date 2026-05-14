@@ -65,22 +65,21 @@ async function loadActors() {
 
 function createActorSelect(selectedActorId: string | null = null, selectedRole: string = '') {
   const wrapper = document.createElement('div');
-  wrapper.className = 'mb-3 p-2 border rounded';
+  wrapper.className = 'row g-2 align-items-end mb-2';
 
-  // =========================
-  // LABEL: ACTOR
-  // =========================
-  const labelActor = document.createElement('label');
-  labelActor.className = 'form-label fw-semibold';
-  labelActor.textContent = 'Actor';
+  // =====================
+  // ACTOR
+  // =====================
+  const colActor = document.createElement('div');
+  colActor.className = 'col-md-5';
 
   const select = document.createElement('select');
   select.name = 'actors[]';
-  select.className = 'form-select';
+  select.className = 'form-select actor-select';
 
   const empty = document.createElement('option');
   empty.value = '';
-  empty.textContent = '-- Selecciona actor --';
+  empty.textContent = '-- Actor --';
   select.appendChild(empty);
 
   for (const actor of actorsList) {
@@ -95,40 +94,44 @@ function createActorSelect(selectedActorId: string | null = null, selectedRole: 
     select.appendChild(option);
   }
 
-  // =========================
-  // LABEL: ROL
-  // =========================
-  const labelRole = document.createElement('label');
-  labelRole.className = 'form-label fw-semibold mt-2';
-  labelRole.textContent = 'Rol';
+  colActor.appendChild(select);
+
+  // =====================
+  // ROLE
+  // =====================
+  const colRole = document.createElement('div');
+  colRole.className = 'col-md-6';
 
   const roleInput = document.createElement('input');
   roleInput.type = 'text';
   roleInput.name = 'roles[]';
   roleInput.className = 'form-control';
-  roleInput.placeholder = 'Ex: protagonista, secundari...';
+  roleInput.placeholder = 'Rol / personatge';
   roleInput.value = selectedRole;
 
-  // =========================
-  // BOTÓN ELIMINAR
-  // =========================
+  colRole.appendChild(roleInput);
+
+  // =====================
+  // DELETE
+  // =====================
+  const colDelete = document.createElement('div');
+  colDelete.className = 'col-md-1 d-grid';
+
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
-  removeBtn.className = 'btn btn-sm btn-danger mt-2';
-  removeBtn.textContent = 'Eliminar';
+  removeBtn.className = 'btn btn-danger';
+  removeBtn.textContent = '✕';
 
   removeBtn.onclick = () => wrapper.remove();
 
-  // =========================
+  colDelete.appendChild(removeBtn);
+
+  // =====================
   // APPEND
-  // =========================
-  wrapper.appendChild(labelActor);
-  wrapper.appendChild(select);
-
-  wrapper.appendChild(labelRole);
-  wrapper.appendChild(roleInput);
-
-  wrapper.appendChild(removeBtn);
+  // =====================
+  wrapper.appendChild(colActor);
+  wrapper.appendChild(colRole);
+  wrapper.appendChild(colDelete);
 
   document.getElementById('actorsContainer')?.appendChild(wrapper);
 }
