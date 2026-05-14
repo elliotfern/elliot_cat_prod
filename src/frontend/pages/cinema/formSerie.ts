@@ -199,7 +199,7 @@ export async function formSerie(isUpdate: boolean, idUuid?: string) {
     form.addEventListener('submit', function (event) {
       console.log('SUBMIT FUNCIONA');
       event.preventDefault();
-      transmissioDadesDB(event, 'POST', 'formSerie', `https://elliot.cat/api/cinema/put/serie`);
+      transmissioDadesDB(event, 'POST', 'formSerie', `https://elliot.cat/api/cinema/put?serie`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nova sèrie tv</h2>`;
@@ -214,7 +214,7 @@ export async function formSerie(isUpdate: boolean, idUuid?: string) {
     createActorSelect();
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formSerie', 'https://elliot.cat/api/cinema/post/serie', true);
+      transmissioDadesDB(event, 'POST', 'formSerie', 'https://elliot.cat/api/cinema/post?serie', true);
     });
   }
 
