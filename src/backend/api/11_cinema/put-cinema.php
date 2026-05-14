@@ -81,12 +81,18 @@ if (isset($_GET['pelicula'])) {
      * IMATGE (OPCIONAL UPDATE)
      * =========================
      */
+
     $updateImg = false;
     $imatge_id_bin = null;
 
     if (!empty($_FILES['img_upload']) && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK) {
 
       $file = $_FILES['img_upload'];
+      $nom = pathinfo($file['name'], PATHINFO_FILENAME);
+
+      $alt = !empty($_POST['alt'])
+        ? data_input($_POST['alt'])
+        : $nom;
 
       $img_uuid = ImageService::createFromUpload(
         $file,
@@ -99,6 +105,8 @@ if (isset($_GET['pelicula'])) {
       $imatge_id_bin = Uuid::toBinary($img_uuid);
       $updateImg = true;
     }
+
+    error_log("PAYLOAD: " . print_r($_POST, true));
 
     /**
      * =========================
@@ -210,17 +218,22 @@ if (isset($_GET['pelicula'])) {
       ['id' => $idText],
       200
     );
-  } catch (PDOException $e) {
+  } catch (Throwable $e) {
 
     $db->rollBack();
 
+    error_log("ERROR API PELICULA UPDATE: " . $e->getMessage());
+
     Response::error(
       MissatgesAPI::error('errorBD'),
-      [$e->getMessage()],
+      [
+        $e->getMessage(),
+        $e->getFile(),
+        $e->getLine()
+      ],
       500
     );
   }
-
 
   // RUTA PARA ACTUALIZAR SERIE TV
   // ruta PUT => "/api/cinema/put/?serie"
