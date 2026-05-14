@@ -668,7 +668,7 @@ if ($slug === "pelicules") {
     AdminMiddleware::handle();
 
     $sql = <<<SQL
-                SELECT p.pelicula AS titol, sa.rol, p.any AS anyInici, p.slug
+                SELECT p.pelicula AS titol, sa.role, p.any AS anyInici, p.slug
                 FROM %s AS p
                 LEFT JOIN %s AS sa ON p.id = sa.pelicula_id
                 LEFT JOIN %s AS pe ON pe.id = sa.actor_id
