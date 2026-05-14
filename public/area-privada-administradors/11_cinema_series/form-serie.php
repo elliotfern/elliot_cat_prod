@@ -228,10 +228,6 @@
 
         <h4>Actors i actrius de la sèrie</h4>
 
-        <label class="form-label">
-          Repartiment
-        </label>
-
         <div id="actorsContainer"></div>
 
         <button

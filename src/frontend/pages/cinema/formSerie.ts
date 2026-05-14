@@ -37,7 +37,7 @@ interface SerieTVFitxa {
   }[];
 }
 
-let actorsList: { id: string; nom_complet: string }[] = [];
+let actorsList: { id: string; nomComplet: string }[] = [];
 
 async function loadActors() {
   try {
@@ -65,7 +65,14 @@ async function loadActors() {
 
 function createActorSelect(selectedActorId: string | null = null, selectedRole: string = '') {
   const wrapper = document.createElement('div');
-  wrapper.className = 'd-flex gap-2 mb-2 align-items-center';
+  wrapper.className = 'mb-3 p-2 border rounded';
+
+  // =========================
+  // LABEL: ACTOR
+  // =========================
+  const labelActor = document.createElement('label');
+  labelActor.className = 'form-label fw-semibold';
+  labelActor.textContent = 'Actor';
 
   const select = document.createElement('select');
   select.name = 'actors[]';
@@ -79,7 +86,7 @@ function createActorSelect(selectedActorId: string | null = null, selectedRole: 
   for (const actor of actorsList) {
     const option = document.createElement('option');
     option.value = String(actor.id);
-    option.textContent = actor.nom_complet;
+    option.textContent = actor.nomComplet;
 
     if (selectedActorId && String(selectedActorId) === String(actor.id)) {
       option.selected = true;
@@ -88,22 +95,39 @@ function createActorSelect(selectedActorId: string | null = null, selectedRole: 
     select.appendChild(option);
   }
 
+  // =========================
+  // LABEL: ROL
+  // =========================
+  const labelRole = document.createElement('label');
+  labelRole.className = 'form-label fw-semibold mt-2';
+  labelRole.textContent = 'Rol';
+
   const roleInput = document.createElement('input');
   roleInput.type = 'text';
   roleInput.name = 'roles[]';
   roleInput.className = 'form-control';
-  roleInput.placeholder = 'Rol / personatge';
+  roleInput.placeholder = 'Ex: protagonista, secundari...';
   roleInput.value = selectedRole;
 
+  // =========================
+  // BOTÓN ELIMINAR
+  // =========================
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
-  removeBtn.className = 'btn btn-danger';
-  removeBtn.textContent = '✕';
+  removeBtn.className = 'btn btn-sm btn-danger mt-2';
+  removeBtn.textContent = 'Eliminar';
 
   removeBtn.onclick = () => wrapper.remove();
 
+  // =========================
+  // APPEND
+  // =========================
+  wrapper.appendChild(labelActor);
   wrapper.appendChild(select);
+
+  wrapper.appendChild(labelRole);
   wrapper.appendChild(roleInput);
+
   wrapper.appendChild(removeBtn);
 
   document.getElementById('actorsContainer')?.appendChild(wrapper);
@@ -190,7 +214,7 @@ export async function formSerie(isUpdate: boolean, idUuid?: string) {
     });
   }
 
-  await auxiliarSelect(data.director_id ?? '', 'nomComplet', 'director_id', 'nomComplet');
+  await auxiliarSelect(data.director_id ?? '', 'directors', 'director_id', 'nomComplet');
   await auxiliarSelect(data.img_id ?? '', 'auxiliarImatgesSeries', 'img_id', 'alt');
   await auxiliarSelect(data.genere_id ?? '', 'generesPelis', 'genere_id', 'genere');
   await auxiliarSelect(data.idioma_id ?? '', 'llengues', 'idioma_id', 'idioma_ca');
