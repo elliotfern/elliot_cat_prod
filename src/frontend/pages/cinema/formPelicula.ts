@@ -158,7 +158,7 @@ export async function formPelicula(isUpdate: boolean, idUuid?: string) {
   await actorsPromise;
 
   if (idUuid && isUpdate) {
-    const response = await fetch(`https://elliot.cat/api/cinema/get/serieIntranet?id=${idUuid}`);
+    const response = await fetch(`https://elliot.cat/api/cinema/get/peliculaIntranet?id=${idUuid}`);
 
     const responseData = await response.json();
 
