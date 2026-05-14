@@ -107,21 +107,22 @@ if (isset($_GET['pelicula'])) {
      * UPDATE SERIE
      * =========================
      */
-    $sql = <<<SQL
-            UPDATE %s SET
-                name = :name,
-                slug = :slug,
-                startYear = :startYear,
-                endYear = :endYear,
-                season = :season,
-                chapter = :chapter,
-                director_id = :director_id,
-                idioma_id = :idioma_id,
-                genere_id = :genere_id,
-                pais_id = :pais_id,
-                descripcio = :descripcio,
-                dateModified = NOW()
-        SQL;
+    $table = qi(Tables::CINEMA_SERIES_TV, $pdo);
+
+    $set = [
+      "name = :name",
+      "slug = :slug",
+      "startYear = :startYear",
+      "endYear = :endYear",
+      "season = :season",
+      "chapter = :chapter",
+      "director_id = :director_id",
+      "idioma_id = :idioma_id",
+      "genere_id = :genere_id",
+      "pais_id = :pais_id",
+      "descripcio = :descripcio",
+      "dateModified = NOW()"
+    ];
 
     $params = [
       ':id' => $idBin,
@@ -138,29 +139,33 @@ if (isset($_GET['pelicula'])) {
       ':descripcio' => $descripcio
     ];
 
+    // img opcional
     if ($img_id_bin !== '__MISSING__') {
-      $sql .= ", img_id = :img_id";
+      $set[] = "img_id = :img_id";
       $params[':img_id'] = $img_id_bin;
     }
 
-    $sql .= " WHERE id = :id";
+    $sql = "
+      UPDATE $table SET
+        " . implode(",\n", $set) . "
+      WHERE id = :id
+    ";
 
-    $query = sprintf($sql, qi(Tables::CINEMA_SERIES_TV, $pdo));
-
-    $db->execute($query, $params);
+    $db->execute($sql, $params);
 
     /**
      * =========================
      * RELACIONS ACTORS
      * =========================
      */
-    $db->execute(
-      "DELETE FROM %s WHERE serie_id = :id",
-      [
-        qi(Tables::CINEMA_ACTORS_SERIES, $pdo),
-        ':id' => $idBin
-      ]
-    );
+
+    $table = qi(Tables::CINEMA_ACTORS_SERIES, $pdo);
+
+    $sql = "DELETE FROM $table WHERE serie_id = :id";
+
+    $db->execute($sql, [
+      ':id' => $idBin
+    ]);
 
     $actors = $_POST['actors'] ?? [];
     $roles  = $_POST['roles'] ?? [];
