@@ -152,7 +152,14 @@ if (isset($_GET['persona'])) {
         $errors['ciutat_defuncio_id'] = 'invalid_uuid';
     }
 
-    $hasImage = !empty($_FILES['img_upload']) && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK;
+    $img_id_bin = '__MISSING__';
+
+    $hasImage = !empty($_FILES['img_upload'])
+        && $_FILES['img_upload']['error'] === UPLOAD_ERR_OK;
+
+    /**
+     * 1) Usuario sube una nueva imagen
+     */
     if ($hasImage) {
 
         $file = $_FILES['img_upload'];
@@ -172,8 +179,23 @@ if (isset($_GET['persona'])) {
         );
 
         $img_id_bin = Uuid::toBinary($img_uuid);
-    } else if (!empty($data['img_id']) && isUuid($data['img_id'])) {
-        $img_id_bin = Uuid::toBinary($data['img_id']);
+
+        /**
+         * 2) Usuario selecciona una imagen existente
+         * 3) Usuario elimina la imagen
+         */
+    } else if (array_key_exists('img_id', $data)) {
+
+        // eliminar imagen
+        if ($data['img_id'] === null || $data['img_id'] === '') {
+
+            $img_id_bin = null;
+
+            // asignar imagen existente
+        } else if (isUuid($data['img_id'])) {
+
+            $img_id_bin = Uuid::toBinary($data['img_id']);
+        }
     }
 
     // groups
@@ -295,9 +317,12 @@ if (isset($_GET['persona'])) {
         }
 
         if ($img_id_bin !== '__MISSING__') {
+
             if ($img_id_bin === null) {
+
                 $set[] = "img_id = NULL";
             } else {
+
                 $set[] = "img_id = :img_id";
                 $bind[] = [':img_id', $img_id_bin, PDO::PARAM_LOB];
             }
