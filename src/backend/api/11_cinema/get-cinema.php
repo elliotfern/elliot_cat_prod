@@ -524,8 +524,8 @@ if ($slug === "pelicules") {
     $sql = <<<SQL
                 SELECT a.nom, a.cognoms, a.id AS actor_id, sa.role, img.nameImg, sa.id, a.slug
                 FROM %s AS s
-                LEFT JOIN %s AS sa on s.id = sa.pelicula_id
-                LEFT JOIN %s AS a ON a.id = sa.actor_id
+                INNER JOIN %s AS sa on s.id = sa.pelicula_id
+                INNER JOIN %s AS a ON a.id = sa.actor_id
                 LEFT JOIN %s AS img ON a.img_id = img.id
                 WHERE s.slug = :peli;
             SQL;

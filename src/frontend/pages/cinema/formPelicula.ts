@@ -219,7 +219,7 @@ export async function formPelicula(isUpdate: boolean, idUuid?: string) {
   }
 
   await auxiliarSelect(data.director_id ?? '', 'directors', 'director_id', 'nomComplet');
-  await auxiliarSelect(data.imatge_id ?? '', 'auxiliarImatgesSeries', 'imatge_id', 'alt');
+  await auxiliarSelect(data.imatge_id ?? '', 'imgPelis', 'imatge_id', 'alt');
   await auxiliarSelect(data.genere_id ?? '', 'generesPelis', 'genere_id', 'genere');
   await auxiliarSelect(data.idioma_id ?? '', 'llengues', 'idioma_id', 'idioma_ca');
   await auxiliarSelect(data.pais_id ?? '', 'paisos', 'pais_id', 'pais_ca');
