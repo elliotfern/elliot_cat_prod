@@ -62,8 +62,7 @@
           name="startYear"
           id="startYear"
           min="1900"
-          max="2100"
-          required>
+          max="2100">
       </div>
 
       <!-- Any final -->
@@ -92,8 +91,7 @@
           type="number"
           name="season"
           id="season"
-          min="1"
-          required>
+          min="1">
       </div>
 
       <!-- Capítols -->
@@ -107,8 +105,7 @@
           type="number"
           name="chapter"
           id="chapter"
-          min="1"
-          required>
+          min="1">
       </div>
 
       <!-- Director -->
@@ -120,8 +117,7 @@
         <select
           class="form-select"
           name="director_id"
-          id="director_id"
-          required>
+          id="director_id">
         </select>
       </div>
 
@@ -134,8 +130,7 @@
         <select
           class="form-select"
           name="genere_id"
-          id="genere_id"
-          required>
+          id="genere_id">
         </select>
       </div>
 
@@ -148,8 +143,7 @@
         <select
           class="form-select"
           name="pais_id"
-          id="pais_id"
-          required>
+          id="pais_id">
         </select>
       </div>
 
@@ -162,8 +156,7 @@
         <select
           class="form-select"
           name="idioma_id"
-          id="idioma_id"
-          required>
+          id="idioma_id">
         </select>
       </div>
 

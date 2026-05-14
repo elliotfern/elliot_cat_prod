@@ -197,7 +197,8 @@ export async function formSerie(isUpdate: boolean, idUuid?: string) {
     }
 
     form.addEventListener('submit', function (event) {
-      // Lo mandamos por POST porque PUT no funciona bien con ficheros
+      console.log('SUBMIT FUNCIONA');
+      event.preventDefault();
       transmissioDadesDB(event, 'POST', 'formSerie', `https://elliot.cat/api/cinema/put/serie`);
     });
   } else {
