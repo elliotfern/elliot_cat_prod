@@ -53,7 +53,7 @@
 
             <h4 style="text-align: left;">Pressupostos:</h4>
             <ul class="llistat">
-              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-series">Llistat de pressupostos</a></li>
+              <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-pressupostos">Llistat de pressupostos</a></li>
             </ul>
 
             <h4 style="text-align: left;">Taules auxiliars:</h4>
@@ -67,9 +67,6 @@
               <li><a href="<?php echo APP_INTRANET . $url['comptabilitat']; ?>/llistat-productes">Llistat catàleg de productes i serveis</a></li>
             </ul>
 
-            db_comptabilitat_facturacio_estat
-            db_comptabilitat_facturacio_tipus_iva
-            db_comptabilitat_facturacio_tipus_pagament
           </div>
 
         <?php } else {
