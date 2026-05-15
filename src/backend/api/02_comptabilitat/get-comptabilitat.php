@@ -851,7 +851,7 @@ SQL;
             LEFT JOIN %s AS c ON p.client_id = c.id2
             LEFT JOIN %s AS e ON p.estat_id = e.id2
             LEFT JOIN %s AS s ON p.servei_id = s.id2
-            ORDER BY c.data DESC
+            ORDER BY p.data DESC
             SQL;
 
     $query = sprintf(
