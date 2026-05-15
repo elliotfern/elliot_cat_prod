@@ -82,5 +82,7 @@ export function comptabilitat() {
     formDespesa(false);
   } else if (pageType[2] === 'modifica-factura-proveidor') {
     formDespesa(true, id);
-  }
+   } else if (pageType[2] === 'llistat-pressupostos') {
+    taulaProveidors();
+   }
 }

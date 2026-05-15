@@ -48,6 +48,7 @@ class Tables
     public const DB_COMPTABILITAT_PROVEIDORS = 'db_comptabilitat_proveidors';
     public const DB_COMPTABILITAT_CATEGORIES_DESPESA = 'db_comptabilitat_categories_despesa';
     public const DB_COMPTABILITAT_SUBCATEGORIES_DESPESA = 'db_comptabilitat_subcategories_despesa';
+    public const DB_COMPTABILITAT_PRESSUPOSTOS = 'db_comptabilitat_pressupostos';
 
     // Curriculum
     public const CURRICULUM_PERFIL = 'db_curriculum_perfil';

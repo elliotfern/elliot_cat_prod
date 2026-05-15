@@ -837,6 +837,56 @@ SQL;
             500
         );
     }
+
+    // GET : Llistat Pressupostos
+    // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostos"
+} else if ($slug === 'clients') {
+
+    AdminMiddleware::handle();
+
+    $sql = <<<SQL
+            SELECT 
+            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id2, c.clientNom, c.clientCognoms, c.clientEmpresa, e.estatNom, s.producte, YEAR(p.data) AS any
+            FROM %s AS p
+            LEFT JOIN %s AS c ON p.client_id = c.id2
+            LEFT JOIN %s AS e ON p.estat_id = e.id2
+            LEFT JOIN %s AS s ON p.servei_id = s.id2
+            ORDER BY c.data DESC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo),
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');
