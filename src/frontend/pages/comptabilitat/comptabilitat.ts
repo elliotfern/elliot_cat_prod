@@ -11,6 +11,7 @@ import { taulaFacturacioClients } from './taulaFacturacioClients';
 import { taulaDespeses } from './taulaFacturacioProveidors';
 import { taulaLlistatClients } from './taulaLlistatClients';
 import { taulaLlistatEmissors } from './taulaLlistatEmissors';
+import { taulaPressupostos } from './taulaLlistatPressupostos';
 import { taulaLlistatProductes } from './taulaLlistatProductes';
 import { taulaProveidors } from './taulaLlistatProveidors';
 
@@ -82,7 +83,7 @@ export function comptabilitat() {
     formDespesa(false);
   } else if (pageType[2] === 'modifica-factura-proveidor') {
     formDespesa(true, id);
-   } else if (pageType[2] === 'llistat-pressupostos') {
-    taulaProveidors();
-   }
+  } else if (pageType[2] === 'llistat-pressupostos') {
+    taulaPressupostos();
+  }
 }
