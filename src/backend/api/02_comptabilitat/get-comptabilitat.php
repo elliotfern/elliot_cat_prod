@@ -840,7 +840,7 @@ SQL;
 
     // GET : Llistat Pressupostos
     // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostos"
-} else if ($slug === 'clients') {
+} else if ($slug === 'pressupostos') {
 
     AdminMiddleware::handle();
 
