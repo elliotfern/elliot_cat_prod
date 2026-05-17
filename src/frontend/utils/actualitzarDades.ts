@@ -24,16 +24,27 @@ function getElements(form: HTMLFormElement) {
   return { okMessageDiv, okTextDiv, errMessageDiv, errTextDiv };
 }
 
-function markInvalidFields(form: HTMLFormElement, errors: unknown) {
+function markInvalidFields(form: HTMLFormElement, errors: any) {
   form.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
 
-  if (!errors || typeof errors !== 'object' || Array.isArray(errors)) return;
+  // limpiar mensajes anteriores
+  form.querySelectorAll('.invalid-feedback').forEach((el) => {
+    el.innerHTML = '';
+  });
 
-  const rec = errors as Record<string, unknown>;
+  if (!errors || typeof errors !== 'object') return;
 
-  for (const field of Object.keys(rec)) {
-    const el = form.querySelector<HTMLElement>(`#${CSS.escape(field)}, [name="${CSS.escape(field)}"]`);
-    if (el) el.classList.add('is-invalid');
+  for (const field of Object.keys(errors)) {
+    const input = form.querySelector(`#${CSS.escape(field)}, [name="${CSS.escape(field)}"]`);
+    const errorBox = document.getElementById(`error-${field}`);
+
+    if (input) {
+      input.classList.add('is-invalid');
+    }
+
+    if (errorBox) {
+      errorBox.innerHTML = errors[field].join('<br>');
+    }
   }
 }
 

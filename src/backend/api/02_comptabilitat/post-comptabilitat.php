@@ -126,17 +126,17 @@ if ($slug === 'clients') {
     // Validación
     $errors = [];
 
-    Validator::required($errors, 'clientNom', $clientNom);
-    Validator::maxLength($errors, 'clientNom', $clientNom, 255);
+    Validator::required($errors, 'Nom', $clientNom);
+    Validator::maxLength($errors, 'Nom', $clientNom, 255);
 
-    Validator::email($errors, 'clientEmail', $clientEmail);
+    Validator::email($errors, 'Email', $clientEmail);
 
-    Validator::required($errors, 'clientAdreca', $clientAdreca);
-    Validator::required($errors, 'ciutat_id', $ciutat_id);
-    Validator::required($errors, 'provincia_id', $provincia_id);
-    Validator::required($errors, 'pais_id', $pais_id);
-    Validator::required($errors, 'clientStatus', $clientStatus);
-    Validator::required($errors, 'clientRegistre', $clientRegistre);
+    Validator::required($errors, 'Adreça', $clientAdreca);
+    Validator::required($errors, 'Ciutat', $ciutat_id);
+    Validator::required($errors, 'Provincia', $provincia_id);
+    Validator::required($errors, 'País', $pais_id);
+    Validator::required($errors, 'Estat', $clientStatus);
+    Validator::required($errors, 'Data registre', $clientRegistre);
 
     Validator::maxLength($errors, 'clientNIF', $clientNIF, 20);
     Validator::maxLength($errors, 'clientCP', $clientCP, 10);
