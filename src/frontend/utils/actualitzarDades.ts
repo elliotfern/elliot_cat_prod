@@ -27,7 +27,7 @@ function getElements(form: HTMLFormElement) {
 function markInvalidFields(form: HTMLFormElement, errors: any) {
   form.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
 
-  // limpiar mensajes anteriores
+  // limpiar textos
   form.querySelectorAll('.invalid-feedback').forEach((el) => {
     el.innerHTML = '';
   });
@@ -38,12 +38,14 @@ function markInvalidFields(form: HTMLFormElement, errors: any) {
     const input = form.querySelector(`#${CSS.escape(field)}, [name="${CSS.escape(field)}"]`);
     const errorBox = document.getElementById(`error-${field}`);
 
+    const messages = Array.isArray(errors[field]) ? errors[field].join('<br>') : errors[field];
+
     if (input) {
       input.classList.add('is-invalid');
     }
 
     if (errorBox) {
-      errorBox.innerHTML = errors[field].join('<br>');
+      errorBox.innerHTML = messages;
     }
   }
 }
