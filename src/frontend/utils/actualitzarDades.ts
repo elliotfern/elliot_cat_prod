@@ -24,29 +24,61 @@ function getElements(form: HTMLFormElement) {
   return { okMessageDiv, okTextDiv, errMessageDiv, errTextDiv };
 }
 
+function setChoicesError(select: HTMLSelectElement, message: string) {
+  const wrapper = select.closest('.choices');
+  if (!wrapper) return;
+
+  // limpiar error anterior
+  const old = wrapper.parentElement?.querySelector('.choices-error');
+  if (old) old.remove();
+
+  // marcar visualmente
+  wrapper.classList.add('is-invalid');
+
+  // crear mensaje inline
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'choices-error text-danger small mt-1';
+  errorDiv.innerHTML = message;
+
+  // insertar debajo del componente
+  wrapper.parentElement?.appendChild(errorDiv);
+}
+
+function clearChoicesErrors(form: HTMLFormElement) {
+  form.querySelectorAll('.choices.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
+
+  form.querySelectorAll('.choices-error').forEach((el) => el.remove());
+}
+
 function markInvalidFields(form: HTMLFormElement, errors: any) {
   form.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
 
-  // limpiar textos
-  form.querySelectorAll('.invalid-feedback').forEach((el) => {
-    el.innerHTML = '';
-  });
+  form.querySelectorAll('.invalid-feedback').forEach((el) => (el.innerHTML = ''));
+
+  clearChoicesErrors(form);
 
   if (!errors || typeof errors !== 'object') return;
 
   for (const field of Object.keys(errors)) {
-    const input = form.querySelector(`#${CSS.escape(field)}, [name="${CSS.escape(field)}"]`);
-    const errorBox = document.getElementById(`error-${field}`);
-
+    const el = form.querySelector(`[name="${field}"]`);
     const messages = Array.isArray(errors[field]) ? errors[field].join('<br>') : errors[field];
 
-    if (input) {
-      input.classList.add('is-invalid');
+    if (!el) continue;
+
+    // INPUT NORMAL
+    if (el.tagName !== 'SELECT') {
+      el.classList.add('is-invalid');
+
+      const errorBox = document.getElementById(`error-${field}`);
+      if (errorBox) {
+        errorBox.innerHTML = messages;
+      }
+
+      continue;
     }
 
-    if (errorBox) {
-      errorBox.innerHTML = messages;
-    }
+    // CHOICES.JS SELECT
+    setChoicesError(el as HTMLSelectElement, messages);
   }
 }
 
