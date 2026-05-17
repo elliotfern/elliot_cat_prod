@@ -125,22 +125,21 @@ if ($slug === 'clients') {
 
     // Validación
     $errors = [];
+    Validator::required($errors, 'clientNom', $clientNom, 'Nom');
+    Validator::maxLength($errors, 'clientNom', $clientNom, 255, 'Nom');
 
-    Validator::required($errors, 'Nom', $clientNom);
-    Validator::maxLength($errors, 'Nom', $clientNom, 255);
+    Validator::email($errors, 'clientEmail', $clientEmail, 'Email');
 
-    Validator::email($errors, 'Email', $clientEmail);
+    Validator::required($errors, 'clientAdreca', $clientAdreca, 'Adreça');
+    Validator::required($errors, 'ciutat_id', $ciutat_id, 'Ciutat');
+    Validator::required($errors, 'provincia_id', $provincia_id, 'Provincia');
+    Validator::required($errors, 'pais_id', $pais_id, 'País');
+    Validator::required($errors, 'clientStatus', $clientStatus, 'Estat');
+    Validator::required($errors, 'clientRegistre', $clientRegistre, 'Data registre');
 
-    Validator::required($errors, 'Adreça', $clientAdreca);
-    Validator::required($errors, 'Ciutat', $ciutat_id);
-    Validator::required($errors, 'Provincia', $provincia_id);
-    Validator::required($errors, 'País', $pais_id);
-    Validator::required($errors, 'Estat', $clientStatus);
-    Validator::required($errors, 'Data registre', $clientRegistre);
-
-    Validator::maxLength($errors, 'clientNIF', $clientNIF, 20);
-    Validator::maxLength($errors, 'clientCP', $clientCP, 10);
-    Validator::maxLength($errors, 'clientWeb', $clientWeb, 255);
+    Validator::maxLength($errors, 'clientNIF', $clientNIF, 20, 'NIF');
+    Validator::maxLength($errors, 'clientCP', $clientCP, 10, 'Codi postal');
+    Validator::maxLength($errors, 'clientWeb', $clientWeb, 255, 'Pàgina web');
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
