@@ -170,9 +170,19 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
 
       form.dispatchEvent(new CustomEvent('form:success', { detail: response }));
     } else {
+      const errors = response?.errors;
+
+      let errorDetails = '';
+
+      if (errors && typeof errors === 'object' && !Array.isArray(errors)) {
+        errorDetails = Object.values(errors).flat().join('<br>');
+      }
+
+      const fullMessage = response?.message || Missatges.error.default;
+
       missatgesBackend({
         tipus: 'error',
-        missatge: response?.message || Missatges.error.default,
+        missatge: errorDetails ? `${fullMessage}<br><br>${errorDetails}` : fullMessage,
         contenidor: ui.errMessageDiv,
         text: ui.errTextDiv,
         altreContenidor: ui.okMessageDiv,

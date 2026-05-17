@@ -124,33 +124,39 @@ if ($slug === 'clients') {
 
     // Validación
     $errors = [];
+
     if ($clientNom === null) {
-        $errors[] = ValidacioErrors::requerit('clientNom');
+        $errors['clientNom'][] = ValidacioErrors::requerit('clientNom');
     } elseif (mb_strlen($clientNom) > 255) {
-        $errors[] = ValidacioErrors::massaLlarg('clientNom', 255);
+        $errors['clientNom'][] = ValidacioErrors::massaLlarg('clientNom', 255);
     }
 
     if ($clientEmail !== null && !filter_var($clientEmail, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = ValidacioErrors::invalid('clientEmail');
+        $errors['clientEmail'][] = ValidacioErrors::invalid('clientEmail');
     }
+
     if ($clientWeb !== null) {
+
         if (mb_strlen($clientWeb) > 255) {
-            $errors[] = ValidacioErrors::massaLlarg('clientWeb', 255);
+            $errors['clientWeb'][] = ValidacioErrors::massaLlarg('clientWeb', 255);
         } elseif (!preg_match('~^https?://~i', $clientWeb)) {
-            $clientWeb = 'https://' . $clientWeb; // autocompleta esquema
+            $clientWeb = 'https://' . $clientWeb;
         }
     }
+
     if ($clientNIF !== null && mb_strlen($clientNIF) > 20) {
-        $errors[] = ValidacioErrors::massaLlarg('clientNIF', 20);
+        $errors['clientNIF'][] = ValidacioErrors::massaLlarg('clientNIF', 20);
     }
+
     if ($clientCP !== null && mb_strlen($clientCP) > 10) {
-        $errors[] = ValidacioErrors::massaLlarg('clientCP', 10);
+        $errors['clientCP'][] = ValidacioErrors::massaLlarg('clientCP', 10);
     }
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
     }
 
+    // conversió a Binary 16
     $ciutat_id = !empty($ciutat_id) ?  Uuid::toBinary($ciutat_id) : null;
     $provincia_id = !empty($provincia_id) ? Uuid::toBinary($provincia_id) : null;
     $pais_id = !empty($pais_id) ?  Uuid::toBinary($pais_id) : null;
