@@ -94,53 +94,103 @@ if ($slug === 'clients') {
         Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
     }
 
-    // Helpers
-    $trimOrNull  = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
-    $toIntOrNull = static fn($v): ?int    => (is_numeric($v) ? (int)$v : null);
-    $isZeroUuid  = static fn($s): bool    => is_string($s) && preg_match('/^0{8}-0{4}-0{4}-0{4}-0{12}$/i', $s);
-    $uuidOrNull  = static function ($v): ?string {
-        if ($v === null || $v === '') return null;
-        $s = is_string($v) ? trim($v) : '';
-        if ($s === '' || preg_match('/^0{8}-0{4}-0{4}-0{4}-0{12}$/i', $s)) return null;
-        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s) ? strtolower($s) : null;
-    };
-    $dateOrNull  = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
+    // Datos normalizados
+    $clientNom      = Normalizer::string($data['clientNom'] ?? null);
+    $clientCognoms  = Normalizer::string($data['clientCognoms'] ?? null);
+    $clientEmail    = Normalizer::string($data['clientEmail'] ?? null);
+    $clientWeb      = Normalizer::string($data['clientWeb'] ?? null);
+    $clientNIF      = Normalizer::string($data['clientNIF'] ?? null);
+    $clientEmpresa  = Normalizer::string($data['clientEmpresa'] ?? null);
+    $clientAdreca   = Normalizer::string($data['clientAdreca'] ?? null);
+    $clientCP       = Normalizer::string($data['clientCP'] ?? null);
 
-    // Datos
-    $clientNom      = $trimOrNull($data['clientNom'] ?? null);
-    $clientCognoms  = $trimOrNull($data['clientCognoms'] ?? null);
-    $clientEmail    = $trimOrNull($data['clientEmail'] ?? null);
-    $clientWeb      = $trimOrNull($data['clientWeb'] ?? null);
-    $clientNIF      = $trimOrNull($data['clientNIF'] ?? null);
-    $clientEmpresa  = $trimOrNull($data['clientEmpresa'] ?? null);
-    $clientAdreca   = $trimOrNull($data['clientAdreca'] ?? null);
-    $clientCP       = $trimOrNull($data['clientCP'] ?? null);
+    $pais_id        = Normalizer::uuid($data['pais_id'] ?? null);
+    $provincia_id   = Normalizer::uuid($data['provincia_id'] ?? null);
+    $ciutat_id      = Normalizer::uuid($data['ciutat_id'] ?? null);
 
-    $pais_id        = $uuidOrNull($data['pais_id'] ?? null);
-    $provincia_id   = $uuidOrNull($data['provincia_id'] ?? null);
-    $ciutat_id      = $uuidOrNull($data['ciutat_id'] ?? null);
-
-    $clientTelefon  = $trimOrNull($data['clientTelefon'] ?? null);
-    $clientStatus   = $toIntOrNull($data['clientStatus'] ?? 1) ?? 1;
-    $clientRegistre = $dateOrNull($data['clientRegistre'] ?? null);
+    $clientTelefon  = Normalizer::string($data['clientTelefon'] ?? null);
+    $clientStatus   = Normalizer::int($data['clientStatus'] ?? null);
+    $clientRegistre = Normalizer::date($data['clientRegistre'] ?? null);
 
     // Validación
     $errors = [];
-    Validator::required($errors, 'clientNom', $clientNom, 'Nom');
-    Validator::maxLength($errors, 'clientNom', $clientNom, 255, 'Nom');
 
-    Validator::email($errors, 'clientEmail', $clientEmail, 'Email');
+    Validator::schema([
+        'clientNom'      => $clientNom,
+        'clientEmail'    => $clientEmail,
+        'clientAdreca'   => $clientAdreca,
+        'ciutat_id'      => $ciutat_id,
+        'provincia_id'   => $provincia_id,
+        'pais_id'        => $pais_id,
+        'clientStatus'   => $clientStatus,
+        'clientRegistre' => $clientRegistre,
+        'clientNIF'      => $clientNIF,
+        'clientCP'       => $clientCP,
+        'clientWeb'      => $clientWeb,
+    ], $errors, [
+        'clientNom' => [
+            'required',
+            'string',
+            'max:255',
+            'label:Nom',
+        ],
 
-    Validator::required($errors, 'clientAdreca', $clientAdreca, 'Adreça');
-    Validator::required($errors, 'ciutat_id', $ciutat_id, 'Ciutat');
-    Validator::required($errors, 'provincia_id', $provincia_id, 'Provincia');
-    Validator::required($errors, 'pais_id', $pais_id, 'País');
-    Validator::required($errors, 'clientStatus', $clientStatus, 'Estat');
-    Validator::required($errors, 'clientRegistre', $clientRegistre, 'Data registre');
+        'clientEmail' => [
+            'email',
+            'label:Email',
+        ],
 
-    Validator::maxLength($errors, 'clientNIF', $clientNIF, 20, 'NIF');
-    Validator::maxLength($errors, 'clientCP', $clientCP, 10, 'Codi postal');
-    Validator::maxLength($errors, 'clientWeb', $clientWeb, 255, 'Pàgina web');
+        'clientAdreca' => [
+            'required',
+            'string',
+            'label:Adreça',
+        ],
+
+        'ciutat_id' => [
+            'required_uuid',
+            'uuid',
+            'label:Ciutat',
+        ],
+
+        'provincia_id' => [
+            'required_uuid',
+            'uuid',
+            'label:Provincia',
+        ],
+
+        'pais_id' => [
+            'required_uuid',
+            'uuid',
+            'label:País',
+        ],
+
+        'clientStatus' => [
+            'required_int',
+            'int',
+            'label:Estat',
+        ],
+
+        'clientRegistre' => [
+            'required',
+            'date',
+            'label:Data registre',
+        ],
+
+        'clientNIF' => [
+            'max:20',
+            'label:NIF',
+        ],
+
+        'clientCP' => [
+            'max:10',
+            'label:Codi postal',
+        ],
+
+        'clientWeb' => [
+            'max:255',
+            'label:Pàgina web',
+        ],
+    ]);
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
@@ -253,6 +303,7 @@ if ($slug === 'clients') {
     Validator::required($errors, 'tipus_iva', $tipus_iva);
     Validator::required($errors, 'estat', $estat);
     Validator::required($errors, 'metode_pagament', $metode_pagament);
+
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
