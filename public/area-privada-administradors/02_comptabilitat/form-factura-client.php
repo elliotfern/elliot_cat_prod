@@ -1,4 +1,4 @@
-<div class="barraNavegacioContenidor"></div>
+<div id="barraNavegacioContenidor"></div>
 
 <div class="container-fluid form">
 

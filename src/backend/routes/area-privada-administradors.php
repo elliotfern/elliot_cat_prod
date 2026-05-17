@@ -56,7 +56,8 @@ $routes = [
     APP_GESTIO . $url['comptabilitat'] . '/modifica-factura-proveidor/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-proveidor.php'),
 
     APP_GESTIO . $url['comptabilitat'] . '/llistat-pressupostos' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-pressupostos.php'),
-
+    APP_GESTIO . $url['comptabilitat'] . '/nou-pressupost' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-pressupost.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/modifica-pressupost/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-pressupost.php'),
 
     // 02.Auxiliars
     APP_GESTIO . $url['comptabilitat'] . '/llistat-emissors' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-emissors.php'),

@@ -7,7 +7,7 @@ use App\Utils\Url;
 
 <h1>Gestió Comptabilitat i Clients</h1>
 <?php if (isUserAdmin()) { ?>
-  <div class="d-flex flex-wrap gap-2">
+  <div class="d-flex flex-wrap gap-2 my-3">
     <a
       href="<?php echo Url::intranet('comptabilitat'); ?>/nou-client"
       class="btn btn-secondary btn-sm">
@@ -27,7 +27,7 @@ use App\Utils\Url;
     </a>
 
     <a
-      href="<?php echo Url::intranet('comptabilitat'); ?>/nou-factura"
+      href="<?php echo Url::intranet('comptabilitat'); ?>/nova-factura"
       class="btn btn-secondary btn-sm">
       Crear factura
     </a>

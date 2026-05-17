@@ -7,7 +7,7 @@ use App\Utils\Url;
 <h1>Gestió Comptabilitat i Clients</h1>
 <h2>Llistat d'emissors de factures</h2>
 
-<div class="d-flex flex-wrap gap-2">
+<div class="d-flex flex-wrap gap-2 my-3">
     <a
         href="<?php echo Url::intranet('comptabilitat'); ?>/nou-emissor"
         class="btn btn-secondary btn-sm">

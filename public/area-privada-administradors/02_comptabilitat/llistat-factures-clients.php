@@ -8,7 +8,7 @@ use App\Utils\Url;
 <h2>LListat factures - <div id="titolTipusFactura"></div>
 </h2>
 
-<div class="d-flex flex-wrap gap-2">
+<div class="d-flex flex-wrap gap-2 my-3">
     <a
         href="<?php echo Url::intranet('comptabilitat'); ?>/nova-factura"
         class="btn btn-secondary btn-sm">

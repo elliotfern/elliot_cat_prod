@@ -1,9 +1,12 @@
-<div class="barraNavegacioContenidor"></div>
+<div id="barraNavegacioContenidor"></div>
 
-<div class="container-fluid form">
+<h1>Gestió Comptabilitat i Clients</h1>
+<h2>Formulari Clients</h2>
 
-    <h2>Gestió comptabilitat i clients</h2>
-    <div id="titolForm"></div>
+<div class="form">
+    <h3>
+        <div id="titolForm"></div>
+    </h3>
 
     <div class="alert alert-success" id="okMessage" style="display:none" role="alert">
         <div id="okText"></div>
