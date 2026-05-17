@@ -1,18 +1,17 @@
-    <div id="barraNavegacioContenidor"></div>
+<?php
 
-    <div class="container">
+use App\Utils\Url;
+?>
 
-        <h1>Base de dades: Persones</h1>
+<div id="barraNavegacioContenidor"></div>
+<h1>Base de dades: Persones</h1>
 
-        <?php if (isUserAdmin()) : ?>
-            <p>
-                <a
-                    href="<?php echo APP_INTRANET . $url['persona']; ?>/nova-persona/"
-                    class="btn btn-secondary btn-sm">
-                    Afegir autor
-                </a>
-            </p>
-        <?php endif; ?>
+<?php if (isUserAdmin()) : ?>
+    <a
+        href="<?php echo Url::intranet('persones'); ?>/nova-persona/"
+        class="btn btn-secondary btn-sm">
+        Afegir autor
+    </a>
+<?php endif; ?>
 
-        <div id="taulaLlistatPersones"></div>
-    </div>
+<div id="taulaLlistatPersones"></div>

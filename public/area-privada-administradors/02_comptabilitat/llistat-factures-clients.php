@@ -1,29 +1,19 @@
-<div class="container contingut">
-    <div id="barraNavegacioContenidor"></div>
+<?php
 
-    <main>
-        <div class="container contingut">
-            <h1>Comptabilitat: Facturació clients</h1>
-            <div id="titolTipusFactura"></div>
+use App\Utils\Url;
+?>
 
-            <p><button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nova-factura'" class="button btn-gran btn-secondari">Crear factura</button></p>
+<div id="barraNavegacioContenidor"></div>
+<h1>Gestió Comptabilitat i Clients</h1>
+<h2>LListat factures - <div id="titolTipusFactura"></div>
+</h2>
 
-            <div id="taulaLlistatFactures"></div>
-
-        </div>
-    </main>
+<div class="d-flex flex-wrap gap-2">
+    <a
+        href="<?php echo Url::intranet('comptabilitat'); ?>/nova-factura"
+        class="btn btn-secondary btn-sm">
+        Crear factura
+    </a>
 </div>
 
-<style>
-    /* separa los botones dentro del btn-group */
-    .btn-group.separat>.btn-petit {
-        margin-left: 0 !important;
-        /* anula el -1px típico */
-        margin-right: .5rem;
-        margin-bottom: 0.3rem;
-    }
-
-    .btn-group.separat>.btn-petit:last-child {
-        margin-right: 0;
-    }
-</style>
+<div id="taulaLlistatFactures"></div>

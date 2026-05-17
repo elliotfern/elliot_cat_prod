@@ -17,7 +17,7 @@ if ($id === null) {
 }
 ?>
 
-<div class="barraNavegacio"></div>
+<div class="barraNavegacioContenidor"></div>
 
 <div id="invoiceRoot" class="container-fluid form" data-invoice-id="<?php echo $id; ?>">
 

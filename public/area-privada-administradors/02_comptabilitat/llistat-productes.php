@@ -1,19 +1,18 @@
-    <div id="barraNavegacioContenidor"></div>
+<?php
 
+use App\Utils\Url;
+?>
 
-    <div class="container">
+<div id="barraNavegacioContenidor"></div>
+<h1>Gestió Comptabilitat i Clients</h1>
+<h2>Llistat de productes i serveis</h2>
 
-        <h1>Gestió Comptabilitat i Clients</h1>
-        <h2>Llistat de productes i serveis</h2>
+<div class="d-flex flex-wrap gap-2">
+    <a
+        href="<?php echo Url::intranet('comptabilitat'); ?>/nou-producte"
+        class="btn btn-secondary btn-sm">
+        Crear producte
+    </a>
+</div>
 
-        <div id="isAdminButton" style="display: none;">
-
-            <p>
-                <button onclick="window.location.href='<?php echo APP_INTRANET . $url['comptabilitat']; ?>/nou-producte/'" class="button btn-gran btn-secondari">Afegir producte</button>
-            </p>
-
-        </div>
-
-        <div id="taulaLlistatProductes"></div>
-
-    </div>
+<div id="taulaLlistatProductes"></div>
