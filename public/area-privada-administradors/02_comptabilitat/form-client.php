@@ -21,7 +21,7 @@ use App\Utils\Url;
         <div id="errText"></div>
     </div>
 
-    <form method="POST" action="" class="needs-validation" novalidate>
+    <form method="POST" action="" id="formClient" class="needs-validation" novalidate>
 
         <input type="hidden" id="id" name="id" />
 
