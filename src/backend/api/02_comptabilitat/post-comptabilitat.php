@@ -8,6 +8,7 @@ use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
 use App\Config\Database;
 use App\Utils\Uuid;
+use App\Utils\Validator;
 
 /** @var array $routeParams */
 /** @var array $conn */
@@ -125,32 +126,21 @@ if ($slug === 'clients') {
     // Validación
     $errors = [];
 
-    if ($clientNom === null) {
-        $errors['clientNom'][] = ValidacioErrors::requerit('clientNom');
-    } elseif (mb_strlen($clientNom) > 255) {
-        $errors['clientNom'][] = ValidacioErrors::massaLlarg('clientNom', 255);
-    }
+    Validator::required($errors, 'clientNom', $clientNom);
+    Validator::maxLength($errors, 'clientNom', $clientNom, 255);
 
-    if ($clientEmail !== null && !filter_var($clientEmail, FILTER_VALIDATE_EMAIL)) {
-        $errors['clientEmail'][] = ValidacioErrors::invalid('clientEmail');
-    }
+    Validator::email($errors, 'clientEmail', $clientEmail);
 
-    if ($clientWeb !== null) {
+    Validator::required($errors, 'clientAdreca', $clientAdreca);
+    Validator::required($errors, 'ciutat_id', $ciutat_id);
+    Validator::required($errors, 'provincia_id', $provincia_id);
+    Validator::required($errors, 'pais_id', $pais_id);
+    Validator::required($errors, 'clientStatus', $clientStatus);
+    Validator::required($errors, 'clientRegistre', $clientRegistre);
 
-        if (mb_strlen($clientWeb) > 255) {
-            $errors['clientWeb'][] = ValidacioErrors::massaLlarg('clientWeb', 255);
-        } elseif (!preg_match('~^https?://~i', $clientWeb)) {
-            $clientWeb = 'https://' . $clientWeb;
-        }
-    }
-
-    if ($clientNIF !== null && mb_strlen($clientNIF) > 20) {
-        $errors['clientNIF'][] = ValidacioErrors::massaLlarg('clientNIF', 20);
-    }
-
-    if ($clientCP !== null && mb_strlen($clientCP) > 10) {
-        $errors['clientCP'][] = ValidacioErrors::massaLlarg('clientCP', 10);
-    }
+    Validator::maxLength($errors, 'clientNIF', $clientNIF, 20);
+    Validator::maxLength($errors, 'clientCP', $clientCP, 10);
+    Validator::maxLength($errors, 'clientWeb', $clientWeb, 255);
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
