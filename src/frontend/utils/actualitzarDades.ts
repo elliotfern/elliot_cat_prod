@@ -82,7 +82,7 @@ async function request(method: string, url: string, body: FormData | Record<stri
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    throw data;
+    return data;
   }
 
   return data;
@@ -191,9 +191,19 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
 
     return response;
   } catch (error: any) {
+    const errors = error?.errors;
+
+    let errorDetails = '';
+
+    if (errors && typeof errors === 'object') {
+      errorDetails = Object.values(errors).flat().join('<br>');
+    }
+
+    const fullMessage = error?.message || Missatges.error.xarxa;
+
     missatgesBackend({
       tipus: 'error',
-      missatge: error?.message || Missatges.error.xarxa,
+      missatge: errorDetails ? `${fullMessage}<div class="mt-2">${errorDetails}</div>` : fullMessage,
       contenidor: ui.errMessageDiv,
       text: ui.errTextDiv,
       altreContenidor: ui.okMessageDiv,
