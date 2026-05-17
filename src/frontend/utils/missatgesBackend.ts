@@ -4,13 +4,17 @@ export function missatgesBackend({ tipus, missatge, contenidor, text, altreConte
     altreContenidor.classList.remove('alert-success', 'alert-danger');
   }
 
-  const heading = tipus === 'success' ? '<h4 class="alert-heading"><strong>Transmissió de dades correcta!</strong></h4>' : '<h4 class="alert-heading"><strong>Error en les dades!</strong></h4>';
+  const heading = tipus === 'success' ? 'Transmissió de dades correcta!' : 'Error en les dades!';
 
-  text.innerHTML = `${heading}${missatge}`;
+  text.innerHTML = `
+    <h4 class="alert-heading"><strong>${heading}</strong></h4>
+    <div class="mt-2">${missatge}</div>
+  `;
+
   contenidor.style.display = 'block';
-
   contenidor.classList.remove('alert-success', 'alert-danger');
   contenidor.classList.add(tipus === 'success' ? 'alert-success' : 'alert-danger');
+
   contenidor.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   setTimeout(() => {

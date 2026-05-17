@@ -178,11 +178,9 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
         errorDetails = Object.values(errors).flat().join('<br>');
       }
 
-      const fullMessage = response?.message || Missatges.error.default;
-
       missatgesBackend({
         tipus: 'error',
-        missatge: errorDetails ? `${fullMessage}<br><br>${errorDetails}` : fullMessage,
+        missatge: errorDetails ? `${response?.message || Missatges.error.default}<div class="mt-2">${errorDetails}</div>` : response?.message || Missatges.error.default,
         contenidor: ui.errMessageDiv,
         text: ui.errTextDiv,
         altreContenidor: ui.okMessageDiv,
