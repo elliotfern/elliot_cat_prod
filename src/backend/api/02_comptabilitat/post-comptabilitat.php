@@ -9,6 +9,7 @@ use App\Config\DatabaseConnection;
 use App\Config\Database;
 use App\Utils\Uuid;
 use App\Utils\Validator;
+use App\Utils\Normalizer;
 
 /** @var array $routeParams */
 /** @var array $conn */
@@ -204,31 +205,35 @@ if ($slug === 'clients') {
         Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
     }
 
-    // Helpers
-    // Helpers corregidos para PHP 8+
-    $trimOrNull = static fn($v): ?string => ($v === null) ? null : (trim((string)$v) ?: null);
-    $toIntOrNull = static fn($v): ?int => is_numeric($v) ? (int)$v : null;
-    $dateOrNull = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
-    $toDecimal = static fn($v): ?string => ($v === null) ? null : (preg_match('/^-?\d+(\.\d{1,4})?$/', str_replace(',', '.', str_replace([' ', "\u{00A0}"], '', (string)$v))) ? str_replace(',', '.', (string)$v) : null);
+    // Normalizar
+    $emissor_id     = Normalizer::int($data['client_id'] ?? null);
+    $client_id      = Normalizer::int($data['client_id'] ?? null);
+    $tipus_iva      = Normalizer::int($data['tipus_iva'] ?? null);
+    $estat      = Normalizer::int($data['estat'] ?? null);
+    $metode_pagament      = Normalizer::int($data['metode_pagament'] ?? null);
+    $projecte_id      = Normalizer::int($data['projecte_id'] ?? null);
 
-    // Datos (nombres ya alineados con BD)
-    $emissor_id      = $toIntOrNull($data['emissor_id'] ?? null);
-    $client_id       = $toIntOrNull($data['client_id'] ?? null);
-    $concepte        = $trimOrNull($data['concepte'] ?? null);
-    $data_factura    = $dateOrNull($data['data_factura'] ?? null);
-    $data_venciment  = $dateOrNull($data['data_venciment'] ?? null);
-    $base_imposable  = $toDecimal($data['base_imposable'] ?? null);
-    $despeses_extra  = $toDecimal($data['despeses_extra'] ?? 0);
-    $total_factura   = $toDecimal($data['total_factura'] ?? null);
-    $import_iva      = $toDecimal($data['import_iva'] ?? null);
-    $tipus_iva       = $toIntOrNull($data['tipus_iva'] ?? null);
-    $estat           = $toIntOrNull($data['estat'] ?? null);
-    $metode_pagament = $toIntOrNull($data['metode_pagament'] ?? null);
-    $notes           = $trimOrNull($data['notes'] ?? null);
-    $projecte_id     = $toIntOrNull($data['projecte_id'] ?? null);
-    $arxiu_url       = $trimOrNull($data['arxiu_url'] ?? null);
-    $recurrent = isset($data['recurrent']) ? (int)$data['recurrent'] : 0;
-    $frequencia = $recurrent ? $trimOrNull($data['frequencia'] ?? null) : null;
+    $clientNom      = Normalizer::string($data['clientNom'] ?? null);
+    $concepte      = Normalizer::string($data['concepte'] ?? null);
+    $notes      = Normalizer::string($data['notes'] ?? null);
+    $arxiu_url      = Normalizer::string($data['arxiu_url'] ?? null);
+
+    $data_factura   = Normalizer::date($data['data_factura'] ?? null);
+    $data_venciment   = Normalizer::date($data['data_venciment'] ?? null);
+
+    $clientEmail    = Normalizer::email($data['clientEmail'] ?? null);
+
+    $total_factura  = Normalizer::decimal($data['total_factura'] ?? null);
+    $base_imposable  = Normalizer::decimal($data['base_imposable'] ?? null);
+    $despeses_extra  = Normalizer::decimal($data['despeses_extra'] ?? null);
+    $import_iva  = Normalizer::decimal($data['import_iva'] ?? null);
+
+    $recurrent   = Normalizer::int($data['recurrent'] ?? null);
+    $frequencia  = Normalizer::string($data['frequencia'] ?? null);
+
+    if (!$recurrent) {
+        $frequencia = null;
+    }
 
     $detallsProductes = $data['productes'] ?? [];
 
@@ -313,9 +318,9 @@ if ($slug === 'clients') {
             foreach ($detallsProductes as $p) {
                 $stmtProd->execute([
                     ':factura_id' => $numero_factura,
-                    ':producte_id' => $toIntOrNull($p['producte_id'] ?? null),
-                    ':descripcio' => $trimOrNull($p['descripcio'] ?? null),
-                    ':preu' => $toDecimal($p['preu'] ?? null)
+                    ':producte_id' => $p['producte_id'] ?? null,
+                    ':descripcio' => $p['descripcio'] ?? null,
+                    ':preu' => $p['preu'] ?? null
                 ]);
             }
         }
