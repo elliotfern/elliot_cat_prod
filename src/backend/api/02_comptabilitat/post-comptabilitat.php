@@ -234,22 +234,24 @@ if ($slug === 'clients') {
 
     // Validación
     $errors = [];
-    if ($emissor_id === null)      $errors[] = ValidacioErrors::requerit('emissor_id');
-    if ($client_id === null)       $errors[] = ValidacioErrors::requerit('client_id');
-    if ($concepte === null)        $errors[] = ValidacioErrors::requerit('concepte');
-    if ($data_factura === null)    $errors[] = ValidacioErrors::dataNoValida('data_factura');
-    if ($data_venciment === null)  $errors[] = ValidacioErrors::dataNoValida('data_venciment');
-    if ($base_imposable === null)  $errors[] = ValidacioErrors::requerit('base_imposable');
-    if ($total_factura === null)   $errors[] = ValidacioErrors::requerit('total_factura');
-    if ($import_iva === null)      $errors[] = ValidacioErrors::requerit('import_iva');
-    if ($tipus_iva === null)       $errors[] = ValidacioErrors::requerit('tipus_iva');
-    if ($estat === null)            $errors[] = ValidacioErrors::requerit('estat');
-    if ($metode_pagament === null) $errors[] = ValidacioErrors::requerit('metode_pagament');
+
+    Validator::required($errors, 'emissor_id', $emissor_id);
+    Validator::required($errors, 'client_id', $client_id);
+    Validator::required($errors, 'concepte', $concepte);
+
+    Validator::date($errors, 'data_factura', $data_factura);
+    Validator::date($errors, 'data_venciment', $data_venciment);
+
+    Validator::required($errors, 'base_imposable', $base_imposable);
+    Validator::required($errors, 'total_factura', $total_factura);
+    Validator::required($errors, 'import_iva', $import_iva);
+    Validator::required($errors, 'tipus_iva', $tipus_iva);
+    Validator::required($errors, 'estat', $estat);
+    Validator::required($errors, 'metode_pagament', $metode_pagament);
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
     }
-
 
     try {
         global $conn, $userUuid;

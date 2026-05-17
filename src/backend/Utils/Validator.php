@@ -29,4 +29,16 @@ class Validator
             $errors[$field][] = ValidacioErrors::massaLlarg($label ?? $field, $max);
         }
     }
+
+    public static function date(array &$errors, string $field, $value): void
+    {
+        if ($value === null || $value === '') {
+            $errors[$field][] = ValidacioErrors::requerit($field);
+            return;
+        }
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            $errors[$field][] = ValidacioErrors::invalid($field);
+        }
+    }
 }
