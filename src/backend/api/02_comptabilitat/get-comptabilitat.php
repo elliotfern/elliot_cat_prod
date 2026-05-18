@@ -86,7 +86,7 @@ if ($slug === 'clients') {
     }
 
     // GET : Detalls client ID
-    // ruta => "https://elliot.cat/api/comptabilitat/get/clientId"
+    // ruta => "https://elliot.cat/api/comptabilitat/get/clientId?id=i89jnbd"
 } else if ($slug === 'clientId') {
 
     AdminMiddleware::handle();

@@ -29,6 +29,7 @@ $routes = [
     APP_GESTIO . $url['comptabilitat'] . '/llistat-clients' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-clients.php'),
     APP_GESTIO . $url['comptabilitat'] . '/nou-client' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-client.php'),
     APP_GESTIO . $url['comptabilitat'] . '/modifica-client/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-client.php'),
+    APP_GESTIO . $url['comptabilitat'] . '/fitxa-client/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'vista-client.php'),
 
     // 02.2 Proveidors
     APP_GESTIO . $url['comptabilitat'] . '/llistat-proveidors' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-proveidors.php'),

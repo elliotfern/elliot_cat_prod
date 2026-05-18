@@ -1,5 +1,6 @@
 import { getPageType } from '../../utils/urlPath';
 import { detallsFacturaClients } from './detallsFacturaClient';
+import { fitxaClient } from './fitxaClient';
 import { formClient } from './formClient';
 import { formDespesa } from './formDespesa';
 import { formEmissor } from './formEmissor';
@@ -45,6 +46,8 @@ export function comptabilitat() {
     formClient(false);
   } else if (pageType[2] === 'modifica-client') {
     formClient(true, id);
+  } else if (pageType[2] === 'fitxa-client') {
+    fitxaClient(id);
   } else if (pageType[2] === 'llistat-emissors') {
     taulaLlistatEmissors();
   } else if (pageType[2] === 'nou-emissor') {
