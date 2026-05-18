@@ -151,12 +151,12 @@ use App\Utils\Url;
 
             <!-- ESTAT -->
             <div class="col-md-4">
-                <label for="clientStatus" class="form-label">Estat *</label>
+                <label for="estat_id" class="form-label">Estat *</label>
                 <select class="form-select"
-                    id="clientStatus"
-                    name="clientStatus"
+                    id="estat_id"
+                    name="estat_id"
                     required></select>
-                <div class="invalid-feedback" id="error-clientStatus"></div>
+                <div class="invalid-feedback" id="error-estat_id"></div>
             </div>
 
             <!-- REGISTRE -->

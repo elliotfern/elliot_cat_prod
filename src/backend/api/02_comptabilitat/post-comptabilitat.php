@@ -135,9 +135,9 @@ if ($slug === 'clients') {
         $sql = <<<SQL
             INSERT INTO {$table}
             (clientNom, clientCognoms, clientEmail, clientWeb, clientNIF, clientEmpresa, clientAdreca, clientCP,
-                ciutat_id, provincia_id, pais_id, clientTelefon, clientStatus, clientRegistre)
+                ciutat_id, provincia_id, pais_id, clientTelefon, estat_id, clientRegistre)
             VALUES
-            (:clientNom, :clientCognoms, :clientEmail, :clientWeb, :clientNIF, :clientEmpresa, :clientAdreca, :clientCP, :ciutat_id, :provincia_id,:pais_id, :clientTelefon, :clientStatus, :clientRegistre)
+            (:clientNom, :clientCognoms, :clientEmail, :clientWeb, :clientNIF, :clientEmpresa, :clientAdreca, :clientCP, :ciutat_id, :provincia_id,:pais_id, :clientTelefon, :estat_id, :clientRegistre)
             SQL;
 
         $stmt = $db->getPdo()->prepare($sql);
@@ -160,7 +160,7 @@ if ($slug === 'clients') {
         $stmt->bindValue(':pais_id', $pais_id, PDO::PARAM_STR);
 
         $stmt->bindValue(':clientTelefon', $clientData['clientTelefon'] ?? null, PDO::PARAM_STR);
-        $stmt->bindValue(':clientStatus', $clientData['clientStatus'], PDO::PARAM_INT);
+        $stmt->bindValue(':estat_id', $clientData['estat_id'], PDO::PARAM_STR);
         $stmt->bindValue(':clientRegistre', $clientData['clientRegistre'], PDO::PARAM_STR);
 
         $stmt->execute();

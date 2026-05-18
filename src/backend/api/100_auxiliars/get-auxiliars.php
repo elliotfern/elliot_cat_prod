@@ -1105,9 +1105,9 @@ if ($slug === 'directors') {
 } else if ($slug === 'estatsClients') {
 
     $sql = <<<SQL
-            SELECT s.estatNom AS estat_ca, s.id
+            SELECT s.estat AS estat_ca, s.id
             FROM %s AS s
-            ORDER BY s.estatNom ASC
+            ORDER BY s.estat ASC
             SQL;
 
     $query = sprintf(
