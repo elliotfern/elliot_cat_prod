@@ -15,4 +15,5 @@ export type RenderTableOptions<T extends object> = {
   // ✅ NOU (opt-in): permet split d'un string en múltiples valors per al filtre
   filterSplitBy?: Partial<Record<keyof T, string | RegExp>>;
   filterSplitTrim?: boolean; // default true
+  renderHeader?: (raw: unknown) => string;
 };

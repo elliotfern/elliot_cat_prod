@@ -139,6 +139,149 @@ if ($slug === 'clients') {
         );
     }
 
+    // GET : Pressupostos enviats a client ID
+    // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostosClientId?id=i89jnbd"
+} else if ($slug === 'pressupostosClientId') {
+
+    AdminMiddleware::handle();
+
+    $id = $_GET['id'];
+
+    $sql = <<<SQL
+            SELECT 
+            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id, e.estatNom, s.producte, YEAR(p.data) AS any
+            FROM %s AS p
+            LEFT JOIN %s AS c ON p.client_id = c.id
+            LEFT JOIN %s AS e ON p.estat_id = e.id
+            LEFT JOIN %s AS s ON p.servei_id = s.id2
+            WHERE c.id = :id
+            ORDER BY p.data DESC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo),
+    );
+
+    try {
+
+        $params = [':id' => uuid::toBinary($id)];
+        $result = $db->getData($query, $params, false);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : Factures enviades a client ID
+    // ruta => "https://elliot.cat/api/comptabilitat/get/facturesClientId?id=i89jnbd"
+} else if ($slug === 'facturesClientId') {
+
+    AdminMiddleware::handle();
+
+    $id = $_GET['id'];
+
+    $sql = <<<SQL
+        SELECT 
+            ic.id,
+            ic.numero_factura,
+            ic.emissor_id,
+            ic.client_id,
+            ic.concepte,
+            ic.data_factura,
+            YEAR(ic.data_factura) AS yearInvoice,
+            CONCAT('Any ', YEAR(ic.data_factura)) AS any,
+            ic.data_venciment,
+            ic.base_imposable,
+            ic.despeses_extra,
+            ic.total_factura,
+            ic.import_iva,
+            ic.tipus_iva,
+            ic.estat,
+            ic.metode_pagament,
+            vt.ivaPercen,
+            ist.estat,
+            pt.tipus AS tipusNom,
+            pt.notes,
+            c.clientNom,
+            c.clientCognoms,
+            c.clientEmpresa
+        FROM %s AS ic
+        LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
+        LEFT JOIN %s AS ist ON ist.id = ic.estat
+        LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
+        LEFT JOIN %s AS c ON ic.client_id = c.id
+        WHERE c.id = :id
+        ORDER BY ic.numero_factura DESC
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo)
+    );
+
+    $sql2 = <<<SQL
+        SELECT  
+            SUM(ic.total_factura) AS total_facturat
+            FROM %s ic
+            WHERE ic.client_id = :id
+    SQL;
+
+    $query2 = sprintf(
+        $sql2,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo)
+    );
+
+    try {
+        $params = [':id' => uuid::toBinary($id)];
+        $factures = $db->getData($query, $params, false);
+
+        $totalRow = $db->getData($query2, $params, false);
+
+        $total = $totalRow[0]['total_facturat'] ?? 0;
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            [
+                'factures' => $factures ?? [],
+                'totals' => [
+                    'total_facturat' => (float)$total
+                ]
+            ],
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // GET : Llistat factures clients
     // ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients?emissor_id={id}"
 } else if ($slug === 'facturacioClients') {
@@ -848,10 +991,10 @@ SQL;
 
     $sql = <<<SQL
             SELECT 
-            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id2, c.clientNom, c.clientCognoms, c.clientEmpresa, e.estatNom, s.producte, YEAR(p.data) AS any
+            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id, c.clientNom, c.clientCognoms, c.clientEmpresa, e.estatNom, s.producte, YEAR(p.data) AS any
             FROM %s AS p
-            LEFT JOIN %s AS c ON p.client_id = c.id2
-            LEFT JOIN %s AS e ON p.estat_id = e.id2
+            LEFT JOIN %s AS c ON p.client_id = c.id
+            LEFT JOIN %s AS e ON p.estat_id = e.id
             LEFT JOIN %s AS s ON p.servei_id = s.id2
             ORDER BY p.data DESC
             SQL;

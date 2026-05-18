@@ -1,4 +1,6 @@
 import { formatData } from '../../utils/formataData';
+import { renderClientFactures } from './fitxaClientFactures';
+import { renderClientPressupostos } from './fitxaClientPressupostos';
 
 type ClientDTO = {
   id: string;
@@ -45,31 +47,63 @@ function renderClient(response: ApiResponse) {
     return;
   }
 
-  const value = (v: any) => (v === null || v === '' ? '—' : v);
+  renderClientPressupostos(client.id);
+  renderClientFactures(client.id);
+
+  const v = (x: any) => (x === null || x === '' ? '—' : x);
 
   container.innerHTML = `
-    <div class="client-card">
-      <h2>${value(client.clientNom)} ${value(client.clientCognoms)}</h2>
+    <div class="card shadow-sm">
 
-      <p><strong>Email:</strong> ${value(client.clientEmail)}</p>
-      <p><strong>Web:</strong> ${value(client.clientWeb)}</p>
-      <p><strong>NIF:</strong> ${value(client.clientNIF)}</p>
-      <p><strong>Empresa:</strong> ${value(client.clientEmpresa)}</p>
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">
+          ${v(client.clientNom)} ${v(client.clientCognoms)}
+        </h4>
 
-      <hr />
+        <span class="badge bg-primary">
+          ${v(client.estat)}
+        </span>
+      </div>
 
-      <p><strong>Direcció:</strong> ${value(client.clientAdreca)} (${value(client.clientCP)})</p>
+      <div class="card-body">
 
-      <p><strong>Ciutat:</strong> ${value(client.ciutat_ca)}</p>
-      <p><strong>Província:</strong> ${value(client.provincia_ca)}</p>
-      <p><strong>País:</strong> ${value(client.pais_ca)}</p>
+        <div class="row g-4">
 
-      <hr />
+          <!-- CONTACTE -->
+          <div class="col-md-6">
+            <h6 class="text-muted mb-2">Contacte</h6>
+            <p class="mb-1"><strong>Email:</strong> ${v(client.clientEmail)}</p>
+            <p class="mb-1"><strong>Telèfon:</strong> ${v(client.clientTelefon)}</p>
+            <p class="mb-1"><strong>Web:</strong> ${v(client.clientWeb)}</p>
+          </div>
 
-      <p><strong>Telèfon:</strong> ${value(client.clientTelefon)}</p>
-      <p><strong>Data registre:</strong> ${value(formatData(client.clientRegistre))}</p>
+          <!-- FISCAL -->
+          <div class="col-md-6">
+            <h6 class="text-muted mb-2">Dades fiscals</h6>
+            <p class="mb-1"><strong>NIF:</strong> ${v(client.clientNIF)}</p>
+            <p class="mb-1"><strong>Empresa:</strong> ${v(client.clientEmpresa)}</p>
+          </div>
 
-      <p><strong>Estat:</strong> ${value(client.estat)}</p>
+          <!-- ADREÇA -->
+          <div class="col-12">
+            <h6 class="text-muted mb-2">Adreça</h6>
+            <p class="mb-1">${v(client.clientAdreca)}</p>
+            <p class="mb-1">
+              ${v(client.clientCP)} · ${v(client.ciutat_ca)}
+            </p>
+            <p class="mb-1">
+              ${v(client.provincia_ca)} · ${v(client.pais_ca)}
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card-footer text-muted small">
+        Data de registre: ${v(client.clientRegistre)}
+      </div>
+
     </div>
   `;
 }

@@ -13,4 +13,5 @@ use App\Utils\Url;
 <div id="clientPresupostos"></div>
 
 <hr>
+<div id="facturesTotals"></div>
 <div id="clientFactures"></div>
