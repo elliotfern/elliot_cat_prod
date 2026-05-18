@@ -8,8 +8,8 @@ use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
 use App\Config\Database;
 use App\Utils\Uuid;
-use App\Utils\Validator;
-use App\Utils\Normalizer;
+use App\Utils\Schema\SchemaProcessor;
+use App\Modules\Clients\Schemas\ClientSchema;
 
 /** @var array $routeParams */
 /** @var array $conn */
@@ -91,115 +91,40 @@ if ($slug === 'clients') {
     $data = json_decode($raw, true);
 
     if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['JSON invàlid'],
+            400
+        );
+        return;
     }
 
-    // Datos normalizados
-    $clientNom      = Normalizer::string($data['clientNom'] ?? null);
-    $clientCognoms  = Normalizer::string($data['clientCognoms'] ?? null);
-    $clientEmail    = Normalizer::string($data['clientEmail'] ?? null);
-    $clientWeb      = Normalizer::string($data['clientWeb'] ?? null);
-    $clientNIF      = Normalizer::string($data['clientNIF'] ?? null);
-    $clientEmpresa  = Normalizer::string($data['clientEmpresa'] ?? null);
-    $clientAdreca   = Normalizer::string($data['clientAdreca'] ?? null);
-    $clientCP       = Normalizer::string($data['clientCP'] ?? null);
+    // Datos normalizados y validados
+    try {
 
-    $pais_id        = Normalizer::uuid($data['pais_id'] ?? null);
-    $provincia_id   = Normalizer::uuid($data['provincia_id'] ?? null);
-    $ciutat_id      = Normalizer::uuid($data['ciutat_id'] ?? null);
+        $clientData = SchemaProcessor::process(
+            $data,
+            ClientSchema::create()
+        );
+    } catch (Exception $e) {
 
-    $clientTelefon  = Normalizer::string($data['clientTelefon'] ?? null);
-    $clientStatus   = Normalizer::int($data['clientStatus'] ?? null);
-    $clientRegistre = Normalizer::date($data['clientRegistre'] ?? null);
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            json_decode($e->getMessage(), true),
+            400
+        );
+        return; // o exit;
 
-    // Validación
-    $errors = [];
-
-    Validator::schema([
-        'clientNom'      => $clientNom,
-        'clientEmail'    => $clientEmail,
-        'clientAdreca'   => $clientAdreca,
-        'ciutat_id'      => $ciutat_id,
-        'provincia_id'   => $provincia_id,
-        'pais_id'        => $pais_id,
-        'clientStatus'   => $clientStatus,
-        'clientRegistre' => $clientRegistre,
-        'clientNIF'      => $clientNIF,
-        'clientCP'       => $clientCP,
-        'clientWeb'      => $clientWeb,
-    ], $errors, [
-        'clientNom' => [
-            'required',
-            'string',
-            'max:255',
-            'label:Nom',
-        ],
-
-        'clientEmail' => [
-            'email',
-            'label:Email',
-        ],
-
-        'clientAdreca' => [
-            'required',
-            'string',
-            'label:Adreça',
-        ],
-
-        'ciutat_id' => [
-            'required_uuid',
-            'uuid',
-            'label:Ciutat',
-        ],
-
-        'provincia_id' => [
-            'required_uuid',
-            'uuid',
-            'label:Provincia',
-        ],
-
-        'pais_id' => [
-            'required_uuid',
-            'uuid',
-            'label:País',
-        ],
-
-        'clientStatus' => [
-            'required_int',
-            'int',
-            'label:Estat',
-        ],
-
-        'clientRegistre' => [
-            'required',
-            'date',
-            'label:Data registre',
-        ],
-
-        'clientNIF' => [
-            'max:20',
-            'label:NIF',
-        ],
-
-        'clientCP' => [
-            'max:10',
-            'label:Codi postal',
-        ],
-
-        'clientWeb' => [
-            'max:255',
-            'label:Pàgina web',
-        ],
-    ]);
-
-    if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
     }
 
     // conversió a Binary 16
-    $ciutat_id = !empty($ciutat_id) ?  Uuid::toBinary($ciutat_id) : null;
-    $provincia_id = !empty($provincia_id) ? Uuid::toBinary($provincia_id) : null;
-    $pais_id = !empty($pais_id) ?  Uuid::toBinary($pais_id) : null;
+    $ciutat_id     = $clientData['ciutat_id'] ?? null;
+    $provincia_id  = $clientData['provincia_id'] ?? null;
+    $pais_id       = $clientData['pais_id'] ?? null;
+
+    $ciutat_id = $ciutat_id ? Uuid::toBinary($ciutat_id) : null;
+    $provincia_id = $provincia_id ? Uuid::toBinary($provincia_id) : null;
+    $pais_id = $pais_id ? Uuid::toBinary($pais_id) : null;
 
     try {
 
@@ -216,28 +141,32 @@ if ($slug === 'clients') {
 
         $stmt = $db->getPdo()->prepare($sql);
 
-        $stmt->bindValue(':clientNom', $clientNom, PDO::PARAM_STR);
-        $stmt->bindValue(':clientCognoms', $clientCognoms, $clientCognoms !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientEmail', $clientEmail, $clientEmail !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientWeb', $clientWeb, $clientWeb !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientNIF', $clientNIF, $clientNIF !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientEmpresa', $clientEmpresa, $clientEmpresa !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientAdreca', $clientAdreca, $clientAdreca !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientCP', $clientCP, $clientCP !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':clientNom', $clientData['clientNom'], PDO::PARAM_STR);
+        $stmt->bindValue(':clientCognoms', $clientData['clientCognoms'] ?? null, $clientData['clientCognoms'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':clientEmail', $clientData['clientEmail'], PDO::PARAM_STR);
+        $stmt->bindValue(
+            ':clientWeb',
+            $clientData['clientWeb'],
+            $clientData['clientWeb'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+        );
+        $stmt->bindValue(':clientNIF', $clientData['clientNIF'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':clientEmpresa', $clientData['clientEmpresa'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':clientAdreca', $clientData['clientAdreca'], PDO::PARAM_STR);
+        $stmt->bindValue(':clientCP', $clientData['clientCP'] ?? null, PDO::PARAM_STR);
 
-        $stmt->bindValue(':ciutat_id', $ciutat_id, $ciutat_id !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':provincia_id', $provincia_id, $provincia_id !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':pais_id', $pais_id, $pais_id !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':ciutat_id', $ciutat_id, PDO::PARAM_STR);
+        $stmt->bindValue(':provincia_id', $provincia_id, PDO::PARAM_STR);
+        $stmt->bindValue(':pais_id', $pais_id, PDO::PARAM_STR);
 
-        $stmt->bindValue(':clientTelefon', $clientTelefon, $clientTelefon !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientStatus', $clientStatus, PDO::PARAM_INT);
-        $stmt->bindValue(':clientRegistre', $clientRegistre, $clientRegistre !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':clientTelefon', $clientData['clientTelefon'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':clientStatus', $clientData['clientStatus'], PDO::PARAM_INT);
+        $stmt->bindValue(':clientRegistre', $clientData['clientRegistre'], PDO::PARAM_STR);
 
         $stmt->execute();
         $newId = (int)$conn->lastInsertId();
 
         // Auditoría
-        $detalls = sprintf("Creació client: %s (%s)", $clientNom, $clientEmail ?? '-');
+        $detalls = sprintf("Creació client: %s (%s)",  $clientData['clientNom'],  $clientData['clientEmail'] ?? '-');
         Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_clients', $newId);
 
         $conn->commit();
