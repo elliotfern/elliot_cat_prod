@@ -6,6 +6,7 @@ import { formDespesa } from './formDespesa';
 import { formEmissor } from './formEmissor';
 import { formFacturaClient } from './formFacturaClient';
 import { formFacturaProducte } from './formFacturaProducte';
+import { formPressupost } from './formPressupost';
 import { formProducte } from './formProducte';
 import { formProveidor } from './formProveidor';
 import { taulaFacturacioClients } from './taulaFacturacioClients';
@@ -88,9 +89,9 @@ export function comptabilitat() {
     formDespesa(true, id);
   } else if (pageType[2] === 'llistat-pressupostos') {
     taulaPressupostos();
-   } else if (pageType[2] === 'nou-pressupost') {
-    formDespesa(false);
+  } else if (pageType[2] === 'nou-pressupost') {
+    formPressupost(false);
   } else if (pageType[2] === 'modifica-pressupost') {
-    formDespesa(true, id);
+    formPressupost(true, id);
   }
 }
