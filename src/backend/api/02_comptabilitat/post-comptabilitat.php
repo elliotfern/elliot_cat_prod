@@ -11,6 +11,7 @@ use App\Utils\Uuid;
 use Ramsey\Uuid\Uuid as ramsey;
 use App\Utils\Schema\SchemaProcessor;
 use App\Modules\Clients\Schema\ClientSchema;
+use App\Modules\Pressupostos\Schema\PressupostSchema;
 use App\Utils\Schema\SchemaValidationException;
 
 /** @var array $routeParams */
@@ -716,6 +717,109 @@ if ($slug === 'clients') {
     } catch (Throwable $e) {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
+
+    // POST : Crear nou pressupost
+    // ruta => "/api/comptabilitat/post/pressupost"
+} else if ($slug === "pressupost") {
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['JSON invàlid'],
+            400
+        );
+        return;
+    }
+
+    // Datos normalizados y validados
+    try {
+        $schema = PressupostSchema::create();
+        $pressupostData = SchemaProcessor::process(
+            $data,
+            $schema
+        );
+    } catch (SchemaValidationException $e) {
+
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            $e->toApiArray(),
+            400
+        );
+
+        return;
+    }
+
+    // UUID + BINARIS
+    $id = ramsey::uuid7()->getBytes();
+
+    $client_id  = isset($pressupostData['client_id']) ? Uuid::toBinary($pressupostData['client_id']) : null;
+    $servei_id  = isset($pressupostData['servei_id']) ? Uuid::toBinary($pressupostData['servei_id']) : null;
+    $estat_id   = isset($pressupostData['estat_id']) ? Uuid::toBinary($pressupostData['estat_id']) : null;
+
+    try {
+
+        $conn->beginTransaction();
+
+        $table = qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo);
+
+        $sql = <<<SQL
+        INSERT INTO {$table}
+        (id, concepte, client_id, servei_id, estat_id, import, data)
+        VALUES
+        (:id, :concepte, :client_id, :servei_id, :estat_id, :import, :data)
+    SQL;
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->bindValue(':id', $id, PDO::PARAM_LOB);
+        $stmt->bindValue(':concepte', $pressupostData['concepte'], PDO::PARAM_STR);
+
+        $stmt->bindValue(':client_id', $client_id, PDO::PARAM_STR);
+        $stmt->bindValue(':servei_id', $servei_id, PDO::PARAM_STR);
+        $stmt->bindValue(':estat_id', $estat_id, PDO::PARAM_STR);
+
+        $stmt->bindValue(':import', $pressupostData['import'], PDO::PARAM_STR);
+        $stmt->bindValue(':data', $pressupostData['data'], PDO::PARAM_STR);
+
+        $stmt->execute();
+
+        // AUDITORIA
+        $detalls = sprintf(
+            "Creació pressupost: %s (import: %s)",
+            $pressupostData['concepte'],
+            $pressupostData['import']
+        );
+
+        Audit::registrarCanvi(
+            $conn,
+            $userUuid,
+            "INSERT",
+            $detalls,
+            'db_comptabilitat_pressupostos',
+            $id
+        );
+
+        $conn->commit();
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            ['id' => $id],
+            201
+        );
+    } catch (Throwable $e) {
+
+        if ($conn->inTransaction()) {
+            $conn->rollBack();
+        }
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL

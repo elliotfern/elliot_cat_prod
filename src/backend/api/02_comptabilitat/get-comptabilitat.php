@@ -193,6 +193,60 @@ if ($slug === 'clients') {
         );
     }
 
+    // GET : Pressupost ID
+    // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostId?id=i89jnbd"
+} else if ($slug === 'pressupostId') {
+
+    AdminMiddleware::handle();
+
+    $id = $_GET['id'];
+    $sql = <<<SQL
+            SELECT 
+            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at,
+            c.id, e.estat, s.producte, YEAR(p.data) AS any
+            FROM %s AS p
+            LEFT JOIN %s AS c ON p.client_id = c.id
+            LEFT JOIN %s AS e ON p.estat_id = e.id
+            LEFT JOIN %s AS s ON p.servei_id = s.id2
+            WHERE p.id = :id
+            LIMIT 1
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo),
+    );
+
+    try {
+
+        $params = [':id' => uuid::toBinary($id)];
+        $result = $db->getData($query, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // GET : Factures enviades a client ID
     // ruta => "https://elliot.cat/api/comptabilitat/get/facturesClientId?id=i89jnbd"
 } else if ($slug === 'facturesClientId') {

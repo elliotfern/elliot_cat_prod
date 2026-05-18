@@ -1,4 +1,4 @@
-import { formatData } from '../../utils/formataData';
+import { formatData, formatDataCatala } from '../../utils/formataData';
 import { renderClientFactures } from './fitxaClientFactures';
 import { renderClientPressupostos } from './fitxaClientPressupostos';
 
@@ -108,7 +108,7 @@ function renderClient(response: ApiResponse) {
       </div>
 
       <div class="card-footer text-muted small">
-        Data de registre: ${v(client.clientRegistre)}
+        Data d'alta: ${formatDataCatala(v(client.clientRegistre))}
       </div>
 
     </div>

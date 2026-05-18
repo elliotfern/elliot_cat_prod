@@ -64,7 +64,7 @@ class ClientSchema
             ],
 
             'clientTelefon' => [
-                'rules' => 'int',
+                'rules' => 'string|max:255',
                 'label' => 'Telèfon',
             ],
 
@@ -145,7 +145,7 @@ class ClientSchema
             ],
 
             'clientTelefon' => [
-                'rules' => 'int',
+                'rules' => 'string|max:255',
                 'label' => 'Telèfon',
             ],
 

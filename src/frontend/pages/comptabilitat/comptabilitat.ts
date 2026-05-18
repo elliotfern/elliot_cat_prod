@@ -88,5 +88,9 @@ export function comptabilitat() {
     formDespesa(true, id);
   } else if (pageType[2] === 'llistat-pressupostos') {
     taulaPressupostos();
+   } else if (pageType[2] === 'nou-pressupost') {
+    formDespesa(false);
+  } else if (pageType[2] === 'modifica-pressupost') {
+    formDespesa(true, id);
   }
 }
