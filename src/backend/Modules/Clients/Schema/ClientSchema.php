@@ -8,11 +8,6 @@ class ClientSchema
     {
         return [
 
-            'id' => [
-                'rules' => 'required|uuid',
-                'label' => 'ID',
-            ],
-
             'clientNom' => [
                 'rules' => 'string',
                 'label' => 'Nom',
@@ -80,6 +75,87 @@ class ClientSchema
 
             'clientRegistre' => [
                 'rules' => 'required|date',
+                'label' => 'Data registre',
+            ],
+        ];
+    }
+
+    public static function update(): array
+    {
+        return [
+
+            'id' => [
+                'rules' => 'required|uuid',
+                'label' => 'ID',
+            ],
+
+            'clientNom' => [
+                'rules' => 'string',
+                'label' => 'Nom',
+            ],
+
+            'clientCognoms' => [
+                'rules' => 'string',
+                'label' => 'Cognoms',
+            ],
+
+            'clientEmail' => [
+                'rules' => 'string|email|max:255',
+                'label' => 'Email',
+            ],
+
+            'clientWeb' => [
+                'rules' => 'string|max:255',
+                'label' => 'Web',
+            ],
+
+            'clientNIF' => [
+                'rules' => 'string|max:20',
+                'label' => 'NIF',
+            ],
+
+            'clientEmpresa' => [
+                'rules' => 'string|max:255',
+                'label' => 'Empresa',
+            ],
+
+            'clientAdreca' => [
+                'rules' => 'string',
+                'label' => 'Adreça',
+            ],
+
+            'clientCP' => [
+                'rules' => 'string|max:10',
+                'label' => 'Codi Postal',
+            ],
+
+            'ciutat_id' => [
+                'rules' => 'uuid',
+                'label' => 'Ciutat',
+            ],
+
+            'provincia_id' => [
+                'rules' => 'uuid',
+                'label' => 'Província',
+            ],
+
+            'pais_id' => [
+                'rules' => 'uuid',
+                'label' => 'País',
+            ],
+
+            'clientTelefon' => [
+                'rules' => 'int',
+                'label' => 'Telèfon',
+            ],
+
+            'estat_id' => [
+                'rules' => 'uuid',
+                'label' => 'Estat',
+            ],
+
+            'clientRegistre' => [
+                'rules' => 'date',
                 'label' => 'Data registre',
             ],
         ];

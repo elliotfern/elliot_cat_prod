@@ -8,6 +8,7 @@ use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
 use App\Config\Database;
 use App\Utils\Uuid;
+use Ramsey\Uuid\Uuid as ramsey;
 use App\Utils\Schema\SchemaProcessor;
 use App\Modules\Clients\Schema\ClientSchema;
 use App\Utils\Schema\SchemaValidationException;
@@ -102,10 +103,10 @@ if ($slug === 'clients') {
 
     // Datos normalizados y validados
     try {
-
+        $schema = ClientSchema::create();
         $clientData = SchemaProcessor::process(
             $data,
-            ClientSchema::create()
+            $schema
         );
     } catch (SchemaValidationException $e) {
 
@@ -119,6 +120,7 @@ if ($slug === 'clients') {
     }
 
     // conversió a Binary 16
+    $id            = $relUuid = ramsey::uuid7()->getBytes();
     $ciutat_id     = $clientData['ciutat_id'] ?? null;
     $provincia_id  = $clientData['provincia_id'] ?? null;
     $pais_id       = $clientData['pais_id'] ?? null;
@@ -134,14 +136,15 @@ if ($slug === 'clients') {
 
         $sql = <<<SQL
             INSERT INTO {$table}
-            (clientNom, clientCognoms, clientEmail, clientWeb, clientNIF, clientEmpresa, clientAdreca, clientCP,
+            (id, clientNom, clientCognoms, clientEmail, clientWeb, clientNIF, clientEmpresa, clientAdreca, clientCP,
                 ciutat_id, provincia_id, pais_id, clientTelefon, estat_id, clientRegistre)
             VALUES
-            (:clientNom, :clientCognoms, :clientEmail, :clientWeb, :clientNIF, :clientEmpresa, :clientAdreca, :clientCP, :ciutat_id, :provincia_id,:pais_id, :clientTelefon, :estat_id, :clientRegistre)
+            (:id, :clientNom, :clientCognoms, :clientEmail, :clientWeb, :clientNIF, :clientEmpresa, :clientAdreca, :clientCP, :ciutat_id, :provincia_id,:pais_id, :clientTelefon, :estat_id, :clientRegistre)
             SQL;
 
         $stmt = $db->getPdo()->prepare($sql);
 
+        $stmt->bindValue(':id', $id, PDO::PARAM_LOB);
         $stmt->bindValue(':clientNom', $clientData['clientNom'], PDO::PARAM_STR);
         $stmt->bindValue(':clientCognoms', $clientData['clientCognoms'] ?? null, $clientData['clientCognoms'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':clientEmail', $clientData['clientEmail'], PDO::PARAM_STR);
@@ -164,15 +167,14 @@ if ($slug === 'clients') {
         $stmt->bindValue(':clientRegistre', $clientData['clientRegistre'], PDO::PARAM_STR);
 
         $stmt->execute();
-        $newId = (int)$conn->lastInsertId();
 
         // Auditoría
         $detalls = sprintf("Creació client: %s (%s)",  $clientData['clientNom'],  $clientData['clientEmail'] ?? '-');
-        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_clients', $newId);
+        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_clients', $$id);
 
         $conn->commit();
 
-        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+        Response::success(MissatgesAPI::success('create'), ['id' => $$id], 201);
     } catch (Throwable $e) {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
