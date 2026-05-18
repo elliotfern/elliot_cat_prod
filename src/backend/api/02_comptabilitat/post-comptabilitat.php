@@ -111,11 +111,11 @@ if ($slug === 'clients') {
 
         Response::error(
             MissatgesAPI::error('validacio'),
-            $e->getErrors(),
+            $e->toApiArray(),
             400
         );
-        return; // o exit;
 
+        return;
     }
 
     // conversió a Binary 16

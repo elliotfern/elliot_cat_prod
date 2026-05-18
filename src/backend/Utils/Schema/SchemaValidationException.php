@@ -14,7 +14,18 @@ class SchemaValidationException extends Exception
         $this->errors = $errors;
     }
 
-    public function getFormattedErrors(): array
+    /**
+     * Devuelve errores listos para API response
+     */
+    public function toApiArray(): array
+    {
+        return $this->errors;
+    }
+
+    /**
+     * Compatibilidad (opcional)
+     */
+    public function getErrors(): array
     {
         return $this->errors;
     }
