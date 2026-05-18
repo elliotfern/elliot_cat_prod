@@ -1356,7 +1356,7 @@ if ($slug === 'directors') {
 } else if ($slug === "productes") {
 
     $sql = <<<SQL
-            SELECT c.id, c.producte
+            SELECT c.id2, c.producte
             FROM %s AS c
             ORDER BY c.producte ASC
             SQL;
