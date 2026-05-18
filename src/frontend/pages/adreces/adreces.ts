@@ -12,7 +12,6 @@ const url = window.location.href;
 const pageType = getPageType(url);
 
 export function adreces() {
-  const id = parseInt(pageType[3], 10);
   const uuid = pageType[3];
   if (pageType[2] === 'modifica-link') {
     formLink(true, uuid);

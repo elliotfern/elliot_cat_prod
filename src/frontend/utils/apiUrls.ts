@@ -116,11 +116,11 @@ export const API_URLS: ApiUrls = {
     CIUTAT_ID: (id: string) => `${API_BASE}/${RESOURCES.AUXILIARS}/${TIPUS.GET}/${ENDPOINTS.CIUTAT_ID}?id=${encodeURIComponent(id)}`,
     PAIS_ID: (id: string) => `${API_WEB}/${ENDPOINTS.PAISOS}/${encodeURIComponent(id)}`,
     CLIENTS: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENTS}`,
-    CLIENT_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENT}?id=${encodeURIComponent(id)}`,
+    CLIENT_ID: (id: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENT}?id=${encodeURIComponent(id)}`,
     FACTURACIO_CLIENTS: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURACIO_CLIENTS}?emissor_id=${encodeURIComponent(id)}`,
     INVOICE_PDF: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PDF}/${ENDPOINTS.PDF_FACTURA}/${encodeURIComponent(id)}/${encodeURIComponent(lang)}`,
-    FACTURA_CLIENT_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_ID}?id=${encodeURIComponent(id)}`,
-    FACTURA_CLIENT_PRODUCTE_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE_ID}?id=$
+    FACTURA_CLIENT_ID: (id: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_ID}?id=${encodeURIComponent(id)}`,
+    FACTURA_CLIENT_PRODUCTE_ID: (id: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE_ID}?id=$
     {encodeURIComponent(id)}`,
     TEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.TEMA_ID}?id=${encodeURIComponent(id)}`,
     SUBTEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.SUBTEMA_ID}?id=${encodeURIComponent(id)}`,
@@ -134,13 +134,13 @@ export const API_URLS: ApiUrls = {
     BLOG_ARTICLE_ID: (id: number) => `${API_BASE}/${RESOURCES.BLOG}/${TIPUS.GET}/${ENDPOINTS.BLOG_ARTICLE_ID}?id=${encodeURIComponent(id)}`,
     HISTORIA_CURS_ARTICLE_ID: (id: number) => `${API_BASE}/${RESOURCES.HISTORIA}/${TIPUS.GET}/${ENDPOINTS.HISTORIA_CURS_ARTICLE_ID}?id=${encodeURIComponent(id)}`,
     EMISSORS_FACTURES: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.EMISSORS_FACTURES}`,
-    EMISSOR_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.EMISSOR_ID}?id=${encodeURIComponent(id)}`,
+    EMISSOR_ID: (id: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.EMISSOR_ID}?id=${encodeURIComponent(id)}`,
     PRODUCTES: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PRODUCTES}`,
-    PRODUCTE_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PRODUCTE_ID}?id=${encodeURIComponent(id)}`,
+    PRODUCTE_ID: (id: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PRODUCTE_ID}?id=${encodeURIComponent(id)}`,
     DESPESES: (id: number, tipus_despesa: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.DESPESES}?receptor_id=${encodeURIComponent(id)}&tipus_despesa=${encodeURIComponent(tipus_despesa)}`,
     PROVEIDORS: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PROVEIDORS}`,
-    PROVEIDOR_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PROVEIDOR_ID}?id=${encodeURIComponent(id)}`,
-    DESPESA_ID: (id: number) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.DESPESA_ID}?id=${encodeURIComponent(id)}`,
+    PROVEIDOR_ID: (id: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.PROVEIDOR_ID}?id=${encodeURIComponent(id)}`,
+    DESPESA_ID: (id: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.DESPESA_ID}?id=${encodeURIComponent(id)}`,
   },
 
   POST: {

@@ -6,7 +6,7 @@ import { getPageType } from './utils/urlPath';
 import { cinema } from './pages/cinema/funcions';
 import { loginPage } from './pages/login/funcions';
 import { vault } from './pages/vault/funcions';
-import { historiaOberta } from './pages/historiaOberta/historiaOberta';
+//import { historiaOberta } from './pages/historiaOberta/historiaOberta';
 import { biblioteca } from './pages/biblioteca/biblioteca';
 import { adreces } from './pages/adreces/adreces';
 import { persona } from './pages/persona/persona';
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
   } else if (pageType[1] === 'lector-rss' || pageType[0] === 'lector-rss') {
     lectorRss();
   } else if (pageType[1] === 'historia' || pageType[0] === 'historia') {
-    historiaOberta();
+    //historiaOberta();
   } else if (pageType[1] === 'biblioteca' || pageType[0] === 'biblioteca') {
     biblioteca();
   } else if (pageType[1] === 'adreces' || pageType[0] === 'adreces') {
