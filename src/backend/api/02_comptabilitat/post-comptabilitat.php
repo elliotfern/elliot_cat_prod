@@ -124,10 +124,12 @@ if ($slug === 'clients') {
     $ciutat_id     = $clientData['ciutat_id'] ?? null;
     $provincia_id  = $clientData['provincia_id'] ?? null;
     $pais_id       = $clientData['pais_id'] ?? null;
+    $estat_id       = $clientData['estat_id'] ?? null;
 
     $ciutat_id = $ciutat_id ? Uuid::toBinary($ciutat_id) : null;
     $provincia_id = $provincia_id ? Uuid::toBinary($provincia_id) : null;
     $pais_id = $pais_id ? Uuid::toBinary($pais_id) : null;
+    $estat_id = $estat_id ? Uuid::toBinary($estat_id) : null;
 
     try {
 

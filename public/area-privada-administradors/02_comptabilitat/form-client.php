@@ -6,13 +6,10 @@ use App\Utils\Url;
 <div id="barraNavegacioContenidor"></div>
 
 <h1>Gestió Comptabilitat i Clients</h1>
-<h2>Formulari Clients</h2>
+<h2>Formulari Client: <div id="titolForm"></div>
+</h2>
 
 <div class="form">
-    <h3>
-        <div id="titolForm"></div>
-    </h3>
-
     <div class="alert alert-success" id="okMessage" style="display:none" role="alert">
         <div id="okText"></div>
     </div>

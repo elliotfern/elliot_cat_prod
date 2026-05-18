@@ -61,7 +61,7 @@ export async function formClient(isUpdate: boolean, id?: number) {
 
     record = data;
 
-    divTitol.innerHTML = `<h2>Modificació dades Client</h2>`;
+    divTitol.innerHTML = `Client: ${data.clientNom} ${data.clientCognoms}`;
     btnSubmit.textContent = 'Modificar dades';
 
     // Pinta inputs (no fuerza selects vacíos; auxiliarSelect los preseleccionará)
@@ -71,7 +71,7 @@ export async function formClient(isUpdate: boolean, id?: number) {
       transmissioDadesDB(event, 'PUT', 'formClient', API_URLS.PUT.CLIENT);
     });
   } else {
-    divTitol.innerHTML = `<h2>Creació de nou Client</h2>`;
+    divTitol.innerHTML = `Nou registre`;
     btnSubmit.textContent = 'Inserir dades';
 
     form.addEventListener('submit', (event) => {

@@ -8,6 +8,9 @@ use App\Utils\ValidacioErrors;
 use App\Config\Database;
 use App\Config\DatabaseConnection;
 use App\Utils\Uuid;
+use App\Utils\Schema\SchemaProcessor;
+use App\Modules\Clients\Schema\ClientSchema;
+use App\Utils\Schema\SchemaValidationException;
 
 /** @var array $routeParams */
 /** @var array $conn */
@@ -47,70 +50,29 @@ if ($slug === 'clients') {
     $data = json_decode($raw, true);
 
     if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['JSON invàlid'],
+            400
+        );
+        return;
     }
 
-    // Helpers (mismos que en POST)
-    // Helpers corregidos para PHP 8+
-    $trimOrNull = static fn($v): ?string => ($v === null) ? null : (trim((string)$v) ?: null);
-    $toIntOrNull = static fn($v): ?int => is_numeric($v) ? (int)$v : null;
-    $dateOrNull = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
-    $toDecimal = static fn($v): ?string => ($v === null) ? null : (preg_match('/^-?\d+(\.\d{1,4})?$/', str_replace(',', '.', str_replace([' ', "\u{00A0}"], '', (string)$v))) ? str_replace(',', '.', (string)$v) : null);
-    $uuidOrNull  = static function ($v): ?string {
-        if ($v === null || $v === '') return null;
-        $s = is_string($v) ? trim($v) : '';
-        if ($s === '' || preg_match('/^0{8}-0{4}-0{4}-0{4}-0{12}$/i', $s)) return null;
-        return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $s) ? strtolower($s) : null;
-    };
+    // Datos normalizados y validados
+    try {
+        $schema = ClientSchema::update();
+        $clientData = SchemaProcessor::process(
+            $data,
+            $schema
+        );
+    } catch (SchemaValidationException $e) {
 
-    // Datos (id requerido)
-    $id             = (int)($data['id'] ?? 0);
-    $clientNom      = $trimOrNull($data['clientNom'] ?? null);
-    $clientCognoms  = $trimOrNull($data['clientCognoms'] ?? null);
-    $clientEmail    = $trimOrNull($data['clientEmail'] ?? null);
-    $clientWeb      = $trimOrNull($data['clientWeb'] ?? null);
-    $clientNIF      = $trimOrNull($data['clientNIF'] ?? null);
-    $clientEmpresa  = $trimOrNull($data['clientEmpresa'] ?? null);
-    $clientAdreca   = $trimOrNull($data['clientAdreca'] ?? null);
-    $clientCP       = $trimOrNull($data['clientCP'] ?? null);
-
-    $pais_id        = $uuidOrNull($data['pais_id'] ?? null);
-    $provincia_id   = $uuidOrNull($data['provincia_id'] ?? null);
-    $ciutat_id      = $uuidOrNull($data['ciutat_id'] ?? null);
-
-    $clientTelefon  = $trimOrNull($data['clientTelefon'] ?? null);
-    $clientStatus   = $toIntOrNull($data['clientStatus'] ?? 1) ?? 1;
-    $clientRegistre = $dateOrNull($data['clientRegistre'] ?? null);
-
-    // Validación
-    $errors = [];
-    if ($id <= 0) {
-        $errors[] = ValidacioErrors::requerit('id');
-    }
-    if ($clientNom === null) {
-        $errors[] = ValidacioErrors::requerit('clientNom');
-    } elseif (mb_strlen($clientNom) > 255) {
-        $errors[] = ValidacioErrors::massaLlarg('clientNom', 255);
-    }
-    if ($clientEmail !== null && !filter_var($clientEmail, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = ValidacioErrors::invalid('clientEmail');
-    }
-    if ($clientWeb !== null) {
-        if (mb_strlen($clientWeb) > 255) {
-            $errors[] = ValidacioErrors::massaLlarg('clientWeb', 255);
-        } elseif (!preg_match('~^https?://~i', $clientWeb)) {
-            $clientWeb = 'https://' . $clientWeb;
-        }
-    }
-    if ($clientNIF !== null && mb_strlen($clientNIF) > 20) {
-        $errors[] = ValidacioErrors::massaLlarg('clientNIF', 20);
-    }
-    if ($clientCP !== null && mb_strlen($clientCP) > 10) {
-        $errors[] = ValidacioErrors::massaLlarg('clientCP', 10);
-    }
-
-    if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            $e->toApiArray(),
+            400
+        );
+        return;
     }
 
     try {
@@ -118,20 +80,42 @@ if ($slug === 'clients') {
         /** @var PDO $conn */
         $conn->beginTransaction();
 
+        // recuperar variables ja normalitzades
+        $id = $clientData['id'];
+        $ciutat_id = $clientData['ciutat_id'];
+        $provincia_id = $clientData['provincia_id'];
+        $pais_id = $clientData['pais_id'];
+        $estat_id = $clientData['estat_id'];
+
+        $clientNom = $clientData['clientNom'];
+        $clientCognoms = $clientData['clientCognoms'];
+        $clientEmail = $clientData['clientEmail'];
+        $clientWeb = $clientData['clientWeb'];
+        $clientNIF = $clientData['clientNIF'];
+        $clientEmpresa = $clientData['clientEmpresa'];
+        $clientAdreca = $clientData['clientAdreca'];
+        $clientCP = $clientData['clientCP'];
+        $clientTelefon = $clientData['clientTelefon'];
+        $clientRegistre = $clientData['clientRegistre'];
+
+        // convertir uuid a binary16
+        $id_bin = uuid::toBinary($id);
+        $ciutat_id_bin = !empty($ciutat_id) ? uuid::toBinary($ciutat_id) : null;
+        $provincia_id_bin = !empty($provincia_id) ? uuid::toBinary($provincia_id) : null;
+        $pais_id_bin = !empty($pais_id) ? uuid::toBinary($pais_id) : null;
+        $estat_id_bin = !empty($estat_id) ? uuid::toBinary($estat_id) : null;
+
         // Comprobar existencia
         $chk = $conn->prepare("SELECT 1 FROM db_comptabilitat_clients WHERE id = :id");
-        $chk->bindValue(':id', $id, PDO::PARAM_INT);
+        $chk->bindValue(':id', $id_bin, PDO::PARAM_LOB);
         $chk->execute();
         if (!$chk->fetchColumn()) {
             $conn->rollBack();
             Response::error(MissatgesAPI::error('not_found'), ["Client id {$id} no existeix"], 404);
+            return;
         }
 
-        $ciutat_id = !empty($ciutat_id) ? uuid::toBinary($ciutat_id) : null;
-        $provincia_id = !empty($provincia_id) ? uuid::toBinary($provincia_id) : null;
-        $pais_id = !empty($pais_id) ? uuid::toBinary($pais_id) : null;
-
-        $table = qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo);
+        $table = qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo);
         $sql = <<<SQL
                 UPDATE {$table}
                     SET clientNom = :clientNom,
@@ -146,7 +130,7 @@ if ($slug === 'clients') {
                        provincia_id = :provincia_id,
                        pais_id = :pais_id,
                        clientTelefon = :clientTelefon,
-                       clientStatus = :clientStatus,
+                       estat_id = :estat_id,
                        clientRegistre = :clientRegistre
                     WHERE id = :id
                 SQL;
@@ -162,15 +146,14 @@ if ($slug === 'clients') {
         $stmt->bindValue(':clientAdreca', $clientAdreca, $clientAdreca !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':clientCP', $clientCP, $clientCP !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
 
-        $stmt->bindValue(':ciutat_id', $ciutat_id, $ciutat_id !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':provincia_id', $provincia_id, $provincia_id !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':pais_id', $pais_id, $pais_id !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+        $stmt->bindValue(':ciutat_id', $ciutat_id_bin, $ciutat_id_bin !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
+        $stmt->bindValue(':provincia_id', $provincia_id_bin, $provincia_id_bin !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
+        $stmt->bindValue(':pais_id', $pais_id_bin, $pais_id_bin !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
+        $stmt->bindValue(':estat_id', $estat_id_bin, $estat_id_bin !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
+        $stmt->bindValue(':id', $id_bin, PDO::PARAM_LOB);
 
         $stmt->bindValue(':clientTelefon', $clientTelefon, $clientTelefon !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientStatus', $clientStatus, PDO::PARAM_INT);
         $stmt->bindValue(':clientRegistre', $clientRegistre, $clientRegistre !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
         $stmt->execute();
 
@@ -184,6 +167,7 @@ if ($slug === 'clients') {
     } catch (Throwable $e) {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+        return;
     }
 } else if ($slug === 'facturaClient' && $_SERVER['REQUEST_METHOD'] === 'PUT') {
     $inputData = file_get_contents('php://input');
