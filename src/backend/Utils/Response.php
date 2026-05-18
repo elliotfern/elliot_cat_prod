@@ -9,6 +9,7 @@ class Response
 
     private static array $uuidFields = [
         'id',
+        'id2',
         'img_id',
         'imatge_id',
         'pais_autor_id',
