@@ -301,6 +301,15 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   tableWrapper.appendChild(table);
 
   container.innerHTML = '';
+
+  if (options.renderHeader) {
+    const headerWrapper = document.createElement('div');
+
+    headerWrapper.innerHTML = options.renderHeader(result);
+
+    container.appendChild(headerWrapper);
+  }
+
   container.appendChild(searchInput);
   if (filterByField) {
     container.appendChild(buttonContainer);
