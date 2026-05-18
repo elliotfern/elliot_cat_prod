@@ -30,7 +30,7 @@ export async function formPressupost(isUpdate: boolean, id?: string) {
   let record: Partial<Despesa> = {};
 
   if (isUpdate && id) {
-    const resp = await fetchDataGet<ApiResponse<Despesa | Despesa[]>>(`/comptabilitat/get/pressupostId?id=${id}`);
+    const resp = await fetchDataGet<ApiResponse<Despesa | Despesa[]>>(`api/comptabilitat/get/pressupostId?id=${id}`);
     const data = first(resp?.data);
     if (!data) return;
 

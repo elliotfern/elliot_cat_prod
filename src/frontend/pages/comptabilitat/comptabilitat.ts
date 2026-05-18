@@ -1,6 +1,7 @@
 import { getPageType } from '../../utils/urlPath';
 import { detallsFacturaClients } from './detallsFacturaClient';
 import { fitxaClient } from './fitxaClient';
+import { fitxaPressupost } from './fitxaPressupost';
 import { formClient } from './formClient';
 import { formDespesa } from './formDespesa';
 import { formEmissor } from './formEmissor';
@@ -93,5 +94,7 @@ export function comptabilitat() {
     formPressupost(false);
   } else if (pageType[2] === 'modifica-pressupost') {
     formPressupost(true, id);
+  } else if (pageType[2] === 'fitxa-pressupost') {
+    fitxaPressupost(id);
   }
 }

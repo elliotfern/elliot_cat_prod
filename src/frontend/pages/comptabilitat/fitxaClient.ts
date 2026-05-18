@@ -1,4 +1,4 @@
-import { formatData, formatDataCatala } from '../../utils/formataData';
+import { formatDataCatala } from '../../utils/formataData';
 import { renderClientFactures } from './fitxaClientFactures';
 import { renderClientPressupostos } from './fitxaClientPressupostos';
 

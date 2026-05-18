@@ -7,7 +7,7 @@ import { DOMAIN_WEB } from '../../utils/urls';
 
 export interface Proveidor {
   id: string;
-  idClient: string;
+  client_id: string;
   concepte?: string;
   import?: string;
   data: string;
@@ -39,12 +39,10 @@ export async function taulaPressupostos() {
       header: 'Client',
       field: 'concepte',
       render: (_: unknown, row: Proveidor) =>
-        `<a href="${DOMAIN_WEB}/gestio/comptabilitat/fitxa-client/${row.idClient}">
+        `<a href="${DOMAIN_WEB}/gestio/comptabilitat/fitxa-client/${row.client_id}">
            ${row.clientNom} ${row.clientCognoms} (${row.clientEmpresa})
          </a>`,
     },
-
-    { header: 'Import', field: 'import' },
 
     {
       header: 'Import',
@@ -67,7 +65,7 @@ export async function taulaPressupostos() {
       field: 'id',
       render: (_: unknown, row: Proveidor) => `
         <a href="${DOMAIN_WEB}/gestio/comptabilitat/modifica-pressupost/${row.id}">
-          <button class="btn-petit">Modifica</button>
+          <button class="class="btn btn-warning btn-sm"">Modifica</button>
         </a>`,
     });
   }

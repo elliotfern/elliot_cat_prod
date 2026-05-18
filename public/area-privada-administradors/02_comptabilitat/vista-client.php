@@ -1,9 +1,5 @@
-<?php
-
-use App\Utils\Url;
-?>
-
 <div id="barraNavegacioContenidor"></div>
+
 <h1>Gestió Comptabilitat i Clients</h1>
 <h2>Fitxa de client</h2>
 
