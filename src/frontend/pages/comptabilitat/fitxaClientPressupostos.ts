@@ -56,5 +56,12 @@ export function renderClientPressupostos(clientId: string) {
     containerId: 'clientPresupostos',
     columns,
     filterKeys: ['concepte', 'producte'],
+    rowsPerPage: 9999,
+
+    renderHeader: () => `
+    <div class="mb-3">
+      <h2 class="h4 mb-0">Pressupostos client:</h2>
+    </div>
+  `,
   });
 }

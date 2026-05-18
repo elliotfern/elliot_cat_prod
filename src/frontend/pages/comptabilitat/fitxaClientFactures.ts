@@ -83,43 +83,27 @@ export function renderClientFactures(clientId: string) {
     columns,
     filterKeys: ['numero_factura', 'concepte'],
     dataKey: 'factures',
+    rowsPerPage: 9999,
 
     renderHeader: (result: any) => {
       const total = result?.data?.totals?.total_facturat ?? 0;
 
       return `
-        <div class="card shadow-sm mb-4">
-
-          <div class="card-body">
-
-            <h5 class="card-title mb-3">
-              Resum de facturació
-            </h5>
-
-            <div class="row">
-
-              <div class="col-md-4">
-
-                <div class="border rounded p-3 bg-light">
-
-                  <small class="text-muted d-block">
-                    Total facturat
-                  </small>
-
-                  <strong class="fs-4">
-                    ${Number(total).toFixed(2)} €
-                  </strong>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h2 class="h4 mb-0">Factures client</h2>
+          <small class="text-muted">
+            Total facturat acumulat
+          </small>
         </div>
-      `;
+
+        <div class="text-end">
+          <div class="fs-4 fw-bold text-success">
+            ${Number(total).toFixed(2)} €
+          </div>
+        </div>
+      </div>
+    `;
     },
   });
 }

@@ -309,7 +309,9 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
   container.appendChild(tableWrapper);
   container.appendChild(totalRecords);
-  container.appendChild(paginationNav);
+  if (filteredData.length > rowsPerPage) {
+    container.appendChild(paginationNav);
+  }
 
   applyFilters(); // inicia renderizado con filtros aplicados
 }
