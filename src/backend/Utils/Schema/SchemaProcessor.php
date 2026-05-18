@@ -22,6 +22,13 @@ class SchemaProcessor
 
             $value = $input[$field] ?? null;
 
+            /**
+             * HARD NORMALIZATION (IMPORTANT)
+             */
+            if (is_string($value) && trim($value) === '') {
+                $value = null;
+            }
+
             if ($value === null && isset($rules['default'])) {
                 $value = $rules['default'];
             }
