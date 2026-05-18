@@ -11,155 +11,148 @@ class Validator
 
         $errors = [];
 
+        $ruleList = $rules['rules'] ?? [];
         $type = $rules['type'] ?? null;
 
+        $isNullable = self::hasRule($ruleList, 'nullable');
+
         /*
-         * Required
+         * REQUIRED
          */
-        if (($rules['required'] ?? false) === true) {
+        if (self::hasRule($ruleList, 'required')) {
 
-            if ($value === null) {
-
-                $errors[] = 'Camp obligatori';
-
-                return $errors;
+            if ($value === null || $value === '') {
+                return ['Camp obligatori'];
             }
         }
 
         /*
-         * Null allowed
+         * NULL handling
          */
         if ($value === null) {
-            return $errors;
+            return $isNullable ? [] : [];
         }
 
         /*
-         * Type validation
+         * TYPE VALIDATION (delegated)
          */
-        switch ($type) {
+        $errors = array_merge(
+            $errors,
+            self::validateType($value, $type, $ruleList)
+        );
 
-            case FieldType::STRING:
+        /*
+         * RULE VALIDATION (engine)
+         */
+        foreach ($ruleList as $rule) {
 
-                $errors = array_merge(
-                    $errors,
-                    self::validateString($value, $rules)
-                );
+            $name = $rule['name'];
 
-                break;
+            switch ($name) {
 
-            case FieldType::INT:
+                case 'email':
+                    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                        $errors[] = 'Email invàlid';
+                    }
+                    break;
 
-                $errors = array_merge(
-                    $errors,
-                    self::validateInt($value)
-                );
+                case 'max':
+                    if (is_string($value)) {
+                        if (mb_strlen($value) > $rule['value']) {
+                            $errors[] = 'Longitud màxima: ' . $rule['value'];
+                        }
+                    }
+                    break;
 
-                break;
-
-            case FieldType::FLOAT:
-
-                $errors = array_merge(
-                    $errors,
-                    self::validateFloat($value)
-                );
-
-                break;
-
-            case FieldType::BOOL:
-
-                $errors = array_merge(
-                    $errors,
-                    self::validateBool($value)
-                );
-
-                break;
-
-            case FieldType::UUID:
-
-                $errors = array_merge(
-                    $errors,
-                    self::validateUuid($value)
-                );
-
-                break;
+                case 'date':
+                    if (!self::isValidDate($value)) {
+                        $errors[] = 'Data invàlida';
+                    }
+                    break;
+            }
         }
 
         return $errors;
     }
 
-    private static function validateString(
+    private static function validateType(
         mixed $value,
+        ?string $type,
         array $rules
     ): array {
 
-        $errors = [];
+        return match ($type) {
 
+            'string' => self::validateString($value),
+            'int'    => self::validateInt($value),
+            'float'  => self::validateFloat($value),
+            'bool'   => self::validateBool($value),
+            'uuid'   => self::validateUuid($value),
+
+            default => []
+        };
+    }
+
+    private static function validateString(mixed $value): array
+    {
+        return is_string($value)
+            ? []
+            : ['Ha de ser un string'];
+    }
+
+    private static function validateInt(mixed $value): array
+    {
+        return is_int($value)
+            ? []
+            : ['Ha de ser un enter'];
+    }
+
+    private static function validateFloat(mixed $value): array
+    {
+        return is_float($value)
+            ? []
+            : ['Ha de ser un número'];
+    }
+
+    private static function validateBool(mixed $value): array
+    {
+        return is_bool($value)
+            ? []
+            : ['Ha de ser un boolean'];
+    }
+
+    private static function validateUuid(mixed $value): array
+    {
         if (!is_string($value)) {
-            $errors[] = 'Ha de ser un string';
-            return $errors;
+            return ['UUID invàlid'];
         }
 
-        if (isset($rules['max'])) {
+        if (!preg_match('/^[0-9a-f-]{36}$/', $value)) {
+            return ['UUID invàlid'];
+        }
 
-            if (mb_strlen($value) > $rules['max']) {
+        return [];
+    }
 
-                $errors[] =
-                    'Longitud màxima: ' .
-                    $rules['max'];
+    private static function isValidDate(mixed $value): bool
+    {
+        if (!is_string($value)) {
+            return false;
+        }
+
+        $timestamp = strtotime($value);
+
+        return $timestamp !== false;
+    }
+
+    private static function hasRule(array $rules, string $name): bool
+    {
+        foreach ($rules as $rule) {
+            if (($rule['name'] ?? null) === $name) {
+                return true;
             }
         }
 
-        return $errors;
-    }
-
-    private static function validateInt(
-        mixed $value
-    ): array {
-
-        if (!is_int($value)) {
-            return ['Ha de ser un enter'];
-        }
-
-        return [];
-    }
-
-    private static function validateFloat(
-        mixed $value
-    ): array {
-
-        if (!is_float($value)) {
-            return ['Ha de ser un número'];
-        }
-
-        return [];
-    }
-
-    private static function validateBool(
-        mixed $value
-    ): array {
-
-        if (!is_bool($value)) {
-            return ['Ha de ser un boolean'];
-        }
-
-        return [];
-    }
-
-    private static function validateUuid(
-        mixed $value
-    ): array {
-
-        if (!is_string($value)) {
-            return ['UUID invàlid'];
-        }
-
-        if (!preg_match(
-            '/^[0-9a-f-]{36}$/',
-            $value
-        )) {
-            return ['UUID invàlid'];
-        }
-
-        return [];
+        return false;
     }
 }

@@ -33,8 +33,8 @@ export async function taulaLlistatClients() {
 
     {
       header: 'Estat',
-      field: 'estatNom',
-      render: (_: unknown, row: Client) => `${row.estatNom}`,
+      field: 'estat',
+      render: (_: unknown, row: Client) => `${row.estat}`,
     },
   ];
 

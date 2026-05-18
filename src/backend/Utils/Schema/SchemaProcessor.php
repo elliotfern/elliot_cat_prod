@@ -2,7 +2,8 @@
 
 namespace App\Utils\Schema;
 
-use Exception;
+use App\Utils\Schema\SchemaValidationException;
+use App\Utils\Schema\RuleParser;
 
 class SchemaProcessor
 {
@@ -15,55 +16,28 @@ class SchemaProcessor
 
         $errors = [];
 
-        foreach ($schema as $field => $rules) {
+        foreach ($schema as $field => $rulesRaw) {
 
-            /*
-             * Input value
-             */
+            $rules = RuleParser::parse($rulesRaw);
+
             $value = $input[$field] ?? null;
 
-            /*
-             * Default value
-             */
-            if (
-                $value === null &&
-                array_key_exists('default', $rules)
-            ) {
+            if ($value === null && isset($rules['default'])) {
                 $value = $rules['default'];
             }
 
-            /*
-             * Normalize
-             */
-            $value = Normalizer::normalize(
-                $value,
-                $rules
-            );
+            $value = Normalizer::normalize($value, $rules);
 
-            /*
-             * Validate
-             */
-            $fieldErrors = Validator::validate(
-                $value,
-                $rules
-            );
+            $fieldErrors = Validator::validate($value, $rules);
 
-            /*
-             * Collect errors
-             */
             if (!empty($fieldErrors)) {
-
                 $errors[$field] = [
                     'label' => $rules['label'] ?? $field,
                     'messages' => $fieldErrors
                 ];
-
                 continue;
             }
 
-            /*
-             * Store normalized value
-             */
             $result[$field] = $value;
         }
 
@@ -72,12 +46,7 @@ class SchemaProcessor
          */
         if (!empty($errors)) {
 
-            throw new Exception(
-                json_encode(
-                    $errors,
-                    JSON_UNESCAPED_UNICODE
-                )
-            );
+            throw new SchemaValidationException($errors);
         }
 
         return $result;

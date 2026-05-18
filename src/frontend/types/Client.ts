@@ -13,6 +13,7 @@ export interface Client {
   pais_id: string | null; // UUID v7 en texto (BINARY(16) en BD)
   provincia_id: string | null; // UUID v7 en texto
   ciutat_id: string | null; // UUID v7 en texto
+  estat_id: string | null; // UUID v7 en texto
 
   ciutat_ca: string;
   pais_ca: string;
@@ -21,5 +22,5 @@ export interface Client {
   clientTelefon: string | null; // VARCHAR
   clientStatus: number; // INT (p.ej. 0/1/2)
   clientRegistre: string | null; // 'YYYY-MM-DD' (DATE)
-  estatNom: string;
+  estat: string;
 }

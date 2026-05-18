@@ -9,7 +9,8 @@ use App\Config\DatabaseConnection;
 use App\Config\Database;
 use App\Utils\Uuid;
 use App\Utils\Schema\SchemaProcessor;
-use App\Modules\Clients\Schemas\ClientSchema;
+use App\Modules\Clients\Schema\ClientSchema;
+use App\Utils\Schema\SchemaValidationException;
 
 /** @var array $routeParams */
 /** @var array $conn */
@@ -106,11 +107,11 @@ if ($slug === 'clients') {
             $data,
             ClientSchema::create()
         );
-    } catch (Exception $e) {
+    } catch (SchemaValidationException $e) {
 
         Response::error(
             MissatgesAPI::error('validacio'),
-            json_decode($e->getMessage(), true),
+            $e->getErrors(),
             400
         );
         return; // o exit;
@@ -181,8 +182,14 @@ if ($slug === 'clients') {
     $data = json_decode($inputData, true);
 
     if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['JSON invàlid'],
+            400
+        );
+        return;
     }
+
 
     // Normalizar
     $emissor_id     = Normalizer::int($data['client_id'] ?? null);

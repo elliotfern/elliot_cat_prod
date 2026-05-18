@@ -27,23 +27,17 @@ class Normalizer
 
         return match ($type) {
 
-            FieldType::STRING =>
-            self::normalizeString($value, $rules),
+            'string' => self::normalizeString($value, $rules),
 
-            FieldType::INT =>
-            self::normalizeInt($value),
+            'int'    => self::normalizeInt($value),
 
-            FieldType::FLOAT =>
-            self::normalizeFloat($value),
+            'float'  => self::normalizeFloat($value),
 
-            FieldType::BOOL =>
-            self::normalizeBool($value),
+            'bool'   => self::normalizeBool($value),
 
-            FieldType::UUID =>
-            self::normalizeUuid($value),
+            'uuid'   => self::normalizeUuid($value),
 
-            default =>
-            $value,
+            default  => $value,
         };
     }
 
@@ -90,8 +84,6 @@ class Normalizer
         mixed $value
     ): ?string {
 
-        return strtolower(
-            trim((string) $value)
-        );
+        return strtolower(trim((string) $value));
     }
 }
