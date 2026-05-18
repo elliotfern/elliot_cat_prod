@@ -13,7 +13,6 @@ class SchemaProcessor
     ): array {
 
         $result = [];
-
         $errors = [];
 
         foreach ($schema as $field => $rulesRaw) {
@@ -23,18 +22,31 @@ class SchemaProcessor
             $value = $input[$field] ?? null;
 
             /**
-             * HARD NORMALIZATION (IMPORTANT)
+             * 🔥 NORMALIZACIÓN HARD (CRÍTICA)
+             * - convierte strings vacíos y whitespace a null SIEMPRE
              */
-            if (is_string($value) && trim($value) === '') {
-                $value = null;
+            if (is_string($value)) {
+                $value = trim($value);
+                if ($value === '') {
+                    $value = null;
+                }
             }
 
-            if ($value === null && isset($rules['default'])) {
+            /**
+             * default
+             */
+            if ($value === null && array_key_exists('default', $rules)) {
                 $value = $rules['default'];
             }
 
+            /**
+             * normalize
+             */
             $value = Normalizer::normalize($value, $rules);
 
+            /**
+             * validate
+             */
             $fieldErrors = Validator::validate($value, $rules);
 
             if (!empty($fieldErrors)) {
@@ -48,11 +60,7 @@ class SchemaProcessor
             $result[$field] = $value;
         }
 
-        /*
-         * Validation failed
-         */
         if (!empty($errors)) {
-
             throw new SchemaValidationException($errors);
         }
 

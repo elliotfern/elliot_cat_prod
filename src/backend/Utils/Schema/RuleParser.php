@@ -4,50 +4,67 @@ namespace App\Utils\Schema;
 
 class RuleParser
 {
-    public static function parse(string|array $rules): array
+    public static function parse(array $schemaField): array
     {
-        $rules = is_string($rules)
-            ? explode('|', $rules)
-            : $rules;
-
         $parsed = [
             'rules' => [],
-            'label' => null,
+            'label' => $schemaField['label'] ?? null,
+            'type' => null,
         ];
 
-        foreach ($rules as $rule) {
+        $rulesString = $schemaField['rules'] ?? '';
 
-            $rule = trim($rule);
+        $parts = explode('|', $rulesString);
 
-            /**
-             * LABEL (metadata)
-             */
-            if (str_starts_with($rule, 'label:')) {
-                $parsed['label'] = substr($rule, 6);
+        foreach ($parts as $part) {
+
+            // required
+            if ($part === 'required') {
+                $parsed['rules'][] = ['name' => 'required'];
                 continue;
             }
 
-            /**
-             * PARAMETRIC RULES (key:value)
-             */
-            if (str_contains($rule, ':')) {
+            // nullable
+            if ($part === 'nullable') {
+                $parsed['rules'][] = ['name' => 'nullable'];
+                continue;
+            }
 
-                [$name, $value] = explode(':', $rule, 2);
+            // email
+            if ($part === 'email') {
+                $parsed['rules'][] = ['name' => 'email'];
+                continue;
+            }
 
+            // max:255
+            if (str_starts_with($part, 'max:')) {
                 $parsed['rules'][] = [
-                    'name'  => $name,
-                    'value' => is_numeric($value) ? (int)$value : $value,
+                    'name' => 'max',
+                    'value' => (int) substr($part, 4)
                 ];
-
                 continue;
             }
 
-            /**
-             * SIMPLE RULES
-             */
-            $parsed['rules'][] = [
-                'name' => $rule,
-            ];
+            // type guessing
+            if ($part === 'string') {
+                $parsed['type'] = 'string';
+            }
+
+            if ($part === 'int') {
+                $parsed['type'] = 'int';
+            }
+
+            if ($part === 'uuid') {
+                $parsed['type'] = 'uuid';
+            }
+
+            if ($part === 'bool') {
+                $parsed['type'] = 'bool';
+            }
+
+            if ($part === 'date') {
+                $parsed['type'] = 'date';
+            }
         }
 
         return $parsed;

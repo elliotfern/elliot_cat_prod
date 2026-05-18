@@ -10,29 +10,41 @@ class Validator
         array $schema
     ): array {
 
-        // normalize empty strings early
-        if (is_string($value)) {
-            $value = trim($value);
-            if ($value === '') {
-                $value = null;
-            }
-        }
-
         $errors = [];
 
         $rules = $schema['rules'] ?? [];
         $type  = $schema['type'] ?? null;
 
+        /**
+         * 🔥 HARD NORMALIZATION (critical)
+         */
+        if (is_string($value)) {
+            $value = trim($value);
+
+            if ($value === '') {
+                $value = null;
+            }
+        }
+
         $isNullable = self::hasRule($rules, 'nullable');
+        $isRequired = self::hasRule($rules, 'required');
 
-        $isRequired  = self::hasRule($rules, 'required');
-
+        /**
+         * REQUIRED CHECK (FIRST LINE OF DEFENSE)
+         */
         if ($isRequired && $value === null) {
             return ['Camp obligatori'];
         }
 
         /**
-         * 2. TYPE VALIDATION
+         * NULL HANDLING
+         */
+        if ($value === null) {
+            return $isNullable ? [] : [];
+        }
+
+        /**
+         * TYPE VALIDATION
          */
         $errors = array_merge(
             $errors,
@@ -40,7 +52,7 @@ class Validator
         );
 
         /**
-         * 3. RULE VALIDATION
+         * RULE VALIDATION
          */
         foreach ($rules as $rule) {
 
