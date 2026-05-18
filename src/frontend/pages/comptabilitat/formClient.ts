@@ -21,7 +21,7 @@ interface Fitxa {
   ciutat_id: string | null;
 
   clientTelefon: string | null;
-  clientStatus: number; // 0/1/2...
+  estat_id: string | null;
   clientRegistre?: string | null; // 'YYYY-MM-DD'
 }
 
@@ -83,5 +83,5 @@ export async function formClient(isUpdate: boolean, id?: number) {
   await auxiliarSelect(record.pais_id ?? null, 'paisos', 'pais_id', 'pais_ca');
   await auxiliarSelect(record.provincia_id ?? null, 'provincies', 'provincia_id', 'provincia_ca');
   await auxiliarSelect(record.ciutat_id ?? null, 'ciutats', 'ciutat_id', 'ciutat');
-  await auxiliarSelect(record.clientStatus ?? null, 'estatsClients', 'clientStatus', 'estat_ca');
+  await auxiliarSelect(record.estat_id ?? null, 'estatsClients', 'estat_id', 'estat');
 }

@@ -81,7 +81,7 @@ class Validator
         }
 
         return $errors;
-    }
+    }1
 
     /**
      * TYPE VALIDATION
