@@ -22,10 +22,10 @@ export function renderClientPressupostos(clientId: string) {
     {
       header: 'Concepte',
       field: 'concepte',
-      render: (_: unknown, row: PressupostClient) => `<strong>${row.concepte ?? ''}</strong>`,
+      render: (_: unknown, row: PressupostClient) => `<strong><a href="https://elliot.cat/gestio/comptabilitat/fitxa-pressupost">${row.concepte ?? ''}</a></strong>`,
     },
     {
-      header: 'Producte',
+      header: 'Servei',
       field: 'producte',
       render: (_: unknown, row: PressupostClient) => `${row.producte ?? ''}`,
     },

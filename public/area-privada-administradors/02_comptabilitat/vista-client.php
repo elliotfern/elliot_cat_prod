@@ -10,8 +10,8 @@ use App\Utils\Url;
 <div id="fitxaClient"></div>
 
 <hr>
-<div id="clientPresupostos"></div>
+<div id="clientPresupostos" class="mb-4"></div>
 
 <hr>
 <div id="facturesTotals"></div>
-<div id="clientFactures"></div>
+<div id="clientFactures" class="mb-4"></div>

@@ -15,7 +15,7 @@ type ClientDTO = {
   clientTelefon: number | null;
   clientRegistre: string;
 
-  ciutat_ca: string | null;
+  ciutat_final: string | null;
   provincia_ca: string | null;
   pais_ca: string | null;
 
@@ -63,6 +63,13 @@ function renderClient(response: ApiResponse) {
         <span class="badge bg-primary">
           ${v(client.estat)}
         </span>
+
+        <a
+          href="https://elliot.cat/gestio/comptabilitat/modifica-client/${client.id}"
+          class="btn btn-secondary btn-sm">
+          Modifica client
+        </a>
+
       </div>
 
       <div class="card-body">
@@ -89,7 +96,7 @@ function renderClient(response: ApiResponse) {
             <h6 class="text-muted mb-2">Adreça</h6>
             <p class="mb-1">${v(client.clientAdreca)}</p>
             <p class="mb-1">
-              ${v(client.clientCP)} · ${v(client.ciutat_ca)}
+              ${v(client.clientCP)} · ${v(client.ciutat_final)}
             </p>
             <p class="mb-1">
               ${v(client.provincia_ca)} · ${v(client.pais_ca)}

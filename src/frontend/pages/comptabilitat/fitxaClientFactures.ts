@@ -27,9 +27,7 @@ export function renderClientFactures(clientId: string) {
       field: 'numero_factura',
 
       render: (_: unknown, row: FacturaClient) => `
-        <strong>
-          ${row.numero_factura}
-        </strong>
+        <strong><a href="https://elliot.cat/gestio/comptabilitat/fitxa-factura">${row.numero_factura}</a></strong>
       `,
     },
 

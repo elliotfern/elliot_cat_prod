@@ -93,7 +93,7 @@ if ($slug === 'clients') {
 
     $id = $_GET['id'];
     $sql = <<<SQL
-            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, c.ciutat_id, c.provincia_id, c.pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.estat_id, s.estat
+            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, c.ciutat_id, c.provincia_id, c.pais_id, c.clientTelefon, c.clientRegistre, COALESCE(ciutat_ca, ciutat) AS ciutat_final, co.pais_ca, cou.provincia_ca, c.estat_id, s.estat
             FROM %s AS c
             LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
             LEFT JOIN %s AS co ON c.pais_id = co.id
@@ -232,7 +232,7 @@ if ($slug === 'clients') {
         LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
         LEFT JOIN %s AS c ON ic.client_id = c.id
         WHERE c.id = :id
-        ORDER BY ic.numero_factura DESC
+        ORDER BY ic.data_factura DESC
     SQL;
 
     $query = sprintf(
