@@ -6,61 +6,59 @@ class Validator
 {
     public static function validate(
         mixed $value,
-        array $rules
+        array $schema
     ): array {
 
         $errors = [];
 
-        $ruleList = $rules['rules'] ?? [];
-        $type = $rules['type'] ?? null;
+        $rules = $schema['rules'] ?? [];
+        $type  = $schema['type'] ?? null;
 
-        $isNullable = self::hasRule($ruleList, 'nullable');
+        $isNullable = self::hasRule($rules, 'nullable');
+        $isRequired  = self::hasRule($rules, 'required');
 
-        /*
-         * REQUIRED
+        /**
+         * 1. EMPTY HANDLING
          */
-        if (self::hasRule($ruleList, 'required')) {
+        if ($value === null || $value === '') {
 
-            if ($value === null || $value === '') {
+            if ($isRequired) {
                 return ['Camp obligatori'];
             }
+
+            if ($isNullable) {
+                return [];
+            }
+
+            return [];
         }
 
-        /*
-         * NULL handling
-         */
-        if ($value === null) {
-            return $isNullable ? [] : [];
-        }
-
-        /*
-         * TYPE VALIDATION (delegated)
+        /**
+         * 2. TYPE VALIDATION
          */
         $errors = array_merge(
             $errors,
-            self::validateType($value, $type, $ruleList)
+            self::validateType($value, $type)
         );
 
-        /*
-         * RULE VALIDATION (engine)
+        /**
+         * 3. RULE VALIDATION
          */
-        foreach ($ruleList as $rule) {
+        foreach ($rules as $rule) {
 
             $name = $rule['name'];
 
             switch ($name) {
 
                 case 'email':
-                    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    if (!is_string($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                         $errors[] = 'Email invàlid';
                     }
                     break;
 
                 case 'max':
-                    if (is_string($value)) {
-                        if (mb_strlen($value) > $rule['value']) {
-                            $errors[] = 'Longitud màxima: ' . $rule['value'];
-                        }
+                    if (is_string($value) && mb_strlen($value) > $rule['value']) {
+                        $errors[] = 'Longitud màxima: ' . $rule['value'];
                     }
                     break;
 
@@ -75,10 +73,12 @@ class Validator
         return $errors;
     }
 
+    /**
+     * TYPE VALIDATION
+     */
     private static function validateType(
         mixed $value,
-        ?string $type,
-        array $rules
+        ?string $type
     ): array {
 
         return match ($type) {
@@ -95,30 +95,22 @@ class Validator
 
     private static function validateString(mixed $value): array
     {
-        return is_string($value)
-            ? []
-            : ['Ha de ser un string'];
+        return is_string($value) ? [] : ['Ha de ser un string'];
     }
 
     private static function validateInt(mixed $value): array
     {
-        return is_int($value)
-            ? []
-            : ['Ha de ser un enter'];
+        return is_int($value) ? [] : ['Ha de ser un enter'];
     }
 
     private static function validateFloat(mixed $value): array
     {
-        return is_float($value)
-            ? []
-            : ['Ha de ser un número'];
+        return is_float($value) ? [] : ['Ha de ser un número'];
     }
 
     private static function validateBool(mixed $value): array
     {
-        return is_bool($value)
-            ? []
-            : ['Ha de ser un boolean'];
+        return is_bool($value) ? [] : ['Ha de ser un boolean'];
     }
 
     private static function validateUuid(mixed $value): array
@@ -127,24 +119,26 @@ class Validator
             return ['UUID invàlid'];
         }
 
-        if (!preg_match('/^[0-9a-f-]{36}$/', $value)) {
-            return ['UUID invàlid'];
-        }
-
-        return [];
+        return preg_match('/^[0-9a-f-]{36}$/', $value)
+            ? []
+            : ['UUID invàlid'];
     }
 
+    /**
+     * DATE
+     */
     private static function isValidDate(mixed $value): bool
     {
         if (!is_string($value)) {
             return false;
         }
 
-        $timestamp = strtotime($value);
-
-        return $timestamp !== false;
+        return strtotime($value) !== false;
     }
 
+    /**
+     * HELPERS
+     */
     private static function hasRule(array $rules, string $name): bool
     {
         foreach ($rules as $rule) {

@@ -4,15 +4,20 @@ namespace App\Utils\Schema;
 
 class RuleParser
 {
-    public static function parse(array $rules): array
+    public static function parse(string|array $rules): array
     {
+        $rules = is_string($rules)
+            ? explode('|', $rules)
+            : $rules;
+
         $parsed = [
             'rules' => [],
             'label' => null,
-            'type' => null,
         ];
 
         foreach ($rules as $rule) {
+
+            $rule = trim($rule);
 
             /**
              * LABEL (metadata)
@@ -23,61 +28,26 @@ class RuleParser
             }
 
             /**
-             * MAX (rule with parameter)
+             * PARAMETRIC RULES (key:value)
              */
-            if (str_starts_with($rule, 'max:')) {
+            if (str_contains($rule, ':')) {
+
+                [$name, $value] = explode(':', $rule, 2);
+
                 $parsed['rules'][] = [
-                    'name' => 'max',
-                    'value' => (int) substr($rule, 4),
+                    'name'  => $name,
+                    'value' => is_numeric($value) ? (int)$value : $value,
                 ];
+
                 continue;
             }
 
             /**
              * SIMPLE RULES
              */
-            if ($rule === 'required') {
-                $parsed['rules'][] = ['name' => 'required'];
-                continue;
-            }
-
-            if ($rule === 'nullable') {
-                $parsed['rules'][] = ['name' => 'nullable'];
-                continue;
-            }
-
-            if ($rule === 'email') {
-                $parsed['rules'][] = ['name' => 'email'];
-                continue;
-            }
-
-            if ($rule === 'date') {
-                $parsed['rules'][] = ['name' => 'date'];
-                continue;
-            }
-
-            /**
-             * TYPE RULES (solo uno por campo)
-             */
-            if ($rule === 'string') {
-                $parsed['type'] = 'string';
-                continue;
-            }
-
-            if ($rule === 'int') {
-                $parsed['type'] = 'int';
-                continue;
-            }
-
-            if ($rule === 'uuid') {
-                $parsed['type'] = 'uuid';
-                continue;
-            }
-
-            if ($rule === 'bool') {
-                $parsed['type'] = 'bool';
-                continue;
-            }
+            $parsed['rules'][] = [
+                'name' => $rule,
+            ];
         }
 
         return $parsed;

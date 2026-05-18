@@ -2,8 +2,6 @@
 
 namespace App\Modules\Clients\Schema;
 
-use App\Utils\Schema\FieldType;
-
 class ClientSchema
 {
     public static function create(): array
@@ -11,86 +9,78 @@ class ClientSchema
         return [
 
             'id' => [
-                'uuid',
-                'required',
-                'label:ID',
+                'rules' => 'required|uuid',
+                'label' => 'ID',
             ],
 
             'clientNom' => [
-                'string',
-                'label:Nom',
+                'rules' => 'string',
+                'label' => 'Nom',
             ],
 
             'clientCognoms' => [
-                'string',
-                'label:Cognoms',
+                'rules' => 'string',
+                'label' => 'Cognoms',
             ],
 
             'clientEmail' => [
-                'string',
-                'required',
-                'label:Email',
+                'rules' => 'required|string|email|max:255',
+                'label' => 'Email',
             ],
 
             'clientWeb' => [
-                'string',
-                'label:Web',
+                'rules' => 'string|max:255',
+                'label' => 'Web',
             ],
 
             'clientNIF' => [
-                'string',
-                'label:NIF',
+                'rules' => 'string|max:20',
+                'label' => 'NIF',
             ],
 
             'clientEmpresa' => [
-                'string',
-                'label:Empresa',
+                'rules' => 'string|max:255',
+                'label' => 'Empresa',
             ],
 
             'clientAdreca' => [
-                'string',
-                'required',
-                'label:Adreça',
+                'rules' => 'required|string',
+                'label' => 'Adreça',
             ],
 
             'clientCP' => [
-                'string',
-                'label:Codi Postal',
+                'rules' => 'string|max:10',
+                'label' => 'Codi Postal',
             ],
 
             'ciutat_id' => [
-                'uuid',
-                'required',
-                'label:Ciutat',
+                'rules' => 'required|uuid',
+                'label' => 'Ciutat',
             ],
 
             'provincia_id' => [
-                'uuid',
-                'required',
-                'label:Província',
+                'rules' => 'required|uuid',
+                'label' => 'Província',
             ],
 
             'pais_id' => [
-                'uuid',
-                'required',
-                'label:País',
+                'rules' => 'required|uuid',
+                'label' => 'País',
             ],
 
             'clientTelefon' => [
-                'int',
-                'label:Telèfon',
+                'rules' => 'int',
+                'label' => 'Telèfon',
             ],
 
             'estat_id' => [
-                'uuid',
-                'required',
-                'label:Estat',
+                'rules' => 'required|uuid',
+                'label' => 'Estat',
             ],
 
             'clientRegistre' => [
-                'string',
-                'required',
-                'label:Data registre',
+                'rules' => 'required|date',
+                'label' => 'Data registre',
             ],
         ];
     }
