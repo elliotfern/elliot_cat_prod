@@ -9,7 +9,7 @@ class ClientSchema
         return [
 
             'clientNom' => [
-                'rules' => 'string',
+                'rules' => 'required|string',
                 'label' => 'Nom',
             ],
 
@@ -90,7 +90,7 @@ class ClientSchema
             ],
 
             'clientNom' => [
-                'rules' => 'string',
+                'rules' => 'required|string',
                 'label' => 'Nom',
             ],
 
@@ -100,7 +100,7 @@ class ClientSchema
             ],
 
             'clientEmail' => [
-                'rules' => 'string|email|max:255',
+                'rules' => 'required|string|email|max:255',
                 'label' => 'Email',
             ],
 
@@ -130,17 +130,17 @@ class ClientSchema
             ],
 
             'ciutat_id' => [
-                'rules' => 'uuid',
+                'rules' => 'required|uuid',
                 'label' => 'Ciutat',
             ],
 
             'provincia_id' => [
-                'rules' => 'uuid',
+                'rules' => 'required|uuid',
                 'label' => 'Província',
             ],
 
             'pais_id' => [
-                'rules' => 'uuid',
+                'rules' => 'required|uuid',
                 'label' => 'País',
             ],
 
@@ -150,12 +150,12 @@ class ClientSchema
             ],
 
             'estat_id' => [
-                'rules' => 'uuid',
+                'rules' => 'required|uuid',
                 'label' => 'Estat',
             ],
 
             'clientRegistre' => [
-                'rules' => 'date',
+                'rules' => 'required|date',
                 'label' => 'Data registre',
             ],
         ];
