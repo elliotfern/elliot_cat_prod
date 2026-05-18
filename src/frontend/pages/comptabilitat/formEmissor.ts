@@ -22,7 +22,7 @@ interface ApiResponse<T> {
   data: T;
 }
 
-export async function formEmissor(isUpdate: boolean, id?: number) {
+export async function formEmissor(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formEmissor') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnEmissor') as HTMLButtonElement | null;

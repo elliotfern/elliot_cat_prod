@@ -6,7 +6,7 @@ use App\Utils\Url;
 <div id="barraNavegacioContenidor"></div>
 
 <h1>Gestió Comptabilitat i Clients</h1>
-<h2>Formulari Client: <div id="titolForm"></div>
+<h2>Formulari Client: <span id="titolForm"></span>
 </h2>
 
 <div class="form">

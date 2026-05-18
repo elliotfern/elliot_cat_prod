@@ -40,7 +40,7 @@ interface ApiResponse<T> {
   data: T;
 }
 
-export async function formFacturaClient(isUpdate: boolean, id?: number) {
+export async function formFacturaClient(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formFacturaClient') as HTMLFormElement;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnFactura') as HTMLButtonElement;

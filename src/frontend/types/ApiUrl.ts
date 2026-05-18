@@ -18,11 +18,11 @@ export type ApiUrls = {
     CIUTAT_ID: (id: string) => string;
     PAIS_ID: (slug: string) => string;
     CLIENTS: string;
-    CLIENT_ID: (id: number) => string;
+    CLIENT_ID: (id: string) => string;
     FACTURACIO_CLIENTS: (id: number) => string;
     INVOICE_PDF: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => string;
-    FACTURA_CLIENT_ID: (id: number) => string;
-    FACTURA_CLIENT_PRODUCTE_ID: (id: number) => string;
+    FACTURA_CLIENT_ID: (id: string) => string;
+    FACTURA_CLIENT_PRODUCTE_ID: (id: string) => string;
     TEMA_ID: (id: string) => string;
     SUBTEMA_ID: (id: string) => string;
     LINK_ID: (id: string) => string;
@@ -35,13 +35,13 @@ export type ApiUrls = {
     BLOG_ARTICLE_ID: (id: number) => string;
     HISTORIA_CURS_ARTICLE_ID: (id: number) => string;
     EMISSORS_FACTURES: string;
-    EMISSOR_ID: (id: number) => string;
+    EMISSOR_ID: (id: string) => string;
     PRODUCTES: string;
-    PRODUCTE_ID: (id: number) => string;
+    PRODUCTE_ID: (id: string) => string;
     DESPESES: (id: number, tipus_despesa: string) => string;
     PROVEIDORS: string;
-    PROVEIDOR_ID: (id: number) => string;
-    DESPESA_ID: (id: number) => string;
+    PROVEIDOR_ID: (id: string) => string;
+    DESPESA_ID: (id: string) => string;
   };
   POST: {
     PERFIL_CV: string;

@@ -24,7 +24,7 @@ interface ApiResponse<T> {
   data: T;
 }
 
-export async function formProveidor(isUpdate: boolean, id?: number) {
+export async function formProveidor(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formProveidor') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnProveidor') as HTMLButtonElement | null;

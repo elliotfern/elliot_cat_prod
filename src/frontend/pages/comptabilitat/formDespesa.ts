@@ -37,7 +37,7 @@ interface ApiResponse<T> {
 
 const first = <T>(d: T | T[] | null | undefined): T | null => (Array.isArray(d) ? (d[0] ?? null) : (d ?? null));
 
-export async function formDespesa(isUpdate: boolean, id?: number) {
+export async function formDespesa(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formDespesa') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnDespesa') as HTMLButtonElement | null;

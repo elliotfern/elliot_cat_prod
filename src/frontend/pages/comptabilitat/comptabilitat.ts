@@ -18,7 +18,7 @@ import { taulaProveidors } from './taulaLlistatProveidors';
 export function comptabilitat() {
   const url = window.location.href;
   const pageType = getPageType(url);
-  const id = parseInt(pageType[3], 10);
+  const id = pageType[3];
 
   if (pageType[2] === 'facturacio-clients-partita-iva') {
     const emissor = 3;

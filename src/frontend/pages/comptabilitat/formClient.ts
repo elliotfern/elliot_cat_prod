@@ -40,9 +40,9 @@ function nilUuid(u: string | null | undefined): string | null {
 // Si tu helper `first`:
 const first = <T>(d: T | T[] | null | undefined): T | null => (Array.isArray(d) ? (d[0] ?? null) : (d ?? null));
 
-export async function formClient(isUpdate: boolean, id?: number) {
+export async function formClient(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formClient') as HTMLFormElement | null;
-  const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
+  const divTitol = document.getElementById('titolForm') as HTMLSpanElement | null;
   const btnSubmit = document.getElementById('btnClient') as HTMLButtonElement | null;
   if (!divTitol || !btnSubmit || !form) return;
 
