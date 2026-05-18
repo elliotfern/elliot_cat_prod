@@ -100,6 +100,7 @@ if ($slug === 'clients') {
             LEFT JOIN %s AS cou ON c.provincia_id = cou.id
             LEFT JOIN %s AS s ON c.estat_id = s.id
             WHERE c.id = :id
+            LIMIT 1
             SQL;
 
     $query = sprintf(
@@ -114,7 +115,7 @@ if ($slug === 'clients') {
     try {
 
         $params = [':id' => uuid::toBinary($id)];
-        $result = $db->getData($query, $params, false);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(

@@ -1,106 +1,75 @@
-type ClientApiResponse = {
-  status: string;
-  data?: {
-    id: string;
-    clientNom: string | null;
-    clientCognoms: string | null;
-    clientEmail: string | null;
-    clientWeb: string | null;
-    clientNIF: string | null;
-    clientEmpresa: string | null;
-    clientAdreca: string | null;
-    clientCP: string | null;
-    clientTelefon: string | null;
-    clientRegistre: string | null;
-    ciutat_ca: string | null;
-    pais_ca: string | null;
-    provincia_ca: string | null;
-    estat_id: string | null;
-    estat: string | null;
-  };
-  message?: string;
+import { formatData } from '../../utils/formataData';
+
+type ClientDTO = {
+  id: string;
+  clientNom: string | null;
+  clientCognoms: string | null;
+  clientEmail: string | null;
+  clientWeb: string | null;
+  clientNIF: string | null;
+  clientEmpresa: string | null;
+  clientAdreca: string | null;
+  clientCP: string | null;
+  clientTelefon: number | null;
+  clientRegistre: string;
+
+  ciutat_ca: string | null;
+  provincia_ca: string | null;
+  pais_ca: string | null;
+
+  estat: string | null;
 };
 
-function escape(value: unknown): string {
-  if (value === null || value === undefined || value === '') return '—';
-  return String(value);
+type ApiResponse = {
+  status: string;
+  message: string;
+  data: ClientDTO | null;
+};
+
+export async function fitxaClient(id: string) {
+  const res = await fetch(`https://elliot.cat/api/comptabilitat/get/clientId?id=${id}`);
+
+  const json: ApiResponse = await res.json();
+
+  renderClient(json);
 }
 
-export async function fitxaClient(clientId: string): Promise<void> {
+function renderClient(response: ApiResponse) {
   const container = document.getElementById('fitxaClient');
-
   if (!container) return;
 
-  container.innerHTML = '<p>Carregant client...</p>';
+  const client = response.data;
 
-  try {
-    const res = await fetch(`https://elliot.cat/api/comptabilitat/get/clientId?id=${clientId}`);
-
-    const json: ClientApiResponse = await res.json();
-
-    if (json.status !== 'success' || !json.data) {
-      container.innerHTML = `<p>Error carregant client</p>`;
-      return;
-    }
-
-    const c = json.data;
-
-    container.innerHTML = `
-      <div class="card shadow-sm">
-        <div class="card-body">
-
-          <h3 class="mb-3">
-            ${escape(c.clientNom)} ${escape(c.clientCognoms)}
-          </h3>
-
-          <div class="row g-2">
-
-            <div class="col-md-6">
-              <strong>Email:</strong> ${escape(c.clientEmail)}
-            </div>
-
-            <div class="col-md-6">
-              <strong>Telèfon:</strong> ${escape(c.clientTelefon)}
-            </div>
-
-            <div class="col-md-6">
-              <strong>Empresa:</strong> ${escape(c.clientEmpresa)}
-            </div>
-
-            <div class="col-md-6">
-              <strong>NIF:</strong> ${escape(c.clientNIF)}
-            </div>
-
-            <div class="col-12">
-              <strong>Adreça:</strong> ${escape(c.clientAdreca)} ${escape(c.clientCP)}
-            </div>
-
-            <div class="col-md-4">
-              <strong>Ciutat:</strong> ${escape(c.ciutat_ca)}
-            </div>
-
-            <div class="col-md-4">
-              <strong>Província:</strong> ${escape(c.provincia_ca)}
-            </div>
-
-            <div class="col-md-4">
-              <strong>País:</strong> ${escape(c.pais_ca)}
-            </div>
-
-            <div class="col-md-6">
-              <strong>Registre:</strong> ${escape(c.clientRegistre)}
-            </div>
-
-            <div class="col-md-6">
-              <strong>Estat:</strong> ${escape(c.estat)}
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-    `;
-  } catch (err) {
-    container.innerHTML = `<p>Error de xarxa</p>`;
+  if (!client) {
+    container.innerHTML = `<p>No s'ha trobat el client</p>`;
+    return;
   }
+
+  const value = (v: any) => (v === null || v === '' ? '—' : v);
+
+  container.innerHTML = `
+    <div class="client-card">
+      <h2>${value(client.clientNom)} ${value(client.clientCognoms)}</h2>
+
+      <p><strong>Email:</strong> ${value(client.clientEmail)}</p>
+      <p><strong>Web:</strong> ${value(client.clientWeb)}</p>
+      <p><strong>NIF:</strong> ${value(client.clientNIF)}</p>
+      <p><strong>Empresa:</strong> ${value(client.clientEmpresa)}</p>
+
+      <hr />
+
+      <p><strong>Direcció:</strong> ${value(client.clientAdreca)} (${value(client.clientCP)})</p>
+
+      <p><strong>Ciutat:</strong> ${value(client.ciutat_ca)}</p>
+      <p><strong>Província:</strong> ${value(client.provincia_ca)}</p>
+      <p><strong>País:</strong> ${value(client.pais_ca)}</p>
+
+      <hr />
+
+      <p><strong>Telèfon:</strong> ${value(client.clientTelefon)}</p>
+      <p><strong>Data registre:</strong> ${value(formatData(client.clientRegistre))}</p>
+
+      <p><strong>Estat:</strong> ${value(client.estat)}</p>
+    </div>
+  `;
 }
