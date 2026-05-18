@@ -61,15 +61,17 @@ function markInvalidFields(form: HTMLFormElement, errors: any) {
 
   for (const field of Object.keys(errors)) {
     const el = form.querySelector(`[name="${field}"]`);
-    const messages = Array.isArray(errors[field]) ? errors[field].join('<br>') : errors[field];
+    const error = errors[field];
+
+    const messages = Array.isArray(error?.messages) ? error.messages.join('<br>') : '';
 
     if (!el) continue;
 
-    // INPUT NORMAL
     if (el.tagName !== 'SELECT') {
       el.classList.add('is-invalid');
 
       const errorBox = document.getElementById(`error-${field}`);
+
       if (errorBox) {
         errorBox.innerHTML = messages;
       }
@@ -77,7 +79,6 @@ function markInvalidFields(form: HTMLFormElement, errors: any) {
       continue;
     }
 
-    // CHOICES.JS SELECT
     setChoicesError(el as HTMLSelectElement, messages);
   }
 }
@@ -220,7 +221,15 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
       let errorDetails = '';
 
       if (errors && typeof errors === 'object' && !Array.isArray(errors)) {
-        errorDetails = Object.values(errors).flat().join('<br>');
+        errorDetails = Object.values(errors)
+          .map((err: any) => {
+            if (err?.messages) {
+              return err.messages.join('<br>');
+            }
+            return '';
+          })
+          .filter(Boolean)
+          .join('<br>');
       }
 
       missatgesBackend({
