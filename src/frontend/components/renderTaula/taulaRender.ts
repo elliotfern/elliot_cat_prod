@@ -11,20 +11,37 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-function pluckItems<T>(raw: unknown): T[] {
-  // Si és array directe
-  if (Array.isArray(raw)) return raw as T[];
+function pluckItems<T>(raw: unknown, dataKey?: string): T[] {
+  // Array directe
+  if (Array.isArray(raw)) {
+    return raw as T[];
+  }
 
-  if (!isObject(raw)) return [];
+  if (!isObject(raw)) {
+    return [];
+  }
 
   // raw.items
-  if (Array.isArray(raw.items)) return raw.items as T[];
+  if (Array.isArray(raw.items)) {
+    return raw.items as T[];
+  }
 
-  // raw.data pot ser array o objecte amb items
   const data = raw.data;
-  if (Array.isArray(data)) return data as T[];
 
-  if (isObject(data) && Array.isArray(data.items)) return data.items as T[];
+  // raw.data[]
+  if (Array.isArray(data)) {
+    return data as T[];
+  }
+
+  // raw.data.items[]
+  if (isObject(data) && Array.isArray(data.items)) {
+    return data.items as T[];
+  }
+
+  // raw.data.{customKey}[]
+  if (dataKey && isObject(data) && Array.isArray(data[dataKey])) {
+    return data[dataKey] as T[];
+  }
 
   return [];
 }
@@ -59,7 +76,7 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
     return;
   }
 
-  const data: T[] = pluckItems<T>(result);
+  const data: T[] = pluckItems<T>(result, options.dataKey);
 
   if (!data.length) {
     container.innerHTML = `<div class="alert alert-info">${result.message ?? 'No hi ha dades.'}</div>`;

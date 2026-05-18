@@ -149,7 +149,7 @@ if ($slug === 'clients') {
 
     $sql = <<<SQL
             SELECT 
-            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id, e.estatNom, s.producte, YEAR(p.data) AS any
+            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id, e.estat, s.producte, YEAR(p.data) AS any
             FROM %s AS p
             LEFT JOIN %s AS c ON p.client_id = c.id
             LEFT JOIN %s AS e ON p.estat_id = e.id
@@ -991,7 +991,7 @@ SQL;
 
     $sql = <<<SQL
             SELECT 
-            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id, c.clientNom, c.clientCognoms, c.clientEmpresa, e.estatNom, s.producte, YEAR(p.data) AS any
+            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id, c.clientNom, c.clientCognoms, c.clientEmpresa, e.estat, s.producte, YEAR(p.data) AS any
             FROM %s AS p
             LEFT JOIN %s AS c ON p.client_id = c.id
             LEFT JOIN %s AS e ON p.estat_id = e.id

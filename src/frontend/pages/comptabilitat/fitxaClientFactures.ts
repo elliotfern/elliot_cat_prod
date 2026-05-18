@@ -20,12 +20,8 @@ interface FacturaClient {
   ivaPercen: number | null;
 }
 
-export function renderClientFactures(
-  clientId: string
-) {
-
+export function renderClientFactures(clientId: string) {
   const columns: TaulaDinamica<FacturaClient>[] = [
-
     {
       header: 'Factura',
       field: 'numero_factura',
@@ -41,32 +37,21 @@ export function renderClientFactures(
       header: 'Concepte',
       field: 'concepte',
 
-      render: (_: unknown, row: FacturaClient) =>
-        row.concepte ?? '',
+      render: (_: unknown, row: FacturaClient) => row.concepte ?? '',
     },
 
     {
       header: 'Data factura',
       field: 'data_factura',
 
-      render: (_: unknown, row: FacturaClient) =>
-        row.data_factura
-          ? new Date(
-              row.data_factura
-            ).toLocaleDateString('ca-ES')
-          : '',
+      render: (_: unknown, row: FacturaClient) => (row.data_factura ? new Date(row.data_factura).toLocaleDateString('ca-ES') : ''),
     },
 
     {
       header: 'Venciment',
       field: 'data_venciment',
 
-      render: (_: unknown, row: FacturaClient) =>
-        row.data_venciment
-          ? new Date(
-              row.data_venciment
-            ).toLocaleDateString('ca-ES')
-          : '',
+      render: (_: unknown, row: FacturaClient) => (row.data_venciment ? new Date(row.data_venciment).toLocaleDateString('ca-ES') : ''),
     },
 
     {
@@ -93,23 +78,14 @@ export function renderClientFactures(
   ];
 
   renderDynamicTable({
-
-    url:
-      `https://elliot.cat/api/comptabilitat/get/facturesClientId?id=${clientId}`,
-
+    url: `https://elliot.cat/api/comptabilitat/get/facturesClientId?id=${clientId}`,
     containerId: 'clientFactures',
-
     columns,
-
-    filterKeys: [
-      'numero_factura',
-      'concepte',
-    ],
+    filterKeys: ['numero_factura', 'concepte'],
+    dataKey: 'factures',
 
     renderHeader: (result: any) => {
-
-      const total =
-        result?.data?.totals?.total_facturat ?? 0;
+      const total = result?.data?.totals?.total_facturat ?? 0;
 
       return `
         <div class="card shadow-sm mb-4">

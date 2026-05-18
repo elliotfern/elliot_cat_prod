@@ -16,4 +16,5 @@ export type RenderTableOptions<T extends object> = {
   filterSplitBy?: Partial<Record<keyof T, string | RegExp>>;
   filterSplitTrim?: boolean; // default true
   renderHeader?: (raw: unknown) => string;
+  dataKey?: string;
 };
