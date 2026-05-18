@@ -65,7 +65,7 @@ export async function taulaPressupostos() {
       field: 'id',
       render: (_: unknown, row: Proveidor) => `
         <a href="${DOMAIN_WEB}/gestio/comptabilitat/modifica-pressupost/${row.id}">
-          <button class="class="btn btn-warning btn-sm"">Modifica</button>
+          <button class="btn btn-warning btn-sm">Modifica</button>
         </a>`,
     });
   }
