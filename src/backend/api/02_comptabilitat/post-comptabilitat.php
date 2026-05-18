@@ -170,11 +170,11 @@ if ($slug === 'clients') {
 
         // Auditoría
         $detalls = sprintf("Creació client: %s (%s)",  $clientData['clientNom'],  $clientData['clientEmail'] ?? '-');
-        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_clients', $$id);
+        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_clients', $id);
 
         $conn->commit();
 
-        Response::success(MissatgesAPI::success('create'), ['id' => $$id], 201);
+        Response::success(MissatgesAPI::success('create'), ['id' => $id], 201);
     } catch (Throwable $e) {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
