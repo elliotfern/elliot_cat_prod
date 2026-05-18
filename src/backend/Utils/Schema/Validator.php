@@ -4,10 +4,19 @@ namespace App\Utils\Schema;
 
 class Validator
 {
+
     public static function validate(
         mixed $value,
         array $schema
     ): array {
+
+        // normalize empty strings early
+        if (is_string($value)) {
+            $value = trim($value);
+            if ($value === '') {
+                $value = null;
+            }
+        }
 
         $errors = [];
 
@@ -15,22 +24,11 @@ class Validator
         $type  = $schema['type'] ?? null;
 
         $isNullable = self::hasRule($rules, 'nullable');
+
         $isRequired  = self::hasRule($rules, 'required');
 
-        /**
-         * 1. EMPTY HANDLING
-         */
-        if ($value === null || $value === '') {
-
-            if ($isRequired) {
-                return ['Camp obligatori'];
-            }
-
-            if ($isNullable) {
-                return [];
-            }
-
-            return [];
+        if ($isRequired && $value === null) {
+            return ['Camp obligatori'];
         }
 
         /**
