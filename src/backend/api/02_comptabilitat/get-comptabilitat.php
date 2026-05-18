@@ -5,6 +5,7 @@ use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Utils\AdminMiddleware;
+use App\Utils\Uuid;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
@@ -112,7 +113,7 @@ if ($slug === 'clients') {
 
     try {
 
-        $params = [':id' => $id];
+        $params = [':id' => uuid::toBinary($id)];
         $result = $db->getData($query, $params, false);
 
         if (empty($result)) {
