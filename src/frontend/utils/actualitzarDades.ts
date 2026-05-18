@@ -11,6 +11,11 @@ type ApiResponse = {
   [key: string]: unknown;
 };
 
+type FieldError = {
+  label?: string;
+  messages?: string[] | string;
+};
+
 function getElements(form: HTMLFormElement) {
   const okMessageDiv = document.getElementById('okMessage');
   const okTextDiv = document.getElementById('okText');
@@ -51,21 +56,26 @@ function clearChoicesErrors(form: HTMLFormElement) {
 }
 
 function markInvalidFields(form: HTMLFormElement, errors: any) {
+  // reset visual state
   form.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
-
   form.querySelectorAll('.invalid-feedback').forEach((el) => (el.innerHTML = ''));
-
   clearChoicesErrors(form);
 
   if (!errors || typeof errors !== 'object') return;
 
-  for (const field of Object.keys(errors)) {
+  for (const [field, errorRaw] of Object.entries(errors)) {
+    const error = errorRaw as FieldError;
+
     const el = form.querySelector(`[name="${field}"]`);
-    const error = errors[field];
-
-    const messages = Array.isArray(error?.messages) ? error.messages.join('<br>') : '';
-
     if (!el) continue;
+
+    const label = error.label ?? field;
+
+    const messages = normalizeFieldErrors(error);
+
+    const htmlMessages = messages.filter(Boolean).join('<br>');
+
+    if (!htmlMessages) continue;
 
     if (el.tagName !== 'SELECT') {
       el.classList.add('is-invalid');
@@ -73,14 +83,33 @@ function markInvalidFields(form: HTMLFormElement, errors: any) {
       const errorBox = document.getElementById(`error-${field}`);
 
       if (errorBox) {
-        errorBox.innerHTML = messages;
+        errorBox.innerHTML = `
+        <div class="fw-semibold">${label}</div>
+        <div>${htmlMessages}</div>
+      `;
       }
 
       continue;
     }
 
-    setChoicesError(el as HTMLSelectElement, messages);
+    setChoicesError(
+      el as HTMLSelectElement,
+      `
+      <div class="fw-semibold">${label}</div>
+      <div>${htmlMessages}</div>
+    `
+    );
   }
+}
+
+function normalizeFieldErrors(error: any): string[] {
+  if (!error) return [];
+
+  if (Array.isArray(error.messages)) return error.messages;
+
+  if (typeof error.messages === 'string') return [error.messages];
+
+  return [];
 }
 
 /**
@@ -216,25 +245,9 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
 
       form.dispatchEvent(new CustomEvent('form:success', { detail: response }));
     } else {
-      const errors = response?.errors;
-
-      let errorDetails = '';
-
-      if (errors && typeof errors === 'object' && !Array.isArray(errors)) {
-        errorDetails = Object.values(errors)
-          .map((err: any) => {
-            if (err?.messages) {
-              return err.messages.join('<br>');
-            }
-            return '';
-          })
-          .filter(Boolean)
-          .join('<br>');
-      }
-
       missatgesBackend({
         tipus: 'error',
-        missatge: errorDetails ? `${response?.message || Missatges.error.default}<div class="mt-2">${errorDetails}</div>` : response?.message || Missatges.error.default,
+        missatge: Missatges.error.validation,
         contenidor: ui.errMessageDiv,
         text: ui.errTextDiv,
         altreContenidor: ui.okMessageDiv,
