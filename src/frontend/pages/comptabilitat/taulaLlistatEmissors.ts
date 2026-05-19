@@ -3,6 +3,7 @@ import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { API_URLS } from '../../utils/apiUrls';
+import { mostrar } from '../../utils/renderText';
 
 interface Emissor {
   id: number;
@@ -37,7 +38,7 @@ export async function taulaLlistatEmissors() {
     {
       header: 'Número IVA',
       field: 'numero_iva',
-      render: (_: unknown, row: Emissor) => `${row.numero_iva}`,
+      render: (_: unknown, row: Emissor) => `${mostrar(row.numero_iva, '-')}`,
     },
     {
       header: 'País',
@@ -60,7 +61,7 @@ export async function taulaLlistatEmissors() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Emissor) => `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/comptabilitat/modifica-emissor/${row.id}"><button class="btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Emissor) => `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/comptabilitat/modifica-emissor/${row.id}"><button class="btn btn-edicio">Modifica</button></a>`,
     });
   }
 

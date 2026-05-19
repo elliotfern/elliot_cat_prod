@@ -1,6 +1,6 @@
 import 'trix/dist/trix.css';
 import 'trix';
-import './estils/style.css';
+import './assets/css/style.css';
 
 import { getPageType } from './utils/urlPath';
 import { cinema } from './pages/cinema/funcions';
