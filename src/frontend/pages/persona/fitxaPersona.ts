@@ -79,11 +79,10 @@ export async function fitxaPersona(url: string, id: string) {
 
     const json = await res.json();
 
-    if (json.status !== 'success' || !json.data) {
-      console.error('Resposta API no vàlida');
+    if (!json.success) {
+      console.error(json.message);
       return;
     }
-
     // 1. API
     const personaApi = json.data;
 
