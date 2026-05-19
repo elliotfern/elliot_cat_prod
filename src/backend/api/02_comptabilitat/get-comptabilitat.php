@@ -689,16 +689,16 @@ SQL;
     }
     // GET : Obtenir emissor per ID
     // ruta => "https://elliot.cat/api/comptabilitat/get/emissorId?id={id}"
-} else if ($slug === 'emissorId' && isset($_GET['id'])) {
+} else if ($slug === 'emissorId') {
 
     AdminMiddleware::handle();
 
-    $emissor_id = (int) $_GET['id'];
+    $emissor_id = $_GET['id'];
 
     $sql = <<<SQL
-        SELECT e.id, e.nom, e.nif, e.numero_iva, p.pais_ca, e.adreca, e.telefon, e.email
+        SELECT e.id, e.nom, e.nif, e.numero_iva, p.pais_ca, e.adreca, e.telefon, e.email, e.pais_id
         FROM %s AS e
-        LEFT JOIN %s AS p ON e.pais = p.id
+        LEFT JOIN %s AS p ON e.pais_id = p.id
         WHERE e.id = :emissor_id
         LIMIT 1
     SQL;
