@@ -1,13 +1,11 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { formatData } from '../../utils/formataData';
 import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Client } from '../../types/Client';
 import { API_URLS } from '../../utils/apiUrls';
-
-const url = window.location.href;
-const pageType = getPageType(url);
+import { Button } from '../../ui/button';
+import { INTRANET_URLS } from '../../utils/IntranetUrls';
 
 export async function taulaLlistatClients() {
   const isAdmin = await getIsAdmin();
@@ -16,7 +14,7 @@ export async function taulaLlistatClients() {
     {
       header: 'Client',
       field: 'clientNom',
-      render: (_: unknown, row: Client) => `<a id="${row.id}" href="https://${window.location.hostname}/gestio/comptabilitat/fitxa-client/${row.id}">${row.clientNom} ${row.clientCognoms}</a>`,
+      render: (_: unknown, row: Client) => `<a id="${row.id}" href="${INTRANET_URLS.COMPTABILITAT.CLIENT_FITXA_ID(row.id)}">${row.clientNom} ${row.clientCognoms}</a>`,
     },
 
     {
@@ -42,7 +40,7 @@ export async function taulaLlistatClients() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Client) => `<a a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/comptabilitat/modifica-client/${row.id}"><button class="btn-petit">Modifica</button></a>`,
+      render: (_, { id }) => Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(id)),
     });
   }
 
