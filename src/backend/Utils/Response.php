@@ -37,7 +37,12 @@ class Response
         'idioma_id',
         'actor_id',
         'client_id',
-        'servei_id'
+        'servei_id',
+        'categoria_id',
+        'proveidor_id',
+        'emisor_id',
+        'receptor_id',
+        'subcategoria_id',
     ];
 
     public static function success(string $message = '', $data = null, int $httpCode = 200): void
