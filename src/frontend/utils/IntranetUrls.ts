@@ -23,7 +23,7 @@ const MODUL = {
 
 export const INTRANET_URLS: IntranetUrls = {
   COMPTABILITAT: {
-    EMISSOR_FITXA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.CURRICULUM}/${ENDPOINTS.EMISSOR_FITXA}/${encodeURIComponent(id)}`,
-    EMISSOR_MODIFICA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.CURRICULUM}/${ENDPOINTS.EMISSOR_MODIFICA}/${encodeURIComponent(id)}`,
+    EMISSOR_FITXA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.EMISSOR_FITXA}/${encodeURIComponent(id)}`,
+    EMISSOR_MODIFICA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.EMISSOR_MODIFICA}/${encodeURIComponent(id)}`,
   },
 };
