@@ -947,7 +947,7 @@ SQL;
 
         Response::success(
             MissatgesAPI::success('get'),
-            $result[0],
+            $result,
             200
         );
     } catch (PDOException $e) {
