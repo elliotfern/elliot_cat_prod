@@ -157,7 +157,7 @@ $slug = $routeParams[0] ?? '';
                 return;
             }
 
-            if (json.status === 'success') {
+            if (json.response === 'success') {
                 showOk(json.message);
             } else {
                 showErr(json.message, json.errors);

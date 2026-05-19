@@ -65,9 +65,9 @@ if ($slug === "perfilCV") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -107,7 +107,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -139,7 +143,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -170,7 +178,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -202,7 +214,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -236,7 +252,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -274,7 +294,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -308,7 +332,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -373,9 +401,9 @@ if ($slug === "perfilCV") {
         $result['i18n'] = $i18nRows;
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
@@ -405,7 +433,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -440,7 +472,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -472,7 +508,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -501,7 +541,11 @@ if ($slug === "perfilCV") {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -585,9 +629,9 @@ if ($slug === "perfilCV") {
         $main['i18n'] = $i18n;
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $main,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $main,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(

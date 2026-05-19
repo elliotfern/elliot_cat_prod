@@ -93,9 +93,9 @@ if ($slug === 'llistatPersones') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (\Throwable $e) {
         Response::error(
@@ -193,9 +193,9 @@ if ($slug === 'llistatPersones') {
         unset($base['grup_id'], $base['grup_nom']);
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $base,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $base,
+            httpCode: 200
         );
     } catch (\Throwable $e) {
         http_response_code(500);
@@ -248,7 +248,11 @@ if ($slug === 'llistatPersones') {
             exit;
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -277,7 +281,11 @@ if ($slug === 'llistatPersones') {
             exit;
         }
 
-        Response::success(MissatgesAPI::success('get'), $rows, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $rows,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([

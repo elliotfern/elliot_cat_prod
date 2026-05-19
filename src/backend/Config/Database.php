@@ -220,4 +220,9 @@ class Database
     {
         return $this->conn->inTransaction();
     }
+
+    public function qi(string $table): string
+    {
+        return qi($table, $this->conn);
+    }
 }

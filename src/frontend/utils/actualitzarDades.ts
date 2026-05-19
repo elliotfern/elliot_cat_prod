@@ -224,7 +224,7 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
       response = await request(method, url, data);
     }
 
-    if (response?.status === 'success') {
+    if (response?.success) {
       markInvalidFields(form, null);
 
       missatgesBackend({

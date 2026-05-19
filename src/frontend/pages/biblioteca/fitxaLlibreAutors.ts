@@ -203,7 +203,7 @@ async function eliminarAutorPerRelacio(btn: HTMLButtonElement, relId: number, ll
       return;
     }
 
-    if (json.status === 'success') {
+    if (json.response.success) {
       // opción A: recargar
       window.location.href = `${window.location.origin}/gestio/biblioteca/fitxa-llibre-autors/${encodeURIComponent(llibreSlug)}`;
       return;
@@ -243,7 +243,7 @@ async function eliminarAutorPerAutorUuid(btn: HTMLButtonElement, autorUuid: stri
       return;
     }
 
-    if (json.status === 'success') {
+    if (json.response.success) {
       window.location.href = `${window.location.origin}/gestio/biblioteca/fitxa-llibre-autors/${encodeURIComponent(llibreSlug)}`;
       return;
     }

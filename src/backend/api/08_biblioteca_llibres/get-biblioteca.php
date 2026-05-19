@@ -132,7 +132,11 @@ if ($slug === 'totsLlibres') {
         unset($b);
 
         // response
-        Response::success(MissatgesAPI::success('get'), $books, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $books,
+            httpCode: 200
+        );
         exit;
     } catch (\Throwable $e) {
         http_response_code(500);
@@ -214,7 +218,7 @@ if ($slug === 'totsLlibres') {
                 'llibre' => $book,
                 'autors' => $authors,
             ],
-            200
+            httpCode: 200
         );
         exit;
     } catch (\Throwable $e) {
@@ -284,8 +288,11 @@ if ($slug === 'totsLlibres') {
             exit;
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
-        exit;
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -338,9 +345,9 @@ if ($slug === 'totsLlibres') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (\Throwable $e) {
         Response::error(
@@ -482,8 +489,11 @@ if ($slug === 'totsLlibres') {
             ];
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
-        exit;
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         header('Content-Type: application/json; charset=utf-8');
@@ -524,7 +534,11 @@ if ($slug === 'totsLlibres') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -562,7 +576,11 @@ if ($slug === 'totsLlibres') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -600,7 +618,11 @@ if ($slug === 'totsLlibres') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -611,8 +633,6 @@ if ($slug === 'totsLlibres') {
         ]);
         exit;
     }
-
-
 
 
     // 11) Gèneres
@@ -638,7 +658,11 @@ if ($slug === 'totsLlibres') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -674,7 +698,11 @@ if ($slug === 'totsLlibres') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -715,7 +743,11 @@ if ($slug === 'totsLlibres') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -751,7 +783,11 @@ if ($slug === 'totsLlibres') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -787,7 +823,11 @@ if ($slug === 'totsLlibres') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([

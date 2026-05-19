@@ -74,9 +74,9 @@ if ($slug === "pelicules") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -125,9 +125,9 @@ if ($slug === "pelicules") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -181,9 +181,9 @@ if ($slug === "pelicules") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -289,9 +289,9 @@ if ($slug === "pelicules") {
          */
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $serie,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $serie,
+            httpCode: 200
         );
     } catch (PDOException $e) {
 
@@ -397,9 +397,9 @@ if ($slug === "pelicules") {
          */
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $serie,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $serie,
+            httpCode: 200
         );
     } catch (PDOException $e) {
 
@@ -452,9 +452,9 @@ if ($slug === "pelicules") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -502,9 +502,9 @@ if ($slug === "pelicules") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -553,9 +553,9 @@ if ($slug === "pelicules") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -605,9 +605,9 @@ if ($slug === "pelicules") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -697,9 +697,9 @@ if ($slug === "pelicules") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -747,9 +747,9 @@ if ($slug === "pelicules") {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(

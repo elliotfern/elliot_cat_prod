@@ -63,9 +63,9 @@ if ($slug === 'llistatVisitesEspai') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -110,9 +110,9 @@ if ($slug === 'llistatVisitesEspai') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -158,9 +158,9 @@ if ($slug === 'llistatVisitesEspai') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -205,9 +205,9 @@ if ($slug === 'llistatVisitesEspai') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -252,9 +252,9 @@ if ($slug === 'llistatVisitesEspai') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -297,9 +297,9 @@ if ($slug === 'llistatVisitesEspai') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -351,9 +351,9 @@ if ($slug === 'llistatVisitesEspai') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -401,9 +401,9 @@ if ($slug === 'llistatVisitesEspai') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -449,9 +449,9 @@ if ($slug === 'llistatVisitesEspai') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(

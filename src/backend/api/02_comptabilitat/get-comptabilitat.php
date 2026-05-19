@@ -6,6 +6,7 @@ use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Utils\AdminMiddleware;
 use App\Utils\Uuid;
+use App\Services\ClientService;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
@@ -39,51 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 if ($slug === 'clients') {
 
     AdminMiddleware::handle();
+    $clientService = new ClientService($db);
+    $clients = $clientService->getAll();
 
-    $sql = <<<SQL
-            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, c.ciutat_id, c.provincia_id, c.pais_id, c.clientTelefon, c.clientRegistre, ci.ciutat_ca, co.pais_ca, cou.provincia_ca, c.estat_id, s.estat, s.ordre
-            FROM %s AS c
-            LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
-            LEFT JOIN %s AS co ON c.pais_id = co.id
-            LEFT JOIN %s AS cou ON c.provincia_id = cou.id
-            LEFT JOIN %s AS s ON c.estat_id = s.id
-            ORDER BY c.clientCognoms ASC
-            SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
-        qi(Tables::DB_CIUTATS, $pdo),
-        qi(Tables::DB_PAISOS, $pdo),
-        qi(Tables::DB_PROVINCIES, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo)
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: $clients,
+        httpCode: 200
     );
-
-    try {
-
-        $result = $db->getData($query);
-
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
-
-        Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
-        );
-    } catch (PDOException $e) {
-        Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
-        );
-    }
 
     // GET : Detalls client ID
     // ruta => "https://elliot.cat/api/comptabilitat/get/clientId?id=i89jnbd"
@@ -91,53 +55,24 @@ if ($slug === 'clients') {
 
     AdminMiddleware::handle();
 
-    $id = $_GET['id'];
-    $sql = <<<SQL
-            SELECT c.id, c.clientNom, c.clientCognoms, c.clientEmail, c.clientWeb, c.clientNIF, c.clientEmpresa, c.clientAdreca, c.clientCP, c.ciutat_id, c.provincia_id, c.pais_id, c.clientTelefon, c.clientRegistre, COALESCE(ciutat_ca, ciutat) AS ciutat_final, co.pais_ca, cou.provincia_ca, c.estat_id, s.estat
-            FROM %s AS c
-            LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
-            LEFT JOIN %s AS co ON c.pais_id = co.id
-            LEFT JOIN %s AS cou ON c.provincia_id = cou.id
-            LEFT JOIN %s AS s ON c.estat_id = s.id
-            WHERE c.id = :id
-            LIMIT 1
-            SQL;
+    $id = $_GET['id'] ?? null;
 
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
-        qi(Tables::DB_CIUTATS, $pdo),
-        qi(Tables::DB_PAISOS, $pdo),
-        qi(Tables::DB_PROVINCIES, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo)
-    );
+    $clientService = new ClientService($db);
+    $client = $clientService->getById($id);
 
-    try {
-
-        $params = [':id' => uuid::toBinary($id)];
-        $result = $db->getData($query, $params, true);
-
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
-
-        Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
-        );
-    } catch (PDOException $e) {
+    if (!$client) {
         Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
+            message: MissatgesAPI::error('not_found'),
+            httpCode: 404
         );
+        return;
     }
+
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: $client,
+        httpCode: 200
+    );
 
     // GET : Pressupostos enviats a client ID
     // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostosClientId?id=i89jnbd"
@@ -181,9 +116,9 @@ if ($slug === 'clients') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -235,9 +170,9 @@ if ($slug === 'clients') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -326,7 +261,7 @@ if ($slug === 'clients') {
                     'total_facturat' => (float)$total
                 ]
             ],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -405,9 +340,9 @@ if ($slug === 'clients') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -543,7 +478,7 @@ if ($slug === 'clients') {
                 'factura' => $result,
                 'productes' => $productes
             ],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
@@ -621,9 +556,9 @@ SQL;
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -676,9 +611,9 @@ SQL;
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -723,9 +658,9 @@ SQL;
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -774,9 +709,9 @@ SQL;
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -821,9 +756,9 @@ SQL;
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -877,9 +812,9 @@ SQL;
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -946,9 +881,9 @@ SQL;
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1013,7 +948,7 @@ SQL;
 
     try {
         $params = ['id' => $despesa_id];
-        $result = $db->getData($query, $params);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(
@@ -1025,9 +960,9 @@ SQL;
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result[0],
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1075,9 +1010,9 @@ SQL;
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(

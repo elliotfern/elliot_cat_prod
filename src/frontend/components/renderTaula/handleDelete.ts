@@ -35,7 +35,7 @@ export function initDeleteHandlers() {
 
       const data = await response.json();
 
-      if (response.ok && data.status === 'success') {
+      if (response.ok && data.response.success) {
         alert('Registre eliminat correctament.');
 
         if (reloadKey && reloadCallbacks[reloadKey]) {

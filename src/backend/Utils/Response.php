@@ -6,7 +6,6 @@ use App\Utils\Uuid;
 
 class Response
 {
-
     private static array $uuidFields = [
         'id',
         'id2',
@@ -45,34 +44,45 @@ class Response
         'subcategoria_id',
     ];
 
-    public static function success(string $message = '', $data = null, int $httpCode = 200): void
-    {
+    public static function success(
+        string $message = '',
+        mixed $data = null,
+        array $meta = [],
+        int $httpCode = 200
+    ): void {
         http_response_code($httpCode);
 
         $data = self::mapUuid($data);
 
         self::send([
-            'status' => 'success',
+            'success' => true,
             'message' => $message,
+            'errors' => [],
+            'meta' => $meta,
             'data' => $data,
         ]);
     }
 
-    public static function error(string $message = '', array $errors = [], int $httpCode = 400): void
-    {
+    public static function error(
+        string $message = '',
+        array $errors = [],
+        int $httpCode = 400
+    ): void {
         http_response_code($httpCode);
 
         self::send([
-            'status' => 'error',
+            'success' => false,
             'message' => $message,
             'errors' => $errors,
+            'meta' => [],
+            'data' => null,
         ]);
     }
 
     /**
      * Convierte automáticamente UUID binarios a string UUID
      */
-    private static function mapUuid($data)
+    private static function mapUuid(mixed $data): mixed
     {
         if (!is_array($data)) {
             return $data;
@@ -80,8 +90,10 @@ class Response
 
         foreach ($data as $key => &$value) {
 
-            // SOLO si el campo es UUID real
-            if (in_array($key, self::$uuidFields, true) && is_string($value) && strlen($value) === 16) {
+            if (
+                in_array($key, self::$uuidFields, true)
+                && self::isBinaryUuid($value)
+            ) {
                 $value = Uuid::toString($value);
                 continue;
             }
@@ -96,28 +108,55 @@ class Response
 
     private static function send(array $payload): void
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
 
         $response = array_merge([
-            'status' => 'success',
+            'success' => true,
             'message' => '',
             'errors' => [],
+            'meta' => [],
             'data' => null,
         ], $payload);
 
         $response = self::sanitizeUtf8($response);
 
-        echo json_encode($response);
+        $json = json_encode(
+            $response,
+            JSON_UNESCAPED_UNICODE
+                | JSON_UNESCAPED_SLASHES
+        );
+
+        if ($json === false) {
+
+            http_response_code(500);
+
+            echo json_encode([
+                'success' => false,
+                'message' => 'JSON_ENCODE_ERROR',
+                'errors' => [
+                    json_last_error_msg()
+                ],
+                'meta' => [],
+                'data' => null,
+            ]);
+
+            exit;
+        }
+
+        echo $json;
         exit;
     }
 
-    private static function sanitizeUtf8($data)
+    private static function sanitizeUtf8(mixed $data): mixed
     {
         if (!is_array($data)) {
-            return self::cleanString($data);
+            return is_string($data)
+                ? self::cleanString($data)
+                : $data;
         }
 
         array_walk_recursive($data, function (&$v) {
+
             if (is_string($v)) {
                 $v = self::cleanString($v);
             }
@@ -131,23 +170,38 @@ class Response
         // quitar NUL bytes
         $value = str_replace("\0", '', $value);
 
-        // si ya es UTF-8 válido
+        // ya es UTF-8 válido
         if (mb_check_encoding($value, 'UTF-8')) {
-            return @iconv('UTF-8', 'UTF-8//IGNORE', $value) ?: $value;
+
+            return @iconv(
+                'UTF-8',
+                'UTF-8//IGNORE',
+                $value
+            ) ?: $value;
         }
 
-        // intentar latin1 → UTF-8
-        $converted = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $value);
+        // intentar latin1 -> UTF8
+        $converted = @iconv(
+            'ISO-8859-1',
+            'UTF-8//IGNORE',
+            $value
+        );
+
         if ($converted !== false) {
             return $converted;
         }
 
         // fallback final
-        return @iconv('UTF-8', 'UTF-8//IGNORE', $value) ?: $value;
+        return @iconv(
+            'UTF-8',
+            'UTF-8//IGNORE',
+            $value
+        ) ?: $value;
     }
 
-    private static function isBinaryUuid($value): bool
+    private static function isBinaryUuid(mixed $value): bool
     {
-        return is_string($value) && strlen($value) === 16;
+        return is_string($value)
+            && strlen($value) === 16;
     }
 }
