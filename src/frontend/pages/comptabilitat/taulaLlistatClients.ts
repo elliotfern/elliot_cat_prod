@@ -6,6 +6,16 @@ import { Client } from '../../types/Client';
 import { API_URLS } from '../../utils/apiUrls';
 import { Button } from '../../ui/button';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';
+import { mostrar } from '../../utils/renderText';
+
+function getEstatBadgeClass(ordre: number): string {
+  if (ordre <= 2) return 'bg-secondary';
+  if (ordre <= 4) return 'bg-info';
+  if (ordre <= 6) return 'bg-warning';
+  if (ordre <= 8) return 'bg-primary';
+  if (ordre <= 10) return 'bg-success';
+  return 'bg-dark';
+}
 
 export async function taulaLlistatClients() {
   const isAdmin = await getIsAdmin();
@@ -14,13 +24,14 @@ export async function taulaLlistatClients() {
     {
       header: 'Client',
       field: 'clientNom',
-      render: (_: unknown, row: Client) => `<a id="${row.id}" href="${INTRANET_URLS.COMPTABILITAT.CLIENT_FITXA_ID(row.id)}">${row.clientNom} ${row.clientCognoms}</a>`,
+      render: (_: unknown, row: Client) => `<a id="${row.id}" href="${INTRANET_URLS.COMPTABILITAT.CLIENT_FITXA_ID(row.id)}">
+      ${mostrar(row.clientNom, '')} ${mostrar(row.clientCognoms, '')}</a>`,
     },
 
     {
       header: 'Empresa',
       field: 'clientEmpresa',
-      render: (_: unknown, row: Client) => `${row.clientEmpresa}`,
+      render: (_: unknown, row: Client) => `${mostrar(row.clientEmpresa, '-')}`,
     },
 
     {
@@ -32,7 +43,13 @@ export async function taulaLlistatClients() {
     {
       header: 'Estat',
       field: 'estat',
-      render: (_: unknown, row: Client) => `${row.estat}`,
+      render: (_: unknown, row: Client) => {
+        const classe = getEstatBadgeClass(row.ordre);
+        return `
+          <span class="badge ${classe}">
+            ${row.estat}
+          </span>`;
+      },
     },
   ];
 

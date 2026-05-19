@@ -23,4 +23,5 @@ export interface Client {
   clientStatus: number; // INT (p.ej. 0/1/2)
   clientRegistre: string | null; // 'YYYY-MM-DD' (DATE)
   estat: string;
+  ordre: number;
 }
