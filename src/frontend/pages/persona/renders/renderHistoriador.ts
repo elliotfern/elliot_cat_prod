@@ -38,7 +38,7 @@ export async function renderHistoriador(persona: PersonaView) {
 
   const json = await res.json();
 
-  if (json.status !== 'success' || !Array.isArray(json.data)) return null;
+  if (!json.success || !Array.isArray(json.data)) return null;
 
   const llibres = json.data;
 
