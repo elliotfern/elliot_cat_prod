@@ -65,9 +65,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -107,9 +107,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -150,9 +150,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -190,9 +190,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -225,9 +225,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -260,9 +260,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -296,7 +296,11 @@ if ($slug === 'directors') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -332,9 +336,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -370,7 +374,11 @@ if ($slug === 'directors') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -407,7 +415,11 @@ if ($slug === 'directors') {
             exit; // IMPORTANTE
         }
 
-        Response::success(MissatgesAPI::success('get'), $result, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
     } catch (\Throwable $e) {
         http_response_code(500);
         echo json_encode([
@@ -449,9 +461,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -491,9 +503,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -536,9 +548,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -574,9 +586,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -611,9 +623,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -658,9 +670,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -702,9 +714,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -751,9 +763,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $row,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -785,9 +797,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -821,9 +833,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -849,7 +861,11 @@ if ($slug === 'directors') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -870,7 +886,11 @@ if ($slug === 'directors') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -893,7 +913,11 @@ if ($slug === 'directors') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );;
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -915,7 +939,11 @@ if ($slug === 'directors') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -939,7 +967,11 @@ if ($slug === 'directors') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -960,7 +992,11 @@ if ($slug === 'directors') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -981,7 +1017,11 @@ if ($slug === 'directors') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -1002,7 +1042,11 @@ if ($slug === 'directors') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -1031,8 +1075,11 @@ if ($slug === 'directors') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
-        return;
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -1049,7 +1096,11 @@ if ($slug === 'directors') {
     try {
         $row = $query;
 
-        Response::success(MissatgesAPI::success('get'), $row, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -1065,7 +1116,11 @@ if ($slug === 'directors') {
             range(1, 31)
         );
 
-        Response::success(MissatgesAPI::success('get'), $rows, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $rows,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -1095,7 +1150,11 @@ if ($slug === 'directors') {
             $rows[] = ["id" => $i + 1, "mes" => $nom];
         }
 
-        Response::success(MissatgesAPI::success('get'), $rows, 200);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $rows,
+            httpCode: 200
+        );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
@@ -1129,9 +1188,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1171,9 +1230,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1213,9 +1272,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1255,9 +1314,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1297,9 +1356,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1339,9 +1398,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1381,9 +1440,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1423,9 +1482,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1465,9 +1524,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1507,9 +1566,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1553,9 +1612,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1595,9 +1654,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1631,9 +1690,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1673,9 +1732,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1715,9 +1774,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1758,9 +1817,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1800,9 +1859,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1843,9 +1902,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1887,9 +1946,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1931,9 +1990,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -1975,9 +2034,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -2019,9 +2078,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -2061,9 +2120,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -2103,9 +2162,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -2144,9 +2203,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -2186,9 +2245,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -2229,9 +2288,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $result,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -2266,9 +2325,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $metodes,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $metodes,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -2300,9 +2359,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $metodes,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $metodes,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -2336,9 +2395,9 @@ if ($slug === 'directors') {
         }
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $metodes,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $metodes,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(

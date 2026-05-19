@@ -13,6 +13,7 @@ use App\Modules\Clients\Schema\ClientSchema;
 use App\Modules\Pressupostos\Schema\PressupostSchema;
 use App\Modules\Emissors\Schema\EmissorSchema;
 use App\Utils\Schema\SchemaValidationException;
+use App\Services\ClientService;
 
 /** @var array $routeParams */
 /** @var array $conn */
@@ -48,128 +49,46 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: PUT");
 
 if ($slug === 'clients') {
-    $raw  = file_get_contents('php://input');
+
+    AdminMiddleware::handle();
+
+    $raw = file_get_contents('php://input');
     $data = json_decode($raw, true);
 
     if (!is_array($data)) {
         Response::error(
-            MissatgesAPI::error('validacio'),
-            ['JSON invàlid'],
-            400
+            message: MissatgesAPI::error('validacio'),
+            errors: ['JSON invàlid'],
+            httpCode: 400
         );
         return;
     }
 
-    // Datos normalizados y validados
+    $clientService = new ClientService($db);
+
     try {
-        $schema = ClientSchema::update();
-        $clientData = SchemaProcessor::process(
-            $data,
-            $schema
+
+        $result = $clientService->update($data);
+
+        Response::success(
+            message: MissatgesAPI::success('update'),
+            data: $result,
+            httpCode: 200
         );
     } catch (SchemaValidationException $e) {
 
         Response::error(
-            MissatgesAPI::error('validacio'),
-            $e->toApiArray(),
-            400
+            message: MissatgesAPI::error('validacio'),
+            errors: $e->toApiArray(),
+            httpCode: 400
         );
-        return;
-    }
-
-    try {
-        global $conn, $userUuid;
-        /** @var PDO $conn */
-        $conn->beginTransaction();
-
-        // recuperar variables ja normalitzades
-        $id = $clientData['id'];
-        $ciutat_id = $clientData['ciutat_id'];
-        $provincia_id = $clientData['provincia_id'];
-        $pais_id = $clientData['pais_id'];
-        $estat_id = $clientData['estat_id'];
-
-        $clientNom = $clientData['clientNom'];
-        $clientCognoms = $clientData['clientCognoms'];
-        $clientEmail = $clientData['clientEmail'];
-        $clientWeb = $clientData['clientWeb'];
-        $clientNIF = $clientData['clientNIF'];
-        $clientEmpresa = $clientData['clientEmpresa'];
-        $clientAdreca = $clientData['clientAdreca'];
-        $clientCP = $clientData['clientCP'];
-        $clientTelefon = $clientData['clientTelefon'];
-        $clientRegistre = $clientData['clientRegistre'];
-
-        // convertir uuid a binary16
-        $id_bin = uuid::toBinary($id);
-        $ciutat_id_bin = !empty($ciutat_id) ? uuid::toBinary($ciutat_id) : null;
-        $provincia_id_bin = !empty($provincia_id) ? uuid::toBinary($provincia_id) : null;
-        $pais_id_bin = !empty($pais_id) ? uuid::toBinary($pais_id) : null;
-        $estat_id_bin = !empty($estat_id) ? uuid::toBinary($estat_id) : null;
-
-        // Comprobar existencia
-        $chk = $conn->prepare("SELECT 1 FROM db_comptabilitat_clients WHERE id = :id");
-        $chk->bindValue(':id', $id_bin, PDO::PARAM_LOB);
-        $chk->execute();
-        if (!$chk->fetchColumn()) {
-            $conn->rollBack();
-            Response::error(MissatgesAPI::error('not_found'), ["Client id {$id} no existeix"], 404);
-            return;
-        }
-
-        $table = qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo);
-        $sql = <<<SQL
-                UPDATE {$table}
-                    SET clientNom = :clientNom,
-                       clientCognoms = :clientCognoms,
-                       clientEmail = :clientEmail,
-                       clientWeb = :clientWeb,
-                       clientNIF = :clientNIF,
-                       clientEmpresa = :clientEmpresa,
-                       clientAdreca = :clientAdreca,
-                       clientCP = :clientCP,
-                       ciutat_id = :ciutat_id,
-                       provincia_id = :provincia_id,
-                       pais_id = :pais_id,
-                       clientTelefon = :clientTelefon,
-                       estat_id = :estat_id,
-                       clientRegistre = :clientRegistre
-                    WHERE id = :id
-                SQL;
-
-        $stmt = $conn->prepare($sql);
-
-        $stmt->bindValue(':clientNom', $clientNom, PDO::PARAM_STR);
-        $stmt->bindValue(':clientCognoms', $clientCognoms, $clientCognoms !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientEmail', $clientEmail, $clientEmail !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientWeb', $clientWeb, $clientWeb !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientNIF', $clientNIF, $clientNIF !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientEmpresa', $clientEmpresa, $clientEmpresa !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientAdreca', $clientAdreca, $clientAdreca !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientCP', $clientCP, $clientCP !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-
-        $stmt->bindValue(':ciutat_id', $ciutat_id_bin, $ciutat_id_bin !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
-        $stmt->bindValue(':provincia_id', $provincia_id_bin, $provincia_id_bin !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
-        $stmt->bindValue(':pais_id', $pais_id_bin, $pais_id_bin !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
-        $stmt->bindValue(':estat_id', $estat_id_bin, $estat_id_bin !== null ? PDO::PARAM_LOB : PDO::PARAM_NULL);
-        $stmt->bindValue(':id', $id_bin, PDO::PARAM_LOB);
-
-        $stmt->bindValue(':clientTelefon', $clientTelefon, $clientTelefon !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientRegistre', $clientRegistre, $clientRegistre !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-
-        $stmt->execute();
-
-        // Auditoría
-        $detalls = sprintf("Actualització client: %s (%s)", $clientNom, $clientEmail ?? '-');
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_clients', $id);
-
-        $conn->commit();
-
-        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
     } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
-        return;
+
+        Response::error(
+            message: MissatgesAPI::error('errorBD'),
+            errors: [$e->getMessage()],
+            httpCode: 500
+        );
     }
 } else if ($slug === 'facturaClient' && $_SERVER['REQUEST_METHOD'] === 'PUT') {
     $inputData = file_get_contents('php://input');

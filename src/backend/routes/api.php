@@ -118,6 +118,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/comptabilitat/delete/{slug}' => [
+        'view' => 'src/backend/api/02_comptabilitat/delete-comptabilitat.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     '/api/comptabilitat/pdf/{slug}/{id}/{lang}' => [
         'view' => 'src/backend/api/02_comptabilitat/generate_pdf.php',
         'needs_session' => false,

@@ -10,7 +10,8 @@ use App\Config\Database;
 use App\Utils\Uuid;
 use Ramsey\Uuid\Uuid as ramsey;
 use App\Utils\Schema\SchemaProcessor;
-use App\Modules\Clients\Schema\ClientSchema;
+use App\Utils\AdminMiddleware;
+use App\Services\ClientService;
 use App\Modules\Pressupostos\Schema\PressupostSchema;
 use App\Modules\Emissors\Schema\EmissorSchema;
 use App\Utils\Schema\SchemaValidationException;
@@ -91,97 +92,46 @@ function generarNumeroFactura(PDO $db): string
 }
 
 if ($slug === 'clients') {
-    $raw  = file_get_contents('php://input');
+
+    AdminMiddleware::handle();
+
+    $raw = file_get_contents('php://input');
     $data = json_decode($raw, true);
 
     if (!is_array($data)) {
         Response::error(
-            MissatgesAPI::error('validacio'),
-            ['JSON invàlid'],
-            400
+            message: MissatgesAPI::error('validacio'),
+            errors: ['JSON invàlid'],
+            httpCode: 400
         );
         return;
     }
 
-    // Datos normalizados y validados
+    $clientService = new ClientService($db);
+
     try {
-        $schema = ClientSchema::create();
-        $clientData = SchemaProcessor::process(
-            $data,
-            $schema
+
+        $result = $clientService->create($data);
+
+        Response::success(
+            message: MissatgesAPI::success('create'),
+            data: $result,
+            httpCode: 201
         );
     } catch (SchemaValidationException $e) {
 
         Response::error(
-            MissatgesAPI::error('validacio'),
-            $e->toApiArray(),
-            400
+            message: MissatgesAPI::error('validacio'),
+            errors: $e->toApiArray(),
+            httpCode: 400
         );
-
-        return;
-    }
-
-    // conversió a Binary 16
-    $id            = $relUuid = ramsey::uuid7()->getBytes();
-    $ciutat_id     = $clientData['ciutat_id'] ?? null;
-    $provincia_id  = $clientData['provincia_id'] ?? null;
-    $pais_id       = $clientData['pais_id'] ?? null;
-    $estat_id       = $clientData['estat_id'] ?? null;
-
-    $ciutat_id = $ciutat_id ? Uuid::toBinary($ciutat_id) : null;
-    $provincia_id = $provincia_id ? Uuid::toBinary($provincia_id) : null;
-    $pais_id = $pais_id ? Uuid::toBinary($pais_id) : null;
-    $estat_id = $estat_id ? Uuid::toBinary($estat_id) : null;
-
-    try {
-
-        $conn->beginTransaction();
-        $table = qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo);
-
-        $sql = <<<SQL
-            INSERT INTO {$table}
-            (id, clientNom, clientCognoms, clientEmail, clientWeb, clientNIF, clientEmpresa, clientAdreca, clientCP,
-                ciutat_id, provincia_id, pais_id, clientTelefon, estat_id, clientRegistre)
-            VALUES
-            (:id, :clientNom, :clientCognoms, :clientEmail, :clientWeb, :clientNIF, :clientEmpresa, :clientAdreca, :clientCP, :ciutat_id, :provincia_id,:pais_id, :clientTelefon, :estat_id, :clientRegistre)
-            SQL;
-
-        $stmt = $db->getPdo()->prepare($sql);
-
-        $stmt->bindValue(':id', $id, PDO::PARAM_LOB);
-        $stmt->bindValue(':clientNom', $clientData['clientNom'], PDO::PARAM_STR);
-        $stmt->bindValue(':clientCognoms', $clientData['clientCognoms'] ?? null, $clientData['clientCognoms'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':clientEmail', $clientData['clientEmail'], PDO::PARAM_STR);
-        $stmt->bindValue(
-            ':clientWeb',
-            $clientData['clientWeb'],
-            $clientData['clientWeb'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
-        );
-        $stmt->bindValue(':clientNIF', $clientData['clientNIF'] ?? null, PDO::PARAM_STR);
-        $stmt->bindValue(':clientEmpresa', $clientData['clientEmpresa'] ?? null, PDO::PARAM_STR);
-        $stmt->bindValue(':clientAdreca', $clientData['clientAdreca'], PDO::PARAM_STR);
-        $stmt->bindValue(':clientCP', $clientData['clientCP'] ?? null, PDO::PARAM_STR);
-
-        $stmt->bindValue(':ciutat_id', $ciutat_id, PDO::PARAM_STR);
-        $stmt->bindValue(':provincia_id', $provincia_id, PDO::PARAM_STR);
-        $stmt->bindValue(':pais_id', $pais_id, PDO::PARAM_STR);
-
-        $stmt->bindValue(':clientTelefon', $clientData['clientTelefon'] ?? null, PDO::PARAM_STR);
-        $stmt->bindValue(':estat_id', $clientData['estat_id'], PDO::PARAM_STR);
-        $stmt->bindValue(':clientRegistre', $clientData['clientRegistre'], PDO::PARAM_STR);
-
-        $stmt->execute();
-
-        // Auditoría
-        $detalls = sprintf("Creació client: %s (%s)",  $clientData['clientNom'],  $clientData['clientEmail'] ?? '-');
-        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_clients', $id);
-
-        $conn->commit();
-
-        Response::success(MissatgesAPI::success('create'), ['id' => $id], 201);
     } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+
+        Response::error(
+            message: MissatgesAPI::error('errorBD'),
+            errors: [$e->getMessage()],
+            httpCode: 500
+        );
     }
 } else if ($slug === 'facturaClient') {
     $inputData = file_get_contents('php://input');
