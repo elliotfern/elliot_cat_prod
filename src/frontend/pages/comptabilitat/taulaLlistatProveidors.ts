@@ -1,11 +1,12 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
+import { Button } from '../../ui/button';
 import { API_URLS } from '../../utils/apiUrls';
-import { DOMAIN_WEB } from '../../utils/urls';
+import { INTRANET_URLS } from '../../utils/IntranetUrls';
 
 export interface Proveidor {
-  id: number;
+  id: string;
   nom: string;
   nif?: string;
   adreca?: string;
@@ -29,7 +30,7 @@ export async function taulaProveidors() {
       header: 'Nom',
       field: 'nom',
       render: (_: unknown, row: Proveidor) =>
-        `<a href="${DOMAIN_WEB}/gestio/comptabilitat/fitxa-proveidor/${row.id}">
+        `<a href="${INTRANET_URLS.COMPTABILITAT.PROVEIDOR_FITXA_ID(row.id)}">
            ${row.nom}
          </a>`,
     },
@@ -44,10 +45,7 @@ export async function taulaProveidors() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Proveidor) => `
-        <a href="${DOMAIN_WEB}/gestio/comptabilitat/modifica-proveidor/${row.id}">
-          <button class="btn-petit">Modifica</button>
-        </a>`,
+      render: (_, { id }) => Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.PROVEIDOR_MODIFICA_ID(id)),
     });
   }
 

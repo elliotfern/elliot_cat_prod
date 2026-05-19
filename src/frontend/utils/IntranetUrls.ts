@@ -5,8 +5,10 @@ import { INTRANET_WEB } from './urls';
 export const ENDPOINTS = {
   EMISSOR_MODIFICA: 'modifica-emissor',
   EMISSOR_FITXA: 'fitxa-emissor',
-  CLIENT_MODIFICA: 'modifica-emissor',
-  CLIENT_FITXA: 'fitxa-emissor',
+  CLIENT_MODIFICA: 'modifica-client',
+  CLIENT_FITXA: 'fitxa-client',
+  PROVEIDOR_MODIFICA: 'modifica-client',
+  PROVEIDOR_FITXA: 'fitxa-client',
 } as const;
 
 // Mapa de recursos disponibles
@@ -29,5 +31,7 @@ export const INTRANET_URLS: IntranetUrls = {
     EMISSOR_MODIFICA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.EMISSOR_MODIFICA}/${encodeURIComponent(id)}`,
     CLIENT_FITXA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.CLIENT_FITXA}/${encodeURIComponent(id)}`,
     CLIENT_MODIFICA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.CLIENT_MODIFICA}/${encodeURIComponent(id)}`,
+    PROVEIDOR_FITXA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.PROVEIDOR_FITXA}/${encodeURIComponent(id)}`,
+    PROVEIDOR_MODIFICA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.PROVEIDOR_MODIFICA}/${encodeURIComponent(id)}`,
   },
 };

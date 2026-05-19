@@ -895,7 +895,7 @@ SQL;
 
     AdminMiddleware::handle();
 
-    $proveidor_id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+    $proveidor_id = $_GET['id'];
 
     if (!$proveidor_id) {
         Response::error(
@@ -933,8 +933,8 @@ SQL;
     );
 
     try {
-        $params = ['id' => $proveidor_id];
-        $result = $db->getData($query, $params);
+        $params = ['id' => uuid::toBinary($proveidor_id)];
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(
