@@ -11,6 +11,7 @@ use App\Utils\Uuid;
 use App\Utils\Schema\SchemaProcessor;
 use App\Modules\Clients\Schema\ClientSchema;
 use App\Modules\Pressupostos\Schema\PressupostSchema;
+use App\Modules\Emissors\Schema\EmissorSchema;
 use App\Utils\Schema\SchemaValidationException;
 
 /** @var array $routeParams */
