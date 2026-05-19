@@ -718,7 +718,7 @@ if ($slug === 'clients') {
     $id = $emissorData['id'];
     $id = Uuid::toBinary($id);
 
-    $pais_id = $emissorData['pais'] ?? null;
+    $pais_id = $emissorData['pais_id'] ?? null;
     $pais_id = $pais_id ? Uuid::toBinary($pais_id) : null;
 
     // -------------------------
