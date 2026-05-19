@@ -677,6 +677,148 @@ if ($slug === 'clients') {
             500
         );
     }
+} else if ($slug === 'emissor') {
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['JSON invàlid'],
+            400
+        );
+        return;
+    }
+
+    // -------------------------
+    // SCHEMA VALIDATION
+    // -------------------------
+    try {
+        $schema = EmissorSchema::update();
+
+        $emissorData = SchemaProcessor::process(
+            $data,
+            $schema
+        );
+    } catch (SchemaValidationException $e) {
+
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            $e->toApiArray(),
+            400
+        );
+
+        return;
+    }
+
+    // -------------------------
+    // UUID / BINARY CONVERSION
+    // -------------------------
+    $id = $emissorData['id'];
+    $id = Uuid::toBinary($id);
+
+    $pais_id = $emissorData['pais'] ?? null;
+    $pais_id = $pais_id ? Uuid::toBinary($pais_id) : null;
+
+    // -------------------------
+    // UPDATE
+    // -------------------------
+    try {
+
+        $conn->beginTransaction();
+
+        $table = qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo);
+
+        $sql = <<<SQL
+        UPDATE {$table}
+        SET
+            nom = :nom,
+            nif = :nif,
+            numero_iva = :numero_iva,
+            pais_id = :pais_id,
+            adreca = :adreca,
+            telefon = :telefon,
+            email = :email,
+            updated_at = NOW()
+        WHERE id = :id
+    SQL;
+
+        $stmt = $conn->prepare($sql);
+
+        $stmt->bindValue(':id', $id, PDO::PARAM_LOB);
+
+        $stmt->bindValue(':nom', $emissorData['nom'], PDO::PARAM_STR);
+        $stmt->bindValue(':nif', $emissorData['nif'], PDO::PARAM_STR);
+
+        $stmt->bindValue(
+            ':numero_iva',
+            $emissorData['numero_iva'] ?? null,
+            $emissorData['numero_iva'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+        );
+
+        $stmt->bindValue(
+            ':pais_id',
+            $pais_id,
+            $pais_id !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+        );
+
+        $stmt->bindValue(
+            ':adreca',
+            $emissorData['adreca'] ?? null,
+            $emissorData['adreca'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+        );
+
+        $stmt->bindValue(
+            ':telefon',
+            $emissorData['telefon'] ?? null,
+            $emissorData['telefon'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+        );
+
+        $stmt->bindValue(
+            ':email',
+            $emissorData['email'] ?? null,
+            $emissorData['email'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
+        );
+
+        $stmt->execute();
+
+        // -------------------------
+        // AUDITORÍA
+        // -------------------------
+        $detalls = sprintf(
+            "Actualització emissor: %s (%s)",
+            $emissorData['nom'],
+            $emissorData['email'] ?? '-'
+        );
+
+        Audit::registrarCanvi(
+            $conn,
+            $userUuid,
+            "UPDATE",
+            $detalls,
+            'db_comptabilitat_emissors',
+            $id
+        );
+
+        $conn->commit();
+
+        Response::success(
+            MissatgesAPI::success('update'),
+            ['id' => $id],
+            200
+        );
+    } catch (Throwable $e) {
+
+        if ($conn->inTransaction()) {
+            $conn->rollBack();
+        }
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

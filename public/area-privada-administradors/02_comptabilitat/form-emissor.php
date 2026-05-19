@@ -6,13 +6,11 @@ use App\Utils\Url;
 <div id="barraNavegacioContenidor"></div>
 
 <h1>Gestió Comptabilitat i Clients</h1>
-<h2>Formulari Emissor factures</h2>
+<h2>Formulari Emissor factures<span id="titolForm"></span></h2>
 
 <div class="form">
-    <h3>
-        <div id="titolForm"></div>
-    </h3>
 
+    <!-- MESSAGES -->
     <div class="alert alert-success" id="okMessage" style="display:none" role="alert">
         <div id="okText"></div>
     </div>
@@ -21,132 +19,101 @@ use App\Utils\Url;
         <div id="errText"></div>
     </div>
 
-    <form method="POST" action="" class="needs-validation" id="formEmissor" novalidate>
+    <form method="POST" action="" id="formEmissor" class="needs-validation" novalidate>
 
         <input type="hidden" id="id" name="id" />
 
         <div class="row g-3">
 
+            <!-- NOM -->
             <div class="col-md-6">
-                <label for="nom" class="form-label fw-semibold">
-                    Nom i cognoms *
-                </label>
-
-                <input
+                <label for="nom" class="form-label">Nom i cognoms *</label>
+                <input type="text"
                     class="form-control"
-                    type="text"
-                    name="nom"
                     id="nom"
+                    name="nom"
                     required />
-
-                <div class="invalid-feedback">
-                    Camp obligatori.
-                </div>
+                <div class="invalid-feedback" id="error-nom"></div>
             </div>
 
+            <!-- NIF -->
             <div class="col-md-6">
-                <label for="nif" class="form-label fw-semibold">
-                    NIF *
-                </label>
-
-                <input
+                <label for="nif" class="form-label">NIF *</label>
+                <input type="text"
                     class="form-control"
-                    type="text"
-                    name="nif"
                     id="nif"
+                    name="nif"
                     required />
-
-                <div class="invalid-feedback">
-                    Camp obligatori.
-                </div>
+                <div class="invalid-feedback" id="error-nif"></div>
             </div>
 
+            <!-- IVA -->
             <div class="col-md-6">
-                <label for="numero_iva" class="form-label fw-semibold">
-                    Número IVA
-                </label>
-
-                <input
+                <label for="numero_iva" class="form-label">Número IVA</label>
+                <input type="text"
                     class="form-control"
-                    type="text"
-                    name="numero_iva"
-                    id="numero_iva" />
+                    id="numero_iva"
+                    name="numero_iva" />
+                <div class="invalid-feedback" id="error-numero_iva"></div>
             </div>
 
+            <!-- PAÍS -->
             <div class="col-md-6">
-                <label for="pais" class="form-label fw-semibold">
-                    País *
-                </label>
-
-                <select
-                    class="form-select"
-                    name="pais"
-                    id="pais"
-                    required>
-
-                    <!-- Omplir amb llistat de països -->
-
-                </select>
-
-                <div class="invalid-feedback">
-                    Selecciona un país.
-                </div>
+                <label for="pais_id" class="form-label">País *</label>
+                <select class="form-select"
+                    id="pais_id"
+                    name="pais_id"
+                    required></select>
+                <div class="invalid-feedback" id="error-pais_id"></div>
             </div>
 
+            <!-- ADREÇA -->
             <div class="col-md-6">
-                <label for="adreca" class="form-label fw-semibold">
-                    Adreça
-                </label>
-
-                <input
+                <label for="adreca" class="form-label">Adreça</label>
+                <input type="text"
                     class="form-control"
-                    type="text"
-                    name="adreca"
-                    id="adreca" />
+                    id="adreca"
+                    name="adreca" />
+                <div class="invalid-feedback" id="error-adreca"></div>
             </div>
 
+            <!-- TELÈFON -->
             <div class="col-md-6">
-                <label for="telefon" class="form-label fw-semibold">
-                    Telèfon
-                </label>
-
-                <input
+                <label for="telefon" class="form-label">Telèfon</label>
+                <input type="tel"
                     class="form-control"
-                    type="text"
-                    name="telefon"
-                    id="telefon" />
+                    id="telefon"
+                    name="telefon" />
+                <div class="invalid-feedback" id="error-telefon"></div>
             </div>
 
+            <!-- EMAIL -->
             <div class="col-md-6">
-                <label for="email" class="form-label fw-semibold">
-                    Email
-                </label>
-
-                <input
+                <label for="email" class="form-label">Email</label>
+                <input type="email"
                     class="form-control"
-                    type="email"
-                    name="email"
-                    id="email" />
+                    id="email"
+                    name="email" />
+                <div class="invalid-feedback" id="error-email"></div>
             </div>
 
         </div>
 
-        <!-- Botones -->
+        <!-- BOTONES -->
         <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
 
-            <a
-                href="<?php echo Url::intranet('comptabilitat'); ?>/llistat-emissors"
+            <a href="<?php echo Url::intranet('comptabilitat'); ?>/llistat-emissors"
                 class="btn btn-outline-secondary">
                 ← Tornar enrere
             </a>
 
-            <button
-                type="submit"
+            <button type="submit"
                 class="btn btn-primary"
                 id="btnEmissor">
                 Desar emissor
             </button>
 
         </div>
+
     </form>
 </div>

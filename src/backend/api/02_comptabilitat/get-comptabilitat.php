@@ -696,7 +696,7 @@ SQL;
     $emissor_id = (int) $_GET['id'];
 
     $sql = <<<SQL
-        SELECT e.id, e.nom, e.nif, e.numero_iva, e.pais, p.pais_ca, e.adreca, e.telefon, e.email
+        SELECT e.id, e.nom, e.nif, e.numero_iva, p.pais_ca, e.adreca, e.telefon, e.email
         FROM %s AS e
         LEFT JOIN %s AS p ON e.pais = p.id
         WHERE e.id = :emissor_id
