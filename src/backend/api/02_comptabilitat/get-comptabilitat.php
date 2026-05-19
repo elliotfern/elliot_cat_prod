@@ -653,7 +653,7 @@ SQL;
             e.created_at, 
             e.updated_at
         FROM %s AS e
-        LEFT JOIN %s AS p ON e.pais = p.id
+        LEFT JOIN %s AS p ON e.pais_id = p.id
         ORDER BY e.nom ASC
     SQL;
 

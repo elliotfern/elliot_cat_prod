@@ -40,7 +40,7 @@ class Response
         'servei_id',
         'categoria_id',
         'proveidor_id',
-        'emisor_id',
+        'emissor_id',
         'receptor_id',
         'subcategoria_id',
     ];
