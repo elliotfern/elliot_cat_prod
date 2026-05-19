@@ -10,7 +10,7 @@ interface Emissor {
   nom: string;
   nif: string;
   numero_iva?: string;
-  pais: number;
+  pais_id: number;
   adreca?: string;
   telefon?: string;
   email?: string;
@@ -28,7 +28,7 @@ export async function formEmissor(isUpdate: boolean, id?: string) {
   const btnSubmit = document.getElementById('btnEmissor') as HTMLButtonElement | null;
 
   let data: Partial<Emissor> = {
-    pais: 0,
+    pais_id: 0,
   };
 
   if (!form || !divTitol || !btnSubmit) return;
@@ -40,7 +40,7 @@ export async function formEmissor(isUpdate: boolean, id?: string) {
     if (!response || !response.data) return;
     data = response.data;
 
-    divTitol.innerHTML = `<h2>Modificació dades Emissor</h2>`;
+    divTitol.innerHTML = `Modificació dades Emissor`;
     btnSubmit.textContent = 'Modificar dades';
 
     renderFormInputs(data);
@@ -50,7 +50,7 @@ export async function formEmissor(isUpdate: boolean, id?: string) {
     });
   } else {
     // Creació nou emissor
-    divTitol.innerHTML = `<h2>Creació nou Emissor</h2>`;
+    divTitol.innerHTML = `Creació nou Emissor`;
     btnSubmit.textContent = 'Desar Emissor';
 
     form.addEventListener('submit', function (event) {
@@ -59,5 +59,5 @@ export async function formEmissor(isUpdate: boolean, id?: string) {
   }
 
   // Omplir select de països
-  await auxiliarSelect(data.pais ?? 0, 'paisos', 'pais', 'pais_ca');
+  await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais_ca');
 }
