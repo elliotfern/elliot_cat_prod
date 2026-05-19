@@ -645,7 +645,7 @@ SQL;
             e.nom, 
             e.nif, 
             e.numero_iva, 
-            e.pais as pais_id, 
+            e.pais_id, 
             p.pais_ca,
             e.adreca, 
             e.telefon, 
