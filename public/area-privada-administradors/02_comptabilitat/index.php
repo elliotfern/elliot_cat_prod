@@ -9,13 +9,12 @@ use App\Utils\Button;
 <h1>Gestió Comptabilitat i Clients</h1>
 <?php if (isUserAdmin()) { ?>
   <div class="d-flex flex-wrap gap-2 my-3">
-
     <?=
-    Button::create('Crear client', Routes::comptabilitat()->nouClient());
-    Button::create('Crear proveïdor', Routes::comptabilitat()->nouProveidor());
-    Button::create('Crear pressupost', Routes::comptabilitat()->nouPressupost());
-    Button::create('Crear factura', Routes::comptabilitat()->novaFactura());
-    Button::create('Crear factura proveïdor', Routes::comptabilitat()->novaFacturaProveidor()); ?>
+    Button::create('Crear client', Routes::comptabilitat()->nouClient()) .
+      Button::create('Crear proveïdor', Routes::comptabilitat()->nouProveidor()) .
+      Button::create('Crear pressupost', Routes::comptabilitat()->nouPressupost()) .
+      Button::create('Crear factura', Routes::comptabilitat()->novaFactura()) .
+      Button::create('Crear factura proveïdor', Routes::comptabilitat()->novaFacturaProveidor()) ?>
   </div>
 
   <div class="alert alert-success">

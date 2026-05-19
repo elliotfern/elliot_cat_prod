@@ -46,6 +46,20 @@ function pluckItems<T>(raw: unknown, dataKey?: string): T[] {
   return [];
 }
 
+function renderCellContent(content: string | HTMLElement | unknown): string {
+  if (content == null) return '';
+
+  if (typeof content === 'string') {
+    return content;
+  }
+
+  if (content instanceof HTMLElement) {
+    return content.outerHTML;
+  }
+
+  return String(content);
+}
+
 export async function renderDynamicTable<T extends object>(options: RenderTableOptions<T>): Promise<void> {
   const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField, filterSplitBy, filterSplitTrim = true } = options;
 
@@ -260,7 +274,9 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
           `<tr>${columns
             .map((col) => {
               const value = row[col.field];
-              return `<td>${col.render ? col.render(value, row) : String(value ?? '')}</td>`;
+              const rendered = col.render ? col.render(value, row) : String(value ?? '');
+
+              return `<td>${renderCellContent(rendered)}</td>`;
             })
             .join('')}</tr>`
       )

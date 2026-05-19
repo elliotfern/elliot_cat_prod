@@ -1,7 +1,9 @@
+export type RenderResult = string | HTMLElement;
+
 export type TaulaDinamica<T extends object> = {
   header: string;
   field: keyof T;
-  render?: (value: unknown, row: T) => string;
+  render?: (value: unknown, row: T) => RenderResult;
 };
 
 export type RenderTableOptions<T extends object> = {

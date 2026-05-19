@@ -113,6 +113,8 @@ export const API_URLS: ApiUrls = {
     EDUCACIO_I18N_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.EDUCACIO_I18N_ID}?id=${encodeURIComponent(id)}`,
     EDUCACIO_I18N_DETALL_ID: (id: number) => `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.GET}/${ENDPOINTS.EDUCACIO_I18N_DETALL_ID}?id=${encodeURIComponent(id)}`,
     PERSONA_DETALL_SLUG: (slug: string) => `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}/${slug}`,
+
+    // comptabilitat
     CIUTAT_ID: (id: string) => `${API_BASE}/${RESOURCES.AUXILIARS}/${TIPUS.GET}/${ENDPOINTS.CIUTAT_ID}?id=${encodeURIComponent(id)}`,
     PAIS_ID: (id: string) => `${API_WEB}/${ENDPOINTS.PAISOS}/${encodeURIComponent(id)}`,
     CLIENTS: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.CLIENTS}`,
@@ -122,6 +124,8 @@ export const API_URLS: ApiUrls = {
     FACTURA_CLIENT_ID: (id: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_ID}?id=${encodeURIComponent(id)}`,
     FACTURA_CLIENT_PRODUCTE_ID: (id: string) => `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.GET}/${ENDPOINTS.FACTURA_CLIENT_PRODUCTE_ID}?id=$
     {encodeURIComponent(id)}`,
+
+    // links
     TEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.TEMA_ID}?id=${encodeURIComponent(id)}`,
     SUBTEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.SUBTEMA_ID}?id=${encodeURIComponent(id)}`,
     LINK_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.LINK_ID}?id=${encodeURIComponent(id)}`,

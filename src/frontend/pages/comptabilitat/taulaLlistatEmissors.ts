@@ -2,11 +2,13 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-import { API_URLS } from '../../utils/apiUrls';
 import { mostrar } from '../../utils/renderText';
+import { Button } from '../../ui/button';
+import { INTRANET_URLS } from '../../utils/IntranetUrls';
+import { API_URLS } from '../../utils/apiUrls';
 
 interface Emissor {
-  id: number;
+  id: string;
   nom: string;
   nif: string;
   numero_iva: string;
@@ -28,7 +30,7 @@ export async function taulaLlistatEmissors() {
     {
       header: 'Nom',
       field: 'nom',
-      render: (_: unknown, row: Emissor) => `<a id="${row.id}" href="https://${window.location.hostname}/gestio/comptabilitat/fitxa-emissor/${row.id}">${row.nom}</a>`,
+      render: (_: unknown, row: Emissor) => `<a id="${row.id}" href="${INTRANET_URLS.COMPTABILITAT.EMISSOR_FITXA_ID(row.id)}">${row.nom}</a>`,
     },
     {
       header: 'NIF',
@@ -61,7 +63,7 @@ export async function taulaLlistatEmissors() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Emissor) => `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/comptabilitat/modifica-emissor/${row.id}"><button class="btn btn-edicio">Modifica</button></a>`,
+      render: (_, { id }) => Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.EMISSOR_MODIFICA_ID(id)),
     });
   }
 
