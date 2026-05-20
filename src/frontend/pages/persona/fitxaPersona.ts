@@ -71,11 +71,11 @@ export async function runFitxaBlocks(options: RunFitxaBlocksOptions) {
 // -------------------------
 // MAIN
 // -------------------------
-export async function fitxaPersona(url: string, id: string) {
+export async function fitxaPersona(url: string, slug: string) {
   try {
     // 1. API
     const personaApi = await api.get<Persona>(url, {
-      id,
+      slug,
     });
 
     // 2. VIEW NORMALIZADA
