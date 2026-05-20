@@ -538,10 +538,13 @@ if ($slug === 'totsLlibres') {
                     p.id AS autor_id,
                     p.nom AS autor_nom,
                     p.cognoms AS autor_cognoms,
-                    p.slug AS autor_slug
+                    p.slug AS autor_slug,
+                    i.nameImg,
+                    i.alt
                 FROM %s AS b
                 LEFT JOIN %s AS la ON la.llibre_id = b.id
                 LEFT JOIN %s AS p ON p.id = la.autor_id
+                LEFT JOIN %s AS i ON b.img_id = i.id
                 WHERE b.id = :id
             SQL;
 
@@ -550,6 +553,7 @@ if ($slug === 'totsLlibres') {
             qi(Tables::LLIBRES, $pdo),
             qi(Tables::LLIBRES_AUTORS, $pdo),
             qi(Tables::PERSONES, $pdo),
+            qi(Tables::IMG, $pdo)
         );
 
         $params = [':id' => uuid::toBinary($id)];
