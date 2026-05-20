@@ -574,22 +574,11 @@ if ($slug === 'totsLlibres') {
             'img_id'         => $first['img_id'],
             'alt'         => $first['alt'],
             'estat_id'       => $first['estat_id'],      // int
-            'nomEstat'    => $first['nomEstat'],   // texto
             'grup'    => $first['grup'],
-
             'tipus_id'    => $first['tipus_id'],
             'editorial_id' => $first['editorial_id'],
             'sub_tema_id' => $first['sub_tema_id'],
-
             'nameImg'     => $first['nameImg'],
-            'nomTipus'    => $first['nomTipus'],
-            'editorial'   => $first['editorial'],
-            'idioma_ca'   => $first['idioma_ca'],
-
-            'sub_tema' => $first['sub_tema'],
-            'tema'     => $first['tema'],
-            'nom_grup'    => $first['nom_grup'],
-            'idGrup'    => $first['idGrup'],
 
             // 2) autores
             'autors'      => [],
