@@ -17,7 +17,7 @@ export interface Llibre {
   // Compat legacy (por si algún endpoint viejo todavía devuelve esto)
   id_autor?: string;
   autorSlug?: string;
-  nom?: string | null;
+  nom: string;
   cognoms?: string | null;
   llibreSlug?: string;
 

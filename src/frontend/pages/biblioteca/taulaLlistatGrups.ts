@@ -2,7 +2,7 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Llibre } from '../../types/Llibre';
-import { API_BASE, DOMAIN_WEB } from '../../utils/urls';
+import { DOMAIN_WEB } from '../../utils/urls';
 import { buildFrontUrl, getLangPrefix } from '../../utils/locales/getLangPrefix';
 
 function escapeHtml(s: string): string {
@@ -33,7 +33,7 @@ export async function taulaLlistatGrups() {
   }
 
   renderDynamicTable<Llibre>({
-    url: `${API_BASE}/biblioteca/get/grupLlibre`,
+    url: `biblioteca/get/grupLlibre`,
     containerId: 'taulaLlistatGrups',
     columns,
     filterKeys: ['nom'],
