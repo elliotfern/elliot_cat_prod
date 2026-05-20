@@ -70,7 +70,7 @@ function initAuthorUI() {
   });
 }
 
-export async function formLlibre(isUpdate: boolean, llibre?: string) {
+export async function formLlibre(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formLlibre');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btn') as HTMLButtonElement;
@@ -83,10 +83,10 @@ export async function formLlibre(isUpdate: boolean, llibre?: string) {
 
   let data: Partial<Llibre> = {};
 
-  if (llibre && isUpdate) {
+  if (id && isUpdate) {
     try {
-      data = await api.get<Llibre>(`biblioteca/get/llibreSlug`, {
-        llibre,
+      data = await api.get<Llibre>(`biblioteca/get/llibreId`, {
+        id,
       });
     } catch (error) {
       console.error(error);
@@ -114,7 +114,6 @@ export async function formLlibre(isUpdate: boolean, llibre?: string) {
     }
 
     btnSubmit.textContent = 'Modificar dades';
-    const id = (data.id ?? '').toString();
 
     if (!id) {
       console.error('ID de persona no disponible');

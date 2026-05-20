@@ -12,8 +12,8 @@ const pageType = getPageType(url);
 
 export async function biblioteca() {
   if (pageType[2] === 'modifica-llibre') {
-    const slug = pageType[3];
-    formLlibre(true, slug);
+    const id = pageType[3];
+    formLlibre(true, id);
   } else if (pageType[2] === 'nou-llibre') {
     formLlibre(false);
   } else if ([pageType[1], pageType[2]].includes('llistat-autors')) {

@@ -506,6 +506,59 @@ if ($slug === 'totsLlibres') {
         exit;
     }
 
+    // 6) Book page
+    // ruta GET => "/api/biblioteca/get/llibreId?id=23refswerwr"
+} else if ($slug === 'llibreId') {
+
+    $id = $_GET['id'];
+
+    try {
+
+        $sql = <<<SQL
+                SELECT 
+                    b.id,
+                    b.titol_original,
+                    b.titol_catala,
+                    b.tipus_id,
+                    b.editorial_id,
+                    b.sub_tema_id,
+                    b.estat_id,
+                    b.slug,
+                    b.any,
+                    b.grup,
+                    b.dateCreated,
+                    b.dateModified,
+                    b.lang,
+                    b.img_id,
+                FROM %s AS b
+                WHERE b.id = :id
+                LIMIT 1
+                SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES, $pdo)
+        );
+
+        $params = [':id' => uuid::toBinary($id)];
+        $rows = $db->getData($query, $params, true);
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $rows,
+            httpCode: 200
+        );
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
     // 10) image author
     // ruta GET => "/api/biblioteca/get/auxiliarImatgesAutor"
 } else if ($slug == 'auxiliarImatgesAutor') {

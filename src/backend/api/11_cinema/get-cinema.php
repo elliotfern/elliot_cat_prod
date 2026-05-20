@@ -138,10 +138,10 @@ if ($slug === "pelicules") {
     }
 
     // GET : fitxa sèrie tv
-    // URL: https://elliot.cat/api/cinema/get/serie?serieSlug=benvinguts-a-la-familia
+    // URL: https://elliot.cat/api/cinema/get/serie?slug=benvinguts-a-la-familia
 } else if ($slug === "serie") {
 
-    $serie = $_GET['serieSlug'];
+    $serie = $_GET['slug'];
     AdminMiddleware::handle();
 
     $sql = <<<SQL
