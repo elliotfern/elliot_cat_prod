@@ -534,19 +534,81 @@ if ($slug === 'totsLlibres') {
                     b.dateCreated,
                     b.dateModified,
                     b.lang,
-                    b.img_id
+                    b.img_id,
+                    p.id AS autor_id,
+                    p.nom AS autor_nom,
+                    p.cognoms AS autor_cognoms,
+                    p.slug AS autor_slug
                 FROM %s AS b
+                LEFT JOIN %s AS la ON la.llibre_id = b.id
+                LEFT JOIN %s AS p ON p.id = la.autor_id
                 WHERE b.id = :id
-                LIMIT 1
-                SQL;
+            SQL;
 
         $query = sprintf(
             $sql,
-            qi(Tables::LLIBRES, $pdo)
+            qi(Tables::LLIBRES, $pdo),
+            qi(Tables::LLIBRES_AUTORS, $pdo),
+            qi(Tables::PERSONES, $pdo),
         );
 
         $params = [':id' => uuid::toBinary($id)];
-        $result = $db->getData($query, $params, true);
+        $rows = $db->getData($query, $params);
+
+        // 1) Datos del libro = primera fila
+        $first = $rows[0];
+
+        $result = [
+            'id'          => $first['id'],
+            'titol_original'       => $first['titol_original'],
+            'titol_catala' => $first['titol_catala'],
+            'slug'        => $first['slug'],
+            'any'         => $first['any'],
+            'dateCreated' => $first['dateCreated'],
+            'dateModified' => $first['dateModified'],
+            'lang'        => $first['lang'],
+            'img_id'         => $first['img_id'],
+            'alt'         => $first['alt'],
+            'estat_id'       => $first['estat_id'],      // int
+            'nomEstat'    => $first['nomEstat'],   // texto
+            'grup'    => $first['grup'],
+
+            'tipus_id'    => $first['tipus_id'],
+            'editorial_id' => $first['editorial_id'],
+            'sub_tema_id' => $first['sub_tema_id'],
+
+            'nameImg'     => $first['nameImg'],
+            'nomTipus'    => $first['nomTipus'],
+            'editorial'   => $first['editorial'],
+            'idioma_ca'   => $first['idioma_ca'],
+
+            'sub_tema' => $first['sub_tema'],
+            'tema'     => $first['tema'],
+            'nom_grup'    => $first['nom_grup'],
+            'idGrup'    => $first['idGrup'],
+
+            // 2) autores
+            'autors'      => [],
+        ];
+
+        // 2) Construir array de autores (deduplicado por seguridad)
+        $seen = [];
+
+        foreach ($rows as $r) {
+            if (empty($r['autor_id'])) continue; // libro sin autores
+
+            $aid = $r['autor_id'];
+            if (isset($seen[$aid])) continue;
+
+            $seen[$aid] = true;
+
+            $result['autors'][] = [
+                'id'      => $aid,
+                'nom'     => $r['autor_nom'],
+                'cognoms' => $r['autor_cognoms'],
+                'slug'    => $r['autor_slug'],
+            ];
+        }
 
         Response::success(
             message: MissatgesAPI::success('get'),
