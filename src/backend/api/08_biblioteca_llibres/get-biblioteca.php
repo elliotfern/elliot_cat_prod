@@ -510,7 +510,12 @@ if ($slug === 'totsLlibres') {
     // ruta GET => "/api/biblioteca/get/llibreId?id=23refswerwr"
 } else if ($slug === 'llibreId') {
 
-    $id = $_GET['id'];
+    $id = $_GET['id'] ?? null;
+
+    if (!$id) {
+        Response::error('Missing id', [], 400);
+        exit;
+    };
 
     try {
 
@@ -529,7 +534,7 @@ if ($slug === 'totsLlibres') {
                     b.dateCreated,
                     b.dateModified,
                     b.lang,
-                    b.img_id,
+                    b.img_id
                 FROM %s AS b
                 WHERE b.id = :id
                 LIMIT 1
@@ -541,11 +546,11 @@ if ($slug === 'totsLlibres') {
         );
 
         $params = [':id' => uuid::toBinary($id)];
-        $rows = $db->getData($query, $params, true);
+        $result = $db->getData($query, $params, true);
 
         Response::success(
             message: MissatgesAPI::success('get'),
-            data: $rows,
+            data: $result,
             httpCode: 200
         );
     } catch (\Throwable $e) {
