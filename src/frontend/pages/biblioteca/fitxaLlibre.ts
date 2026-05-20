@@ -3,13 +3,13 @@ import { renderFitxa } from '../../utils/renderFitxa';
 import { mapLlibreToFitxa } from '../../components/mappers/llibre';
 import { Llibre } from '../../types/Llibre';
 
-export async function fitxaLlibre(baseUrl: string, slug: string) {
+export async function fitxaLlibre(baseUrl: string, llibre: string) {
   try {
-    const llibre = await api.get<Llibre>(baseUrl, {
-      slug,
+    const data = await api.get<Llibre>(baseUrl, {
+      llibre,
     });
 
-    const fitxa = mapLlibreToFitxa(llibre);
+    const fitxa = mapLlibreToFitxa(data);
 
     renderFitxa({
       containerId: 'fitxaLlibre',
@@ -23,7 +23,7 @@ export async function fitxaLlibre(baseUrl: string, slug: string) {
       editButton: {
         basePath: 'biblioteca',
         action: 'modifica-llibre',
-        id: llibre.id,
+        id: data.id,
         label: 'Modifica llibre',
       },
     });

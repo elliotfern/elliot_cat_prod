@@ -27,7 +27,7 @@ export async function cinema() {
     const url = 'cinema/get/pelicula?peliSlug=';
     fitxaPelicula(url, idSlug);
   } else if (slug === 'fitxa-serie') {
-    const url = 'cinema/get/serie?serieSlug=';
+    const url = 'cinema/get/serie';
     fitxaSerie(url, idSlug);
   }
 }

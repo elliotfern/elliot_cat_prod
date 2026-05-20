@@ -24,7 +24,7 @@ export async function biblioteca() {
     taulaLlistatGrups();
   } else if (pageType[2] === 'fitxa-llibre') {
     const slug = pageType[3];
-    fitxaLlibre(`biblioteca/get/`, slug);
+    fitxaLlibre(`biblioteca/get/llibreSlug`, slug);
   } else if (pageType[2] === 'fitxa-llibre-autors') {
     const slug = pageType[3];
     initLlibreAutorsPage(slug);
