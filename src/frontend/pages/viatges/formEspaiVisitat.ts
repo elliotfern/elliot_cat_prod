@@ -1,46 +1,28 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { EspaiVisitat } from '../../types/Espai';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
-interface Fitxa {
-  [key: string]: unknown;
-  grup_ids?: string[];
-  status: string;
-  message: string;
-  id: string;
-  viatge_id: string;
-  espai_id: string;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
-
-export async function formEspaiVisitat(isUpdate: boolean, slug?: string) {
+export async function formEspaiVisitat(isUpdate: boolean, espai?: string) {
   const form = document.getElementById('formEspai');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnEspai') as HTMLButtonElement;
 
-  let data: Partial<Fitxa> = {
-    comarca: 0,
-    provincia: 0,
-    comunitat: 0,
-    estat: 0,
-    id: '',
-    descripcio: '',
-  };
+  let data: Partial<EspaiVisitat> = {};
 
   if (!divTitol || !btnSubmit || !form) return;
 
-  if (slug && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(`https://elliot.cat/api/viatges/get/fitxaEspaiVisitat?espai=${slug}`, true);
+  if (espai && isUpdate) {
+    try {
+      data = await api.get<EspaiVisitat>(`viatges/get/fitxaEspaiVisitat`, {
+        espai,
+      });
+    } catch (error) {
+      console.error(error);
 
-    if (!response || !response.data) return;
-    data = response.data;
-    console.log(data);
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació dades Espai visitat</h2>`;
 

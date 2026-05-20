@@ -747,14 +747,58 @@ if ($slug === 'directors') {
           c.descripcio,
           c.pais_id
         FROM %s AS c
-        WHERE c.id = uuid_text_to_bin(:id)
+        WHERE c.id = :id
         LIMIT 1
         SQL;
 
     $query = sprintf($sql, qi(Tables::DB_CIUTATS, $pdo));
 
     try {
-        $params = [':id' => $id];
+        $params = [':id' => uuid::toBinary($id)];
+        $row = $db->getData($query, $params, true); // true => una sola fila
+
+        if (!$row) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : Pais ID informació
+    // URL: https://elliot.cat/api/auxiliars/get/paisId?id=33
+} else if ($slug === "paisId") {
+
+    $id = $_GET['id'] ?? null;
+
+    // Validación rápida del UUID texto
+    if (!$id || !preg_match('~^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$~i', $id)) {
+        Response::error(MissatgesAPI::error('validacio'), ['Parametre "id" no és un UUID vàlid'], 400);
+        return;
+    }
+
+    $sql = <<<SQL
+        SELECT
+          c.id, c.pais_ca, c.pais_en
+        FROM %s AS c
+        WHERE c.id = :id
+        LIMIT 1
+        SQL;
+
+    $query = sprintf($sql, qi(Tables::DB_PAISOS, $pdo));
+
+    try {
+        $params = [':id' => uuid::toBinary($id)];
         $row = $db->getData($query, $params, true); // true => una sola fila
 
         if (!$row) {

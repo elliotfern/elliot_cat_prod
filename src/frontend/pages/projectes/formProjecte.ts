@@ -1,39 +1,9 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { ProjecteDetalls } from '../../types/Projecte';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-
-interface FitxaProjecte {
-  [key: string]: unknown;
-
-  // DB
-  id: number;
-  name: string;
-  description: string | null;
-
-  status: number; // tinyint unsigned (default 1)
-  category_id: number | null;
-
-  start_date: string | null; // YYYY-MM-DD
-  end_date: string | null; // YYYY-MM-DD
-
-  priority: number; // tinyint unsigned (default 3)
-
-  client_id: number | null;
-  budget_id: number | null;
-  invoice_id: number | null;
-
-  // Meta (no editable, pero puede venir en el GET)
-  created_at?: string;
-  updated_at?: string;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 export async function formProjecte(isUpdate: boolean, id?: number) {
   const form = document.getElementById('formProjecte') as HTMLFormElement | null;
@@ -42,17 +12,7 @@ export async function formProjecte(isUpdate: boolean, id?: number) {
 
   if (!divTitol || !btnSubmit || !form) return;
 
-  let data: Partial<FitxaProjecte> = {
-    status: 1,
-    priority: 3,
-    category_id: null,
-    client_id: null,
-    budget_id: null,
-    invoice_id: null,
-    start_date: null,
-    end_date: null,
-    description: null,
-  };
+  let data: Partial<ProjecteDetalls> = {};
 
   // Esperar a que existan los selects en DOM (muy importante si el HTML se inyecta)
   async function waitForElement(id: string, timeoutMs = 2000): Promise<HTMLElement | null> {
@@ -71,10 +31,15 @@ export async function formProjecte(isUpdate: boolean, id?: number) {
   await waitForElement('invoice_id');
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<FitxaProjecte>>(API_URLS.GET.PROJECTE_ID(id), true);
-    if (!response || !response.data) return;
+    try {
+      data = await api.get<ProjecteDetalls>(API_URLS.GET.PROJECTE_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    data = response.data;
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació del projecte</h2>`;
     btnSubmit.textContent = 'Modificar dades';
@@ -96,7 +61,6 @@ export async function formProjecte(isUpdate: boolean, id?: number) {
     btnSubmit.textContent = 'Inserir dades';
 
     // cargar selects sin selección
-    console.log('FOrm create');
     await auxiliarSelect(null, 'projectes_categories', 'category_id', 'name');
     await auxiliarSelect(null, 'clients', 'client_id', 'clientEmpresa');
     await auxiliarSelect(null, 'budgets', 'budget_id', 'concepte');

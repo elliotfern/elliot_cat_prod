@@ -1,6 +1,5 @@
 export interface Client {
   id: string; // PK (INT)
-
   clientNom: string; // VARCHAR
   clientCognoms: string | null; // VARCHAR
   clientEmail: string | null; // VARCHAR

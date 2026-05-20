@@ -1,31 +1,7 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { EducacioCv } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
 import { DOMAIN_IMG } from '../../utils/urls';
-
-interface Educacio {
-  id: number;
-  institucio: string;
-  institucio_url?: string | null;
-  institucio_localitzacio?: string | null;
-  data_inici?: string | null;
-  data_fi?: string | null;
-  logo_id?: number | null;
-  posicio: number;
-  visible: number | boolean;
-  created_at: string;
-  updated_at: string;
-
-  // extra de la API
-  nameImg?: string | null;
-  ciutat?: string | null;
-  pais_ca?: string | null;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T[];
-}
 
 const esc = (s: unknown) =>
   String(s ?? '')
@@ -43,7 +19,7 @@ function fmtDate(dateStr?: string | null): string {
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-function renderTable(rows: Educacio[]): string {
+function renderTable(rows: EducacioCv[]): string {
   if (!rows.length) {
     return `<div class="alert alert-secondary">No hi ha registres d'educació.</div>`;
   }
@@ -97,19 +73,14 @@ export async function vistaEducacio(): Promise<void> {
   if (!root) return;
   root.innerHTML = spinner();
 
+  let data: EducacioCv[];
+
   try {
-    const url = API_URLS.GET.EDUCACIO_CV;
-    const res = await fetchDataGet<ApiResponse<Educacio>>(url, true);
-
-    if (res) {
-      if (res.status !== 'success') {
-        root.innerHTML = `<div class="alert alert-danger">${esc(res.message)}</div>`;
-        return;
-      }
-
-      root.innerHTML = renderTable(res.data);
-    }
-  } catch (e: any) {
-    root.innerHTML = `<div class="alert alert-danger">${esc(e?.message ?? 'Error carregant dades')}</div>`;
+    data = await api.get<EducacioCv[]>(API_URLS.GET.EDUCACIO_CV);
+    root.innerHTML = renderTable(data);
+  } catch (error) {
+    console.error(error);
+    root.innerHTML = `<div class="alert alert-danger">${esc(error)}</div>`;
+    return;
   }
 }

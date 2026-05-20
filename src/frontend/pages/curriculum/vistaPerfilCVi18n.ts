@@ -1,20 +1,6 @@
-// src/pages/curriculum/vistaPerfilCVI18n.ts
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { PerfilCVI18n } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
-
-interface PerfilCVI18n {
-  id: number;
-  perfil_id: number;
-  locale: number; // 1=ca, 3=es, 2=en, 4=it
-  titular: string;
-  sumari: string;
-}
-
-interface ApiResponse<T> {
-  status: 'success' | 'error';
-  message: string;
-  data: T;
-}
 
 const LOCALES = [
   { id: 1, code: 'ca', label: 'Català' },
@@ -60,12 +46,12 @@ function layoutHTML(perfilId: number) {
   `;
 }
 
-export async function vistaPerfilCVi18n(perfilId = 1): Promise<void> {
+export async function vistaPerfilCVi18n(id = 1): Promise<void> {
   const root = document.getElementById('apiResults');
   if (!root) return;
 
   // Dibuja UI base
-  root.innerHTML = layoutHTML(perfilId);
+  root.innerHTML = layoutHTML(id);
 
   const content = root.querySelector('#localeContent') as HTMLElement;
   const tabBar = root.querySelector('.nav-tabs') as HTMLElement;
@@ -110,19 +96,19 @@ export async function vistaPerfilCVi18n(perfilId = 1): Promise<void> {
       return;
     }
     content.innerHTML = spinner();
+
+    let data: PerfilCVI18n;
     try {
-      const url = API_URLS.GET.PERFIL_CV_I18N_ID(perfilId, locale);
-      const res = await fetchDataGet<ApiResponse<PerfilCVI18n>>(url, true);
-      if (res) {
-        if (res.status !== 'success' || !res.data) {
-          content.innerHTML = errorBox(res.message || "No s'han trobat dades per a aquest idioma.");
-          return;
-        }
-        cache.set(locale, res.data);
-        render(res.data);
-      }
-    } catch (e: any) {
-      content.innerHTML = errorBox(e?.message ?? 'Error carregant les dades');
+      data = await api.get<PerfilCVI18n>(API_URLS.GET.PERFIL_CV_I18N_ID, {
+        id,
+        locale,
+      });
+      cache.set(locale, data);
+      render(data);
+    } catch (error) {
+      console.error(error);
+      content.innerHTML = errorBox("No s'han trobat dades per a aquest idioma.");
+      return;
     }
   };
 

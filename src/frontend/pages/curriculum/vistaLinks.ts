@@ -1,23 +1,7 @@
-// src/pages/curriculum/vistaLinks.ts
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { LinkItem } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
 import { DOMAIN_IMG } from '../../utils/urls';
-
-interface LinkItem {
-  id: number;
-  perfil_id: number;
-  label: string | null;
-  url: string;
-  posicio: number;
-  visible: 0 | 1 | boolean;
-  nameImg: string;
-}
-
-interface ApiResponse<T> {
-  status: 'success' | 'error';
-  message: string;
-  data: T;
-}
 
 const esc = (s: unknown) =>
   String(s ?? '')
@@ -108,20 +92,14 @@ export async function vistaLinks(): Promise<void> {
   if (!root) return;
   root.innerHTML = spinner();
 
+  let data: LinkItem[];
+
   try {
-    const url = API_URLS.GET.LINKS_CV;
-    const res = await fetchDataGet<ApiResponse<LinkItem[]>>(url, true);
-
-    if (res) {
-      if (res.status !== 'success') {
-        root.innerHTML = errorBox(res.message || 'Error desconegut');
-        return;
-      }
-
-      const items = Array.isArray(res.data) ? res.data : [];
-      root.innerHTML = renderTable(items);
-    }
-  } catch (e: any) {
-    root.innerHTML = errorBox(e?.message ?? 'Error carregant les dades');
+    data = await api.get<LinkItem[]>(API_URLS.GET.LINKS_CV);
+    root.innerHTML = renderTable(data);
+  } catch (error) {
+    console.error(error);
+    root.innerHTML = errorBox('Error desconegut');
+    return;
   }
 }

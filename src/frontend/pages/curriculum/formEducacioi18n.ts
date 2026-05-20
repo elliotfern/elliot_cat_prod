@@ -1,51 +1,29 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { EducacioCvI18n } from '../../types/Curriculum';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-import { setTrixHTML } from '../../utils/setTrix';
-
-interface Fitxa {
-  [key: string]: unknown;
-  status: string;
-  message: string;
-  id: number;
-  espai_cat: string;
-  municipi: number;
-  comarca: number;
-  provincia: number;
-  comunitat: number;
-  estat: number;
-  experiencia_id: number;
-  educacio_id: number;
-  locale: number;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 export async function formEducacioi18(isUpdate: boolean, id?: number) {
   const form = document.getElementById('formEducacioI18n');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnEducacioi18n') as HTMLButtonElement;
 
-  let data: Partial<Fitxa> = {
-    comarca: 0,
-    provincia: 0,
-    comunitat: 0,
-    estat: 0,
-  };
+  let data: Partial<EducacioCvI18n> = {};
 
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.EDUCACIO_I18N_ID(id), true);
+    try {
+      data = await api.get<EducacioCvI18n>(API_URLS.GET.EDUCACIO_I18N_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    if (!response || !response.data) return;
-    data = response.data;
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació educació i18n del currículum</h2>`;
 

@@ -1,49 +1,29 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { PerfilCV } from '../../types/Curriculum';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-
-interface Fitxa {
-  [key: string]: unknown;
-  status: string;
-  message: string;
-  id: number;
-  espai_cat: string;
-  municipi: number;
-  comarca: number;
-  provincia: number;
-  comunitat: number;
-  estat: number;
-  localitzacio_ciutat: number;
-  img_perfil: number;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 export async function formPerfil(isUpdate: boolean, id?: number) {
   const form = document.getElementById('formCVPerfil');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnCVPerfil') as HTMLButtonElement;
 
-  let data: Partial<Fitxa> = {
-    comarca: 0,
-    provincia: 0,
-    comunitat: 0,
-    estat: 0,
-  };
+  let data: Partial<PerfilCV> = {};
 
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PERFIL_CV_ID(id), true);
+    try {
+      data = await api.get<PerfilCV>(API_URLS.GET.PERFIL_CV_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    if (!response || !response.data) return;
-    data = response.data;
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació perfil currículum</h2>`;
 

@@ -1,53 +1,12 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { Tasca } from '../../types/Tasca';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
-interface FitxaTask {
-  [key: string]: unknown;
-
-  // DB
-  id: number;
-  project_id: number | null;
-
-  title: string;
-  subject: string | null;
-  notes: string | null;
-
-  status: number; // tinyint unsigned (default 1)
-  priority: number; // tinyint unsigned (default 3)
-
-  planned_date: string | null; // YYYY-MM-DD
-  is_next: number; // tinyint(1) default 0
-
-  blocked_reason: string | null;
-  estimated_hours: number | null; // decimal(6,2)
-
-  // Meta (puede venir en GET)
-  created_at?: string;
-  updated_at?: string;
-  done_at?: string | null;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
-
 export async function formTask(isUpdate: boolean, id?: number) {
-  let data: Partial<FitxaTask> = {
-    status: 1,
-    priority: 3,
-    project_id: null,
-    planned_date: null,
-    estimated_hours: null,
-    is_next: 0,
-    subject: null,
-    notes: null,
-    blocked_reason: null,
-  };
+  let data: Partial<Tasca> = {};
 
   async function waitForElement(idEl: string, timeoutMs = 4000): Promise<HTMLElement | null> {
     const start = Date.now();
@@ -103,10 +62,15 @@ export async function formTask(isUpdate: boolean, id?: number) {
   }
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<FitxaTask>>(API_URLS.GET.TASK_ID(id), true);
-    if (!response || !response.data) return;
+    try {
+      data = await api.get<Tasca>(API_URLS.GET.TASK_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    data = response.data;
+      return;
+    }
 
     // Título y botón
     if ('innerHTML' in divTitol) {

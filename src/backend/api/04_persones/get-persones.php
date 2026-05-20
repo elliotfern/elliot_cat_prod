@@ -208,18 +208,10 @@ if ($slug === 'llistatPersones') {
         exit;
     }
 
-    // ruta GET => "/api/persones/get/?grupPersona={id}"
-} else if (isset($_GET['grupPersona'])) {
+    // ruta GET => "/api/persones/get/grupPersona?id={id}"
+} else if ($slug === 'grupPersona') {
 
-    $id = $_GET['grupPersona'] ?? null;
-
-    $idHex = str_replace('-', '', strtolower($id));
-    if (!ctype_xdigit($idHex) || strlen($idHex) !== 32) {
-        Response::error(MissatgesAPI::error('invalid_data'), ['id' => 'invalid_uuid'], 400);
-        exit;
-    }
-
-    $idBytes = hex2bin($idHex);
+    $id = $_GET['id'] ?? null;
 
     try {
         if (empty($id)) {
@@ -229,18 +221,12 @@ if ($slug === 'llistatPersones') {
 
         $db = new Database();
 
-        $query = "SELECT LOWER(CONCAT_WS('-',
-        SUBSTR(HEX(a.id), 1, 8),
-        SUBSTR(HEX(a.id), 9, 4),
-        SUBSTR(HEX(a.id), 13, 4),
-        SUBSTR(HEX(a.id), 17, 4),
-        SUBSTR(HEX(a.id), 21)
-        )) AS id, a.grup_ca, a.grup_es, a.grup_en, a.grup_it, a.grup_fr
+        $query = "SELECT id, a.grup_ca, a.grup_es, a.grup_en, a.grup_it, a.grup_fr
          FROM " . Tables::PERSONES_GRUPS . " AS a
          WHERE a.id = :id
          LIMIT 1";
 
-        $params = [':id' => $idBytes];
+        $params = [':id' => uuid::toBinary($id)];
         $result = $db->getData($query, $params);
 
         if (empty($result)) {

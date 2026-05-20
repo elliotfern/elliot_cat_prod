@@ -1,35 +1,9 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { Client } from '../../types/Client';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-
-interface Fitxa {
-  id: number;
-  clientNom: string;
-  clientCognoms: string | null;
-  clientEmail: string | null;
-  clientWeb: string | null;
-  clientNIF: string | null;
-  clientEmpresa: string | null;
-  clientAdreca: string | null;
-  clientCP: string | null;
-
-  // UUID texto o null
-  pais_id: string | null;
-  provincia_id: string | null;
-  ciutat_id: string | null;
-
-  clientTelefon: string | null;
-  estat_id: string | null;
-  clientRegistre?: string | null; // 'YYYY-MM-DD'
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 const ZERO_UUID = /^0{8}-0{4}-0{4}-0{4}-0{12}$/i;
 function nilUuid(u: string | null | undefined): string | null {
@@ -46,26 +20,29 @@ export async function formClient(isUpdate: boolean, id?: string) {
   const btnSubmit = document.getElementById('btnClient') as HTMLButtonElement | null;
   if (!divTitol || !btnSubmit || !form) return;
 
-  let record: Partial<Fitxa> = {};
+  let data: Partial<Client> = {};
 
   if (id && isUpdate) {
-    // 👇 La API puede devolver data como objeto o array
-    const resp = await fetchDataGet<ApiResponse<Fitxa | Fitxa[]>>(API_URLS.GET.CLIENT_ID(id), true);
-    const data = first(resp?.data);
-    if (!data) return;
+    try {
+      data = await api.get<Client>(API_URLS.GET.CLIENT_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
+
+      return;
+    }
 
     // 🔧 UUID “cero” → null
     data.pais_id = nilUuid(data.pais_id);
     data.provincia_id = nilUuid(data.provincia_id);
     data.ciutat_id = nilUuid(data.ciutat_id);
 
-    record = data;
-
     divTitol.innerHTML = `Client: ${data.clientNom} ${data.clientCognoms}`;
     btnSubmit.textContent = 'Modificar dades';
 
     // Pinta inputs (no fuerza selects vacíos; auxiliarSelect los preseleccionará)
-    renderFormInputs(record);
+    renderFormInputs(data);
 
     form.addEventListener('submit', (event) => {
       transmissioDadesDB(event, 'PUT', 'formClient', API_URLS.PUT.CLIENT);
@@ -80,8 +57,8 @@ export async function formClient(isUpdate: boolean, id?: string) {
   }
 
   // --- Selects auxiliares (preselección segura) ---
-  await auxiliarSelect(record.pais_id ?? null, 'paisos', 'pais_id', 'pais_ca');
-  await auxiliarSelect(record.provincia_id ?? null, 'provincies', 'provincia_id', 'provincia_ca');
-  await auxiliarSelect(record.ciutat_id ?? null, 'ciutats', 'ciutat_id', 'ciutat');
-  await auxiliarSelect(record.estat_id ?? null, 'estatsClients', 'estat_id', 'estat');
+  await auxiliarSelect(data.pais_id ?? null, 'paisos', 'pais_id', 'pais_ca');
+  await auxiliarSelect(data.provincia_id ?? null, 'provincies', 'provincia_id', 'provincia_ca');
+  await auxiliarSelect(data.ciutat_id ?? null, 'ciutats', 'ciutat_id', 'ciutat');
+  await auxiliarSelect(data.estat_id ?? null, 'estatsClients', 'estat_id', 'estat');
 }

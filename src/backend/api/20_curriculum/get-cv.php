@@ -78,10 +78,10 @@ if ($slug === "perfilCV") {
     }
 
     // GET : Perfil CV i18n ID
-    // URL: https://elliot.cat/api/curriculum/get/perfilCVI18n?perfil_id=1&locale=1
+    // URL: https://elliot.cat/api/curriculum/get/perfilCVI18n?id=1&locale=1
 } else if ($slug === "perfilCVi18n") {
 
-    $perfilId = 1;
+    $perfilId = isset($_GET['id']) ? (int)$_GET['id'] : null;
     $locale   = isset($_GET['locale']) ? (int)$_GET['locale'] : null;
 
     $db = new Database();

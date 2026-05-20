@@ -1,28 +1,8 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { Proveidor } from '../../types/Proveidor';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-
-interface Proveidor {
-  id?: number;
-  nom: string;
-  nif?: string;
-  adreca?: string;
-  ciutat?: string;
-  codi_postal?: string;
-  pais?: string;
-  telefon?: string;
-  email?: string;
-  web?: string;
-  contacte?: string;
-  notes?: string;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 export async function formProveidor(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formProveidor') as HTMLFormElement | null;
@@ -35,10 +15,15 @@ export async function formProveidor(isUpdate: boolean, id?: string) {
 
   // Si es actualización, cargamos los datos
   if (isUpdate && id) {
-    const response = await fetchDataGet<ApiResponse<Proveidor>>(API_URLS.GET.PROVEIDOR_ID(id), true);
-    if (!response || !response.data) return;
+    try {
+      data = await api.get<Proveidor>(API_URLS.GET.PROVEIDOR_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    data = response.data;
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació Proveïdor</h2>`;
     btnSubmit.textContent = 'Modificar Proveïdor';

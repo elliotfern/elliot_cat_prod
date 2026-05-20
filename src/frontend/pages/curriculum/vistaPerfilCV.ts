@@ -1,30 +1,7 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { PerfilCV } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
 import { DOMAIN_IMG, DOMAIN_WEB } from '../../utils/urls';
-
-type Vis = 0 | 1 | boolean;
-
-interface PerfilCV {
-  id: number;
-  email: string;
-  nom_complet: string;
-  tel: string | null;
-  web: string | null;
-  ciutat_ca: string | null; // ci.ciutat
-  nameImg: string | null; // i.nameImg
-  disponibilitat: number | null;
-  visibilitat: Vis;
-  created_at: string; // ISO
-  updated_at: string; // ISO
-  adreca: string;
-  pais_ca: string;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 // Mapa opcional per mostrar disponibilitat (ajusta si tens catàleg propi)
 const DISPON: Record<number, string> = {
@@ -125,19 +102,16 @@ export async function vistaPerfilCV(): Promise<void> {
   show(container, spinner());
 
   const id = qsId();
+  let data: PerfilCV;
+
   try {
-    const url = API_URLS.GET.PERFIL_CV_ID(id);
-    const res = await fetchDataGet<ApiResponse<PerfilCV>>(url, true);
-
-    if (res) {
-      if (res.status !== 'success' || !res.data) {
-        show(container, errorBox(res.message || 'Error desconegut'));
-        return;
-      }
-
-      show(container, renderCard(res.data));
-    }
-  } catch (e: any) {
-    show(container, errorBox(e?.message ?? 'Error carregant les dades'));
+    data = await api.get<PerfilCV>(API_URLS.GET.PERFIL_CV_ID, {
+      id,
+    });
+    show(container, renderCard(data));
+  } catch (error) {
+    console.error(error);
+    show(container, errorBox('Error desconegut'));
+    return;
   }
 }

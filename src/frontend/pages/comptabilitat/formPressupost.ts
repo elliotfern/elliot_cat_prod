@@ -1,45 +1,33 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { Pressupost } from '../../types/Pressupost';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
-import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-
-interface Despesa {
-  id?: number;
-  data: string; // 'YYYY-MM-DD'
-  concepte: string;
-  client_id?: string;
-  estat_id: string;
-  servei_id: string;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
-
-const first = <T>(d: T | T[] | null | undefined): T | null => (Array.isArray(d) ? (d[0] ?? null) : (d ?? null));
 
 export async function formPressupost(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formPressupost') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnPressupost') as HTMLButtonElement | null;
+
   if (!form || !divTitol || !btnSubmit) return;
 
-  let record: Partial<Despesa> = {};
+  let data: Partial<Pressupost> = {};
 
   if (isUpdate && id) {
-    const resp = await fetchDataGet<ApiResponse<Despesa | Despesa[]>>(`/comptabilitat/get/pressupostId?id=${id}`);
-    const data = first(resp?.data);
-    if (!data) return;
+    try {
+      data = await api.get<Pressupost>(`comptabilitat/get/pressupostId`, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    record = data;
+      return;
+    }
 
     divTitol.innerHTML = `Modificació Pressupost`;
     btnSubmit.textContent = 'Modifica Pressupost';
 
-    renderFormInputs(record);
+    renderFormInputs(data);
 
     form.addEventListener('submit', (event) => {
       transmissioDadesDB(event, 'PUT', 'formPressupost', `/api/comptabilitat/put/pressupost`);
@@ -54,7 +42,7 @@ export async function formPressupost(isUpdate: boolean, id?: string) {
   }
 
   // --- Selects auxiliares ---
-  await auxiliarSelect(record.client_id ?? null, 'clients', 'client_id', 'clientEmpresa');
-  await auxiliarSelect(record.servei_id ?? null, 'productes', 'servei_id', 'producte');
-  await auxiliarSelect(record.estat_id ?? null, 'estatsClients', 'estat_id', 'estat');
+  await auxiliarSelect(data.client_id ?? null, 'clients', 'client_id', 'clientEmpresa');
+  await auxiliarSelect(data.servei_id ?? null, 'productes', 'servei_id', 'producte');
+  await auxiliarSelect(data.estat_id ?? null, 'estatsClients', 'estat_id', 'estat');
 }

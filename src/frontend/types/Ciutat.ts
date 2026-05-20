@@ -4,7 +4,7 @@ export interface Ciutat {
   ciutat_ca: string;
   ciutat_en: string;
   pais_ca: string;
-  idPais: number;
+  pais_id: string;
   updated_at: string;
   created_at: string;
 }

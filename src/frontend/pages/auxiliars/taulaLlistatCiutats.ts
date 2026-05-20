@@ -42,7 +42,7 @@ export async function taulaLlistatCiutats() {
     {
       header: 'País',
       field: 'pais_ca',
-      render: (_: unknown, row: Ciutat) => `<a id="${row.idPais}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-pais/${row.idPais}">${row.pais_ca}</a>`,
+      render: (_: unknown, row: Ciutat) => `<a id="${row.pais_id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-pais/${row.pais_id}">${row.pais_ca}</a>`,
     },
 
     {

@@ -1,63 +1,7 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { ProjecteDetalls, TasquesResponse } from '../../types/Projecte';
 import { API_URLS } from '../../utils/apiUrls';
 import { formatData } from '../../utils/formataData';
-
-// --- Types ---
-type ProjecteDetalls = {
-  id: number;
-  name: string;
-  description: string | null;
-  status: number;
-  category_id: number | null;
-  category_name?: string | null;
-  start_date: string;
-  end_date: string;
-  priority: number;
-  client_id: number | null;
-  client_name?: string | null;
-  budget_id: number | null;
-  invoice_id: number | null;
-  created_at?: string;
-  updated_at?: string;
-};
-
-type TascaItem = {
-  id: number;
-  project_id: number | null;
-  title: string;
-  subject: string | null;
-  notes: string | null;
-  status: number;
-  priority: number;
-  planned_date: string;
-  is_next: number;
-  blocked_reason: string | null;
-  estimated_hours: string | number | null;
-  created_at?: string;
-  updated_at?: string;
-  done_at?: string | null;
-};
-
-type TasquesResponse = {
-  project: { id: number };
-  kpis: {
-    total: number;
-    done: number;
-    blocked: number;
-    in_progress: number;
-    backlog: number;
-    next: number;
-  };
-  page: number;
-  limit: number;
-  items: TascaItem[];
-};
-
-type ApiResponse<T> = {
-  status: string;
-  message: string;
-  data: T;
-};
 
 // --- Helpers UI ---
 function setText(id: string, value: string) {
@@ -106,9 +50,7 @@ export async function initProjecteDetalls(id: number): Promise<void> {
     return;
   }
 
-  const projectId = id;
-
-  if (!Number.isFinite(projectId) || projectId <= 0) {
+  if (!Number.isFinite(id) || id <= 0) {
     return;
   }
 
@@ -123,12 +65,19 @@ export async function initProjecteDetalls(id: number): Promise<void> {
   }
 
   // --- 1) GET detalls projecte ---
-  const resP = await fetchDataGet<ApiResponse<ProjecteDetalls>>(API_URLS.GET.PROJECTE_DETALLS(projectId), true);
-  if (!resP || !resP.data) {
+  let data: ProjecteDetalls;
+
+  try {
+    data = await api.get<ProjecteDetalls>(API_URLS.GET.PROJECTE_DETALLS, {
+      id,
+    });
+  } catch (error) {
+    console.error(error);
+    fitxa.innerHTML = `<div class="text-muted">No s'han pogut carregar els detalls del projecte.</div>`;
     return;
   }
 
-  const p = resP.data;
+  const p = data;
 
   // Pintar Header (básico)
   header.innerHTML = `
@@ -170,15 +119,20 @@ export async function initProjecteDetalls(id: number): Promise<void> {
   setText('subtitolProjecte', `Detalls del projecte · #${p.id}`);
 
   // --- 2) GET tasques + KPIs ---
-  const resT = await fetchDataGet<ApiResponse<TasquesResponse>>(API_URLS.GET.PROJECTE_TASQUES(projectId), true);
-  if (!resT || !resT.data) {
-    // No es fatal: dejamos proyecto pintado
+  let data2: TasquesResponse;
+
+  try {
+    data2 = await api.get<TasquesResponse>(API_URLS.GET.PROJECTE_TASQUES, {
+      id,
+    });
+  } catch (error) {
+    console.error(error);
     kpisBox.innerHTML = `<div class="text-muted">No s'han pogut carregar les tasques.</div>`;
     tasquesBox.innerHTML = '';
     return;
   }
 
-  const { kpis, items } = resT.data;
+  const { kpis, items } = data2;
 
   // KPIs (simple)
   kpisBox.innerHTML = `

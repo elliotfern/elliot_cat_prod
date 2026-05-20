@@ -1,51 +1,28 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { Tema } from '../../types/Tema';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
-import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-import { setTrixHTML } from '../../utils/setTrix';
-
-interface Fitxa {
-  [key: string]: unknown;
-  status: string;
-  message: string;
-  id: number;
-  espai_cat: string;
-  municipi: number;
-  comarca: number;
-  provincia: number;
-  comunitat: number;
-  estat: number;
-  experiencia_id: number;
-  institucio_localitzacio: number;
-  logo_id: number;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 export async function formTema(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formTema');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnTema') as HTMLButtonElement;
 
-  let data: Partial<Fitxa> = {
-    comarca: 0,
-    provincia: 0,
-    comunitat: 0,
-    estat: 0,
-  };
+  let data: Partial<Tema> = {};
 
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.TEMA_ID(id), true);
+    try {
+      data = await api.get<Tema>(API_URLS.GET.TEMA_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    if (!response || !response.data) return;
-    data = response.data;
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació tema</h2>`;
 
@@ -64,7 +41,4 @@ export async function formTema(isUpdate: boolean, id?: string) {
       transmissioDadesDB(event, 'POST', 'formTema', API_URLS.POST.TEMA, true);
     });
   }
-
-  // await auxiliarSelect(data.logo_id ?? 0, 'imatgesEmpreses', 'logo_id', 'nom');
-  //await auxiliarSelect(data.institucio_localitzacio ?? 0, 'ciutats', 'institucio_localitzacio', 'ciutat');
 }

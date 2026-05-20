@@ -1,22 +1,8 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { Producte } from '../../types/Producte';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-
-interface Producte {
-  id?: number;
-  producte: string;
-  descripcio?: string;
-  actiu: number;
-  unitat?: string;
-  preu_recomanat?: number;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 export async function formProducte(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formProducte') as HTMLFormElement | null;
@@ -25,16 +11,19 @@ export async function formProducte(isUpdate: boolean, id?: string) {
 
   if (!form || !divTitol || !btnSubmit) return;
 
-  let data: Partial<Producte> = {
-    actiu: 1,
-  };
+  let data: Partial<Producte> = {};
 
   // Si es actualización, cargamos los datos
   if (isUpdate && id) {
-    const response = await fetchDataGet<ApiResponse<Producte>>(API_URLS.GET.PRODUCTE_ID(id), true);
-    if (!response || !response.data) return;
+    try {
+      data = await api.get<Producte>(`comptabilitat/get/pressupostId`, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    data = response.data;
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació Producte</h2>`;
     btnSubmit.textContent = 'Modificar Producte';

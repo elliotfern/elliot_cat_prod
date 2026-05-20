@@ -6,7 +6,6 @@ import { formClient } from './formClient';
 import { formDespesa } from './formDespesa';
 import { formEmissor } from './formEmissor';
 import { formFacturaClient } from './formFacturaClient';
-import { formFacturaProducte } from './formFacturaProducte';
 import { formPressupost } from './formPressupost';
 import { formProducte } from './formProducte';
 import { formProveidor } from './formProveidor';
@@ -38,10 +37,6 @@ export function comptabilitat() {
     formFacturaClient(true, id);
   } else if (pageType[2] === 'fitxa-factura-client') {
     detallsFacturaClients();
-  } else if (pageType[2] === 'nou-producte-factura') {
-    formFacturaProducte(false);
-  } else if (pageType[2] === 'modifica-producte-factura') {
-    formFacturaProducte(true, id);
   } else if (pageType[2] === 'llistat-clients') {
     taulaLlistatClients();
   } else if (pageType[2] === 'nou-client') {

@@ -1,4 +1,5 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { BlogArticle } from '../../types/BlogArticle';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
@@ -6,28 +7,6 @@ import { LANG_ID_TO_CODE } from '../../utils/locales/getLangPrefix';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 import { setTrixHTML } from '../../utils/setTrix';
 import { DOMAIN_WEB } from '../../utils/urls';
-
-interface BlogArticleFitxa {
-  [key: string]: unknown;
-
-  id: number;
-  post_type: string;
-  post_title: string;
-  post_content: string;
-  post_excerpt?: string | null;
-  lang: number; // int(1)
-  post_status: string;
-  slug: string;
-  categoria: string; // binary(16) -> normalment ho representarem com hex/uuid string al frontend
-  post_date: string; // datetime
-  post_modified: string; // datetime
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 function fillFormFromData(form: HTMLFormElement, data: Record<string, unknown>) {
   // 1) Inputs/textarea/select por NAME
@@ -51,11 +30,6 @@ function fillFormFromData(form: HTMLFormElement, data: Record<string, unknown>) 
   }
 }
 
-/**
- * Formulari Blog Article (Create / Update)
- * - View PHP: /gestio/blog/modifica-article/{id} (update)
- * - View PHP: /gestio/blog/nou-article (create) (o la que sigui)
- */
 export async function formBlogArticle(isUpdate: boolean, id?: number) {
   const form = document.getElementById('modificaBlog') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolBlog') as HTMLHeadingElement | null;
@@ -64,18 +38,12 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
   if (!form || !divTitol || !btnSubmit) return;
 
   // Defaults mínims (tu pots canviar-los)
-  let data: Partial<BlogArticleFitxa> = {
-    post_type: 'post',
-    post_status: 'publish',
-    lang: 1,
-    post_excerpt: '',
-    post_content: '',
-  };
+  let data: Partial<BlogArticle> = {};
 
   // 1) Omplir selects dinàmics (abans de renderFormInputs)
   // ⚠️ Ajusta aquests "datasets" i camps quan fem endpoints.
   // auxiliarSelect(valorSeleccionat, dataset, selectId, campLabel)
-  async function fillSelects(current: Partial<BlogArticleFitxa>) {
+  async function fillSelects(current: Partial<BlogArticle>) {
     await Promise.all([
       // Categoria (binary16): normalment aquí tindràs una taula de categories/temes amb uuid + nom
       auxiliarSelect(current.categoria ?? '', 'temes', 'categoria', 'tema'),
@@ -93,13 +61,15 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
 
   if (isUpdate && id) {
     // 2) GET fitxa
-    const response = await fetchDataGet<ApiResponse<BlogArticleFitxa>>(API_URLS.GET.BLOG_ARTICLE_ID(id), true);
-    if (!response || !response.data) return;
+    try {
+      data = await api.get<BlogArticle>(API_URLS.GET.BLOG_ARTICLE_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    const row = Array.isArray(response.data) ? response.data[0] : response.data;
-    if (!row) return;
-
-    data = row;
+      return;
+    }
 
     // 3) Títol UI
 

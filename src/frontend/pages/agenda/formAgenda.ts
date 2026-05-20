@@ -1,47 +1,11 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { EsdevenimentAgenda } from '../../types/EsdevenimentAgenda';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
-type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'altre';
-type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat';
-
-interface EsdevenimentAgenda {
-  status: string;
-  message: string;
-
-  id: number;
-
-  titol: string;
-  descripcio: string | null;
-  tipus: TipusEsdeveniment;
-
-  lloc: string | null;
-
-  data_inici: string; // backend format
-  data_fi: string; // backend format
-
-  tot_el_dia: number; // 0/1
-  estat: EstatEsdeveniment;
-
-  creat_el?: string;
-  actualitzat_el?: string;
-  usuari_id?: number;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
-
-/**
- * IMPORTANT:
- * - En tu HTML, los selects deben existir con id="tipus" y id="estat"
- * - Pueden estar vacíos; auxiliarSelect los rellena.
- */
-export async function formAgendaEsdeveniment(isUpdate: boolean, id?: string) {
+export async function formAgendaEsdeveniment(isUpdate: boolean, id2?: string) {
   const form = document.getElementById('formCrearEsdeveniment') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnGuardar') as HTMLButtonElement | null;
@@ -49,23 +13,22 @@ export async function formAgendaEsdeveniment(isUpdate: boolean, id?: string) {
   if (!divTitol || !btnSubmit || !form) return;
 
   // Defaults de CREATE
-  let data: Partial<EsdevenimentAgenda> = {
-    tot_el_dia: 0,
-    estat: 'confirmat',
-    tipus: 'altre',
-    descripcio: null,
-    lloc: null,
-  };
+  let data: Partial<EsdevenimentAgenda> = {};
 
   // 1) Si es UPDATE: cargar evento
-  if (id && isUpdate) {
-    const idNum = Number(id);
-    if (!Number.isFinite(idNum) || idNum <= 0) return;
+  if (id2 && isUpdate) {
+    const id = Number(id2);
+    if (!Number.isFinite(id) || id <= 0) return;
 
-    const response = await fetchDataGet<ApiResponse<EsdevenimentAgenda>>(API_URLS.GET.AGENDA_ID(idNum), true);
+    try {
+      data = await api.get<EsdevenimentAgenda>(API_URLS.GET.AGENDA_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    if (!response || !response.data) return;
-    data = response.data;
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificar esdeveniment</h2>`;
     btnSubmit.textContent = 'Modificar dades';

@@ -1,37 +1,5 @@
-import { fetchDataGet } from '../../services/api/fetchData';
-
-export type PressupostDetail = {
-  id: string;
-  concepte: string;
-
-  client_id: string;
-  servei_id: string;
-  estat_id: string;
-
-  import: number;
-  data: string;
-
-  created_at: string;
-  modified_at: string;
-
-  // joins del backend
-  idClient: string;
-  clientNom: string;
-  clientCognoms?: string;
-  clientEmail?: string;
-  clientEmpresa?: string;
-
-  estat?: string;
-  producte?: string;
-
-  any?: number;
-};
-
-type ApiResponse = {
-  status: string;
-  message: string;
-  data: PressupostDetail | null;
-};
+import { api } from '../../core/api/client';
+import { Pressupost } from '../../types/Pressupost';
 
 function formatDate(date: string): string {
   return new Date(date).toLocaleDateString('ca-ES');
@@ -45,18 +13,22 @@ function formatMoney(value: number): string {
 }
 
 export async function fitxaPressupost(id: string) {
-  const res = await fetch(`https://elliot.cat/api/comptabilitat/get/pressupostId?id=${id}`);
+  let data: Pressupost;
+  try {
+    data = await api.get<Pressupost>(`comptabilitat/get/pressupostId`, {
+      id,
+    });
+    renderPressupost(data);
+  } catch (error) {
+    console.error(error);
 
-  const json: ApiResponse = await res.json();
-
-  renderPressupost(json);
+    return;
+  }
 }
 
-function renderPressupost(response: ApiResponse) {
+function renderPressupost(pressupost: Pressupost) {
   const container = document.getElementById('fitxaPressupost');
   if (!container) return;
-
-  const pressupost = response.data;
 
   if (!pressupost) {
     container.innerHTML = `<p>No s'ha trobat el pressupost</p>`;

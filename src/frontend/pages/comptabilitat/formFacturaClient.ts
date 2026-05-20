@@ -1,44 +1,9 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { Factura, ProducteFactura } from '../../types/Factura';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-
-interface ProducteFactura {
-  producte_id: number | null;
-  descripcio: string;
-  preu: number;
-}
-
-interface FitxaFactura {
-  [key: string]: unknown;
-  id: number;
-  numero_factura: string;
-  emissor_id: number | null;
-  client_id: number;
-  concepte: string;
-  data_factura: string;
-  data_venciment: string;
-  base_imposable: number;
-  despeses_extra: number | null;
-  total_factura: number;
-  import_iva: number;
-  tipus_iva: number;
-  estat: number;
-  metode_pagament: number;
-  notes: string | null;
-  projecte_id: number | null;
-  arxiu_url: string | null;
-  recurrent: boolean;
-  frequencia: 'mensual' | 'trimestral' | 'anual' | null;
-  productes?: ProducteFactura[];
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 export async function formFacturaClient(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formFacturaClient') as HTMLFormElement;
@@ -46,16 +11,21 @@ export async function formFacturaClient(isUpdate: boolean, id?: string) {
   const btnSubmit = document.getElementById('btnFactura') as HTMLButtonElement;
   if (!divTitol || !btnSubmit || !form) return;
 
-  let data: any = {};
+  let data: Partial<Factura> = {};
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<FitxaFactura>>(API_URLS.GET.FACTURA_CLIENT_ID(id), true);
+    try {
+      data = await api.get<Factura>(API_URLS.GET.FACTURA_CLIENT_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    if (!response || !response.data) return;
-    data = response.data.factura; // <--- aquí extraemos solo el objeto factura
+      return;
+    }
 
     // Inicializar productos
-    initProductesFactura(response.data.productes ?? []);
+    initProductesFactura(data.productes ?? []);
 
     divTitol.innerHTML = `<h2>Modificació dades Factura client</h2>`;
     renderFormInputs(data);
@@ -136,33 +106,95 @@ function preProcessFacturaFormData(rawData: Record<string, any>): Record<string,
   };
 }
 
-/**
- * Inicializa la tabla de productos y añade funcionalidad de añadir/eliminar
- */
 export async function initProductesFactura(existingProducts: ProducteFactura[] = []) {
   const addBtn = document.getElementById('addProducte') as HTMLButtonElement;
+
   const tbody = document.querySelector('#tableProductesFactura tbody') as HTMLTableSectionElement;
+
   if (!addBtn || !tbody) return;
 
-  // Cargar productos desde API
-  const productesResponse = await fetchDataGet<ApiResponse<{ id: number; producte: string }[]>>(API_URLS.GET.PRODUCTES, true);
-  const productes = productesResponse?.data ?? [];
+  /*
+   * Carregar productes
+   */
+
+  let productes: {
+    id: number;
+    producte: string;
+  }[] = [];
+
+  try {
+    productes = await api.get<
+      {
+        id: number;
+        producte: string;
+      }[]
+    >(API_URLS.GET.PRODUCTES);
+  } catch (error) {
+    console.error(error);
+
+    return;
+  }
+
+  /*
+   * Crear fila
+   */
 
   function crearFila(product?: ProducteFactura) {
     const row = document.createElement('tr');
 
-    const optionsHTML = productes.map((p) => `<option value="${p.id}" ${product?.producte_id === p.id ? 'selected' : ''}>${p.producte}</option>`).join('');
+    const optionsHTML = productes
+      .map(
+        (p) => `
+          <option
+            value="${p.id}"
+            ${product?.producte_id === p.id ? 'selected' : ''}
+          >
+            ${p.producte}
+          </option>
+        `
+      )
+      .join('');
 
     row.innerHTML = `
       <td>
-        <select name="producte_id[]" class="form-select">
-          <option value="">Selecciona producte</option>
+        <select
+          name="producte_id[]"
+          class="form-select"
+        >
+          <option value="">
+            Selecciona producte
+          </option>
+
           ${optionsHTML}
         </select>
       </td>
-      <td><input type="text" name="preu[]" class="form-control" value="${product?.preu != null ? product.preu : ''}" /></td>
-      <td><input type="text" name="descripcio[]" class="form-control" value="${product?.descripcio ?? ''}" /></td>
-      <td><button type="button" class="btn btn-danger btn-sm removeProducte">Eliminar</button></td>
+
+      <td>
+        <input
+          type="text"
+          name="preu[]"
+          class="form-control"
+          value="${product?.preu ?? ''}"
+        />
+      </td>
+
+      <td>
+        <input
+          type="text"
+          name="descripcio[]"
+          class="form-control"
+          value="${product?.descripcio ?? ''}"
+        />
+      </td>
+
+      <td>
+        <button
+          type="button"
+          class="btn btn-danger btn-sm removeProducte"
+        >
+          Eliminar
+        </button>
+      </td>
     `;
 
     row.querySelector('.removeProducte')?.addEventListener('click', () => row.remove());
@@ -170,10 +202,16 @@ export async function initProductesFactura(existingProducts: ProducteFactura[] =
     tbody.appendChild(row);
   }
 
-  // Botón añadir
+  /*
+   * Afegir fila
+   */
+
   addBtn.addEventListener('click', () => crearFila());
 
-  // Renderizar productos existentes (al editar)
+  /*
+   * Productes existents
+   */
+
   existingProducts.forEach((p) => crearFila(p));
 }
 

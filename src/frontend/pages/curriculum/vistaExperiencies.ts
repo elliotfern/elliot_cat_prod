@@ -1,25 +1,6 @@
-// src/pages/curriculum/vistaExperiencia.ts
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { ExperienciaItem } from '../../types/ExperienciaItem';
 import { API_URLS } from '../../utils/apiUrls';
-
-interface ExperienciaItem {
-  id: number;
-  empresa: string;
-  empresa_url?: string | null;
-  empresa_localitzacio?: number | null;
-  data_inici: string;
-  data_fi?: string | null;
-  is_current: 0 | 1 | boolean;
-  logo_empresa?: number | null;
-  posicio: number;
-  visible: 0 | 1 | boolean;
-}
-
-interface ApiResponse<T> {
-  status: 'success' | 'error';
-  message: string;
-  data: T;
-}
 
 const esc = (s: unknown) =>
   String(s ?? '')
@@ -100,20 +81,15 @@ export async function vistaExperiencia(): Promise<void> {
   if (!root) return;
   root.innerHTML = spinner();
 
+  let data: ExperienciaItem[] = [];
+
   try {
-    const url = API_URLS.GET.EXPERIENCIES;
-    const res = await fetchDataGet<ApiResponse<ExperienciaItem[]>>(url, true);
+    data = await api.get<ExperienciaItem[]>(API_URLS.GET.EXPERIENCIES);
 
-    if (res) {
-      if (res.status !== 'success') {
-        root.innerHTML = errorBox(res.message || 'Error desconegut');
-        return;
-      }
+    root.innerHTML = renderTable(data);
+  } catch (error) {
+    console.error(error);
 
-      const items = Array.isArray(res.data) ? res.data : [];
-      root.innerHTML = renderTable(items);
-    }
-  } catch (e: any) {
-    root.innerHTML = errorBox(e?.message ?? 'Error carregant les dades');
+    root.innerHTML = errorBox('Error carregant experiències');
   }
 }

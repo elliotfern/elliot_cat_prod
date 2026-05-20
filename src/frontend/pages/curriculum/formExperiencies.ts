@@ -1,49 +1,29 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { ExperienciaCv } from '../../types/Curriculum';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
-
-interface Fitxa {
-  [key: string]: unknown;
-  status: string;
-  message: string;
-  id: number;
-  espai_cat: string;
-  municipi: number;
-  comarca: number;
-  provincia: number;
-  comunitat: number;
-  estat: number;
-  logo_empresa: number;
-  empresa_localitzacio: number;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 export async function formExperiencies(isUpdate: boolean, id?: number) {
   const form = document.getElementById('formCVExperiencia');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnExperiencia') as HTMLButtonElement;
 
-  let data: Partial<Fitxa> = {
-    comarca: 0,
-    provincia: 0,
-    comunitat: 0,
-    estat: 0,
-  };
+  let data: Partial<ExperienciaCv> = {};
 
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.EXPERIENCIA_ID(id), true);
+    try {
+      data = await api.get<ExperienciaCv>(API_URLS.GET.EXPERIENCIA_ID, {
+        id,
+      });
+    } catch (error) {
+      console.error(error);
 
-    if (!response || !response.data) return;
-    data = response.data;
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació experiència professional del currículum</h2>`;
 

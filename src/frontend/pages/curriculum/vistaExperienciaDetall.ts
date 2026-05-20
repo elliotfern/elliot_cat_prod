@@ -1,42 +1,7 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { ExperienciaCv } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
 import { DOMAIN_IMG } from '../../utils/urls';
-
-interface ExperienciaI18n {
-  locale: number;
-  rol_titol: string;
-  sumari?: string | null;
-  fites?: string | null;
-  idi18n: number;
-}
-
-interface Experiencia {
-  id: number;
-  empresa: string;
-  empresa_url?: string | null;
-  empresa_localitzacio?: string | null;
-  data_inici: string;
-  data_fi?: string | null;
-  is_current: number | boolean;
-  logo_empresa?: number | null;
-  posicio: number;
-  visible: number | boolean;
-  created_at: string;
-  updated_at: string;
-  idi18n: number;
-
-  nameImg?: string | null;
-  ciutat?: string | null;
-  pais_ca?: string | null;
-
-  i18n: ExperienciaI18n[];
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
 
 const esc = (s: unknown) =>
   String(s ?? '')
@@ -83,14 +48,14 @@ function fmtDateLocale(dateStr?: string | null, locale: number = 1): string {
   return `${capitalizeFirst(mes)} ${any}`;
 }
 
-function fmtPeriode(exp: Experiencia, locale: number): string {
+function fmtPeriode(exp: ExperienciaCv, locale: number): string {
   if (exp.is_current === 1 || exp.is_current === true) {
     return `${fmtDateLocale(exp.data_inici, locale)} - ${CURRENT_LABEL[locale] ?? 'actual'}`;
   }
   return `${fmtDateLocale(exp.data_inici, locale)} - ${fmtDateLocale(exp.data_fi, locale)}`;
 }
 
-function renderTabs(exp: Experiencia): string {
+function renderTabs(exp: ExperienciaCv): string {
   if (!exp.i18n?.length) {
     return `<div class="alert alert-secondary">No hi ha traduccions disponibles.</div>`;
   }
@@ -130,7 +95,7 @@ function renderTabs(exp: Experiencia): string {
   `;
 }
 
-function renderExperiencia(exp: Experiencia): string {
+function renderExperiencia(exp: ExperienciaCv): string {
   const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}.png` : null;
   const localitzacio = [exp.ciutat, exp.pais_ca].filter(Boolean).join(', ');
 
@@ -179,20 +144,17 @@ export async function vistaExperienciaDetall(id: number): Promise<void> {
   if (!root) return;
   root.innerHTML = spinner();
 
+  let data: ExperienciaCv;
+
   try {
-    const url = API_URLS.GET.EXPERIENCIA_I18N_DETALL_ID(id);
-    const res = await fetchDataGet<ApiResponse<Experiencia>>(url, true);
-
-    if (res) {
-      if (res.status !== 'success') {
-        root.innerHTML = `<div class="alert alert-danger">${esc(res.message)}</div>`;
-        return;
-      }
-
-      root.innerHTML = renderExperiencia(res.data);
-      initTabs(root); // 👉 inicializar las pestañas
-    }
-  } catch (e: any) {
-    root.innerHTML = `<div class="alert alert-danger">${esc(e?.message ?? 'Error carregant dades')}</div>`;
+    data = await api.get<ExperienciaCv>(API_URLS.GET.EXPERIENCIA_I18N_DETALL_ID, {
+      id,
+    });
+    root.innerHTML = renderExperiencia(data);
+    initTabs(root); // 👉 inicializar las pestañas
+  } catch (error) {
+    console.error(error);
+    root.innerHTML = `<div class="alert alert-danger">${esc(error)}</div>`;
+    return;
   }
 }

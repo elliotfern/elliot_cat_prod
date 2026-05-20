@@ -1,40 +1,29 @@
 export interface Factura {
+  [key: string]: unknown;
   id: number;
-  numero_factura: number;
-
-  emissor_id?: number;
+  numero_factura: string;
+  emissor_id: number | null;
   client_id: number;
-
-  clientEmpresa?: string;
-  clientNom?: string;
-  clientCognoms?: string;
-
   concepte: string;
-
-  data_factura: string; // YYYY-MM-DD
-  data_venciment: string; // YYYY-MM-DD
-
+  data_factura: string;
+  data_venciment: string;
   base_imposable: number;
-  despeses_extra?: number;
-
+  despeses_extra: number | null;
   total_factura: number;
   import_iva: number;
-
   tipus_iva: number;
-  ivaPercen?: number;
-
-  estat: number | string; // depende si usas label o id
+  estat: number;
   metode_pagament: number;
+  notes: string | null;
+  projecte_id: number | null;
+  arxiu_url: string | null;
+  recurrent: boolean;
+  frequencia: 'mensual' | 'trimestral' | 'anual' | null;
+  productes?: ProducteFactura[];
+}
 
-  yearInvoice: number;
-  any: string;
-
-  notes?: string;
-  projecte_id?: number;
-  arxiu_url?: string;
-
-  recurrent?: number;
-  frequencia?: 'mensual' | 'trimestral' | 'anual';
-
-  slug?: string;
+export interface ProducteFactura {
+  producte_id: number | null;
+  descripcio: string;
+  preu: number;
 }

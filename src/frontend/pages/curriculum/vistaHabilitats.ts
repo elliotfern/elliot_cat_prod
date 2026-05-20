@@ -1,21 +1,8 @@
 // src/pages/curriculum/vistaHabilitats.ts
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { HabilitatItem } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
 import { DOMAIN_IMG } from '../../utils/urls';
-
-interface HabilitatItem {
-  id: number;
-  nom: string;
-  imatge_id?: number | null;
-  nameImg?: string | null; // campo devuelto por la API con el nombre del archivo del icono
-  posicio: number;
-}
-
-interface ApiResponse<T> {
-  status: 'success' | 'error';
-  message: string;
-  data: T;
-}
 
 const esc = (s: unknown) =>
   String(s ?? '')
@@ -87,20 +74,14 @@ export async function vistaHabilitats(): Promise<void> {
   if (!root) return;
   root.innerHTML = spinner();
 
+  let data: HabilitatItem[];
+
   try {
-    const url = API_URLS.GET.HABILITATS;
-    const res = await fetchDataGet<ApiResponse<HabilitatItem[]>>(url, true);
-
-    if (res) {
-      if (res.status !== 'success') {
-        root.innerHTML = errorBox(res.message || 'Error desconegut');
-        return;
-      }
-
-      const items = Array.isArray(res.data) ? res.data : [];
-      root.innerHTML = renderTable(items);
-    }
-  } catch (e: any) {
-    root.innerHTML = errorBox(e?.message ?? 'Error carregant les dades');
+    data = await api.get<HabilitatItem[]>(API_URLS.GET.HABILITATS);
+    root.innerHTML = renderTable(data);
+  } catch (error) {
+    console.error(error);
+    root.innerHTML = errorBox('Error desconegut');
+    return;
   }
 }

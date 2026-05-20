@@ -1,50 +1,32 @@
-import { fetchDataGet } from '../../services/api/fetchData';
+import { api } from '../../core/api/client';
+import { PerfilCV } from '../../types/Curriculum';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
-interface Fitxa {
-  [key: string]: unknown;
-  status: string;
-  message: string;
-  id: number;
-  espai_cat: string;
-  municipi: number;
-  comarca: number;
-  provincia: number;
-  comunitat: number;
-  estat: number;
-  perfil_id: number;
-  locale: number;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
-
-export async function formPerfilI18n(isUpdate: boolean, idLocale?: number) {
+export async function formPerfilI18n(isUpdate: boolean, locale?: number) {
   const form = document.getElementById('formCVPerfilI18n');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnCVPerfili18n') as HTMLButtonElement;
 
-  let data: Partial<Fitxa> = {
-    comarca: 0,
-    provincia: 0,
-    comunitat: 0,
-    estat: 0,
-  };
+  let data: Partial<PerfilCV> = {};
 
   if (!divTitol || !btnSubmit || !form) return;
 
-  if (idLocale && isUpdate) {
+  if (locale && isUpdate) {
     const id = 1;
-    const response = await fetchDataGet<ApiResponse<Fitxa>>(API_URLS.GET.PERFIL_CV_I18N_ID(id, idLocale), true);
 
-    if (!response || !response.data) return;
-    data = response.data;
+    try {
+      data = await api.get<PerfilCV>(API_URLS.GET.PERFIL_CV_I18N_ID, {
+        id,
+        locale,
+      });
+    } catch (error) {
+      console.error(error);
+
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació perfil i18n currículum</h2>`;
 
