@@ -5,11 +5,11 @@ import { SerieTv } from '../../types/SerieTv';
 
 export async function fitxaSerie(baseUrl: string, slug: string) {
   try {
-    const json = await api.get<SerieTv>(baseUrl, {
+    const serie = await api.get<SerieTv>(baseUrl, {
       slug,
     });
 
-    const fitxa = mapSerieToFitxa(json);
+    const fitxa = mapSerieToFitxa(serie);
 
     renderFitxa({
       containerId: 'fitxaSerie',
@@ -23,7 +23,7 @@ export async function fitxaSerie(baseUrl: string, slug: string) {
       editButton: {
         basePath: 'cinema',
         action: 'modifica-serie',
-        id: '',
+        id: serie.id, // ✅ aquí estaba el error
         label: 'Modifica sèrie',
       },
     });

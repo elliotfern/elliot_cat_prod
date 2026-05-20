@@ -4,15 +4,13 @@ $slug = $routeParams[0];
 
 <div id="barraNavegacioContenidor"></div>
 
-<div class="container">
+<h1>Arts escèniques, cinema i televisió</h1>
 
-  <h1>Arts escèniques, cinema i televisió: llistat pel·lícules</h1>
+<div id='fitxaSerie'></div>
 
-  <div id='fitxaSerie'></div>
+<hr>
 
-  <hr>
-
-  <div id='taulaActors'></div>
+<div id='taulaActors'></div>
 
 </div>
 
