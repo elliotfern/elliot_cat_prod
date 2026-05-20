@@ -1,7 +1,7 @@
 // src/utils/auxiliarSelect.ts
 import Choices from 'choices.js';
 import 'choices.js/public/assets/styles/choices.min.css';
-import { API_BASE } from './urls';
+import { api } from '../core/api/client';
 
 type Item = { id: number | string; [key: string]: unknown };
 
@@ -9,14 +9,6 @@ const choicesRegistry = new Map<string, Choices>();
 const ZERO_UUID = /^0{8}-0{4}-0{4}-0{4}-0{12}$/i;
 
 const isEmptySel = (v: unknown): boolean => v === null || v === undefined || v === '' || v === 0 || v === '0' || (typeof v === 'string' && ZERO_UUID.test(v));
-
-function pluckItems(json: any): Item[] {
-  if (Array.isArray(json?.data?.items)) return json.data.items;
-  if (Array.isArray(json?.items)) return json.items;
-  if (Array.isArray(json?.data)) return json.data;
-  if (Array.isArray(json)) return json;
-  return [];
-}
 
 /**
  * Rellena un <select> con datos remotos y preselecciona valores.
@@ -27,17 +19,12 @@ function pluckItems(json: any): Item[] {
  * @param fallbackValue valor a usar si selected es vacío
  * @param config   opciones extra para Choices
  */
-export async function auxiliarSelect(selected: number | string | Array<number | string> | null | undefined, api: string, elementId: string, valorText: string, fallbackValue?: number | string, config?: any): Promise<Choices | void> {
-  const urlAjax = `${API_BASE}/auxiliars/get/${api}`;
-
+export async function auxiliarSelect(selected: number | string | Array<number | string> | null | undefined, apiUrl: string, elementId: string, valorText: string, fallbackValue?: number | string, config?: any): Promise<Choices | void> {
   try {
-    const response = await fetch(urlAjax, { method: 'GET', credentials: 'include' });
-    if (!response.ok) throw new Error(`Error HTTP ${response.status}`);
-
-    const jsonResponse = await response.json();
-    const data: Item[] = pluckItems(jsonResponse);
+    const data = await api.get<Item[]>(`/auxiliars/get/${apiUrl}`);
 
     const selectElement = document.getElementById(elementId) as HTMLSelectElement | null;
+
     if (!selectElement) return;
 
     // Destruir instancia anterior de Choices si existía
