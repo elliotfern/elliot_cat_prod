@@ -153,8 +153,8 @@ if ($slug === "pelicules") {
                 LEFT JOIN %s AS img ON tv.img_id = img.id
                 LEFT JOIN %s AS id ON tv.idioma_id = id.id
                 LEFT JOIN %s AS g ON tv.genere_id = g.id
-                WHERE tv.slug = :slug;
-                LIMIT 1
+                WHERE tv.slug = :slug
+                LIMIT 1;
             SQL;
 
     $query = sprintf(
