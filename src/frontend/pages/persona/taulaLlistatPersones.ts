@@ -60,7 +60,7 @@ export async function taulaLlistatPersones() {
            type="button"
            class="delete-button btn btn-danger btn-sm"
            data-id="${row.id}" 
-           data-url="https://elliot.cat/api/persones/delete/persona?id=${row.id}"
+           data-url="persones/delete/persona?id=${row.id}"
            data-reload-callback="${reloadKey}"
          >
            Elimina
@@ -69,7 +69,7 @@ export async function taulaLlistatPersones() {
   }
 
   renderDynamicTable({
-    url: `https://elliot.cat/api/persones/get/llistatPersones`,
+    url: `persones/get/llistatPersones`,
     containerId: 'taulaLlistatPersones',
     columns,
     filterKeys: ['cognoms'],

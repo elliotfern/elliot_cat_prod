@@ -52,7 +52,7 @@ export function renderClientPressupostos(clientId: string) {
   ];
 
   renderDynamicTable({
-    url: `https://elliot.cat/api/comptabilitat/get/pressupostosClientId?id=${clientId}`,
+    url: `comptabilitat/get/pressupostosClientId?id=${clientId}`,
     containerId: 'clientPresupostos',
     columns,
     filterKeys: ['concepte', 'producte'],

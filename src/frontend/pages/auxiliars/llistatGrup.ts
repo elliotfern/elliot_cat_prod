@@ -8,9 +8,6 @@ export interface GrupPersones {
   grup_ca: string;
 }
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
 export async function taulaLlistatGrupsPersones(): Promise<void> {
   const isAdmin = await getIsAdmin();
 
@@ -38,7 +35,7 @@ export async function taulaLlistatGrupsPersones(): Promise<void> {
   }
 
   renderDynamicTable({
-    url: `https://elliot.cat/api/persones/get/grupPersones`,
+    url: `persones/get/grupPersones`,
     containerId: 'taulaLlistatGrupsPersones',
     columns,
     filterKeys: ['grup_ca'],

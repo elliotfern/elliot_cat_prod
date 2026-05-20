@@ -1,61 +1,23 @@
+import { api } from '../../core/api/client';
+import { Llibre } from '../../types/Llibre';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
-interface Fitxa {
-  [key: string]: unknown;
-  grup_ids?: string[];
-  status: string;
-  message: string;
+type Autor = {
   id: string;
-  img_id: number;
-  sub_tema_id: number;
-  lang: number;
-  estat_id: number;
-  editorial_id: number;
-  grup: number;
-  tipus_id: number;
-  autors: {
-    id: string;
-    nom: string;
-    cognoms: string;
-    slug: string;
-  }[];
+  nom: string;
+  autor_nom_complet: string;
+};
 
-  // --- relaciones
-  grups: GrupDTO[];
-}
-
-type GrupDTO = { id: string; nom: string };
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
-}
-
-let autorsList: { id: string; autor_nom_complet: string }[] = [];
+let autorsList: Autor[] = [];
 
 async function loadAutors() {
   try {
-    const response = await fetch('https://elliot.cat/api/biblioteca/get/totsAutors', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    });
+    autorsList = await api.get<Autor[]>(`biblioteca/get/totsAutors`);
+  } catch (error) {
+    console.error('loadAutors failed:', error);
 
-    if (!response.ok) {
-      console.error('Error loading autors:', response.status);
-      autorsList = [];
-      return;
-    }
-
-    const data = await response.json();
-
-    autorsList = Array.isArray(data) ? data : (data?.data ?? []);
-  } catch (e) {
-    console.error('loadAutors failed:', e);
     autorsList = [];
   }
 }
@@ -108,11 +70,7 @@ function initAuthorUI() {
   });
 }
 
-export async function formLlibre(isUpdate: boolean, slug?: string) {
-  console.log('FORM INIT');
-
-  let data: Partial<Fitxa> = { id: '' };
-
+export async function formLlibre(isUpdate: boolean, llibre?: string) {
   const form = document.getElementById('formLlibre');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btn') as HTMLButtonElement;
@@ -123,19 +81,18 @@ export async function formLlibre(isUpdate: boolean, slug?: string) {
 
   await autorsPromise;
 
-  if (slug && isUpdate) {
-    console.log('ENTER SLUG:', slug, isUpdate);
-    const response = await fetch(`https://elliot.cat/api/biblioteca/get/llibreSlug?llibre=${slug}`);
+  let data: Partial<Llibre> = {};
 
-    const responseData = await response.json();
+  if (llibre && isUpdate) {
+    try {
+      data = await api.get<Llibre>(`biblioteca/get/llibreSlug`, {
+        llibre,
+      });
+    } catch (error) {
+      console.error(error);
 
-    if (!responseData || !responseData.data) return;
-
-    data = responseData.data;
-
-    renderFormInputs(data);
-
-    if (!response || !data) return;
+      return;
+    }
 
     divTitol.innerHTML = `<h2>Modificació dades Llibre</h2>`;
 
@@ -146,6 +103,7 @@ export async function formLlibre(isUpdate: boolean, slug?: string) {
     if (container) container.innerHTML = '';
 
     initAuthorUI();
+    renderFormInputs(data);
 
     if (data?.autors?.length) {
       for (const autor of data.autors) {
