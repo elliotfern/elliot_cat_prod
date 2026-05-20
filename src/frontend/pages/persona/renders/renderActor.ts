@@ -21,7 +21,7 @@ export async function renderActor(persona: PersonaView) {
   let series: ActorSerie[] = [];
 
   try {
-    [pelicules, series] = await Promise.all([
+    const [peliculesRes, seriesRes] = await Promise.allSettled([
       api.get<ActorPelicula[]>('cinema/get/actor-pelicules', {
         actor: persona.id,
       }),
@@ -30,9 +30,22 @@ export async function renderActor(persona: PersonaView) {
         actor: persona.id,
       }),
     ]);
+
+    // Películas
+    if (peliculesRes.status === 'fulfilled') {
+      pelicules = peliculesRes.value;
+    } else {
+      console.error('Error carregant pel·lícules', peliculesRes.reason);
+    }
+
+    // Series
+    if (seriesRes.status === 'fulfilled') {
+      series = seriesRes.value;
+    } else {
+      console.error('Error carregant sèries', seriesRes.reason);
+    }
   } catch (error) {
     console.error(error);
-
     return null;
   }
 
