@@ -10,4 +10,6 @@ export interface Link {
   tema: string;
   sub_tema: string;
   tipus: string;
+  sub_tema_id: string;
+  lang: string;
 }

@@ -128,7 +128,7 @@ export const API_URLS: ApiUrls = {
     // links
     TEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.TEMA_ID}?id=${encodeURIComponent(id)}`,
     SUBTEMA_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.SUBTEMA_ID}?id=${encodeURIComponent(id)}`,
-    LINK_ID: (id: string) => `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.LINK_ID}?id=${encodeURIComponent(id)}`,
+    LINK_ID: `${API_BASE}/${RESOURCES.ADRECES}/${TIPUS.GET}/${ENDPOINTS.LINK_ID}`,
     AGENDA_ID: (id: number) => `${API_BASE}/${RESOURCES.AGENDA}/${TIPUS.GET}/${ENDPOINTS.AGENDA_ID}?id=${encodeURIComponent(id)}`,
     PERSONES_GRUPS_ID: (id: string) => `${API_BASE}/${RESOURCES.PERSONA}/${TIPUS.GET}/?grupPersona=${encodeURIComponent(id)}`,
     PROJECTE_ID: (id: number) => `${API_BASE}/${RESOURCES.PROJECTES}/${TIPUS.GET}/${ENDPOINTS.PROJECTE_ID}?id=${encodeURIComponent(id)}`,

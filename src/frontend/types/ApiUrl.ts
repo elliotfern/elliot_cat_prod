@@ -25,7 +25,7 @@ export type ApiUrls = {
     FACTURA_CLIENT_PRODUCTE_ID: (id: string) => string;
     TEMA_ID: (id: string) => string;
     SUBTEMA_ID: (id: string) => string;
-    LINK_ID: (id: string) => string;
+    LINK_ID: string;
     AGENDA_ID: (id: number) => string;
     PERSONES_GRUPS_ID: (id: string) => string;
     PROJECTE_ID: (id: number) => string;
