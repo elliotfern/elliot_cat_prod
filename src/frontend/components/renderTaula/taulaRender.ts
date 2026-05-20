@@ -1,50 +1,5 @@
+import { api } from '../../core/api/client';
 import { RenderTableOptions } from '../../types/TaulaDinamica';
-
-type ApiResult<T> = {
-  status?: string;
-  message?: string;
-  data?: { items?: T[] } | T[];
-  items?: T[];
-};
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function pluckItems<T>(raw: unknown, dataKey?: string): T[] {
-  // Array directe
-  if (Array.isArray(raw)) {
-    return raw as T[];
-  }
-
-  if (!isObject(raw)) {
-    return [];
-  }
-
-  // raw.items
-  if (Array.isArray(raw.items)) {
-    return raw.items as T[];
-  }
-
-  const data = raw.data;
-
-  // raw.data[]
-  if (Array.isArray(data)) {
-    return data as T[];
-  }
-
-  // raw.data.items[]
-  if (isObject(data) && Array.isArray(data.items)) {
-    return data.items as T[];
-  }
-
-  // raw.data.{customKey}[]
-  if (dataKey && isObject(data) && Array.isArray(data[dataKey])) {
-    return data[dataKey] as T[];
-  }
-
-  return [];
-}
 
 function renderCellContent(content: string | HTMLElement | unknown): string {
   if (content == null) return '';
@@ -60,78 +15,97 @@ function renderCellContent(content: string | HTMLElement | unknown): string {
   return String(content);
 }
 
-export async function renderDynamicTable<T extends object>(options: RenderTableOptions<T>): Promise<void> {
+export async function renderDynamicTable<T extends Record<string, any>>(options: RenderTableOptions<T>): Promise<void> {
   const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField, filterSplitBy, filterSplitTrim = true } = options;
 
   const container = document.getElementById(containerId);
+
   if (!container) {
     console.error(`Contenedor #${containerId} no encontrado`);
     return;
   }
 
-  let result: ApiResult<T>;
+  // =========================
+  // API
+  // =========================
+
+  let data: T[] = [];
 
   try {
-    const response = await fetch(url);
+    data = await api.get<T[]>(url);
+  } catch (error) {
+    console.error(error);
 
-    if (!response.ok) {
-      container.innerHTML = `<div class="alert alert-info">Error HTTP ${response.status}</div>`;
-      return;
-    }
+    container.innerHTML = `
+      <div class="alert alert-danger">
+        Error carregant dades
+      </div>
+    `;
 
-    result = (await response.json()) as ApiResult<T>;
-  } catch (_e: unknown) {
-    container.innerHTML = `<div class="alert alert-info">Error de xarxa o resposta invàlida</div>`;
     return;
   }
 
-  if (result.status === 'error') {
-    container.innerHTML = `<div class="alert alert-info">${result.message ?? 'No hi ha dades.'}</div>`;
+  if (!Array.isArray(data) || data.length === 0) {
+    container.innerHTML = `
+      <div class="alert alert-info">
+        No hi ha dades.
+      </div>
+    `;
+
     return;
   }
 
-  const data: T[] = pluckItems<T>(result, options.dataKey);
-
-  if (!data.length) {
-    container.innerHTML = `<div class="alert alert-info">${result.message ?? 'No hi ha dades.'}</div>`;
-    return;
-  }
+  // =========================
+  // STATE
+  // =========================
 
   let currentPage = 1;
   let filteredData = [...data];
   let activeButtonFilter: string | null = null;
 
-  // Crear input de búsqueda
+  // =========================
+  // ELEMENTS
+  // =========================
+
   const searchInput = document.createElement('input');
+
   searchInput.className = 'form-control w-30 mb-3';
   searchInput.placeholder = 'Cercar...';
 
-  // Crear contenedor de botones de filtro
   const buttonContainer = document.createElement('div');
+
   buttonContainer.className = 'd-flex flex-wrap gap-2 mb-3';
 
-  // Crear tabla y elementos relacionados
   const table = document.createElement('table');
+
   table.classList.add('table', 'table-striped', 'table-hover', 'table-bordered', 'align-middle');
+
   const thead = document.createElement('thead');
+
   thead.classList.add('table-dark');
+
   const tbody = document.createElement('tbody');
-
-  // Paginacio
-  const paginationNav = document.createElement('nav');
-  paginationNav.setAttribute('aria-label', 'Paginació');
-
-  const pagination = document.createElement('ul');
-  pagination.className = 'pagination justify-content-center mt-3';
-  paginationNav.appendChild(pagination);
-
-  // Crear el numero total de registres
-  const totalRecords = document.createElement('div');
-  totalRecords.className = 'text-muted small mt-2';
 
   table.append(thead, tbody);
 
-  // Normalizador para búsqueda
+  const paginationNav = document.createElement('nav');
+
+  paginationNav.setAttribute('aria-label', 'Paginació');
+
+  const pagination = document.createElement('ul');
+
+  pagination.className = 'pagination justify-content-center mt-3';
+
+  paginationNav.appendChild(pagination);
+
+  const totalRecords = document.createElement('div');
+
+  totalRecords.className = 'text-muted small mt-2';
+
+  // =========================
+  // HELPERS
+  // =========================
+
   const normalizeText = (text: string) =>
     text
       .normalize('NFD')
@@ -140,12 +114,16 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
   function getFilterParts(raw: unknown): string[] {
     const s = String(raw ?? '');
+
     if (!s) return [];
 
     if (!filterByField) return [s];
 
     const splitter = filterSplitBy?.[filterByField];
-    if (!splitter) return [s]; // comportament antic
+
+    if (!splitter) {
+      return [s];
+    }
 
     return s
       .split(splitter as any)
@@ -153,101 +131,52 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
       .filter(Boolean);
   }
 
+  // =========================
+  // FILTERS
+  // =========================
+
   function applyFilters() {
     const search = normalizeText(searchInput.value);
 
     filteredData = data
       .filter((row) => {
         if (!activeButtonFilter) return true;
+
         if (!filterByField) return true;
 
         const fieldValue = row[filterByField];
 
-        // 1) si ja és array, igual que ara
+        // ARRAY
         if (Array.isArray(fieldValue)) {
           return fieldValue.map(String).includes(activeButtonFilter);
         }
 
-        // 2) si hi ha split opt-in, compara contra les parts
+        // SPLIT
         const parts = getFilterParts(fieldValue);
+
         if (parts.length > 1) {
           return parts.includes(activeButtonFilter);
         }
 
-        // 3) fallback antic
+        // SIMPLE
         return String(fieldValue) === activeButtonFilter;
       })
       .filter((row) => {
-        if (search.length === 0) return true;
-        return filterKeys.some((key) => normalizeText(String(row[key])).includes(search));
+        if (search.length === 0) {
+          return true;
+        }
+
+        return filterKeys.some((key) => normalizeText(String(row[key] ?? '')).includes(search));
       });
 
     currentPage = 1;
+
     renderTable();
   }
 
-  function renderFilterButtons() {
-    if (!filterByField) return;
-
-    let uniqueValues: string[] = [];
-
-    const first = data[0]?.[filterByField];
-
-    if (Array.isArray(first)) {
-      // Si el campo es un array (como grups)
-      uniqueValues = Array.from(
-        new Set(
-          data
-            .flatMap((row) => {
-              const v = row[filterByField];
-              return Array.isArray(v) ? v : [];
-            })
-            .map(String)
-        )
-      ).filter(Boolean);
-    } else {
-      // ✅ Si hi ha split configurat per aquest camp, aplanem valors
-      const splitter = filterSplitBy?.[filterByField];
-
-      if (splitter) {
-        uniqueValues = Array.from(new Set(data.flatMap((row) => getFilterParts(row[filterByField])).map(String))).filter(Boolean);
-      } else {
-        // comportament antic
-        uniqueValues = Array.from(new Set(data.map((row) => String(row[filterByField])))).filter(Boolean);
-      }
-    }
-
-    uniqueValues = uniqueValues.sort((a, b) => {
-      return String(a).localeCompare(String(b), 'ca', { sensitivity: 'base' });
-    });
-
-    buttonContainer.innerHTML = '';
-
-    const allButton = document.createElement('button');
-    allButton.textContent = 'Tots';
-    allButton.className = 'btn btn-outline-primary btn-sm filter-btn';
-    allButton.onclick = () => {
-      activeButtonFilter = null;
-      updateActiveButton(allButton);
-      applyFilters();
-    };
-    buttonContainer.appendChild(allButton);
-
-    uniqueValues.forEach((value) => {
-      const button = document.createElement('button');
-      button.textContent = String(value);
-      button.className = 'btn btn-primary btn-sm filter-btn';
-
-      button.onclick = () => {
-        activeButtonFilter = value;
-        updateActiveButton(button);
-        applyFilters();
-      };
-      buttonContainer.appendChild(button);
-    });
-
-    updateActiveButton(allButton);
-  }
+  // =========================
+  // FILTER BUTTONS
+  // =========================
 
   function updateActiveButton(activeButton: HTMLButtonElement) {
     const buttons = buttonContainer.querySelectorAll('.filter-btn');
@@ -259,59 +188,178 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
     activeButton.classList.add('active');
   }
 
-  function renderTable() {
-    // Cabecera
-    thead.innerHTML = `<tr>${columns.map((col) => `<th>${col.header}</th>`).join('')}</tr>`;
+  function renderFilterButtons() {
+    if (!filterByField) return;
 
-    // Paginación
+    let uniqueValues: string[] = [];
+
+    const first = data[0]?.[filterByField];
+
+    // ARRAY FIELD
+    if (Array.isArray(first)) {
+      uniqueValues = Array.from(
+        new Set(
+          data
+            .flatMap((row) => {
+              const v = row[filterByField];
+
+              return Array.isArray(v) ? v : [];
+            })
+            .map(String)
+        )
+      ).filter(Boolean);
+    } else {
+      // SPLIT FIELD
+      const splitter = filterSplitBy?.[filterByField];
+
+      if (splitter) {
+        uniqueValues = Array.from(new Set(data.flatMap((row) => getFilterParts(row[filterByField])).map(String))).filter(Boolean);
+      } else {
+        // SIMPLE FIELD
+        uniqueValues = Array.from(new Set(data.map((row) => String(row[filterByField] ?? '')))).filter(Boolean);
+      }
+    }
+
+    uniqueValues = uniqueValues.sort((a, b) =>
+      a.localeCompare(b, 'ca', {
+        sensitivity: 'base',
+      })
+    );
+
+    buttonContainer.innerHTML = '';
+
+    // TOTS
+    const allButton = document.createElement('button');
+
+    allButton.textContent = 'Tots';
+    allButton.className = 'btn btn-outline-primary btn-sm filter-btn';
+
+    allButton.onclick = () => {
+      activeButtonFilter = null;
+
+      updateActiveButton(allButton);
+
+      applyFilters();
+    };
+
+    buttonContainer.appendChild(allButton);
+
+    // VALUES
+    uniqueValues.forEach((value) => {
+      const button = document.createElement('button');
+
+      button.textContent = value;
+
+      button.className = 'btn btn-primary btn-sm filter-btn';
+
+      button.onclick = () => {
+        activeButtonFilter = value;
+
+        updateActiveButton(button);
+
+        applyFilters();
+      };
+
+      buttonContainer.appendChild(button);
+    });
+
+    updateActiveButton(allButton);
+  }
+
+  // =========================
+  // TABLE
+  // =========================
+
+  function renderTable() {
+    // HEADER
+
+    thead.innerHTML = `
+      <tr>
+        ${columns.map((col) => `<th>${col.header}</th>`).join('')}
+      </tr>
+    `;
+
+    // PAGINATION
+
     const start = (currentPage - 1) * rowsPerPage;
+
     const end = start + rowsPerPage;
+
     const rowsToShow = filteredData.slice(start, end);
+
+    // ROWS
 
     tbody.innerHTML = rowsToShow
       .map(
-        (row) =>
-          `<tr>${columns
-            .map((col) => {
-              const value = row[col.field];
-              const rendered = col.render ? col.render(value, row) : String(value ?? '');
+        (row) => `
+          <tr>
+            ${columns
+              .map((col) => {
+                const value = row[col.field];
 
-              return `<td>${renderCellContent(rendered)}</td>`;
-            })
-            .join('')}</tr>`
+                const rendered = col.render ? col.render(value, row) : String(value ?? '');
+
+                return `
+                  <td>
+                    ${renderCellContent(rendered)}
+                  </td>
+                `;
+              })
+              .join('')}
+          </tr>
+        `
       )
       .join('');
 
+    // PAGINATION BUTTONS
+
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
     pagination.innerHTML = '';
 
     for (let i = 1; i <= totalPages; i++) {
       const li = document.createElement('li');
+
       li.className = 'page-item' + (i === currentPage ? ' active' : '');
 
       const a = document.createElement('a');
+
       a.className = 'page-link';
       a.href = '#';
       a.textContent = String(i);
+
       a.addEventListener('click', (e) => {
         e.preventDefault();
+
         if (i === currentPage) return;
+
         currentPage = i;
+
         renderTable();
       });
 
       li.appendChild(a);
+
       pagination.appendChild(li);
     }
 
-    totalRecords.textContent = `Número total de registres: ${filteredData.length}`;
+    totalRecords.textContent = `
+      Número total de registres: ${filteredData.length}
+    `;
   }
 
-  // Eventos
+  // =========================
+  // EVENTS
+  // =========================
+
   searchInput.addEventListener('input', applyFilters);
 
-  // Render inicial
+  // =========================
+  // INITIAL RENDER
+  // =========================
+
   const tableWrapper = document.createElement('div');
+
   tableWrapper.className = 'table-responsive';
 
   tableWrapper.appendChild(table);
@@ -321,22 +369,26 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   if (options.renderHeader) {
     const headerWrapper = document.createElement('div');
 
-    headerWrapper.innerHTML = options.renderHeader(result);
+    headerWrapper.innerHTML = options.renderHeader(data);
 
     container.appendChild(headerWrapper);
   }
 
   container.appendChild(searchInput);
+
   if (filterByField) {
     container.appendChild(buttonContainer);
+
     renderFilterButtons();
   }
 
   container.appendChild(tableWrapper);
+
   container.appendChild(totalRecords);
+
   if (filteredData.length > rowsPerPage) {
     container.appendChild(paginationNav);
   }
 
-  applyFilters(); // inicia renderizado con filtros aplicados
+  applyFilters();
 }
