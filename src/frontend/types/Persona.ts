@@ -32,6 +32,9 @@ export interface Persona {
   ciutat_naixement_id: number;
   ciutat_defuncio_id: number;
   descripcio: string;
+  ciutatNaixement: string;
+  ciutatDefuncio: string;
+  web: string;
 
   // --- relaciones
   grups: GrupDTO[];

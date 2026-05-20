@@ -1,4 +1,6 @@
 import { mapPersona, mapPersonaToFitxa } from '../../components/mappers/persona';
+import { api } from '../../core/api/client';
+import { Persona } from '../../types/Persona';
 import { PersonaView } from '../../types/PersonaView';
 import { renderFitxa } from '../../utils/renderFitxa';
 
@@ -71,20 +73,10 @@ export async function runFitxaBlocks(options: RunFitxaBlocksOptions) {
 // -------------------------
 export async function fitxaPersona(url: string, id: string) {
   try {
-    const res = await fetch(`${url}${id}`);
-
-    if (!res.ok) {
-      throw new Error('Error AJAX');
-    }
-
-    const json = await res.json();
-
-    if (!json.success) {
-      console.error(json.message);
-      return;
-    }
     // 1. API
-    const personaApi = json.data;
+    const personaApi = await api.get<Persona>(url, {
+      id,
+    });
 
     // 2. VIEW NORMALIZADA
     const persona = mapPersona(personaApi);
@@ -115,7 +107,9 @@ export async function fitxaPersona(url: string, id: string) {
       containerSelector: '.quadre-extra',
       persona,
     });
-  } catch (err) {
-    console.error('Error fitxaPersona:', err);
+  } catch (error) {
+    console.error(error);
+
+    return;
   }
 }

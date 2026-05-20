@@ -1,46 +1,27 @@
-interface PersonaView {
-  id: string;
+import { api } from '../../../core/api/client';
+import { PersonaView } from '../../../types/PersonaView';
+
+type LlibreAutor = {
   slug: string;
-
-  nom: string;
-  cognoms: string;
-
-  img: string;
-  alt: string;
-
-  web: string;
-  descripcio: string;
-
-  dateCreated: string | null;
-  dateModified: string | null;
-
-  anyNaixement?: number | null;
-  anyDefuncio?: number | null;
-
-  mesNaixement?: number | null;
-  diaNaixement?: number | null;
-
-  mesDefuncio?: number | null;
-  diaDefuncio?: number | null;
-
-  ciutatNaixement: string | null;
-  ciutatDefuncio: string | null;
-
-  paisAutor: string;
-  sexe: string;
-  grupsText: string;
-}
+  titol: string;
+  any?: number | null;
+};
 
 export async function renderHistoriador(persona: PersonaView) {
-  const res = await fetch(`/api/biblioteca/get/autorLlibres?id=${persona.id}`);
+  let llibres: LlibreAutor[];
 
-  if (!res.ok) return null;
+  try {
+    llibres = await api.get<LlibreAutor[]>('biblioteca/get/autorLlibres', {
+      id: persona.id,
+    });
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 
-  const json = await res.json();
-
-  if (!json.success || !Array.isArray(json.data)) return null;
-
-  const llibres = json.data;
+  if (!Array.isArray(llibres) || !llibres.length) {
+    return null;
+  }
 
   const wrapper = document.createElement('div');
 
@@ -56,25 +37,30 @@ export async function renderHistoriador(persona: PersonaView) {
             <th class="text-end">Accions</th>
           </tr>
         </thead>
+
         <tbody>
           ${llibres
             .map(
-              (l: any) => `
-            <tr>
-              <td>
-                <a href="https://elliot.cat/gestio/biblioteca/fitxa-llibre/${l.slug}">
-                  ${l.titol}
-                </a>
-              </td>
-              <td>${l.any ?? ''}</td>
-              <td class="text-end">
-                <a href="https://elliot.cat/gestio/biblioteca/modifica-llibre/${l.slug}"
-                   class="btn btn-sm btn-outline-warning">
-                  Modifica
-                </a>
-              </td>
-            </tr>
-          `
+              (l) => `
+                <tr>
+                  <td>
+                    <a href="https://elliot.cat/gestio/biblioteca/fitxa-llibre/${l.slug}">
+                      ${l.titol}
+                    </a>
+                  </td>
+
+                  <td>${l.any ?? ''}</td>
+
+                  <td class="text-end">
+                    <a
+                      href="https://elliot.cat/gestio/biblioteca/modifica-llibre/${l.slug}"
+                      class="btn btn-sm btn-outline-warning"
+                    >
+                      Modifica
+                    </a>
+                  </td>
+                </tr>
+              `
             )
             .join('')}
         </tbody>

@@ -1,64 +1,39 @@
-interface PersonaView {
-  id: string;
+import { api } from '../../../core/api/client';
+import { PersonaView } from '../../../types/PersonaView';
+
+type ActorPelicula = {
   slug: string;
+  titol: string;
+  rol?: string | null;
+  anyInici?: number | null;
+};
 
-  nom: string;
-  cognoms: string;
-
-  img: string;
-  alt: string;
-
-  web: string;
-  descripcio: string;
-
-  dateCreated: string | null;
-  dateModified: string | null;
-
-  anyNaixement?: number | null;
-  anyDefuncio?: number | null;
-
-  mesNaixement?: number | null;
-  diaNaixement?: number | null;
-
-  mesDefuncio?: number | null;
-  diaDefuncio?: number | null;
-
-  ciutatNaixement: string | null;
-  ciutatDefuncio: string | null;
-
-  paisAutor: string;
-  sexe: string;
-  grupsText: string;
-}
+type ActorSerie = {
+  slug: string;
+  titol: string;
+  role?: string | null;
+  anyInici?: number | null;
+  anyFi?: number | null;
+};
 
 export async function renderActor(persona: PersonaView) {
-  const [peliculesRes, seriesRes] = await Promise.all([fetch(`/api/cinema/get/actor-pelicules?actor=${persona.id}`), fetch(`/api/cinema/get/actor-series?actor=${persona.id}`)]);
+  let pelicules: ActorPelicula[] = [];
+  let series: ActorSerie[] = [];
 
-  let pelicules: any[] = [];
-  let series: any[] = [];
+  try {
+    [pelicules, series] = await Promise.all([
+      api.get<ActorPelicula[]>('cinema/get/actor-pelicules', {
+        actor: persona.id,
+      }),
 
-  // ==========================
-  // PELÍCULAS
-  // ==========================
+      api.get<ActorSerie[]>('cinema/get/actor-series', {
+        actor: persona.id,
+      }),
+    ]);
+  } catch (error) {
+    console.error(error);
 
-  if (peliculesRes.ok) {
-    const peliculesJson = await peliculesRes.json();
-
-    if (peliculesJson.status === 'success' && Array.isArray(peliculesJson.data)) {
-      pelicules = peliculesJson.data;
-    }
-  }
-
-  // ==========================
-  // SERIES TV
-  // ==========================
-
-  if (seriesRes.ok) {
-    const seriesJson = await seriesRes.json();
-
-    if (seriesJson.status === 'success' && Array.isArray(seriesJson.data)) {
-      series = seriesJson.data;
-    }
+    return null;
   }
 
   // ==========================
@@ -97,7 +72,7 @@ export async function renderActor(persona: PersonaView) {
 
             ${pelicules
               .map(
-                (p: any) => `
+                (p) => `
               
               <tr>
 
@@ -156,33 +131,33 @@ export async function renderActor(persona: PersonaView) {
           <tbody>
 
             ${series
-              .map((s: any) => {
+              .map((s) => {
                 const anys = s.anyFi ? `${s.anyInici} - ${s.anyFi}` : s.anyInici;
 
                 return `
-                <tr>
+                  <tr>
 
-                  <td>
-                    <a href="https://elliot.cat/gestio/cinema/fitxa-serie/${s.slug}">
-                      ${s.titol}
-                    </a>
-                  </td>
+                    <td>
+                      <a href="https://elliot.cat/gestio/cinema/fitxa-serie/${s.slug}">
+                        ${s.titol}
+                      </a>
+                    </td>
 
-                  <td>${s.role ?? ''}</td>
+                    <td>${s.role ?? ''}</td>
 
-                  <td>${anys ?? ''}</td>
+                    <td>${anys ?? ''}</td>
 
-                  <td class="text-end">
-                    <a
-                      href="https://elliot.cat/gestio/cinema/modifica-serie/${s.slug}"
-                      class="btn btn-sm btn-outline-warning"
-                    >
-                      Modifica
-                    </a>
-                  </td>
+                    <td class="text-end">
+                      <a
+                        href="https://elliot.cat/gestio/cinema/modifica-serie/${s.slug}"
+                        class="btn btn-sm btn-outline-warning"
+                      >
+                        Modifica
+                      </a>
+                    </td>
 
-                </tr>
-              `;
+                  </tr>
+                `;
               })
               .join('')}
 

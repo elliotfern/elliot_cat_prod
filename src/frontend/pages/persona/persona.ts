@@ -12,7 +12,7 @@ export function persona() {
   if (pageType[2] === 'modifica-persona') {
     formPersona(true, slug);
   } else if (pageType[2] === 'fitxa-persona') {
-    fitxaPersona('/api/persones/get/persona?slug=', slug);
+    fitxaPersona('persones/get/persona?slug=', slug);
   } else if (pageType[2] === 'nova-persona') {
     formPersona(false);
   } else if ([pageType[1], pageType[0]].includes('base-dades-persones')) {
