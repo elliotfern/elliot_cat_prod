@@ -1,29 +1,16 @@
+import { api } from '../../core/api/client';
 import { mapSerieToFitxa } from '../../components/mappers/serie';
 import { renderFitxa } from '../../utils/renderFitxa';
+import { SerieTv } from '../../types/SerieTv';
 
 export async function fitxaSerie(baseUrl: string, slug: string) {
-  const urlAjax = `${baseUrl}${slug}`;
-
   try {
-    const response = await fetch(urlAjax);
+    const json = await api.get<SerieTv>(baseUrl, {
+      slug,
+    });
 
-    if (!response.ok) {
-      throw new Error('Error en la petició API');
-    }
+    const fitxa = mapSerieToFitxa(json);
 
-    const json = await response.json();
-
-    if (json.status !== 'success' || !json.data?.length) {
-      throw new Error('Dades no vàlides');
-    }
-
-    // ⚠️ tu API devuelve array con 1 elemento
-    const apiData = json.data[0];
-
-    // 👉 1. convertir API → modelo UI
-    const fitxa = mapSerieToFitxa(apiData);
-
-    // 👉 2. render genérico
     renderFitxa({
       containerId: 'fitxaSerie',
       title: fitxa.title,
@@ -36,7 +23,7 @@ export async function fitxaSerie(baseUrl: string, slug: string) {
       editButton: {
         basePath: 'cinema',
         action: 'modifica-serie',
-        id: apiData.id,
+        id: '',
         label: 'Modifica sèrie',
       },
     });

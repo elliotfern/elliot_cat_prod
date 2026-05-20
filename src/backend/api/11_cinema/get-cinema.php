@@ -154,6 +154,7 @@ if ($slug === "pelicules") {
                 LEFT JOIN %s AS id ON tv.idioma_id = id.id
                 LEFT JOIN %s AS g ON tv.genere_id = g.id
                 WHERE tv.slug = :slug;
+                LIMIT 1
             SQL;
 
     $query = sprintf(
@@ -169,7 +170,7 @@ if ($slug === "pelicules") {
     try {
 
         $params = [':slug' => $serie];
-        $result = $db->getData($query, $params);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(
@@ -424,7 +425,8 @@ if ($slug === "pelicules") {
                 LEFT JOIN %s AS img ON p.imatge_id = img.id
                 LEFT JOIN %s AS id ON p.idioma_id = id.id
                 LEFT JOIN %s AS g ON p.genere_id = g.id
-                WHERE p.slug = :slug;
+                WHERE p.slug = :slug
+                LIMIT 1;
             SQL;
 
     $query = sprintf(
@@ -440,7 +442,7 @@ if ($slug === "pelicules") {
 
     try {
         $params = [':slug' => $peli];
-        $result = $db->getData($query, $params);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(

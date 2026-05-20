@@ -1,0 +1,26 @@
+export type SerieTv = {
+  id: string;
+  slug: string;
+  titol: string;
+  imatge: string;
+  descripcio: string;
+  created_at: string | null;
+  updated_at: string | null;
+  name: string;
+  startYear: string;
+  endYear: string;
+  season: string;
+  chapter: string;
+  director_id: string;
+  lang: string;
+  genere_id: string;
+  pais_id: string;
+  img_id: string;
+  idioma_ca: string;
+  pais_ca: string;
+  nameImg: string;
+  genere: string;
+  nom: string;
+  cognoms: string;
+  slugDirector: string;
+};

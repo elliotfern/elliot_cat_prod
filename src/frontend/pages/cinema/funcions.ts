@@ -24,10 +24,10 @@ export async function cinema() {
   } else if (slug === 'llistat-pelicules') {
     taulaLlistatPelicules();
   } else if (slug === 'fitxa-pelicula') {
-    const url = 'https://elliot.cat/api/cinema/get/pelicula?peliSlug=';
+    const url = 'cinema/get/pelicula?peliSlug=';
     fitxaPelicula(url, idSlug);
   } else if (slug === 'fitxa-serie') {
-    const url = 'https://elliot.cat/api/cinema/get/serie?serieSlug=';
+    const url = 'cinema/get/serie?serieSlug=';
     fitxaSerie(url, idSlug);
   }
 }
