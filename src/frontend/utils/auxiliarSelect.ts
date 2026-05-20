@@ -21,7 +21,7 @@ const isEmptySel = (v: unknown): boolean => v === null || v === undefined || v =
  */
 export async function auxiliarSelect(selected: number | string | Array<number | string> | null | undefined, apiUrl: string, elementId: string, valorText: string, fallbackValue?: number | string, config?: any): Promise<Choices | void> {
   try {
-    const data = await api.get<Item[]>(`/auxiliars/get/${apiUrl}`);
+    const data = await api.get<Item[]>(`auxiliars/get/${apiUrl}`);
 
     const selectElement = document.getElementById(elementId) as HTMLSelectElement | null;
 
