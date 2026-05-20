@@ -2,7 +2,7 @@ import { getPageType } from '../../utils/urlPath';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { taulaLlistatAutors } from './taulaLlistatAutors';
 import { taulaLlistatLlibres } from './taulaLlistatLlibres';
-import { fetchApiDataLlibre } from './fitxaLlibre';
+import { fitxaLlibre } from './fitxaLlibre';
 import { initAdminButtons, initLlibreAutorsPage } from './fitxaLlibreAutors';
 import { taulaLlistatGrups } from './taulaLlistatGrups';
 import { formLlibre } from './formLlibre';
@@ -24,7 +24,7 @@ export async function biblioteca() {
     taulaLlistatGrups();
   } else if (pageType[2] === 'fitxa-llibre') {
     const slug = pageType[3];
-    fetchApiDataLlibre(`/api/biblioteca/get/llibreSlug?llibre=${slug}`);
+    fitxaLlibre(`biblioteca/get/`, slug);
   } else if (pageType[2] === 'fitxa-llibre-autors') {
     const slug = pageType[3];
     initLlibreAutorsPage(slug);
