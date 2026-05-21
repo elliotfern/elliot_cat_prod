@@ -73,13 +73,13 @@ async function sendInvoiceEmail(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'i
   }
 }
 
-const EMISSORS: Record<number, string> = {
+const EMISSORS: Record<string, string> = {
   1: 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
   2: 'Autònom Irlanda (1 novembre 2022 - 29 març 2026)',
   3: 'Partita Iva Itàlia (30 març 2026 - )',
 };
 
-export function renderTitolEmissor(emissorId: number) {
+export function renderTitolEmissor(emissorId: string) {
   const container = document.getElementById('titolTipusFactura');
   if (!container) return;
 
@@ -88,7 +88,7 @@ export function renderTitolEmissor(emissorId: number) {
   container.innerHTML = `<h3>${titol}</h3>`;
 }
 
-export async function taulaFacturacioClients(emissorId: number) {
+export async function taulaFacturacioClients(id: string) {
   const isAdmin = await getIsAdmin();
 
   const columns: TaulaDinamica<Factura>[] = [
@@ -164,7 +164,7 @@ export async function taulaFacturacioClients(emissorId: number) {
   }
 
   renderDynamicTable({
-    url: API_URLS.GET.FACTURACIO_CLIENTS(emissorId),
+    url: `${API_URLS.GET.FACTURACIO_CLIENTS}?id=${id}`,
     containerId: 'taulaLlistatFactures',
     columns,
     filterKeys: ['clientEmpresa', 'clientCognoms'],
@@ -172,7 +172,7 @@ export async function taulaFacturacioClients(emissorId: number) {
   });
 
   const container = document.getElementById('taulaLlistatFactures');
-  renderTitolEmissor(emissorId);
+  renderTitolEmissor(id);
 
   container?.addEventListener('click', (ev) => {
     const target = ev.target as HTMLElement;

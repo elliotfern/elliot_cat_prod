@@ -272,12 +272,12 @@ if ($slug === 'clients') {
     }
 
     // GET : Llistat factures clients
-    // ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients?emissor_id={id}"
+    // ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients?id={id}"
 } else if ($slug === 'facturacioClients') {
 
     AdminMiddleware::handle();
 
-    $emissor_id = isset($_GET['emissor_id']) ? (int) $_GET['emissor_id'] : null;
+    $emissor_id = isset($_GET['id']) ? $_GET['id'] : null;
 
     $sql = <<<SQL
         SELECT 
@@ -323,11 +323,7 @@ if ($slug === 'clients') {
     );
 
     try {
-
-        $params = [
-            'emissor_id' => $emissor_id
-        ];
-
+        $params = ['emissor_id' => $emissor_id];
         $result = $db->getData($query, $params);
 
         if (empty($result)) {

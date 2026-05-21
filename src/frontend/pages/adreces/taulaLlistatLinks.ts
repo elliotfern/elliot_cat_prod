@@ -44,7 +44,7 @@ export async function taulaLlistatLinks() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/adreces/get/llistatLinks`,
+    url: `adreces/get/llistatLinks`,
     containerId: 'taulaLlistatLinks',
     columns,
     filterKeys: ['nom'],

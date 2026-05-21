@@ -19,7 +19,7 @@ export type ApiUrls = {
     PAIS_ID: string;
     CLIENTS: string;
     CLIENT_ID: string;
-    FACTURACIO_CLIENTS: (id: number) => string;
+    FACTURACIO_CLIENTS: string;
     INVOICE_PDF: (id: number, lang: 'ca' | 'es' | 'en' | 'it') => string;
     FACTURA_CLIENT_ID: string;
     FACTURA_CLIENT_PRODUCTE_ID: (id: string) => string;

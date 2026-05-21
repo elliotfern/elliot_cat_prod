@@ -23,13 +23,13 @@ export function comptabilitat() {
   const id = pageType[3];
 
   if (pageType[2] === 'facturacio-clients-partita-iva') {
-    const emissor = 3;
+    const emissor = '0x019e3ebaf71370c2860a40a7a15db12';
     taulaFacturacioClients(emissor);
   } else if (pageType[2] === 'facturacio-clients-autonom-irlanda') {
-    const emissor = 2;
+    const emissor = '0x019e3ebaf71370c2860a40a7a078beb4';
     taulaFacturacioClients(emissor);
   } else if (pageType[2] === 'facturacio-clients-hispantic') {
-    const emissor = 1;
+    const emissor = '0x019e3ebaf71370c2860a40a79fb5ad7b';
     taulaFacturacioClients(emissor);
   } else if (pageType[2] === 'nova-factura') {
     formFacturaClient(false);
