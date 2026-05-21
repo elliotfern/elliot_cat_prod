@@ -4,19 +4,51 @@ import { RenderTableOptions } from '../../types/TaulaDinamica';
 function renderCellContent(content: string | HTMLElement | unknown): string {
   if (content == null) return '';
 
-  if (typeof content === 'string') {
-    return content;
-  }
+  if (typeof content === 'string') return content;
 
-  if (content instanceof HTMLElement) {
-    return content.outerHTML;
-  }
+  if (content instanceof HTMLElement) return content.outerHTML;
 
   return String(content);
 }
 
+/**
+ * Acceso seguro a propiedades anidadas: "data.factures"
+ */
+function getNestedValue(obj: any, path?: string): unknown {
+  if (!path) return obj;
+
+  return path.split('.').reduce((acc, key) => acc?.[key], obj);
+}
+
+/**
+ * Normaliza cualquier respuesta API a array
+ */
+function extractArray(result: unknown, dataKey?: string): any[] {
+  // 1. dataKey (nuevo sistema)
+  const viaKey = getNestedValue(result, dataKey);
+
+  if (Array.isArray(viaKey)) return viaKey;
+
+  // 2. fallback clásico { data: [] }
+  const legacyData = (result as any)?.data;
+
+  if (Array.isArray(legacyData)) return legacyData;
+
+  // 3. fallback { data: { x: [] } }
+  if (legacyData && typeof legacyData === 'object') {
+    const firstArray = Object.values(legacyData).find(Array.isArray);
+
+    if (Array.isArray(firstArray)) return firstArray;
+  }
+
+  // 4. fallback directo
+  if (Array.isArray(result)) return result;
+
+  return [];
+}
+
 export async function renderDynamicTable<T extends Record<string, any>>(options: RenderTableOptions<T>): Promise<void> {
-  const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField, filterSplitBy, filterSplitTrim = true } = options;
+  const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField, filterSplitBy, filterSplitTrim = true, dataKey } = options;
 
   const container = document.getElementById(containerId);
 
@@ -25,14 +57,10 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
     return;
   }
 
-  // =========================
-  // API
-  // =========================
-
-  let data: T[] = [];
+  let raw: any;
 
   try {
-    data = await api.get<T[]>(url);
+    raw = await api.get<any>(url);
   } catch (error) {
     console.error(error);
 
@@ -41,8 +69,26 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
         Error carregant dades
       </div>
     `;
-
     return;
+  }
+
+  // =========================
+  // NORMALIZACIÓN SEGURA
+  // =========================
+
+  let data: T[] = [];
+
+  if (Array.isArray(raw)) {
+    // caso antiguo: API devuelve array directo
+    data = raw;
+  } else if (raw && typeof raw === 'object') {
+    if (dataKey && Array.isArray(raw[dataKey])) {
+      // caso nuevo: { factures: [] }
+      data = raw[dataKey];
+    } else if (Array.isArray(raw.data)) {
+      // fallback antiguo wrapper
+      data = raw.data;
+    }
   }
 
   if (!Array.isArray(data) || data.length === 0) {
@@ -51,7 +97,6 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
         No hi ha dades.
       </div>
     `;
-
     return;
   }
 
@@ -68,20 +113,16 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   // =========================
 
   const searchInput = document.createElement('input');
-
   searchInput.className = 'form-control w-30 mb-3';
   searchInput.placeholder = 'Cercar...';
 
   const buttonContainer = document.createElement('div');
-
   buttonContainer.className = 'd-flex flex-wrap gap-2 mb-3';
 
   const table = document.createElement('table');
-
   table.classList.add('table', 'table-striped', 'table-hover', 'table-bordered', 'align-middle');
 
   const thead = document.createElement('thead');
-
   thead.classList.add('table-dark');
 
   const tbody = document.createElement('tbody');
@@ -89,17 +130,14 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   table.append(thead, tbody);
 
   const paginationNav = document.createElement('nav');
-
   paginationNav.setAttribute('aria-label', 'Paginació');
 
   const pagination = document.createElement('ul');
-
   pagination.className = 'pagination justify-content-center mt-3';
 
   paginationNav.appendChild(pagination);
 
   const totalRecords = document.createElement('div');
-
   totalRecords.className = 'text-muted small mt-2';
 
   // =========================
@@ -114,16 +152,13 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
 
   function getFilterParts(raw: unknown): string[] {
     const s = String(raw ?? '');
-
     if (!s) return [];
 
     if (!filterByField) return [s];
 
     const splitter = filterSplitBy?.[filterByField];
 
-    if (!splitter) {
-      return [s];
-    }
+    if (!splitter) return [s];
 
     return s
       .split(splitter as any)
@@ -132,7 +167,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   }
 
   // =========================
-  // FILTERS
+  // FILTER LOGIC
   // =========================
 
   function applyFilters() {
@@ -141,153 +176,45 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
     filteredData = data
       .filter((row) => {
         if (!activeButtonFilter) return true;
-
         if (!filterByField) return true;
 
         const fieldValue = row[filterByField];
 
-        // ARRAY
         if (Array.isArray(fieldValue)) {
           return fieldValue.map(String).includes(activeButtonFilter);
         }
 
-        // SPLIT
         const parts = getFilterParts(fieldValue);
 
         if (parts.length > 1) {
           return parts.includes(activeButtonFilter);
         }
 
-        // SIMPLE
         return String(fieldValue) === activeButtonFilter;
       })
       .filter((row) => {
-        if (search.length === 0) {
-          return true;
-        }
+        if (!search) return true;
 
         return filterKeys.some((key) => normalizeText(String(row[key] ?? '')).includes(search));
       });
 
     currentPage = 1;
-
     renderTable();
   }
 
   // =========================
-  // FILTER BUTTONS
-  // =========================
-
-  function updateActiveButton(activeButton: HTMLButtonElement) {
-    const buttons = buttonContainer.querySelectorAll('.filter-btn');
-
-    buttons.forEach((btn) => {
-      btn.classList.remove('active');
-    });
-
-    activeButton.classList.add('active');
-  }
-
-  function renderFilterButtons() {
-    if (!filterByField) return;
-
-    let uniqueValues: string[] = [];
-
-    const first = data[0]?.[filterByField];
-
-    // ARRAY FIELD
-    if (Array.isArray(first)) {
-      uniqueValues = Array.from(
-        new Set(
-          data
-            .flatMap((row) => {
-              const v = row[filterByField];
-
-              return Array.isArray(v) ? v : [];
-            })
-            .map(String)
-        )
-      ).filter(Boolean);
-    } else {
-      // SPLIT FIELD
-      const splitter = filterSplitBy?.[filterByField];
-
-      if (splitter) {
-        uniqueValues = Array.from(new Set(data.flatMap((row) => getFilterParts(row[filterByField])).map(String))).filter(Boolean);
-      } else {
-        // SIMPLE FIELD
-        uniqueValues = Array.from(new Set(data.map((row) => String(row[filterByField] ?? '')))).filter(Boolean);
-      }
-    }
-
-    uniqueValues = uniqueValues.sort((a, b) =>
-      a.localeCompare(b, 'ca', {
-        sensitivity: 'base',
-      })
-    );
-
-    buttonContainer.innerHTML = '';
-
-    // TOTS
-    const allButton = document.createElement('button');
-
-    allButton.textContent = 'Tots';
-    allButton.className = 'btn btn-outline-primary btn-sm filter-btn';
-
-    allButton.onclick = () => {
-      activeButtonFilter = null;
-
-      updateActiveButton(allButton);
-
-      applyFilters();
-    };
-
-    buttonContainer.appendChild(allButton);
-
-    // VALUES
-    uniqueValues.forEach((value) => {
-      const button = document.createElement('button');
-
-      button.textContent = value;
-
-      button.className = 'btn btn-primary btn-sm filter-btn';
-
-      button.onclick = () => {
-        activeButtonFilter = value;
-
-        updateActiveButton(button);
-
-        applyFilters();
-      };
-
-      buttonContainer.appendChild(button);
-    });
-
-    updateActiveButton(allButton);
-  }
-
-  // =========================
-  // TABLE
+  // TABLE RENDER
   // =========================
 
   function renderTable() {
-    // HEADER
-
     thead.innerHTML = `
       <tr>
         ${columns.map((col) => `<th>${col.header}</th>`).join('')}
       </tr>
     `;
 
-    // PAGINATION
-
     const start = (currentPage - 1) * rowsPerPage;
-
-    const end = start + rowsPerPage;
-
-    const rowsToShow = filteredData.slice(start, end);
-
-    // ROWS
+    const rowsToShow = filteredData.slice(start, start + rowsPerPage);
 
     tbody.innerHTML = rowsToShow
       .map(
@@ -296,14 +223,9 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
             ${columns
               .map((col) => {
                 const value = row[col.field];
-
                 const rendered = col.render ? col.render(value, row) : String(value ?? '');
 
-                return `
-                  <td>
-                    ${renderCellContent(rendered)}
-                  </td>
-                `;
+                return `<td>${renderCellContent(rendered)}</td>`;
               })
               .join('')}
           </tr>
@@ -311,79 +233,53 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
       )
       .join('');
 
-    // PAGINATION BUTTONS
-
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
 
     pagination.innerHTML = '';
 
     for (let i = 1; i <= totalPages; i++) {
       const li = document.createElement('li');
-
       li.className = 'page-item' + (i === currentPage ? ' active' : '');
 
       const a = document.createElement('a');
-
       a.className = 'page-link';
       a.href = '#';
       a.textContent = String(i);
 
-      a.addEventListener('click', (e) => {
+      a.onclick = (e) => {
         e.preventDefault();
-
-        if (i === currentPage) return;
-
         currentPage = i;
-
         renderTable();
-      });
+      };
 
       li.appendChild(a);
-
       pagination.appendChild(li);
     }
 
-    totalRecords.textContent = `
-      Número total de registres: ${filteredData.length}
-    `;
+    totalRecords.textContent = `Número total de registres: ${filteredData.length}`;
   }
 
   // =========================
-  // EVENTS
+  // INIT
   // =========================
 
   searchInput.addEventListener('input', applyFilters);
 
-  // =========================
-  // INITIAL RENDER
-  // =========================
-
-  const tableWrapper = document.createElement('div');
-
-  tableWrapper.className = 'table-responsive';
-
-  tableWrapper.appendChild(table);
-
   container.innerHTML = '';
-
-  if (options.renderHeader) {
-    const headerWrapper = document.createElement('div');
-
-    headerWrapper.innerHTML = options.renderHeader(data);
-
-    container.appendChild(headerWrapper);
-  }
 
   container.appendChild(searchInput);
 
-  if (filterByField) {
-    container.appendChild(buttonContainer);
-
-    renderFilterButtons();
+  if (options.renderHeader) {
+    const headerWrapper = document.createElement('div');
+    headerWrapper.innerHTML = options.renderHeader(raw);
+    container.appendChild(headerWrapper);
   }
 
-  container.appendChild(tableWrapper);
+  const tableWrapper = document.createElement('div');
+  tableWrapper.className = 'table-responsive';
+  tableWrapper.appendChild(table);
 
+  container.appendChild(tableWrapper);
   container.appendChild(totalRecords);
 
   if (filteredData.length > rowsPerPage) {
