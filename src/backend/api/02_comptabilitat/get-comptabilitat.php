@@ -418,7 +418,7 @@ if ($slug === 'clients') {
             LEFT JOIN %s AS pro ON pro.id = c.provincia_id
             LEFT JOIN %s AS pa ON pa.id = c.pais_id
             LEFT JOIN %s AS e ON e.id = ic.emissor_id
-            LEFT JOIN %s AS pai ON pai.id = e.pais
+            LEFT JOIN %s AS pai ON pai.id = e.pais_id
             WHERE ic.id = :id
             LIMIT 1
         SQL;
