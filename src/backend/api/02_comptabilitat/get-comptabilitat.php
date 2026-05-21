@@ -323,7 +323,7 @@ if ($slug === 'clients') {
     );
 
     try {
-        $params = ['emissor_id' => $emissor_id];
+        $params = ['emissor_id' => uuid::toBinary($emissor_id)];
         $result = $db->getData($query, $params);
 
         if (empty($result)) {
