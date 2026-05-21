@@ -51,7 +51,7 @@ export async function taulaPressupostos() {
     },
 
     {
-      header: 'Data',
+      header: 'Data enviament',
       field: 'data',
       render: (_: unknown, row: Proveidor) => `${formatDataCatala(row.data)}`,
     },
