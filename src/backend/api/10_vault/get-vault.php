@@ -4,6 +4,10 @@ use App\Vault\Adapters\Inbound\VaultController;
 use App\Vault\Core\Services\VaultService;
 use App\Vault\Adapters\Outbound\DatabasePasswordRepository;
 use App\Config\DatabaseConnection;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+
+use App\Utils\AdminMiddleware;
 
 
 // Siempre JSON
@@ -27,6 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // Verificar si se ha recibido un parámetro válido
 if (isset($_GET['llistat_serveis'])) {
 
+    AdminMiddleware::handle();
+
     // Conectar a la base de datos
     $conn = DatabaseConnection::getConnection();
 
@@ -45,11 +51,24 @@ if (isset($_GET['llistat_serveis'])) {
     // Verificar que hemos obtenido un array de datos
     header('Content-Type: application/json');
     if (is_array($passwords)) {
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $passwords,
+            httpCode: 200
+        );
+
+
         // Devolver los datos como un array JSON
-        echo json_encode($passwords, JSON_PRETTY_PRINT);
+        //echo json_encode($passwords, JSON_PRETTY_PRINT);
     } else {
         // Si no se ha obtenido un array, devolver un error en formato JSON
-        echo json_encode(["error" => "No se encontraron contraseñas"]);
+        Response::error(
+            MissatgesAPI::error('not_found'),
+            [],
+            404
+        );
+        return;
     }
 } elseif (isset($_GET['id']) && is_numeric($_GET['id'])) {
     // Conectar a la base de datos
