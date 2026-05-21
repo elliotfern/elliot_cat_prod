@@ -71,7 +71,7 @@ export async function taulaPressupostos() {
   }
 
   renderDynamicTable({
-    url: `/api/comptabilitat/get/pressupostos`,
+    url: `comptabilitat/get/pressupostos`,
     containerId: 'taulaLlistatPressupostos',
     columns,
     filterKeys: ['producte'],

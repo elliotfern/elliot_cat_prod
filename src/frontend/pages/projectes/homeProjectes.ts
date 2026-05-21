@@ -1,9 +1,4 @@
-type ApiEnvelope<T> = {
-  status: string;
-  message: string;
-  errors: unknown[];
-  data: T;
-};
+import { api } from '../../core/api/client';
 
 type TaskItem = {
   id: number;
@@ -278,26 +273,6 @@ function renderActiveProjectsCard(items: ProjectWithNext[]): string {
   `;
 }
 
-async function fetchHome(): Promise<HomeData> {
-  const res = await fetch('/api/projectes/get/home', {
-    method: 'GET',
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-  });
-
-  if (!res.ok) {
-    const t = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status}: ${t}`);
-  }
-
-  const json = (await res.json()) as ApiEnvelope<HomeData>;
-  if (!json || json.status !== 'success') {
-    throw new Error(json?.message ?? 'API error');
-  }
-
-  return json.data;
-}
-
 export async function initProjectesHome(): Promise<void> {
   const panels = el<HTMLDivElement>('projectesHomePanels');
   const actius = el<HTMLDivElement>('panelProjectesActius');
@@ -306,8 +281,9 @@ export async function initProjectesHome(): Promise<void> {
   panels.innerHTML = `<div class="text-muted">Carregant...</div>`;
   actius.innerHTML = '';
 
+  let data: HomeData;
   try {
-    const data = await fetchHome();
+    data = await api.get<HomeData>(`projectes/get/home`);
 
     panels.innerHTML = `
       <div class="row g-3">
@@ -317,8 +293,8 @@ export async function initProjectesHome(): Promise<void> {
     `;
 
     actius.innerHTML = renderActiveProjectsCard(data.activeProjects ?? []);
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error(error);
     panels.innerHTML = `
       <div class="alert alert-danger mb-0">
         No s'han pogut carregar els panells de la Home.
