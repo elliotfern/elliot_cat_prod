@@ -1,24 +1,13 @@
-// invoice-page.ts
-
-import { API_BASE, DOMAIN_WEB } from '../../utils/urls';
-
-type JSONObject = Record<string, unknown>;
+import { api } from '../../core/api/client';
+import { DOMAIN_WEB } from '../../utils/urls';
 
 // === Config ===
 const API_URLS = {
-  INVOICE_BY_ID: (id: string | number) => `${API_BASE}/comptabilitat/get/facturaCompleta?id=${id}`,
+  INVOICE_BY_ID: `comptabilitat/get/facturaCompleta`,
 };
 
-// === Tipos ===
-interface ApiResponse<T> {
-  status: 'success' | 'error' | string;
-  message?: string;
-  errors?: unknown[];
-  data: T;
-}
-
 interface Invoice {
-  id: number;
+  id: string;
   client_id: number;
   concepte: string;
   data_factura: string;
@@ -73,25 +62,6 @@ function escHtml(s: unknown): string {
     .replace(/'/g, '&#39;');
 }
 
-async function fetchJSON<T = JSONObject>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    credentials: 'include',
-    ...init,
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Fetch error ${res.status} ${res.statusText}: ${text || url}`);
-  }
-  return res.json() as Promise<T>;
-}
-
-async function fetchApiData<T>(url: string, init?: RequestInit): Promise<T> {
-  const json = await fetchJSON<ApiResponse<T>>(url, init);
-  if (json.status !== 'success') throw new Error(json.message || 'Error API');
-  return json.data;
-}
-
 // === Render ===
 function renderInvoiceHeader(container: HTMLElement, inv: Invoice): void {
   const client = inv.clientEmpresa?.trim() ? `<strong>${escHtml(inv.clientEmpresa)}</strong>` : [inv.clientNom, inv.clientCognoms].filter(Boolean).map(escHtml).join(' ') || '—';
@@ -124,8 +94,6 @@ function renderInvoiceHeader(container: HTMLElement, inv: Invoice): void {
           ✏️ Modificar factura
         </a>
       </div>
-
-    </div>
   `;
 }
 
@@ -156,7 +124,7 @@ function renderInvoiceAmounts(container: HTMLElement, inv: Invoice): void {
   `;
 }
 
-function renderProducts(container: HTMLElement, invoiceId: number, lines: InvoiceLine[]): void {
+function renderProducts(container: HTMLElement, invoiceId: string, lines: InvoiceLine[]): void {
   if (!lines.length) {
     container.innerHTML = `
       <div class="alert alert-info">Aquesta factura no té línies de producte.</div>
@@ -195,7 +163,7 @@ function renderProducts(container: HTMLElement, invoiceId: number, lines: Invoic
   `;
 }
 
-// === API Calls ===
+/* === API Calls 
 async function getInvoice(id: string | number): Promise<Invoice> {
   const data = await fetchApiData<{ factura: Invoice; productes: InvoiceLine[] }>(API_URLS.INVOICE_BY_ID(id));
   return data.factura;
@@ -204,6 +172,19 @@ async function getInvoice(id: string | number): Promise<Invoice> {
 async function getInvoiceLines(id: string | number): Promise<InvoiceLine[]> {
   const data = await fetchApiData<{ factura: Invoice; productes: InvoiceLine[] }>(API_URLS.INVOICE_BY_ID(id));
   return data.productes ?? [];
+}
+=== */
+
+async function getInvoiceData(id: string): Promise<{
+  factura: Invoice;
+  productes: InvoiceLine[];
+}> {
+  return api.get<{
+    factura: Invoice;
+    productes: InvoiceLine[];
+  }>(API_URLS.INVOICE_BY_ID, {
+    id,
+  });
 }
 
 // === Init ===
@@ -226,24 +207,24 @@ export async function detallsFacturaClients(rootSelector = '#invoiceRoot'): Prom
   productsEl.innerHTML = `<div class="placeholder-glow"><span class="placeholder col-12"></span></div>`;
 
   try {
-    const invoice = await getInvoice(invoiceId);
-    renderInvoiceHeader(headerEl, invoice);
-    renderInvoiceAmounts(amountsEl, invoice);
+    const data = await getInvoiceData(invoiceId);
 
-    try {
-      const lines = await getInvoiceLines(invoiceId);
-      renderProducts(productsEl, invoice.id, lines);
-    } catch {
-      productsEl.innerHTML = `
-        <hr>
-        <div class="alert alert-warning">No s'han pogut carregar les línies de producte en aquest moment.</div>
-      `;
-    }
+    const factura = data.factura;
+    const productes = data.productes;
+
+    renderInvoiceHeader(headerEl, factura);
+    renderInvoiceAmounts(amountsEl, factura);
+    renderProducts(productsEl, factura.id, productes);
   } catch (err) {
+    console.error(err);
+
     headerEl.innerHTML = '';
     amountsEl.innerHTML = '';
+
     productsEl.innerHTML = `
-      <div class="alert alert-danger">S'ha produït un error en carregar la factura. Torna-ho a intentar més tard.</div>
-    `;
+    <div class="alert alert-danger">
+      S'ha produït un error en carregar la factura.
+    </div>
+  `;
   }
 }

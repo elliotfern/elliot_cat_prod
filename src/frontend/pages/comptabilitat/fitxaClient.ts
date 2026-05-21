@@ -1,46 +1,31 @@
+import { api } from '../../core/api/client';
+import { Client } from '../../types/Client';
+import { API_URLS } from '../../utils/apiUrls';
 import { formatDataCatala } from '../../utils/formataData';
 import { renderClientFactures } from './fitxaClientFactures';
 import { renderClientPressupostos } from './fitxaClientPressupostos';
 
-type ClientDTO = {
-  id: string;
-  clientNom: string | null;
-  clientCognoms: string | null;
-  clientEmail: string | null;
-  clientWeb: string | null;
-  clientNIF: string | null;
-  clientEmpresa: string | null;
-  clientAdreca: string | null;
-  clientCP: string | null;
-  clientTelefon: number | null;
-  clientRegistre: string;
-
-  ciutat_final: string | null;
-  provincia_ca: string | null;
-  pais_ca: string | null;
-
-  estat: string | null;
-};
-
-type ApiResponse = {
-  status: string;
-  message: string;
-  data: ClientDTO | null;
-};
-
 export async function fitxaClient(id: string) {
-  const res = await fetch(`https://elliot.cat/api/comptabilitat/get/clientId?id=${id}`);
+  let data: Client;
 
-  const json: ApiResponse = await res.json();
+   try {
+        data = await api.get<Client>(API_URLS.GET.CLIENT_ID, {
+          id,
+        });
+      } catch (error) {
+        console.error(error);
+  
+        return;
+      }
 
-  renderClient(json);
+  renderClient(data);
 }
 
-function renderClient(response: ApiResponse) {
+function renderClient(response: Client) {
   const container = document.getElementById('fitxaClient');
   if (!container) return;
 
-  const client = response.data;
+  const client = response;
 
   if (!client) {
     container.innerHTML = `<p>No s'ha trobat el client</p>`;

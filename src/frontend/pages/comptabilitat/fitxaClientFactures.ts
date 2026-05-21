@@ -1,24 +1,6 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
+import { FacturaClient } from '../../types/Client';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-
-interface FacturaClient {
-  id: string;
-  numero_factura: string;
-  concepte: string | null;
-
-  data_factura: string;
-  data_venciment: string | null;
-
-  base_imposable: number;
-  import_iva: number;
-  total_factura: number;
-
-  any: string;
-
-  estat: string | null;
-  tipusNom: string | null;
-  ivaPercen: number | null;
-}
 
 export function renderClientFactures(clientId: string) {
   const columns: TaulaDinamica<FacturaClient>[] = [
@@ -76,7 +58,7 @@ export function renderClientFactures(clientId: string) {
   ];
 
   renderDynamicTable({
-    url: `https://elliot.cat/api/comptabilitat/get/facturesClientId?id=${clientId}`,
+    url: `comptabilitat/get/facturesClientId?id=${clientId}`,
     containerId: 'clientFactures',
     columns,
     filterKeys: ['numero_factura', 'concepte'],
