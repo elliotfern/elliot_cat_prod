@@ -65,8 +65,8 @@ export function renderClientFactures(clientId: string) {
     dataKey: 'factures',
     rowsPerPage: 9999,
 
-    renderHeader: (result: any) => {
-      const total = result?.data?.totals?.total_facturat ?? 0;
+    renderHeader: ({ raw }: any) => {
+      const total = raw?.data?.totals?.total_facturat ?? 0;
 
       return `
       <div class="d-flex justify-content-between align-items-center mb-3">

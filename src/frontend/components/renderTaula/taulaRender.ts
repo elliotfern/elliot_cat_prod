@@ -271,7 +271,10 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
 
   if (options.renderHeader) {
     const headerWrapper = document.createElement('div');
-    headerWrapper.innerHTML = options.renderHeader(raw);
+    headerWrapper.innerHTML = options.renderHeader({
+      raw,
+      data,
+    });
     container.appendChild(headerWrapper);
   }
 
