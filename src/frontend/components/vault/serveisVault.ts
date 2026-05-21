@@ -69,7 +69,7 @@ export async function serveisVaultApi() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/vault/get/?llistat_serveis`,
+    url: `vault/get/?llistat_serveis`,
     containerId: 'taulaLlistatVault',
     columns,
     filterKeys: ['servei'],
