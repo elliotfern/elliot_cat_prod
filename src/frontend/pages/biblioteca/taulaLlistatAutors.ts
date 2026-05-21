@@ -42,7 +42,7 @@ export async function taulaLlistatAutors() {
   }
 
   renderDynamicTable({
-    url: `${API_BASE}/biblioteca/get/totsAutors`,
+    url: `biblioteca/get/totsAutors`,
     containerId: 'taulaLlistatAutors',
     columns,
     filterKeys: ['cognoms'],
