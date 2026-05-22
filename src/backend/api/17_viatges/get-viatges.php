@@ -376,6 +376,7 @@ if ($slug === 'llistatVisitesEspai') {
             LEFT JOIN %s AS a ON p.tipus_id = a.id
             LEFT JOIN %s AS i ON p.img_id = i.id
             WHERE p.slug = :slug
+            LIMIT 1
             SQL;
 
     $query = sprintf(
@@ -389,7 +390,7 @@ if ($slug === 'llistatVisitesEspai') {
     try {
 
         $params = [':slug' => $espai];
-        $result = $db->getData($query, $params);
+        $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
             Response::error(
