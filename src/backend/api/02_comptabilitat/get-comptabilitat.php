@@ -1,12 +1,14 @@
 <?php
 
+use App\Application\Client\Presenter\ClientResponse;
+use App\Application\Client\ReadModel\ClientDetailReadModel;
+use App\Application\Client\Service\ClientService;
 use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Utils\AdminMiddleware;
 use App\Utils\Uuid;
-use App\Services\ClientService;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
@@ -40,12 +42,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 if ($slug === 'clients') {
 
     AdminMiddleware::handle();
-    $clientService = new ClientService($db);
     $clients = $clientService->getAll();
+
+    $data = array_map(
+        fn($client) => ClientResponse::toArray($client),
+        $clients
+    );
 
     Response::success(
         message: MissatgesAPI::success('get'),
-        data: $clients,
+        data: $data,
         httpCode: 200
     );
 
@@ -57,7 +63,6 @@ if ($slug === 'clients') {
 
     $id = $_GET['id'] ?? null;
 
-    $clientService = new ClientService($db);
     $client = $clientService->getById($id);
 
     if (!$client) {
@@ -70,7 +75,7 @@ if ($slug === 'clients') {
 
     Response::success(
         message: MissatgesAPI::success('get'),
-        data: $client,
+        data: ClientResponse::toArray($client),
         httpCode: 200
     );
 
