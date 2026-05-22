@@ -78,19 +78,10 @@ if ($slug === "esdevenimentId") {
         $params = [':id' => $id];
         $row    = $db->getData($query, $params, true);
 
-        if (empty($row)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
-
         Response::success(
-            MissatgesAPI::success('get'),
-            $row,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -102,7 +93,7 @@ if ($slug === "esdevenimentId") {
 
     /**
      * GET : Llistat d’esdeveniments futurs
-     * URL: https://tu-dominio/api/agenda/get/esdevenimentsFuturs?usuari_id=1
+     * URL: /agenda/get/esdevenimentsFuturs?usuari_id=1
      */
 } else if ($slug === "esdevenimentsFuturs") {
     $usuariId = 1;
@@ -144,11 +135,10 @@ if ($slug === "esdevenimentId") {
 
         $rows = $db->getData($query);
 
-        // Para agenda puede tener sentido devolver [] con 200 aunque no haya nada
         Response::success(
-            MissatgesAPI::success('get'),
-            $rows ?: [],
-            200
+            message: MissatgesAPI::success('get'),
+            data: $rows,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -161,7 +151,7 @@ if ($slug === "esdevenimentId") {
 
     /**
      * GET : Llistat d’esdeveniments per rang de dates
-     * URL: https://tu-dominio/api/agenda/get/esdevenimentsRang?usuari_id=1&from=2025-01-01&to=2025-01-31
+     * URL: agenda/get/esdevenimentsRang?usuari_id=1&from=2025-01-01&to=2025-01-31
      */
 } else if ($slug === "esdevenimentsRang") {
 
@@ -283,11 +273,10 @@ if ($slug === "esdevenimentId") {
         });
 
         Response::success(
-            MissatgesAPI::success('get'),
-            $all,
-            200
+            message: MissatgesAPI::success('get'),
+            data: $all,
+            httpCode: 200
         );
-        return;
     } catch (PDOException $e) {
         Response::error(
             MissatgesAPI::error('errorBD'),

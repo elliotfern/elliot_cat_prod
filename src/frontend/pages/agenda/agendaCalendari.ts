@@ -1,3 +1,5 @@
+import { api } from '../../core/api/client';
+
 // models/AgendaEsdeveniment.ts
 export type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'viatge' | 'altre' | 'aniversari';
 
@@ -24,12 +26,6 @@ export interface AgendaEsdeveniment {
 const MONTHS_CA = ['Gener', 'Febrer', 'Març', 'Abril', 'Maig', 'Juny', 'Juliol', 'Agost', 'Setembre', 'Octubre', 'Novembre', 'Desembre'];
 
 const WEEK_START_MONDAY = true;
-
-interface ApiResponse<T> {
-  success?: boolean;
-  message?: string;
-  data?: T;
-}
 
 /** Parsea "YYYY-MM-DD HH:MM:SS" a Date */
 function parseDateTime(dateTimeStr: string): Date {
@@ -222,21 +218,14 @@ function renderCalendar(year: number, monthIndex: number, events: AgendaEsdeveni
 /** Carga eventos del mes desde el backend */
 async function loadMonthData(usuariId: number, year: number, monthIndex: number): Promise<AgendaEsdeveniment[]> {
   const { from, to } = getMonthRange(year, monthIndex);
+
   usuariId = 1;
 
-  const res = await fetch(`/api/agenda/get/esdevenimentsRang?usuari_id=${usuariId}&from=${from}&to=${to}`, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    credentials: 'include',
+  return api.get<AgendaEsdeveniment[]>('agenda/get/esdevenimentsRang', {
+    usuari_id: usuariId,
+    from,
+    to,
   });
-
-  if (!res.ok) {
-    throw new Error('Error carregant esdeveniments del mes');
-  }
-
-  const json: ApiResponse<AgendaEsdeveniment[]> | any = await res.json();
-  const data: AgendaEsdeveniment[] = json.data ?? json ?? [];
-  return data;
 }
 
 /** Inicializa calendario */
