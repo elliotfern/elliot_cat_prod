@@ -1,5 +1,6 @@
 // src/frontend/services/auth/isAdmin.ts
-// Solo UX: pinta botones. Seguridad real: backend (403).
+
+import { api } from '../../core/api/client';
 
 type MeResponse = {
   authenticated: boolean;
@@ -13,8 +14,8 @@ type MeResponse = {
 
 type CachedMe = {
   me: MeResponse;
-  expiry: number; // ms epoch
-  fingerprint: string; // uid:<user_id> o anon
+  expiry: number;
+  fingerprint: string;
 };
 
 const ME_CACHE_KEY = 'auth.me.v1';
@@ -30,6 +31,7 @@ function safeJsonParse<T>(raw: string): T | null {
 
 function buildFingerprint(me: MeResponse): string {
   const uid = String(me.user_id ?? '').trim();
+
   return uid ? `uid:${uid}` : 'anon';
 }
 
@@ -41,66 +43,44 @@ function clearMeCache(): void {
   localStorage.removeItem(ME_CACHE_KEY);
 }
 
-export async function fetchMe(apiBase = 'https://elliot.cat'): Promise<MeResponse> {
-  const base = apiBase.replace(/\/+$/, '');
-  const url = `${base}/api/auth/get/?me`;
-
-  let res: Response;
+export async function fetchMe(): Promise<MeResponse> {
   try {
-    res = await fetch(url, {
-      method: 'GET',
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-      cache: 'no-store',
-    });
-  } catch {
-    return { authenticated: false, error: 'NETWORK_ERROR' };
-  }
+    return await api.get<MeResponse>('auth/get/?me');
+  } catch (error) {
+    console.error(error);
 
-  if (res.status === 401) return { authenticated: false };
-  if (!res.ok) return { authenticated: false, error: `HTTP_${res.status}` };
-
-  try {
-    const data = (await res.json()) as MeResponse;
-    if (!data || typeof data.authenticated !== 'boolean') {
-      return { authenticated: false, error: 'BAD_JSON_SHAPE' };
-    }
-    return data;
-  } catch {
-    return { authenticated: false, error: 'BAD_JSON' };
+    return {
+      authenticated: false,
+      error: 'AUTH_ERROR',
+    };
   }
 }
 
 /**
- * /me con cache (UX).
- * - TTL corto
- * - sin doble request si cache válido
- * - cache atado a user_id para no mezclar usuarios
+ * /me con cache UX
  */
-export async function getMeCached(apiBase?: string, opts?: { ttlMs?: number; forceRefresh?: boolean }): Promise<MeResponse> {
+export async function getMeCached(opts?: { ttlMs?: number; forceRefresh?: boolean }): Promise<MeResponse> {
   const ttlMs = opts?.ttlMs ?? DEFAULT_TTL_MS;
   const forceRefresh = opts?.forceRefresh ?? false;
+
   const now = Date.now();
 
   if (!forceRefresh) {
     const raw = localStorage.getItem(ME_CACHE_KEY);
+
     if (raw) {
       const cached = safeJsonParse<CachedMe>(raw);
 
       if (cached?.me && typeof cached.expiry === 'number' && cached.expiry > now) {
-        // Cache válido → devolvemos sin llamar a red
         return cached.me;
       }
 
-      // expirado o corrupto
       clearMeCache();
     }
   }
 
-  // Refresh real
-  const me = await fetchMe(apiBase);
+  const me = await fetchMe();
 
-  // Si no autenticado → limpiar para evitar UI “fantasma”
   if (!me.authenticated) {
     clearMeCache();
     return me;
@@ -115,32 +95,30 @@ export async function getMeCached(apiBase?: string, opts?: { ttlMs?: number; for
   try {
     localStorage.setItem(ME_CACHE_KEY, JSON.stringify(payload));
   } catch {
-    // Si falla el storage, seguimos sin cache. UX OK igualmente.
+    // ignore
   }
 
   return me;
 }
 
-export async function getIsAdmin(apiBase?: string, opts?: { ttlMs?: number; forceRefresh?: boolean }): Promise<boolean> {
-  const me = await getMeCached(apiBase, opts);
+export async function getIsAdmin(opts?: { ttlMs?: number; forceRefresh?: boolean }): Promise<boolean> {
+  const me = await getMeCached(opts);
+
   return isAdminFromMe(me);
 }
 
-export async function isAdminUser(apiBase?: string): Promise<boolean> {
-  const me = await fetchMe(apiBase);
+export async function isAdminUser(): Promise<boolean> {
+  const me = await fetchMe();
+
   return isAdminFromMe(me);
 }
 
-/** Limpia cache en logout */
 export function clearAuthCache(): void {
   clearMeCache();
 }
 
-/**
- * Llama a esto cuando una request protegida devuelva 401/403.
- * - 401: sesión expirada → limpiar
- * - 403: permisos cambiaron (o cache mentía) → limpiar para repintar UI
- */
 export function handleAuthErrorStatus(status: number): void {
-  if (status === 401 || status === 403) clearMeCache();
+  if (status === 401 || status === 403) {
+    clearMeCache();
+  }
 }
