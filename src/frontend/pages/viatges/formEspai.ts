@@ -15,7 +15,7 @@ export async function formEspai(isUpdate: boolean, espai?: string) {
 
   if (espai && isUpdate) {
     try {
-      data = await api.get<Espai>(`viatges/get/fitxaEspai?espai`, {
+      data = await api.get<Espai>(`viatges/get/fitxaEspai`, {
         espai,
       });
     } catch (error) {
