@@ -3,6 +3,7 @@ import { formatData } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { Vault, TwoFACodeResponse } from '../../types/Vault';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
+import { api } from '../../core/api/client';
 
 export async function serveisVaultApi() {
   const isAdmin = await getIsAdmin(); // Comprobar si es admin
@@ -98,72 +99,84 @@ export async function serveisVaultApi() {
 }
 
 // Función para mostrar/ocultar la contraseña
-function showPass(id: number): void {
-  const inputField = document.getElementById(`passw-${id}`) as HTMLInputElement;
-  const urlAjax = `/api/vault/get/?id=${id}`;
+async function showPass(id: number): Promise<void> {
+  const inputField = document.getElementById(`passw-${id}`) as HTMLInputElement | null;
 
-  if (inputField.type === 'password') {
-    fetch(urlAjax, { method: 'GET', headers: { Accept: 'application/json' } })
-      .then((response) => (response.ok ? response.json() : Promise.reject('Error en la solicitud AJAX')))
-      .then((data: { password?: string; error?: string }) => {
-        if (data.password) {
-          inputField.value = data.password;
-          inputField.type = 'text';
-          navigator.clipboard.writeText(data.password).catch(console.error);
+  if (!inputField) return;
 
-          setTimeout(() => {
-            inputField.value = '**********';
-            inputField.type = 'password';
-          }, 5000);
-        } else {
-          inputField.value = data.error || 'Error desconocido';
-          inputField.type = 'text';
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        alert('Hubo un problema al intentar obtener la contraseña.');
-      });
+  if (inputField.type !== 'password') return;
+
+  try {
+    const data = await api.get<{
+      password?: string;
+      error?: string;
+    }>('vault/get', {
+      id,
+    });
+
+    if (data.password) {
+      inputField.value = data.password;
+      inputField.type = 'text';
+
+      navigator.clipboard.writeText(data.password).catch(console.error);
+
+      setTimeout(() => {
+        inputField.value = '**********';
+        inputField.type = 'password';
+      }, 5000);
+
+      return;
+    }
+
+    inputField.value = data.error || 'Error desconegut';
+    inputField.type = 'text';
+  } catch (error) {
+    console.error(error);
+
+    alert('Hi ha hagut un problema intentant obtenir la contrasenya.');
   }
 }
 
 // Función para mostrar/ocultar el código 2FA
-function show2FACode(id: number): void {
-  const inputField = document.getElementById(`clau2f-${id}`) as HTMLInputElement;
-  const urlAjax = `/api/vault/get/?type=codigo2f&id2F=${id}`;
+async function show2FACode(id: number): Promise<void> {
+  const inputField = document.getElementById(`clau2f-${id}`) as HTMLInputElement | null;
 
-  // Comprobamos si el campo de entrada existe y es de tipo "password"
   if (!inputField) {
     console.error(`Input field with id "clau2f-${id}" not found`);
     return;
   }
 
-  if (inputField.type === 'password') {
-    fetch(urlAjax, { method: 'GET', headers: { Accept: 'application/json' } })
-      .then((response) => response.json())
-      .then((data: TwoFACodeResponse) => {
-        if (data.code) {
-          // Mostrar el código 2FA en el campo correspondiente
-          inputField.value = data.code;
-          inputField.type = 'text'; // Mostrar el código
+  if (inputField.type !== 'password') return;
 
-          // Copiar al portapapeles si es necesario
-          navigator.clipboard.writeText(data.code).catch((error) => {
-            console.error('Error al copiar el código 2FA al portapapeles:', error);
-          });
+  try {
+    const data = await api.get<TwoFACodeResponse>('vault/get', {
+      type: 'codigo2f',
+      id2F: id,
+    });
 
-          // Ocultar el código después de 5 segundos
-          setTimeout(() => {
-            inputField.value = '*******'; // Volver al placeholder
-            inputField.type = 'password';
-          }, 5000);
-        } else {
-          alert('Error al obtener el código 2FA');
-        }
-      })
-      .catch((error) => {
-        console.error('Error al obtener el código 2FA:', error);
-        alert('Hubo un problema al intentar obtener el código 2FA.');
+    if (data.code) {
+      // Mostrar código
+      inputField.value = data.code;
+      inputField.type = 'text';
+
+      // Copiar al portapapeles
+      navigator.clipboard.writeText(data.code).catch((error) => {
+        console.error('Error al copiar el código 2FA:', error);
       });
+
+      // Ocultar tras 5 segundos
+      setTimeout(() => {
+        inputField.value = '*******';
+        inputField.type = 'password';
+      }, 5000);
+
+      return;
+    }
+
+    alert(data.error || 'Error al obtenir el codi 2FA');
+  } catch (error) {
+    console.error('Error al obtener el código 2FA:', error);
+
+    alert('Hi ha hagut un problema intentant obtenir el codi 2FA.');
   }
 }

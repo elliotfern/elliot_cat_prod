@@ -1,3 +1,5 @@
+import { api } from '../../core/api/client';
+
 type MeResponse = {
   authenticated: boolean;
   user_id: number | string | null;
@@ -7,7 +9,7 @@ type MeResponse = {
   is_admin: boolean;
 };
 
-const ME_ENDPOINT = '/api/auth/get/?me';
+const ME_ENDPOINT = 'auth/get/?me';
 const GESTIO_URL = 'https://elliot.cat/gestio';
 
 function escapeHtml(s: string): string {
@@ -30,15 +32,13 @@ function escapeHtml(s: string): string {
 }
 
 async function fetchMe(): Promise<MeResponse | null> {
+  let data: MeResponse;
   try {
-    const res = await fetch(ME_ENDPOINT, {
-      method: 'GET',
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-    });
-    if (!res.ok) return null;
-    return (await res.json()) as MeResponse;
-  } catch {
+    data = await api.get<MeResponse>(ME_ENDPOINT);
+    return data as MeResponse;
+  } catch (error) {
+    console.error(error);
+
     return null;
   }
 }
