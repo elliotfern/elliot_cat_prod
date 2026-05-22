@@ -84,7 +84,7 @@ if ($slug === 'clients') {
 
     $sql = <<<SQL
             SELECT 
-            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id, e.estat, s.producte, YEAR(p.data) AS any
+            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id AS idClient, e.estat, s.producte, YEAR(p.data) AS any
             FROM %s AS p
             LEFT JOIN %s AS c ON p.client_id = c.id
             LEFT JOIN %s AS e ON p.estat_id = e.id
