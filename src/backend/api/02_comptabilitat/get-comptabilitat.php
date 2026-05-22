@@ -1,9 +1,9 @@
 <?php
 
 use App\Application\Client\Presenter\ClientResponse;
-use App\Application\Client\ReadModel\ClientDetailReadModel;
 use App\Application\Client\Service\ClientService;
 use App\Config\Database;
+use App\Infrastructure\Persistence\Client\MysqlClientRepository;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
@@ -15,6 +15,9 @@ $slug = $routeParams[0] ?? null;
 
 $db = new Database();
 $pdo = $db->getPdo();
+
+$clientRepository = new MysqlClientRepository($db);
+$clientService = new ClientService($clientRepository);
 
 // Configuración de cabeceras para aceptar JSON y responder JSON
 header("Content-Type: application/json");
