@@ -5,26 +5,14 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Espai } from '../../types/Espai';
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
-export async function taulaLlistatEspaisViatges() {
+export async function taulaLlistatEspaisViatges(slug: string) {
   const isAdmin = await getIsAdmin();
-  let slug: string = '';
-  let gestioUrl: string = '';
-
-  if (isAdmin) {
-    slug = pageType[3];
-    gestioUrl = '/gestio';
-  } else {
-    slug = pageType[2];
-  }
 
   const columns: TaulaDinamica<Espai>[] = [
     {
       header: 'Espai',
       field: 'nom',
-      render: (_: unknown, row: Espai) => `<a href="https://${window.location.host}${gestioUrl}/viatges/fitxa-espai/${row.slug}">${row.nom}</a>`,
+      render: (_: unknown, row: Espai) => `<a href="https://elliot.cat/gestio/viatges/fitxa-espai/${row.slug}">${row.nom}</a>`,
     },
     { header: 'Ciutat', field: 'ciutat' },
     {
@@ -42,7 +30,7 @@ export async function taulaLlistatEspaisViatges() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Espai) => `
-         <a href="https://${window.location.host}/gestio/viatges/modifica-espai/${row.id}"><button class="btn-petit">Modifica</button></a>`,
+         <a href="https://elliot.cat/gestio/viatges/modifica-espai/${row.id}"><button class="btn-petit">Modifica</button></a>`,
     });
   }
 

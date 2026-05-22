@@ -26,8 +26,9 @@ export function viatges() {
   } else if ([pageType[1], pageType[2]].includes('llistat-espais-visitats')) {
     taulaLlistatEspaisVisitats();
   } else if ([pageType[1], pageType[2]].includes('fitxa-viatge')) {
+    const slug = pageType[3];
     fitxaViatge();
-    taulaLlistatEspaisViatges();
+    taulaLlistatEspaisViatges(slug);
   } else if ([pageType[1], pageType[2]].includes('fitxa-espai')) {
     const slug = pageType[3];
     fitxaEspai(slug); // se ejecuta cuando Leaflet está cargado

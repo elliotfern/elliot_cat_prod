@@ -6,17 +6,12 @@ import { Viatge } from '../../types/Viatge';
 
 export async function taulaLlistatViatges() {
   const isAdmin = await getIsAdmin(); // Comprovar si és admin
-  let gestioUrl: string = '';
-
-  if (isAdmin) {
-    gestioUrl = '/gestio';
-  }
 
   const columns: TaulaDinamica<Viatge>[] = [
     {
       header: 'Viatge',
       field: 'viatge',
-      render: (_: unknown, row: Viatge) => `<a href="https://${window.location.host}${gestioUrl}/viatges/fitxa-viatge/${row.slug}">${row.viatge}</a>`,
+      render: (_: unknown, row: Viatge) => `<a href="https://elliot.cat/gestio/viatges/fitxa-viatge/${row.slug}">${row.viatge}</a>`,
     },
     { header: 'Descripció', field: 'descripcio' },
     { header: 'País', field: 'pais_ca' },
