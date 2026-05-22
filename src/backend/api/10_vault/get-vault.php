@@ -92,11 +92,21 @@ if (isset($_GET['llistat_serveis'])) {
     // Verificar que hemos obtenido un array de datos
     header('Content-Type: application/json');
     if (is_array($passwords)) {
+
         // Devolver los datos como un array JSON
-        echo json_encode($passwords, JSON_PRETTY_PRINT);
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $passwords,
+            httpCode: 200
+        );
     } else {
         // Si no se ha obtenido un array, devolver un error en formato JSON
-        echo json_encode(["error" => "No se encontraron contraseñas"]);
+        Response::error(
+            MissatgesAPI::error('not_found'),
+            [],
+            404
+        );
+        return;
     }
 
     // Verificar si se ha recibido un parámetro válido
@@ -181,10 +191,20 @@ if (isset($_GET['llistat_serveis'])) {
     header('Content-Type: application/json');
     if (is_array($passwords)) {
         // Devolver los datos como un array JSON
-        echo json_encode($passwords, JSON_PRETTY_PRINT);
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $passwords,
+            httpCode: 200
+        );
     } else {
         // Si no se ha obtenido un array, devolver un error en formato JSON
-        echo json_encode(["error" => "No se encontraron contraseñas"]);
+        Response::error(
+            MissatgesAPI::error('not_found'),
+            [],
+            404
+        );
+        return;
     }
 } else {
     echo json_encode(['error' => 'Invalid ID']);
