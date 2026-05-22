@@ -5,6 +5,7 @@ use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\BeforeValidException;
+use App\Utils\Response;
 
 // Cargar variables de entorno desde .env
 $jwtSecret = $_ENV['TOKEN'] ?? null;
@@ -21,68 +22,80 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 if (isset($_GET['me'])) {
 
     if (!$jwtSecret) {
-        http_response_code(500);
-        echo json_encode(['error' => 'Server misconfigured (missing TOKEN secret)']);
-        exit;
+        Response::error(
+            message: 'Server misconfigured (missing TOKEN secret)',
+            httpCode: 500
+        );
     }
 
-    // Lee cookie token (si tienes helper, úsalo; si no, esto vale)
     $token = $_COOKIE['token'] ?? '';
 
     if (empty($token)) {
-        http_response_code(401);
-        echo json_encode(['authenticated' => false, 'error' => 'Missing token']);
-        exit;
+        Response::error(
+            message: 'Missing token',
+            httpCode: 401
+        );
     }
 
     try {
-        $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
 
-        // OJO: esto depende de que el JWT realmente incluya estos campos
+        $decoded = JWT::decode(
+            $token,
+            new Key($jwtSecret, 'HS256')
+        );
+
         $userType = $decoded->user_type ?? null;
-        $fullName = $decoded->full_name ?? null; // si no existe, lo devuelves null
-        $userId   = $decoded->user_id ?? null;   // si existe
 
-        if ($userType === null) {
-            // token válido, pero sin claim esperado
-            http_response_code(200);
-            echo json_encode([
+        Response::success(
+            message: 'Usuari autenticat correctament',
+            data: [
                 'authenticated' => true,
-                'user_type' => null,
-                'warning' => 'Token has no user_type claim'
-            ]);
-            exit;
-        }
+                'user_id' => $decoded->user_id ?? null,
+                'email' => $decoded->email ?? null,
+                'full_name' => $decoded->nom ?? null,
+                'user_type' => isset($decoded->user_type)
+                    ? (int)$decoded->user_type
+                    : null,
 
-        echo json_encode([
-            'authenticated' => true,
-            'user_id' => $decoded->user_id ?? null,
-            'email' => $decoded->email ?? null,
-            'full_name' => $decoded->nom ?? null,     // <-- aquí
-            'user_type' => isset($decoded->user_type) ? (int)$decoded->user_type : null,
-            'is_admin' => (isset($decoded->user_type) && (int)$decoded->user_type === 1),
-        ]);
-        exit;
+                'is_admin' => (
+                    isset($decoded->user_type)
+                    && (int)$decoded->user_type === 1
+                ),
+            ],
+            httpCode: 200
+        );
     } catch (ExpiredException $e) {
+
         error_log("JWT expirado: " . $e->getMessage());
-        http_response_code(401);
-        echo json_encode(['authenticated' => false, 'error' => 'Token expired']);
-        exit;
+
+        Response::error(
+            message: 'Token expired',
+            httpCode: 401
+        );
     } catch (SignatureInvalidException $e) {
+
         error_log("Firma inválida: " . $e->getMessage());
-        http_response_code(401);
-        echo json_encode(['authenticated' => false, 'error' => 'Invalid signature']);
-        exit;
+
+        Response::error(
+            message: 'Invalid signature',
+            httpCode: 401
+        );
     } catch (BeforeValidException $e) {
+
         error_log("Token usado antes de tiempo: " . $e->getMessage());
-        http_response_code(401);
-        echo json_encode(['authenticated' => false, 'error' => 'Token not yet valid']);
-        exit;
+
+        Response::error(
+            message: 'Token not yet valid',
+            httpCode: 401
+        );
     } catch (Exception $e) {
+
         error_log("Otro error JWT: " . $e->getMessage());
-        http_response_code(401);
-        echo json_encode(['authenticated' => false, 'error' => $e->getMessage()]);
-        exit;
+
+        Response::error(
+            message: $e->getMessage(),
+            httpCode: 401
+        );
     }
 } else if ((isset($_GET['logOut']))) {
     // Verifica que el usuario esté autenticado
