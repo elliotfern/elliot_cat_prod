@@ -13,6 +13,15 @@ export interface Espai {
   descripcio: string;
   img_id: string;
   tipus_id: string;
+  nameImg: string;
+  alt: string;
+  any_fundacio: string;
+  tipus: string;
+  web: string;
+  dateCreated: string;
+  dateModified: string;
+  coordinades_latitud: string;
+  coordinades_longitud: string;
 }
 
 export interface EspaiVisitat {

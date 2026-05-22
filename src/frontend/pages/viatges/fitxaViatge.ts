@@ -1,19 +1,24 @@
 import { renderFitxaInformacio } from '../../components/renderFitxaInformacio/renderFitxaInformacio';
 import { getPageType } from '../../utils/urlPath';
-import { getIsAdmin } from '../../services/auth/isAdmin';
 import { formatDataCatala } from '../../utils/formataData';
+import { api } from '../../core/api/client';
+import { Viatge } from '../../types/Viatge';
 
 export async function fitxaViatge() {
-  const isAdmin = await getIsAdmin();
   const url = window.location.href;
   const pageType = getPageType(url);
-  let slug: string = '';
+  let viatge = pageType[3];
 
-  slug = pageType[3];
+  let result: Viatge;
+  try {
+    result = await api.get<Viatge>(`viatges/get/fitxaViatgeDetalls`, {
+      viatge,
+    });
+  } catch (error) {
+    console.error(error);
 
-  const response = await fetch(`https://${window.location.host}/api/viatges/get/fitxaViatgeDetalls?viatge=${slug}`);
-  const json = await response.json();
-  const result = json.data;
+    return;
+  }
 
   const data = {
     nameImg: result.nameImg,

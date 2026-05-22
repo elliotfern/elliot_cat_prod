@@ -1,3 +1,5 @@
+import { api } from '../../core/api/client';
+
 // models/AgendaEsdeveniment.ts
 export type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'viatge' | 'altre';
 
@@ -219,19 +221,7 @@ export async function carregarEsdevenimentDetall(): Promise<void> {
   main.innerHTML = '<p>Carregant esdeveniment...</p>';
 
   try {
-    const res = await fetch(`/api/agenda/get/esdevenimentId?id=${id}`, {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
-      credentials: 'include',
-    });
-
-    if (!res.ok) {
-      main.innerHTML = "<p>Error carregant l'esdeveniment.</p>";
-      return;
-    }
-
-    const json: ApiResponse<AgendaEsdeveniment> | any = await res.json();
-    const ev: AgendaEsdeveniment = (json.data ?? json) as AgendaEsdeveniment;
+    const ev = await api.get<AgendaEsdeveniment>('agenda/get/esdevenimentId', { id });
 
     if (!ev || !ev.id_esdeveniment) {
       main.innerHTML = '<p>Esdeveniment no trobat.</p>';
@@ -241,6 +231,9 @@ export async function carregarEsdevenimentDetall(): Promise<void> {
     renderEsdeveniment(ev);
   } catch (err) {
     console.error(err);
-    main.innerHTML = "<p>Error inesperat carregant l'esdeveniment.</p>";
+
+    main.innerHTML = `
+    <p>Error carregant l'esdeveniment.</p>
+  `;
   }
 }

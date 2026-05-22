@@ -1,15 +1,23 @@
 import { renderFitxaInformacio } from '../../components/renderFitxaInformacio/renderFitxaInformacio';
-import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css'; // Importar el CSS de Leaflet
+import { Espai } from '../../types/Espai';
+import { api } from '../../core/api/client';
 
-export async function fitxaEspai(slug: string) {
+export async function fitxaEspai(espai: string) {
   const isAdmin = await getIsAdmin();
 
-  const response = await fetch(`https://${window.location.host}/api/viatges/get/fitxaEspaiDetalls?espai=${slug}`);
-  const json = await response.json();
-  const result = json.data[0]; // 👈 aquí está la clave
+  let result: Espai;
+  try {
+    result = await api.get<Espai>(`viatges/get/fitxaEspaiDetalls`, {
+      espai,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return;
+  }
 
   const data = {
     nameImg: result.nameImg ?? '',

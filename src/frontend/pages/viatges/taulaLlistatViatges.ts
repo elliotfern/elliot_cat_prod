@@ -43,7 +43,7 @@ export async function taulaLlistatViatges() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/viatges/get/llistatViatges`,
+    url: `viatges/get/llistatViatges`,
     containerId: 'taulaLlistatViatges',
     columns,
     filterKeys: ['viatge', 'descripcio'],
