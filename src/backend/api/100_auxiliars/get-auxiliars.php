@@ -1,6 +1,6 @@
 <?php
 
-use App\Application\Presenter\PaisResponse;
+use App\Application\Pais\Presenter\PaisResponse;
 use App\Config\Database;
 use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Pais\MysqlPaisRepository;
