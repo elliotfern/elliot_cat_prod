@@ -1,6 +1,10 @@
 <?php
 
+use App\Application\Response\PaisResponse;
 use App\Config\Database;
+use App\Config\DatabaseConnection;
+use App\Infrastructure\Persistence\Pais\MysqlPaisRepository;
+use App\Utils\AdminMiddleware;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
@@ -10,7 +14,9 @@ use App\Utils\Uuid;
 $slug = $routeParams[0] ?? null;
 
 $db = new Database();
-$pdo = $db->getPdo();
+$pdo = DatabaseConnection::getConnection();
+
+$paisRepository = new MysqlPaisRepository($pdo);
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -435,43 +441,20 @@ if ($slug === 'directors') {
     // ruta GET => "/api/cinema/get/auxiliars/paisos"
 } else if ($slug === "pais" || $slug === "paisos") {
 
-    $sql = <<<SQL
-            SELECT p.id, p.pais_ca
-            FROM %s AS p
-            ORDER BY p.pais_ca ASC
-            SQL;
+    AdminMiddleware::handle();
 
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_PAISOS, $pdo),
+    $paisos = $paisRepository->findAll();
 
+    $data = array_map(
+        fn($pais) => PaisResponse::toArray($pais),
+        $paisos
     );
 
-    try {
-
-        $result = $db->getData($query);
-
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
-
-        Response::success(
-            message: MissatgesAPI::success('get'),
-            data: $result,
-            httpCode: 200
-        );
-    } catch (PDOException $e) {
-        Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
-        );
-    }
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: $data,
+        httpCode: 200
+    );
 
     // Llistat provincies
     // ruta GET => "/api/cinema/get/auxiliars/provincies"

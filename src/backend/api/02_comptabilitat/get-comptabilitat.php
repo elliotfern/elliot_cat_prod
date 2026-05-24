@@ -3,6 +3,7 @@
 use App\Application\Client\Presenter\ClientResponse;
 use App\Application\Client\Service\ClientService;
 use App\Config\Database;
+use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Client\MysqlClientRepository;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
@@ -14,7 +15,7 @@ use App\Utils\Uuid;
 $slug = $routeParams[0] ?? null;
 
 $db = new Database();
-$pdo = $db->getPdo();
+$pdo = DatabaseConnection::getConnection();
 
 $clientRepository = new MysqlClientRepository($db);
 $clientService = new ClientService($clientRepository);
