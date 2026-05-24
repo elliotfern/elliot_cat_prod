@@ -10,7 +10,7 @@ class MysqlPaisMapper
     public static function map(array $row): Pais
     {
         return new Pais(
-            uuid::toBinary($row['id']),
+            uuid::toString($row['id']),
             $row['pais_ca'],
             $row['pais_en'],
             new \DateTimeImmutable($row['created_at']),
