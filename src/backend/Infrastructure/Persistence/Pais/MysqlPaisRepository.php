@@ -17,7 +17,7 @@ class MysqlPaisRepository implements PaisRepositoryInterface
     {
         $stmt = $this->pdo->prepare("
             SELECT *
-            FROM db_geo_pais
+            FROM db_geo_paisos
             WHERE id = :id
             LIMIT 1
         ");
@@ -43,7 +43,7 @@ class MysqlPaisRepository implements PaisRepositoryInterface
     {
         $stmt = $this->pdo->query("
             SELECT *
-            FROM db_geo_pais
+            FROM db_geo_paisos
             ORDER BY pais_ca
         ");
 

@@ -45,7 +45,7 @@ export async function taulaLlistatPaisos(): Promise<void> {
   }
 
   renderDynamicTable({
-    url: `https://api.elliot.cat/api/paisos`,
+    url: `auxiliars/get/paisos`,
     containerId: 'taulaLlistatPaisos',
     columns,
     filterKeys: ['pais_ca', 'pais_en'],
