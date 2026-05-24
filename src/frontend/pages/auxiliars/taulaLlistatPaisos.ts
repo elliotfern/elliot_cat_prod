@@ -33,6 +33,6 @@ export async function taulaLlistatPaisos(): Promise<void> {
     url: `auxiliars/get/paisos`,
     containerId: 'taulaLlistatPaisos',
     columns,
-    //filterKeys: ['pais_ca', 'pais_en'],
+    //filterKeys: ['pais_ca', 'pais_en']
   });
 }
