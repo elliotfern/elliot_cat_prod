@@ -61,7 +61,7 @@ export async function taulaLlistatCiutats() {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/auxiliars/get/llistatCiutats`,
+    url: `auxiliars/get/llistatCiutats`,
     containerId: 'taulaLlistatCiutats',
     columns,
     filterKeys: ['ciutat'],

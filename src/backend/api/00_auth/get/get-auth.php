@@ -118,7 +118,8 @@ if (isset($_GET['me'])) {
     session_destroy();  // Destruye la sesión
 
     // Respuesta en formato JSON o redirige
-    echo json_encode(['message' => 'OK']);
-
-    exit;
+    Response::success(
+        message: 'OK',
+        httpCode: 200
+    );
 }

@@ -34,7 +34,7 @@ export async function taulaLlistatSubTemaId(id: string) {
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/adreces/get/subTemaId?id=${id}`,
+    url: `adreces/get/subTemaId?id=${id}`,
     containerId: 'taulaLlistatSubTemaId',
     columns,
     filterKeys: ['nom'], // cercador

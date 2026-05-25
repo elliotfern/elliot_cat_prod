@@ -22,7 +22,7 @@ export async function taulaLlistatTemaId(id: string) {
   });
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/adreces/get/llistatLinksTemaId?id=${id}`,
+    url: `adreces/get/llistatLinksTemaId?id=${id}`,
     containerId: 'taulaLlistatTemaId',
     columns,
     filterKeys: ['tema'],
