@@ -2,6 +2,8 @@
 
 namespace App\Utils;
 
+use App\Domain\Shared\Exception\ValidationException;
+
 class Validator
 {
     public static function required(array &$errors, string $field, $value, ?string $label = null): void
@@ -149,6 +151,16 @@ class Validator
                     continue;
                 }
             }
+        }
+    }
+
+    public static function throwIfErrors(array $errors): void
+    {
+        if (!empty($errors)) {
+            throw new ValidationException(
+                'Error de validació',
+                $errors
+            );
         }
     }
 }

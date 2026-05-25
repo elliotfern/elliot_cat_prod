@@ -1,5 +1,9 @@
 <?php
 
+use App\Infrastructure\Error\ErrorHandler;
+
+ErrorHandler::register();
+
 // Configuración inicial para mostrar errores en desarrollo
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

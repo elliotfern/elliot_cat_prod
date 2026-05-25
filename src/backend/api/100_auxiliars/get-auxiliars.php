@@ -1,14 +1,17 @@
 <?php
 
+use App\Application\Ciutat\Presenter\CiutatResponse;
 use App\Application\Pais\Presenter\PaisResponse;
 use App\Config\Database;
 use App\Config\DatabaseConnection;
+use App\Infrastructure\Persistence\Ciutat\MysqlCiutatRepository;
 use App\Infrastructure\Persistence\Pais\MysqlPaisRepository;
 use App\Utils\AdminMiddleware;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Utils\Uuid;
+use App\Utils\Validator;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
@@ -622,92 +625,38 @@ if ($slug === 'directors') {
     // URL: https://elliot.cat/api/auxiliars/get/ciutats
 } else if ($slug === "ciutats") {
 
-    $sql = <<<SQL
-            SELECT c.id, CONCAT(
-                COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat),
-                IF(p.pais_ca IS NOT NULL, CONCAT(' (', p.pais_ca, ')'), '')
-            ) AS ciutat
-            FROM %s AS c
-            LEFT JOIN %s AS p ON c.pais_id = p.id
-            ORDER BY ciutat COLLATE utf8mb4_unicode_ci ASC;
-            SQL;
+    $ciutatRepository = new MysqlCiutatRepository($pdo);
+    $ciutats = $ciutatRepository->getAll();
 
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_CIUTATS, $pdo),
-        qi(Tables::DB_PAISOS, $pdo),
-
+    $data = array_map(
+        fn($ciutat) => CiutatResponse::toArray($ciutat),
+        $ciutats
     );
 
-    try {
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: $data,
+        httpCode: 200
+    );
 
-        $result = $db->getData($query);
-
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
-
-        Response::success(
-            message: MissatgesAPI::success('get'),
-            data: $result,
-            httpCode: 200
-        );
-    } catch (PDOException $e) {
-        Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
-        );
-    }
 
     // GET : llistat ciutats
     // URL: https://elliot.cat/api/auxiliars/get/llistatCiutats
 } else if ($slug === "llistatCiutats") {
 
-    $sql = <<<SQL
-            SELECT c.id, c.ciutat, c.ciutat_ca, c.ciutat_en, c.descripcio, p.id AS idPais, c.created_at, c.updated_at, p.pais_ca
-            FROM %s AS c
-            LEFT JOIN %s AS p ON c.pais_id = p.id
-            ORDER BY ciutat COLLATE utf8mb4_unicode_ci ASC;
-            SQL;
+    $ciutatRepository = new MysqlCiutatRepository($pdo);
+    $ciutats = $ciutatRepository->getAll();
 
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_CIUTATS, $pdo),
-        qi(Tables::DB_PAISOS, $pdo),
-
+    $data = array_map(
+        fn($ciutat) => CiutatResponse::toArray($ciutat),
+        $ciutats
     );
 
-    try {
-
-        $result = $db->getData($query);
-
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
-
-        Response::success(
-            message: MissatgesAPI::success('get'),
-            data: $result,
-            httpCode: 200
-        );
-    } catch (PDOException $e) {
-        Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
-        );
-    }
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: $data,
+        httpCode: 200
+    );
 
     // GET : Ciutat ID informació
     // URL: https://elliot.cat/api/auxiliars/get/ciutatId?id=33
@@ -715,48 +664,19 @@ if ($slug === 'directors') {
 
     $id = $_GET['id'] ?? null;
 
-    // Validación rápida del UUID texto
-    if (!$id || !preg_match('~^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$~i', $id)) {
-        Response::error(MissatgesAPI::error('validacio'), ['Parametre "id" no és un UUID vàlid'], 400);
-        return;
-    }
+    $errors = [];
 
-    $sql = <<<SQL
-        SELECT
-          c.id,
-          c.ciutat,
-          c.ciutat_ca,
-          c.ciutat_en,
-          c.descripcio,
-          c.pais_id
-        FROM %s AS c
-        WHERE c.id = :id
-        LIMIT 1
-        SQL;
+    Validator::requiredUuid($errors, 'id', $id);
+    Validator::throwIfErrors($errors);
 
-    $query = sprintf($sql, qi(Tables::DB_CIUTATS, $pdo));
+    $ciutatRepository = new MysqlCiutatRepository($pdo);
+    $ciutat = $ciutatRepository->findById($id);
 
-    try {
-        $params = [':id' => uuid::toBinary($id)];
-        $row = $db->getData($query, $params, true); // true => una sola fila
-
-        if (!$row) {
-            Response::error(MissatgesAPI::error('not_found'), [], 404);
-            return;
-        }
-
-        Response::success(
-            message: MissatgesAPI::success('get'),
-            data: $row,
-            httpCode: 200
-        );
-    } catch (PDOException $e) {
-        Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
-        );
-    }
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: CiutatResponse::toArray($ciutat),
+        httpCode: 200
+    );
 
     // GET : Pais ID informació
     // URL: https://elliot.cat/api/auxiliars/get/paisId?id=33
