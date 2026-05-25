@@ -12,7 +12,7 @@ export type RenderTableOptions<T extends object> = {
   containerId: string;
   rowsPerPage?: number;
   filterKeys?: Array<keyof T>;
-  filterByField?: keyof T;
+  filterByField?: string;
 
   // ✅ NOU (opt-in): permet split d'un string en múltiples valors per al filtre
   filterSplitBy?: Partial<Record<keyof T, string | RegExp>>;

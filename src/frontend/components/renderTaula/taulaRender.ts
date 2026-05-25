@@ -195,7 +195,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
       .filter((row) => {
         if (!search) return true;
 
-        return filterKeys.some((key) => normalizeText(String(row[key] ?? '')).includes(search));
+        return filterKeys.some((key) => normalizeText(String(getNestedValue(row, String(key)) ?? '')).includes(search));
       });
 
     currentPage = 1;

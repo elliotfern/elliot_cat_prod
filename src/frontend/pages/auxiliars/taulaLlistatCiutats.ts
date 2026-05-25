@@ -41,8 +41,8 @@ export async function taulaLlistatCiutats() {
 
     {
       header: 'País',
-      field: 'pais_ca',
-      render: (_: unknown, row: Ciutat) => `<a id="${row.pais_id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-pais/${row.pais_id}">${row.pais_ca}</a>`,
+      field: 'pais',
+      render: (_: unknown, row: Ciutat) => `<a id="${row.pais.id}" href="https://${window.location.hostname}${gestioUrl}/auxiliars/fitxa-pais/${row.pais.id}">${row.pais.pais_ca}</a>`,
     },
 
     {
@@ -65,6 +65,6 @@ export async function taulaLlistatCiutats() {
     containerId: 'taulaLlistatCiutats',
     columns,
     filterKeys: ['ciutat'],
-    filterByField: 'pais_ca',
+    filterByField: 'pais.pais_ca',
   });
 }
