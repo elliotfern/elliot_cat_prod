@@ -306,9 +306,9 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
       const isActive = value === activeButtonFilter;
 
       btn.className = `
-        btn btn-sm d-flex align-items-center gap-2
-        ${isActive ? 'btn-primary active' : 'btn-outline-primary'}
-      `;
+      btn btn-sm d-flex align-items-center gap-2
+      ${isActive ? 'btn-primary' : 'btn-outline-primary'}
+    `;
 
       btn.innerHTML = `
       <span>${value}</span>
