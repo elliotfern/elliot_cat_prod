@@ -20,33 +20,6 @@ function getNestedValue(obj: any, path?: string): unknown {
   return path.split('.').reduce((acc, key) => acc?.[key], obj);
 }
 
-/**
- * Normaliza cualquier respuesta API a array
- */
-function extractArray(result: unknown, dataKey?: string): any[] {
-  // 1. dataKey (nuevo sistema)
-  const viaKey = getNestedValue(result, dataKey);
-
-  if (Array.isArray(viaKey)) return viaKey;
-
-  // 2. fallback clásico { data: [] }
-  const legacyData = (result as any)?.data;
-
-  if (Array.isArray(legacyData)) return legacyData;
-
-  // 3. fallback { data: { x: [] } }
-  if (legacyData && typeof legacyData === 'object') {
-    const firstArray = Object.values(legacyData).find(Array.isArray);
-
-    if (Array.isArray(firstArray)) return firstArray;
-  }
-
-  // 4. fallback directo
-  if (Array.isArray(result)) return result;
-
-  return [];
-}
-
 export async function renderDynamicTable<T extends Record<string, any>>(options: RenderTableOptions<T>): Promise<void> {
   const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField, filterSplitBy, filterSplitTrim = true, dataKey } = options;
 
@@ -55,6 +28,48 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   if (!container) {
     console.error(`Contenedor #${containerId} no encontrado`);
     return;
+  }
+
+  function renderFilters() {
+    if (!filterByField) return;
+
+    const values = data.map((row) => getNestedValue(row, filterByField)).filter(Boolean) as string[];
+
+    const counts = values.reduce((acc: Record<string, number>, value) => {
+      const key = String(value);
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    const uniqueValues = Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ca', { sensitivity: 'base' }));
+
+    buttonContainer.innerHTML = '';
+
+    uniqueValues.forEach((value) => {
+      const count = counts[value];
+      const isActive = value === activeButtonFilter;
+
+      const btn = document.createElement('button');
+
+      btn.className = `
+      btn btn-sm d-flex align-items-center gap-2
+      ${isActive ? 'btn-primary' : 'btn-outline-primary'}
+    `;
+
+      btn.innerHTML = `
+      <span>${value}</span>
+      <span class="badge text-bg-secondary">${count}</span>
+    `;
+
+      btn.onclick = () => {
+        activeButtonFilter = isActive ? null : value;
+
+        renderFilters(); // 🔥 IMPORTANTÍSIMO
+        applyFilters();
+      };
+
+      buttonContainer.appendChild(btn);
+    });
   }
 
   let raw: any;
@@ -283,47 +298,8 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   tableWrapper.appendChild(table);
 
   if (filterByField) {
-    const values = data.map((row) => getNestedValue(row, filterByField)).filter(Boolean) as string[];
-
-    // contar ocurrencias
-    const counts = values.reduce((acc: Record<string, number>, value) => {
-      const key = String(value);
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
-
-    // únicos ordenados alfabéticamente
-    const uniqueValues = Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ca', { sensitivity: 'base' }));
-
-    // limpiar contenedor
-    buttonContainer.innerHTML = '';
-
-    uniqueValues.forEach((value) => {
-      const count = counts[value];
-
-      const btn = document.createElement('button');
-
-      const isActive = value === activeButtonFilter;
-
-      btn.className = `
-      btn btn-sm d-flex align-items-center gap-2
-      ${isActive ? 'btn-primary' : 'btn-outline-primary'}
-    `;
-
-      btn.innerHTML = `
-      <span>${value}</span>
-      <span class="badge text-bg-secondary">${count}</span>
-    `;
-
-      btn.onclick = () => {
-        activeButtonFilter = isActive ? null : value;
-        applyFilters();
-      };
-
-      buttonContainer.appendChild(btn);
-    });
-
     container.appendChild(buttonContainer);
+    renderFilters();
   }
 
   container.appendChild(tableWrapper);
