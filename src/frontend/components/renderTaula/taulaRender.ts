@@ -282,6 +282,50 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   tableWrapper.className = 'table-responsive';
   tableWrapper.appendChild(table);
 
+  if (filterByField) {
+    const values = data.map((row) => getNestedValue(row, filterByField)).filter(Boolean) as string[];
+
+    // contar ocurrencias
+    const counts = values.reduce((acc: Record<string, number>, value) => {
+      const key = String(value);
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {});
+
+    // únicos ordenados alfabéticamente
+    const uniqueValues = Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ca', { sensitivity: 'base' }));
+
+    // limpiar contenedor
+    buttonContainer.innerHTML = '';
+
+    uniqueValues.forEach((value) => {
+      const count = counts[value];
+
+      const btn = document.createElement('button');
+
+      const isActive = value === activeButtonFilter;
+
+      btn.className = `
+      btn btn-sm d-flex align-items-center gap-2
+      ${isActive ? 'btn-primary' : 'btn-outline-primary'}
+    `;
+
+      btn.innerHTML = `
+      <span>${value}</span>
+      <span class="badge text-bg-secondary">${count}</span>
+    `;
+
+      btn.onclick = () => {
+        activeButtonFilter = isActive ? null : value;
+        applyFilters();
+      };
+
+      buttonContainer.appendChild(btn);
+    });
+
+    container.appendChild(buttonContainer);
+  }
+
   container.appendChild(tableWrapper);
   container.appendChild(totalRecords);
 
