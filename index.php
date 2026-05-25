@@ -1,4 +1,9 @@
 <?php
+// Incluir configuraciones y rutas
+require __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/src/backend/Config/config.php';
+require_once __DIR__ . '/src/backend/Utils/verificacioSessio.php';
+require_once __DIR__ . '/src/backend/routes/routes.php';
 
 use App\Infrastructure\Error\ErrorHandler;
 
@@ -8,14 +13,6 @@ ErrorHandler::register();
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-
-// Incluir configuraciones y rutas
-
-require __DIR__ . '/vendor/autoload.php';
-
-require_once __DIR__ . '/src/backend/Config/config.php';
-require_once __DIR__ . '/src/backend/Utils/verificacioSessio.php';
-require_once __DIR__ . '/src/backend/routes/routes.php';
 
 // Obtener la ruta solicitada
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
