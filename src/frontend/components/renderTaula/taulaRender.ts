@@ -178,7 +178,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
         if (!activeButtonFilter) return true;
         if (!filterByField) return true;
 
-        const fieldValue = row[filterByField];
+        const fieldValue = getNestedValue(row, filterByField);
 
         if (Array.isArray(fieldValue)) {
           return fieldValue.map(String).includes(activeButtonFilter);
@@ -190,7 +190,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
           return parts.includes(activeButtonFilter);
         }
 
-        return String(fieldValue) === activeButtonFilter;
+        return String(fieldValue ?? '') === activeButtonFilter;
       })
       .filter((row) => {
         if (!search) return true;
