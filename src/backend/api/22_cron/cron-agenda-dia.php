@@ -144,25 +144,24 @@ SQL;
         && $todayDay === 28
         && !$isLeap;
 
-    $sqlB = "
-SELECT
+    $sqlB = "SELECT
     (-c.id) AS id_esdeveniment,
     CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
     NULL AS descripcio,
     'aniversari' AS tipus,
     NULL AS lloc,
-    CONCAT(:today, ' 00:00:00') AS data_inici,
-    CONCAT(:today, ' 23:59:59') AS data_fi,
+    CONCAT(:todayStart, ' 00:00:00') AS data_inici,
+    CONCAT(:todayEnd, ' 23:59:59') AS data_fi,
     1 AS tot_el_dia,
     'confirmat' AS estat
-FROM db_contactes c
-WHERE c.data_naixement IS NOT NULL
-AND (
-    (
-        MONTH(c.data_naixement) = :month
-        AND DAY(c.data_naixement) = :day
-    )
-";
+        FROM db_contactes c
+        WHERE c.data_naixement IS NOT NULL
+        AND (
+            (
+                MONTH(c.data_naixement) = :month
+                AND DAY(c.data_naixement) = :day
+            )
+        ";
 
     // 29 febrero → celebrar el 28 en años no bisiestos
     if ($isFeb28NonLeap) {
@@ -183,9 +182,10 @@ ORDER BY c.nom ASC, c.cognoms ASC
     $stmtB = $pdo->prepare($sqlB);
 
     $stmtB->execute([
-        ':today' => $today,
-        ':month' => $todayMonth,
-        ':day'   => $todayDay
+        ':todayStart' => $today,
+        ':todayEnd'   => $today,
+        ':month'      => $todayMonth,
+        ':day'        => $todayDay
     ]);
 
     $birthdays = $stmtB->fetchAll(PDO::FETCH_ASSOC);
