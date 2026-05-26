@@ -159,11 +159,10 @@ try {
     if ($stmt->execute()) {
         // rowCount() puede ser 0 si no cambiaste nada; igual lo consideramos OK
         Response::success(
-            MissatgesAPI::success('update'),
-            ['id' => $id, 'updated' => (int)$stmt->rowCount()],
-            200
+            message: MissatgesAPI::success('update'),
+            data: ['id' => $id],
+            httpCode: 200
         );
-        exit;
     }
 
     Response::error(

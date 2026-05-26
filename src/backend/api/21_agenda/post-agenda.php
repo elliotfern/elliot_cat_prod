@@ -138,11 +138,10 @@ try {
         $newId = (int)$conn->lastInsertId();
 
         Response::success(
-            MissatgesAPI::success('create'),
-            ['id' => $newId],
-            201
+            message: MissatgesAPI::success('create'),
+            data: ['id' => $newId],
+            httpCode: 201
         );
-        exit;
     }
 
     Response::error(
