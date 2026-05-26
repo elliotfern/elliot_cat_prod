@@ -6,7 +6,9 @@ export type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'v
 export type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat' | 'cancel-lat';
 
 export interface AgendaEsdeveniment {
-  id_esdeveniment: number;
+  id: string;
+  ciutat_id: string;
+  ciutat_final: string;
   titol: string;
   descripcio?: string | null;
   tipus: TipusEsdeveniment;
@@ -23,12 +25,6 @@ export interface AgendaEsdeveniment {
 const MONTHS_CA = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
 
 const WEEKDAYS_CA = ['Diumenge', 'Dilluns', 'Dimarts', 'Dimecres', 'Dijous', 'Divendres', 'Dissabte'];
-
-interface ApiResponse<T> {
-  success?: boolean;
-  message?: string;
-  data?: T;
-}
 
 function parseDateTime(dateTimeStr: string): Date {
   return new Date(dateTimeStr.replace(' ', 'T'));
@@ -151,6 +147,8 @@ function renderEsdeveniment(ev: AgendaEsdeveniment): void {
     ? `<div class="agenda-detall-section">
          <div class="agenda-detall-label">Lloc</div>
          <div class="agenda-detall-value">${ev.lloc}</div>
+         <div class="agenda-detall-label">Ciutat</div>
+         <div class="agenda-detall-value">${ev.ciutat_final}</div>
        </div>`
     : '';
 
@@ -201,7 +199,7 @@ function renderEsdeveniment(ev: AgendaEsdeveniment): void {
   // Actualizamos link del botón "Modificar"
   const btnModificar = document.getElementById('btn-modificar-esdeveniment') as HTMLAnchorElement | null;
   if (btnModificar) {
-    btnModificar.href = `/gestio/agenda/modifica-esdeveniment/${ev.id_esdeveniment}`;
+    btnModificar.href = `/gestio/agenda/modifica-esdeveniment/${ev.id}`;
   }
 }
 
@@ -223,7 +221,7 @@ export async function carregarEsdevenimentDetall(): Promise<void> {
   try {
     const ev = await api.get<AgendaEsdeveniment>('agenda/get/esdevenimentId', { id });
 
-    if (!ev || !ev.id_esdeveniment) {
+    if (!ev || !ev.id) {
       main.innerHTML = '<p>Esdeveniment no trobat.</p>';
       return;
     }

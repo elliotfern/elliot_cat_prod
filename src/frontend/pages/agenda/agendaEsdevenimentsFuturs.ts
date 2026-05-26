@@ -3,7 +3,7 @@ export type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'a
 export type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat' | 'cancel-lat';
 
 export interface AgendaEsdeveniment {
-  id_esdeveniment: number;
+  id: string;
   titol: string;
   descripcio?: string | null;
   tipus: TipusEsdeveniment;
@@ -246,7 +246,7 @@ export async function carregarAgendaFutura(usuariId: number): Promise<void> {
         // 2) Botón "Modificar"
         const editBtn = document.createElement('a');
         editBtn.className = 'agenda-btn-modificar';
-        editBtn.href = `/gestio/agenda/modifica-esdeveniment/${ev.id_esdeveniment}`;
+        editBtn.href = `/gestio/agenda/modifica-esdeveniment/${ev.id}`;
         editBtn.textContent = 'Modificar';
 
         metaDiv.appendChild(dateSpan);

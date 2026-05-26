@@ -6,7 +6,7 @@ export type TipusEsdeveniment = 'reunio' | 'visita_medica' | 'videotrucada' | 'v
 export type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat' | 'cancel-lat';
 
 export interface AgendaEsdeveniment {
-  id_esdeveniment: number;
+  id: string;
   titol: string;
   descripcio?: string | null;
   tipus: TipusEsdeveniment;
@@ -17,6 +17,8 @@ export interface AgendaEsdeveniment {
   estat: EstatEsdeveniment;
   creat_el: string;
   actualitzat_el: string;
+  ciutat_id: string;
+  ciutat_final: string;
 
   // añadidos (opcionales)
   origen?: 'agenda' | 'contacte';
@@ -192,7 +194,7 @@ function renderCalendar(year: number, monthIndex: number, events: AgendaEsdeveni
         if (isBirthday && ev.contacte_id) {
           link.href = `/gestio/agenda-contactes/fitxa-contacte/${ev.contacte_id}`;
         } else {
-          link.href = `/gestio/agenda/veure-esdeveniment/${ev.id_esdeveniment}`;
+          link.href = `/gestio/agenda/veure-esdeveniment/${ev.id}`;
         }
 
         link.textContent = getShortEventLabel(ev);
