@@ -230,7 +230,7 @@ if ($slug === "esdevenimentId") {
             t.contacte_id
         FROM (
             SELECT
-                (-c.id) AS id_esdeveniment,
+                (-c.id) AS id,
                 CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
                 NULL AS descripcio,
                 'aniversari' AS tipus,

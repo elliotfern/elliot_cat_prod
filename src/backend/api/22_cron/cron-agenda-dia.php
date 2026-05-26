@@ -85,7 +85,7 @@ try {
 
     $sql = <<<SQL
 SELECT
-    e.id_esdeveniment,
+    e.id,
     e.titol,
     e.descripcio,
     e.tipus,
