@@ -9,40 +9,80 @@ use App\Utils\Tables;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as MailException;
 
-// 0) Zona horaria coherente en TODO el script
+// ======================================================
+// CONFIG
+// ======================================================
+
 $TZ_NAME = 'Europe/Madrid';
+
 date_default_timezone_set($TZ_NAME);
 $tz = new DateTimeZone($TZ_NAME);
 
-// 0.1) Asegura que PHPMailer (Composer) se carga
-require_once(APP_ROOT . '/vendor/phpmailer/phpmailer/src/Exception.php');
-require_once(APP_ROOT . '/vendor/phpmailer/phpmailer/src/PHPMailer.php');
-require_once(APP_ROOT . '/vendor/phpmailer/phpmailer/src/SMTP.php');
+// DEBUG TEMPORAL
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 
-// 1) Cargar secret Brevo (mejor loguear si está vacío)
+// ======================================================
+// AUTOLOAD
+// ======================================================
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// ======================================================
+// PHPMailer
+// ======================================================
+
+require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/Exception.php';
+require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/SMTP.php';
+
+// ======================================================
+// ENV
+// ======================================================
+
 $brevoApi = (string)($_ENV['BREVO_API'] ?? '');
+
 if ($brevoApi === '') {
-    error_log('BREVO_API vacío/no definido (no se puede enviar por SMTP)');
+    error_log('[agenda_resum_dia] BREVO_API vacío');
     exit(1);
 }
+
+// ======================================================
+// DB
+// ======================================================
 
 try {
     $db  = new Database();
     $pdo = $db->getPdo();
+
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (Throwable $e) {
     error_log('[agenda_resum_dia] DB error: ' . $e->getMessage());
     exit(1);
 }
 
-// 2) Rango del día (intervalo semiabierto [start, end))
+// ======================================================
+// FECHAS
+// ======================================================
+
 $now   = new DateTime('now', $tz);
 $today = $now->format('Y-m-d');
 
 $start = $today . ' 00:00:00';
-$end   = (new DateTime($today, $tz))->modify('+1 day')->format('Y-m-d') . ' 00:00:00';
+
+$end = (new DateTime($today, $tz))
+    ->modify('+1 day')
+    ->format('Y-m-d') . ' 00:00:00';
+
+error_log('[agenda_resum_dia] START');
+error_log('[agenda_resum_dia] TODAY=' . $today);
+
+// ======================================================
+// EVENTOS
+// ======================================================
 
 try {
-    // 3) Eventos que SOLAPAN con el día
+
     $sql = <<<SQL
 SELECT
     e.id_esdeveniment,
@@ -57,25 +97,54 @@ SELECT
 FROM %s AS e
 WHERE
     e.data_inici < :end
-    AND e.data_fi    >= :start
+    AND (
+        e.data_fi IS NULL
+        OR e.data_fi >= :start
+    )
     AND e.estat <> 'cancel·lat'
 ORDER BY e.data_inici ASC
 SQL;
 
-    $query = sprintf($sql, qi(Tables::AGENDA_ESDEVENIMENTS, $pdo));
+    $query = sprintf(
+        $sql,
+        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo)
+    );
 
     $stmt = $pdo->prepare($query);
-    $stmt->execute([':start' => $start, ':end' => $end]);
+
+    $stmt->execute([
+        ':start' => $start,
+        ':end'   => $end
+    ]);
+
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 3.1) Cumpleaños de hoy (contactes) - versión corregida
+    error_log('[agenda_resum_dia] EVENTS=' . count($rows));
+
+    // ======================================================
+    // CUMPLEAÑOS
+    // ======================================================
+
     $todayObj   = new DateTime($today, $tz);
+
     $todayMonth = (int)$todayObj->format('m');
     $todayDay   = (int)$todayObj->format('d');
-    $todayYear  = (int)$todayObj->format('Y');
-    $lastFebDay = ($todayYear % 4 === 0 && ($todayYear % 100 !== 0 || $todayYear % 400 === 0)) ? 29 : 28;
 
-    $sqlB = <<<SQL
+    $todayYear = (int)$todayObj->format('Y');
+
+    $isLeap =
+        ($todayYear % 4 === 0)
+        && (
+            $todayYear % 100 !== 0
+            || $todayYear % 400 === 0
+        );
+
+    $isFeb28NonLeap =
+        $todayMonth === 2
+        && $todayDay === 28
+        && !$isLeap;
+
+    $sqlB = "
 SELECT
     (-c.id) AS id_esdeveniment,
     CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
@@ -88,104 +157,193 @@ SELECT
     'confirmat' AS estat
 FROM db_contactes c
 WHERE c.data_naixement IS NOT NULL
-  AND (
-        (MONTH(c.data_naixement) = :month AND DAY(c.data_naixement) = :day)
-        OR (MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29 AND :month = 2 AND :day = :lastFebDay)
-      )
+AND (
+    (
+        MONTH(c.data_naixement) = :month
+        AND DAY(c.data_naixement) = :day
+    )
+";
+
+    // 29 febrero → celebrar el 28 en años no bisiestos
+    if ($isFeb28NonLeap) {
+
+        $sqlB .= "
+    OR (
+        MONTH(c.data_naixement) = 2
+        AND DAY(c.data_naixement) = 29
+    )
+";
+    }
+
+    $sqlB .= "
+)
 ORDER BY c.nom ASC, c.cognoms ASC
-SQL;
+";
 
     $stmtB = $pdo->prepare($sqlB);
+
     $stmtB->execute([
-        ':today'     => $today,
-        ':month'     => $todayMonth,
-        ':day'       => $todayDay,
-        ':lastFebDay' => $lastFebDay
+        ':today' => $today,
+        ':month' => $todayMonth,
+        ':day'   => $todayDay
     ]);
+
     $birthdays = $stmtB->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    error_log('[agenda_resum_dia] SQL error: ' . $e->getMessage());
+
+    error_log('[agenda_resum_dia] BIRTHDAYS=' . count($birthdays));
+} catch (Throwable $e) {
+
+    error_log('[agenda_resum_dia] SQL ERROR: ' . $e->getMessage());
+
     exit(1);
 }
 
-// Asegurar arrays
-$rows      = is_array($rows) ? $rows : [];
-$birthdays = is_array($birthdays ?? null) ? $birthdays : [];
+// ======================================================
+// MERGE
+// ======================================================
 
-// Unir eventos + cumpleaños
+$rows       = is_array($rows) ? $rows : [];
+$birthdays  = is_array($birthdays) ? $birthdays : [];
+
 $all = array_merge($rows, $birthdays);
 
-// Si no hay nada (ni eventos ni cumpleaños), no mandes email
+// ======================================================
+// SIN EVENTOS
+// ======================================================
+
 if (empty($all)) {
-    error_log('No events/birthdays today -> no email sent');
+
+    error_log('[agenda_resum_dia] NO EVENTS');
+
     exit(0);
 }
 
-// Orden: todo el día primero, luego por hora inicio, y título
+// ======================================================
+// SORT
+// ======================================================
+
 usort($all, function ($a, $b) {
+
     $ta = (int)($a['tot_el_dia'] ?? 0);
     $tb = (int)($b['tot_el_dia'] ?? 0);
-    if ($ta !== $tb) return $tb <=> $ta;
+
+    if ($ta !== $tb) {
+        return $tb <=> $ta;
+    }
 
     $da = (string)($a['data_inici'] ?? '');
     $db = (string)($b['data_inici'] ?? '');
-    if ($da !== $db) return strcmp($da, $db);
 
-    return strcmp((string)($a['titol'] ?? ''), (string)($b['titol'] ?? ''));
+    if ($da !== $db) {
+        return strcmp($da, $db);
+    }
+
+    return strcmp(
+        (string)($a['titol'] ?? ''),
+        (string)($b['titol'] ?? '')
+    );
 });
 
-// Ahora usamos $all en vez de $rows
 $rows = $all;
 
-// 4) Destinatario 
+// ======================================================
+// DESTINATARIO
+// ======================================================
+
 $YOUR_EMAIL = 'elliot@hispantic.com';
 $YOUR_NAME  = 'Elliot Fernandez';
 
-// 5) Construir email
-$subject  = "Agenda del dia $today";
-$bodyText = buildAgendaEmailText($YOUR_NAME, $today, $rows, $tz, $start, $end);
-$bodyHtml = buildAgendaEmailHtml($YOUR_NAME, $today, $rows, $tz, $start, $end);
+// ======================================================
+// EMAIL
+// ======================================================
 
-// 6) Enviar con Brevo + PHPMailer (SMTP)
+$subject  = "Agenda del dia {$today}";
+
+$bodyText = buildAgendaEmailText(
+    $YOUR_NAME,
+    $today,
+    $rows,
+    $tz,
+    $start,
+    $end
+);
+
+$bodyHtml = buildAgendaEmailHtml(
+    $YOUR_NAME,
+    $today,
+    $rows,
+    $tz,
+    $start,
+    $end
+);
+
+// ======================================================
+// SMTP
+// ======================================================
+
 try {
+
+    error_log('[agenda_resum_dia] ABOUT TO SEND');
+
     $mail = new PHPMailer(true);
+
     $mail->CharSet = 'UTF-8';
 
     $mail->isSMTP();
+
     $mail->Host       = 'smtp-relay.brevo.com';
     $mail->SMTPAuth   = true;
     $mail->Username   = '7a0605001@smtp-brevo.com';
     $mail->Password   = $brevoApi;
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port       = 587;
-    $mail->SMTPDebug  = 0; // 0 en producción
 
-    $mail->setFrom('elliot@hispantic.com', 'Agenda');
-    $mail->addAddress($YOUR_EMAIL, $YOUR_NAME);
-    $mail->addReplyTo($YOUR_EMAIL, $YOUR_NAME);
+    // DEBUG SMTP
+    $mail->SMTPDebug = 0;
+
+    $mail->setFrom(
+        'elliot@hispantic.com',
+        'Agenda'
+    );
+
+    $mail->addAddress(
+        $YOUR_EMAIL,
+        $YOUR_NAME
+    );
+
+    $mail->addReplyTo(
+        $YOUR_EMAIL,
+        $YOUR_NAME
+    );
 
     $mail->Subject = $subject;
+
     $mail->Body    = $bodyHtml;
     $mail->AltBody = $bodyText;
+
     $mail->isHTML(true);
 
     $mail->send();
+
+    error_log('[agenda_resum_dia] MAIL SENT OK');
+
     exit(0);
 } catch (MailException $e) {
-    error_log('[agenda_resum_dia] Mailer error: ' . $e->getMessage());
+
+    error_log('[agenda_resum_dia] MAIL ERROR: ' . $e->getMessage());
+
     exit(1);
 } catch (Throwable $e) {
-    error_log('Unknown mail error');
+
+    error_log('[agenda_resum_dia] UNKNOWN MAIL ERROR: ' . $e->getMessage());
+
     exit(1);
 }
 
-// --- Funciones buildAgendaEmailText y buildAgendaEmailHtml aquí quedan igual que tu versión original ---
+// ======================================================
+// FUNCTIONS
+// ======================================================
 
-/**
- * Texto plano
- *
- * @param array<int,array<string,mixed>> $events
- */
 function buildAgendaEmailText(
     string $nomUsuari,
     string $today,
@@ -194,70 +352,58 @@ function buildAgendaEmailText(
     string $startDay,
     string $endDay
 ): string {
+
     $dayStart = new DateTime($startDay, $tz);
     $dayEnd   = new DateTime($endDay, $tz);
 
     $lines   = [];
+
     $lines[] = "{$nomUsuari},";
     $lines[] = "";
     $lines[] = "Aquests són els esdeveniments previstos per avui ({$today}):";
     $lines[] = "";
 
     foreach ($events as $ev) {
+
         $start = new DateTime((string)($ev['data_inici'] ?? ''), $tz);
         $end   = new DateTime((string)($ev['data_fi'] ?? ''), $tz);
 
         $totElDia = (int)($ev['tot_el_dia'] ?? 0) === 1;
 
         if ($totElDia) {
+
             $horaText = 'Tot el dia';
         } else {
+
             $horaIni = $start->format('H:i');
             $horaFi  = $end->format('H:i');
 
-            $startsBeforeDay = $start < $dayStart;
-            $endsAfterDay    = $end > $dayEnd;
-
-            if ($startsBeforeDay && !$endsAfterDay) {
-                $horaText = "↦ fins {$horaFi}";
-            } elseif (!$startsBeforeDay && $endsAfterDay) {
-                $horaText = "{$horaIni} ↦";
-            } elseif ($startsBeforeDay && $endsAfterDay) {
-                $horaText = "↦ (solapa tot el dia)";
-            } else {
-                $horaText = "{$horaIni} - {$horaFi}";
-            }
+            $horaText = "{$horaIni} - {$horaFi}";
         }
 
         $titol = (string)($ev['titol'] ?? '');
         $lloc  = (string)($ev['lloc'] ?? '');
         $tipus = (string)($ev['tipus'] ?? '');
-        if ($tipus === 'aniversari') $tipus = '🎂 aniversari';
 
         $line = "- [{$horaText}] {$titol}";
-        if (trim($lloc) !== '') {
+
+        if ($lloc !== '') {
             $line .= " · {$lloc}";
         }
-        if (trim($tipus) !== '') {
+
+        if ($tipus !== '') {
             $line .= " ({$tipus})";
         }
+
         $lines[] = $line;
     }
 
     $lines[] = "";
     $lines[] = "Que tinguis un bon dia!";
-    $lines[] = "";
-    $lines[] = "--";
-    $lines[] = "Recordatori automàtic de l'agenda";
 
     return implode("\n", $lines);
 }
 
-/**
- * HTML
- *
- * @param array<int,array<string,mixed>> $events
- */
 function buildAgendaEmailHtml(
     string $nomUsuari,
     string $today,
@@ -266,35 +412,25 @@ function buildAgendaEmailHtml(
     string $startDay,
     string $endDay
 ): string {
-    $dayStart = new DateTime($startDay, $tz);
-    $dayEnd   = new DateTime($endDay, $tz);
 
     $rowsHtml = '';
 
     foreach ($events as $ev) {
+
         $start = new DateTime((string)($ev['data_inici'] ?? ''), $tz);
         $end   = new DateTime((string)($ev['data_fi'] ?? ''), $tz);
 
         $totElDia = (int)($ev['tot_el_dia'] ?? 0) === 1;
 
         if ($totElDia) {
+
             $horaText = 'Tot el dia';
         } else {
-            $horaIni = $start->format('H:i');
-            $horaFi  = $end->format('H:i');
 
-            $startsBeforeDay = $start < $dayStart;
-            $endsAfterDay    = $end > $dayEnd;
-
-            if ($startsBeforeDay && !$endsAfterDay) {
-                $horaText = "↦ fins {$horaFi}";
-            } elseif (!$startsBeforeDay && $endsAfterDay) {
-                $horaText = "{$horaIni} ↦";
-            } elseif ($startsBeforeDay && $endsAfterDay) {
-                $horaText = "↦ (solapa tot el dia)";
-            } else {
-                $horaText = "{$horaIni} - {$horaFi}";
-            }
+            $horaText =
+                $start->format('H:i')
+                . ' - '
+                . $end->format('H:i');
         }
 
         $titol = htmlspecialchars((string)($ev['titol'] ?? ''), ENT_QUOTES, 'UTF-8');
@@ -302,51 +438,42 @@ function buildAgendaEmailHtml(
         $tipus = htmlspecialchars((string)($ev['tipus'] ?? ''), ENT_QUOTES, 'UTF-8');
         $hora  = htmlspecialchars($horaText, ENT_QUOTES, 'UTF-8');
 
-        $rowsHtml .= '<tr>';
-        $rowsHtml .= '<td style="padding:6px 8px;font-size:13px;white-space:nowrap;">' . $hora . '</td>';
-        $rowsHtml .= '<td style="padding:6px 8px;font-size:13px;font-weight:600;">' . $titol . '</td>';
-        $rowsHtml .= '<td style="padding:6px 8px;font-size:12px;color:#4b5563;">' . $lloc . '</td>';
-        $rowsHtml .= '<td style="padding:6px 8px;font-size:12px;color:#6b7280;">' . $tipus . '</td>';
-        $rowsHtml .= '</tr>';
+        $rowsHtml .= '
+<tr>
+<td style="padding:6px 8px;">' . $hora . '</td>
+<td style="padding:6px 8px;font-weight:600;">' . $titol . '</td>
+<td style="padding:6px 8px;">' . $lloc . '</td>
+<td style="padding:6px 8px;">' . $tipus . '</td>
+</tr>
+';
     }
 
-    $nomUsuariEsc = htmlspecialchars($nomUsuari, ENT_QUOTES, 'UTF-8');
-    $todayEsc     = htmlspecialchars($today, ENT_QUOTES, 'UTF-8');
-
-    return <<<HTML
+    return '
 <!DOCTYPE html>
 <html lang="ca">
 <head>
-    <meta charset="UTF-8">
-    <title>Agenda del dia {$todayEsc}</title>
+<meta charset="UTF-8">
+<title>Agenda</title>
 </head>
-<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#111827;background:#f3f4f6;padding:16px;">
-    <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;padding:16px 18px 20px;box-shadow:0 10px 25px rgba(15,23,42,0.18);">
-        <h1 style="font-size:18px;margin:0 0 8px 0;">Hola {$nomUsuariEsc},</h1>
-        <p style="margin:0 0 12px 0;font-size:14px;color:#374151;">
-            Aquests són els esdeveniments previstos per avui <strong>({$todayEsc})</strong>:
-        </p>
+<body style="font-family:Arial,sans-serif;">
 
-        <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:8px;">
-            <thead>
-                <tr>
-                    <th align="left" style="font-size:12px;color:#6b7280;padding:4px 8px;border-bottom:1px solid #e5e7eb;">Hora</th>
-                    <th align="left" style="font-size:12px;color:#6b7280;padding:4px 8px;border-bottom:1px solid #e5e7eb;">Esdeveniment</th>
-                    <th align="left" style="font-size:12px;color:#6b7280;padding:4px 8px;border-bottom:1px solid #e5e7eb;">Lloc</th>
-                    <th align="left" style="font-size:12px;color:#6b7280;padding:4px 8px;border-bottom:1px solid #e5e7eb;">Tipus</th>
-                </tr>
-            </thead>
-            <tbody>
-                {$rowsHtml}
-            </tbody>
-        </table>
+<h2>Agenda del dia ' . htmlspecialchars($today, ENT_QUOTES, 'UTF-8') . '</h2>
 
-        <p style="margin-top:16px;font-size:13px;color:#6b7280;">
-            Que tinguis un bon dia!<br>
-            <span style="font-size:12px;color:#9ca3af;">Recordatori automàtic de l'agenda</span>
-        </p>
-    </div>
+<table width="100%" cellspacing="0" cellpadding="0" border="1" style="border-collapse:collapse;">
+<thead>
+<tr>
+<th align="left">Hora</th>
+<th align="left">Esdeveniment</th>
+<th align="left">Lloc</th>
+<th align="left">Tipus</th>
+</tr>
+</thead>
+<tbody>
+' . $rowsHtml . '
+</tbody>
+</table>
+
 </body>
 </html>
-HTML;
+';
 }
