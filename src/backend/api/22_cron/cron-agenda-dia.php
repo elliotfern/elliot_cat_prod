@@ -1,5 +1,5 @@
 <?php
-// cron/agenda_resum_dia.php
+// URL: https://elliot.cat/api/cron/agenda-dia
 
 declare(strict_types=1);
 
@@ -26,15 +26,15 @@ error_reporting(E_ALL);
 // AUTOLOAD
 // ======================================================
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '../../../../../vendor/autoload.php';
 
 // ======================================================
 // PHPMailer
 // ======================================================
 
-require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/Exception.php';
-require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/SMTP.php';
+require_once __DIR__ . '../../../../../vendor/phpmailer/phpmailer/src/Exception.php';
+require_once __DIR__ . '../../../../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+require_once __DIR__ . '../../../../../vendor/phpmailer/phpmailer/src/SMTP.php';
 
 // ======================================================
 // ENV
