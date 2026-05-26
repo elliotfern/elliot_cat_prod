@@ -16,12 +16,12 @@ class MysqlCiutatRepository implements CiutatRepository
 
     public function getAll(): array
     {
-        $sql = "
-            SELECT
+        $sql = "SELECT
                 c.id,
                 c.ciutat,
                 c.ciutat_ca,
                 c.ciutat_en,
+                COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final,
                 c.descripcio,
                 c.created_at,
                 c.updated_at,
@@ -33,12 +33,8 @@ class MysqlCiutatRepository implements CiutatRepository
                 p.updated_at AS pais_updated_at
 
             FROM db_geo_ciutats c
-
-            INNER JOIN db_geo_paisos p
-                ON c.pais_id = p.id
-
-            ORDER BY c.ciutat ASC
-        ";
+            INNER JOIN db_geo_paisos p ON c.pais_id = p.id
+            ORDER BY c.ciutat ASC ";
 
         $stmt = $this->pdo->query($sql);
 

@@ -11,6 +11,7 @@ class Ciutat
         private string $ciutat,
         private ?string $ciutatCa,
         private ?string $ciutatEn,
+        private ?string $ciutatFinal,
         private string $descripcio,
         private Pais $pais,
         private \DateTimeImmutable $createdAt,
@@ -35,6 +36,11 @@ class Ciutat
     public function getCiutatEn(): ?string
     {
         return $this->ciutatEn;
+    }
+
+    public function getCiutatFinal(): ?string
+    {
+        return $this->ciutatFinal;
     }
 
     public function getDescripcio(): string

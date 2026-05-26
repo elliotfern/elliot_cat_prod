@@ -5,7 +5,7 @@ import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
-export async function formAgendaEsdeveniment(isUpdate: boolean, id2?: string) {
+export async function formAgendaEsdeveniment(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formCrearEsdeveniment') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnGuardar') as HTMLButtonElement | null;
@@ -16,10 +16,7 @@ export async function formAgendaEsdeveniment(isUpdate: boolean, id2?: string) {
   let data: Partial<EsdevenimentAgenda> = {};
 
   // 1) Si es UPDATE: cargar evento
-  if (id2 && isUpdate) {
-    const id = Number(id2);
-    if (!Number.isFinite(id) || id <= 0) return;
-
+  if (id && isUpdate) {
     try {
       data = await api.get<EsdevenimentAgenda>(API_URLS.GET.AGENDA_ID, {
         id,
@@ -43,7 +40,7 @@ export async function formAgendaEsdeveniment(isUpdate: boolean, id2?: string) {
       transmissioDadesDB(event, 'PUT', 'formCrearEsdeveniment', API_URLS.PUT.AGENDA_ESDEVENIMENT);
     });
 
-    return;
+    await auxiliarSelect(data.ciutat_id, 'ciutats', 'ciutat_id', 'ciutat_final');
   }
 
   // 2) CREATE
@@ -55,6 +52,8 @@ export async function formAgendaEsdeveniment(isUpdate: boolean, id2?: string) {
 
   // Luego aplicamos defaults en el formulario (si quieres que se vean ya seleccionados)
   renderFormInputs(data);
+
+  await auxiliarSelect(data.ciutat_id, 'ciutats', 'ciutat_id', 'ciutat_final');
 
   form.addEventListener('submit', function (event) {
     transmissioDadesDB(event, 'POST', 'formCrearEsdeveniment', API_URLS.POST.AGENDA_ESDEVENIMENT, true);

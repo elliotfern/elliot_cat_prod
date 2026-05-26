@@ -2,6 +2,8 @@
 
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
+use App\Utils\Uuid;
+use Ramsey\Uuid\Uuid as ramsey;
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -109,13 +111,17 @@ if (!empty($errors)) {
 $data_inici = $dtInici->format('Y-m-d H:i:s');
 $data_fi    = $dtFi->format('Y-m-d H:i:s');
 
+$ciutat_id = Uuid::toBinary($data['ciutat_id']);
+$id = ramsey::uuid7();
+$idBytes = $id->getBytes();   // para BINARY(16)
+
 try {
     global $conn;
 
     $sql = "INSERT INTO db_agenda_esdeveniments
-            (titol, descripcio, tipus, lloc, data_inici, data_fi, tot_el_dia, estat)
+            (id, titol, descripcio, tipus, lloc, ciutat_id, data_inici, data_fi, tot_el_dia, estat)
           VALUES
-            (:titol, :descripcio, :tipus, :lloc, :data_inici, :data_fi, :tot_el_dia, :estat)";
+            (:id, :titol, :descripcio, :tipus, :lloc, :ciutat_id, :data_inici, :data_fi, :tot_el_dia, :estat)";
 
     $stmt = $conn->prepare($sql);
 
@@ -133,9 +139,11 @@ try {
     $stmt->bindValue(':data_fi', $data_fi, PDO::PARAM_STR);
     $stmt->bindValue(':tot_el_dia', $tot_el_dia, PDO::PARAM_INT);
     $stmt->bindValue(':estat', (string)$estat, PDO::PARAM_STR);
+    $stmt->bindValue(':ciutat_id', $ciutat_id, PDO::PARAM_STR);
+    $stmt->bindValue(':id', $idBytes, PDO::PARAM_STR);
 
     if ($stmt->execute()) {
-        $newId = (int)$conn->lastInsertId();
+        $newId = $id;
 
         Response::success(
             message: MissatgesAPI::success('create'),

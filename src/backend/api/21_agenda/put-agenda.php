@@ -2,6 +2,7 @@
 
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
+use App\Utils\Uuid;
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -57,13 +58,8 @@ if (!is_array($data)) {
 
 // ID: por query o body
 $id = 0;
-if (isset($data['id_esdeveniment'])) {
-    $id = (int)$data['id_esdeveniment'];
-}
-
-if ($id <= 0) {
-    Response::error(MissatgesAPI::error('invalid_data'), ['id' => 'required'], 400);
-    exit;
+if (isset($data['id'])) {
+    $id = $data['id'];
 }
 
 // Validación
@@ -118,6 +114,7 @@ if (!empty($errors)) {
 // Formato MySQL
 $data_inici = $dtInici->format('Y-m-d H:i:s');
 $data_fi    = $dtFi->format('Y-m-d H:i:s');
+$ciutat_id = Uuid::toBinary($data['ciutat_id']);
 
 try {
     global $conn;
@@ -130,15 +127,17 @@ try {
               data_inici = :data_inici,
               data_fi = :data_fi,
               tot_el_dia = :tot_el_dia,
-              estat = :estat
-          WHERE id_esdeveniment = :id";
+              estat = :estat,
+              ciutat_id = :ciutat_id
+          WHERE id = :id";
 
     // Si quieres forzar multi-tenant:
     // if ($usuari_id) $sql .= " AND usuari_id = :usuari_id";
 
     $stmt = $conn->prepare($sql);
 
-    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->bindValue(':id', Uuid::toBinary($id), PDO::PARAM_STR);
+      $stmt->bindValue(':ciutat_id', $ciutat_id, PDO::PARAM_STR);
     $stmt->bindValue(':titol', (string)$titol, PDO::PARAM_STR);
 
     if ($descripcio === null) $stmt->bindValue(':descripcio', null, PDO::PARAM_NULL);

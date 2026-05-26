@@ -5,7 +5,7 @@ export interface EsdevenimentAgenda {
   status: string;
   message: string;
 
-  id: number;
+  id: string;
 
   titol: string;
   descripcio: string | null;
@@ -22,4 +22,5 @@ export interface EsdevenimentAgenda {
   creat_el?: string;
   actualitzat_el?: string;
   usuari_id?: number;
+  ciutat_id: string;
 }

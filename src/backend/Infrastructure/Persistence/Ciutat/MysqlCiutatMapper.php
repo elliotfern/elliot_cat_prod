@@ -24,6 +24,7 @@ class MysqlCiutatMapper
             $row['ciutat_ca'],
             $row['ciutat_en'],
             $row['descripcio'],
+            $row['ciutat_final'],
             $pais,
             new \DateTimeImmutable($row['created_at']),
             new \DateTimeImmutable($row['updated_at'])

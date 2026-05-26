@@ -21,7 +21,7 @@
                 <form action="" id="formCrearEsdeveniment" class="row g-3">
 
                     <!-- Si luego haces modo edición, este hidden te sirve -->
-                    <input type="hidden" id="id_esdeveniment" name="id_esdeveniment" value="">
+                    <input type="hidden" id="id" name="id" value="">
 
                     <div class="col-md-12">
                         <label for="titol" class="form-label">Títol *</label>
@@ -50,6 +50,13 @@
                     <div class="col-md-8">
                         <label for="lloc" class="form-label">Lloc</label>
                         <input class="form-control" type="text" name="lloc" id="lloc" maxlength="255">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ciutat_id" class="form-label">Ciutat *</label>
+                        <select class="form-select" name="ciutat_id" id="ciutat_id" required>
+                        </select>
+                        <div class="invalid-feedback">Selecciona una ciutat vàlida.</div>
                     </div>
 
                     <div class="col-md-4 d-flex align-items-end">
