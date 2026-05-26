@@ -120,22 +120,6 @@ function getEstatBadgeClass(estat: string): string {
   }
 }
 
-/** Intenta obtener el ID del data-attribute, y si no, de la URL */
-function getEsdevenimentIdFromDomOrUrl(wrapper: HTMLElement): number | null {
-  const attr = wrapper.getAttribute('data-esdeveniment-id');
-  if (attr && /^\d+$/.test(attr)) {
-    return parseInt(attr, 10);
-  }
-
-  const pathParts = window.location.pathname.split('/').filter(Boolean);
-  const last = pathParts[pathParts.length - 1];
-  if (last && /^\d+$/.test(last)) {
-    return parseInt(last, 10);
-  }
-
-  return null;
-}
-
 /** Pinta el HTML del evento dentro del wrapper */
 function renderEsdeveniment(ev: AgendaEsdeveniment): void {
   const wrapper = document.getElementById('agenda-esdeveniment-main');
@@ -204,13 +188,12 @@ function renderEsdeveniment(ev: AgendaEsdeveniment): void {
 }
 
 /** Carga el evento desde la API */
-export async function carregarEsdevenimentDetall(): Promise<void> {
+export async function carregarEsdevenimentDetall(id: string): Promise<void> {
   const wrapper = document.getElementById('agenda-esdeveniment-wrapper');
   const main = document.getElementById('agenda-esdeveniment-main');
 
   if (!wrapper || !main) return;
 
-  const id = getEsdevenimentIdFromDomOrUrl(wrapper);
   if (!id) {
     main.innerHTML = "<p>No s'ha pogut determinar l'ID de l'esdeveniment.</p>";
     return;

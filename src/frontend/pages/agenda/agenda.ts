@@ -17,7 +17,8 @@ export function agenda() {
   } else if (pageType[2] === 'calendari-esdeveniments') {
     initCalendariAgenda();
   } else if (pageType[2] === 'veure-esdeveniment') {
-    carregarEsdevenimentDetall();
+     const id = pageType[3];
+    carregarEsdevenimentDetall(id);
   } else if (pageType[2] === 'nou-esdeveniment') {
     formAgendaEsdeveniment(false);
   } else if (pageType[2] === 'modifica-esdeveniment') {
