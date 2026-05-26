@@ -4,6 +4,7 @@ use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Utils\Uuid;
 
 $slug = $routeParams[0] ?? null;
 
@@ -40,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
  */
 if ($slug === "esdevenimentId") {
 
-    $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
+    $id = $_GET['id'];
 
     if (!$id) {
         Response::error(
@@ -53,7 +54,7 @@ if ($slug === "esdevenimentId") {
 
     $sql = <<<SQL
             SELECT 
-                e.id_esdeveniment,
+                e.id,
                 e.titol,
                 e.descripcio,
                 e.tipus,
@@ -63,19 +64,23 @@ if ($slug === "esdevenimentId") {
                 e.tot_el_dia,
                 e.estat,
                 e.creat_el,
-                e.actualitzat_el
+                e.actualitzat_el,
+                e.ciutat_id,
+                COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final
             FROM %s AS e
-            WHERE e.id_esdeveniment = :id
+            LEFT JOIN %s AS c ON e.ciutat_id = c.id
+            WHERE e.id = :id
             LIMIT 1
         SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo)
+        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo)
     );
 
     try {
-        $params = [':id' => $id];
+        $params = [':id' => Uuid::toBinary($id)];
         $row    = $db->getData($query, $params, true);
 
         Response::success(
@@ -109,7 +114,7 @@ if ($slug === "esdevenimentId") {
 
     $sql = <<<SQL
             SELECT 
-                e.id_esdeveniment,
+                e.id,
                 e.titol,
                 e.descripcio,
                 e.tipus,
@@ -119,16 +124,19 @@ if ($slug === "esdevenimentId") {
                 e.tot_el_dia,
                 e.estat,
                 e.creat_el,
-                e.actualitzat_el
+                e.actualitzat_el,
+                e.ciutat_id,
+                COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final
             FROM %s AS e
-            WHERE 
-                 e.data_inici >= NOW()
+            LEFT JOIN %s AS c ON e.ciutat_id = c.id
+            WHERE e.data_inici >= NOW()
             ORDER BY e.data_inici ASC
         SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo)
+        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo),
     );
 
     try {
@@ -186,27 +194,28 @@ if ($slug === "esdevenimentId") {
 
     $sql = <<<SQL
         SELECT 
-            e.id_esdeveniment,
+            e.id,
             e.titol,
             e.descripcio,
             e.tipus,
             e.lloc,
+            e.ciutat_id,
             e.data_inici,
             e.data_fi,
             e.tot_el_dia,
             e.estat,
             e.creat_el,
-            e.actualitzat_el
+            e.actualitzat_el,
+            COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final
         FROM %s AS e
-        WHERE 
-            e.data_inici >= :from
-            AND e.data_inici <= :to
+        LEFT JOIN %s AS c ON e.ciutat_id = c.id
+        WHERE e.data_inici >= :from AND e.data_inici <= :to
         ORDER BY e.data_inici ASC
     SQL;
 
     $sqlBirthdays = <<<SQL
         SELECT
-            t.id_esdeveniment,
+            t.id,
             t.titol,
             t.descripcio,
             t.tipus,
@@ -250,7 +259,8 @@ if ($slug === "esdevenimentId") {
 
     $query = sprintf(
         $sql,
-        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo)
+        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo)
     );
 
     try {

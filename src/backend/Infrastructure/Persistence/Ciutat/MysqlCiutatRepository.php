@@ -21,8 +21,8 @@ class MysqlCiutatRepository implements CiutatRepository
                 c.ciutat,
                 c.ciutat_ca,
                 c.ciutat_en,
-                COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final,
                 c.descripcio,
+                COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final,
                 c.created_at,
                 c.updated_at,
 

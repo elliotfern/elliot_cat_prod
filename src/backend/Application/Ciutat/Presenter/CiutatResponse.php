@@ -13,8 +13,8 @@ class CiutatResponse
             'ciutat' => $ciutat->getCiutat(),
             'ciutat_ca' => $ciutat->getCiutatCa(),
             'ciutat_en' => $ciutat->getCiutatEn(),
-            'ciutat_final' => $ciutat->getCiutatFinal(),
             'descripcio' => $ciutat->getDescripcio(),
+            'ciutat_final' => $ciutat->getCiutatFinal(),
 
             'pais' => [
                 'id' => $ciutat->getPais()->getId(),
