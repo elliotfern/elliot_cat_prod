@@ -33,12 +33,12 @@ final class GetAgendaFutureEventsUseCase
             }
 
             $result[] = [
-                'id' => $event->getId(),
+                'id' => bin2hex($event->getId()->value()),
                 'titol' => $event->titol(),
                 'descripcio' => $event->descripcio(),
                 'tipus' => (string)$event->tipus(),
                 'lloc' => $event->lloc(),
-                'ciutat_id' => $event->ciutatId(),
+                'ciutat_id' => $event->ciutatId() ? bin2hex($event->ciutatId()) : null,
                 'ciutat_nom' => $ciutatNom,
                 'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
                 'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
