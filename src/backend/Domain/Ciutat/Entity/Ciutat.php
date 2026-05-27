@@ -61,4 +61,12 @@ class Ciutat
     {
         return $this->updatedAt;
     }
+
+    public function getNom(): string
+    {
+        return $this->ciutatCa
+            ?? $this->ciutat
+            ?? $this->ciutatEn
+            ?? $this->ciutatFinal;
+    }
 }

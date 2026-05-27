@@ -1,15 +1,24 @@
 <?php
 
+use App\Application\Agenda\UseCase\GetAgendaByIdUseCase;
+use App\Application\Agenda\UseCase\GetAgendaFutureEventsUseCase;
+use App\Application\Agenda\UseCase\GetAgendaRangeUseCase;
+use App\Application\Agenda\Service\BirthdayService;
 use App\Config\Database;
+use App\Config\DatabaseConnection;
+use App\Infrastructure\Persistence\Agenda\MysqlAgendaRepository;
+use App\Infrastructure\Persistence\Ciutat\MysqlCiutatRepository;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Utils\Tables;
-use App\Utils\Uuid;
 
 $slug = $routeParams[0] ?? null;
 
 $db  = new Database();
-$pdo = $db->getPdo();
+$pdo = DatabaseConnection::getConnection();
+
+$agendaRepository = new MysqlAgendaRepository($pdo);
+$ciutatRepository = new MysqlCiutatRepository($pdo);
+$birthdayService = new BirthdayService($pdo);
 
 /*
  * BACKEND AGENDA
@@ -41,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
  */
 if ($slug === "esdevenimentId") {
 
-    $id = $_GET['id'];
+    $id = $_GET['id'] ?? null;
 
     if (!$id) {
         Response::error(
@@ -52,43 +61,30 @@ if ($slug === "esdevenimentId") {
         return;
     }
 
-    $sql = <<<SQL
-            SELECT 
-                e.id,
-                e.titol,
-                e.descripcio,
-                e.tipus,
-                e.lloc,
-                e.data_inici,
-                e.data_fi,
-                e.tot_el_dia,
-                e.estat,
-                e.creat_el,
-                e.actualitzat_el,
-                e.ciutat_id,
-                COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final
-            FROM %s AS e
-            LEFT JOIN %s AS c ON e.ciutat_id = c.id
-            WHERE e.id = :id
-            LIMIT 1
-        SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo),
-        qi(Tables::DB_CIUTATS, $pdo)
-    );
-
     try {
-        $params = [':id' => Uuid::toBinary($id)];
-        $row    = $db->getData($query, $params, true);
+
+        $useCase = new GetAgendaByIdUseCase(
+            $agendaRepository,
+            $ciutatRepository
+        );
+
+        $data = $useCase->execute($id);
+
+        if (!$data) {
+            Response::error(
+                MissatgesAPI::error('notFound'),
+                ['Esdeveniment no trobat'],
+                404
+            );
+            return;
+        }
 
         Response::success(
             message: MissatgesAPI::success('get'),
-            data: $row,
+            data: $data,
             httpCode: 200
         );
-    } catch (PDOException $e) {
+    } catch (Throwable $e) {
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
@@ -112,43 +108,22 @@ if ($slug === "esdevenimentId") {
         return;
     }
 
-    $sql = <<<SQL
-            SELECT 
-                e.id,
-                e.titol,
-                e.descripcio,
-                e.tipus,
-                e.lloc,
-                e.data_inici,
-                e.data_fi,
-                e.tot_el_dia,
-                e.estat,
-                e.creat_el,
-                e.actualitzat_el,
-                e.ciutat_id,
-                COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final
-            FROM %s AS e
-            LEFT JOIN %s AS c ON e.ciutat_id = c.id
-            WHERE e.data_inici >= NOW()
-            ORDER BY e.data_inici ASC
-        SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo),
-        qi(Tables::DB_CIUTATS, $pdo),
+    $useCase = new GetAgendaFutureEventsUseCase(
+        $agendaRepository,
+        $ciutatRepository
     );
 
     try {
 
-        $rows = $db->getData($query);
+        $data = $useCase->execute();
 
         Response::success(
             message: MissatgesAPI::success('get'),
-            data: $rows,
+            data: $data,
             httpCode: 200
         );
-    } catch (PDOException $e) {
+    } catch (Throwable $e) {
+
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
@@ -163,9 +138,9 @@ if ($slug === "esdevenimentId") {
      */
 } else if ($slug === "esdevenimentsRang") {
 
-    $usuariId = isset($_GET['usuari_id']) ? (int)$_GET['usuari_id'] : 0;
+    $usuariId = (int)($_GET['usuari_id'] ?? 0);
     $from     = $_GET['from'] ?? null;
-    $to       = $_GET['to']   ?? null;
+    $to       = $_GET['to'] ?? null;
 
     if ($usuariId <= 0 || !$from || !$to) {
         Response::error(
@@ -188,112 +163,28 @@ if ($slug === "esdevenimentId") {
         return;
     }
 
-    $fromDateTime = $from . ' 00:00:00';
-    $toDateTime   = $to   . ' 23:59:59';
-    $yearFrom     = (int)substr($from, 0, 4);
-
-    $sql = <<<SQL
-        SELECT 
-            e.id,
-            e.titol,
-            e.descripcio,
-            e.tipus,
-            e.lloc,
-            e.ciutat_id,
-            e.data_inici,
-            e.data_fi,
-            e.tot_el_dia,
-            e.estat,
-            e.creat_el,
-            e.actualitzat_el,
-            COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final
-        FROM %s AS e
-        LEFT JOIN %s AS c ON e.ciutat_id = c.id
-        WHERE e.data_inici >= :from AND e.data_inici <= :to
-        ORDER BY e.data_inici ASC
-    SQL;
-
-    $sqlBirthdays = <<<SQL
-        SELECT
-            t.id,
-            t.titol,
-            t.descripcio,
-            t.tipus,
-            t.lloc,
-            CONCAT(t.ymd, ' 00:00:00') AS data_inici,
-            CONCAT(t.ymd, ' 23:59:59') AS data_fi,
-            t.tot_el_dia,
-            t.estat,
-            t.creat_el,
-            t.actualitzat_el,
-            t.origen,
-            t.contacte_id
-        FROM (
-            SELECT
-                (-c.id) AS id,
-                CONCAT('🎂 ', c.nom, ' ', c.cognoms) AS titol,
-                NULL AS descripcio,
-                'aniversari' AS tipus,
-                NULL AS lloc,
-                CASE
-                    WHEN MONTH(c.data_naixement) = 2 AND DAY(c.data_naixement) = 29
-                        THEN DATE(LAST_DAY(CONCAT(:yearFrom1, '-02-01')))
-                    ELSE DATE(CONCAT(
-                        :yearFrom2, '-',
-                        LPAD(MONTH(c.data_naixement), 2, '0'), '-',
-                        LPAD(DAY(c.data_naixement), 2, '0')
-                    ))
-                END AS ymd,
-                1 AS tot_el_dia,
-                'confirmat' AS estat,
-                NOW() AS creat_el,
-                NOW() AS actualitzat_el,
-                'contacte' AS origen,
-                c.id AS contacte_id
-            FROM db_contactes c
-            WHERE c.data_naixement IS NOT NULL
-        ) t
-        WHERE t.ymd BETWEEN :fromDate AND :toDate
-        ORDER BY t.ymd ASC
-    SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::AGENDA_ESDEVENIMENTS, $pdo),
-        qi(Tables::DB_CIUTATS, $pdo)
-    );
-
     try {
-        $events = $db->getData($query, [
-            ':from' => $fromDateTime,
-            ':to'   => $toDateTime,
-        ]) ?: [];
 
-        $birthdays = $db->getData($sqlBirthdays, [
-            ':yearFrom1' => $yearFrom,
-            ':yearFrom2' => $yearFrom,
-            ':fromDate'  => $from,
-            ':toDate'    => $to,
-        ]) ?: [];
+        $useCase = new GetAgendaRangeUseCase(
+            $agendaRepository,
+            $ciutatRepository,
+            $birthdayService
+        );
 
-        $all = array_merge($events, $birthdays);
-
-        usort($all, static function ($a, $b) {
-            return strcmp((string)($a['data_inici'] ?? ''), (string)($b['data_inici'] ?? ''));
-        });
+        $result = $useCase->execute($from, $to);
 
         Response::success(
             message: MissatgesAPI::success('get'),
-            data: $all,
+            data: $result,
             httpCode: 200
         );
-    } catch (PDOException $e) {
+    } catch (\Throwable $e) {
+
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
             500
         );
-        return;
     }
 } else {
     // Slug no reconocido
