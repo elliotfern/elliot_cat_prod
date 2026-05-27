@@ -50,11 +50,11 @@ final class GetAgendaRangeUseCase
         foreach ($birthdaysRaw as $b) {
 
             $birthdays[] = new AgendaItemDTO(
-                id: $b['id'], // asumir ya UUID string válido
+                id: (string)$b['id'], // asumir ya UUID string válido
                 titol: $b['titol'],
                 tipus: $b['tipus'],
-                dataInici: $b['data_inici'],
-                dataFi: $b['data_fi'],
+                dataInici: (string)$b['data_inici'],
+                dataFi: $b['data_fi'] ? (string)$b['data_fi'] : null,
                 totElDia: true,
                 lloc: null,
                 source: 'birthday'
