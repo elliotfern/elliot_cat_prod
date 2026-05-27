@@ -20,16 +20,9 @@ final class AgendaMapper
         array $row
     ): AgendaEvent {
 
-        $binaryId = $row['id'];
-        $id = Uuid::toString($binaryId);
-
-        if (!is_string($id) || strlen($id) < 32) {
-            throw new \RuntimeException('Invalid agenda UUID string');
-        }
-
         return new AgendaEvent(
 
-            id: new AgendaId($id),
+            id: AgendaId::fromBinary($row['id']),
 
             titol: (string)$row['titol'],
 
