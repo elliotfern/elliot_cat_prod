@@ -117,6 +117,9 @@ if ($slug === "esdevenimentId") {
 
         $data = $useCase->execute();
 
+        var_dump($data);
+        exit;
+
         Response::success(
             message: MissatgesAPI::success('get'),
             data: $data,

@@ -8,7 +8,6 @@ use App\Domain\Agenda\Entity\AgendaEvent;
 use App\Domain\Agenda\ValueObject\AgendaEstat;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Domain\Agenda\ValueObject\AgendaTipus;
-use App\Utils\Uuid;
 use DateTimeImmutable;
 
 final class AgendaMapper
