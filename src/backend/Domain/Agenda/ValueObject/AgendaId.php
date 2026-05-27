@@ -38,6 +38,11 @@ final class AgendaId
         );
     }
 
+    public static function toString(string $binary): string
+    {
+        return ramsey::fromBytes($binary)->toString();
+    }
+
     public function value(): string
     {
         return $this->value;
@@ -54,10 +59,6 @@ final class AgendaId
         return $binary;
     }
 
-    public function toString(): string
-    {
-        return $this->value;
-    }
 
     public function equals(self $other): bool
     {
