@@ -24,7 +24,7 @@ const WEEK_START_MONDAY = true;
 ========================= */
 
 function parseDateTime(str: string): Date {
-  return new Date(str.replace(' ', 'T'));
+  return new Date(str.replace(' ', 'T') + 'Z');
 }
 
 function getDayKey(dateStr: string): string {
@@ -89,13 +89,9 @@ function getShortEventLabel(ev: AgendaEsdeveniment): string {
 async function loadMonthData(usuariId: number, year: number, month: number): Promise<AgendaEsdeveniment[]> {
   const { from, to } = getMonthRange(year, month);
 
-  const res = await api.get<{ data: AgendaEsdeveniment[] }>('agenda/get/esdevenimentsRang', {
-    usuari_id: usuariId,
-    from,
-    to,
-  });
+  const data = await api.get<AgendaEsdeveniment[]>('agenda/get/esdevenimentsRang', { usuari_id: usuariId, from, to });
 
-  return res.data ?? [];
+  return data;
 }
 
 /* =========================
@@ -133,7 +129,7 @@ function renderCalendar(year: number, month: number, events: AgendaEsdeveniment[
 
   for (let d = 1; d <= days; d++) {
     const date = new Date(year, month, d);
-    const key = getDayKey(date.toISOString());
+    const key = getDayKey(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`);
 
     const cell = document.createElement('div');
     cell.className = 'cal-day';
