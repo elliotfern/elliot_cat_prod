@@ -23,7 +23,7 @@ final class GetAgendaFutureEventsUseCase
         foreach ($events as $event) {
 
             $ciutatNom = null;
-
+            /*
             if ($event->ciutatId() !== null) {
                 $ciutat = $this->ciutatRepository->findById(
                     $event->ciutatId()
@@ -31,7 +31,7 @@ final class GetAgendaFutureEventsUseCase
 
                 $ciutatNom = $ciutat?->getNom();
             }
-
+*/
             $result[] = [
                 'id' => (string)$event->id(),
                 'titol' => $event->titol(),
