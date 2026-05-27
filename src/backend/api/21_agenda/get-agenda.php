@@ -7,7 +7,6 @@ use App\Application\Agenda\Service\BirthdayService;
 use App\Config\Database;
 use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Agenda\MysqlAgendaRepository;
-use App\Infrastructure\Persistence\Ciutat\MysqlCiutatRepository;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 
@@ -17,7 +16,6 @@ $db  = new Database();
 $pdo = DatabaseConnection::getConnection();
 
 $agendaRepository = new MysqlAgendaRepository($pdo);
-$ciutatRepository = new MysqlCiutatRepository($pdo);
 $birthdayService = new BirthdayService($pdo);
 
 /*
@@ -50,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
  */
 if ($slug === "esdevenimentId") {
 
-    $id = $_GET['id'] ?? null;
+    $id = $_GET['id'];
 
     if (!$id) {
         Response::error(
@@ -65,7 +63,6 @@ if ($slug === "esdevenimentId") {
 
         $useCase = new GetAgendaByIdUseCase(
             $agendaRepository,
-            $ciutatRepository
         );
 
         $data = $useCase->execute($id);
@@ -110,7 +107,6 @@ if ($slug === "esdevenimentId") {
 
     $useCase = new GetAgendaFutureEventsUseCase(
         $agendaRepository,
-        $ciutatRepository
     );
 
     try {
@@ -167,7 +163,6 @@ if ($slug === "esdevenimentId") {
 
         $useCase = new GetAgendaRangeUseCase(
             $agendaRepository,
-            $ciutatRepository,
             $birthdayService
         );
 
