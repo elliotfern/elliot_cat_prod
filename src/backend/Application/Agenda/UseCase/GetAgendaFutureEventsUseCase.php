@@ -33,7 +33,7 @@ final class GetAgendaFutureEventsUseCase
             }
 */
             $result[] = [
-                'id' => (string)$event->id(),
+                'id' => $event->id()->value(),
                 'titol' => $event->titol(),
                 'descripcio' => $event->descripcio(),
                 'tipus' => (string)$event->tipus(),
