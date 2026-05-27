@@ -41,7 +41,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
-            ':id' => $id->toBinary()
+            ':id' => $id->value()
         ]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -138,7 +138,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
-            ':id' => $id->toBinary()
+            ':id' => $id->value()
         ]);
     }
 }
