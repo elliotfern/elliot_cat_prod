@@ -34,7 +34,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         c.ciutat AS ciutat_nom,
         c.ciutat_ca AS ciutat_ca
     FROM db_agenda_esdeveniments AS e
-    LEFT JOIN db_ciutats c ON e.ciutat_id = c.id
+    LEFT JOIN db_geo_ciutats c ON e.ciutat_id = c.id
     WHERE id = :id
     LIMIT 1";
 
@@ -74,7 +74,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         c.ciutat AS ciutat_nom,
         c.ciutat_ca AS ciutat_ca
     FROM db_agenda_esdeveniments AS e
-    LEFT JOIN db_ciutats c ON e.ciutat_id = c.id
+    LEFT JOIN db_geo_ciutats c ON e.ciutat_id = c.id
     WHERE data_inici >= :from
       AND data_inici <= :to
     ORDER BY data_inici ASC";
@@ -112,7 +112,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         c.ciutat AS ciutat_nom,
         c.ciutat_ca AS ciutat_ca
     FROM db_agenda_esdeveniments AS e
-    LEFT JOIN db_ciutats c ON e.ciutat_id = c.id
+    LEFT JOIN db_geo_ciutats c ON e.ciutat_id = c.id
     WHERE data_inici >= NOW()
     ORDER BY data_inici ASC";
         $stmt = $this->pdo->query($sql);
