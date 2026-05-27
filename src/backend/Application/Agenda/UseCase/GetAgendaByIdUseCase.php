@@ -6,8 +6,6 @@ namespace App\Application\Agenda\UseCase;
 
 use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
 use App\Domain\Agenda\ValueObject\AgendaId;
-use App\Domain\Ciutat\Repository\CiutatRepository;
-use App\Utils\Uuid;
 
 final class GetAgendaByIdUseCase
 {

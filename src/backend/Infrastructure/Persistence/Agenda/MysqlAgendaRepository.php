@@ -19,7 +19,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
     public function findById(AgendaId $id): ?AgendaEvent
     {
         $sql = "SELECT 
-          e.id,
+        e.id,
         e.titol,
         e.descripcio,
         e.tipus,
@@ -35,7 +35,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         c.ciutat_ca AS ciutat_ca
     FROM db_agenda_esdeveniments AS e
     LEFT JOIN db_geo_ciutats c ON e.ciutat_id = c.id
-    WHERE id = :id
+    WHERE e.id = :id
     LIMIT 1";
 
         $stmt = $this->pdo->prepare($sql);
