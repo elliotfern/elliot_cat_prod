@@ -21,13 +21,13 @@ final class AgendaMapper
 
         $id = $row['id'] ?? null;
 
-        if (!is_string($id) || strlen($id) !== 16) {
-            throw new \RuntimeException('Invalid agenda UUID binary');
+        if (!is_string($id) || strlen($id) < 32) {
+            throw new \RuntimeException('Invalid agenda UUID string');
         }
 
         return new AgendaEvent(
 
-            id: new AgendaId($row['id']),
+            id: new AgendaId($id),
 
             titol: (string)$row['titol'],
 
