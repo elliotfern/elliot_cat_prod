@@ -23,7 +23,7 @@ final class GetAgendaFutureEventsUseCase
         foreach ($events as $event) {
 
             $ciutatNom = null;
-            /*
+
             if ($event->ciutatId() !== null) {
                 $ciutat = $this->ciutatRepository->findById(
                     $event->ciutatId()
@@ -31,14 +31,14 @@ final class GetAgendaFutureEventsUseCase
 
                 $ciutatNom = $ciutat?->getNom();
             }
-*/
+
             $result[] = [
-                'id' => $event->id()->value(),
+                'id' => $event->id()->toString(),
                 'titol' => $event->titol(),
                 'descripcio' => $event->descripcio(),
                 'tipus' => (string)$event->tipus(),
                 'lloc' => $event->lloc(),
-                'ciutat_id' => $event->ciutatId(),
+                'ciutat_id' => $event->ciutatId()?->toString(),
                 'ciutat_nom' => $ciutatNom,
                 'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
                 'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
