@@ -27,7 +27,7 @@ final class AgendaEvent
         private readonly DateTimeImmutable $actualitzatEl
     ) {}
 
-    public function id(): AgendaId
+    public function getId(): AgendaId
     {
         return $this->id;
     }

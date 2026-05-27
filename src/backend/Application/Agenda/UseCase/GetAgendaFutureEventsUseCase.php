@@ -33,12 +33,12 @@ final class GetAgendaFutureEventsUseCase
             }
 
             $result[] = [
-                'id' => $event->id()->toString(),
+                'id' => $event->getId(),
                 'titol' => $event->titol(),
                 'descripcio' => $event->descripcio(),
                 'tipus' => (string)$event->tipus(),
                 'lloc' => $event->lloc(),
-                'ciutat_id' => $event->ciutatId()?->toString(),
+                'ciutat_id' => $event->ciutatId(),
                 'ciutat_nom' => $ciutatNom,
                 'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
                 'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),

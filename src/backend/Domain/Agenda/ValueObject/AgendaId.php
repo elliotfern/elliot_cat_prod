@@ -1,10 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Domain\Agenda\ValueObject;
-
-use App\Utils\Uuid;
 
 final class AgendaId
 {
@@ -19,15 +15,5 @@ final class AgendaId
     public function value(): string
     {
         return $this->value;
-    }
-
-    public function toBinary(): string
-    {
-        return $this->value;
-    }
-
-    public function toString(): string
-    {
-        return Uuid::toString($this->value);
     }
 }
