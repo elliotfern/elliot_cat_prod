@@ -93,7 +93,7 @@ if ($slug === "esdevenimentId") {
     }
 
     /**
-     * GET : Llistat d’esdeveniments futurs
+     * GET : Llistat d’esdeveniments futurs - 
      * URL: /agenda/get/esdevenimentsFuturs?usuari_id=1
      */
 } else if ($slug === "esdevenimentsFuturs") {
