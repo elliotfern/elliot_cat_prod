@@ -11,7 +11,7 @@ class MysqlCiutatMapper
     public static function map(array $row): Ciutat
     {
         $pais = new Pais(
-            Uuid::toString($row['pais_id']),
+            Uuid::fromBytes($row['pais_id']),
             $row['pais_ca'],
             $row['pais_en'],
             new \DateTimeImmutable($row['pais_created_at']),
@@ -19,7 +19,7 @@ class MysqlCiutatMapper
         );
 
         return new Ciutat(
-            Uuid::toString($row['id']),
+            Uuid::fromBytes($row['id']),
             $row['ciutat'],
             $row['ciutat_ca'],
             $row['ciutat_en'],

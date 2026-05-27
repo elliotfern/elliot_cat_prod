@@ -48,4 +48,9 @@ class Uuid
 
         return $bin;
     }
+
+    public static function fromBytes(string $bytes): string
+    {
+        return \Ramsey\Uuid\Uuid::fromBytes($bytes)->toString();
+    }
 }
