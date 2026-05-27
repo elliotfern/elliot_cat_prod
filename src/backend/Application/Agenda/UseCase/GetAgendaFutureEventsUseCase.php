@@ -24,13 +24,15 @@ final class GetAgendaFutureEventsUseCase
 
             $ciutatNom = null;
 
-            if ($event->ciutatId() !== null) {
-                $ciutat = $this->ciutatRepository->findById(
-                    $event->ciutatId()
-                );
+            error_log('ANTES CIUTAT REPO');
 
-                $ciutatNom = $ciutat?->getNom();
-            }
+            $ciutat = $this->ciutatRepository->findById(
+                $event->ciutatId()
+            );
+            $ciutatNom = $ciutat?->getNom();
+
+            error_log('DESPUES CIUTAT REPO');
+
 
             $result[] = [
                 'id' => bin2hex($event->getId()->value()),
