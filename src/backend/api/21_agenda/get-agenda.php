@@ -9,6 +9,7 @@ use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Agenda\MysqlAgendaRepository;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
+use App\Domain\Agenda\ValueObject\AgendaId;
 
 $slug = $routeParams[0] ?? null;
 
@@ -49,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 if ($slug === "esdevenimentId") {
 
     $id = $_GET['id'];
+    $agendaId = AgendaId::fromString($id);
 
     if (!$id) {
         Response::error(
@@ -65,7 +67,7 @@ if ($slug === "esdevenimentId") {
             $agendaRepository,
         );
 
-        $data = $useCase->execute($id);
+        $data = $useCase->execute($agendaId);
 
         if (!$data) {
             Response::error(
