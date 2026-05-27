@@ -41,8 +41,6 @@ final class AgendaMapper
                 ? $row['ciutat_id']
                 : null,
 
-            ciutatNom: self::ciutatNom($row),
-
             dataInici: new DateTimeImmutable(
                 (string)$row['data_inici']
             ),
@@ -67,12 +65,5 @@ final class AgendaMapper
                 (string)$row['actualitzat_el']
             )
         );
-    }
-
-    public static function ciutatNom(array $row): ?string
-    {
-        return $row['ciutat_ca']
-            ?? $row['ciutat_nom']
-            ?? null;
     }
 }

@@ -32,22 +32,14 @@ final class GetAgendaRangeUseCase
 
         foreach ($events as $event) {
 
-            $ciutatNom = null;
-
-            if ($event->ciutatId()) {
-                $ciutat = $this->ciutatRepository->findById($event->ciutatId());
-                $ciutatNom = $ciutat?->getNom();
-            }
-
             $result[] = new AgendaItemDTO(
-                id: (string)$event->id(),
+                id: (string)$event->getId(),
                 titol: $event->titol(),
                 tipus: (string)$event->tipus(),
                 dataInici: $event->dataInici()->format('Y-m-d H:i:s'),
                 dataFi: $event->dataFi()?->format('Y-m-d H:i:s'),
                 totElDia: $event->totElDia(),
                 lloc: $event->lloc(),
-                ciutatNom: $ciutatNom,
                 source: 'agenda'
             );
         }
@@ -67,7 +59,6 @@ final class GetAgendaRangeUseCase
                 dataFi: $b['data_fi'],
                 totElDia: true,
                 lloc: null,
-                ciutatNom: null,
                 source: 'birthday'
             );
         }
