@@ -8,6 +8,7 @@ use App\Domain\Agenda\Entity\AgendaEvent;
 use App\Domain\Agenda\ValueObject\AgendaEstat;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Domain\Agenda\ValueObject\AgendaTipus;
+use App\Utils\Uuid;
 use DateTimeImmutable;
 
 final class AgendaMapper
@@ -18,9 +19,9 @@ final class AgendaMapper
     public static function toDomain(
         array $row
     ): AgendaEvent {
-        var_dump($row);
-        die;
-        $id = $row['id'] ?? null;
+
+        $binaryId = $row['id'];
+        $id = Uuid::toString($binaryId);
 
         if (!is_string($id) || strlen($id) < 32) {
             throw new \RuntimeException('Invalid agenda UUID string');
