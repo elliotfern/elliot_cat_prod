@@ -18,7 +18,8 @@ final class AgendaMapper
     public static function toDomain(
         array $row
     ): AgendaEvent {
-
+        var_dump($row);
+        die;
         $id = $row['id'] ?? null;
 
         if (!is_string($id) || strlen($id) < 32) {
