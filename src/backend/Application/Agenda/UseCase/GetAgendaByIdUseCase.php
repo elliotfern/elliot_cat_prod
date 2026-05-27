@@ -37,7 +37,7 @@ final class GetAgendaByIdUseCase
 
 
         return [
-            'id' => (string)$event->id(),
+            'id' => $event->getId(),
             'titol' => $event->titol(),
             'descripcio' => $event->descripcio(),
             'tipus' => (string)$event->tipus(),

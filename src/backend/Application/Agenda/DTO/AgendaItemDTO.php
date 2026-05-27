@@ -14,7 +14,6 @@ final class AgendaItemDTO
         public ?string $dataFi,
         public bool $totElDia,
         public ?string $lloc,
-        public ?string $ciutatNom,
         public string $source // 'agenda' | 'birthday'
     ) {}
 }

@@ -22,18 +22,6 @@ final class GetAgendaFutureEventsUseCase
 
         foreach ($events as $event) {
 
-            $ciutatNom = null;
-
-            error_log('ANTES CIUTAT REPO');
-
-            $ciutat = $this->ciutatRepository->findById(
-                $event->ciutatId()
-            );
-            $ciutatNom = $ciutat?->getNom();
-
-            error_log('DESPUES CIUTAT REPO');
-
-
             $result[] = [
                 'id' => bin2hex($event->getId()->value()),
                 'titol' => $event->titol(),
@@ -41,7 +29,6 @@ final class GetAgendaFutureEventsUseCase
                 'tipus' => (string)$event->tipus(),
                 'lloc' => $event->lloc(),
                 'ciutat_id' => $event->ciutatId() ? bin2hex($event->ciutatId()) : null,
-                'ciutat_nom' => $ciutatNom,
                 'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
                 'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
                 'tot_el_dia' => $event->totElDia(),
