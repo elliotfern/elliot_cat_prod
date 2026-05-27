@@ -7,26 +7,24 @@ namespace App\Application\Agenda\UseCase;
 use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Domain\Ciutat\Repository\CiutatRepository;
+use App\Utils\Uuid;
 
 final class GetAgendaByIdUseCase
 {
     public function __construct(
         private AgendaRepositoryInterface $repository,
-        private CiutatRepository $ciutatRepository
     ) {}
 
-    public function execute(string $id): ?array
+    public function execute(AgendaId $id): ?array
     {
-        $event = $this->repository->findById(
-            AgendaId::fromBinary($id)
-        );
+        $event = $this->repository->findById($id);
 
         if (!$event) {
             return null;
         }
 
         return [
-            'id' => $event->getId(),
+            'id' => $event->getId()->toString(),
             'titol' => $event->titol(),
             'descripcio' => $event->descripcio(),
             'tipus' => (string)$event->tipus(),

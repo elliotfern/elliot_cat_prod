@@ -6,12 +6,12 @@ namespace App\Application\Agenda\UseCase;
 
 use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
 use App\Domain\Ciutat\Repository\CiutatRepository;
+use Ramsey\Uuid\Uuid;
 
 final class GetAgendaFutureEventsUseCase
 {
     public function __construct(
         private AgendaRepositoryInterface $agendaRepository,
-        private CiutatRepository $ciutatRepository
     ) {}
 
     public function execute(): array
@@ -23,12 +23,12 @@ final class GetAgendaFutureEventsUseCase
         foreach ($events as $event) {
 
             $result[] = [
-                'id' => bin2hex($event->getId()->value()),
+                'id' => $event->getId()->toString(),
                 'titol' => $event->titol(),
                 'descripcio' => $event->descripcio(),
                 'tipus' => (string)$event->tipus(),
                 'lloc' => $event->lloc(),
-                'ciutat_id' => $event->ciutatId() ? bin2hex($event->ciutatId()) : null,
+                'ciutat_id' => $event->ciutatId(),
                 'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
                 'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
                 'tot_el_dia' => $event->totElDia(),
