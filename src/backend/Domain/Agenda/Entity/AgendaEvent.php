@@ -18,6 +18,7 @@ final class AgendaEvent
         private readonly AgendaTipus $tipus,
         private readonly ?string $lloc,
         private readonly ?string $ciutatId,
+        private readonly ?string $ciutatNom,
         private readonly DateTimeImmutable $dataInici,
         private readonly ?DateTimeImmutable $dataFi,
         private readonly bool $totElDia,
@@ -54,6 +55,11 @@ final class AgendaEvent
     public function ciutatId(): ?string
     {
         return $this->ciutatId;
+    }
+
+    public function ciutatNom(): ?string
+    {
+        return $this->ciutatNom;
     }
 
     public function dataInici(): DateTimeImmutable

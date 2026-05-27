@@ -27,6 +27,12 @@ final class AgendaId
 
     public static function fromBinary(string $binary): self
     {
+        if (strlen($binary) !== 16) {
+            throw new InvalidArgumentException(
+                'UUID binary inválido (esperado 16 bytes, recibido ' . strlen($binary) . ')'
+            );
+        }
+
         return new self(
             Uuid::toString($binary)
         );
@@ -39,7 +45,18 @@ final class AgendaId
 
     public function toBinary(): string
     {
-        return Uuid::toBinary($this->value);
+        $binary = Uuid::toBinary($this->value);
+
+        if (strlen($binary) !== 16) {
+            throw new InvalidArgumentException('UUID conversion failed');
+        }
+
+        return $binary;
+    }
+
+    public function toString(): string
+    {
+        return $this->value;
     }
 
     public function equals(self $other): bool

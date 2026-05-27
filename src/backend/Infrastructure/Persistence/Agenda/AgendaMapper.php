@@ -19,8 +19,15 @@ final class AgendaMapper
         array $row
     ): AgendaEvent {
 
+        $id = $row['id'] ?? null;
+
+        if (!is_string($id) || strlen($id) !== 16) {
+            throw new \RuntimeException('Invalid agenda UUID binary');
+        }
+
         return new AgendaEvent(
-            id: AgendaId::fromBinary($row['id']),
+
+            id: AgendaId::fromBinary($id),
 
             titol: (string)$row['titol'],
 
@@ -37,8 +44,10 @@ final class AgendaMapper
                 : null,
 
             ciutatId: isset($row['ciutat_id'])
-                ? (string)$row['ciutat_id']
+                ? $row['ciutat_id']
                 : null,
+
+            ciutatNom: self::ciutatNom($row),
 
             dataInici: new DateTimeImmutable(
                 (string)$row['data_inici']
