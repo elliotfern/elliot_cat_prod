@@ -27,7 +27,7 @@ final class AgendaMapper
 
         return new AgendaEvent(
 
-            id: AgendaId::fromBinary($id),
+            id: new AgendaId($row['id']),
 
             titol: (string)$row['titol'],
 
