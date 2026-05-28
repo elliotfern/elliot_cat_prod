@@ -41,7 +41,7 @@ final class GetAgendaByIdUseCase
                 ? Uuid::toString($event->ciutatId())
                 : null,
 
-            'ciutat_nom' => $ciutatNom,
+            //'ciutat_nom' => $ciutatNom,
 
             'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
             'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
