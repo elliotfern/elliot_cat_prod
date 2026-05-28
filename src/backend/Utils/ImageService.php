@@ -78,7 +78,7 @@ class ImageService
         $dateCreated = date('Y-m-d');
 
         $id = Uuid::uuid7()->getBytes(); // binary
-        $uuidString = Uuid::fromBytes($id)->toString();
+        $uuidString = Uuid::toString($id);
 
         $sql = "INSERT INTO db_img
                 (id, nameImg, typeImg, alt, nom, dateCreated)
