@@ -10,6 +10,7 @@ use App\Infrastructure\Persistence\Agenda\MysqlAgendaRepository;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Domain\Agenda\ValueObject\AgendaId;
+use App\Infrastructure\Persistence\Ciutat\MysqlCiutatRepository;
 
 $slug = $routeParams[0] ?? null;
 
@@ -18,6 +19,7 @@ $pdo = DatabaseConnection::getConnection();
 
 $agendaRepository = new MysqlAgendaRepository($pdo);
 $birthdayService = new BirthdayService($pdo);
+$ciutatRepository = new MysqlCiutatRepository($pdo);
 
 /*
  * BACKEND AGENDA
@@ -65,6 +67,7 @@ if ($slug === "esdevenimentId") {
 
         $useCase = new GetAgendaByIdUseCase(
             $agendaRepository,
+            $ciutatRepository
         );
 
         $data = $useCase->execute($agendaId);
