@@ -49,8 +49,7 @@ class MysqlCiutatRepository implements CiutatRepository
 
     public function findById(string $id): Ciutat
     {
-        $sql = "
-        SELECT
+        $sql = "SELECT
             c.id,
             c.ciutat,
             c.ciutat_ca,
@@ -58,7 +57,7 @@ class MysqlCiutatRepository implements CiutatRepository
             c.descripcio,
             c.created_at,
             c.updated_at,
-
+            COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final,
             p.id AS pais_id,
             p.pais_ca,
             p.pais_en,
@@ -66,14 +65,9 @@ class MysqlCiutatRepository implements CiutatRepository
             p.updated_at AS pais_updated_at
 
         FROM db_geo_ciutats c
-
-        INNER JOIN db_geo_paisos p
-            ON c.pais_id = p.id
-
+        INNER JOIN db_geo_paisos p ON c.pais_id = p.id
         WHERE c.id = :id
-
-        LIMIT 1
-    ";
+        LIMIT 1";
 
         $stmt = $this->pdo->prepare($sql);
 
