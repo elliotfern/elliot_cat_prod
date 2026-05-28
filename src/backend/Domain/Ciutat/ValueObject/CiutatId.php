@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Domain\Agenda\ValueObject;
+namespace App\Domain\Ciutat\ValueObject;
 
 use App\Utils\Uuid;
 
-final class AgendaId
+final class CiutatId
 {
     public function __construct(
         private string $value

@@ -8,6 +8,7 @@ use App\Domain\Agenda\Entity\AgendaEvent;
 use App\Domain\Agenda\ValueObject\AgendaEstat;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Domain\Agenda\ValueObject\AgendaTipus;
+use App\Domain\Ciutat\ValueObject\CiutatId;
 use DateTimeImmutable;
 
 final class AgendaMapper
@@ -38,7 +39,7 @@ final class AgendaMapper
                 : null,
 
             ciutatId: !empty($row['ciutat_id'])
-                ? $row['ciutat_id']
+                ? new CiutatId($row['ciutat_id'])
                 : null,
 
             dataInici: new DateTimeImmutable(

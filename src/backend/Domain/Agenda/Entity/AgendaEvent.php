@@ -7,6 +7,7 @@ namespace App\Domain\Agenda\Entity;
 use App\Domain\Agenda\ValueObject\AgendaEstat;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Domain\Agenda\ValueObject\AgendaTipus;
+use App\Domain\Ciutat\ValueObject\CiutatId;
 use DateTimeImmutable;
 
 final class AgendaEvent
@@ -17,7 +18,7 @@ final class AgendaEvent
         private readonly ?string $descripcio,
         private readonly AgendaTipus $tipus,
         private readonly ?string $lloc,
-        private readonly ?string $ciutatId,
+        private readonly ?CiutatId $ciutatId,
         private readonly DateTimeImmutable $dataInici,
         private readonly ?DateTimeImmutable $dataFi,
         private readonly bool $totElDia,
@@ -51,7 +52,7 @@ final class AgendaEvent
         return $this->lloc;
     }
 
-    public function ciutatId(): ?string
+    public function ciutatId(): ?CiutatId
     {
         return $this->ciutatId;
     }

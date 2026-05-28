@@ -13,7 +13,7 @@ final class GetAgendaByIdUseCase
 {
     public function __construct(
         private AgendaRepositoryInterface $repository,
-        private CiutatRepository $ciutatRepository,
+        private CiutatRepository $ciutatRepository
     ) {}
 
     public function execute(AgendaId $id): ?array
@@ -26,8 +26,12 @@ final class GetAgendaByIdUseCase
 
         $ciutatNom = null;
 
-        if ($event->ciutatId() !== null) {
-            $ciutat = $this->ciutatRepository->findById($event->ciutatId());
+        if ($event->ciutatId()) {
+
+            $ciutat = $this->ciutatRepository->findById(
+                $event->ciutatId()->toString()
+            );
+
             $ciutatNom = $ciutat?->getNom();
         }
 
@@ -37,12 +41,8 @@ final class GetAgendaByIdUseCase
             'descripcio' => $event->descripcio(),
             'tipus' => (string)$event->tipus(),
             'lloc' => $event->lloc(),
-            'ciutat_id' => $event->ciutatId()
-                ? Uuid::toString($event->ciutatId())
-                : null,
-
-            //'ciutat_nom' => $ciutatNom,
-
+            'ciutat_id' => $event->ciutatId()?->toString(),
+            'ciutat_nom' => $ciutatNom,
             'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
             'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
             'tot_el_dia' => $event->totElDia(),
@@ -50,14 +50,5 @@ final class GetAgendaByIdUseCase
             'creat_el' => $event->creatEl()->format('Y-m-d H:i:s'),
             'actualitzat_el' => $event->actualitzatEl()->format('Y-m-d H:i:s'),
         ];
-    }
-
-    private function getCiutatNom(?string $ciutatId): ?string
-    {
-        if (!$ciutatId) {
-            return null;
-        }
-
-        return $this->ciutatRepository->findById($ciutatId)?->getNom();
     }
 }
