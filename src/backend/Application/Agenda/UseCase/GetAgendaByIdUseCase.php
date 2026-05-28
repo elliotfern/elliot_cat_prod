@@ -7,6 +7,7 @@ namespace App\Application\Agenda\UseCase;
 use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Domain\Ciutat\Repository\CiutatRepository;
+use App\Utils\Uuid;
 
 final class GetAgendaByIdUseCase
 {
@@ -36,9 +37,11 @@ final class GetAgendaByIdUseCase
             'descripcio' => $event->descripcio(),
             'tipus' => (string)$event->tipus(),
             'lloc' => $event->lloc(),
+            'ciutat_id' => $event->ciutatId()
+                ? Uuid::toString($event->ciutatId())
+                : null,
 
-            'ciutat_id' => $event->ciutatId(),
-            //'ciutat_nom' => $this->getCiutatNom($event->ciutatId()),
+            'ciutat_nom' => $ciutatNom,
 
             'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
             'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
