@@ -37,7 +37,7 @@ final class AgendaMapper
                 ? (string)$row['lloc']
                 : null,
 
-            ciutatId: isset($row['ciutat_id'])
+            ciutatId: !empty($row['ciutat_id'])
                 ? $row['ciutat_id']
                 : null,
 
