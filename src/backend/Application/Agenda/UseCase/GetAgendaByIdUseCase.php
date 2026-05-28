@@ -38,7 +38,7 @@ final class GetAgendaByIdUseCase
             'lloc' => $event->lloc(),
 
             'ciutat_id' => $event->ciutatId(),
-            'ciutat_nom' => $this->getCiutatNom($event->ciutatId()),
+            //'ciutat_nom' => $this->getCiutatNom($event->ciutatId()),
 
             'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
             'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
