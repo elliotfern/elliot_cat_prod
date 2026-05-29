@@ -44,7 +44,7 @@ class AgendaSchema
             ],
 
             'tot_el_dia' => [
-                'rules' => 'required|boolean',
+                'rules' => 'boolean',
                 'label' => 'Tot el dia',
             ],
 
@@ -100,7 +100,7 @@ class AgendaSchema
             ],
 
             'tot_el_dia' => [
-                'rules' => 'required|boolean',
+                'rules' => 'boolean',
                 'label' => 'Tot el dia',
             ],
 
