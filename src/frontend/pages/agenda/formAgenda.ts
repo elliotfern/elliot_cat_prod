@@ -41,23 +41,23 @@ export async function formAgendaEsdeveniment(isUpdate: boolean, id?: string) {
     });
 
     await auxiliarSelect(data.ciutat_id, 'ciutats', 'ciutat_id', 'ciutat_final');
+  } else {
+    // 2) CREATE
+    divTitol.innerHTML = `<h2>Creació de nou esdeveniment</h2>`;
+    btnSubmit.textContent = 'Inserir dades';
+
+    // Primero cargamos selects para que existan opciones
+    await carregarSelectsAgenda(data);
+
+    // Luego aplicamos defaults en el formulario (si quieres que se vean ya seleccionados)
+    renderFormInputs(data);
+
+    await auxiliarSelect(data.ciutat_id, 'ciutats', 'ciutat_id', 'ciutat_final');
+
+    form.addEventListener('submit', function (event) {
+      transmissioDadesDB(event, 'POST', 'formCrearEsdeveniment', API_URLS.POST.AGENDA_ESDEVENIMENT, true);
+    });
   }
-
-  // 2) CREATE
-  divTitol.innerHTML = `<h2>Creació de nou esdeveniment</h2>`;
-  btnSubmit.textContent = 'Inserir dades';
-
-  // Primero cargamos selects para que existan opciones
-  await carregarSelectsAgenda(data);
-
-  // Luego aplicamos defaults en el formulario (si quieres que se vean ya seleccionados)
-  renderFormInputs(data);
-
-  await auxiliarSelect(data.ciutat_id, 'ciutats', 'ciutat_id', 'ciutat_final');
-
-  form.addEventListener('submit', function (event) {
-    transmissioDadesDB(event, 'POST', 'formCrearEsdeveniment', API_URLS.POST.AGENDA_ESDEVENIMENT, true);
-  });
 }
 
 /**
