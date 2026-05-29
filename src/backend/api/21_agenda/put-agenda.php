@@ -14,6 +14,9 @@ use App\Utils\Schema\SchemaValidationException;
 
 $pdo = DatabaseConnection::getConnection();
 
+/** @var array $routeParams */
+$id = $routeParams[0] ?? null;
+
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
 
@@ -33,17 +36,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 try {
 
     // -------------------------
-    // ID (GET)
+    // ID (param)
     // -------------------------
 
-    $id = $_GET['id'] ?? null;
+    $id_param = $id ?? null;
 
-    if (!$id) {
+    if (!$id_param) {
         Response::error('ID obligatori', [], 400);
         return;
     }
 
-    $agendaId = AgendaId::fromString($id);
+    $agendaId = AgendaId::fromString($id_param);
 
     // -------------------------
     // INPUT JSON
@@ -77,7 +80,6 @@ try {
             $data,
             $schema
         );
-
     } catch (SchemaValidationException $e) {
 
         Response::error(
@@ -111,7 +113,6 @@ try {
         data: ['id' => $id],
         httpCode: 200
     );
-
 } catch (\Throwable $e) {
 
     Response::error(

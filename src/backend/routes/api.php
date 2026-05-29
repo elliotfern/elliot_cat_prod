@@ -521,7 +521,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/agenda/put' => [
+    '/api/agenda/put/{slug}' => [
         'view' => 'src/backend/api/21_agenda/put-agenda.php',
         'needs_session' => false,
         'header_footer' => false,

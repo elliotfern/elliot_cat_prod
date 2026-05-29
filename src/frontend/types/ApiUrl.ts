@@ -91,7 +91,7 @@ export type ApiUrls = {
     TEMA: string;
     SUBTEMA: string;
     LINK: string;
-    AGENDA_ESDEVENIMENT: string;
+    AGENDA_ESDEVENIMENT: (id: string) => string;
     PERSONES_GRUPS: string;
     PROJECTE: string;
     TASCA: string;

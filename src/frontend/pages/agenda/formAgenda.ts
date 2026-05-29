@@ -37,7 +37,7 @@ export async function formAgendaEsdeveniment(isUpdate: boolean, id?: string) {
     await carregarSelectsAgenda(data);
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formCrearEsdeveniment', API_URLS.PUT.AGENDA_ESDEVENIMENT);
+      transmissioDadesDB(event, 'PUT', 'formCrearEsdeveniment', API_URLS.PUT.AGENDA_ESDEVENIMENT(id));
     });
 
     await auxiliarSelect(data.ciutat_id, 'ciutats', 'ciutat_id', 'ciutat_final');
