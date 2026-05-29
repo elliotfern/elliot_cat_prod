@@ -35,7 +35,7 @@ final class UpdateAgendaEventUseCase
 
             // importante: mantener binary16 coherente
             ciutatId: !empty($data['ciutat_id'])
-                ? $data['ciutat_id']
+                ? CiutatId::fromString($data['ciutat_id'])
                 : null,
 
             dataInici: new \DateTimeImmutable($data['data_inici']),
