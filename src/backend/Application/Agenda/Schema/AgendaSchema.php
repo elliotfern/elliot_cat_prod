@@ -2,74 +2,111 @@
 
 namespace App\Application\Agenda\Schema;
 
-final class AgendaSchema
+class AgendaSchema
 {
     public static function create(): array
     {
         return [
 
             'titol' => [
-                'type' => 'string',
-                'required' => true,
-                'min' => 3,
-                'max' => 255,
+                'rules' => 'required|string|max:255',
+                'label' => 'Títol',
             ],
 
             'descripcio' => [
-                'type' => 'string',
-                'required' => false,
-                'nullable' => true,
+                'rules' => 'string',
+                'label' => 'Descripció',
             ],
 
             'tipus' => [
-                'type' => 'string',
-                'required' => true,
-                'allowed' => [
-                    'reunio',
-                    'visita_medica',
-                    'videotrucada',
-                    'viatge',
-                    'altre',
-                    'aniversari'
-                ]
+                'rules' => 'required|string',
+                'label' => 'Tipus',
             ],
 
             'lloc' => [
-                'type' => 'string',
-                'required' => false,
-                'nullable' => true,
+                'rules' => 'string',
+                'label' => 'Lloc',
             ],
 
             'ciutat_id' => [
-                'type' => 'uuid',
-                'required' => false,
-                'nullable' => true,
+                'rules' => 'uuid',
+                'label' => 'Ciutat',
             ],
 
             'data_inici' => [
-                'type' => 'datetime',
-                'required' => true,
+                'rules' => 'required|date',
+                'label' => 'Data inici',
             ],
 
             'data_fi' => [
-                'type' => 'datetime',
-                'required' => false,
-                'nullable' => true,
+                'rules' => 'date',
+                'label' => 'Data fi',
             ],
 
             'tot_el_dia' => [
-                'type' => 'boolean',
-                'required' => true,
+                'rules' => 'required|boolean',
+                'label' => 'Tot el dia',
             ],
 
             'estat' => [
-                'type' => 'string',
-                'required' => true,
-                'allowed' => [
-                    'pendent',
-                    'confirmat',
-                    'cancel·lat'
-                ]
+                'rules' => 'required|string',
+                'label' => 'Estat',
+            ],
+        ];
+    }
+
+    public static function update(): array
+    {
+        return [
+
+            'id' => [
+                'rules' => 'required|uuid',
+                'label' => 'ID',
+            ],
+
+            'titol' => [
+                'rules' => 'required|string|max:255',
+                'label' => 'Títol',
+            ],
+
+            'descripcio' => [
+                'rules' => 'string',
+                'label' => 'Descripció',
+            ],
+
+            'tipus' => [
+                'rules' => 'required|string',
+                'label' => 'Tipus',
+            ],
+
+            'lloc' => [
+                'rules' => 'string',
+                'label' => 'Lloc',
+            ],
+
+            'ciutat_id' => [
+                'rules' => 'uuid',
+                'label' => 'Ciutat',
+            ],
+
+            'data_inici' => [
+                'rules' => 'required|date',
+                'label' => 'Data inici',
+            ],
+
+            'data_fi' => [
+                'rules' => 'date',
+                'label' => 'Data fi',
+            ],
+
+            'tot_el_dia' => [
+                'rules' => 'required|boolean',
+                'label' => 'Tot el dia',
+            ],
+
+            'estat' => [
+                'rules' => 'required|string',
+                'label' => 'Estat',
             ],
         ];
     }

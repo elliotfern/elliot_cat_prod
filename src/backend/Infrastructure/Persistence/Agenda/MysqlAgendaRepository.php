@@ -129,7 +129,6 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
     {
         $sql = "
         INSERT INTO db_agenda_esdeveniments (
-
             id,
             titol,
             descripcio,
@@ -142,9 +141,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
             estat,
             creat_el,
             actualitzat_el
-
         ) VALUES (
-
             :id,
             :titol,
             :descripcio,
@@ -158,40 +155,38 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
             :creat_el,
             :actualitzat_el
         )
+        ON DUPLICATE KEY UPDATE
+            titol = VALUES(titol),
+            descripcio = VALUES(descripcio),
+            tipus = VALUES(tipus),
+            lloc = VALUES(lloc),
+            ciutat_id = VALUES(ciutat_id),
+            data_inici = VALUES(data_inici),
+            data_fi = VALUES(data_fi),
+            tot_el_dia = VALUES(tot_el_dia),
+            estat = VALUES(estat),
+            actualitzat_el = VALUES(actualitzat_el)
     ";
 
         $stmt = $this->pdo->prepare($sql);
 
         $stmt->execute([
-
-            ':id' => $event->getId()->value(),
-
+            ':id' => $event->getId()->value(), // binary16
             ':titol' => $event->titol(),
-
             ':descripcio' => $event->descripcio(),
-
             ':tipus' => (string)$event->tipus(),
-
             ':lloc' => $event->lloc(),
 
-            ':ciutat_id' => $event->ciutatId()?->value(),
+            ':ciutat_id' => $event->ciutatId(),
 
-            ':data_inici' => $event->dataInici()
-                ->format('Y-m-d H:i:s'),
+            ':data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
+            ':data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
 
-            ':data_fi' => $event->dataFi()?->format(
-                'Y-m-d H:i:s'
-            ),
-
-            ':tot_el_dia' => $event->totElDia(),
-
+            ':tot_el_dia' => $event->totElDia() ? 1 : 0,
             ':estat' => (string)$event->estat(),
 
-            ':creat_el' => $event->creatEl()
-                ->format('Y-m-d H:i:s'),
-
-            ':actualitzat_el' => $event->actualitzatEl()
-                ->format('Y-m-d H:i:s'),
+            ':creat_el' => $event->creatEl()->format('Y-m-d H:i:s'),
+            ':actualitzat_el' => $event->actualitzatEl()->format('Y-m-d H:i:s'),
         ]);
     }
 
