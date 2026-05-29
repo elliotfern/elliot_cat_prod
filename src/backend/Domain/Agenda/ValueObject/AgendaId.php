@@ -14,6 +14,15 @@ final class AgendaId
         }
     }
 
+    public static function generate(): self
+    {
+        return new self(
+            Uuid::toBinary(
+                Uuid::generate()
+            )
+        );
+    }
+
     public static function fromString(string $uuid): self
     {
         return new self(

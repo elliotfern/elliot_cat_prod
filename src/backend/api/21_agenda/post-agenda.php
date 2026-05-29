@@ -1,9 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Utils\Uuid;
-use Ramsey\Uuid\Uuid as ramsey;
+use App\Application\Agenda\Schema\AgendaSchema;
+use App\Application\Agenda\UseCase\CreateAgendaEventUseCase;
+use App\Config\DatabaseConnection;
+use App\Infrastructure\Persistence\Agenda\MysqlAgendaRepository;
+use App\Utils\Schema\SchemaProcessor;
+use App\Utils\Schema\SchemaValidationException;
+
+$pdo = DatabaseConnection::getConnection();
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -21,155 +29,74 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Helpers
-function requireField(array $data, string $key, array &$errors)
-{
-    if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
-        $errors[$key] = 'required';
-        return null;
-    }
-    return data_input($data[$key]);
-}
-
-function optionalField(array $data, string $key)
-{
-    return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
-        ? data_input($data[$key])
-        : null;
-}
-
-function parseDateTimeOrError(?string $s): ?DateTime
-{
-    if ($s === null) return null;
-    try {
-        return new DateTime($s);
-    } catch (Throwable $e) {
-        return null;
-    }
-}
-
-// Leer JSON
-$input = file_get_contents("php://input");
-$data = json_decode($input, true);
-
-if (!is_array($data)) {
-    Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
-    exit;
-}
-
-// Validación
-$errors = [];
-
-$titol = requireField($data, 'titol', $errors);
-$tipus = requireField($data, 'tipus', $errors);
-$data_inici_raw = requireField($data, 'data_inici', $errors);
-$data_fi_raw    = requireField($data, 'data_fi', $errors);
-
-$descripcio = optionalField($data, 'descripcio');
-$lloc       = optionalField($data, 'lloc');
-
-// Defaults si no vienen
-$tot_el_dia_raw = isset($data['tot_el_dia']) ? $data['tot_el_dia'] : 0;
-$estat = isset($data['estat']) && $data['estat'] !== '' && $data['estat'] !== null
-    ? data_input($data['estat'])
-    : 'confirmat';
-
-// Enums permitidos
-$allowedTipus = ['reunio', 'visita_medica', 'videotrucada', 'altre'];
-$allowedEstat = ['pendent', 'confirmat', 'cancel·lat'];
-
-if ($tipus !== null && !in_array((string)$tipus, $allowedTipus, true)) {
-    $errors['tipus'] = 'invalid';
-}
-if ($estat !== null && !in_array((string)$estat, $allowedEstat, true)) {
-    $errors['estat'] = 'invalid';
-}
-
-// tot_el_dia normalizado a 0/1
-$tot_el_dia = 0;
-if ($tot_el_dia_raw === true || $tot_el_dia_raw === 1 || $tot_el_dia_raw === '1' || $tot_el_dia_raw === 'true') {
-    $tot_el_dia = 1;
-}
-
-// Fechas
-$dtInici = is_string($data_inici_raw) ? parseDateTimeOrError($data_inici_raw) : null;
-$dtFi    = is_string($data_fi_raw) ? parseDateTimeOrError($data_fi_raw) : null;
-
-if (!$dtInici) $errors['data_inici'] = 'invalid_datetime';
-if (!$dtFi)    $errors['data_fi'] = 'invalid_datetime';
-
-if ($dtInici && $dtFi && $dtInici >= $dtFi) {
-    $errors['data_fi'] = 'must_be_after_data_inici';
-}
-
-if (!empty($errors)) {
-    Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
-    exit;
-}
-
-// Formato para MySQL DATETIME
-$data_inici = $dtInici->format('Y-m-d H:i:s');
-$data_fi    = $dtFi->format('Y-m-d H:i:s');
-
-$ciutat_id = Uuid::toBinary($data['ciutat_id']);
-$id = ramsey::uuid7();
-$idBytes = $id->getBytes();   // para BINARY(16)
-
 try {
-    global $conn;
 
-    $sql = "INSERT INTO db_agenda_esdeveniments
-            (id, titol, descripcio, tipus, lloc, ciutat_id, data_inici, data_fi, tot_el_dia, estat)
-          VALUES
-            (:id, :titol, :descripcio, :tipus, :lloc, :ciutat_id, :data_inici, :data_fi, :tot_el_dia, :estat)";
+    // -------------------------
+    // INPUT JSON
+    // -------------------------
 
-    $stmt = $conn->prepare($sql);
+    $data = json_decode(
+        file_get_contents('php://input'),
+        true
+    );
 
-    $stmt->bindValue(':titol', (string)$titol, PDO::PARAM_STR);
+    if (!$data || !is_array($data)) {
 
-    if ($descripcio === null) $stmt->bindValue(':descripcio', null, PDO::PARAM_NULL);
-    else $stmt->bindValue(':descripcio', (string)$descripcio, PDO::PARAM_STR);
-
-    $stmt->bindValue(':tipus', (string)$tipus, PDO::PARAM_STR);
-
-    if ($lloc === null) $stmt->bindValue(':lloc', null, PDO::PARAM_NULL);
-    else $stmt->bindValue(':lloc', (string)$lloc, PDO::PARAM_STR);
-
-    $stmt->bindValue(':data_inici', $data_inici, PDO::PARAM_STR);
-    $stmt->bindValue(':data_fi', $data_fi, PDO::PARAM_STR);
-    $stmt->bindValue(':tot_el_dia', $tot_el_dia, PDO::PARAM_INT);
-    $stmt->bindValue(':estat', (string)$estat, PDO::PARAM_STR);
-    $stmt->bindValue(':ciutat_id', $ciutat_id, PDO::PARAM_STR);
-    $stmt->bindValue(':id', $idBytes, PDO::PARAM_STR);
-
-    if ($stmt->execute()) {
-        $newId = $id;
-
-        Response::success(
-            message: MissatgesAPI::success('create'),
-            data: ['id' => $newId],
-            httpCode: 201
+        Response::error(
+            "Payload invàlid.",
+            [],
+            400
         );
+
+        return;
     }
 
-    Response::error(
-        MissatgesAPI::error('db_error'),
-        [
-            'sqlState' => $stmt->errorCode(),
-            'info' => $stmt->errorInfo(),
-        ],
-        500
+    // -------------------------
+    // SCHEMA VALIDATION
+    // -------------------------
+
+    try {
+
+        $schema = AgendaSchema::create();
+
+        $agendaData = SchemaProcessor::process(
+            $data,
+            $schema
+        );
+    } catch (SchemaValidationException $e) {
+
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            $e->toApiArray(),
+            400
+        );
+
+        return;
+    }
+
+    // -------------------------
+    // USE CASE
+    // -------------------------
+
+    $repository = new MysqlAgendaRepository($pdo);
+    $useCase = new CreateAgendaEventUseCase($repository);
+    $id = $useCase->execute($agendaData);
+
+    // -------------------------
+    // RESPONSE
+    // -------------------------
+
+    Response::success(
+        message: MissatgesAPI::success('update'),
+        data: ['id' => $id],
+        httpCode: 200
     );
-    exit;
-} catch (Throwable $e) {
+} catch (\Throwable $e) {
+
     Response::error(
-        MissatgesAPI::error('internal_error'),
+        "S'ha produït un error a la base de dades.",
         [
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-        ],
-        500
+            $e->getMessage()
+        ]
     );
-    exit;
 }

@@ -127,7 +127,72 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
 
     public function save(AgendaEvent $event): void
     {
-        // lo dejamos para el siguiente paso (write side)
+        $sql = "
+        INSERT INTO db_agenda_esdeveniments (
+
+            id,
+            titol,
+            descripcio,
+            tipus,
+            lloc,
+            ciutat_id,
+            data_inici,
+            data_fi,
+            tot_el_dia,
+            estat,
+            creat_el,
+            actualitzat_el
+
+        ) VALUES (
+
+            :id,
+            :titol,
+            :descripcio,
+            :tipus,
+            :lloc,
+            :ciutat_id,
+            :data_inici,
+            :data_fi,
+            :tot_el_dia,
+            :estat,
+            :creat_el,
+            :actualitzat_el
+        )
+    ";
+
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->execute([
+
+            ':id' => $event->getId()->value(),
+
+            ':titol' => $event->titol(),
+
+            ':descripcio' => $event->descripcio(),
+
+            ':tipus' => (string)$event->tipus(),
+
+            ':lloc' => $event->lloc(),
+
+            ':ciutat_id' => $event->ciutatId()?->value(),
+
+            ':data_inici' => $event->dataInici()
+                ->format('Y-m-d H:i:s'),
+
+            ':data_fi' => $event->dataFi()?->format(
+                'Y-m-d H:i:s'
+            ),
+
+            ':tot_el_dia' => $event->totElDia(),
+
+            ':estat' => (string)$event->estat(),
+
+            ':creat_el' => $event->creatEl()
+                ->format('Y-m-d H:i:s'),
+
+            ':actualitzat_el' => $event->actualitzatEl()
+                ->format('Y-m-d H:i:s'),
+        ]);
     }
 
     public function delete(AgendaId $id): void
