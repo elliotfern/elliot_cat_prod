@@ -43,4 +43,14 @@ final class AgendaEstat
     {
         return self::ALLOWED;
     }
+
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
+
+    public static function confirmat(): self
+    {
+        return new self('confirmat');
+    }
 }

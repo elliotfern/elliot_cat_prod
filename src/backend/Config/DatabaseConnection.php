@@ -11,41 +11,37 @@ class DatabaseConnection
 
     public static function getConnection(): PDO
     {
-        if (self::$conn === null) {
-            $dbHost = $_ENV['DB_HOST'] ?? 'localhost';
-            $dbUser = $_ENV['DB_USER'] ?? 'root';
-            $dbPass = $_ENV['DB_PASS'] ?? '';
-            $dbName = $_ENV['DB_DBNAME'] ?? '';
+        if (self::$conn !== null) {
+            return self::$conn;
+        }
 
-            try {
-                self::$conn = new PDO(
-                    "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4",
-                    $dbUser,
-                    $dbPass,
-                    [
-                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                        PDO::ATTR_EMULATE_PREPARES => false,
-                    ]
-                );
-            } catch (PDOException $e) {
-                error_log("Error de conexión: " . $e->getMessage());
-                throw $e; // ✅ no retornes null
-            }
+        $dbUser = $_ENV['DB_USER'] ?? '';
+        $dbPass = $_ENV['DB_PASS'] ?? '';
+        $dbHost = $_ENV['DB_HOST'] ?? '127.0.0.1';
+        $dbName = $_ENV['DB_DBNAME'] ?? '';
+        $dbPort = $_ENV['DB_PORT'] ?? 3306;;
+
+        try {
+            self::$conn = new PDO(
+                "mysql:host=$dbHost;port=$dbPort;dbname=$dbName;charset=utf8mb4",
+                $dbUser,
+                $dbPass,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ]
+            );
+        } catch (PDOException $e) {
+            error_log("Error de conexión: " . $e->getMessage());
+            throw $e;
         }
 
         return self::$conn;
     }
 
-    public static function getParams(): array
+    public static function reset(): void
     {
-        return [
-            'host' => $_ENV['DB_HOST'] ?? 'localhost',
-            'port' => $_ENV['DB_PORT'] ?? 3306,
-            'dbname' => $_ENV['DB_DBNAME'] ?? '',
-            'user' => $_ENV['DB_USER'] ?? 'root',
-            'password' => $_ENV['DB_PASS'] ?? '',
-            'charset' => 'utf8mb4',
-        ];
+        self::$conn = null;
     }
 }

@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="tests/bootstrap.php">
+
+<phpunit 
+    bootstrap="src/backend/bootstrap.php"
+    colors="true"
+    displayDetailsOnTestsThatTriggerWarnings="true"
+    displayDetailsOnTestsThatTriggerNotices="true"
+>
+
+<php>
+    <env name="APP_ENV" value="test" force="true"/>
+    <env name="DB_DBNAME" value="epgylzqu_elliot_cat_test" force="true"/>
+    <env name="DB_HOST" value="87.98.230.129" force="true"/>
+    <env name="DB_USER" value="epgylzqu_user" force="true"/>
+</php>
     <testsuites>
-        <testsuite name="Default">
-            <directory>./tests</directory>
-        </testsuite>
-        <testsuite name="Unit Tests">
-            <directory>tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Integration Tests">
-            <directory>tests/Integration</directory>
-        </testsuite>
-        <testsuite name="Models Tests">
-            <directory>tests/Models</directory>
+        <testsuite name="Application Test Suite">
+            <directory>src/backend/Tests</directory>
         </testsuite>
     </testsuites>
+
+    <logging>
+        <testdoxText outputFile="php://stdout"/>
+    </logging>
 </phpunit>

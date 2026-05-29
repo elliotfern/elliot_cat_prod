@@ -13,6 +13,7 @@ use DateTimeImmutable;
 final class AgendaEvent
 {
     public function __construct(
+
         private readonly AgendaId $id,
         private readonly string $titol,
         private readonly ?string $descripcio,
@@ -25,7 +26,11 @@ final class AgendaEvent
         private readonly AgendaEstat $estat,
         private readonly DateTimeImmutable $creatEl,
         private readonly DateTimeImmutable $actualitzatEl
-    ) {}
+
+
+    ) {
+        $this->assertValidDates();
+    }
 
     public function getId(): AgendaId
     {
@@ -84,5 +89,12 @@ final class AgendaEvent
     public function actualitzatEl(): DateTimeImmutable
     {
         return $this->actualitzatEl;
+    }
+
+    private function assertValidDates(): void
+    {
+        if ($this->dataFi !== null && $this->dataFi < $this->dataInici) {
+            throw new \InvalidArgumentException('Invalid date range');
+        }
     }
 }

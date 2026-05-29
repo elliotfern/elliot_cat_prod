@@ -46,4 +46,9 @@ final class AgendaTipus
     {
         return self::ALLOWED;
     }
+
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
 }

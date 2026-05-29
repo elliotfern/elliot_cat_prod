@@ -17,7 +17,7 @@ final class UpdateAgendaEventUseCase
         private AgendaRepositoryInterface $repository
     ) {}
 
-    public function execute(AgendaId $id, array $data): void
+    public function execute(AgendaId $id, array $data): string
     {
         $event = $this->repository->findById($id);
 
@@ -25,31 +25,27 @@ final class UpdateAgendaEventUseCase
             throw new \RuntimeException('Agenda event not found');
         }
 
-        // 🔁 RECREAR ENTIDAD (INMUTABLE)
         $updated = new AgendaEvent(
             id: $event->getId(),
             titol: $data['titol'],
             descripcio: $data['descripcio'] ?? null,
             tipus: new AgendaTipus($data['tipus']),
             lloc: $data['lloc'] ?? null,
-
-            // importante: mantener binary16 coherente
             ciutatId: !empty($data['ciutat_id'])
                 ? CiutatId::fromString($data['ciutat_id'])
                 : null,
-
             dataInici: new \DateTimeImmutable($data['data_inici']),
             dataFi: !empty($data['data_fi'])
                 ? new \DateTimeImmutable($data['data_fi'])
                 : null,
-
             totElDia: (bool)$data['tot_el_dia'],
             estat: new AgendaEstat($data['estat']),
-
             creatEl: $event->creatEl(),
             actualitzatEl: new \DateTimeImmutable()
         );
 
         $this->repository->save($updated);
+
+        return $updated->getId()->toString();
     }
 }
