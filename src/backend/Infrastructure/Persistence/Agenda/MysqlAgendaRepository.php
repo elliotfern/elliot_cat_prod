@@ -177,7 +177,9 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
             ':tipus' => (string)$event->tipus(),
             ':lloc' => $event->lloc(),
 
-            ':ciutat_id' => $event->ciutatId(),
+            ':ciutat_id' => $event->ciutatId()
+                ? $event->ciutatId()->value()
+                : null,
 
             ':data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
             ':data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
