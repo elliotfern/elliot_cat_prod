@@ -6,7 +6,10 @@ use Dotenv\Dotenv;
 
 $basePath = __DIR__ . '/../..';
 $dotenv = Dotenv::createImmutable($basePath, '.env');
-$dotenv->load();
+
+if (getenv('APP_ENV') !== 'testing') {
+    $dotenv->load();
+}
 
 require_once __DIR__ . '/Config/funcions.php';
 require_once __DIR__ . '/Config/config.php';

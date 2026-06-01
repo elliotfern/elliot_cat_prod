@@ -37,6 +37,9 @@ jobs:
           echo "APP_DEBUG=true" >> .env
           echo "DATABASE_URL=sqlite:///:memory:" >> .env
 
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
       # 4) PHP Syntax Check
       - name: PHP Syntax Check
         run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
