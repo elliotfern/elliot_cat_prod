@@ -31,7 +31,7 @@ jobs:
 
       # 3) Install PHP dependencies (CI BUILD)
       - name: Install PHP dependencies
-        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+        run: composer install --prefer-dist --no-interaction
 
       # 4) PHP Syntax Check
       - name: PHP Syntax Check
