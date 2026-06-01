@@ -4,7 +4,7 @@
 $routes = [
     // Generador UUID V7
     '/api/uuid' => [
-        'view' => 'src/backend/api/100_auxiliars/crear-uuid.php',
+        'view' => '../src/backend/api/100_auxiliars/crear-uuid.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -13,15 +13,15 @@ $routes = [
 
     // API: Registre usuari / Login
     '/api/auth/login' => [
-        'view' => 'src/backend/api/00_auth/get/get-login.php',
+        'view' => '../src/backend/api/00_auth/get/get-login.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true
     ],
 
-    '/api/auth/get' => [
-        'view' => 'src/backend/api/00_auth/get/get-auth.php',
+    '/api/auth/get/{slug}' => [
+        'view' => '../src/backend/api/00_auth/get/get-auth.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -29,7 +29,7 @@ $routes = [
     ],
 
     '/api/auth/get/usuaris' => [
-        'view' => 'src/backend/api/00_auth/get/get-usuaris.php',
+        'view' => '../src/backend/api/00_auth/get/get-usuaris.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -37,7 +37,7 @@ $routes = [
     ],
 
     '/api/auth/get/usuari/{id}' => [
-        'view' => 'src/backend/api/00_auth/get/get-usuari.php',
+        'view' => '../src/backend/api/00_auth/get/get-usuari.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -45,7 +45,7 @@ $routes = [
     ],
 
     '/api/auth/post/usuari' => [
-        'view' => 'src/backend/api/00_auth/post/post-usuari.php',
+        'view' => '../src/backend/api/00_auth/post/post-usuari.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -53,7 +53,7 @@ $routes = [
     ],
 
     '/api/auth/put/usuari' => [
-        'view' => 'src/backend/api/00_auth/put/put-usuari.php',
+        'view' => '../src/backend/api/00_auth/put/put-usuari.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -61,7 +61,7 @@ $routes = [
     ],
 
     '/api/auth/get/nomUsuari' => [
-        'view' => 'src/backend/api/00_auth/get/get-nom-usuari.php',
+        'view' => '../src/backend/api/00_auth/get/get-nom-usuari.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -70,7 +70,7 @@ $routes = [
 
     // API: Vault
     '/api/vault/get' => [
-        'view' => 'src/backend/api/10_vault/get-vault.php',
+        'view' => '../src/backend/api/10_vault/get-vault.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -78,7 +78,7 @@ $routes = [
     ],
 
     '/api/vault/post' => [
-        'view' => 'src/backend/api/10_vault/post-vault.php',
+        'view' => '../src/backend/api/10_vault/post-vault.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -86,7 +86,7 @@ $routes = [
     ],
 
     '/api/vault/put' => [
-        'view' => 'src/backend/api/10_vault/put-vault.php',
+        'view' => '../src/backend/api/10_vault/put-vault.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -95,7 +95,7 @@ $routes = [
 
     // API COMPTABILITAT ERP
     '/api/comptabilitat/get/{slug}' => [
-        'view' => 'src/backend/api/02_comptabilitat/get-comptabilitat.php',
+        'view' => '../src/backend/api/02_comptabilitat/get-comptabilitat.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -103,7 +103,7 @@ $routes = [
     ],
 
     '/api/comptabilitat/post/{slug}' => [
-        'view' => 'src/backend/api/02_comptabilitat/post-comptabilitat.php',
+        'view' => '../src/backend/api/02_comptabilitat/post-comptabilitat.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -111,7 +111,7 @@ $routes = [
     ],
 
     '/api/comptabilitat/put/{slug}' => [
-        'view' => 'src/backend/api/02_comptabilitat/put-comptabilitat.php',
+        'view' => '../src/backend/api/02_comptabilitat/put-comptabilitat.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -119,7 +119,7 @@ $routes = [
     ],
 
     '/api/comptabilitat/delete/{slug}' => [
-        'view' => 'src/backend/api/02_comptabilitat/delete-comptabilitat.php',
+        'view' => '../src/backend/api/02_comptabilitat/delete-comptabilitat.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -127,7 +127,7 @@ $routes = [
     ],
 
     '/api/comptabilitat/pdf/{slug}/{id}/{lang}' => [
-        'view' => 'src/backend/api/02_comptabilitat/generate_pdf.php',
+        'view' => '../src/backend/api/02_comptabilitat/generate_pdf.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -136,7 +136,7 @@ $routes = [
 
     // 08. BIBLIOTECA
     '/api/biblioteca/get/{slug}' => [
-        'view' => 'src/backend/api/08_biblioteca_llibres/get-biblioteca.php',
+        'view' => '../src/backend/api/08_biblioteca_llibres/get-biblioteca.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -144,7 +144,7 @@ $routes = [
     ],
 
     '/api/biblioteca/put/{slug}' => [
-        'view' => 'src/backend/api/08_biblioteca_llibres/put-biblioteca.php',
+        'view' => '../src/backend/api/08_biblioteca_llibres/put-biblioteca.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -152,7 +152,7 @@ $routes = [
     ],
 
     '/api/biblioteca/post/{slug}' => [
-        'view' => 'src/backend/api/08_biblioteca_llibres/post-biblioteca.php',
+        'view' => '../src/backend/api/08_biblioteca_llibres/post-biblioteca.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -160,7 +160,7 @@ $routes = [
     ],
 
     '/api/biblioteca/delete' => [
-        'view' => 'src/backend/api/08_biblioteca_llibres/delete-biblioteca.php',
+        'view' => '../src/backend/api/08_biblioteca_llibres/delete-biblioteca.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -170,7 +170,7 @@ $routes = [
 
     // BD CINEMA
     '/api/cinema/get/{slug}' => [
-        'view' => 'src/backend/api/11_cinema/get-cinema.php',
+        'view' => '../src/backend/api/11_cinema/get-cinema.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -178,7 +178,7 @@ $routes = [
     ],
 
     '/api/cinema/post' => [
-        'view' => 'src/backend/api/11_cinema/post-cinema.php',
+        'view' => '../src/backend/api/11_cinema/post-cinema.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -186,7 +186,7 @@ $routes = [
     ],
 
     '/api/cinema/put' => [
-        'view' => 'src/backend/api/11_cinema/put-cinema.php',
+        'view' => '../src/backend/api/11_cinema/put-cinema.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -195,7 +195,7 @@ $routes = [
 
     // BD AUXILIARS
     '/api/auxiliars/post/imatges' => [
-        'view' => 'src/backend/api/100_auxiliars/image-upload-process-form.php',
+        'view' => '../src/backend/api/100_auxiliars/image-upload-process-form.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -204,7 +204,7 @@ $routes = [
 
     // BD AUXILIARS
     '/api/auxiliars/get/' => [
-        'view' => 'src/backend/api/100_auxiliars/get-auxiliars.php',
+        'view' => '../src/backend/api/100_auxiliars/get-auxiliars.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -212,7 +212,7 @@ $routes = [
     ],
 
     '/api/auxiliars/get/{slug}' => [
-        'view' => 'src/backend/api/100_auxiliars/get-auxiliars.php',
+        'view' => '../src/backend/api/100_auxiliars/get-auxiliars.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -221,7 +221,7 @@ $routes = [
 
     // XARXES SOCIALS
     '/api/xarxes-socials/post/bluesky' => [
-        'view' => 'src/backend/api/12_xarxes_socials/post-bluesky.php',
+        'view' => '../src/backend/api/12_xarxes_socials/post-bluesky.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -229,7 +229,7 @@ $routes = [
     ],
 
     '/api/xarxes-socials/get/mastodont' => [
-        'view' => 'src/backend/api/12_xarxes_socials/get-mastodon.php',
+        'view' => '../src/backend/api/12_xarxes_socials/get-mastodon.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -237,7 +237,7 @@ $routes = [
     ],
 
     '/api/xarxes-socials/post/mastodont' => [
-        'view' => 'src/backend/api/12_xarxes_socials/post-mastodont.php',
+        'view' => '../src/backend/api/12_xarxes_socials/post-mastodont.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -245,7 +245,7 @@ $routes = [
     ],
 
     '/api/xarxes-socials/post/likes-mastodont' => [
-        'view' => 'src/backend/api/12_xarxes_socials/post-like-mastodont.php',
+        'view' => '../src/backend/api/12_xarxes_socials/post-like-mastodont.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -253,7 +253,7 @@ $routes = [
     ],
 
     '/api/xarxes-socials/post/blog' => [
-        'view' => 'src/backend/api/12_xarxes_socials/post-blog.php',
+        'view' => '../src/backend/api/12_xarxes_socials/post-blog.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -262,7 +262,7 @@ $routes = [
 
     // LECTOR RSS
     '/api/lector-rss/get' => [
-        'view' => 'src/backend/api/14_lector_rss/get-lector.php',
+        'view' => '../src/backend/api/14_lector_rss/get-lector.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -271,7 +271,7 @@ $routes = [
 
     // SITEMAP
     '/api/sitemap/get' => [
-        'view' => 'src/backend/api/15_sitemap/get-sitemap.php',
+        'view' => '../src/backend/api/15_sitemap/get-sitemap.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -280,7 +280,7 @@ $routes = [
 
     // HISTORIA OBERTA
     '/api/historia/migracio' => [
-        'view' => 'src/backend/api/16_historia_oberta/migracio.php',
+        'view' => '../src/backend/api/16_historia_oberta/migracio.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -288,7 +288,7 @@ $routes = [
     ],
 
     '/api/historia/get/{slug}' => [
-        'view' => 'src/backend/api/16_historia_oberta/get-historia.php',
+        'view' => '../src/backend/api/16_historia_oberta/get-historia.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -296,7 +296,7 @@ $routes = [
     ],
 
     '/api/historia/post/{slug}' => [
-        'view' => 'src/backend/api/16_historia_oberta/post-historia.php',
+        'view' => '../src/backend/api/16_historia_oberta/post-historia.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -304,7 +304,7 @@ $routes = [
     ],
 
     '/api/historia/json' => [
-        'view' => 'src/backend/api/16_historia_oberta/post-historia-json.php',
+        'view' => '../src/backend/api/16_historia_oberta/post-historia-json.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -312,7 +312,7 @@ $routes = [
     ],
 
     '/api/historia/put/{slug}' => [
-        'view' => 'src/backend/api/16_historia_oberta/put-historia.php',
+        'view' => '../src/backend/api/16_historia_oberta/put-historia.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -321,7 +321,7 @@ $routes = [
 
     // AGENDA CONTACTES
     '/api/contactes/get' => [
-        'view' => 'src/backend/api/contactes/get-contactes.php',
+        'view' => '../src/backend/api/contactes/get-contactes.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -330,7 +330,7 @@ $routes = [
 
     // 09. Adreces interes
     '/api/adreces/get/{slug}' => [
-        'view' => 'src/backend/api/09_adreces/get-link.php',
+        'view' => '../src/backend/api/09_adreces/get-link.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -338,7 +338,7 @@ $routes = [
     ],
 
     '/api/adreces/post/{slug}' => [
-        'view' => 'src/backend/api/09_adreces/post-link.php',
+        'view' => '../src/backend/api/09_adreces/post-link.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -346,7 +346,7 @@ $routes = [
     ],
 
     '/api/adreces/put/{slug}' => [
-        'view' => 'src/backend/api/09_adreces/put-link.php',
+        'view' => '../src/backend/api/09_adreces/put-link.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -355,7 +355,7 @@ $routes = [
 
     // 04. Persones
     '/api/persones/get/{slug}' => [
-        'view' => 'src/backend/api/04_persones/get-persones.php',
+        'view' => '../src/backend/api/04_persones/get-persones.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -363,7 +363,7 @@ $routes = [
     ],
 
     '/api/persones/post' => [
-        'view' => 'src/backend/api/04_persones/post-persones.php',
+        'view' => '../src/backend/api/04_persones/post-persones.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -371,7 +371,7 @@ $routes = [
     ],
 
     '/api/persones/put' => [
-        'view' => 'src/backend/api/04_persones/put-persones.php',
+        'view' => '../src/backend/api/04_persones/put-persones.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -379,7 +379,7 @@ $routes = [
     ],
 
     '/api/persones/delete/{slug}' => [
-        'view' => 'src/backend/api/04_persones/delete-persones.php',
+        'view' => '../src/backend/api/04_persones/delete-persones.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -389,7 +389,7 @@ $routes = [
 
     // 17. VIATGES
     '/api/viatges/get/{slug}' => [
-        'view' => 'src/backend/api/17_viatges/get-viatges.php',
+        'view' => '../src/backend/api/17_viatges/get-viatges.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -397,7 +397,7 @@ $routes = [
     ],
 
     '/api/viatges/post/{slug}' => [
-        'view' => 'src/backend/api/17_viatges/post-viatges.php',
+        'view' => '../src/backend/api/17_viatges/post-viatges.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -405,7 +405,7 @@ $routes = [
     ],
 
     '/api/viatges/put/{slug}' => [
-        'view' => 'src/backend/api/17_viatges/put-viatges.php',
+        'view' => '../src/backend/api/17_viatges/put-viatges.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -414,7 +414,7 @@ $routes = [
 
     // Blog
     '/api/blog/get/{slug}' => [
-        'view' => 'src/backend/api/13_blog/get-blog.php',
+        'view' => '../src/backend/api/13_blog/get-blog.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -422,7 +422,7 @@ $routes = [
     ],
 
     '/api/blog/post' => [
-        'view' => 'src/backend/api/13_blog/post-blog.php',
+        'view' => '../src/backend/api/13_blog/post-blog.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -430,7 +430,7 @@ $routes = [
     ],
 
     '/api/blog/put' => [
-        'view' => 'src/backend/api/13_blog/put-blog.php',
+        'view' => '../src/backend/api/13_blog/put-blog.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -438,7 +438,7 @@ $routes = [
     ],
 
     '/api/radio/get' => [
-        'view' => 'src/backend/api/19_radio/get-radio.php',
+        'view' => '../src/backend/api/19_radio/get-radio.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -447,7 +447,7 @@ $routes = [
 
     // Curriculum
     '/api/curriculum/get/{slug}' => [
-        'view' => 'src/backend/api/20_curriculum/get-cv.php',
+        'view' => '../src/backend/api/20_curriculum/get-cv.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -455,7 +455,7 @@ $routes = [
     ],
 
     '/api/curriculum/post/{slug}' => [
-        'view' => 'src/backend/api/20_curriculum/post-cv.php',
+        'view' => '../src/backend/api/20_curriculum/post-cv.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -463,7 +463,7 @@ $routes = [
     ],
 
     '/api/curriculum/put/{slug}' => [
-        'view' => 'src/backend/api/20_curriculum/put-cv.php',
+        'view' => '../src/backend/api/20_curriculum/put-cv.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -472,7 +472,7 @@ $routes = [
 
     // Generador PDF Curriculum
     '/api/curriculum/pdf' => [
-        'view' => 'src/backend/api/20_curriculum/pdf-cv.php',
+        'view' => '../src/backend/api/20_curriculum/pdf-cv.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -481,7 +481,7 @@ $routes = [
 
     // Ciutats
     '/api/ciutats/get/{slug}' => [
-        'view' => 'src/backend/api/100_auxiliars/ciutats/get-ciutats.php',
+        'view' => '../src/backend/api/100_auxiliars/ciutats/get-ciutats.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -489,7 +489,7 @@ $routes = [
     ],
 
     '/api/ciutats/post' => [
-        'view' => 'src/backend/api/100_auxiliars/ciutats/post-ciutats.php',
+        'view' => '../src/backend/api/100_auxiliars/ciutats/post-ciutats.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -497,7 +497,7 @@ $routes = [
     ],
 
     '/api/ciutats/put' => [
-        'view' => 'src/backend/api/100_auxiliars/ciutats/put-ciutats.php',
+        'view' => '../src/backend/api/100_auxiliars/ciutats/put-ciutats.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -506,7 +506,7 @@ $routes = [
 
     // 21 Agenda esdeveniments
     '/api/agenda/get/{slug}' => [
-        'view' => 'src/backend/api/21_agenda/get-agenda.php',
+        'view' => '../src/backend/api/21_agenda/get-agenda.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -514,7 +514,7 @@ $routes = [
     ],
 
     '/api/agenda/post' => [
-        'view' => 'src/backend/api/21_agenda/post-agenda.php',
+        'view' => '../src/backend/api/21_agenda/post-agenda.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -522,7 +522,7 @@ $routes = [
     ],
 
     '/api/agenda/put/{slug}' => [
-        'view' => 'src/backend/api/21_agenda/put-agenda.php',
+        'view' => '../src/backend/api/21_agenda/put-agenda.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -530,7 +530,7 @@ $routes = [
     ],
 
     '/api/agenda/delete/{slug}' => [
-        'view' => 'src/backend/api/21_agenda/delete-agenda.php',
+        'view' => '../src/backend/api/21_agenda/delete-agenda.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -539,7 +539,7 @@ $routes = [
 
     // CRON
     '/api/cron/agenda-dia' => [
-        'view' => 'src/backend/api/22_cron/cron-agenda-dia.php',
+        'view' => '../src/backend/api/22_cron/cron-agenda-dia.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -548,7 +548,7 @@ $routes = [
 
     // PROJECTES
     '/api/projectes/get/{slug}' => [
-        'view' => 'src/backend/api/06_projectes/get-projectes.php',
+        'view' => '../src/backend/api/06_projectes/get-projectes.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -556,7 +556,7 @@ $routes = [
     ],
 
     '/api/projectes/post/{slug}' => [
-        'view' => 'src/backend/api/06_projectes/post-projectes.php',
+        'view' => '../src/backend/api/06_projectes/post-projectes.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
@@ -564,7 +564,7 @@ $routes = [
     ],
 
     '/api/projectes/put/{slug}' => [
-        'view' => 'src/backend/api/06_projectes/put-projectes.php',
+        'view' => '../src/backend/api/06_projectes/put-projectes.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,

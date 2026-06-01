@@ -37,7 +37,7 @@ function renderTable(items: HabilitatItem[]): string {
       const iconUrl = resolveImg(it.nameImg);
       const iconHTML = iconUrl ? `<img src="${esc(iconUrl)}" alt="" width="22" height="22" style="object-fit:contain;vertical-align:-3px">` : `<span class="text-muted">—</span>`;
 
-      const editHref = `https://elliot.cat/gestio/curriculum/modifica-habilitat/${it.id}`;
+      const editHref = `/gestio/curriculum/modifica-habilitat/${it.id}`;
 
       return `
         <tr>

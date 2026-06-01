@@ -8,10 +8,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": false,
-    "outDir": "./dist",
+    "outDir": "./public/dist",
     "rootDir": "./src/",
     "sourceMap": false,
-
+    "types": ["node"],
     "forceConsistentCasingInFileNames": true,
     "typeRoots": ["./node_modules/@types", "src/frontend/types"]
       },

@@ -9,13 +9,10 @@ $id = $params['id'];
   <h5 id="fitxaNomCognoms"></h5>
 
   <div class="alert alert-success" id="updateContacteMessageOk" style="display:none" role="alert">
-    <h4 class="alert-heading"><strong><?php echo ADD_OK_MESSAGE_SHORT; ?></h4></strong>
-    <h6><?php echo ADD_OK_MESSAGE; ?></h6>
   </div>
 
   <div class="alert alert-danger" id="updateContacteMessageErr" style="display:none" role="alert">
-    <h4 class="alert-heading"><strong><?php echo ERROR_TYPE_MESSAGE_SHORT; ?></h4></strong>
-    <h6><?php echo ERROR_TYPE_MESSAGE; ?></h6>
+
   </div>
 
   <form method="POST" action="" id="modalFormUpdateLink" class="row g-3">
@@ -259,7 +256,3 @@ pais */
     });
   }
 </script>
-
-<?php
-# footer
-require_once(APP_ROOT . '/public/01_inici/footer.php');

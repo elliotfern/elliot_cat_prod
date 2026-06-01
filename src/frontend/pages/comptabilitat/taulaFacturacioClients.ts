@@ -96,7 +96,7 @@ export async function taulaFacturacioClients(id: string) {
       header: 'Num',
       field: 'numero_factura',
       render: (_: unknown, row: Factura) =>
-        `<a id="${row.id}" href="${DOMAIN_WEB}/gestio/comptabilitat/fitxa-factura-client/${row.id}">
+        `<a id="${row.id}" href="/gestio/comptabilitat/fitxa-factura-client/${row.id}">
           ${row.numero_factura}
         </a>`,
     },
@@ -157,7 +157,7 @@ export async function taulaFacturacioClients(id: string) {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Factura) => `
-        <a href="https://${window.location.hostname}/gestio/comptabilitat/modifica-factura/${row.id}">
+        <a href="/gestio/comptabilitat/modifica-factura/${row.id}">
           <button class="btn-petit">Modifica</button>
         </a>`,
     });

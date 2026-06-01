@@ -1,6 +1,7 @@
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
+import { API_BASE } from '../../utils/urls';
 
 interface SerieTVFitxa {
   status: string;
@@ -41,7 +42,7 @@ let actorsList: { id: string; nomComplet: string }[] = [];
 
 async function loadActors() {
   try {
-    const response = await fetch('https://elliot.cat/api/cinema/get/actors', {
+    const response = await fetch(`${API_BASE}/cinema/get/actors`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -158,7 +159,7 @@ export async function formSerie(isUpdate: boolean, idUuid?: string) {
   await actorsPromise;
 
   if (idUuid && isUpdate) {
-    const response = await fetch(`https://elliot.cat/api/cinema/get/serieIntranet?id=${idUuid}`);
+    const response = await fetch(`${API_BASE}/cinema/get/serieIntranet?id=${idUuid}`);
 
     const responseData = await response.json();
 
@@ -201,7 +202,7 @@ export async function formSerie(isUpdate: boolean, idUuid?: string) {
       event.preventDefault();
 
       try {
-        const result = await transmissioDadesDB(event, 'POST', 'formSerie', 'https://elliot.cat/api/cinema/put?serie');
+        const result = await transmissioDadesDB(event, 'POST', 'formSerie', `${API_BASE}/cinema/put?serie`);
 
         console.log('RESULTADO:', result);
       } catch (e) {
@@ -221,7 +222,7 @@ export async function formSerie(isUpdate: boolean, idUuid?: string) {
     createActorSelect();
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formSerie', 'https://elliot.cat/api/cinema/post?serie', true);
+      transmissioDadesDB(event, 'POST', 'formSerie', `${API_BASE}/cinema/post?serie`, true);
     });
   }
 

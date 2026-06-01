@@ -30,8 +30,8 @@ function renderTable(rows: EducacioCv[]): string {
       const localitzacio = [r.ciutat, r.pais_ca].filter(Boolean).join(', ');
       const periode = `${fmtDate(r.data_inici)} - ${fmtDate(r.data_fi) || 'actualitat'}`;
 
-      const editHref = `https://elliot.cat/gestio/curriculum/modifica-educacio/${r.id}`;
-      const detailHref = `https://elliot.cat/gestio/curriculum/perfil-educacio-i18n/${r.id}`;
+      const editHref = `/gestio/curriculum/modifica-educacio/${r.id}`;
+      const detailHref = `/gestio/curriculum/perfil-educacio-i18n/${r.id}`;
 
       return `
         <tr>

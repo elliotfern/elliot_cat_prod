@@ -143,6 +143,8 @@ if ($slug === "esdevenimentId") {
     $from     = $_GET['from'] ?? null;
     $to       = $_GET['to'] ?? null;
 
+    error_log(json_encode([$from, $to]));
+
     if ($usuariId <= 0 || !$from || !$to) {
         Response::error(
             MissatgesAPI::error('validacio'),

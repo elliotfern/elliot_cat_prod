@@ -50,7 +50,7 @@ function renderPressupost(pressupost: Pressupost) {
           </span>
 
            <a
-          href="https://elliot.cat/gestio/comptabilitat/modifica-pressupost/${pressupost.id}"
+          href="/gestio/comptabilitat/modifica-pressupost/${pressupost.id}"
           class="btn btn-secondary btn-sm">
           Modifica pressupost
         </a>

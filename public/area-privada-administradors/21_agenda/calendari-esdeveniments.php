@@ -10,7 +10,7 @@
             <div id="isAdminButton" style="display: none;">
                 <?php if (isUserAdmin()) : ?>
                     <p>
-                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['agenda']; ?>/nou-esdeveniment'" class="button btn-gran btn-secondari">Nou esdeveniment</button>
+                        <button onclick="window.location.href='<?php echo '/gestio' . $url['agenda']; ?>/nou-esdeveniment'" class="button btn-gran btn-secondari">Nou esdeveniment</button>
 
                     </p>
                 <?php endif; ?>

@@ -1,19 +1,6 @@
 <?php
 
-// Cargar librerías externas
-require_once __DIR__ . '/../../../vendor/autoload.php';
-
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../../');
-$dotenv->load();
-require_once __DIR__ . '/../Config/connection.php';
-require_once __DIR__ . '/../Config/funcions.php';
-
 // Definir constantes de configuración
-define('BASE_URL', $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']);
-define('APP_ROOT', $_SERVER['DOCUMENT_ROOT']);
-
-define('APP_DOMAIN', 'https://elliot.cat');
-define('APP_MEDIA', 'https://media.elliot.cat');
 define('IMG_ROOT', '/home/epgylzqu/media.elliotfern.com/img');
 
 define('APP_GESTIO',  "/gestio");
@@ -23,17 +10,9 @@ $base_url = '';
 
 $isAdmin = isUserAdmin();
 
-if ($isAdmin) {
-    $base_url = BASE_URL . APP_GESTIO;
-    define("APP_INTRANET", $base_url);
-} else {
-    $base_url = BASE_URL;
-    define("APP_INTRANET", $base_url);
-}
-
 // Variables del directori de fitxers
-define('APP_INTRANET_DIR',  "public/area-privada-administradors/");
-define('APP_AREA_USUARIS_DIR',  "public/area-privada-usuaris/");
+define('APP_INTRANET_DIR',  "./area-privada-administradors/");
+define('APP_AREA_USUARIS_DIR',  "./area-privada-usuaris/");
 
 define('APP_HOMEPAGE_DIR',  "01_homepage/");
 define('APP_COMPTABILITAT_DIR',  "02_comptabilitat/");

@@ -3,6 +3,7 @@ import { Llibre } from '../../types/Llibre';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
+import { API_BASE } from '../../utils/urls';
 
 type Autor = {
   id: string;
@@ -122,7 +123,7 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
 
     form.addEventListener('submit', function (event) {
       // Lo mandamos por POST porque PUT no funciona bien con ficheros
-      transmissioDadesDB(event, 'POST', 'formLlibre', `https://elliot.cat/api/biblioteca/put/llibre`);
+      transmissioDadesDB(event, 'POST', 'formLlibre', `${API_BASE}/biblioteca/put/llibre`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nou Llibre</h2>`;
@@ -137,7 +138,7 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
     createAuthorSelect();
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formLlibre', 'https://elliot.cat/api/biblioteca/post/llibre', true);
+      transmissioDadesDB(event, 'POST', 'formLlibre', `${API_BASE}/biblioteca/post/llibre`, true);
     });
   }
 

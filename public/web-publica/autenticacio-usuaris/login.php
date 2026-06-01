@@ -38,7 +38,7 @@
       <hr class="my-4">
 
       <a class="d-block text-center small"
-        href="<?php echo BASE_URL; ?>/nou-usuari">
+        href="nou-usuari">
         No estàs registrat? Crea un nou usuari
       </a>
 

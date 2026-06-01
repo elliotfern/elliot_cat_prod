@@ -1,6 +1,7 @@
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
+import { API_BASE } from '../../utils/urls';
 
 interface SerieTVFitxa {
   status: string;
@@ -41,7 +42,7 @@ let actorsList: { id: string; nomComplet: string }[] = [];
 
 async function loadActors() {
   try {
-    const response = await fetch('https://elliot.cat/api/cinema/get/actors', {
+    const response = await fetch(`${API_BASE}/cinema/get/actors`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
@@ -158,7 +159,7 @@ export async function formPelicula(isUpdate: boolean, idUuid?: string) {
   await actorsPromise;
 
   if (idUuid && isUpdate) {
-    const response = await fetch(`https://elliot.cat/api/cinema/get/peliculaIntranet?id=${idUuid}`);
+    const response = await fetch(`${API_BASE}/cinema/get/peliculaIntranet?id=${idUuid}`);
 
     const responseData = await response.json();
 
@@ -198,7 +199,7 @@ export async function formPelicula(isUpdate: boolean, idUuid?: string) {
 
     form.addEventListener('submit', async function (event) {
       event.preventDefault();
-      transmissioDadesDB(event, 'POST', 'formPelicula', 'https://elliot.cat/api/cinema/put?pelicula');
+      transmissioDadesDB(event, 'POST', 'formPelicula', `${API_BASE}/cinema/put?pelicula`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nova pel·lícula</h2>`;
@@ -214,7 +215,7 @@ export async function formPelicula(isUpdate: boolean, idUuid?: string) {
 
     form.addEventListener('submit', function (event) {
       event.preventDefault();
-      transmissioDadesDB(event, 'POST', 'formPelicula', 'https://elliot.cat/api/cinema/post?pelicula', true);
+      transmissioDadesDB(event, 'POST', 'formPelicula', `${API_BASE}/cinema/post?pelicula`, true);
     });
   }
 

@@ -3,6 +3,7 @@ import { EspaiVisitat } from '../../types/Espai';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
+import { API_BASE } from '../../utils/urls';
 
 export async function formEspaiVisitat(isUpdate: boolean, espai?: string) {
   const form = document.getElementById('formEspai');
@@ -37,14 +38,14 @@ export async function formEspaiVisitat(isUpdate: boolean, espai?: string) {
     }
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formEspai', `https://elliot.cat/api/viatges/put/espaiVisitat`);
+      transmissioDadesDB(event, 'PUT', 'formEspai', `${API_BASE}/viatges/put/espaiVisitat`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nou Espai visitat</h2>`;
     btnSubmit.textContent = 'Inserir dades';
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formEspai', 'https://elliot.cat/api/viatges/post/espaiVisitat', true);
+      transmissioDadesDB(event, 'POST', 'formEspai', `${API_BASE}/viatges/post/espaiVisitat`, true);
     });
   }
 

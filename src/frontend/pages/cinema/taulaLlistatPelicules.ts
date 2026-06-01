@@ -1,35 +1,22 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-// import { formatData } from '../../utils/formataData';
-import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
 export async function taulaLlistatPelicules() {
   const isAdmin = await getIsAdmin();
-  let slug: string = '';
-  let gestioUrl: string = '';
 
-  if (isAdmin) {
-    slug = pageType[3];
-    gestioUrl = '/gestio';
-  } else {
-    slug = pageType[2];
-  }
   const columns: TaulaDinamica<Pelicula>[] = [
     {
       header: 'Pel·lícula',
       field: 'pelicula',
-      render: (_: unknown, row: Pelicula) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/fitxa-pelicula/${row.slug}">${row.pelicula}</a>`,
+      render: (_: unknown, row: Pelicula) => `<a id="${row.id}" title="Show movie details" href="/gestio/cinema/fitxa-pelicula/${row.slug}">${row.pelicula}</a>`,
     },
     { header: 'Any', field: 'any' },
     {
       header: 'Director/a',
       field: 'cognoms',
       render: (_: unknown, row: Pelicula) => {
-        return `<a id="${row.id}" title="Fitxa director" href="https://${window.location.hostname}/estio/base-dades-persones/fitxa-persona/${row.director_slug}">${row.nom} ${row.cognoms}</a>`;
+        return `<a id="${row.id}" title="Fitxa director" href="/gestio/base-dades-persones/fitxa-persona/${row.director_slug}">${row.nom} ${row.cognoms}</a>`;
       },
     },
     { header: 'País', field: 'pais_ca' },
@@ -40,12 +27,12 @@ export async function taulaLlistatPelicules() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Pelicula) => `<a id="${row.id}" title="Show movie details" href="https://${window.location.hostname}${gestioUrl}/cinema/modifica-pelicula/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Pelicula) => `<a id="${row.id}" title="Show movie details" href="/gestio/cinema/modifica-pelicula/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/cinema/get/pelicules`,
+    url: `/cinema/get/pelicules`,
     containerId: 'taulaLlistatPelicules',
     columns,
     filterKeys: ['nom', 'cognoms', 'pelicula'],

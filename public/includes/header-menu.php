@@ -2,7 +2,7 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
 
-            <a class="navbar-brand fw-bold text-dark text-decoration-none" href="/ca/homepage" data-route="/homepage">
+            <a class="navbar-brand fw-bold text-dark text-decoration-none" href="/" data-route="/">
                 Elliot Fernandez
             </a>
 
@@ -24,36 +24,23 @@
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/ca/homepage" data-route="/homepage">Inici</a>
+                        <a class="nav-link" href="/" data-route="/">Inici</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/ca/sobre-autor" data-route="/sobre-autor">Sobre l'autor</a>
+                        <a class="nav-link" href="/sobre-autor" data-route="/sobre-autor">Sobre l'autor</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/ca/biblioteca" data-route="/biblioteca">Biblioteca</a>
+                        <a class="nav-link" href="/biblioteca" data-route="/biblioteca">Biblioteca</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/ca/historia" data-route="/historia">Història</a>
+                        <a class="nav-link" href="/historia" data-route="/historia">Història</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/ca/blog" data-route="/blog">Blog</a>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="languagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Idiomes
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languagesDropdown">
-                            <li><a class="dropdown-item" href="#" data-lang="ca">Català</a></li>
-                            <li><a class="dropdown-item" href="#" data-lang="en">Anglès</a></li>
-                            <li><a class="dropdown-item" href="#" data-lang="es">Castellà</a></li>
-                            <li><a class="dropdown-item" href="#" data-lang="it">Italià</a></li>
-                            <li><a class="dropdown-item" href="#" data-lang="fr">Francès</a></li>
-                        </ul>
+                        <a class="nav-link" href="/blog" data-route="/blog">Blog</a>
                     </li>
                 </ul>
 
@@ -68,15 +55,15 @@
 <?php if (isUserAdmin()) : ?>
     <nav id="intranetNav" class="navbar navbar-light bg-light border-bottom">
         <div class="container-fluid">
-            <a class="navbar-brand fw-semibold" href="<?= APP_INTRANET ?>">Intranet</a>
+            <a class="navbar-brand fw-semibold" href="/gestio">Intranet</a>
 
             <!-- Favoritos (desktop) -->
             <div class="d-none d-lg-flex gap-2">
-                <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET ?>">Inici</a>
-                <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET . $url['projectes'] ?>">Projectes</a>
-                <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET . $url['programacio'] ?>">Programació</a>
-                <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET . $url['comptabilitat'] ?>">Comptabilitat</a>
-                <a class="btn btn-sm btn-outline-secondary" href="<?= APP_INTRANET . $url['agenda'] ?>">Agenda</a>
+                <a class="btn btn-sm btn-outline-secondary" href="/gestio">Inici</a>
+                <a class="btn btn-sm btn-outline-secondary" href="/gestio<?= $url['projectes'] ?>">Projectes</a>
+                <a class="btn btn-sm btn-outline-secondary" href="/gestio<?= $url['programacio'] ?>">Programació</a>
+                <a class="btn btn-sm btn-outline-secondary" href="/gestio<?= $url['comptabilitat'] ?>">Comptabilitat</a>
+                <a class="btn btn-sm btn-outline-secondary" href="/gestio<?= $url['agenda'] ?>">Agenda</a>
             </div>
 
             <div class="d-flex gap-2 align-items-center">
@@ -103,39 +90,39 @@
             <!-- Aquí ya pondremos TODOS tus enlaces agrupados -->
             <div class="list-group mb-3">
                 <div class="small text-muted mb-2">Gestió</div>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['comptabilitat'] ?>">Comptabilitat i clients</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['usuaris'] ?>">Gestió usuaris</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['projectes'] ?>">Gestor projectes</a>
+                <a class="list-group-item list-group-item-action" href="">Comptabilitat i clients</a>
+                <a class="list-group-item list-group-item-action" href="">Gestió usuaris</a>
+                <a class="list-group-item list-group-item-action" href="">Gestor projectes</a>
             </div>
 
             <div class="list-group mb-3">
                 <div class="small text-muted mb-2">CRM / Contactes</div>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['persones'] ?>">Persones</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['contactes'] ?>">Agenda contactes</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['agenda'] ?>">Agenda</a>
+                <a class="list-group-item list-group-item-action" href="">Persones</a>
+                <a class="list-group-item list-group-item-action" href="">Agenda contactes</a>
+                <a class="list-group-item list-group-item-action" href="">Agenda</a>
             </div>
 
             <div class="list-group mb-3">
                 <div class="small text-muted mb-2">Contingut</div>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['blog'] ?>">Blog</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['rss'] ?>">Lector RSS</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['historia'] ?>">Historia</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['biblioteca'] ?>">Biblioteca</a>
+                <a class="list-group-item list-group-item-action" href="">Blog</a>
+                <a class="list-group-item list-group-item-action" href="">Lector RSS</a>
+                <a class="list-group-item list-group-item-action" href="">Historia</a>
+                <a class="list-group-item list-group-item-action" href="">Biblioteca</a>
             </div>
 
             <div class="list-group mb-3">
                 <div class="small text-muted mb-2">Eines</div>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['adreces'] ?>">Links</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['vault'] ?>">Claus</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['auxiliars'] ?>">Auxiliars</a>
+                <a class="list-group-item list-group-item-action" href="">Links</a>
+                <a class="list-group-item list-group-item-action" href="">Claus</a>
+                <a class="list-group-item list-group-item-action" href="">Auxiliars</a>
             </div>
 
             <div class="list-group">
                 <div class="small text-muted mb-2">Oci</div>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['cinema'] ?>">Cinema</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['radio'] ?>">Ràdio</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['viatges'] ?>">Viatges</a>
-                <a class="list-group-item list-group-item-action" href="<?= APP_INTRANET . $url['xarxes'] ?>">Xarxes socials</a>
+                <a class="list-group-item list-group-item-action" href="">Cinema</a>
+                <a class="list-group-item list-group-item-action" href="">Ràdio</a>
+                <a class="list-group-item list-group-item-action" href="">Viatges</a>
+                <a class="list-group-item list-group-item-action" href="">Xarxes socials</a>
             </div>
 
         </div>

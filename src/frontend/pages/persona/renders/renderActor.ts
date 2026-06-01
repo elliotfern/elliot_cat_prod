@@ -90,7 +90,7 @@ export async function renderActor(persona: PersonaView) {
               <tr>
 
                 <td>
-                  <a href="https://elliot.cat/gestio/cinema/fitxa-pelicula/${p.slug}">
+                  <a href="/gestio/cinema/fitxa-pelicula/${p.slug}">
                     ${p.titol}
                   </a>
                 </td>
@@ -101,7 +101,7 @@ export async function renderActor(persona: PersonaView) {
 
                 <td class="text-end">
                   <a
-                    href="https://elliot.cat/gestio/cinema/modifica-pelicula/${p.slug}"
+                    href="/gestio/cinema/modifica-pelicula/${p.slug}"
                     class="btn btn-sm btn-outline-warning"
                   >
                     Modifica
@@ -151,7 +151,7 @@ export async function renderActor(persona: PersonaView) {
                   <tr>
 
                     <td>
-                      <a href="https://elliot.cat/gestio/cinema/fitxa-serie/${s.slug}">
+                      <a href="/gestio/cinema/fitxa-serie/${s.slug}">
                         ${s.titol}
                       </a>
                     </td>
@@ -162,7 +162,7 @@ export async function renderActor(persona: PersonaView) {
 
                     <td class="text-end">
                       <a
-                        href="https://elliot.cat/gestio/cinema/modifica-serie/${s.slug}"
+                        href="/gestio/cinema/modifica-serie/${s.slug}"
                         class="btn btn-sm btn-outline-warning"
                       >
                         Modifica

@@ -6,21 +6,21 @@ class Url
 {
     public static function to(string $key): string
     {
-        return AppDomains::MAIN . AppRoutes::get($key);
+        return AppDomains::main() . AppRoutes::get($key);
     }
 
     public static function intranet(string $key): string
     {
-        return AppDomains::MAIN . AppRoutes::intranet($key);
+        return AppDomains::main() . AppRoutes::intranet($key);
     }
 
     public static function media(string $path): string
     {
-        return AppDomains::MEDIA . '/' . ltrim($path, '/');
+        return AppDomains::media() . '/' . ltrim($path, '/');
     }
 
     public static function api(string $path): string
     {
-        return AppDomains::API . '/' . ltrim($path, '/');
+        return AppDomains::api() . '/' . ltrim($path, '/');
     }
 }

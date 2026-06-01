@@ -1,24 +1,11 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { formatNaixementEdat } from '../../utils/formataData';
-import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Contacte } from '../../types/Contacte';
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
 export async function taulaLlistatContactes() {
   const isAdmin = await getIsAdmin();
-  let slug: string = '';
-  let gestioUrl: string = '';
-
-  if (isAdmin) {
-    slug = pageType[3];
-    gestioUrl = '/gestio';
-  } else {
-    slug = pageType[2];
-  }
 
   const columns: TaulaDinamica<Contacte>[] = [
     {
@@ -81,12 +68,12 @@ export async function taulaLlistatContactes() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Contacte) => `<a id="${row.idTema}" title="Modifica" href="https://${window.location.hostname}${gestioUrl}/agenda-contactes/modifica-contacte/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Contacte) => `<a id="${row.idTema}" title="Modifica" href="/gestio/agenda-contactes/modifica-contacte/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
     });
   }
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/contactes/get/?contactes`,
+    url: `/contactes/get/?contactes`,
     containerId: 'taulaLlistatContactes',
     columns,
     filterKeys: ['nom', 'cognoms'],

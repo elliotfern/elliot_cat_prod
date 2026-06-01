@@ -8,7 +8,6 @@ concurrency:
   group: deploy-main
   cancel-in-progress: true
 
-  # Forzar Node.js 24 para todas las actions
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -21,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2) PHP Setup, composer y tests
+      # 2) PHP Setup
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -30,16 +29,19 @@ jobs:
           coverage: none
           cache: composer
 
+      # 3) Install PHP dependencies (CI BUILD)
       - name: Install PHP dependencies
-        run: composer install --prefer-dist --no-interaction
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
+      # 4) PHP Syntax Check
       - name: PHP Syntax Check
         run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
 
+      # 5) Run tests
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --colors=always
 
-      # 2) Node setup
+      # 6) Node setup
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -49,25 +51,23 @@ jobs:
       - name: Install dependencies (npm)
         run: npm ci
 
-      # 3) Build frontend
+      # 7) Build frontend
       - name: Build frontend assets
         run: npm run build
 
-      # 4) Write APP_VERSION (version.txt)
+      # 8) Write version file
       - name: Write APP_VERSION file
         run: |
           echo "${GITHUB_SHA}" > public/version.txt
           echo "APP_VERSION=${GITHUB_SHA}"
-          echo "---- version.txt ----"
           cat public/version.txt
 
-      # (Opcional) Mostrar línea del footer (ahora no tendrá v=1.3.xx, tendrá v=<sha>)
-      - name: Show footer-end.php line
+      # 9) Show footer debug (optional)
+      - name: Show footer bundle line
         run: |
-          echo "---- footer-end.php (bundle line) ----"
           grep -n "bundle.js?v=" public/includes/footer-end.php || true
 
-      # 5) SSH setup
+      # 10) SSH setup
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -75,21 +75,18 @@ jobs:
 
       - name: Add server to known_hosts
         run: |
-          set -euo pipefail
           mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
           ssh-keyscan -H 87.98.230.129 >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
 
-      # 6) Rsync deploy
+      # 11) Rsync deploy
       - name: Sync project to shared hosting (rsync)
         run: |
           set -euo pipefail
 
           REMOTE="epgylzqu@87.98.230.129"
-          REMOTE_DIR="/home/epgylzqu/elliotfern.com/"
+          REMOTE_DIR="/home/epgylzqu/elliot.cat/"
 
-          rsync -az --delete \
+          rsync -az --delete-excluded \
             --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
             --exclude ".git/" \
             --exclude ".github/" \
@@ -101,30 +98,13 @@ jobs:
             -e "ssh" \
             ./ "$REMOTE:$REMOTE_DIR"
 
-      # 7) Verify version on server
+      # 12) Verify deploy
       - name: Verify version on server
         run: |
           ssh epgylzqu@87.98.230.129 "bash -lc '
-            echo \"---- version.txt on server ----\"
-            cat /home/epgylzqu/elliotfern.com/public/version.txt || true
+            echo \"---- version.txt ----\"
+            cat /home/epgylzqu/elliot.cat/public/version.txt || true
 
-            echo \"---- footer-end.php on server (bundle line) ----\"
-            grep -n 'dist/' public/includes/footer-end.php || true
-
-            echo \"---- main.js info ----\"
-            ls -lh /home/epgylzqu/elliotfern.com/public/dist/ || true
-          '"
-
-      # 8) Composer install on server
-      - name: Composer install on server
-        run: |
-          set -euo pipefail
-
-          ssh epgylzqu@87.98.230.129 "bash -lc '
-            set -euo pipefail
-            cd /home/epgylzqu/elliotfern.com
-
-            command -v composer >/dev/null 2>&1 || { echo \"ERROR: composer no está instalado\"; exit 3; }
-
-            composer install --no-dev --prefer-dist --optimize-autoloader
+            echo \"---- dist folder ----\"
+            ls -lh /home/epgylzqu/elliot.cat/public/dist/ || true
           '"

@@ -12,7 +12,7 @@ export async function taulaLlistatEspaisViatges(slug: string) {
     {
       header: 'Espai',
       field: 'nom',
-      render: (_: unknown, row: Espai) => `<a href="https://elliot.cat/gestio/viatges/fitxa-espai/${row.slug}">${row.nom}</a>`,
+      render: (_: unknown, row: Espai) => `<a href="/gestio/viatges/fitxa-espai/${row.slug}">${row.nom}</a>`,
     },
     { header: 'Ciutat', field: 'ciutat' },
     {
@@ -30,7 +30,7 @@ export async function taulaLlistatEspaisViatges(slug: string) {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Espai) => `
-         <a href="https://elliot.cat/gestio/viatges/modifica-espai/${row.id}"><button class="btn-petit">Modifica</button></a>`,
+         <a href="/gestio/viatges/modifica-espai/${row.id}"><button class="btn-petit">Modifica</button></a>`,
     });
   }
 

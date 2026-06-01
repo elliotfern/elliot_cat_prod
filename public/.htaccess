@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+# 🚫 Nunca pasar assets a PHP
+RewriteRule ^dist/ - [L] RewriteRule \.(js|css|png|jpg|jpeg|gif|svg|ico|txt)$ - [L]
+
+RewriteEngine On RewriteBase /
+
+# Si es archivo o carpeta real, no tocar
+
+RewriteCond %{REQUEST_FILENAME} -f [OR] RewriteCond %{REQUEST_FILENAME} -d RewriteRule ^ - [L]
+
+# API
+
+RewriteRule ^api/ index.php [QSA,L]
+
+# Todo lo demás al front controller
+
+RewriteRule ^ index.php [QSA,L] </IfModule>

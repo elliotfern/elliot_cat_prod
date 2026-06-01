@@ -1,5 +1,4 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 
@@ -11,9 +10,7 @@ export interface GrupPersones {
 export async function taulaLlistatGrupsPersones(): Promise<void> {
   const isAdmin = await getIsAdmin();
 
-  const gestioUrl = isAdmin ? '/gestio' : '';
-
-  const editHref = (id: string): string => `https://${window.location.hostname}${gestioUrl}/auxiliars/modifica-grup/${id}`;
+  const editHref = (id: string): string => `/gestio/auxiliars/modifica-grup/${id}`;
 
   const columns: TaulaDinamica<GrupPersones>[] = [
     {

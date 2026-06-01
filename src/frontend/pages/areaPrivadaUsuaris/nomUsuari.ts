@@ -1,5 +1,5 @@
 export async function nomUsuari(): Promise<void> {
-  const urlAjax = `https://${window.location.hostname}/api/auth/get/nomUsuari`;
+  const urlAjax = `/api/auth/get/nomUsuari`;
 
   const userDiv = document.getElementById('benvingudaUsuari');
   if (userDiv) {

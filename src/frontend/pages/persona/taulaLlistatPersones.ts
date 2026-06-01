@@ -14,11 +14,11 @@ export async function taulaLlistatPersones() {
       field: 'nom',
       render: (_: unknown, row: Persona) => {
         return `<a id="${row.id}" title="${row.nom}" 
-               href="https://${window.location.hostname}/gestio/base-dades-persones/fitxa-persona/${row.slug}">
+               <a href="/gestio/base-dades-persones/fitxa-persona/${row.slug}">
                ${row.nom}  ${row.cognoms}
             </a>`;
       },
-    },
+    }, 
 
     { header: 'País', field: 'pais_ca' },
 
@@ -47,7 +47,7 @@ export async function taulaLlistatPersones() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Persona) =>
-        `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/base-dades-persones/modifica-persona/${row.slug}">
+        `<a id="${row.id}" title="Modifica" href="/gestio/base-dades-persones/modifica-persona/${row.slug}">
           <button type="button" class="btn btn-warning btn-sm">Modifica</button>
         </a>`,
     });

@@ -4,6 +4,7 @@ import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 import { setTrixHTML } from '../../utils/setTrix';
+import { API_BASE } from '../../utils/urls';
 
 export async function formPersona(isUpdate: boolean, slug?: string) {
   const form = document.getElementById('formPersona');
@@ -42,7 +43,7 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
 
     form.addEventListener('submit', function (event) {
       //transmissioDadesDB(event, 'PUT', 'formPersona', API_URLS.PUT.PERSONA(id));
-      transmissioDadesDB(event, 'POST', 'formPersona', `https://elliot.cat/api/persones/put/?persona=${id}`);
+      transmissioDadesDB(event, 'POST', 'formPersona', `${API_BASE}/persones/put/?persona=${id}`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nova Persona</h2>`;
@@ -50,7 +51,7 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
 
     form.addEventListener('submit', function (event) {
       //transmissioDadesDB(event, 'POST', 'formPersona', API_URLS.POST.PERSONA, true);
-      transmissioDadesDB(event, 'POST', 'formPersona', 'https://elliot.cat/api/persones/post/?persona', true);
+      transmissioDadesDB(event, 'POST', 'formPersona', `${API_BASE}/persones/post/?persona`, true);
     });
   }
 

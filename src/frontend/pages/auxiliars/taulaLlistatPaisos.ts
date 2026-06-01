@@ -6,7 +6,7 @@ import { Pais } from '../../types/Pais';
 export async function taulaLlistatPaisos(): Promise<void> {
   const isAdmin = await getIsAdmin();
 
-  const editHref = (id: string): string => `https://elliot.cat/gestio/auxiliars/modifica-pais/${id}`;
+  const editHref = (id: string): string => `/gestio/auxiliars/modifica-pais/${id}`;
 
   const columns: TaulaDinamica<Pais>[] = [
     {

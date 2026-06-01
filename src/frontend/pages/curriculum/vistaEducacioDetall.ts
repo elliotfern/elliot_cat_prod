@@ -30,9 +30,7 @@ function fmtDate(dateStr?: string | null): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return '';
-  return `${capitalizeFirst(
-    d.toLocaleDateString('ca-ES', { month: 'long' })
-  )} ${d.getFullYear()}`;
+  return `${capitalizeFirst(d.toLocaleDateString('ca-ES', { month: 'long' }))} ${d.getFullYear()}`;
 }
 
 function renderTabs(ed: EducacioCv): string {
@@ -54,7 +52,7 @@ function renderTabs(ed: EducacioCv): string {
 
   const panes = i18n
     .map((t, idx) => {
-      const editHref = `https://elliot.cat/gestio/curriculum/modifica-educacio-i18n/${t.locale}/${ed.id}`;
+      const editHref = `/gestio/curriculum/modifica-educacio-i18n/${t.locale}/${ed.id}`;
 
       return `
         <div class="tab-pane ${idx === 0 ? 'active' : ''}" id="pane-${t.locale}">
@@ -77,17 +75,11 @@ function renderTabs(ed: EducacioCv): string {
 }
 
 function renderEducacio(ed: EducacioCv): string {
-  const logoUrl = ed.nameImg
-    ? `${DOMAIN_IMG}/img/logos-empreses/${ed.nameImg}.png`
-    : null;
+  const logoUrl = ed.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${ed.nameImg}.png` : null;
 
   const localitzacio = [ed.ciutat, ed.pais_ca].filter(Boolean).join(', ');
 
-  const periode = ed.data_inici
-    ? `${fmtDate(ed.data_inici)} - ${
-        ed.data_fi ? fmtDate(ed.data_fi) : 'actualitat'
-      }`
-    : '';
+  const periode = ed.data_inici ? `${fmtDate(ed.data_inici)} - ${ed.data_fi ? fmtDate(ed.data_fi) : 'actualitat'}` : '';
 
   return `
     <div class="mb-3">
@@ -95,13 +87,7 @@ function renderEducacio(ed: EducacioCv): string {
         ${logoUrl ? `<img src="${esc(logoUrl)}" style="height:40px" class="me-3">` : ''}
         <div>
           <h2 class="h5 mb-0">${esc(ed.institucio)}</h2>
-          ${
-            ed.institucio_url
-              ? `<a href="${esc(ed.institucio_url)}" target="_blank">${esc(
-                  ed.institucio_url
-                )}</a>`
-              : ''
-          }
+          ${ed.institucio_url ? `<a href="${esc(ed.institucio_url)}" target="_blank">${esc(ed.institucio_url)}</a>` : ''}
         </div>
       </div>
 

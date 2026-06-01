@@ -26,7 +26,6 @@ import { agenda } from './pages/agenda/agenda';
 import { projectes } from './pages/projectes/projectes';
 import { initUserAreaButton } from './components/header/userAreaButton';
 import { blog } from './pages/blog/blog';
-import { initI18nHeaderLinks } from './components/header/i18nHeaderLinks';
 
 function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
   if (document.getElementById(id)) {
@@ -96,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const url = window.location.href;
   const pageType = getPageType(url);
 
-  initI18nHeaderLinks();
   void initUserAreaButton();
   barraNavegacio();
   mostrarBotonsNomesAdmin();
@@ -107,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   console.log(pageType);
-  if (pageType[1] === 'entrada') {
+  if (pageType[0] === 'entrada') {
     loginPage();
   } else if (pageType[0] === 'nou-usuari') {
     const autor = document.getElementById('formUsuari');

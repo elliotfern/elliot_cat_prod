@@ -44,7 +44,7 @@ export async function renderHistoriador(persona: PersonaView) {
               (l) => `
                 <tr>
                   <td>
-                    <a href="https://elliot.cat/gestio/biblioteca/fitxa-llibre/${l.slug}">
+                    <a href="/gestio/biblioteca/fitxa-llibre/${l.slug}">
                       ${l.titol}
                     </a>
                   </td>
@@ -53,7 +53,7 @@ export async function renderHistoriador(persona: PersonaView) {
 
                   <td class="text-end">
                     <a
-                      href="https://elliot.cat/gestio/biblioteca/modifica-llibre/${l.slug}"
+                      href="/gestio/biblioteca/modifica-llibre/${l.slug}"
                       class="btn btn-sm btn-outline-warning"
                     >
                       Modifica

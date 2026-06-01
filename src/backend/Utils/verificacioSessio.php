@@ -26,12 +26,12 @@ function verificarSesion(): object
     if (!$jwtSecret) {
         // Si no hay secret, es un fallo de config: mejor echar fuera
         error_log("Missing TOKEN secret in env");
-        header('Location: /ca/entrada');
+        header('Location: /entrada');
         exit();
     }
 
     if (empty($_COOKIE['token'])) {
-        header('Location: /ca/entrada');
+        header('Location: /entrada');
         exit();
     }
 
@@ -44,13 +44,10 @@ function verificarSesion(): object
 
         // Solo permitimos user_type 1 (admin) o 2 (usuario)
         if (!in_array($userType, [1, 2], true)) {
-            header('Location: /ca/entrada');
+            header('Location: /entrada');
             exit();
         }
 
-        // ✅ Compatibilidad legacy (tu if antiguo)
-        $_COOKIE['user_id'] = (string)$userType;      // legacy esperaba '1' para admin
-        $_COOKIE['user_type'] = (string)$userType;
 
         // ✅ Extra útil para plantillas/legacy
         if (isset($decoded->nom))   $_COOKIE['nom'] = (string)$decoded->nom;
@@ -66,7 +63,7 @@ function verificarSesion(): object
         return $decoded;
     } catch (Exception $e) {
         error_log("Error al verificar sesión: " . $e->getMessage());
-        header('Location: /ca/entrada');
+        header('Location: /entrada');
         exit();
     }
 }
@@ -78,7 +75,7 @@ function verificarAdmin(): object
     $decoded = verificarSesion(); // ya valida token + user_type 1 o 2
 
     if ((int)($decoded->user_type ?? 0) !== 1) {
-        header('Location: /ca/entrada');
+        header('Location: /entrada');
         exit();
     }
 

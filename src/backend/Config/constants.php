@@ -1,12 +1,11 @@
 <?php
 
 // PER USAR EN LES URLS
-define('APP_URL', $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST']); // https://gestio.elliotfern.com
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$isLocal = in_array($host, ['localhost', '127.0.0.1']);
 
-define('APP_ROOT', dirname(__DIR__));
-
-// Missatges
-define('ADD_OK_MESSAGE_SHORT', 'Dades afegidades correctament!');
-define('ADD_OK_MESSAGE', 'Les dades s\'han afegit correctament a la base de dades.');
-define('ERROR_TYPE_MESSAGE_SHORT', 'Error!');
-define('ERROR_TYPE_MESSAGE', 'Verifica que les dades siguin correctes');
+if ($isLocal) {
+    define('APP_URL', 'http://localhost');
+} else {
+    define('APP_URL', 'https://elliot.cat');
+}

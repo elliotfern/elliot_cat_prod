@@ -8,15 +8,15 @@ import { renderClientPressupostos } from './fitxaClientPressupostos';
 export async function fitxaClient(id: string) {
   let data: Client;
 
-   try {
-        data = await api.get<Client>(API_URLS.GET.CLIENT_ID, {
-          id,
-        });
-      } catch (error) {
-        console.error(error);
-  
-        return;
-      }
+  try {
+    data = await api.get<Client>(API_URLS.GET.CLIENT_ID, {
+      id,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return;
+  }
 
   renderClient(data);
 }
@@ -50,7 +50,7 @@ function renderClient(response: Client) {
         </span>
 
         <a
-          href="https://elliot.cat/gestio/comptabilitat/modifica-client/${client.id}"
+          href="/gestio/comptabilitat/modifica-client/${client.id}"
           class="btn btn-secondary btn-sm">
           Modifica client
         </a>

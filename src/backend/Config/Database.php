@@ -12,12 +12,15 @@ class Database
 
     public function __construct()
     {
-        $conn = DatabaseConnection::getConnection();
+        try {
+            $this->conn = DatabaseConnection::getConnection();
+        } catch (\Throwable $e) {
+            error_log("DB CONNECTION ERROR: " . $e->getMessage());
 
-        if ($conn === null) {
-            throw new \Exception("No s'ha pogut establir la connexió amb la base de dades.");
+            throw new \Exception(
+                "DB connection failed: " . $e->getMessage()
+            );
         }
-        $this->conn = $conn;
     }
 
     /**

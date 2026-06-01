@@ -1152,9 +1152,9 @@ if ($slug === 'directors') {
 } else if ($slug === "clients") {
 
     $sql = <<<SQL
-            SELECT c.id, c.clientEmpresa
+            SELECT c.id, c.empresa
             FROM %s AS c
-            ORDER BY c.clientEmpresa ASC
+            ORDER BY c.empresa ASC
             SQL;
 
     $query = sprintf(

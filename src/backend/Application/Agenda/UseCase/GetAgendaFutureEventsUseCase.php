@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Application\Agenda\UseCase;
 
 use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
-use App\Domain\Ciutat\Repository\CiutatRepository;
 use Ramsey\Uuid\Uuid;
 
 final class GetAgendaFutureEventsUseCase

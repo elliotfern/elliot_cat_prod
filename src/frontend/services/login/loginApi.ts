@@ -31,7 +31,7 @@ export async function loginApi(event: Event) {
   };
 
   try {
-    const response = await fetch('https://api.elliot.cat/api/login', {
+    const response = await fetch('/api/auth/get/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -56,7 +56,9 @@ export async function loginApi(event: Event) {
     showSuccess(data.message || 'Accés permès');
 
     setTimeout(() => {
-      const redirect = data.user_type === 1 ? '/gestio/admin' : '/usuaris';
+      console.log('user_type:', data.data.user_type, typeof data.data.user_type);
+      console.log('FULL RESPONSE:', data);
+      const redirect = Number(data.data.user_type) === 1 ? '/gestio/admin' : '/usuaris';
 
       window.location.href = redirect;
     }, 800);

@@ -1,18 +1,25 @@
 <?php
+
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    echo "ERROR [$errno] $errstr en $errfile:$errline";
+    exit;
+});
+
+set_exception_handler(function ($e) {
+    echo "EXCEPTION: " . $e->getMessage();
+    exit;
+});
+
 // Incluir configuraciones y rutas
-require __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/src/backend/Config/config.php';
-require_once __DIR__ . '/src/backend/Utils/verificacioSessio.php';
-require_once __DIR__ . '/src/backend/routes/routes.php';
+require_once __DIR__ . '/../src/backend/bootstrap.php';
 
 use App\Infrastructure\Error\ErrorHandler;
 
 ErrorHandler::register();
-
-// Configuración inicial para mostrar errores en desarrollo
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
 // Obtener la ruta solicitada
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -23,37 +30,15 @@ if ($requestUri === '') {
     $requestUri = '/';
 }
 
-if (strpos($requestUri, APP_GESTIO) === 0) {
-    verificarAdmin(); // admin-only, y ya hace verificarSesion internamente
-}
-
-// Detectar l'idioma de l'usuari des de la URL o la cookie
-$language = 'ca'; // Per defecte, català
-
-// Verificar si la ruta es solo el idioma, sin "/reserva"
-if (preg_match('#^/(ca|fr|en|es|it)$#', $requestUri, $matches)) {
-    $language = $matches[1];
-    header("Location: /$language/homepage", true, 301);
+// Redirección raíz → homepage
+if ($requestUri === '/') {
+    header('Location: /inici', true, 302);
     exit();
 }
 
-// Detectar el idioma desde la URL (si existe en la ruta)
-preg_match('#^/(ca|fr|en|es|it)/#', $requestUri, $matches);
-$language = $matches[1] ?? null;
-
-// Si no hay idioma en la URL y es la raíz (o idioma por defecto), usamos 'ca'
-if (empty($language)) {
-    // Comprobamos si la ruta es la raíz (ejemplo: /reserva) y no incluye idioma
-    if (preg_match('#^/homepage$#', $requestUri)) {
-        $language = 'ca';  // Asumimos que si está en la raíz, el idioma es 'ca'
-    } else {
-        // Si la cookie 'language' ya existe, usamos ese valor; sino, asignamos 'ca' por defecto
-        $language = $_COOKIE['language'] ?? 'ca';
-    }
+if (strpos($requestUri, "/gestio") === 0) {
+    verificarAdmin(); // admin-only, y ya hace verificarSesion internamente
 }
-
-// Cargar las traducciones correspondientes al idioma
-$translations = require __DIR__ . "/src/backend/locales/{$language}.php";
 
 // Inicializar una variable para los parámetros de la ruta
 $routeParams = [];
@@ -77,7 +62,7 @@ foreach ($routes as $route => $routeInfo) {
 
 // Si la ruta no es encontrada, asignamos la página 404
 if (!$routeFound) {
-    $view = 'public/includes/404.php';
+    $view = './includes/404.php';
     $noHeaderFooter = false;
     $headerMenu = true;
     $apiSenseHTML = false;
@@ -104,21 +89,21 @@ if (!$routeFound) {
 
 // Incluir encabezado y pie de página si no se especifica que no lo tenga
 if ($noHeaderFooter) {
-    include 'public/includes/header.php';
+    include './includes/header.php';
 
     // Incluir la vista asociada a la ruta
     include $view;
 
-    include 'public/includes/footer-end.php';
+    include './includes/footer-end.php';
 } elseif ($headerMenu) {
-    include 'public/includes/header.php';
-    include 'public/includes/header-menu.php';
+    include './includes/header.php';
+    include './includes/header-menu.php';
 
     // Incluir la vista asociada a la ruta
     include $view;
 
-    include 'public/includes/footer.php';
-    include 'public/includes/footer-end.php';
+    include './includes/footer.php';
+    include './includes/footer-end.php';
 } elseif ($apiSenseHTML) {
     // Incluir la vista asociada a la ruta
     include $view;

@@ -20,7 +20,7 @@ export async function taulaLlistatProductes() {
       header: 'Producte',
       field: 'producte',
       render: (_: unknown, row: Producte) =>
-        `<a id="${row.id}" href="https://${window.location.hostname}/gestio/comptabilitat/fitxa-producte/${row.id}">
+        `<a id="${row.id}" href="/gestio/comptabilitat/fitxa-producte/${row.id}">
           ${row.producte}
         </a>`,
     },
@@ -51,7 +51,7 @@ export async function taulaLlistatProductes() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Producte) =>
-        `<a id="${row.id}" title="Modifica" href="https://${window.location.hostname}/gestio/comptabilitat/modifica-producte/${row.id}">
+        `<a id="${row.id}" title="Modifica" href="/gestio/comptabilitat/modifica-producte/${row.id}">
           <button class="btn-petit">Modifica</button>
         </a>`,
     });

@@ -45,7 +45,7 @@ function clearMeCache(): void {
 
 export async function fetchMe(): Promise<MeResponse> {
   try {
-    return await api.get<MeResponse>('auth/get/?me');
+    return await api.get<MeResponse>('auth/get/me');
   } catch (error) {
     console.error(error);
 

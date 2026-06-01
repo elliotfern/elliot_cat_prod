@@ -11,7 +11,7 @@ export async function taulaLlistatViatges() {
     {
       header: 'Viatge',
       field: 'viatge',
-      render: (_: unknown, row: Viatge) => `<a href="https://elliot.cat/gestio/viatges/fitxa-viatge/${row.slug}">${row.viatge}</a>`,
+      render: (_: unknown, row: Viatge) => `<a href="/gestio/viatges/fitxa-viatge/${row.slug}">${row.viatge}</a>`,
     },
     { header: 'Descripció', field: 'descripcio' },
     { header: 'País', field: 'pais_ca' },
@@ -31,7 +31,7 @@ export async function taulaLlistatViatges() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Viatge) => `
-        <a href="https://${window.location.host}/gestio/viatges/modifica-viatge/${row.id}">
+        <a href="/gestio/viatges/modifica-viatge/${row.id}">
             <button class="btn-petit">Modifica</button>
         </a>`,
     });

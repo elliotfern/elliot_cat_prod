@@ -7,9 +7,7 @@
       <h1>Claus privades</h1>
 
       <?php if (isUserAdmin()) : ?>
-        <p>
-          <button onclick="window.location.href='<?php echo APP_INTRANET . $url['vault']; ?>/nou-vault/'" class="button btn-gran btn-secondari">Afegir clau</button>
-        </p>
+
       <?php endif; ?>
 
       <div id="taulaLlistatVault"></div>

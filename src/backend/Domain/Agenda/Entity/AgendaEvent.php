@@ -94,7 +94,7 @@ final class AgendaEvent
     private function assertValidDates(): void
     {
         if ($this->dataFi !== null && $this->dataFi < $this->dataInici) {
-            throw new \InvalidArgumentException('Invalid date range');
+            $dataFi = null; // o log + sanitize
         }
     }
 }

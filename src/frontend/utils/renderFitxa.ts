@@ -48,7 +48,7 @@ export function renderFitxa(options: RenderFitxaOptions) {
         ? `
             <div class="mb-3">
                 <a
-                href="https://elliot.cat/gestio/${options.editButton.basePath}/${options.editButton.action}/${options.editButton.id}/"
+                href=/gestio/${options.editButton.basePath}/${options.editButton.action}/${options.editButton.id}/
                 class="btn btn-secondary btn-sm"
                 >
                 ${options.editButton.label ?? 'Modifica fitxa'}

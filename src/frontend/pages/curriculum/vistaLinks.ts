@@ -47,7 +47,7 @@ function renderTable(items: LinkItem[]): string {
       const iconUrl = resolveImg(it.nameImg);
       const iconHTML = iconUrl ? `<img src="${esc(iconUrl)}" alt="" width="18" height="18" style="object-fit:contain;vertical-align:-3px">` : `<span class="text-muted">—</span>`;
 
-      const editHref = `https://elliot.cat/gestio/curriculum/modifica-link/${it.id}`;
+      const editHref = `/gestio/curriculum/modifica-link/${it.id}`;
 
       return `
       <tr>

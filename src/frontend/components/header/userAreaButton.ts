@@ -9,8 +9,8 @@ type MeResponse = {
   is_admin: boolean;
 };
 
-const ME_ENDPOINT = 'auth/get/?me';
-const GESTIO_URL = 'https://elliot.cat/gestio';
+const ME_ENDPOINT = 'auth/get/me';
+const GESTIO_URL = '/gestio';
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => {

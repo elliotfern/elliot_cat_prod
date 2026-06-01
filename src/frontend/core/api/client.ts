@@ -48,7 +48,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}, queryPara
   let response: Response;
 
   try {
-    response = await fetch(`${API_BASE}${endpoint}${query}`, {
+    response = await fetch(`${API_BASE}/${endpoint}${query}`, {
       headers: {
         'Content-Type': 'application/json',
         ...(options.headers || {}),

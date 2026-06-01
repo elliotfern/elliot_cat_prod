@@ -37,8 +37,8 @@ function renderTable(items: ExperienciaItem[]): string {
 
       const periode = current ? `${fmtDate(it.data_inici)} - actual` : `${fmtDate(it.data_inici)} - ${fmtDate(it.data_fi)}`;
 
-      const detailHref = `https://elliot.cat/gestio/curriculum/perfil-experiencia-professional/${it.id}`;
-      const editHref = `https://elliot.cat/gestio/curriculum/modifica-experiencia/${it.id}`;
+      const detailHref = `/gestio/curriculum/perfil-experiencia-professional/${it.id}`;
+      const editHref = `/gestio/curriculum/modifica-experiencia/${it.id}`;
 
       return `
         <tr>

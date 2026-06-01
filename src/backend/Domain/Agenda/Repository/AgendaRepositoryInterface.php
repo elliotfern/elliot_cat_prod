@@ -27,6 +27,7 @@ interface AgendaRepositoryInterface
      */
     public function findFutureEvents(): array;
 
+
     public function save(AgendaEvent $event): void;
 
     public function delete(

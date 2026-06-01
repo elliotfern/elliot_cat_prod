@@ -34,10 +34,10 @@ if (isset($_GET['llistat_serveis'])) {
     AdminMiddleware::handle();
 
     // Conectar a la base de datos
-    $conn = DatabaseConnection::getConnection();
+    $pdo = DatabaseConnection::getConnection();
 
     // Crear el repositorio
-    $passwordRepository = new DatabasePasswordRepository($conn);
+    $passwordRepository = new DatabasePasswordRepository($pdo);
 
     // Pasar el repositorio a VaultService
     $vaultService = new VaultService($passwordRepository);

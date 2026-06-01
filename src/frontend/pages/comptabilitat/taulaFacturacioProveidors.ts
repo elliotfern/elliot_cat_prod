@@ -29,7 +29,7 @@ export async function taulaDespeses(receptorId: number, tipus_despesa: string) {
       header: 'Proveïdor',
       field: 'proveidorNom',
       render: (_: unknown, row: any) => `
-        <a href="https://${window.location.hostname}/gestio/comptabilitat/fitxa-proveidor/${row.proveidorId}">
+        <a href="/gestio/comptabilitat/fitxa-proveidor/${row.proveidorId}">
           ${row.proveidorNom}
         </a>`,
     },
@@ -52,7 +52,7 @@ export async function taulaDespeses(receptorId: number, tipus_despesa: string) {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: any) => `
-        <a href="https://${window.location.hostname}/gestio/comptabilitat/modifica-factura-proveidor/${row.id}">
+        <a href="/gestio/comptabilitat/modifica-factura-proveidor/${row.id}">
           <button class="btn-petit">Modifica</button>
         </a>`,
     });

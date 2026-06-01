@@ -1,7 +1,6 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-import { API_URLS } from '../../utils/apiUrls';
 import { formatDataCatala } from '../../utils/formataData';
 import { DOMAIN_WEB } from '../../utils/urls';
 
@@ -11,9 +10,9 @@ export interface Proveidor {
   concepte?: string;
   import?: string;
   data: string;
-  clientNom?: string;
-  clientCognoms?: string;
-  clientEmpresa?: string;
+  nom?: string;
+  cognoms?: string;
+  empresa?: string;
   estat?: string;
   producte?: string;
   any?: string;
@@ -40,7 +39,7 @@ export async function taulaPressupostos() {
       field: 'concepte',
       render: (_: unknown, row: Proveidor) =>
         `<a href="${DOMAIN_WEB}/gestio/comptabilitat/fitxa-client/${row.client_id}">
-           ${row.clientNom} ${row.clientCognoms} (${row.clientEmpresa})
+           ${row.nom} ${row.cognoms} (${row.empresa})
          </a>`,
     },
 

@@ -10,7 +10,7 @@
 <php>
     <env name="APP_ENV" value="test" force="true"/>
     <env name="DB_DBNAME" value="epgylzqu_elliot_cat_test" force="true"/>
-    <env name="DB_HOST" value="87.98.230.129" force="true"/>
+    <env name="DB_HOST" value="127.0.0.1" force="true"/>
     <env name="DB_USER" value="epgylzqu_user" force="true"/>
 </php>
     <testsuites>

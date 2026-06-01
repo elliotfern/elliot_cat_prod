@@ -15,15 +15,16 @@ class DatabaseConnection
             return self::$conn;
         }
 
+        $isDev = ($_ENV['APP_ENV'] ?? 'prod') === 'dev';
+
         $dbUser = $_ENV['DB_USER'] ?? '';
         $dbPass = $_ENV['DB_PASS'] ?? '';
         $dbHost = $_ENV['DB_HOST'] ?? '127.0.0.1';
         $dbName = $_ENV['DB_DBNAME'] ?? '';
-        $dbPort = $_ENV['DB_PORT'] ?? 3306;;
 
         try {
             self::$conn = new PDO(
-                "mysql:host=$dbHost;port=$dbPort;dbname=$dbName;charset=utf8mb4",
+                "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4",
                 $dbUser,
                 $dbPass,
                 [
