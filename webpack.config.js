@@ -2,15 +2,21 @@ const path = require('path');
 const webpack = require('webpack');
 const dotenv = require('dotenv');
 
-// 🔥 Detectar entorno
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
 
-// 🔥 Cargar variables
-const env = dotenv.config({ path: envFile }).parsed || {};
+const result = dotenv.config({ path: envFile });
 
-// 🔥 Convertir a DefinePlugin format
+if (result.error) {
+  console.warn(`⚠️ Missing env file: ${envFile}`);
+}
+
+const env = {
+  API_BASE: '',
+  ...result.parsed,
+};
+
 const envKeys = Object.keys(env).reduce((acc, key) => {
-  acc[`process.env.${key}`] = JSON.stringify(env[key]);
+  acc[`process.env.${key}`] = JSON.stringify(env[key] ?? '');
   return acc;
 }, {});
 
@@ -42,11 +48,7 @@ module.exports = {
     ],
   },
 
-  plugins: [
-    // 🔥 INYECTA VARIABLES DE ENTORNO EN FRONTEND
-    new webpack.DefinePlugin(envKeys),
-  ],
-  
+  plugins: [new webpack.DefinePlugin(envKeys)],
 
   devtool: false,
 };

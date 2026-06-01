@@ -59,8 +59,8 @@ jobs:
         run: npm ci
 
       # 7) Build frontend
-      - name: Build frontend assets
-        run: npm run build
+      - name: Build frontend
+        run: export NODE_ENV=production npm run build
 
       # 8) Write version file
       - name: Write APP_VERSION file
@@ -93,7 +93,7 @@ jobs:
           REMOTE="epgylzqu@87.98.230.129"
           REMOTE_DIR="/home/epgylzqu/elliot.cat/"
 
-          rsync -az --delete-excluded \
+          rsync -az --delete \
             --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
             --exclude ".git/" \
             --exclude ".github/" \
