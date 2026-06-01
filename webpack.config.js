@@ -1,22 +1,22 @@
 const path = require('path');
 const webpack = require('webpack');
+
 const dotenv = require('dotenv');
 
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+// SOLO local usa archivo
+const isCI = process.env.CI === 'true';
 
-const result = dotenv.config({ path: envFile });
+let env = {};
 
-if (result.error) {
-  console.warn(`⚠️ Missing env file: ${envFile}`);
+if (!isCI) {
+  const result = dotenv.config({ path: '.env.local' });
+  env = result.parsed || {};
+} else {
+  env = process.env; // CI injecta variables
 }
 
-const env = {
-  API_BASE: '',
-  ...result.parsed,
-};
-
 const envKeys = Object.keys(env).reduce((acc, key) => {
-  acc[`process.env.${key}`] = JSON.stringify(env[key] ?? '');
+  acc[`process.env.${key}`] = JSON.stringify(env[key] || '');
   return acc;
 }, {});
 

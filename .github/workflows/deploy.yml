@@ -58,9 +58,11 @@ jobs:
       - name: Install dependencies (npm)
         run: npm ci
 
-      # 7) Build frontend
-      - name: Build frontend
-        run: export NODE_ENV=production npm run build
+      - name: Build frontend assets
+        env:
+          CI: true
+          API_BASE: https://elliot.cat/api
+        run: npm run build
 
       # 8) Write version file
       - name: Write APP_VERSION file
