@@ -62,6 +62,9 @@ jobs:
         env:
           CI: true
           API_BASE: https://elliot.cat/api
+          DOMAIN_WEB: https://elliot.cat
+          DOMAIN_IMG: https://media.elliot.cat
+          INTRANET_WEB: https://elliot.cat/gestio
         run: npm run build
 
       # 8) Write version file
