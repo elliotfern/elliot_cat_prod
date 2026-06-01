@@ -8,6 +8,7 @@ use App\Domain\Agenda\ValueObject\AgendaEstat;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Domain\Agenda\ValueObject\AgendaTipus;
 use App\Domain\Ciutat\ValueObject\CiutatId;
+use App\Domain\Shared\ValueObject\DateRange;
 use DateTimeImmutable;
 
 final class AgendaEvent
@@ -20,17 +21,14 @@ final class AgendaEvent
         private readonly AgendaTipus $tipus,
         private readonly ?string $lloc,
         private readonly ?CiutatId $ciutatId,
-        private readonly DateTimeImmutable $dataInici,
-        private readonly ?DateTimeImmutable $dataFi,
+        private readonly DateRange $dateRange,
         private readonly bool $totElDia,
         private readonly AgendaEstat $estat,
         private readonly DateTimeImmutable $creatEl,
         private readonly DateTimeImmutable $actualitzatEl
 
 
-    ) {
-        $this->assertValidDates();
-    }
+    ) {}
 
     public function getId(): AgendaId
     {
@@ -61,14 +59,15 @@ final class AgendaEvent
     {
         return $this->ciutatId;
     }
+
     public function dataInici(): DateTimeImmutable
     {
-        return $this->dataInici;
+        return $this->dateRange->start();
     }
 
     public function dataFi(): ?DateTimeImmutable
     {
-        return $this->dataFi;
+        return $this->dateRange->end();
     }
 
     public function totElDia(): bool
@@ -89,12 +88,5 @@ final class AgendaEvent
     public function actualitzatEl(): DateTimeImmutable
     {
         return $this->actualitzatEl;
-    }
-
-    private function assertValidDates(): void
-    {
-        if ($this->dataFi !== null && $this->dataFi < $this->dataInici) {
-            $dataFi = null; // o log + sanitize
-        }
     }
 }

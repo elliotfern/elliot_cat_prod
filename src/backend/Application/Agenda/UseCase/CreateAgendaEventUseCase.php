@@ -10,6 +10,7 @@ use App\Domain\Agenda\ValueObject\AgendaEstat;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Domain\Agenda\ValueObject\AgendaTipus;
 use App\Domain\Ciutat\ValueObject\CiutatId;
+use App\Domain\Shared\ValueObject\DateRange;
 
 final class CreateAgendaEventUseCase
 {
@@ -21,44 +22,26 @@ final class CreateAgendaEventUseCase
     {
         $now = new \DateTimeImmutable();
 
+        $dateRange = new DateRange(
+            new \DateTimeImmutable($data['data_inici']),
+            !empty($data['data_fi'])
+                ? new \DateTimeImmutable($data['data_fi'])
+                : null
+        );
+
         $event = new AgendaEvent(
-
             id: AgendaId::generate(),
-
             titol: $data['titol'],
-
             descripcio: $data['descripcio'] ?? null,
-
-            tipus: new AgendaTipus(
-                $data['tipus']
-            ),
-
+            tipus: new AgendaTipus($data['tipus']),
             lloc: $data['lloc'] ?? null,
-
             ciutatId: !empty($data['ciutat_id'])
-                ? CiutatId::fromString(
-                    $data['ciutat_id']
-                )
+                ? CiutatId::fromString($data['ciutat_id'])
                 : null,
-
-            dataInici: new \DateTimeImmutable(
-                $data['data_inici']
-            ),
-
-            dataFi: !empty($data['data_fi'])
-                ? new \DateTimeImmutable(
-                    $data['data_fi']
-                )
-                : null,
-
+            dateRange: $dateRange,
             totElDia: (bool)$data['tot_el_dia'],
-
-            estat: new AgendaEstat(
-                $data['estat']
-            ),
-
+            estat: new AgendaEstat($data['estat']),
             creatEl: $now,
-
             actualitzatEl: $now
         );
 

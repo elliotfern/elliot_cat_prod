@@ -10,6 +10,7 @@ use App\Domain\Agenda\ValueObject\AgendaTipus;
 use App\Domain\Agenda\ValueObject\AgendaEstat;
 use App\Domain\Agenda\Entity\AgendaEvent;
 use App\Domain\Ciutat\ValueObject\CiutatId;
+use App\Domain\Shared\ValueObject\DateRange;
 
 final class UpdateAgendaEventUseCase
 {
@@ -25,6 +26,13 @@ final class UpdateAgendaEventUseCase
             throw new \RuntimeException('Agenda event not found');
         }
 
+        $dateRange = new DateRange(
+            new \DateTimeImmutable($data['data_inici']),
+            !empty($data['data_fi'])
+                ? new \DateTimeImmutable($data['data_fi'])
+                : null
+        );
+
         $updated = new AgendaEvent(
             id: $event->getId(),
             titol: $data['titol'],
@@ -34,10 +42,7 @@ final class UpdateAgendaEventUseCase
             ciutatId: !empty($data['ciutat_id'])
                 ? CiutatId::fromString($data['ciutat_id'])
                 : null,
-            dataInici: new \DateTimeImmutable($data['data_inici']),
-            dataFi: !empty($data['data_fi'])
-                ? new \DateTimeImmutable($data['data_fi'])
-                : null,
+            dateRange: $dateRange,
             totElDia: (bool)$data['tot_el_dia'],
             estat: new AgendaEstat($data['estat']),
             creatEl: $event->creatEl(),

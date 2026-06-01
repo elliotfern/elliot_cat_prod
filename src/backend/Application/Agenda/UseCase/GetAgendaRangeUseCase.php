@@ -7,9 +7,6 @@ namespace App\Application\Agenda\UseCase;
 use App\Application\Agenda\DTO\AgendaItemDTO;
 use App\Application\Agenda\Service\BirthdayService;
 use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
-use App\Domain\Ciutat\Repository\CiutatRepository;
-
-
 
 final class GetAgendaRangeUseCase
 {
@@ -23,13 +20,11 @@ final class GetAgendaRangeUseCase
         $fromDate = new \DateTimeImmutable($from);
         $toDate   = new \DateTimeImmutable($to);
 
-        // eventos reales
         $events = $this->agendaRepository->findByDateRange($fromDate, $toDate);
 
         $result = [];
 
         foreach ($events as $event) {
-
             $result[] = new AgendaItemDTO(
                 id: $event->getId()->toString(),
                 titol: $event->titol(),
@@ -42,32 +37,30 @@ final class GetAgendaRangeUseCase
             );
         }
 
-        // cumpleaños
         $birthdaysRaw = $this->birthdayService->getBetween($from, $to);
 
         $birthdays = [];
 
         foreach ($birthdaysRaw as $b) {
-
             $birthdays[] = new AgendaItemDTO(
-                id: (string)$b['id'], // asumir ya UUID string válido
+                id: (string)$b['id'],
                 titol: $b['titol'],
                 tipus: $b['tipus'],
-                dataInici: (string)$b['data_inici'],
-                dataFi: $b['data_fi'] ? (string)$b['data_fi'] : null,
+                dataInici: $b['data_inici'],
+                dataFi: $b['data_fi'] ?? null,
                 totElDia: true,
                 lloc: null,
                 source: 'birthday'
             );
         }
 
-        // merge
         $all = array_merge($result, $birthdays);
 
         usort(
             $all,
             fn(AgendaItemDTO $a, AgendaItemDTO $b) =>
-            strcmp($a->dataInici, $b->dataInici)
+            new \DateTimeImmutable($a->dataInici)
+                <=> new \DateTimeImmutable($b->dataInici)
         );
 
         return $all;

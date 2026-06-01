@@ -1,16 +1,14 @@
 <?php
 
-$defaultPublicConfig = [
-    'needs_session' => false,
-    'needs_admin'   => false,
-    'header_footer' => false,
-    'header_menu_footer' => true,
-    'apiSenseHTML' => false,
-];
-
 function route_public(string $viewPath, array $overrides = []): array
 {
-    global $defaultPublicConfig;
+    $defaultPublicConfig = [
+        'needs_session' => false,
+        'needs_admin'   => false,
+        'header_footer' => false,
+        'header_menu_footer' => true,
+        'apiSenseHTML' => false,
+    ];
 
     return array_merge(
         $defaultPublicConfig,

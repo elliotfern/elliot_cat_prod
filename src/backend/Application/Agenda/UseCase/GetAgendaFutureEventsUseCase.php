@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Application\Agenda\UseCase;
 
 use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
-use Ramsey\Uuid\Uuid;
 
 final class GetAgendaFutureEventsUseCase
 {
@@ -27,7 +26,7 @@ final class GetAgendaFutureEventsUseCase
                 'descripcio' => $event->descripcio(),
                 'tipus' => (string)$event->tipus(),
                 'lloc' => $event->lloc(),
-                'ciutat_id' => $event->ciutatId(),
+                'ciutat_id' => $event->ciutatId()?->toString(),
                 'data_inici' => $event->dataInici()->format('Y-m-d H:i:s'),
                 'data_fi' => $event->dataFi()?->format('Y-m-d H:i:s'),
                 'tot_el_dia' => $event->totElDia(),

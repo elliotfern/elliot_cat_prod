@@ -1,19 +1,20 @@
 <?php
 
-// Configuración por defecto para rutas que requieren sesión, sin header_footer, con header_menu_footer
-$defaultProtectedConfig = [
-    'needs_session' => true,
-    'needs_admin'   => true,   // 🔒 TODAS las rutas de gestio requieren admin
-    'header_footer' => false,
-    'header_menu_footer' => true,
-    'apiSenseHTML' => false,
-];
-
-// Helper único para TODAS las rutas
-function route(string $viewPath): array
+function route(string $viewPath, array $overrides = []): array
 {
-    global $defaultProtectedConfig;
-    return array_merge($defaultProtectedConfig, ['view' => $viewPath]);
+    $defaultPublicConfig = [
+        'needs_session' => false,
+        'needs_admin'   => false,
+        'header_footer' => false,
+        'header_menu_footer' => true,
+        'apiSenseHTML' => false,
+    ];
+
+    return array_merge(
+        $defaultPublicConfig,
+        $overrides,
+        ['view' => $viewPath]
+    );
 }
 
 $routes = [

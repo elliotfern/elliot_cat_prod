@@ -9,6 +9,7 @@ use App\Domain\Agenda\ValueObject\AgendaEstat;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Domain\Ciutat\ValueObject\CiutatId;
 use App\Domain\Agenda\ValueObject\AgendaTipus;
+use App\Domain\Shared\ValueObject\DateRange;
 
 final class AgendaEventBuilder
 {
@@ -22,8 +23,7 @@ final class AgendaEventBuilder
     private ?string $lloc = 'Barcelona';
     private ?CiutatId $ciutatId = null;
 
-    private \DateTimeImmutable $dataInici;
-    private ?\DateTimeImmutable $dataFi = null;
+    private DateRange $dateRange;
 
     private bool $totElDia = false;
 
@@ -40,8 +40,10 @@ final class AgendaEventBuilder
         $self->tipus = AgendaTipus::fromString('altre');
         $self->estat = AgendaEstat::fromString('confirmat');
 
-        $self->dataInici = new \DateTimeImmutable('2026-06-01 10:00:00');
-        $self->dataFi = new \DateTimeImmutable('2026-06-01 11:00:00');
+        $self->dateRange = new DateRange(
+            new \DateTimeImmutable('2026-06-01 10:00:00'),
+            new \DateTimeImmutable('2026-06-01 11:00:00')
+        );
 
         $self->creatEl = new \DateTimeImmutable('2026-01-01 10:00:00');
         $self->actualitzatEl = new \DateTimeImmutable('2026-01-01 10:00:00');
@@ -79,15 +81,13 @@ final class AgendaEventBuilder
         return $this;
     }
 
-    public function withDataInici(string $date): self
+    public function withDateRange(string $start, ?string $end): self
     {
-        $this->dataInici = new \DateTimeImmutable($date);
-        return $this;
-    }
+        $this->dateRange = new DateRange(
+            new \DateTimeImmutable($start),
+            $end ? new \DateTimeImmutable($end) : null
+        );
 
-    public function withDataFi(?string $date): self
-    {
-        $this->dataFi = $date ? new \DateTimeImmutable($date) : null;
         return $this;
     }
 
@@ -113,8 +113,7 @@ final class AgendaEventBuilder
             $this->tipus,
             $this->lloc,
             $this->ciutatId,
-            $this->dataInici,
-            $this->dataFi,
+            $this->dateRange,
             $this->totElDia,
             $this->estat,
             $this->creatEl,

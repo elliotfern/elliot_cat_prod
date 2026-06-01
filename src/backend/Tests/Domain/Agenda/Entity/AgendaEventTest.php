@@ -7,8 +7,6 @@ namespace App\Tests\Domain\Agenda\Entity;
 use PHPUnit\Framework\TestCase;
 use App\Domain\Agenda\Entity\AgendaEvent;
 use App\Tests\Domain\Agenda\Builder\AgendaEventBuilder;
-use App\Domain\Agenda\ValueObject\AgendaTipus;
-use InvalidArgumentException;
 
 final class AgendaEventTest extends TestCase
 {
@@ -39,12 +37,12 @@ final class AgendaEventTest extends TestCase
 
     public function test_it_rejects_invalid_date_range(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(\InvalidArgumentException::class);
 
-        AgendaEventBuilder::new()
-            ->withDataInici('2026-06-02 10:00:00')
-            ->withDataFi('2026-06-01 10:00:00')
-            ->build();
+        new \App\Domain\Shared\ValueObject\DateRange(
+            new \DateTimeImmutable('2026-06-02 10:00:00'),
+            new \DateTimeImmutable('2026-06-01 10:00:00')
+        );
     }
 
     public function test_it_can_be_all_day_event(): void
