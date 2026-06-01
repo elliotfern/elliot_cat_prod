@@ -104,6 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutButton.addEventListener('click', logout);
   }
 
+  console.log(process.env.API_BASE);
+
   console.log(pageType);
   if (pageType[0] === 'entrada') {
     loginPage();
