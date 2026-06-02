@@ -24,7 +24,7 @@ const WEEK_START_MONDAY = true;
 ========================= */
 
 function parseDateTime(str: string): Date {
-  return new Date(str.replace(' ', 'T') + 'Z');
+  return new Date(str.replace(' ', 'T'));
 }
 
 function getDayKey(dateStr: string): string {
