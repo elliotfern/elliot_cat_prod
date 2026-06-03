@@ -17,11 +17,21 @@ class DatabaseConnection
 
         $isDev = ($_ENV['APP_ENV'] ?? 'prod') === 'dev';
 
-        $dbUser = $_ENV['DB_USER'] ?? '';
-        $dbPass = $_ENV['DB_PASS'] ?? '';
-        $dbHost = $_ENV['DB_HOST'] ?? '127.0.0.1';
-        $dbName = $_ENV['DB_DBNAME'] ?? '';
+        $dbUser = $_ENV['DB_USER']
+            ?? getenv('DB_USER')
+            ?? '';
 
+        $dbPass = $_ENV['DB_PASS']
+            ?? getenv('DB_PASS')
+            ?? '';
+
+        $dbHost = $_ENV['DB_HOST']
+            ?? getenv('DB_HOST')
+            ?? '127.0.0.1';
+
+        $dbName = $_ENV['DB_DBNAME']
+            ?? getenv('DB_DBNAME')
+            ?? '';
         try {
             self::$conn = new PDO(
                 "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4",
