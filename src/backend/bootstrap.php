@@ -5,10 +5,9 @@ require_once __DIR__ . '../../../vendor/autoload.php';
 use Dotenv\Dotenv;
 
 $basePath = __DIR__ . '/../..';
-$dotenv = Dotenv::createImmutable($basePath, '.env');
 
-if (getenv('APP_ENV') !== 'testing') {
-    $dotenv->load();
+if (file_exists($basePath . '/.env')) {
+    Dotenv::createImmutable($basePath)->load();
 }
 
 require_once __DIR__ . '/Config/funcions.php';
