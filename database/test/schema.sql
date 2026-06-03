@@ -1,6 +1,6 @@
 CREATE TABLE db_geo_ciutats (
   id BINARY(16) PRIMARY KEY,
-  nom VARCHAR(255) NOT NULL
+  ciutat VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE db_agenda_esdeveniments (
