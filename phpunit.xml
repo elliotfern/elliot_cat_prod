@@ -11,7 +11,7 @@
     <env name="APP_ENV" value="test"/>
     <env name="DB_DBNAME" value="epgylzqu_elliot_cat_test"/>
     <env name="DB_HOST" value="127.0.0.1" />
-    <env name="DB_USER" value="epgylzqu_user" force="true"/>
+    <env name="DB_USER" value="epgylzqu_user"/>
 </php>
     <testsuites>
         <testsuite name="Application Test Suite">
