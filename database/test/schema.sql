@@ -1,5 +1,5 @@
 CREATE TABLE db_geo_ciutats (
-  id VARCHAR(36) PRIMARY KEY,
+  id BINARY(16) PRIMARY KEY,
   nom VARCHAR(255) NOT NULL
 );
 
