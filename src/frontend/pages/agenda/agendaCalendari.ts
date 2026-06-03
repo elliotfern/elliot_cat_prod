@@ -6,8 +6,8 @@ export interface BaseAgendaItem {
   id: string;
   titol: string;
   tipus: TipusEsdeveniment;
-  dataInici: string; // "YYYY-MM-DD HH:mm:ss"
-  dataFi: string | null;
+  data_inici: string; // "YYYY-MM-DD HH:mm:ss"
+  data_fi: string;
   totElDia: boolean;
   lloc: string | null;
   source: 'agenda' | 'birthday';
@@ -34,7 +34,7 @@ function getTimePart(dt: string): string {
 }
 
 function compareTime(a: string, b: string): number {
-  return a.split(' ')[1].localeCompare(b.split(' ')[1]);
+  return a.localeCompare(b);
 }
 
 /* =========================
@@ -86,7 +86,7 @@ function getEventClass(tipus: string): string {
 }
 
 function getShortEventLabel(ev: AgendaEsdeveniment): string {
-  const hora = ev.totElDia ? '' : `${getTimePart(ev.dataInici)} · `;
+  const hora = ev.totElDia ? '' : `${getTimePart(ev.data_inici)} · `;
   return `${hora}${ev.titol}`;
 }
 
@@ -97,7 +97,13 @@ function getShortEventLabel(ev: AgendaEsdeveniment): string {
 async function loadMonthData(usuariId: number, year: number, month: number): Promise<AgendaEsdeveniment[]> {
   const { from, to } = getMonthRange(year, month);
 
-  return api.get<AgendaEsdeveniment[]>('agenda/get/esdevenimentsRang', { usuari_id: usuariId, from, to });
+  const response = await api.get<AgendaEsdeveniment[]>('agenda/get/esdevenimentsRang', {
+    usuari_id: usuariId,
+    from,
+    to,
+  });
+
+  return response; // ✅ AQUÍ ESTÁ EL FIX
 }
 
 /* =========================
@@ -127,7 +133,7 @@ function renderCalendar(year: number, month: number, events: AgendaEsdeveniment[
   const byDay: Record<string, AgendaEsdeveniment[]> = {};
 
   events.forEach((e) => {
-    const k = getDatePart(e.dataInici);
+    const k = getDatePart(e.data_inici);
     (byDay[k] ??= []).push(e);
   });
 
@@ -166,7 +172,7 @@ function renderCalendar(year: number, month: number, events: AgendaEsdeveniment[
     const dayEvents = byDay[key] || [];
 
     dayEvents
-      .sort((a, b) => compareTime(a.dataInici, b.dataInici))
+      .sort((a, b) => compareTime(a.data_inici, b.data_fi))
       .slice(0, 3)
       .forEach((ev) => {
         const div = document.createElement('div');
