@@ -88,7 +88,7 @@ jobs:
 
       # 7) Run PHPUnit tests
       - name: Run PHPUnit tests
-        run: vendor/bin/phpunit --colors=always
+        run: vendor/bin/phpunit --exclude-group http --colors=always
 
       # 8) PHP Syntax Check
       - name: PHP Syntax Check

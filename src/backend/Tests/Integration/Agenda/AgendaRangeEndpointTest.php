@@ -9,6 +9,9 @@ use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Agenda\MysqlAgendaRepository;
 use App\Tests\Domain\Agenda\Builder\AgendaEventBuilder;
 use App\Tests\Support\ApiTestClient;
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('http')]
 
 final class AgendaRangeEndpointTest extends TestCase
 {

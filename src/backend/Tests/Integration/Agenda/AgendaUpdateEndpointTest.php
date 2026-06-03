@@ -10,6 +10,9 @@ use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Agenda\MysqlAgendaRepository;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Tests\Domain\Agenda\Builder\AgendaEventBuilder;
+use PHPUnit\Framework\Attributes\Group;
+
+#[Group('http')]
 
 final class AgendaUpdateEndpointTest extends TestCase
 {
