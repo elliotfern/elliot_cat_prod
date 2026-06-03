@@ -33,6 +33,7 @@ jobs:
       DB_PASS: root
       DB_DBNAME: elliot_test
       APP_ENV: test
+      TEST_BASE_URL: http://127.0.0.1:8000
 
     steps:
       # 1) Checkout
@@ -70,6 +71,13 @@ jobs:
       - name: Seed database
         run: |
           mysql -h 127.0.0.1 -uroot -proot elliot_test < database/test/seed.sql
+
+      - name: Start server
+        run: |
+          php -S 127.0.0.1:8000 -t public > /dev/null 2>&1 &
+          sleep 2
+
+      # Start PHP built-in server
 
       # 7) Run PHPUnit tests
       - name: Run PHPUnit tests

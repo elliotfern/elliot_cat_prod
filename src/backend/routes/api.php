@@ -2,6 +2,16 @@
 
 // Rutas principales sin idioma explícito (solo para el idioma por defecto)
 $routes = [
+
+    '/api/test' => [
+        'view' => '../public/test.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+
     // Generador UUID V7
     '/api/uuid' => [
         'view' => '../src/backend/api/100_auxiliars/crear-uuid.php',

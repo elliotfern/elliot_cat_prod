@@ -31,8 +31,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         e.estat,
         e.creat_el,
         e.actualitzat_el,
-        c.ciutat AS ciutat_nom,
-        c.ciutat_ca AS ciutat_ca
+        c.ciutat AS ciutat_nom
     FROM db_agenda_esdeveniments AS e
     LEFT JOIN db_geo_ciutats c ON e.ciutat_id = c.id
     WHERE e.id = :id
@@ -71,8 +70,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         e.estat,
         e.creat_el,
         e.actualitzat_el,
-        c.ciutat AS ciutat_nom,
-        c.ciutat_ca AS ciutat_ca
+        c.ciutat AS ciutat_nom
     FROM db_agenda_esdeveniments AS e
     LEFT JOIN db_geo_ciutats c ON e.ciutat_id = c.id
     WHERE data_inici <= :to
@@ -109,8 +107,7 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         e.estat,
         e.creat_el,
         e.actualitzat_el,
-        c.ciutat AS ciutat_nom,
-        c.ciutat_ca AS ciutat_ca
+        c.ciutat AS ciutat_nom
     FROM db_agenda_esdeveniments AS e
     LEFT JOIN db_geo_ciutats c ON e.ciutat_id = c.id
     WHERE data_inici >= NOW()

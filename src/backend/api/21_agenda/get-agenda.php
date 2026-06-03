@@ -143,7 +143,6 @@ if ($slug === "esdevenimentId") {
     $from     = $_GET['from'] ?? null;
     $to       = $_GET['to'] ?? null;
 
-    error_log(json_encode([$from, $to]));
 
     if ($usuariId <= 0 || !$from || !$to) {
         Response::error(
@@ -173,11 +172,14 @@ if ($slug === "esdevenimentId") {
             $birthdayService
         );
 
-        $result = $useCase->execute($from, $to);
+        $data = array_map(
+            fn($item) => $item->toArray(),
+            $useCase->execute($from, $to)
+        );
 
         Response::success(
             message: MissatgesAPI::success('get'),
-            data: $result,
+            data: $data,
             httpCode: 200
         );
     } catch (\Throwable $e) {

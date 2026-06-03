@@ -8,13 +8,19 @@ final class ApiTestClient
 {
     private string $baseUrl;
 
-    public function __construct(string $baseUrl = 'http://localhost')
+    public function __construct(?string $baseUrl = null)
     {
-        $this->baseUrl = rtrim($baseUrl, '/');
+        $this->baseUrl = rtrim(
+            $baseUrl ?? $_ENV['TEST_BASE_URL'] ?? 'http://localhost',
+            '/'
+        );
     }
 
-    public function get(string $path, array $query = []): array
-    {
+    public function get(
+        string $path,
+        array $query = []
+    ): array {
+
         $url = $this->baseUrl . $path;
 
         if (!empty($query)) {
@@ -24,20 +30,40 @@ final class ApiTestClient
         return $this->request('GET', $url);
     }
 
-    public function post(string $path, array $data = []): array
-    {
+    public function post(
+        string $path,
+        array $data = []
+    ): array {
+
         $url = $this->baseUrl . $path;
-        return $this->request('POST', $url, $data);
+
+        return $this->request(
+            'POST',
+            $url,
+            $data
+        );
     }
 
-    public function put(string $path, array $data = []): array
-    {
+    public function put(
+        string $path,
+        array $data = []
+    ): array {
+
         $url = $this->baseUrl . $path;
-        return $this->request('PUT', $url, $data);
+
+        return $this->request(
+            'PUT',
+            $url,
+            $data
+        );
     }
 
-    private function request(string $method, string $url, array $data = []): array
-    {
+    private function request(
+        string $method,
+        string $url,
+        array $data = []
+    ): array {
+
         $ch = curl_init();
 
         $payload = json_encode($data);
@@ -52,20 +78,34 @@ final class ApiTestClient
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_TIMEOUT => 10,
         ]);
 
         if (!empty($data)) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+
+            curl_setopt(
+                $ch,
+                CURLOPT_POSTFIELDS,
+                $payload
+            );
         }
 
         $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        $httpCode = (int) curl_getinfo(
+            $ch,
+            CURLINFO_HTTP_CODE
+        );
+
         $error = curl_error($ch);
 
         return [
             'status' => $httpCode,
-            'body' => json_decode($response ?: '', true),
-            'raw' => $response,
+            'body' => json_decode(
+                $response ?: '',
+                true
+            ),
+            'raw' => $response ?: '',
             'error' => $error,
         ];
     }

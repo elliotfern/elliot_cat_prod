@@ -16,4 +16,18 @@ final class AgendaItemDTO
         public ?string $lloc,
         public string $source // 'agenda' | 'birthday'
     ) {}
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'titol' => $this->titol,
+            'tipus' => $this->tipus,
+            'data_inici' => $this->dataInici,
+            'data_fi' => $this->dataFi,
+            'tot_el_dia' => $this->totElDia,
+            'lloc' => $this->lloc,
+            'source' => $this->source,
+        ];
+    }
 }

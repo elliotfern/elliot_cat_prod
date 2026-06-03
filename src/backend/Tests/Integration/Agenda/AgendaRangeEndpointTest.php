@@ -16,7 +16,7 @@ final class AgendaRangeEndpointTest extends TestCase
         $pdo = DatabaseConnection::getConnection();
         $repository = new MysqlAgendaRepository($pdo);
 
-        // Creamos evento en BD
+        // Crear evento en BD
         $event = AgendaEventBuilder::new()
             ->withDateRange(
                 '2026-06-15 10:00:00',
@@ -26,7 +26,10 @@ final class AgendaRangeEndpointTest extends TestCase
 
         $repository->save($event);
 
-        $url = 'http://localhost/api/agenda/get/esdevenimentsRang'
+        // URL dinámica según entorno
+        $baseUrl = $_ENV['TEST_BASE_URL'] ?? 'http://localhost';
+
+        $url = $baseUrl . '/api/agenda/get/esdevenimentsRang'
             . '?usuari_id=1'
             . '&from=2026-06-01'
             . '&to=2026-06-30';
