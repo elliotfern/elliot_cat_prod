@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Agenda\MysqlAgendaRepository;
 use App\Tests\Domain\Agenda\Builder\AgendaEventBuilder;
+use App\Tests\Support\ApiTestClient;
 
 final class AgendaRangeEndpointTest extends TestCase
 {
@@ -26,26 +27,30 @@ final class AgendaRangeEndpointTest extends TestCase
 
         $repository->save($event);
 
-        // URL dinámica según entorno
-        $baseUrl = $_ENV['TEST_BASE_URL'] ?? 'http://localhost';
+        // Cliente API (usa TEST_BASE_URL si existe)
+        $client = new ApiTestClient();
 
-        $url = $baseUrl . '/api/agenda/get/esdevenimentsRang'
-            . '?usuari_id=1'
-            . '&from=2026-06-01'
-            . '&to=2026-06-30';
+        $response = $client->get(
+            '/api/agenda/get/esdevenimentsRang',
+            [
+                'usuari_id' => 1,
+                'from' => '2026-06-01',
+                'to' => '2026-06-30'
+            ]
+        );
 
-        $responseRaw = file_get_contents($url);
+        // 🔥 DEBUG útil si falla en CI
+        $this->assertNotEmpty(
+            $response['raw'] ?? null,
+            'La API no ha devuelto respuesta'
+        );
 
-        $this->assertNotFalse($responseRaw);
-
-        $response = json_decode($responseRaw, true);
-
-        $this->assertIsArray($response);
-        $this->assertArrayHasKey('data', $response);
+        $this->assertIsArray($response['body']);
+        $this->assertArrayHasKey('data', $response['body']);
 
         $found = false;
 
-        foreach ($response['data'] as $item) {
+        foreach ($response['body']['data'] as $item) {
             if ($item['id'] === $event->getId()->toString()) {
                 $found = true;
                 break;
