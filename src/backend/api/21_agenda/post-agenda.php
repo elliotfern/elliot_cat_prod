@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Application\Agenda\Factory\AgendaEventFactory;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Application\Agenda\Schema\AgendaSchema;
@@ -17,12 +18,12 @@ $pdo = DatabaseConnection::getConnection();
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'http://localhost']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'http://localhost']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Response::error(MissatgesAPI::error('method_not_allowed'), [], 405);
@@ -79,8 +80,15 @@ try {
     // -------------------------
 
     $repository = new MysqlAgendaRepository($pdo);
-    $useCase = new CreateAgendaEventUseCase($repository);
+    $factory = new AgendaEventFactory();
+
+    $useCase = new CreateAgendaEventUseCase(
+        $repository,
+        $factory
+    );
+
     $id = $useCase->execute($agendaData);
+
 
     // -------------------------
     // RESPONSE

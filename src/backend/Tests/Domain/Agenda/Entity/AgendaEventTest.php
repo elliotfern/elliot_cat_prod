@@ -28,13 +28,6 @@ final class AgendaEventTest extends TestCase
         );
     }
 
-    public function test_it_allows_null_city(): void
-    {
-        $event = AgendaEventBuilder::new()->build();
-
-        $this->assertNull($event->ciutatId());
-    }
-
     public function test_it_rejects_invalid_date_range(): void
     {
         $this->expectException(\InvalidArgumentException::class);

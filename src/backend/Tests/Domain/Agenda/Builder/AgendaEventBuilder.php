@@ -21,7 +21,8 @@ final class AgendaEventBuilder
     private AgendaTipus $tipus;
 
     private ?string $lloc = 'Barcelona';
-    private ?CiutatId $ciutatId = null;
+
+    private CiutatId $ciutatId;
 
     private DateRange $dateRange;
 
@@ -37,9 +38,12 @@ final class AgendaEventBuilder
         $self = new self();
 
         $self->id = AgendaId::fromString('019e7223-646d-71d1-abee-2ed1613c1d0e');
+
         $self->tipus = AgendaTipus::fromString('altre');
         $self->estat = AgendaEstat::fromString('confirmat');
+        $self->ciutatId = CiutatId::fromString('019e7223-646d-71d1-abee-2ed1613c1d0e');
 
+        // 🔥 IMPORTANTE: inicializar SIEMPRE DateRange
         $self->dateRange = new DateRange(
             new \DateTimeImmutable('2026-06-01 10:00:00'),
             new \DateTimeImmutable('2026-06-01 11:00:00')
@@ -57,9 +61,9 @@ final class AgendaEventBuilder
         return $this;
     }
 
-    public function withCiutat(string $uuid): self
+    public function withCiutat(?string $uuid): self
     {
-        $this->ciutatId = CiutatId::fromString($uuid);
+        $this->ciutatId = $uuid ? CiutatId::fromString($uuid) : null;
         return $this;
     }
 
@@ -90,7 +94,6 @@ final class AgendaEventBuilder
 
         return $this;
     }
-
 
     public function withDescripcio(?string $descripcio): self
     {

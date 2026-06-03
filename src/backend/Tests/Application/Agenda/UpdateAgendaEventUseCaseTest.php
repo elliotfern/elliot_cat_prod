@@ -10,6 +10,7 @@ use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
 use App\Domain\Agenda\Entity\AgendaEvent;
 use App\Domain\Agenda\ValueObject\AgendaId;
 use App\Tests\Domain\Agenda\Builder\AgendaEventBuilder;
+use App\Application\Agenda\Factory\AgendaEventFactory;
 
 final class UpdateAgendaEventUseCaseTest extends TestCase
 {
@@ -43,7 +44,12 @@ final class UpdateAgendaEventUseCaseTest extends TestCase
             ->method('save')
             ->with($this->isInstanceOf(AgendaEvent::class));
 
-        $useCase = new UpdateAgendaEventUseCase($repository);
+
+        $factory = new AgendaEventFactory();
+        $useCase = new UpdateAgendaEventUseCase(
+            $repository,
+            $factory
+        );
 
         $result = $useCase->execute($id, $input);
 
@@ -71,7 +77,11 @@ final class UpdateAgendaEventUseCaseTest extends TestCase
             ->with($this->isInstanceOf(AgendaId::class))
             ->willReturn(null);
 
-        $useCase = new UpdateAgendaEventUseCase($repository);
+        $factory = new AgendaEventFactory();
+        $useCase = new UpdateAgendaEventUseCase(
+            $repository,
+            $factory
+        );
 
         $useCase->execute($id, $input);
     }

@@ -50,4 +50,12 @@ final class DateRange
     {
         return $this->end === null;
     }
+
+    public static function fromStrings(string $start, ?string $end = null): self
+    {
+        return new self(
+            new \DateTimeImmutable($start),
+            $end ? new \DateTimeImmutable($end) : null
+        );
+    }
 }

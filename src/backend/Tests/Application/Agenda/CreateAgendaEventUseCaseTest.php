@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use App\Application\Agenda\UseCase\CreateAgendaEventUseCase;
 use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
 use App\Domain\Agenda\Entity\AgendaEvent;
+use App\Application\Agenda\Factory\AgendaEventFactory;
 
 final class CreateAgendaEventUseCaseTest extends TestCase
 {
@@ -31,7 +32,11 @@ final class CreateAgendaEventUseCaseTest extends TestCase
             ->method('save')
             ->with($this->isInstanceOf(AgendaEvent::class));
 
-        $useCase = new CreateAgendaEventUseCase($repository);
+        $factory = new AgendaEventFactory();
+        $useCase = new CreateAgendaEventUseCase(
+            $repository,
+            $factory
+        );
 
         $result = $useCase->execute($input);
 
@@ -57,7 +62,11 @@ final class CreateAgendaEventUseCaseTest extends TestCase
 
         $repository = $this->createMock(AgendaRepositoryInterface::class);
 
-        $useCase = new CreateAgendaEventUseCase($repository);
+        $factory = new AgendaEventFactory();
+        $useCase = new CreateAgendaEventUseCase(
+            $repository,
+            $factory
+        );
 
         $useCase->execute($input);
     }

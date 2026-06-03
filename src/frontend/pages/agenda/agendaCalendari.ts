@@ -6,7 +6,7 @@ export interface BaseAgendaItem {
   id: string;
   titol: string;
   tipus: TipusEsdeveniment;
-  dataInici: string;
+  dataInici: string; // "YYYY-MM-DD HH:mm:ss"
   dataFi: string | null;
   totElDia: boolean;
   lloc: string | null;
@@ -20,16 +20,29 @@ const MONTHS_CA = ['Gener', 'Febrer', 'Març', 'Abril', 'Maig', 'Juny', 'Juliol'
 const WEEK_START_MONDAY = true;
 
 /* =========================
-   HELPERS FECHA
+   🔧 STRING DATE HELPERS (SIN Date)
 ========================= */
 
-function parseDateTime(str: string): Date {
-  return new Date(str.replace(' ', 'T'));
+function getDatePart(dt: string): string {
+  return dt.split(' ')[0];
 }
 
-function getDayKey(dateStr: string): string {
-  const d = parseDateTime(dateStr);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function getTimePart(dt: string): string {
+  const [, time] = dt.split(' ');
+  const [hh, mm] = time.split(':');
+  return `${hh}:${mm}`;
+}
+
+function compareTime(a: string, b: string): number {
+  return a.split(' ')[1].localeCompare(b.split(' ')[1]);
+}
+
+/* =========================
+   CALENDAR HELPERS
+========================= */
+
+function formatKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 function getMonthRange(year: number, month: number) {
@@ -37,8 +50,8 @@ function getMonthRange(year: number, month: number) {
   const to = new Date(year, month + 1, 0);
 
   return {
-    from: `${from.getFullYear()}-${String(from.getMonth() + 1).padStart(2, '0')}-${String(from.getDate()).padStart(2, '0')}`,
-    to: `${to.getFullYear()}-${String(to.getMonth() + 1).padStart(2, '0')}-${String(to.getDate()).padStart(2, '0')}`,
+    from: formatKey(from),
+    to: formatKey(to),
   };
 }
 
@@ -73,12 +86,7 @@ function getEventClass(tipus: string): string {
 }
 
 function getShortEventLabel(ev: AgendaEsdeveniment): string {
-  const d = parseDateTime(ev.dataInici);
-
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-
-  const hora = ev.totElDia ? '' : `${hh}:${mm} · `;
+  const hora = ev.totElDia ? '' : `${getTimePart(ev.dataInici)} · `;
   return `${hora}${ev.titol}`;
 }
 
@@ -89,9 +97,7 @@ function getShortEventLabel(ev: AgendaEsdeveniment): string {
 async function loadMonthData(usuariId: number, year: number, month: number): Promise<AgendaEsdeveniment[]> {
   const { from, to } = getMonthRange(year, month);
 
-  const data = await api.get<AgendaEsdeveniment[]>('agenda/get/esdevenimentsRang', { usuari_id: usuariId, from, to });
-
-  return data;
+  return api.get<AgendaEsdeveniment[]>('agenda/get/esdevenimentsRang', { usuari_id: usuariId, from, to });
 }
 
 /* =========================
@@ -112,29 +118,37 @@ function renderCalendar(year: number, month: number, events: AgendaEsdeveniment[
   const days = last.getDate();
   const startIndex = getWeekDayIndex(first);
 
-  const today = new Date();
-  const todayKey = getDayKey(`${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`);
+  // hoy (solo para UI, no para eventos)
+  const todayKey = (() => {
+    const d = new Date();
+    return formatKey(d);
+  })();
 
   const byDay: Record<string, AgendaEsdeveniment[]> = {};
+
   events.forEach((e) => {
-    const k = getDayKey(e.dataInici);
+    const k = getDatePart(e.dataInici);
     (byDay[k] ??= []).push(e);
   });
 
+  // empty cells
   for (let i = 0; i < startIndex; i++) {
     const empty = document.createElement('div');
     empty.className = 'cal-day cal-day--empty';
     grid.appendChild(empty);
   }
 
+  // days
   for (let d = 1; d <= days; d++) {
     const date = new Date(year, month, d);
-    const key = getDayKey(`${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`);
+    const key = formatKey(date);
 
     const cell = document.createElement('div');
     cell.className = 'cal-day';
 
-    if (key === todayKey) cell.classList.add('cal-day--today');
+    if (key === todayKey) {
+      cell.classList.add('cal-day--today');
+    }
 
     const header = document.createElement('div');
     header.className = 'cal-day-header';
@@ -152,7 +166,7 @@ function renderCalendar(year: number, month: number, events: AgendaEsdeveniment[
     const dayEvents = byDay[key] || [];
 
     dayEvents
-      .sort((a, b) => parseDateTime(a.dataInici).getTime() - parseDateTime(b.dataInici).getTime())
+      .sort((a, b) => compareTime(a.dataInici, b.dataInici))
       .slice(0, 3)
       .forEach((ev) => {
         const div = document.createElement('div');
@@ -163,6 +177,7 @@ function renderCalendar(year: number, month: number, events: AgendaEsdeveniment[
         a.href = ev.source === 'birthday' ? `/gestio/agenda-contactes/fitxa-contacte/${ev.id}` : `/gestio/agenda/veure-esdeveniment/${ev.id}`;
 
         a.textContent = getShortEventLabel(ev);
+
         div.appendChild(a);
         container.appendChild(div);
       });

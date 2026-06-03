@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Application\Agenda\Factory\AgendaEventFactory;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Application\Agenda\Schema\AgendaSchema;
@@ -21,13 +22,12 @@ $id = $routeParams[0] ?? null;
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'http://localhost']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
-
+corsAllow(['https://elliot.cat', 'http://localhost']);
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     Response::error(MissatgesAPI::error('method_not_allowed'), [], 405);
     exit;
@@ -96,8 +96,12 @@ try {
     // -------------------------
 
     $repository = new MysqlAgendaRepository($pdo);
+    $factory = new AgendaEventFactory();
 
-    $useCase = new UpdateAgendaEventUseCase($repository);
+    $useCase = new UpdateAgendaEventUseCase(
+        $repository,
+        $factory
+    );
 
     $useCase->execute(
         $agendaId,
@@ -110,7 +114,7 @@ try {
 
     Response::success(
         message: MissatgesAPI::success('update'),
-        data: ['id' => $id],
+        data: ['id' => $agendaId],
         httpCode: 200
     );
 } catch (\Throwable $e) {

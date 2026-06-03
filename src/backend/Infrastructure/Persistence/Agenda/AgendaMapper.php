@@ -37,10 +37,7 @@ final class AgendaMapper
             lloc: isset($row['lloc'])
                 ? (string)$row['lloc']
                 : null,
-            ciutatId: !empty($row['ciutat_id'])
-                ? new CiutatId($row['ciutat_id'])
-                : null,
-
+            ciutatId: new CiutatId($row['ciutat_id']),
             dateRange: $dateRange,
 
             totElDia: (bool)$row['tot_el_dia'],

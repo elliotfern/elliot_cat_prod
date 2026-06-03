@@ -4,46 +4,19 @@ declare(strict_types=1);
 
 namespace App\Application\Agenda\UseCase;
 
-use App\Domain\Agenda\Entity\AgendaEvent;
+use App\Application\Agenda\Factory\AgendaEventFactory;
 use App\Domain\Agenda\Repository\AgendaRepositoryInterface;
-use App\Domain\Agenda\ValueObject\AgendaEstat;
-use App\Domain\Agenda\ValueObject\AgendaId;
-use App\Domain\Agenda\ValueObject\AgendaTipus;
-use App\Domain\Ciutat\ValueObject\CiutatId;
-use App\Domain\Shared\ValueObject\DateRange;
 
 final class CreateAgendaEventUseCase
 {
     public function __construct(
-        private AgendaRepositoryInterface $repository
+        private AgendaRepositoryInterface $repository,
+        private AgendaEventFactory $factory
     ) {}
 
     public function execute(array $data): string
     {
-        $now = new \DateTimeImmutable();
-
-        $dateRange = new DateRange(
-            new \DateTimeImmutable($data['data_inici']),
-            !empty($data['data_fi'])
-                ? new \DateTimeImmutable($data['data_fi'])
-                : null
-        );
-
-        $event = new AgendaEvent(
-            id: AgendaId::generate(),
-            titol: $data['titol'],
-            descripcio: $data['descripcio'] ?? null,
-            tipus: new AgendaTipus($data['tipus']),
-            lloc: $data['lloc'] ?? null,
-            ciutatId: !empty($data['ciutat_id'])
-                ? CiutatId::fromString($data['ciutat_id'])
-                : null,
-            dateRange: $dateRange,
-            totElDia: (bool)$data['tot_el_dia'],
-            estat: new AgendaEstat($data['estat']),
-            creatEl: $now,
-            actualitzatEl: $now
-        );
+        $event = $this->factory->create($data);
 
         $this->repository->save($event);
 

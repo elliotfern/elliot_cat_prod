@@ -15,6 +15,25 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: elliot_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot" --health-interval=10s --health-timeout=5s --health-retries=10
+
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_USER: root
+      DB_PASS: root
+      DB_DBNAME: elliot_test
+      APP_ENV: test
+
     steps:
       # 1) Checkout
       - name: Checkout
@@ -29,26 +48,38 @@ jobs:
           coverage: none
           cache: composer
 
-      # 3) ENV Test
-      - name: Create CI env file
-        run: |
-          touch .env
-          echo "APP_ENV=testing" >> .env
-          echo "APP_DEBUG=true" >> .env
-          echo "DATABASE_URL=sqlite:///:memory:" >> .env
-
+      # 3) Install PHP dependencies
       - name: Install PHP dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      # 4) PHP Syntax Check
-      - name: PHP Syntax Check
-        run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
+      # 4) Wait for MySQL
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            mysqladmin ping -h 127.0.0.1 -proot && break
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
 
-      # 5) Run tests
+      # 5) Init DB schema
+      - name: Init database schema
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot elliot_test < database/test/schema.sql
+
+      # 6) Seed database
+      - name: Seed database
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot elliot_test < database/test/seed.sql
+
+      # 7) Run PHPUnit tests
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --colors=always
 
-      # 6) Node setup
+      # 8) PHP Syntax Check
+      - name: PHP Syntax Check
+        run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      # 9) Node setup
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -67,19 +98,12 @@ jobs:
           INTRANET_WEB: https://elliot.cat/gestio
         run: npm run build
 
-      # 8) Write version file
+      # 10) Write version file
       - name: Write APP_VERSION file
         run: |
           echo "${GITHUB_SHA}" > public/version.txt
-          echo "APP_VERSION=${GITHUB_SHA}"
-          cat public/version.txt
 
-      # 9) Show footer debug (optional)
-      - name: Show footer bundle line
-        run: |
-          grep -n "bundle.js?v=" public/includes/footer-end.php || true
-
-      # 10) SSH setup
+      # 11) SSH setup
       - name: Start SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -90,7 +114,7 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H 87.98.230.129 >> ~/.ssh/known_hosts
 
-      # 11) Rsync deploy
+      # 12) Rsync deploy
       - name: Sync project to shared hosting (rsync)
         run: |
           set -euo pipefail
@@ -110,7 +134,7 @@ jobs:
             -e "ssh" \
             ./ "$REMOTE:$REMOTE_DIR"
 
-      # 12) Verify deploy
+      # 13) Verify deploy
       - name: Verify version on server
         run: |
           ssh epgylzqu@87.98.230.129 "bash -lc '

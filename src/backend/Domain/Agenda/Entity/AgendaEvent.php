@@ -20,7 +20,7 @@ final class AgendaEvent
         private readonly ?string $descripcio,
         private readonly AgendaTipus $tipus,
         private readonly ?string $lloc,
-        private readonly ?CiutatId $ciutatId,
+        private readonly CiutatId $ciutatId,
         private readonly DateRange $dateRange,
         private readonly bool $totElDia,
         private readonly AgendaEstat $estat,
@@ -55,7 +55,7 @@ final class AgendaEvent
         return $this->lloc;
     }
 
-    public function ciutatId(): ?CiutatId
+    public function ciutatId(): CiutatId
     {
         return $this->ciutatId;
     }
