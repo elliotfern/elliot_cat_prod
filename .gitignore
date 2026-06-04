@@ -8,6 +8,8 @@ error_log
 
 # Ignorar directoris imatges
 /public/img
+/public/info.php
+public/info.php
 
 # Ignorar logs y archivos temporales
 /logs/
