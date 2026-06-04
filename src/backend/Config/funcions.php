@@ -3,15 +3,14 @@
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-function getAuthUserType(): ?int
+function getAuthUserType(): ?string
 {
     $jwtSecret = $_ENV['TOKEN'] ?? null;
     if (!$jwtSecret) {
         return null;
     }
 
-    $token = $_COOKIE['token'] ?? '';
-    $token = trim((string)$token);
+    $token = trim($_COOKIE['token'] ?? '');
     if ($token === '') {
         return null;
     }
@@ -19,12 +18,8 @@ function getAuthUserType(): ?int
     try {
         $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
 
-        if (!isset($decoded->user_type)) {
-            return null;
-        }
-
-        $userType = (int)$decoded->user_type;
-        return in_array($userType, [1, 2], true) ? $userType : null;
+        // 🟡 COMPATIBILIDAD NUEVA
+        return $decoded->role ?? null;
     } catch (Exception $e) {
         error_log("Error en getAuthUserType(): " . $e->getMessage());
         return null;
@@ -40,7 +35,7 @@ function getSanitizedCookie($name)
 
 function isUserAdmin(): bool
 {
-    return getAuthUserType() === 1;
+    return getAuthUserType() === 'admin';
 }
 
 function isUserAuthenticated(): bool
@@ -83,16 +78,20 @@ function corsAllow(array $allowedOrigins): void
 // Función para verificar el JWT
 function verificarJWT($token)
 {
-    // Se asume que tienes una función para decodificar el JWT
-    // y una clave secreta para verificar la firma (asegúrate de reemplazarla con la tuya)
     $jwtSecret = $_ENV['TOKEN'];
 
     try {
-        // Decodifica el JWT (usa una librería como Firebase JWT o alguna similar)
         $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
+
+        // 🟢 compat legacy si existe
+        if (!isset($decoded->role) && isset($decoded->user_type)) {
+            $decoded->role = ((int)$decoded->user_type === 1)
+                ? 'admin'
+                : 'usuari';
+        }
+
         return $decoded;
     } catch (Exception $e) {
-        // Si el token es inválido
         return null;
     }
 }
@@ -111,14 +110,14 @@ function verificaTipusUsuari(): void
         return;
     }
 
-    $user_type = $usuario->user_type ?? null;
+    $role = $usuario->role ?? null;
 
-    switch ($user_type) {
-        case 1:
+    switch ($role) {
+        case 'admin':
             header('Location: /gestio');
             exit;
 
-        case 2:
+        case 'usuari':
             header('Location: /usuaris');
             exit;
     }
@@ -135,21 +134,27 @@ function verificaTipusUsuari(): void
 function getAuthFromToken(): array
 {
     $jwtSecret  = $_ENV['TOKEN'] ?? null;
-    $cookieName = 'token';
 
-    if (!$jwtSecret || empty($_COOKIE[$cookieName])) {
-        return ['is_admin' => false, 'user_id_uuid' => null];
+    if (!$jwtSecret || empty($_COOKIE['token'])) {
+        return ['is_admin' => false, 'role' => null];
     }
 
     try {
-        $decoded = JWT::decode($_COOKIE[$cookieName], new Key($jwtSecret, 'HS256'));
-        $isAdmin = (int)($decoded->user_type ?? 0) === 1;
-        $uid     = $decoded->user_id ?? null; // UUID (string) del token
-        $uuid    = (is_string($uid) && strlen($uid) <= 64) ? $uid : null;
+        $decoded = JWT::decode($_COOKIE['token'], new Key($jwtSecret, 'HS256'));
 
-        return ['is_admin' => $isAdmin, 'user_id_uuid' => $uuid];
+        $role = $decoded->role ?? null;
+
+        return [
+            'is_admin' => $role === 'admin',
+            'role' => $role,
+            'user_id_uuid' => $decoded->user_id ?? null
+        ];
     } catch (\Throwable $e) {
-        return ['is_admin' => false, 'user_id_uuid' => null];
+        return [
+            'is_admin' => false,
+            'role' => null,
+            'user_id_uuid' => null
+        ];
     }
 }
 

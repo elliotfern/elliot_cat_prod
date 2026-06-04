@@ -2,15 +2,20 @@
 
 import { api } from '../../core/api/client';
 
-type MeResponse = {
-  authenticated: boolean;
-  user_id?: string | null;
-  email?: string | null;
-  full_name?: string | null;
-  user_type?: number | null;
-  is_admin?: boolean;
-  error?: string;
-};
+export type MeResponse =
+  | {
+      authenticated: true;
+      user: {
+        id: string;
+        email: string;
+        full_name: string;
+        role: 'admin' | 'user';
+      };
+    }
+  | {
+      authenticated: false;
+      error: string;
+    };
 
 type CachedMe = {
   me: MeResponse;
@@ -30,13 +35,16 @@ function safeJsonParse<T>(raw: string): T | null {
 }
 
 function buildFingerprint(me: MeResponse): string {
-  const uid = String(me.user_id ?? '').trim();
+  if (!me.authenticated) {
+    return 'anon';
+  }
 
+  const uid = me.user.id.trim();
   return uid ? `uid:${uid}` : 'anon';
 }
 
 function isAdminFromMe(me: MeResponse): boolean {
-  return !!me.authenticated && (me.user_type === 1 || me.is_admin === true);
+  return !!me.authenticated && me.user?.role === 'admin';
 }
 
 function clearMeCache(): void {
@@ -45,7 +53,7 @@ function clearMeCache(): void {
 
 export async function fetchMe(): Promise<MeResponse> {
   try {
-    return await api.get<MeResponse>('auth/get/me');
+    return await api.get<MeResponse>('usuaris/get/me');
   } catch (error) {
     console.error(error);
 

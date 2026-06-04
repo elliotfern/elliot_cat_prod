@@ -9,7 +9,7 @@ type MeResponse = {
   is_admin: boolean;
 };
 
-const ME_ENDPOINT = 'auth/get/me';
+const ME_ENDPOINT = 'usuaris/get/me';
 const GESTIO_URL = '/gestio';
 
 function escapeHtml(s: string): string {

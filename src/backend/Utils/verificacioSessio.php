@@ -40,10 +40,10 @@ function verificarSesion(): object
     try {
         $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
 
-        $userType = isset($decoded->user_type) ? (int)$decoded->user_type : null;
+        $role = isset($decoded->role) ? $decoded->role : null;
 
         // Solo permitimos user_type 1 (admin) o 2 (usuario)
-        if (!in_array($userType, [1, 2], true)) {
+        if (!in_array($role, ["admin", "usuari"], true)) {
             header('Location: /entrada');
             exit();
         }
@@ -55,7 +55,7 @@ function verificarSesion(): object
         if (isset($decoded->user_id)) $_COOKIE['uuid'] = (string)$decoded->user_id;
 
         // (opcional) también en $_SESSION para no depender de $_COOKIE en templates
-        $_SESSION['user_type'] = $userType;
+        $_SESSION['user_troleype'] = $role;
         $_SESSION['nom'] = $decoded->nom ?? null;
         $_SESSION['email'] = $decoded->email ?? null;
         $_SESSION['uuid'] = $decoded->user_id ?? null;
@@ -68,13 +68,11 @@ function verificarSesion(): object
     }
 }
 
-
-
 function verificarAdmin(): object
 {
     $decoded = verificarSesion(); // ya valida token + user_type 1 o 2
 
-    if ((int)($decoded->user_type ?? 0) !== 1) {
+    if (($decoded->role ?? null) !== 'admin') {
         header('Location: /entrada');
         exit();
     }

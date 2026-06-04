@@ -144,7 +144,6 @@ class Response
         }
 
         echo $json;
-        exit;
     }
 
     private static function sanitizeUtf8(mixed $data): mixed

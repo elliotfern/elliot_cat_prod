@@ -11,6 +11,11 @@ final class Uuid
         return RamseyUuid::uuid7()->toString();
     }
 
+    public static function generateBinary(): string
+    {
+        return RamseyUuid::uuid7()->getBytes();
+    }
+
     public static function toBinary(string $uuid): string
     {
         return RamseyUuid::fromString($uuid)->getBytes();

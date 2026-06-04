@@ -21,57 +21,25 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    // API: Registre usuari / Login
-    '/api/auth/login' => [
-        'view' => '../src/backend/api/00_auth/get/get-login.php',
+    // Usuaris
+    '/api/usuaris/get/{slug}' => [
+        'view' => '../src/backend/api/00_auth/get-usuaris.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true
     ],
 
-    '/api/auth/get/{slug}' => [
-        'view' => '../src/backend/api/00_auth/get/get-auth.php',
+    '/api/usuaris/post/{slug}' => [
+        'view' => '../src/backend/api/00_auth/post-usuaris.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true
     ],
 
-    '/api/auth/get/usuaris' => [
-        'view' => '../src/backend/api/00_auth/get/get-usuaris.php',
-        'needs_session' => false,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => true
-    ],
-
-    '/api/auth/get/usuari/{id}' => [
-        'view' => '../src/backend/api/00_auth/get/get-usuari.php',
-        'needs_session' => false,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => true
-    ],
-
-    '/api/auth/post/usuari' => [
-        'view' => '../src/backend/api/00_auth/post/post-usuari.php',
-        'needs_session' => false,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => true
-    ],
-
-    '/api/auth/put/usuari' => [
-        'view' => '../src/backend/api/00_auth/put/put-usuari.php',
-        'needs_session' => false,
-        'header_footer' => false,
-        'header_menu_footer' => false,
-        'apiSenseHTML' => true
-    ],
-
-    '/api/auth/get/nomUsuari' => [
-        'view' => '../src/backend/api/00_auth/get/get-nom-usuari.php',
+    '/api/usuaris/put/{slug}' => [
+        'view' => '../src/backend/api/00_auth/put-usuaris.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,

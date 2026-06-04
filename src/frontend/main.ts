@@ -6,7 +6,6 @@ import { getPageType } from './utils/urlPath';
 import { cinema } from './pages/cinema/funcions';
 import { loginPage } from './pages/login/funcions';
 import { vault } from './pages/vault/funcions';
-//import { historiaOberta } from './pages/historiaOberta/historiaOberta';
 import { biblioteca } from './pages/biblioteca/biblioteca';
 import { adreces } from './pages/adreces/adreces';
 import { persona } from './pages/persona/persona';
