@@ -1,19 +1,19 @@
-  <div class="container">
+<?php
 
-    <div id="barraNavegacioContenidor"></div>
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
 
-    <main>
-      <div class="container contingut">
-        <h1>Agenda de contactes</h1>
+<div id="barraNavegacioContenidor"></div>
 
-        <?php if (isUserAdmin()) : ?>
-          <p>
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['contactes']; ?>/nou-contacte/'" class="button btn-gran btn-secondari">Afegir contacte</button>
-          </p>
-        <?php endif; ?>
+<div class="container contingut">
+  <h1>Agenda de contactes</h1>
 
-        <div id="taulaLlistatContactes"></div>
+  <?php if ($viewModel->isAdmin) : ?>
+    <p>
+      <button onclick="window.location.href='<?php echo $url['contactes']; ?>/nou-contacte/'" class="button btn-gran btn-secondari">Afegir contacte</button>
+    </p>
+  <?php endif; ?>
 
-      </div>
-    </main>
-  </div>
+  <div id="taulaLlistatContactes"></div>
+
+</div>

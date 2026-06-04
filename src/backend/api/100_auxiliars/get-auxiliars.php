@@ -6,7 +6,7 @@ use App\Config\Database;
 use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Ciutat\MysqlCiutatRepository;
 use App\Infrastructure\Persistence\Pais\MysqlPaisRepository;
-use App\Utils\AdminMiddleware;
+use App\Infrastructure\Security\Auth\AuthFactory;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
@@ -444,7 +444,7 @@ if ($slug === 'directors') {
     // ruta GET => "/api/cinema/get/auxiliars/paisos"
 } else if ($slug === "pais" || $slug === "paisos") {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $paisos = $paisRepository->findAll();
 

@@ -1,32 +1,28 @@
   <div id="barraNavegacioContenidor"></div>
 
-  <div class="container">
+  <h1>Arts escèniques, cinema i televisió: llistat sères tv</h1>
 
-    <h1>Arts escèniques, cinema i televisió: llistat sères tv</h1>
-
-    <p>
-      <button onclick="window.location.href='<?php echo APP_INTRANET . $url['cinema']; ?>/nova-serie/'" class="button btn-gran btn-secondari">Afegir sèrie tv</button>
-    </p>
+  <p>
+    <button onclick="window.location.href='<?php echo $url['cinema']; ?>/nova-serie/'" class="button btn-gran btn-secondari">Afegir sèrie tv</button>
+  </p>
 
 
-    <div class="table-responsive">
-      <table class="table table-striped table-hover align-middle" id="seriesTable">
-        <thead class="table-dark">
-          <tr>
-            <th>Nom</th>
-            <th>Gènere</th>
-            <th>Director/a</th>
-            <th>Any</th>
-            <th>País</th>
-            <th>Idioma</th>
-            <th class="text-end">Accions</th>
-          </tr>
-        </thead>
-        <tbody id="seriesContainer">
-        </tbody>
-      </table>
-    </div>
-
+  <div class="table-responsive">
+    <table class="table table-striped table-hover align-middle" id="seriesTable">
+      <thead class="table-dark">
+        <tr>
+          <th>Nom</th>
+          <th>Gènere</th>
+          <th>Director/a</th>
+          <th>Any</th>
+          <th>País</th>
+          <th>Idioma</th>
+          <th class="text-end">Accions</th>
+        </tr>
+      </thead>
+      <tbody id="seriesContainer">
+      </tbody>
+    </table>
   </div>
 
   <script>

@@ -1,4 +1,7 @@
 <?php
+
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+
 $id = $routeParams[0];
 ?>
 
@@ -8,14 +11,14 @@ $id = $routeParams[0];
     <h1>Gestor de projectes</h1>
     <h4 id="subtitolProjecte">Detalls del projecte</h4>
 
-    <?php if (isUserAdmin()) : ?>
+    <?php if ($viewModel->isAdmin) : ?>
         <p>
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/nova-tasca'"
+            <button onclick="window.location.href='<?php echo $url['projectes']; ?>/nova-tasca'"
                 class="button btn-gran btn-secondari">
                 Afegir tasca
             </button>
 
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/modifica-projecte/<?php echo $id; ?>'"
+            <button onclick="window.location.href='<?php echo $url['projectes']; ?>/modifica-projecte/<?php echo $id; ?>'"
                 class="button btn-gran btn-secondari">
                 Edita projecte
             </button>

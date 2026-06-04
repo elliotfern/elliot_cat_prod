@@ -5,10 +5,10 @@ use App\Application\Client\Service\ClientService;
 use App\Config\Database;
 use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Client\MysqlClientRepository;
+use App\Infrastructure\Security\Auth\AuthFactory;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
-use App\Utils\AdminMiddleware;
 use App\Utils\Uuid;
 
 /** @var array $routeParams */
@@ -45,7 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // ruta => "https://elliot.cat/api/comptabilitat/get/clients"
 if ($slug === 'clients') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
+
     $clients = $clientService->getAll();
 
     $data = array_map(
@@ -63,8 +64,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/clientId?id=i89jnbd"
 } else if ($slug === 'clientId') {
 
-    AdminMiddleware::handle();
-
+    AuthFactory::admin()->handle();
     $id = $_GET['id'] ?? null;
 
     $client = $clientService->getById($id);
@@ -87,7 +87,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostosClientId?id=i89jnbd"
 } else if ($slug === 'pressupostosClientId') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $id = $_GET['id'];
 
@@ -141,7 +141,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostId?id=i89jnbd"
 } else if ($slug === 'pressupostId') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $id = $_GET['id'];
     $sql = <<<SQL
@@ -195,7 +195,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/facturesClientId?id=i89jnbd"
 } else if ($slug === 'facturesClientId') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $id = $_GET['id'];
 
@@ -284,7 +284,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/facturacioClients?id={id}"
 } else if ($slug === 'facturacioClients') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $emissor_id = isset($_GET['id']) ? $_GET['id'] : null;
 
@@ -361,7 +361,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id=1"
 } else if ($slug === 'facturaCompleta') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
     $pdf = isset($_GET['pdf']) ? true : false; // Parámetro opcional
@@ -493,7 +493,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/despeses?receptor_id={id}&tipus_despesa={personal|professional}"
 } else if ($slug === 'despeses') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $receptor_id = isset($_GET['receptor_id']) ? (int) $_GET['receptor_id'] : null;
     $tipus_despesa = isset($_GET['tipus_despesa']) ? $_GET['tipus_despesa'] : null;
@@ -577,7 +577,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/emissors"
 } else if ($slug === 'emissors') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $sql = <<<SQL
         SELECT 
@@ -631,7 +631,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/emissorId?id={id}"
 } else if ($slug === 'emissorId') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $emissor_id = $_GET['id'];
 
@@ -679,7 +679,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/productes"
 } else if ($slug === 'productes') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $sql = <<<SQL
         SELECT 
@@ -730,7 +730,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/producteId?id={id}"
 } else if ($slug === 'producteId' && isset($_GET['id'])) {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $producte_id = (int) $_GET['id'];
 
@@ -777,7 +777,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/proveidors"
 } else if ($slug === 'proveidors') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $sql = <<<SQL
         SELECT 
@@ -833,7 +833,7 @@ SQL;
     // ruta => https://elliot.cat/api/comptabilitat/get/proveidor?id={id}
 } else if ($slug === 'proveidor') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $proveidor_id = $_GET['id'];
 
@@ -902,7 +902,7 @@ SQL;
     // ruta => https://elliot.cat/api/comptabilitat/get/despesa?id={id}
 } else if ($slug === 'despesa') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $despesa_id = isset($_GET['id']) ? (int) $_GET['id'] : null;
 
@@ -981,7 +981,7 @@ SQL;
     // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostos"
 } else if ($slug === 'pressupostos') {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     $sql = <<<SQL
             SELECT 

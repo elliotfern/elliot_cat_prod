@@ -33,7 +33,7 @@
                 </form>
 
             </div>
-            <a href="<?php echo BASE_URL; ?>/ca/entrada">Tornar a la pàgina d'entrada</a>
+            <a href="/entrada">Tornar a la pàgina d'entrada</a>
         </div>
 
     </div>

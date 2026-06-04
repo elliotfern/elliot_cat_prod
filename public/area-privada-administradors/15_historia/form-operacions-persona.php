@@ -38,9 +38,7 @@ if ($modificaBtn === 1) {
 }
 ?>
 
-<div class="barraNavegacio">
-  <h6><a href="<?php echo APP_INTRANET; ?>">Intranet</a> > <a href="<?php echo APP_INTRANET . $url['persona']; ?>">Base de dades Persones</a></h6>
-</div>
+<div class="barraNavegacioContenidor"></div>
 
 <div class="container-fluid form">
   <?php

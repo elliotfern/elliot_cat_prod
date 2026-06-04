@@ -1,3 +1,8 @@
+<?php
+
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
+
 <header id="siteHeader" class="bg-white border-bottom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
@@ -52,7 +57,7 @@
     </nav>
 </header>
 
-<?php if (isUserAdmin()) : ?>
+<?php if ($viewModel->isAdmin) : ?>
     <nav id="intranetNav" class="navbar navbar-light bg-light border-bottom">
         <div class="container-fluid">
             <a class="navbar-brand fw-semibold" href="/gestio">Intranet</a>

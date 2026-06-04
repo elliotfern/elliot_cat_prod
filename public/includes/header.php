@@ -11,6 +11,7 @@
   <link rel="profile" href="http://gmpg.org/xfn/11">
   <title>Elliot Fernandez</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/estils.css" rel="stylesheet">
 </head>
 
 <body>

@@ -1,17 +1,15 @@
+<?php
+
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
+
+<div id="barraNavegacioContenidor"></div>
+
 <div class="container">
+  <h1>Claus privades</h1>
 
-  <div id="barraNavegacioContenidor"></div>
+  <?php if ($viewModel->isAdmin) : ?>
 
-  <main>
-    <div class="container contingut">
-      <h1>Claus privades</h1>
-
-      <?php if (isUserAdmin()) : ?>
-
-      <?php endif; ?>
-
-      <div id="taulaLlistatVault"></div>
-
-    </div>
-  </main>
+    <div id="taulaLlistatVault"></div>
+  <?php endif; ?>
 </div>

@@ -3,7 +3,7 @@
   margin-bottom: 100px;
   margin-top: 25px;
   padding: 20px;
-  background-color: #ffdaa2; /* Fondo ligeramente gris */
+  background-color: #ffdaa2 !important; /* Fondo ligeramente gris */
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
   border: 2px solid #000000; /* Borde de 2px de color gris claro */

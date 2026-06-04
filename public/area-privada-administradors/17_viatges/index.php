@@ -1,29 +1,27 @@
-<div class="container">
+<?php
 
-    <div id="barraNavegacioContenidor"></div>
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
 
-    <main>
-        <div class="container contingut">
-            <h1>Viatges</h1>
+<div id="barraNavegacioContenidor"></div>
 
-            <div id="isAdminButton" style="display: none;">
-                <?php if (isset($_COOKIE['user_id']) && $_COOKIE['user_id'] === '1') : ?>
-                    <p>
-                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['viatges']; ?>/nou-viatge'" class="button btn-gran btn-secondari">Nou viatge</button>
+<h1>Viatges</h1>
 
-                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['viatges']; ?>/nou-espai'" class="button btn-gran btn-secondari">Nou espai</button>
-                    </p>
-                <?php endif; ?>
-            </div>
+<?php if ($viewModel->isAdmin) : ?>
+    <p>
+        <button onclick="window.location.href='<?php echo $url['viatges']; ?>/nou-viatge'" class="button btn-gran btn-secondari">Nou viatge</button>
 
-            <div class="alert alert-success quadre">
-                <ul class="llistat">
-                    <li> <a href="<?php echo APP_INTRANET . $url['viatges']; ?>/llistat-viatges">Llistat de viatges</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['viatges']; ?>/llistat-espais">Llistat d'espais</a></li>
-                    <li><a href="<?php echo APP_INTRANET . $url['viatges']; ?>/llistat-espais-visitats">Llistat d'espais visitats</a></li>
-                </ul>
-            </div>
+        <button onclick="window.location.href='<?php echo $url['viatges']; ?>/nou-espai'" class="button btn-gran btn-secondari">Nou espai</button>
+    </p>
+<?php endif; ?>
 
-        </div>
-    </main>
+
+<div class="alert alert-success quadre">
+    <ul class="llistat">
+        <li> <a href="<?php echo $url['viatges']; ?>/llistat-viatges">Llistat de viatges</a></li>
+        <li><a href="<?php echo $url['viatges']; ?>/llistat-espais">Llistat d'espais</a></li>
+        <li><a href="<?php echo $url['viatges']; ?>/llistat-espais-visitats">Llistat d'espais visitats</a></li>
+    </ul>
+</div>
+
 </div>

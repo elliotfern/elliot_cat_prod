@@ -179,12 +179,6 @@ if ($slug === 'llistatArticles') {
     $where[] = "b.post_type <> :excluded_post_type";
     $params[':excluded_post_type'] = $excludedPostType;
 
-    // ✅ En público: solo publicados
-    if (!isUserAdmin()) {
-        $where[] = "b.post_status IN ('publish','published','publicat')";
-        // (opcional) si no quieres posts sin fecha en público:
-        // $where[] = "b.post_date IS NOT NULL";
-    }
 
     // (Opcional) filtra por año usando el campo post_date (YYYY-...)
     if ($year >= 1970 && $year <= 2100) {
@@ -307,8 +301,7 @@ if ($slug === 'llistatArticles') {
     $excludedPostType = 'historia_oberta';
 
     // ✅ Admin? (si no, solo publicados)
-    $isAdmin = function_exists('isUserAdmin') && isUserAdmin();
-    $statusWhere = $isAdmin ? "" : " AND b.post_status IN ('publish','published','publicat')";
+    $statusWhere = " AND b.post_status IN ('publish','published','publicat')";
 
     // 1) Anyos disponibles (de post_date)
     $sqlYears = sprintf(
@@ -581,7 +574,7 @@ if ($slug === 'llistatArticles') {
 
         // ✅ Normalizar categoria para que coincida con el endpoint de categorías (UUID con guiones)
         $hex = (string)($result['categoria'] ?? '');
-        $result['categoria'] = $hex !== '' ? hexToUuidText($hex) : null;
+
 
         Response::success(
             MissatgesAPI::success('get'),
@@ -599,12 +592,6 @@ if ($slug === 'llistatArticles') {
     // Llistat Historia Oberta (INTRANET ONLY)
     // URL: /api/blog/get/llistatHistoriaOberta?page=1&limit=10&order=asc|desc&curs=0|id&lang=0|id&status=publish|draft|...
 } else if ($slug === 'llistatHistoriaOberta') {
-
-    // ✅ intranet-only (si quieres, fuerza admin)
-    if (!isUserAdmin()) {
-        Response::error('No autoritzat', [], 403);
-        return;
-    }
 
     $page  = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
@@ -739,12 +726,6 @@ if ($slug === 'llistatArticles') {
     // Facets Historia Oberta (Cursos + Idiomes + Estats)
     // URL: /api/blog/get/filtresHistoriaOberta
 } else if ($slug === 'filtresHistoriaOberta') {
-
-    // ✅ intranet-only
-    if (!function_exists('isUserAdmin') || !isUserAdmin()) {
-        Response::error('No autoritzat', [], 403);
-        return;
-    }
 
     // Idiomes permesos (IDs) - ajusta si cal
     $allowedLangIds = [1, 2, 3, 4, 7];

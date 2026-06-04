@@ -2,59 +2,49 @@
 $slug = $routeParams[0];
 ?>
 
-<div class="container">
-    <div class="barraNavegacio">
-        <h6><a href="<?php echo APP_INTRANET; ?>">Intranet</a> > <a href="<?php echo APP_INTRANET . $url['historia']; ?>">Història</a> > <a href="<?php echo APP_INTRANET . $url['historia']; ?>/llistat-organitzacions">LListat organitzacions</a></h6>
+<div class="barraNavegacioContenidor"> </div>
+
+<h1>Organització: <span id="nom"></span></h1>
+
+<button onclick="window.location.href='<?php echo $url['historia']; ?>/modifica-organitzacio/<?php echo $slug; ?>'" class="button btn-gran btn-secondari">Modifica fitxa</button>
+
+<div class="dadesFitxa">
+    <span id="dateCreated"></span> <span id="dateModified"></span>
+</div>
+
+<div class='fixaDades'>
+
+    <div class='columna imatge'>
+        <img id="nameImg" src='' class='img-thumbnail' alt='Imatge' title='Imatge'>
+        <p><span id="alt" style="font-size:12px"></span></p>
     </div>
 
-    <main>
-        <div class="container contingut">
-            <h1>Organització: <span id="nom"></span></h1>
-
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['historia']; ?>/modifica-organitzacio/<?php echo $slug; ?>'" class="button btn-gran btn-secondari">Modifica fitxa</button>
-
-            <div class="dadesFitxa">
-                <span id="dateCreated"></span> <span id="dateModified"></span>
-            </div>
-
-            <div class='fixaDades'>
-
-                <div class='columna imatge'>
-                    <img id="nameImg" src='' class='img-thumbnail' alt='Imatge' title='Imatge'>
-                    <p><span id="alt" style="font-size:12px"></span></p>
-                </div>
-
-                <div class="columna">
-                    <div class="quadre-detalls">
-                        <p><strong>Data de fundació: </strong> <span id="dataFunda"></span></p>
-                        <p><strong>Data de dissolució: </strong> <span id="dataDiss"></span></p>
-                        <p><strong>Sigla: </strong> <span id="orgSig"></span></p>
-                        <p><strong>Etapa històrica: </strong> <span id="etapaNom"></span></p>
-                        <p><strong>Sub-etapa: </strong> <span id="nomSubEtapa"></span></p>
-                        <p><strong>Ciutat: </strong> <span id="ciutat"></span></p>
-                        <p><strong>País: </strong> <span id="pais_cat"></span></p>
-                        <p><strong>Tipus d'organització: </strong> <span id="nomTipus"></span></p>
-                        <p><strong>Ideologia principal: </strong> <span id="ideologia"></span></p>
-                    </div>
-                </div>
-            </div>
-
-            <hr>
-            <h4>Esdeveniments vinculats a l'organització:</h4>
-
-            <div class="table-responsive">
-                <table id="taula1" class="table table-striped"></table>
-            </div>
-
-            <hr>
-            <h4>Càrrecs vinculats amb l'organització:</h4>
-            <div class="table-responsive">
-                <table id="taula2" class="table table-striped"></table>
-            </div>
-
+    <div class="columna">
+        <div class="quadre-detalls">
+            <p><strong>Data de fundació: </strong> <span id="dataFunda"></span></p>
+            <p><strong>Data de dissolució: </strong> <span id="dataDiss"></span></p>
+            <p><strong>Sigla: </strong> <span id="orgSig"></span></p>
+            <p><strong>Etapa històrica: </strong> <span id="etapaNom"></span></p>
+            <p><strong>Sub-etapa: </strong> <span id="nomSubEtapa"></span></p>
+            <p><strong>Ciutat: </strong> <span id="ciutat"></span></p>
+            <p><strong>País: </strong> <span id="pais_cat"></span></p>
+            <p><strong>Tipus d'organització: </strong> <span id="nomTipus"></span></p>
+            <p><strong>Ideologia principal: </strong> <span id="ideologia"></span></p>
         </div>
+    </div>
+</div>
 
-    </main>
+<hr>
+<h4>Esdeveniments vinculats a l'organització:</h4>
+
+<div class="table-responsive">
+    <table id="taula1" class="table table-striped"></table>
+</div>
+
+<hr>
+<h4>Càrrecs vinculats amb l'organització:</h4>
+<div class="table-responsive">
+    <table id="taula2" class="table table-striped"></table>
 </div>
 
 

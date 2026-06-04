@@ -16,6 +16,5 @@ if (!isset($_SERVER['REQUEST_METHOD'])) {
 
 require_once __DIR__ . '/Config/funcions.php';
 require_once __DIR__ . '/Config/config.php';
-require_once __DIR__ . '/Utils/verificacioSessio.php';
 require_once __DIR__ . '/Utils/utils.php';
 require_once __DIR__ . '/routes/routes.php';

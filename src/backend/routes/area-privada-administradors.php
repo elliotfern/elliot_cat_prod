@@ -2,16 +2,16 @@
 
 function route(string $viewPath, array $overrides = []): array
 {
-    $defaultPublicConfig = [
-        'needs_session' => false,
-        'needs_admin'   => false,
+    $defaultIntranetConfig = [
+        'needs_session' => true,
+        'needs_admin'   => true,
         'header_footer' => false,
         'header_menu_footer' => true,
         'apiSenseHTML' => false,
     ];
 
     return array_merge(
-        $defaultPublicConfig,
+        $defaultIntranetConfig,
         $overrides,
         ['view' => $viewPath]
     );

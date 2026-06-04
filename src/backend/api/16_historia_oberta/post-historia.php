@@ -416,19 +416,6 @@ if ($slug === 'esdeveniment') {
      */
 } else if ($slug === 'createCursArticle') {
 
-    // Auth (si lo usas en intranet)
-    $userUuid = getAuthenticatedUserUuid();
-    if (!$userUuid) {
-        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
-        return;
-    }
-
-    // (Opcional) exigir admin
-    if (!isUserAdmin()) {
-        Response::error(MissatgesAPI::error('validacio'), ['Permís denegat'], 403);
-        return;
-    }
-
     $raw = file_get_contents('php://input');
     $data = json_decode($raw ?: '', true);
 

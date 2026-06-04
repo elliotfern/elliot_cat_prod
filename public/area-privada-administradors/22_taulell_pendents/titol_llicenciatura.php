@@ -1,9 +1,14 @@
+<?php
+
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
+
+<div id="barraNavegacioContenidor"></div>
+
 <div class="container">
 
-    <div id="barraNavegacioContenidor"></div>
-
     <h2>Legalització títol llicenciatura</h2>
-    <?php if (isUserAdmin()) { ?>
+    <?php if ($viewModel->isAdmin) : ?>
 
         <h4>Documents necessaris:</h4>
 
@@ -16,7 +21,7 @@
             <li>Certificato in italiano o in inglese attestante gli esami superati durante il Bachelor</li>
             <li>Certificati attestanti altri titoli eventuali</li>
             <li>Copia del documento d'identità</li>
-            <li><a href="<?php echo APP_INTRANET . $url['taulell_pendents']; ?>/declaracio-valor-titol">Dichiarazione di valore del titolo di laurea (se in suo possesso)</a></li>
+            <li><a href="<?php echo $url['taulell_pendents']; ?>/declaracio-valor-titol">Dichiarazione di valore del titolo di laurea (se in suo possesso)</a></li>
             <li>Diploma Supplement (se in suo possesso)</li>
         </ul>
 
@@ -33,8 +38,5 @@
             sportello Zoom con prenotazione online - Zoom desk with online booking mar / Tue 11-12<br>
             sportello in presenza con prenotazione online - Helpdesk in presence with online booking mer / Wed 14:30-16
         </p>
-    <?php } else {
-        // Código que se ejecuta si la condición es falsa (opcional)
-    } ?>
-
 </div>
+<?php endif; ?>

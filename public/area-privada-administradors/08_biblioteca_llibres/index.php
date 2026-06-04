@@ -1,6 +1,6 @@
 <?php
-$isAdmin = isUserAdmin();
 
+/** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
 <div id="barraNavegacioContenidor"></div>
@@ -8,7 +8,7 @@ $isAdmin = isUserAdmin();
 <h1>Biblioteca de llibres</h1>
 
 <div id="isAdminButton" style="display: none;">
-    <?php if ($isAdmin): ?>
+    <?php if ($viewModel->isAdmin) : ?>
         <p>
             <button onclick="window.location.href='/nou-llibre/'" class="button btn-gran btn-secondari">Afegir llibre</button>
 

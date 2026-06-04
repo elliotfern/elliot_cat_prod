@@ -2,42 +2,31 @@
   authorsTableLibrary();
 </script>
 
-<div class="container">
+<div id="barraNavegacioContenidor"></div>
 
-  <div id="barraNavegacioContenidor"></div>
+<h1>Arts escèniques, cinema i televisió: llistat d'actors/es</h1>
 
-  <main>
-    <div class="container contingut">
-      <h1>Arts escèniques, cinema i televisió: llistat d'actors/es</h1>
+<?php if ($viewModel->isAdmin) : ?>
+  <p>
+    <button onclick="window.location.href='<?php echo $url['persona']; ?>/nova-persona/'" class="button btn-gran btn-secondari">Crea nou actor/a</button>
+  </p>
+<?php endif; ?>
 
-      <div id="isAdminButton" style="display: none;">
-        <?php if (isset($_COOKIE['user_id']) && $_COOKIE['user_id'] === '1') : ?>
-          <p>
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['persona']; ?>/nova-persona/'" class="button btn-gran btn-secondari">Crea nou actor/a</button>
-          </p>
-        <?php endif; ?>
-      </div>
-
-
-      <div class="table-responsive">
-        <table class="table table-striped" id="actorsTable">
-          <thead class="table-primary">
-            <tr>
-              <th></th>
-              <th>Nom</th>
-              <th>Anys</th>
-              <th>Pais</th>
-              <th></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody> <!-- Agregado este tbody -->
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-  </main>
+<div class="table-responsive">
+  <table class="table table-striped" id="actorsTable">
+    <thead class="table-primary">
+      <tr>
+        <th></th>
+        <th>Nom</th>
+        <th>Anys</th>
+        <th>Pais</th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody> <!-- Agregado este tbody -->
+    </tbody>
+  </table>
 </div>
 
 <script>

@@ -28,11 +28,9 @@ if ($modificaBtn === 1) {
 }
 ?>
 
-<div class="barraNavegacio">
-    <h6><a href="<?php echo APP_INTRANET; ?>">Intranet</a> > <a href="<?php echo APP_INTRANET . $url['historia']; ?>">Base de dades Història</a> > <a href="<?php echo APP_INTRANET . $url['historia']; ?>/llistat-esdeveniments">Llistat d'esdeveniments</a> </h6>
-</div>
+<div class="barraNavegacioContenidor"></div>
 
-<div class="container-fluid form">
+<div class="container form">
     <?php
     if ($modificaBtn === 1) {
     ?>

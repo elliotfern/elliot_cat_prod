@@ -4,11 +4,9 @@ use App\Vault\Adapters\Inbound\VaultController;
 use App\Vault\Core\Services\VaultService;
 use App\Vault\Adapters\Outbound\DatabasePasswordRepository;
 use App\Config\DatabaseConnection;
+use App\Infrastructure\Security\Auth\AuthFactory;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-
-use App\Utils\AdminMiddleware;
-
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -31,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // Verificar si se ha recibido un parámetro válido
 if (isset($_GET['llistat_serveis'])) {
 
-    AdminMiddleware::handle();
+    AuthFactory::admin()->handle();
 
     // Conectar a la base de datos
     $pdo = DatabaseConnection::getConnection();

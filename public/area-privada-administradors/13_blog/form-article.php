@@ -1,4 +1,4 @@
-<div class="barraNavegacio">
+<div class="barraNavegacioContenidor">
 </div>
 
 <h2>Blog</h2>

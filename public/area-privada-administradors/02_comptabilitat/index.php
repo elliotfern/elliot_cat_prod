@@ -2,12 +2,14 @@
 
 use App\Utils\Routes;
 use App\Utils\Button;
+
+/** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
 <div id="barraNavegacioContenidor"></div>
 
 <h1>Gestió Comptabilitat i Clients</h1>
-<?php if (isUserAdmin()) { ?>
+<?php if ($viewModel->isAdmin) : ?>
   <div class="d-flex flex-wrap gap-2 my-3">
     <?=
     Button::create('Crear client', Routes::comptabilitat()->nouClient()) .
@@ -64,8 +66,6 @@ use App\Utils\Button;
     </ul>
   </div>
 
-<?php } else {
-  // Código que se ejecuta si la condición es falsa (opcional)
-} ?>
+<?php endif; ?>
 
 </div>

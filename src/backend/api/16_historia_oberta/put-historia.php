@@ -426,17 +426,6 @@ if ($slug === 'esdeveniment') {
      */
 } else if ($slug === 'updateCursArticle') {
 
-    $userUuid = getAuthenticatedUserUuid();
-    if (!$userUuid) {
-        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
-        return;
-    }
-
-    if (!isUserAdmin()) {
-        Response::error(MissatgesAPI::error('validacio'), ['Permís denegat'], 403);
-        return;
-    }
-
     $raw = file_get_contents('php://input');
     $data = json_decode($raw ?: '', true);
 

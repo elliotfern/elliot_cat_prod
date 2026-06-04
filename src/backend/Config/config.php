@@ -6,10 +6,6 @@ define('IMG_ROOT', '/home/epgylzqu/media.elliotfern.com/img');
 define('APP_GESTIO',  "/gestio");
 define('APP_AREA_USUARIS',  "/usuaris");
 
-$base_url = '';
-
-$isAdmin = isUserAdmin();
-
 // Variables del directori de fitxers
 define('APP_INTRANET_DIR',  "./area-privada-administradors/");
 define('APP_AREA_USUARIS_DIR',  "./area-privada-usuaris/");

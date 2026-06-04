@@ -1,48 +1,46 @@
-<div class="container">
+<?php
 
-    <div id="barraNavegacioContenidor"></div>
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
 
-    <main>
-        <div class="container contingut">
-            <h1>Ràdio online</h1>
+<div id="barraNavegacioContenidor"></div>
 
-            <div id="isAdminButton" style="display: none;">
-                <?php if (isUserAdmin()) : ?>
-                    <p>
-                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['usuaris']; ?>/nou-usuari'" class="button btn-gran btn-secondari">Nou usuari</button>
-                    </p>
-                <?php endif; ?>
-            </div>
+<h1>Ràdio online</h1>
 
-            <div class="player">
-                <img class="logo" src="https://elliot.cat/dist/rairadio3.png" alt="Rai Radio 3">
-                <h2>Rai Radio 3</h2>
-                <small>Audio en vivo</small>
-
-                <div id="programa"><em>Cargando programa...</em></div>
-                <div id="descripcion"></div>
-
-                <div id="horarios" style="font-size: 0.9em; color: #555; margin-top: 8px;"></div>
-
-                <button id="btnActualizar" style="margin: 10px 0;">Actualizar info</button>
-
-                <audio id="audio" autoplay>
-                    <source src="https://icecdn-19d24861e90342cc8decb03c24c8a419.msvdn.net/icecastRelay/S56630579/yEbkcBtIoSwd/icecast" type="audio/mpeg">
-                    Tu navegador no soporta el audio.
-                </audio>
-
-                <div class="controls">
-                    <button onclick="audio.play()">▶️</button>
-                    <button onclick="audio.pause()">⏸️</button>
-                    <button onclick="audio.muted = !audio.muted">🔇</button>
-                    <button onclick="audio.volume = Math.min(1, audio.volume + 0.1)">🔊</button>
-                    <button onclick="audio.volume = Math.max(0, audio.volume - 0.1)">🔉</button>
-                </div>
-            </div>
-
-        </div>
-    </main>
+<div id="isAdminButton" style="display: none;">
+    <?php if ($viewModel->isAdmin) : ?>
+        <p>
+            <button onclick="window.location.href='<?php echo $url['usuaris']; ?>/nou-usuari'" class="button btn-gran btn-secondari">Nou usuari</button>
+        </p>
+    <?php endif; ?>
 </div>
+
+<div class="player">
+    <img class="logo" src="https://elliot.cat/dist/rairadio3.png" alt="Rai Radio 3">
+    <h2>Rai Radio 3</h2>
+    <small>Audio en vivo</small>
+
+    <div id="programa"><em>Cargando programa...</em></div>
+    <div id="descripcion"></div>
+
+    <div id="horarios" style="font-size: 0.9em; color: #555; margin-top: 8px;"></div>
+
+    <button id="btnActualizar" style="margin: 10px 0;">Actualizar info</button>
+
+    <audio id="audio" autoplay>
+        <source src="https://icecdn-19d24861e90342cc8decb03c24c8a419.msvdn.net/icecastRelay/S56630579/yEbkcBtIoSwd/icecast" type="audio/mpeg">
+        Tu navegador no soporta el audio.
+    </audio>
+
+    <div class="controls">
+        <button onclick="audio.play()">▶️</button>
+        <button onclick="audio.pause()">⏸️</button>
+        <button onclick="audio.muted = !audio.muted">🔇</button>
+        <button onclick="audio.volume = Math.min(1, audio.volume + 0.1)">🔊</button>
+        <button onclick="audio.volume = Math.max(0, audio.volume - 0.1)">🔉</button>
+    </div>
+</div>
+
 
 <script>
     let timeoutId;

@@ -1,23 +1,10 @@
-<div class="container">
+<div id="barraNavegacioContenidor"></div>
 
-    <div id="barraNavegacioContenidor"></div>
+<h1>Base de dades Països</h1>
+<h2>Llistat complert</h2>
 
-    <main>
-        <div class="container contingut">
+<p>
+    <button onclick="window.location.href='<?php echo $url['auxiliars']; ?>/nou-pais/'" class="button btn-gran btn-secondari">Afegir Ciutat</button>
+</p>
 
-            <h1>Base de dades Països</h1>
-            <h2>Llistat complert</h2>
-
-            <div id="isAdminButton" style="display: none;">
-
-                <p>
-                    <button onclick="window.location.href='<?php echo APP_INTRANET . $url['auxiliars']; ?>/nou-pais/'" class="button btn-gran btn-secondari">Afegir Ciutat</button>
-                </p>
-
-            </div>
-
-            <div id="taulaLlistatPaisos"></div>
-
-        </div>
-    </main>
-</div>
+<div id="taulaLlistatPaisos"></div>

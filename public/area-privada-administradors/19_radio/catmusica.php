@@ -1,45 +1,43 @@
-<div class="container">
+<?php
 
-    <div id="barraNavegacioContenidor"></div>
-
-    <main>
-        <div class="container contingut">
-            <h1>Ràdio online</h1>
-
-            <div id="isAdminButton" style="display: none;">
-                <?php if (isUserAdmin()) : ?>
-                    <p>
-                        <button onclick="window.location.href='<?php echo APP_INTRANET . $url['usuaris']; ?>/nou-usuari'" class="button btn-gran btn-secondari">Nou usuari</button>
-                    </p>
-                <?php endif; ?>
-            </div>
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
 
 
-            <div class="player">
-                <img class="logo" src="https://elliot.cat/dist/catmusica.png" alt="Rai Radio 3">
-                <h2>Catalunya Música</h2>
-                <small>Audio en vivo</small>
+<div id="barraNavegacioContenidor"></div>
 
-                <div id="programa"><em>Cargando programa...</em></div>
-                <p>
-                <div id="descripcion"></div>
-                </p>
+<h1>Ràdio online</h1>
 
-                <div id="horarios" style="font-size: 0.9em; color: #555; margin-top: 8px;"></div>
 
-                <button id="btnActualizar" style="margin: 10px 0;">Actualizar info</button>
+<?php if ($viewModel->isAdmin) : ?>
+    <p>
+        <button onclick="window.location.href='<?php echo $url['usuaris']; ?>/nou-usuari'" class="button btn-gran btn-secondari">Nou usuari</button>
+    </p>
+<?php endif; ?>
 
-                <audio id="audio-player" controls>
-                    <source src="https://directes-radio-int.3catdirectes.cat/live-content/catalunya-musica-hls/master.m3u8" type="application/x-mpegURL">
-                    Tu navegador no soporta el formato HLS.
-                </audio>
-                <button id="volume-up">Subir volumen</button>
-                <button id="volume-down">Bajar volumen</button>
+<div class="player">
+    <img class="logo" src="https://elliot.cat/dist/catmusica.png" alt="Rai Radio 3">
+    <h2>Catalunya Música</h2>
+    <small>Audio en vivo</small>
 
-            </div>
+    <div id="programa"><em>Cargando programa...</em></div>
+    <p>
+    <div id="descripcion"></div>
+    </p>
 
-        </div>
-    </main>
+    <div id="horarios" style="font-size: 0.9em; color: #555; margin-top: 8px;"></div>
+
+    <button id="btnActualizar" style="margin: 10px 0;">Actualizar info</button>
+
+    <audio id="audio-player" controls>
+        <source src="https://directes-radio-int.3catdirectes.cat/live-content/catalunya-musica-hls/master.m3u8" type="application/x-mpegURL">
+        Tu navegador no soporta el formato HLS.
+    </audio>
+    <button id="volume-up">Subir volumen</button>
+    <button id="volume-down">Bajar volumen</button>
+
+</div>
+
 </div>
 
 

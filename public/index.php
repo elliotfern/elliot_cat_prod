@@ -4,20 +4,13 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 
-set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-    echo "ERROR [$errno] $errstr en $errfile:$errline";
-    exit;
-});
-
-set_exception_handler(function ($e) {
-    echo "EXCEPTION: " . $e->getMessage();
-    exit;
-});
-
 // Incluir configuraciones y rutas
+require_once __DIR__ . '/../src/backend/Infrastructure/View/view-types.php';
 require_once __DIR__ . '/../src/backend/bootstrap.php';
 
 use App\Infrastructure\Error\ErrorHandler;
+use App\Infrastructure\Security\Auth\AuthKernel;
+use App\Infrastructure\View\ViewModelFactory;
 
 ErrorHandler::register();
 
@@ -34,10 +27,6 @@ if ($requestUri === '') {
 if ($requestUri === '/') {
     header('Location: /inici', true, 302);
     exit();
-}
-
-if (strpos($requestUri, "/gestio") === 0) {
-    verificarAdmin(); // admin-only, y ya hace verificarSesion internamente
 }
 
 // Inicializar una variable para los parámetros de la ruta
@@ -62,21 +51,22 @@ foreach ($routes as $route => $routeInfo) {
 
 // Si la ruta no es encontrada, asignamos la página 404
 if (!$routeFound) {
+    $viewModel = ViewModelFactory::create();
     $view = './includes/404.php';
     $noHeaderFooter = false;
     $headerMenu = true;
     $apiSenseHTML = false;
 } else {
-    // Verificar si la ruta requiere sesión
-    $needsSession = $routeInfo['needs_session'] ?? false;
-    $needsAdmin   = $routeInfo['needs_admin'] ?? false;
+    AuthKernel::boot();
 
-    if ($needsAdmin) {
-        verificarAdmin();
-    } elseif ($needsSession) {
-        verificarSesion();
-    }
+    AuthKernel::handle(
+        $routeInfo['needs_admin'] ?? false,
+        $routeInfo['needs_session'] ?? false
+    );
 
+
+
+    $viewModel = ViewModelFactory::create();
 
     // Determinar si la vista necesita encabezado y pie de página
     $noHeaderFooter = $routeInfo['header_footer'] ?? false;
@@ -91,7 +81,8 @@ if (!$routeFound) {
 if ($noHeaderFooter) {
     include './includes/header.php';
 
-    // Incluir la vista asociada a la ruta
+    // Incluir la vista asociada a la rut
+
     include $view;
 
     include './includes/footer-end.php';

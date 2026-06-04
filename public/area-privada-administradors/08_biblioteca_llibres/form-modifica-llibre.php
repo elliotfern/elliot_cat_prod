@@ -1,4 +1,4 @@
-<div class="barraNavegacio"></div>
+<div class="barraNavegacioContenidor"></div>
 
 <div class="container form">
   <h2>Base de dades: Biblioteca</h2>

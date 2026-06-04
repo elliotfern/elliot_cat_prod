@@ -2,12 +2,13 @@
 
 use App\Utils\Url;
 
+/** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
 <div id="barraNavegacioContenidor"></div>
 
 <h1>Intranet</h1>
-<?php if (isUserAdmin()) { ?>
+<?php if ($viewModel->isAdmin) : ?>
     <div class="alert alert-success">
         <h4>Taulell temes pendents</h4>
         <ul>
@@ -46,6 +47,4 @@ use App\Utils\Url;
         </ul>
     </div>
 
-<?php } else {
-    // Código que se ejecuta si la condición es falsa (opcional)
-} ?>
+<?php endif; ?>

@@ -1,8 +1,6 @@
-<div class="barraNavegacio">
-  <h6><a href="<?php echo APP_INTRANET; ?>">Intranet</a> > <a href="<?php echo APP_INTRANET . $url['auxiliars']; ?>">Auxiliars</a> > <a href="<?php echo APP_INTRANET . $url['auxiliars']; ?>/llistat-imatges">Llistat imatges</a> </h6>
-</div>
+<div class="barraNavegacioContenidor"></div>
 
-<div class="container-fluid form">
+<div class="container form">
   <h2>Auxiliars: pujar nova imatge</h2>
 
   <div class="alert alert-success" id="missatgeOk" style="display:none">

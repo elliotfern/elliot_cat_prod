@@ -1,3 +1,8 @@
+<?php
+
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
+
 <div class="container">
 
     <div id="barraNavegacioContenidor"></div>
@@ -7,7 +12,8 @@
             <h1>Agenda esdeveniments</h1>
 
             <div id="isAdminButton" style="display: none;">
-                <?php if (isUserAdmin()) : ?>
+                <?php if ($viewModel->isAdmin) : ?>
+
                     <p>
                         <button onclick="window.location.href='<?php echo '/gestio' . $url['agenda']; ?>/nou-esdeveniment'" class="button btn-gran btn-secondari">Nou esdeveniment</button>
 

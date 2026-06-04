@@ -1,16 +1,22 @@
+<?php
+
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
+
 <div id="barraNavegacioContenidor"></div>
 
 <div class="contingut">
     <h1>Gestor de projectes</h1>
 
-    <?php if (isUserAdmin()) : ?>
+    <?php if ($viewModel->isAdmin) : ?>
+
         <p>
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/nou-projecte/'"
+            <button onclick="window.location.href='<?php echo $url['projectes']; ?>/nou-projecte/'"
                 class="button btn-gran btn-secondari">
                 Afegir projecte
             </button>
 
-            <button onclick="window.location.href='<?php echo APP_INTRANET . $url['projectes']; ?>/nova-tasca/'"
+            <button onclick="window.location.href='<?php echo $url['projectes']; ?>/nova-tasca/'"
                 class="button btn-gran btn-secondari">
                 Afegir tasca
             </button>

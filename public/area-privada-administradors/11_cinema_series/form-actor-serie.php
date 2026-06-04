@@ -28,11 +28,8 @@ if ($modificaBtn === 1) {
 }
 ?>
 
-<div class="barraNavegacio">
-  <h6><a href="<?php echo APP_INTRANET; ?>">Intranet</a> > <a href="<?php echo APP_INTRANET . $url['cinema']; ?>">Arts escèniques, cinema i televisió</a> > <a href="<?php echo APP_INTRANET . $url['cinema']; ?>/llistat-series">Llistat sèries tv</a></h6>
-</div>
-
-<div class="container-fluid form">
+<div class="barraNavegacioContenidor"></div>
+<div class="container form">
   <?php
   if ($modificaBtn === 1) {
   ?>

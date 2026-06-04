@@ -1,18 +1,17 @@
-<div class="container">
+<?php
 
-    <div id="barraNavegacioContenidor"></div>
+/** @var App\Infrastructure\View\ViewModel $viewModel */
+?>
 
-    <main>
-        <div class="container">
-            <h1>Adreces d'interés: llistat Sub-temes</h1>
-            <?php if (isUserAdmin()) : ?>
-                <p>
-                    <button onclick="window.location.href='<?php echo APP_INTRANET . $url['auxiliar']; ?>/nou-subtema/'" class="button btn-gran btn-secondari">Afegir sub-tema</button>
-                </p>
-            <?php endif; ?>
+<div id="barraNavegacioContenidor"></div>
 
-            <div id="taulaLlistatSubTemes"></div>
+<h1>Adreces d'interés: llistat Sub-temes</h1>
+<?php if ($viewModel->isAdmin) : ?>
+    <p>
+        <button onclick="window.location.href='<?php echo $url['auxiliar']; ?>/nou-subtema/'" class="button btn-gran btn-secondari">Afegir sub-tema</button>
+    </p>
+<?php endif; ?>
 
-        </div>
-    </main>
+<div id="taulaLlistatSubTemes"></div>
+
 </div>
