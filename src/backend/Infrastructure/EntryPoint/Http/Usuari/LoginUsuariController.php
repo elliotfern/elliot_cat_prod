@@ -43,8 +43,8 @@ final class LoginUsuariController
                 ],
                 httpCode: 200
             );
-        } catch (\RuntimeException $e) {
-
+        } catch (\Throwable $e) {
+            error_log($e->getMessage());
             Response::error(
                 message: MissatgesAPI::error($e->getMessage()),
                 httpCode: 401
