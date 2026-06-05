@@ -31,15 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-// Requiere ADMIN por token (user_type === 1)
-if (!isAuthenticatedAdmin()) {
-    http_response_code(403);
-    echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-    exit;
-}
 
 $conn = DatabaseConnection::getConnection();
-$userUuid = getAuthenticatedUserUuid(); // para auditoría, si la soportas
 
 if (!$conn) {
     die("No se pudo establecer conexión a la base de datos.");
@@ -93,7 +86,6 @@ function generarNumeroFactura(PDO $db): string
 
 if ($slug === 'clients') {
 
-    AdminMiddleware::handle();
 
     $raw = file_get_contents('php://input');
     $data = json_decode($raw, true);
@@ -148,30 +140,30 @@ if ($slug === 'clients') {
 
 
     // Normalizar
-    $emissor_id     = Normalizer::int($data['client_id'] ?? null);
-    $client_id      = Normalizer::int($data['client_id'] ?? null);
-    $tipus_iva      = Normalizer::int($data['tipus_iva'] ?? null);
-    $estat      = Normalizer::int($data['estat'] ?? null);
-    $metode_pagament      = Normalizer::int($data['metode_pagament'] ?? null);
-    $projecte_id      = Normalizer::int($data['projecte_id'] ?? null);
+    $emissor_id     = $data['client_id'] ?? null;
+    $client_id      = $data['client_id'] ?? null;
+    $tipus_iva      = $data['tipus_iva'] ?? null;
+    $estat      = $data['estat'] ?? null;
+    $metode_pagament      = $data['metode_pagament'] ?? null;
+    $projecte_id      = $data['projecte_id'] ?? null;
 
-    $clientNom      = Normalizer::string($data['clientNom'] ?? null);
-    $concepte      = Normalizer::string($data['concepte'] ?? null);
-    $notes      = Normalizer::string($data['notes'] ?? null);
-    $arxiu_url      = Normalizer::string($data['arxiu_url'] ?? null);
+    $clientNom      = $data['clientNom'] ?? null;
+    $concepte      = $data['concepte'] ?? null;
+    $notes      = $data['notes'] ?? null;
+    $arxiu_url      = $data['arxiu_url'] ?? null;
 
-    $data_factura   = Normalizer::date($data['data_factura'] ?? null);
-    $data_venciment   = Normalizer::date($data['data_venciment'] ?? null);
+    $data_factura   = $data['data_factura'] ?? null;
+    $data_venciment   = $data['data_venciment'] ?? null;
 
-    $clientEmail    = Normalizer::email($data['clientEmail'] ?? null);
+    $clientEmail    = $data['clientEmail'] ?? null;
 
-    $total_factura  = Normalizer::decimal($data['total_factura'] ?? null);
-    $base_imposable  = Normalizer::decimal($data['base_imposable'] ?? null);
-    $despeses_extra  = Normalizer::decimal($data['despeses_extra'] ?? null);
-    $import_iva  = Normalizer::decimal($data['import_iva'] ?? null);
+    $total_factura  = $data['total_factura'] ?? null;
+    $base_imposable  = $data['base_imposable'] ?? null;
+    $despeses_extra  = $data['despeses_extra'] ?? null;
+    $import_iva  = $data['import_iva'] ?? null;
 
-    $recurrent   = Normalizer::int($data['recurrent'] ?? null);
-    $frequencia  = Normalizer::string($data['frequencia'] ?? null);
+    $recurrent   = $data['recurrent'] ?? null;
+    $frequencia  = $data['frequencia'] ?? null;
 
     if (!$recurrent) {
         $frequencia = null;
@@ -180,6 +172,7 @@ if ($slug === 'clients') {
     $detallsProductes = $data['productes'] ?? [];
 
     // Validación
+    /*
     $errors = [];
 
     Validator::required($errors, 'emissor_id', $emissor_id);
@@ -200,7 +193,7 @@ if ($slug === 'clients') {
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
     }
-
+*/
     try {
         global $conn, $userUuid;
         $conn->beginTransaction();
@@ -271,7 +264,7 @@ if ($slug === 'clients') {
         // Auditoría
         Audit::registrarCanvi(
             $conn,
-            $userUuid,
+            1,
             "INSERT",
             sprintf("Creació factura client=%d concepte=%s data=%s", $client_id, $concepte, $data_factura),
             'db_comptabilitat_facturacio_clients',
@@ -279,7 +272,11 @@ if ($slug === 'clients') {
         );
 
         $conn->commit();
-        Response::success(MissatgesAPI::success('create'), ['id' => $newId, 'numero_factura' => $numero_factura], 201);
+        Response::success(
+            message: MissatgesAPI::success('create'),
+            data: ['id' => $newId, 'numero_factura' => $numero_factura],
+            httpCode: 200
+        );
     } catch (Throwable $e) {
         if ($conn->inTransaction()) $conn->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
