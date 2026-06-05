@@ -99,7 +99,7 @@ if ($slug === 'clients') {
         return;
     }
 
-    $clientService = new ClientService($db);
+    //$clientService = new ClientService($db);
 
     try {
 
