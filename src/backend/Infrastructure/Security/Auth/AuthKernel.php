@@ -7,29 +7,11 @@ namespace App\Infrastructure\Security\Auth;
 use App\Infrastructure\Security\Auth\AuthFactory;
 
 final class AuthKernel
-
 {
-    public static function handle(bool $needsAdmin, bool $needsSession): void
-    {
-        $user = AuthContext::user();
-
-        // no logueado
-        if ($needsSession && !$user['id']) {
-            header('Location: /entrada', true, 302);
-            exit;
-        }
-
-        // no admin
-        if ($needsAdmin && ($user['role'] ?? null) !== 'admin') {
-            header('Location: /entrada', true, 302);
-            exit;
-        }
-    }
-
     public static function boot(): void
     {
         try {
-            $user = AuthFactory::tryUser(); // o requireAuth()
+            $user = AuthFactory::tryUser();
 
             AuthContext::set([
                 'id'    => $user['user_id'] ?? null,
@@ -42,6 +24,24 @@ final class AuthKernel
                 'email' => null,
                 'role' => null,
             ]);
+        }
+    }
+
+    public static function handle(bool $needsAdmin, bool $needsSession): void
+    {
+        $user = AuthContext::user() ?? [
+            'id' => null,
+            'role' => null,
+        ];
+
+        // no logueado
+        if ($needsSession && !$user['id']) {
+            throw new UnauthorizedException('Session required');
+        }
+
+        // no admin
+        if ($needsAdmin && ($user['role'] ?? null) !== 'admin') {
+            throw new UnauthorizedException('Admin required');
         }
     }
 }

@@ -19,6 +19,8 @@ final class LoginUsuariUseCase
 
     public function execute(string $email, string $password): array
     {
+
+
         // 1. buscar usuari
         $usuari = $this->repository->findByEmail(
             new Email($email)
@@ -28,13 +30,15 @@ final class LoginUsuariUseCase
             throw new \RuntimeException('User not found');
         }
 
+
+
         // 2. comprovar estat
         if (!$usuari->isActive() || $usuari->isDeleted()) {
             throw new \RuntimeException('User inactive or deleted');
         }
 
         // 3. verificar password
-        if (!$this->passwordHasher->verify($password, $usuari->password())) {
+        if (!$usuari->password()->verify($password)) {
             throw new \RuntimeException('Invalid credentials');
         }
 

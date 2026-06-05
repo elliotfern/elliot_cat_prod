@@ -6,10 +6,14 @@ namespace App\Domain\Usuari\ValueObject;
 
 final class Email
 {
-    public function __construct(
-        private string $value
-    ) {
+    public function __construct(private string $value)
+    {
         $this->assertValid($value);
+    }
+
+    public static function fromString(string $email): self
+    {
+        return new self($email);
     }
 
     private function assertValid(string $email): void

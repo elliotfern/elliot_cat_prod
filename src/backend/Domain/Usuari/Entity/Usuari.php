@@ -6,6 +6,7 @@ namespace App\Domain\Usuari\Entity;
 
 use App\Domain\Usuari\Enum\UserRole;
 use App\Domain\Usuari\ValueObject\Email;
+use App\Domain\Usuari\ValueObject\Password;
 use App\Domain\Usuari\ValueObject\UserId;
 use App\Domain\Usuari\ValueObject\UsuariImgId;
 
@@ -14,7 +15,7 @@ final class Usuari
     public function __construct(
         private readonly UserId $id,
         private Email $email,
-        private string $password,
+        private Password $password,
         private string $nom,
         private string $cognom,
         private UserRole $role,
@@ -40,7 +41,7 @@ final class Usuari
         return $this->email;
     }
 
-    public function password(): string
+    public function password(): Password
     {
         return $this->password;
     }

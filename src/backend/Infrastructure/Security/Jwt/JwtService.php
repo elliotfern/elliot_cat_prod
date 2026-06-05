@@ -7,7 +7,8 @@ namespace App\Infrastructure\Security\Jwt;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-final class JwtService
+final class JwtService implements JwtDecoderInterface
+
 {
     public function __construct(
         private string $secret,

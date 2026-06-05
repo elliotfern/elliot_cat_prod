@@ -10,6 +10,7 @@ require_once __DIR__ . '/../src/backend/bootstrap.php';
 
 use App\Infrastructure\Error\ErrorHandler;
 use App\Infrastructure\Security\Auth\AuthKernel;
+use App\Infrastructure\Security\Auth\UnauthorizedException;
 use App\Infrastructure\View\ViewModelFactory;
 
 ErrorHandler::register();
@@ -59,12 +60,15 @@ if (!$routeFound) {
 } else {
     AuthKernel::boot();
 
-    AuthKernel::handle(
-        $routeInfo['needs_admin'] ?? false,
-        $routeInfo['needs_session'] ?? false
-    );
-
-
+    try {
+        AuthKernel::handle(
+            $routeInfo['needs_admin'] ?? false,
+            $routeInfo['needs_session'] ?? false
+        );
+    } catch (UnauthorizedException $e) {
+        header('Location: /entrada', true, 302);
+        exit;
+    }
 
     $viewModel = ViewModelFactory::create();
 

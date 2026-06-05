@@ -49,7 +49,7 @@ export async function formFacturaClient(isUpdate: boolean, id?: string) {
   }
 
   // Cargar selects
-  await auxiliarSelect(data.client_id ?? 0, 'clients', 'client_id', 'clientEmpresa');
+  await auxiliarSelect(data.client_id ?? 0, 'clients', 'client_id', 'empresa');
   await auxiliarSelect(data.tipus_iva ?? 0, 'tipusIVA', 'tipus_iva', 'ivaPercen');
   await auxiliarSelect(data.estat ?? 0, 'estatFacturacio', 'estat', 'estat');
   await auxiliarSelect(data.metode_pagament ?? 0, 'tipusPagament', 'metode_pagament', 'tipus_notes');

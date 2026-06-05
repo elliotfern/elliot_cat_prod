@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Security\Auth;
 
-use App\Infrastructure\Security\Jwt\JwtService;
+use App\Infrastructure\Security\Jwt\JwtDecoderInterface;
 
 final class AuthGuard
 {
     public function __construct(
-        private JwtService $jwtService
+        private JwtDecoderInterface $jwtService
+
     ) {}
 
     public function requireAuth(): array

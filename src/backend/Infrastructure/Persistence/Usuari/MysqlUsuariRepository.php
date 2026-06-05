@@ -10,6 +10,7 @@ use App\Domain\Usuari\ValueObject\Email;
 use App\Domain\Usuari\ValueObject\UserId;
 use App\Domain\Usuari\ValueObject\UsuariImgId;
 use App\Domain\Usuari\Enum\UserRole;
+use App\Domain\Usuari\ValueObject\Password;
 use PDO;
 
 final class MysqlUsuariRepository implements UsuariRepository
@@ -110,7 +111,7 @@ final class MysqlUsuariRepository implements UsuariRepository
         return new Usuari(
             id: new UserId($row['id']),
             email: new Email($row['email']),
-            password: $row['password'],
+            password: Password::fromHash($row['password']),
             nom: $row['nom'],
             cognom: $row['cognom'],
             role: UserRole::from($row['role']),
