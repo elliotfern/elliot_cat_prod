@@ -140,22 +140,19 @@ if ($slug === 'clients') {
 
 
     // Normalizar
-    $emissor_id     = $data['client_id'] ?? null;
-    $client_id      = $data['client_id'] ?? null;
+    $emissor_id     = $data['emissor_id'];
+    $client_id      = $data['client_id'];
     $tipus_iva      = $data['tipus_iva'] ?? null;
     $estat      = $data['estat'] ?? null;
     $metode_pagament      = $data['metode_pagament'] ?? null;
     $projecte_id      = $data['projecte_id'] ?? null;
 
-    $clientNom      = $data['clientNom'] ?? null;
     $concepte      = $data['concepte'] ?? null;
     $notes      = $data['notes'] ?? null;
     $arxiu_url      = $data['arxiu_url'] ?? null;
 
     $data_factura   = $data['data_factura'] ?? null;
     $data_venciment   = $data['data_venciment'] ?? null;
-
-    $clientEmail    = $data['clientEmail'] ?? null;
 
     $total_factura  = $data['total_factura'] ?? null;
     $base_imposable  = $data['base_imposable'] ?? null;

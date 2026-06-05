@@ -94,7 +94,7 @@
             </div>
 
             <div class="col-md-4">
-                <label for="emissorId">Emissor factura:</label>
+                <label for="emissor_id">Emissor factura:</label>
                 <select class="form-select" name="emissor_id" id="emissor_id">
                 </select>
             </div>
