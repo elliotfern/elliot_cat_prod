@@ -72,6 +72,7 @@ jobs:
         run: |
           mysql -h 127.0.0.1 -uroot -proot elliot_test < database/test/seed.sql
 
+      # 7) Start server
       - name: Start server
         run: |
           php -S 127.0.0.1:8000 -t public > server.log 2>&1 &
@@ -84,17 +85,15 @@ jobs:
 
           curl -I http://127.0.0.1:8000 || (cat server.log && exit 1)
 
-      # Start PHP built-in server
-
-      # 7) Run PHPUnit tests
+      # 8) Run PHPUnit tests
       - name: Run PHPUnit tests
         run: vendor/bin/phpunit --exclude-group http --colors=always
 
-      # 8) PHP Syntax Check
+      # 9) PHP Syntax Check
       - name: PHP Syntax Check
         run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      # 9) Node setup
+      # 10) Node setup
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -113,23 +112,20 @@ jobs:
           INTRANET_WEB: https://elliot.cat/gestio
         run: npm run build
 
-      # 10) Write version file
+      # 11) Write version file
       - name: Write APP_VERSION file
         run: |
           echo "${GITHUB_SHA}" > public/version.txt
 
-      # 11) SSH setup
-      - name: Start SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Add server to known_hosts
+      # 12) SSH setup
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 87.98.230.129 >> ~/.ssh/known_hosts
 
-      # 12) Rsync deploy
+      # 13) Rsync deploy
       - name: Sync project to shared hosting (rsync)
         run: |
           set -euo pipefail
@@ -149,7 +145,7 @@ jobs:
             -e "ssh" \
             ./ "$REMOTE:$REMOTE_DIR"
 
-      # 13) Verify deploy
+      # 14) Verify deploy
       - name: Verify version on server
         run: |
           ssh epgylzqu@87.98.230.129 "bash -lc '
