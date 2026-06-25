@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "path": "..",
+    },
+  ],
+  "settings": {
+    "workbench.colorTheme": "Dark 2026",
+    "terminal.integrated.defaultProfile.linux": "zsh",
+  },
+}

@@ -1,13 +1,12 @@
 <?php
-// URL: https://elliot.cat/api/cron/agenda-dia
+// URL: https://elliot.cat/api/cron/agenda-dia 
 
 declare(strict_types=1);
 
 use App\Config\Database;
 use App\Utils\Tables;
+use App\Utils\Mailer;
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception as MailException;
 
 // ======================================================
 // CONFIG
@@ -21,31 +20,6 @@ $tz = new DateTimeZone($TZ_NAME);
 // DEBUG TEMPORAL
 ini_set('display_errors', '1');
 error_reporting(E_ALL);
-
-// ======================================================
-// AUTOLOAD
-// ======================================================
-
-require_once __DIR__ . '../../../../../vendor/autoload.php';
-
-// ======================================================
-// PHPMailer
-// ======================================================
-
-require_once __DIR__ . '../../../../../vendor/phpmailer/phpmailer/src/Exception.php';
-require_once __DIR__ . '../../../../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-require_once __DIR__ . '../../../../../vendor/phpmailer/phpmailer/src/SMTP.php';
-
-// ======================================================
-// ENV
-// ======================================================
-
-$brevoApi = (string)($_ENV['BREVO_API'] ?? '');
-
-if ($brevoApi === '') {
-    error_log('[agenda_resum_dia] BREVO_API vacío');
-    exit(1);
-}
 
 // ======================================================
 // DB
@@ -282,61 +256,27 @@ $bodyHtml = buildAgendaEmailHtml(
 // ======================================================
 
 try {
-
     error_log('[agenda_resum_dia] ABOUT TO SEND');
 
-    $mail = new PHPMailer(true);
+    $mailer = new Mailer();
 
-    $mail->CharSet = 'UTF-8';
-
-    $mail->isSMTP();
-
-    $mail->Host       = 'smtp-relay.brevo.com';
-    $mail->SMTPAuth   = true;
-    $mail->Username   = '7a0605001@smtp-brevo.com';
-    $mail->Password   = $brevoApi;
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port       = 587;
-
-    // DEBUG SMTP
-    $mail->SMTPDebug = 0;
-
-    $mail->setFrom(
-        'elliot@hispantic.com',
-        'Agenda'
+    $sent = $mailer->send(
+        to: $YOUR_EMAIL,
+        toName: $YOUR_NAME,
+        subject: $subject,
+        htmlBody: $bodyHtml,
+        plainText: $bodyText,
     );
 
-    $mail->addAddress(
-        $YOUR_EMAIL,
-        $YOUR_NAME
-    );
-
-    $mail->addReplyTo(
-        $YOUR_EMAIL,
-        $YOUR_NAME
-    );
-
-    $mail->Subject = $subject;
-
-    $mail->Body    = $bodyHtml;
-    $mail->AltBody = $bodyText;
-
-    $mail->isHTML(true);
-
-    $mail->send();
+    if (!$sent) {
+        error_log('[agenda_resum_dia] MAIL ERROR: send() returned false');
+        exit(1);
+    }
 
     error_log('[agenda_resum_dia] MAIL SENT OK');
-
     exit(0);
-} catch (MailException $e) {
-
-    error_log('[agenda_resum_dia] MAIL ERROR: ' . $e->getMessage());
-
-    exit(1);
 } catch (Throwable $e) {
-
     error_log('[agenda_resum_dia] UNKNOWN MAIL ERROR: ' . $e->getMessage());
-
     exit(1);
 }
 

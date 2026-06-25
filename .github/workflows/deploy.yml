@@ -47,7 +47,6 @@ jobs:
           php-version: '8.4'
           extensions: mbstring, pdo, pdo_mysql
           coverage: none
-          cache: composer
 
       # 3) Install PHP dependencies
       - name: Install PHP dependencies

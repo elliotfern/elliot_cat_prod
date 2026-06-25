@@ -1,27 +1,21 @@
-# Ignorar archivos y directorios generados por el sistema operativo
+# Sistema operativo
 .DS_Store
 Thumbs.db
-/.vscode
-.gitignore
 error_log
-/dist
 
-# Ignorar directoris imatges
-/public/img
-/public/info.php
-public/info.php
-
-# Ignorar logs y archivos temporales
-/logs/
-/temp/
-
-# Ignorar directorio de dependencias (ejemplo para PHP y Composer)
+# Dependencias
 /vendor/
 /node_modules/
 
-# Ignorar archivos de configuración local (ejemplo para PHP)
+# Compilados
+/dist/
+/public/dist/
+
+# Entorno y configuración local
 .env
 .env.local
 .env.production
-contra.php
-/src/backend/api/01_curriculum/definicio_taules.sql
+
+# Logs y temporales
+/logs/
+/temp/

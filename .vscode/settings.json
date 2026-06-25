@@ -1,0 +1,28 @@
+{
+  "editor.formatOnSave": true,
+  "workbench.colorTheme": "Default Dark+",
+  "settingsSync.ignoredSettings": ["-php.validate.executablePath"],
+  "liveServer.settings.donotShowInfoMsg": true,
+  "[php]": {
+    "editor.formatOnSave": true
+  },
+  "[html]": {
+    "editor.formatOnSave": true
+  },
+
+  "eslint.enable": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "diffEditor.wordWrap": "on",
+  "editor.wordWrap": "on",
+  "files.autoSave": "afterDelay",
+  "security.workspace.trust.untrustedFiles": "open",
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "git.blame.editorDecoration.enabled": true
+}
