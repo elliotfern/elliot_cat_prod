@@ -33,12 +33,12 @@
 
 <div class="alert alert-success quadre">
     <ul class="llistat">
-        <li><a href="<?php echo $url['curriculum']; ?>/perfil-cv">Veure perfil CV</a></li>
-        <li><a href="<?php echo $url['curriculum']; ?>/perfil-cv-i18n">Veure perfil CV i18n</a></li>
-        <li><a href="<?php echo $url['curriculum']; ?>/perfil-links">Veure links CV</a></li>
-        <li><a href="<?php echo $url['curriculum']; ?>/perfil-habilitats">Veure habilitats CV</a></li>
-        <li><a href="<?php echo $url['curriculum']; ?>/perfil-experiencies">Veure experiències professionals CV</a></li>
-        <li><a href="<?php echo $url['curriculum']; ?>/perfil-educacio">Veure títols educatius CV</a></li>
+        <li><a href="curriculum/perfil-cv">Veure perfil CV</a></li>
+        <li><a href="curriculum/perfil-cv-i18n">Veure perfil CV i18n</a></li>
+        <li><a href="curriculum/perfil-links">Veure links CV</a></li>
+        <li><a href="curriculum/perfil-habilitats">Veure habilitats CV</a></li>
+        <li><a href="curriculum/perfil-experiencies">Veure experiències professionals CV</a></li>
+        <li><a href="curriculum/perfil-educacio">Veure títols educatius CV</a></li>
     </ul>
 
     <ul class="llistat">

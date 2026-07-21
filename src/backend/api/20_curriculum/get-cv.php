@@ -41,7 +41,7 @@ if ($slug === "perfilCV") {
             LEFT JOIN %s AS co ON ci.pais_id = co.id
             WHERE c.id = :id
             SQL;
-
+ 
     $query = sprintf(
         $sql,
         qi(Tables::CURRICULUM_PERFIL, $pdo),

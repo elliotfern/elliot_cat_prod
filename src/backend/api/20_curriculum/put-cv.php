@@ -6,6 +6,7 @@ use App\Utils\Tables;
 use App\Config\Audit;
 use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
+use App\Utils\Uuid;
 
 $slug = $routeParams[0];
 
@@ -25,6 +26,7 @@ if (!$conn) {
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: PUT");
 
+/*
 // Definir el dominio permitido
 $allowedOrigin = APP_DOMAIN;
 
@@ -46,7 +48,7 @@ if (!isAuthenticatedAdmin()) {
 }
 
 $userUuid = getAuthenticatedUserUuid(); // para auditoría, si la soportas
-
+*/
 // PUT : Perfil curriculum
 // URL: https://elliot.cat/api/curriculum/post/perfilCV
 if ($slug === "perfilCV") {
@@ -77,8 +79,8 @@ if ($slug === "perfilCV") {
     $email               = $trimOrNull($data['email'] ?? null);
     $tel                 = $trimOrNull($data['tel'] ?? null);
     $web                 = $trimOrNull($data['web'] ?? null);
-    $localitzacio_ciutat = $trimOrNull($data['localitzacio_ciutat'] ?? null);
-    $img_perfil          = $toIntOrNull($data['img_perfil'] ?? null);
+    $localitzacio_ciutat = $data['localitzacio_ciutat'];
+    $img_perfil          = $data['img_perfil'];
     $disponibilitat      = $toIntOrNull($data['disponibilitat'] ?? null);
     $visibilitat         = $toBool($data['visibilitat'] ?? 1);
 
@@ -98,6 +100,14 @@ if ($slug === "perfilCV") {
         Response::error(MissatgesAPI::error('validacio'), $errors, 400);
     }
 
+    $localitzacio_ciutat_bin = $localitzacio_ciutat !== null
+        ? Uuid::toBinary($localitzacio_ciutat)
+        : null;
+
+    $img_perfil_bin = $img_perfil !== null
+        ? Uuid::toBinary($img_perfil)
+        : null;
+
     try {
         global $conn;
         /** @var PDO $conn */
@@ -112,13 +122,13 @@ if ($slug === "perfilCV") {
             Response::error(MissatgesAPI::error('not_found'), ["Perfil amb id {$id} no existeix"], 404);
         }
 
-        // UPDATE
+        // UPDATE 
         $sql = "UPDATE db_curriculum_perfil
                    SET nom_complet = :nom_complet,
                        email = :email,
                        tel = :tel,
                        web = :web,
-                       localitzacio_ciutat = uuid_text_to_bin(NULLIF(:localitzacio_ciutat, '')),
+                      localitzacio_ciutat = :localitzacio_ciutat,
                        img_perfil = :img_perfil,
                        disponibilitat = :disponibilitat,
                        visibilitat = :visibilitat
@@ -135,11 +145,18 @@ if ($slug === "perfilCV") {
         if ($web === null)                 $stmt->bindValue(':web', null, PDO::PARAM_NULL);
         else                               $stmt->bindValue(':web', $web, PDO::PARAM_STR);
 
-        if ($localitzacio_ciutat === null) $stmt->bindValue(':localitzacio_ciutat', null, PDO::PARAM_NULL);
-        else                               $stmt->bindValue(':localitzacio_ciutat', $localitzacio_ciutat, PDO::PARAM_STR);
+        if ($localitzacio_ciutat_bin === null) {
+            $stmt->bindValue(':localitzacio_ciutat', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':localitzacio_ciutat', $localitzacio_ciutat_bin, PDO::PARAM_LOB);
+        }
 
-        if ($img_perfil === null)          $stmt->bindValue(':img_perfil', null, PDO::PARAM_NULL);
-        else                               $stmt->bindValue(':img_perfil', $img_perfil, PDO::PARAM_INT);
+        if ($img_perfil_bin === null) {
+            $stmt->bindValue(':img_perfil', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':img_perfil', $img_perfil_bin, PDO::PARAM_LOB);
+        }
+
 
         if ($disponibilitat === null)      $stmt->bindValue(':disponibilitat', null, PDO::PARAM_NULL);
         else                               $stmt->bindValue(':disponibilitat', $disponibilitat, PDO::PARAM_INT);
@@ -150,7 +167,7 @@ if ($slug === "perfilCV") {
 
         // Auditoría
         $tipusOperacio = "UPDATE";
-        $detalls = "Actualització perfil CV: {$nom_complet} ({$email})";
+        /* $detalls = "Actualització perfil CV: {$nom_complet} ({$email})";
 
         Audit::registrarCanvi(
             $conn,
@@ -160,13 +177,14 @@ if ($slug === "perfilCV") {
             Tables::CURRICULUM_PERFIL,
             $id
         );
+        */
 
         $conn->commit();
 
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
     } catch (Throwable $e) {
         if ($conn->inTransaction()) $conn->rollBack();
@@ -273,7 +291,7 @@ if ($slug === "perfilCV") {
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $existsId, 'perfil_id' => $perfil_id, 'locale' => $locale],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         if ($conn->inTransaction()) $conn->rollBack();
@@ -396,7 +414,7 @@ if ($slug === "perfilCV") {
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         if ($conn->inTransaction()) $conn->rollBack();
@@ -488,7 +506,7 @@ if ($slug === "perfilCV") {
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         if ($conn->inTransaction()) $conn->rollBack();
@@ -568,11 +586,15 @@ if ($slug === "perfilCV") {
             Response::error(MissatgesAPI::error('not_found'), ["Experiència id {$id} no existeix"], 404);
         }
 
+        $empresa_localitzacio_bin = $empresa_localitzacio !== null
+            ? Uuid::toBinary($empresa_localitzacio)
+            : null;
+
         // UPDATE (incluye updated_at si lo tienes en la tabla)
         $sql = "UPDATE db_curriculum_experiencia_professional
                    SET empresa = :empresa,
                        empresa_url = :empresa_url,
-                       empresa_localitzacio = uuid_text_to_bin(NULLIF(:empresa_localitzacio, '')),
+                       empresa_localitzacio = :empresa_localitzacio,
                        data_inici = :data_inici,
                        data_fi = :data_fi,
                        is_current = :is_current,
@@ -589,10 +611,10 @@ if ($slug === "perfilCV") {
         if ($empresa_url === null) $stmt->bindValue(':empresa_url', null, PDO::PARAM_NULL);
         else                       $stmt->bindValue(':empresa_url', $empresa_url, PDO::PARAM_STR);
 
-        if ($empresa_localitzacio === null || $empresa_localitzacio === '') {
+        if ($empresa_localitzacio_bin === null) {
             $stmt->bindValue(':empresa_localitzacio', null, PDO::PARAM_NULL);
         } else {
-            $stmt->bindValue(':empresa_localitzacio', $empresa_localitzacio, PDO::PARAM_STR); // "0199...."
+            $stmt->bindValue(':empresa_localitzacio', $empresa_localitzacio_bin, PDO::PARAM_LOB);
         }
 
         $stmt->bindValue(':data_inici', $data_inici, PDO::PARAM_STR);
@@ -627,7 +649,7 @@ if ($slug === "perfilCV") {
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         if ($conn->inTransaction()) $conn->rollBack();
@@ -733,7 +755,7 @@ if ($slug === "perfilCV") {
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         if ($conn->inTransaction()) $conn->rollBack();
@@ -795,11 +817,15 @@ if ($slug === "perfilCV") {
             Response::error(MissatgesAPI::error('not_found'), ["Educació id=$id no trobada"], 404);
         }
 
+        $institucio_localitzacio_bin = $institucio_localitzacio !== null
+            ? Uuid::toBinary($institucio_localitzacio)
+            : null;
+
         // UPDATE
         $sql = "UPDATE db_curriculum_educacio
                    SET institucio = :institucio,
                        institucio_url = :institucio_url,
-                       institucio_localitzacio = uuid_text_to_bin(NULLIF(:institucio_localitzacio, '')),
+                       institucio_localitzacio = :institucio_localitzacio,
                        data_inici = :data_inici,
                        data_fi = :data_fi,
                        logo_id = :logo_id,
@@ -812,12 +838,12 @@ if ($slug === "perfilCV") {
         $stmt->bindValue(':institucio', $institucio, PDO::PARAM_STR);
         $stmt->bindValue(':institucio_url', $institucio_url, PDO::PARAM_STR);
 
-        if ($institucio_localitzacio === null || $institucio_localitzacio === '') {
+
+        if ($institucio_localitzacio_bin === null) {
             $stmt->bindValue(':institucio_localitzacio', null, PDO::PARAM_NULL);
         } else {
-            $stmt->bindValue(':institucio_localitzacio', $institucio_localitzacio, PDO::PARAM_STR);
+            $stmt->bindValue(':institucio_localitzacio', $institucio_localitzacio_bin, PDO::PARAM_LOB);
         }
-
 
         if ($data_inici === null) $stmt->bindValue(':data_inici', null, PDO::PARAM_NULL);
         else                      $stmt->bindValue(':data_inici', $data_inici, PDO::PARAM_STR);
@@ -851,7 +877,7 @@ if ($slug === "perfilCV") {
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         if ($conn->inTransaction()) $conn->rollBack();
@@ -954,7 +980,7 @@ if ($slug === "perfilCV") {
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         if ($conn->inTransaction()) $conn->rollBack();

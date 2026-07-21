@@ -42,6 +42,8 @@ class Response
         'emissor_id',
         'receptor_id',
         'subcategoria_id',
+        'img_perfil',
+        'localitzacio_ciutat'
     ];
 
     public static function success(

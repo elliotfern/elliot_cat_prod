@@ -25,6 +25,7 @@ if (!$conn) {
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: POST");
 
+/*
 // Definir el dominio permitido
 $allowedOrigin = APP_DOMAIN;
 
@@ -46,7 +47,7 @@ if (!isAuthenticatedAdmin()) {
 }
 
 $userUuid = getAuthenticatedUserUuid(); // para auditoría, si la soportas
-
+*/
 // POST : Perfil curriculum
 // URL: https://elliot.cat/api/curriculum/post/perfilCV
 if ($slug === "perfilCV") {
@@ -77,8 +78,8 @@ if ($slug === "perfilCV") {
     $email               = $trimOrNull($data['email'] ?? null);
     $tel                 = $trimOrNull($data['tel'] ?? null);
     $web                 = $trimOrNull($data['web'] ?? null);
-    $localitzacio_ciutat = $trimOrNull($data['localitzacio_ciutat'] ?? null);
-    $img_perfil          = $toIntOrNull($data['img_perfil'] ?? null);
+    $localitzacio_ciutat = $data['localitzacio_ciutat'];
+    $img_perfil          = $data['img_perfil'];
     $disponibilitat      = $toIntOrNull($data['disponibilitat'] ?? null);
     $visibilitat         = $toBool($data['visibilitat'] ?? 1);
 
