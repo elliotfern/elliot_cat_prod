@@ -1,4 +1,4 @@
-name: Deploy Elliot.cat legacy (full sync + build + composer)
+name: Elliot.cat (full sync + build + composer)
 
 on:
   push:
@@ -55,6 +55,9 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      - name: Composer security audit
+        run: composer audit
+
       # 4) Wait for MySQL
       - name: Wait for MySQL
         run: |
@@ -95,7 +98,11 @@ jobs:
       - name: PHP Syntax Check
         run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      # 10) Node setup
+      # 10) PHPStan
+      - name: PHPStan analysis
+        run: vendor/bin/phpstan analyse src --memory-limit=1G
+
+      # 11) Node setup
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
@@ -114,12 +121,12 @@ jobs:
           INTRANET_WEB: https://elliot.cat/gestio
         run: npm run build
 
-      # 11) Write version file
+      # 12) Write version file
       - name: Write APP_VERSION file
         run: |
           echo "${GITHUB_SHA}" > public/version.txt
 
-      # 12) SSH setup
+      # 13) SSH setup
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -127,7 +134,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 87.98.230.129 >> ~/.ssh/known_hosts
 
-      # 13) Rsync deploy
+      # 14) Rsync deploy
       - name: Sync project to shared hosting (rsync)
         run: |
           set -euo pipefail
@@ -147,7 +154,7 @@ jobs:
             -e "ssh" \
             ./ "$REMOTE:$REMOTE_DIR"
 
-      # 14) Verify deploy
+      # 15) Verify deploy
       - name: Verify version on server
         run: |
           ssh epgylzqu@87.98.230.129 "bash -lc '

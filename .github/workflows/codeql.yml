@@ -5,12 +5,14 @@ on:
     branches:
       - main
       - develop
+
   pull_request:
     branches:
       - main
       - develop
+
   schedule:
-    - cron: '0 3 * * 0' # Cada domingo a las 03:00 UTC
+    - cron: '0 3 * * 0'
 
 permissions:
   actions: read
@@ -26,7 +28,6 @@ jobs:
       fail-fast: false
       matrix:
         language:
-          - php
           - javascript-typescript
 
     steps:
@@ -34,14 +35,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
 
-      # Solo necesario para lenguajes compilados.
-      # PHP y JavaScript/TypeScript no requieren build normalmente.
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
