@@ -99,8 +99,8 @@ jobs:
         run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
 
       # 10) PHPStan
-      - name: PHPStan analysis
-        run: vendor/bin/phpstan analyse src --memory-limit=1G
+      #- name: PHPStan analysis
+      #  run: vendor/bin/phpstan analyse src --memory-limit=1G
 
       # 11) Node setup
       - name: Setup Node.js

@@ -1,0 +1,2032 @@
+ ------ --------------------------------------------------------------------------------------------------------- 
+  Line   backend/Application/Agenda/UseCase/GetAgendaByIdUseCase.php                                              
+ ------ --------------------------------------------------------------------------------------------------------- 
+  :28    If condition is always true.                                                                             
+         🪪  if.alwaysTrue                                                                                        
+  :34    Using nullsafe method call on non-nullable type App\Domain\Ciutat\Entity\Ciutat. Use -> instead.         
+         🪪  nullsafe.neverNull                                                                                   
+  :43    Using nullsafe method call on non-nullable type App\Domain\Ciutat\ValueObject\CiutatId. Use -> instead.  
+         🪪  nullsafe.neverNull                                                                                   
+ ------ --------------------------------------------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------------------------------------------------------------------------- 
+  Line   backend/Application/Usuari/UseCase/CreateUsuariUseCase.php                                                                              
+ ------ ---------------------------------------------------------------------------------------------------------------------------------------- 
+  :34    Parameter $password of class App\Domain\Usuari\Entity\Usuari constructor expects App\Domain\Usuari\ValueObject\Password, string given.  
+         🪪  argument.type                                                                                                                       
+ ------ ---------------------------------------------------------------------------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------------------------------------------- 
+  Line   backend/Application/Usuari/UseCase/LoginUsuariUseCase.php                                                 
+ ------ ---------------------------------------------------------------------------------------------------------- 
+  :16    Property App\Application\Usuari\UseCase\LoginUsuariUseCase::$passwordHasher is never read, only written.  
+         🪪  property.onlyWritten                                                                                  
+         💡  See: https://phpstan.org/developing-extensions/always-read-written-properties                         
+ ------ ---------------------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------------------------------------------------------- 
+  Line   backend/Config/Database.php                                                                                                                  
+ ------ --------------------------------------------------------------------------------------------------------------------------------------------- 
+  :69    Call to function is_array() with array will always evaluate to true.                                                                         
+         🪪  function.alreadyNarrowedType                                                                                                             
+         💡  Because the type is coming from a PHPDoc, you can turn off this check by setting treatPhpDocTypesAsCertain: false in your phpstan.neon.  
+  :97    Call to function is_array() with array will always evaluate to true.                                                                         
+         🪪  function.alreadyNarrowedType                                                                                                             
+         💡  Because the type is coming from a PHPDoc, you can turn off this check by setting treatPhpDocTypesAsCertain: false in your phpstan.neon.  
+ ------ --------------------------------------------------------------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------ 
+  Line   backend/Config/DatabaseConnection.php           
+ ------ ------------------------------------------------ 
+  :21    Expression on left side of ?? is not nullable.  
+         🪪  nullCoalesce.expr                           
+  :25    Expression on left side of ?? is not nullable.  
+         🪪  nullCoalesce.expr                           
+  :29    Expression on left side of ?? is not nullable.  
+         🪪  nullCoalesce.expr                           
+  :33    Expression on left side of ?? is not nullable.  
+         🪪  nullCoalesce.expr                           
+ ------ ------------------------------------------------ 
+
+ ------ ---------------------------------------------------------------- 
+  Line   backend/Config/funcions.php                                     
+ ------ ---------------------------------------------------------------- 
+  :11    PHPDoc tag @param references unknown parameter: $allowedOrigin  
+         🪪  parameter.notFound                                          
+ ------ ---------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------------------- 
+  Line   backend/Domain/Ciutat/Entity/Ciutat.php                                                                  
+ ------ --------------------------------------------------------------------------------------------------------- 
+  :68    Property App\Domain\Ciutat\Entity\Ciutat::$ciutat on left side of ?? is not nullable nor uninitialized.  
+         🪪  nullCoalesce.initializedProperty                                                                     
+ ------ --------------------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------- 
+  Line   backend/Infrastructure/Persistence/Agenda/MysqlAgendaRepository.php  
+ ------ --------------------------------------------------------------------- 
+  :177   Ternary operator condition is always true.                           
+         🪪  ternary.alwaysTrue                                               
+ ------ --------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------------- 
+  Line   backend/Services/CurriculumPdfService.php                                   
+ ------ ---------------------------------------------------------------------------- 
+  :205   Match expression does not handle remaining values: int<min, 0>|int<5, max>  
+         🪪  match.unhandled                                                         
+  :215   Match expression does not handle remaining values: int<min, 0>|int<5, max>  
+         🪪  match.unhandled                                                         
+ ------ ---------------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------------------------------------- 
+  Line   backend/Tests/Application/Agenda/CreateAgendaEventUseCaseTest.php                                    
+ ------ ----------------------------------------------------------------------------------------------------- 
+  :43    Call to method PHPUnit\Framework\Assert::assertIsString() with string will always evaluate to true.  
+         🪪  method.alreadyNarrowedType                                                                       
+ ------ ----------------------------------------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------------------------------------- 
+  Line   backend/Tests/Application/Agenda/UpdateAgendaEventUseCaseTest.php                                    
+ ------ ----------------------------------------------------------------------------------------------------- 
+  :56    Call to method PHPUnit\Framework\Assert::assertIsString() with string will always evaluate to true.  
+         🪪  method.alreadyNarrowedType                                                                       
+ ------ ----------------------------------------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------------------------------------- 
+  Line   backend/Tests/Domain/Usuari/ValueObject/PasswordTest.php                                             
+ ------ ----------------------------------------------------------------------------------------------------- 
+  :16    Call to method PHPUnit\Framework\Assert::assertIsString() with string will always evaluate to true.  
+         🪪  method.alreadyNarrowedType                                                                       
+ ------ ----------------------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------------- 
+  Line   backend/Tests/Infrastructure/Agenda/MysqlAgendaRepositoryTest.php                           
+ ------ -------------------------------------------------------------------------------------------- 
+  :16    Property App\Tests\Infrastructure\Agenda\MysqlAgendaRepositoryTest::$pdo is unused.         
+         🪪  property.unused                                                                         
+         💡  See: https://phpstan.org/developing-extensions/always-read-written-properties           
+  :17    Property App\Tests\Infrastructure\Agenda\MysqlAgendaRepositoryTest::$repository is unused.  
+         🪪  property.unused                                                                         
+         💡  See: https://phpstan.org/developing-extensions/always-read-written-properties           
+  :23    Unreachable statement - code above always terminates.                                       
+         🪪  deadCode.unreachable                                                                    
+  :39    Unreachable statement - code above always terminates.                                       
+         🪪  deadCode.unreachable                                                                    
+ ------ -------------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------------- 
+  Line   backend/Tests/Infrastructure/Security/Auth/AuthKernelTest.php                               
+ ------ -------------------------------------------------------------------------------------------- 
+  :16    Property Tests\Integration\Security\Auth\AuthKernelTest::$jwt is never read, only written.  
+         🪪  property.onlyWritten                                                                    
+         💡  See: https://phpstan.org/developing-extensions/always-read-written-properties           
+ ------ -------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------- 
+  Line   backend/Utils/ImageService.php                                             
+ ------ --------------------------------------------------------------------------- 
+  :81    Method Ramsey\Uuid\Uuid::toString() invoked with 1 parameter, 0 required.  
+         🪪  arguments.count                                                        
+  :81    Static call to instance method Ramsey\Uuid\Uuid::toString().               
+         🪪  method.staticCall                                                      
+ ------ --------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------------------------------- 
+  Line   backend/Utils/Schema/Normalizer.php                                                                                  
+ ------ --------------------------------------------------------------------------------------------------------------------- 
+  :44    Method App\Utils\Schema\Normalizer::normalizeString() never returns null so it can be removed from the return type.  
+         🪪  return.unusedType                                                                                                
+  :58    Method App\Utils\Schema\Normalizer::normalizeInt() never returns null so it can be removed from the return type.     
+         🪪  return.unusedType                                                                                                
+  :65    Method App\Utils\Schema\Normalizer::normalizeFloat() never returns null so it can be removed from the return type.   
+         🪪  return.unusedType                                                                                                
+  :83    Method App\Utils\Schema\Normalizer::normalizeUuid() never returns null so it can be removed from the return type.    
+         🪪  return.unusedType                                                                                                
+ ------ --------------------------------------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------------------------------------------- 
+  Line   backend/Utils/Validator.php                                                                                        
+ ------ ------------------------------------------------------------------------------------------------------------------- 
+  :162   Parameter #2 $code of class App\Domain\Shared\Exception\ValidationException constructor expects int, array given.  
+         🪪  argument.type                                                                                                  
+ ------ ------------------------------------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
+  Line   backend/Vault/Adapters/Outbound/DatabasePasswordRepository.php                                                                                                    
+ ------ ------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
+  :58    If condition is always true.                                                                                                                                      
+         🪪  if.alwaysTrue                                                                                                                                                 
+  :63    Unreachable statement - code above always terminates.                                                                                                             
+         🪪  deadCode.unreachable                                                                                                                                          
+  :93    If condition is always true.                                                                                                                                      
+         🪪  if.alwaysTrue                                                                                                                                                 
+  :99    Inner named functions are not supported by PHPStan. Consider refactoring to an anonymous function, class method, or a top-level-defined function. See issue #165  
+         (https://github.com/phpstan/phpstan/issues/165) for more details.                                                                                                 
+         🪪  function.inner                                                                                                                                                
+  :104   Function base32Decode not found.                                                                                                                                  
+         🪪  function.notFound                                                                                                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                                                                                              
+  :113   Parameter #1 $string of function str_pad expects string, int<0, max> given.                                                                                       
+         🪪  argument.type                                                                                                                                                 
+  :117   Inner named functions are not supported by PHPStan. Consider refactoring to an anonymous function, class method, or a top-level-defined function. See issue #165  
+         (https://github.com/phpstan/phpstan/issues/165) for more details.                                                                                                 
+         🪪  function.inner                                                                                                                                                
+  :153   Function getTotpCode not found.                                                                                                                                   
+         🪪  function.notFound                                                                                                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                                                                                              
+  :158   Unreachable statement - code above always terminates.                                                                                                             
+         🪪  deadCode.unreachable                                                                                                                                          
+ ------ ------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
+
+ ------ ----------------------------------------------- 
+  Line   backend/Views/pdf/curriculum.php               
+ ------ ----------------------------------------------- 
+  :4     Variable $langCode might not be defined.       
+         🪪  variable.undefined                         
+  :196   Variable $nomComplet might not be defined.     
+         🪪  variable.undefined                         
+  :197   Variable $titular might not be defined.        
+         🪪  variable.undefined                         
+  :198   Variable $contacte might not be defined.       
+         🪪  variable.undefined                         
+  :199   Variable $sumari might not be defined.         
+         🪪  variable.undefined                         
+  :201   Variable $avatarHtml might not be defined.     
+         🪪  variable.undefined                         
+  :206   Variable $linksHtml might not be defined.      
+         🪪  variable.undefined                         
+  :211   Variable $locale might not be defined.         
+         🪪  variable.undefined                         
+  :212   Variable $habilitatHtml might not be defined.  
+         🪪  variable.undefined                         
+  :217   Variable $locale might not be defined.         
+         🪪  variable.undefined                         
+  :218   Variable $expHtml might not be defined.        
+         🪪  variable.undefined                         
+  :221   Variable $locale might not be defined.         
+         🪪  variable.undefined                         
+  :222   Variable $eduHtml might not be defined.        
+         🪪  variable.undefined                         
+  :225   Variable $curriculum might not be defined.     
+         🪪  variable.undefined                         
+  :225   Variable $locale might not be defined.         
+         🪪  variable.undefined                         
+  :227   Variable $curriculum might not be defined.     
+         🪪  variable.undefined                         
+  :227   Variable $locale might not be defined.         
+         🪪  variable.undefined                         
+  :233   Variable $curriculum might not be defined.     
+         🪪  variable.undefined                         
+  :233   Variable $locale might not be defined.         
+         🪪  variable.undefined                         
+  :235   Variable $curriculum might not be defined.     
+         🪪  variable.undefined                         
+  :235   Variable $locale might not be defined.         
+         🪪  variable.undefined                         
+  :236   Variable $formattedDate might not be defined.  
+         🪪  variable.undefined                         
+ ------ ----------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/00_auth/get/get-nom-usuari.php                            
+ ------ ---------------------------------------------------------------------- 
+  :9     Function getSanitizedCookie not found.                                
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/00_auth/get/get-usuari.php                                
+ ------ ---------------------------------------------------------------------- 
+  :11    Function checkReferer not found.                                      
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :20    Variable $routeParams might not be defined.                           
+         🪪  variable.undefined                                                
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/00_auth/get/get-usuaris.php                               
+ ------ ---------------------------------------------------------------------- 
+  :11    Function checkReferer not found.                                      
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------- 
+  Line   backend/api/00_auth/post-usuaris.php                   
+ ------ ------------------------------------------------------- 
+  :73    Unreachable statement - code above always terminates.  
+         🪪  deadCode.unreachable                               
+ ------ ------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/00_auth/put-usuaris.php                                   
+ ------ ---------------------------------------------------------------------- 
+  :7     Function checkReferer not found.                                      
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :30    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :31    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :32    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :33    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :34    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------- 
+  Line   backend/api/02_comptabilitat/delete-comptabilitat.php                          
+ ------ ------------------------------------------------------------------------------- 
+  :32    Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :45    Instantiated class App\Services\ClientService not found.                       
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :49    Call to method delete() on an unknown class App\Services\ClientService.        
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+ ------ ------------------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------- 
+  Line   backend/api/02_comptabilitat/generate_pdf.php        
+ ------ ----------------------------------------------------- 
+  :176   Variable $lang on left side of ?? is never defined.  
+         🪪  nullCoalesce.variable                            
+ ------ ----------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------------------------------------ 
+  Line   backend/api/02_comptabilitat/post-comptabilitat.php                                                         
+ ------ ------------------------------------------------------------------------------------------------------------ 
+  :37    Negated boolean expression is always false.                                                                 
+         🪪  booleanNot.alwaysFalse                                                                                  
+  :106   Variable $clientService might not be defined.                                                               
+         🪪  variable.undefined                                                                                      
+  :264   Parameter #2 $userUuid of static method App\Config\Audit::registrarCanvi() expects string|null, int given.  
+         🪪  argument.type                                                                                           
+  :386   Variable $userUuid might not be defined.                                                                    
+         🪪  variable.undefined                                                                                      
+  :398   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                 
+         🪪  argument.type                                                                                           
+  :478   Variable $userUuid might not be defined.                                                                    
+         🪪  variable.undefined                                                                                      
+  :482   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                 
+         🪪  argument.type                                                                                           
+  :576   Variable $userUuid might not be defined.                                                                    
+         🪪  variable.undefined                                                                                      
+  :580   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                 
+         🪪  argument.type                                                                                           
+  :693   Variable $userUuid might not be defined.                                                                    
+         🪪  variable.undefined                                                                                      
+  :697   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                 
+         🪪  argument.type                                                                                           
+  :779   Variable $userUuid might not be defined.                                                                    
+         🪪  variable.undefined                                                                                      
+  :791   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                 
+         🪪  argument.type                                                                                           
+ ------ ------------------------------------------------------------------------------------------------------------ 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/02_comptabilitat/put-comptabilitat.php                                           
+ ------ --------------------------------------------------------------------------------------------- 
+  :34    Function isAuthenticatedAdmin not found.                                                     
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :41    Function getAuthenticatedUserUuid not found.                                                 
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :43    Negated boolean expression is always false.                                                  
+         🪪  booleanNot.alwaysFalse                                                                   
+  :53    Call to static method handle() on an unknown class AdminMiddleware.                          
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :67    Instantiated class App\Services\ClientService not found.                                     
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :71    Call to method update() on an unknown class App\Services\ClientService.                      
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :217   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :331   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :471   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :586   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :728   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/04_persones/delete-persones.php                                                  
+ ------ --------------------------------------------------------------------------------------------- 
+  :138   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/04_persones/post-persones.php                                                    
+ ------ --------------------------------------------------------------------------------------------- 
+  :35    Strict comparison using === between mixed and null will always evaluate to false.            
+         🪪  identical.alwaysFalse                                                                    
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :39    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :44    Strict comparison using !== between mixed and null will always evaluate to true.             
+         🪪  notIdentical.alwaysTrue                                                                  
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :45    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :162   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :327   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :427   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------------------- 
+  Line   backend/api/04_persones/put-persones.php                                                          
+ ------ -------------------------------------------------------------------------------------------------- 
+  :33    Function data_input not found.                                                                    
+         🪪  function.notFound                                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                              
+  :101   Offset 'persona' on non-empty-array<mixed> on left side of ?? always exists and is not nullable.  
+         🪪  nullCoalesce.offset                                                                           
+  :170   Function data_input not found.                                                                    
+         🪪  function.notFound                                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                              
+  :377   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.       
+         🪪  argument.type                                                                                 
+  :485   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.       
+         🪪  argument.type                                                                                 
+ ------ -------------------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------------ 
+  Line   backend/api/06_projectes/get-projectes.php                                          
+ ------ ------------------------------------------------------------------------------------ 
+  :42    Function getAuthenticatedUserUuid not found.                                        
+         🪪  function.notFound                                                               
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                
+  :49    Strict comparison using === between string and null will always evaluate to false.  
+         🪪  identical.alwaysFalse                                                           
+  :168   Function getAuthenticatedUserUuid not found.                                        
+         🪪  function.notFound                                                               
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                
+  :175   Strict comparison using === between string and null will always evaluate to false.  
+         🪪  identical.alwaysFalse                                                           
+  :252   Function getAuthenticatedUserUuid not found.                                        
+         🪪  function.notFound                                                               
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                
+  :259   Strict comparison using === between string and null will always evaluate to false.  
+         🪪  identical.alwaysFalse                                                           
+  :346   Function getAuthenticatedUserUuid not found.                                        
+         🪪  function.notFound                                                               
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                
+  :353   Strict comparison using === between string and null will always evaluate to false.  
+         🪪  identical.alwaysFalse                                                           
+  :422   Function getAuthenticatedUserUuid not found.                                        
+         🪪  function.notFound                                                               
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                
+  :429   Strict comparison using === between string and null will always evaluate to false.  
+         🪪  identical.alwaysFalse                                                           
+ ------ ------------------------------------------------------------------------------------ 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/06_projectes/post-projectes.php                                                  
+ ------ --------------------------------------------------------------------------------------------- 
+  :56    Function getAuthenticatedUserUuid not found.                                                 
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :63    Strict comparison using === between string and null will always evaluate to false.           
+         🪪  identical.alwaysFalse                                                                    
+  :210   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :242   Function getAuthenticatedUserUuid not found.                                                 
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :249   Strict comparison using === between string and null will always evaluate to false.           
+         🪪  identical.alwaysFalse                                                                    
+  :347   Strict comparison using === between non-empty-string and '' will always evaluate to false.   
+         🪪  identical.alwaysFalse                                                                    
+  :426   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/06_projectes/put-projectes.php                                                   
+ ------ --------------------------------------------------------------------------------------------- 
+  :37    Function getAuthenticatedUserUuid not found.                                                 
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :44    Strict comparison using === between string and null will always evaluate to false.           
+         🪪  identical.alwaysFalse                                                                    
+  :79    Strict comparison using === between mixed and null will always evaluate to false.            
+         🪪  identical.alwaysFalse                                                                    
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :246   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :279   Function getAuthenticatedUserUuid not found.                                                 
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :286   Strict comparison using === between string and null will always evaluate to false.           
+         🪪  identical.alwaysFalse                                                                    
+  :384   Strict comparison using === between non-empty-string and '' will always evaluate to false.   
+         🪪  identical.alwaysFalse                                                                    
+  :474   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/08_biblioteca_llibres/delete-biblioteca.php                                      
+ ------ --------------------------------------------------------------------------------------------- 
+  :55    Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------------------ 
+  Line   backend/api/08_biblioteca_llibres/get-biblioteca.php                                      
+ ------ ------------------------------------------------------------------------------------------ 
+  :159   Strict comparison using === between 'llibreAutors' and '' will always evaluate to false.  
+         🪪  identical.alwaysFalse                                                                 
+ ------ ------------------------------------------------------------------------------------------ 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/08_biblioteca_llibres/post-biblioteca.php                                        
+ ------ --------------------------------------------------------------------------------------------- 
+  :62    Strict comparison using === between mixed and null will always evaluate to false.            
+         🪪  identical.alwaysFalse                                                                    
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :66    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :71    Strict comparison using !== between mixed and null will always evaluate to true.             
+         🪪  notIdentical.alwaysTrue                                                                  
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :72    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :107   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :236   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :278   Strict comparison using === between mixed and null will always evaluate to false.            
+         🪪  identical.alwaysFalse                                                                    
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :282   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :287   Strict comparison using !== between mixed and null will always evaluate to true.             
+         🪪  notIdentical.alwaysTrue                                                                  
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :288   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :327   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/08_biblioteca_llibres/put-biblioteca.php                                         
+ ------ --------------------------------------------------------------------------------------------- 
+  :40    Strict comparison using === between mixed and null will always evaluate to false.            
+         🪪  identical.alwaysFalse                                                                    
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :44    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :49    Strict comparison using !== between mixed and null will always evaluate to true.             
+         🪪  notIdentical.alwaysTrue                                                                  
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :50    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :110   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :198   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------- 
+  Line   backend/api/09_adreces/get-link.php                      
+ ------ --------------------------------------------------------- 
+  :218   Call to sprintf contains 0 placeholders, 1 value given.  
+         🪪  argument.sprintf                                     
+ ------ --------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/09_adreces/post-link.php                                                         
+ ------ --------------------------------------------------------------------------------------------- 
+  :22    Negated boolean expression is always false.                                                  
+         🪪  booleanNot.alwaysFalse                                                                   
+  :40    Function isAuthenticatedAdmin not found.                                                     
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :46    Function getAuthenticatedUserUuid not found.                                                 
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :141   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :155   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :157   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :163   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :172   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :224   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :234   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :236   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :242   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :247   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :305   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :326   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :327   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :338   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :338   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :340   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :346   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :347   Variable $idText might not be defined.                                                       
+         🪪  variable.undefined                                                                       
+  :352   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------------------------------------------------------- 
+  Line   backend/api/09_adreces/put-link.php                                                                                                          
+ ------ --------------------------------------------------------------------------------------------------------------------------------------------- 
+  :31    Constant APP_DOMAIN not found.                                                                                                               
+         🪪  constant.notFound                                                                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                                                                         
+  :44    Function isAuthenticatedAdmin not found.                                                                                                     
+         🪪  function.notFound                                                                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                                                                         
+  :50    Function getAuthenticatedUserUuid not found.                                                                                                 
+         🪪  function.notFound                                                                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                                                                         
+  :86    Call to function is_int() with int will always evaluate to true.                                                                             
+         🪪  function.alreadyNarrowedType                                                                                                             
+  :86    Result of && is always false.                                                                                                                
+         🪪  booleanAnd.alwaysFalse                                                                                                                   
+         💡  Because the type is coming from a PHPDoc, you can turn off this check by setting treatPhpDocTypesAsCertain: false in your phpstan.neon.  
+  :89    Call to function is_int() with int will always evaluate to true.                                                                             
+         🪪  function.alreadyNarrowedType                                                                                                             
+  :89    Result of && is always false.                                                                                                                
+         🪪  booleanAnd.alwaysFalse                                                                                                                   
+         💡  Because the type is coming from a PHPDoc, you can turn off this check by setting treatPhpDocTypesAsCertain: false in your phpstan.neon.  
+  :122   Cannot call method prepare() on array.                                                                                                       
+         🪪  method.nonObject                                                                                                                         
+  :123   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :131   Cannot call method prepare() on array.                                                                                                       
+         🪪  method.nonObject                                                                                                                         
+  :141   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :167   Cannot call method prepare() on array.                                                                                                       
+         🪪  method.nonObject                                                                                                                         
+  :177   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                                                  
+         🪪  argument.type                                                                                                                            
+  :177   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :182   Parameter #1 $conn of static method App\Config\Audit::registrarCanvi() expects PDO, array given.                                             
+         🪪  argument.type                                                                                                                            
+  :185   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :187   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :193   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :196   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                                                  
+         🪪  argument.type                                                                                                                            
+  :244   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :268   Cannot call method prepare() on array.                                                                                                       
+         🪪  method.nonObject                                                                                                                         
+  :287   Cannot call method prepare() on array.                                                                                                       
+         🪪  method.nonObject                                                                                                                         
+  :288   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :298   Parameter #1 $conn of static method App\Config\Audit::registrarCanvi() expects PDO, array given.                                             
+         🪪  argument.type                                                                                                                            
+  :301   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :303   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :311   Offset ':tema_ca'|':tema_en'|':tema_es'|':tema_fr'|':tema_it' on array{':id': mixed, ':tema'?: mixed} on left side of ?? does not exist.     
+         🪪  nullCoalesce.offset                                                                                                                      
+  :318   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :321   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                                                  
+         🪪  argument.type                                                                                                                            
+  :340   Static method App\Utils\ValidacioErrors::format() invoked with 2 parameters, 1 required.                                                     
+         🪪  arguments.count                                                                                                                          
+  :380   Cannot call method prepare() on array.                                                                                                       
+         🪪  method.nonObject                                                                                                                         
+  :381   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :389   Cannot call method prepare() on array.                                                                                                       
+         🪪  method.nonObject                                                                                                                         
+  :399   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :415   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                                                  
+         🪪  argument.type                                                                                                                            
+  :415   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :419   Cannot call method prepare() on array.                                                                                                       
+         🪪  method.nonObject                                                                                                                         
+  :429   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                                                  
+         🪪  argument.type                                                                                                                            
+  :429   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :434   Parameter #1 $conn of static method App\Config\Audit::registrarCanvi() expects PDO, array given.                                             
+         🪪  argument.type                                                                                                                            
+  :437   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :439   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :445   Variable $idText might not be defined.                                                                                                       
+         🪪  variable.undefined                                                                                                                       
+  :448   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.                                                  
+         🪪  argument.type                                                                                                                            
+ ------ --------------------------------------------------------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/100_auxiliars/ciutats/post-ciutats.php                                           
+ ------ --------------------------------------------------------------------------------------------- 
+  :10    Negated boolean expression is always false.                                                  
+         🪪  booleanNot.alwaysFalse                                                                   
+  :34    Function isAuthenticatedAdmin not found.                                                     
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :126   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/100_auxiliars/ciutats/put-ciutats.php                                            
+ ------ --------------------------------------------------------------------------------------------- 
+  :10    Negated boolean expression is always false.                                                  
+         🪪  booleanNot.alwaysFalse                                                                   
+  :30    Function isAuthenticatedAdmin not found.                                                     
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :128   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+  Line    backend/api/100_auxiliars/get-auxiliars.php                                                                                                                         
+ ------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+  :516    Call to sprintf contains 1 placeholder, 2 values given.                                                                                                             
+          🪪  argument.sprintf                                                                                                                                                
+  :1552   Variable $result in empty() always exists and is not falsy.                                                                                                         
+          🪪  empty.variable                                                                                                                                                  
+  :1594   Variable $result in empty() always exists and is not falsy.                                                                                                         
+          🪪  empty.variable                                                                                                                                                  
+  :1757   Variable $result in empty() always exists and is not falsy.                                                                                                         
+          🪪  empty.variable                                                                                                                                                  
+  :1799   Variable $result in empty() always exists and is not falsy.                                                                                                         
+          🪪  empty.variable                                                                                                                                                  
+  :2210   Strict comparison using === between                                                                                                                                 
+          mixed~('auxiliarImatgesAutor'|'auxiliarImatgesEspais'|'auxiliarImatgesSeries'|'blogArticlesCa'|'blogArticlesEn'|'blogArticlesEs'|'blogArticlesIt'|'budgets'|'calen  
+          dariDies'|'calendariMesos'|'categories_despeses'|'ciutatId'|'ciutats'|'clients'|'directors'|'editorials'|'educacions'|'emissors'|'espais'|'estatFacturacio'|'estat  
+          Llibre'|'estatsAgenda'|'estatsClients'|'estatsPublicacio'|'experiencies'|'facturesClients'|'generesPelis'|'grupLlibre'|'grups'|'historiaCursos'|'imatgesEmpreses'|  
+          'imatgesIcones'|'imatgesLlibres'|'imatgesUsuaris'|'imgPelis'|'imgSeries'|'llengues'|'llistatCiutats'|'llistatCompletImatges'|'llistatTipusEspais'|'pais'|'paisId'|  
+          'paisos'|'perfilsCV'|'productes'|'projectes'|'projectes_categories'|'proveidors'|'provincies'|'sexes'|'sub_categories_despeses'|'subtemes'|'temes'|'tipusAgenda'|'  
+          tipusIVA'|'tipusLinks'|'tipusLlibre'|'tipusPagament'|'tipusPublicacio'|'viatges') and 'sub_categories_despeses' will always evaluate to false.                      
+          🪪  identical.alwaysFalse                                                                                                                                           
+          💡  Type                                                                                                                                                            
+          'auxiliarImatgesAutor'|'auxiliarImatgesEspais'|'auxiliarImatgesSeries'|'blogArticlesCa'|'blogArticlesEn'|'blogArticlesEs'|'blogArticlesIt'|'budgets'|'calendariDie  
+          s'|'calendariMesos'|'categories_despeses'|'ciutatId'|'ciutats'|'clients'|'directors'|'editorials'|'educacions'|'emissors'|'espais'|'estatFacturacio'|'estatLlibre'  
+          |'estatsAgenda'|'estatsClients'|'estatsPublicacio'|'experiencies'|'facturesClients'|'generesPelis'|'grupLlibre'|'grups'|'historiaCursos'|'imatgesEmpreses'|'imatge  
+          sIcones'|'imatgesLlibres'|'imatgesUsuaris'|'imgPelis'|'imgSeries'|'llengues'|'llistatCiutats'|'llistatCompletImatges'|'llistatTipusEspais'|'pais'|'paisId'|'paisos  
+          '|'perfilsCV'|'productes'|'projectes'|'projectes_categories'|'proveidors'|'provincies'|'sexes'|'sub_categories_despeses'|'subtemes'|'temes'|'tipusAgenda'|'tipusIV  
+          A'|'tipusLinks'|'tipusLlibre'|'tipusPagament'|'tipusPublicacio'|'viatges' has already been eliminated from mixed.                                                   
+  :2265   Variable $metodes in empty() always exists and is not falsy.                                                                                                        
+          🪪  empty.variable                                                                                                                                                  
+  :2299   Variable $metodes in empty() always exists and is not falsy.                                                                                                        
+          🪪  empty.variable                                                                                                                                                  
+  :2335   Variable $metodes in empty() always exists and is not falsy.                                                                                                        
+          🪪  empty.variable                                                                                                                                                  
+ ------- -------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/100_auxiliars/image-upload-process-form.php               
+ ------ ---------------------------------------------------------------------- 
+  :110   Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :111   Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+ ------ ---------------------------------------------------------------------- 
+
+ ------ -------------------------------------- 
+  Line   backend/api/10_vault/get-vault.php    
+ ------ -------------------------------------- 
+  :119   Variable $conn might not be defined.  
+         🪪  variable.undefined                
+  :147   Variable $conn might not be defined.  
+         🪪  variable.undefined                
+ ------ -------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/10_vault/post-vault.php                                   
+ ------ ---------------------------------------------------------------------- 
+  :50    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :51    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :52    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :53    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :54    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :55    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :56    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/10_vault/put-vault.php                                    
+ ------ ---------------------------------------------------------------------- 
+  :50    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :51    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :52    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :53    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :54    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :55    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------- 
+  Line   backend/api/11_cinema/get-cinema.php                                           
+ ------ ------------------------------------------------------------------------------- 
+  :42    Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :93    Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :145   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :202   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :311   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :417   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :473   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :524   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :574   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :634   Variable $param might not be defined.                                          
+         🪪  variable.undefined                                                         
+  :648   Variable $id might not be defined.                                             
+         🪪  variable.undefined                                                         
+  :662   Variable $id might not be defined.                                             
+         🪪  variable.undefined                                                         
+  :670   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :720   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :773   Variable $id might not be defined.                                             
+         🪪  variable.undefined                                                         
+  :786   Variable $id might not be defined.                                             
+         🪪  variable.undefined                                                         
+ ------ ------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/11_cinema/post-cinema.php                                                        
+ ------ --------------------------------------------------------------------------------------------- 
+  :34    Call to static method handle() on an unknown class App\Utils\AdminMiddleware.                
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :53    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :55    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :58    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :67    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :86    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :207   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :222   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.                
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :241   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :242   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :255   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :274   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :372   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/11_cinema/put-cinema.php                                                         
+ ------ --------------------------------------------------------------------------------------------- 
+  :32    Call to static method handle() on an unknown class App\Utils\AdminMiddleware.                
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :72    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :74    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :77    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :79    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :95    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :225   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :234   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :258   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.                
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :278   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :279   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :292   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :308   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :428   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------------------ 
+  Line   backend/api/12_xarxes_socials/post-blog.php                                               
+ ------ ------------------------------------------------------------------------------------------ 
+  :58    Offset 'mensaje' on non-empty-array<mixed> in isset() always exists and is not nullable.  
+         🪪  isset.offset                                                                          
+ ------ ------------------------------------------------------------------------------------------ 
+
+ ------ ----------------------------------------------------------------------------------------- 
+  Line   backend/api/12_xarxes_socials/post-bluesky.php                                           
+ ------ ----------------------------------------------------------------------------------------- 
+  :41    Offset 'imagen' on non-empty-array<mixed> in isset() always exists and is not nullable.  
+         🪪  isset.offset                                                                         
+ ------ ----------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------- 
+  Line   backend/api/12_xarxes_socials/post-linkedin.php  
+ ------ ------------------------------------------------- 
+  :53    Variable $access_token might not be defined.     
+         🪪  variable.undefined                           
+ ------ ------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/13_blog/get-blog.php                                                             
+ ------ --------------------------------------------------------------------------------------------- 
+  :212   Ternary operator condition is always true.                                                   
+         🪪  ternary.alwaysTrue                                                                       
+  :287   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :426   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :466   Strict comparison using === between 'historia' and 'historia' will always evaluate to true.  
+         🪪  identical.alwaysTrue                                                                     
+  :496   If condition is always true.                                                                 
+         🪪  if.alwaysTrue                                                                            
+  :512   Function hexToUuidText not found.                                                            
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :522   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :582   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :638   Ternary operator condition is always true.                                                   
+         🪪  ternary.alwaysTrue                                                                       
+  :720   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :855   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/13_blog/post-blog.php                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+  :23    Negated boolean expression is always false.                                                  
+         🪪  booleanNot.alwaysFalse                                                                   
+  :27    Function isAuthenticatedAdmin not found.                                                     
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :33    Function getAuthenticatedUserUuid not found.                                                 
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :60    Static method App\Utils\ValidacioErrors::format() invoked with 2 parameters, 1 required.     
+         🪪  arguments.count                                                                          
+  :68    Static method App\Utils\ValidacioErrors::format() invoked with 2 parameters, 1 required.     
+         🪪  arguments.count                                                                          
+  :76    Static method App\Utils\ValidacioErrors::format() invoked with 2 parameters, 1 required.     
+         🪪  arguments.count                                                                          
+  :137   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/13_blog/put-blog.php                                                             
+ ------ --------------------------------------------------------------------------------------------- 
+  :25    Negated boolean expression is always false.                                                  
+         🪪  booleanNot.alwaysFalse                                                                   
+  :29    Function isAuthenticatedAdmin not found.                                                     
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :35    Function getAuthenticatedUserUuid not found.                                                 
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :66    Static method App\Utils\ValidacioErrors::format() invoked with 2 parameters, 1 required.     
+         🪪  arguments.count                                                                          
+  :73    Static method App\Utils\ValidacioErrors::format() invoked with 2 parameters, 1 required.     
+         🪪  arguments.count                                                                          
+  :81    Static method App\Utils\ValidacioErrors::format() invoked with 2 parameters, 1 required.     
+         🪪  arguments.count                                                                          
+  :149   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/14_lector_rss/get-lector.php                              
+ ------ ---------------------------------------------------------------------- 
+  :86    Parameter #3 $value of function curl_setopt expects bool, int given.  
+         🪪  argument.type                                                     
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ---------------------------------------- 
+  Line   backend/api/15_sitemap/get-sitemap.php  
+ ------ ---------------------------------------- 
+  :50    Variable $query might not be defined.   
+         🪪  variable.undefined                  
+  :99    Variable $query might not be defined.   
+         🪪  variable.undefined                  
+ ------ ---------------------------------------- 
+
+ ------- --------------------------------------------------------------------------------------------- 
+  Line    backend/api/16_historia_oberta/get-historia.php                                              
+ ------- --------------------------------------------------------------------------------------------- 
+  :34     Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :65     Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :127    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :191    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :219    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :269    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :351    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :405    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :438    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :469    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :497    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :523    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :551    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :578    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :605    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :635    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :665    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :700    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :731    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :762    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :791    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :818    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :844    Variable $conn might not be defined.                                                         
+          🪪  variable.undefined                                                                       
+  :920    Variable $sql might not be defined.                                                          
+          🪪  variable.undefined                                                                       
+  :934    Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+          🪪  argument.type                                                                            
+  :988    Variable $query might not be defined.                                                        
+          🪪  variable.undefined                                                                       
+  :1057   Variable $query might not be defined.                                                        
+          🪪  variable.undefined                                                                       
+  :1191   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+          🪪  argument.type                                                                            
+  :1243   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+          🪪  argument.type                                                                            
+ ------- --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/16_historia_oberta/post-historia-json.php                                        
+ ------ --------------------------------------------------------------------------------------------- 
+  :93    Variable $nom might not be defined.                                                          
+         🪪  variable.undefined                                                                       
+  :102   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/16_historia_oberta/post-historia.php                                             
+ ------ --------------------------------------------------------------------------------------------- 
+  :53    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :54    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :63    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :66    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :148   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :149   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :201   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :202   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :254   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :255   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :256   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :257   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :258   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :259   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :260   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :261   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :325   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :326   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :327   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :328   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :329   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :330   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :331   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :332   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :333   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :334   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :335   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :336   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :337   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :338   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :541   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/16_historia_oberta/put-historia.php                                              
+ ------ --------------------------------------------------------------------------------------------- 
+  :55    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :56    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :65    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :68    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :148   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :149   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :150   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :205   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :206   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :207   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :261   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :262   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :263   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :264   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :265   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :266   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :267   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :268   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :269   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :335   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :336   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :337   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :338   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :339   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :340   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :341   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :342   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :343   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :344   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :345   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :346   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :347   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :348   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :349   Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :568   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------------- 
+  Line   backend/api/17_viatges/get-viatges.php                                         
+ ------ ------------------------------------------------------------------------------- 
+  :31    Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :82    Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :129   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :179   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :226   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :271   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :316   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :369   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+  :420   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.  
+         🪪  class.notFound                                                             
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols           
+ ------ ------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/17_viatges/post-viatges.php                                                      
+ ------ --------------------------------------------------------------------------------------------- 
+  :32    Strict comparison using === between mixed and null will always evaluate to false.            
+         🪪  identical.alwaysFalse                                                                    
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :36    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :41    Strict comparison using !== between mixed and null will always evaluate to true.             
+         🪪  notIdentical.alwaysTrue                                                                  
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :42    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :57    Call to static method handle() on an unknown class App\Utils\AdminMiddleware.                
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :236   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :264   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.                
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :337   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/17_viatges/put-viatges.php                                                       
+ ------ --------------------------------------------------------------------------------------------- 
+  :36    Strict comparison using === between mixed and null will always evaluate to false.            
+         🪪  identical.alwaysFalse                                                                    
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :40    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :45    Strict comparison using !== between mixed and null will always evaluate to true.             
+         🪪  notIdentical.alwaysTrue                                                                  
+         💡  Type ''|null has already been eliminated from mixed.                                     
+  :46    Function data_input not found.                                                               
+         🪪  function.notFound                                                                        
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :53    Call to static method handle() on an unknown class App\Utils\AdminMiddleware.                
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :225   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :241   Call to static method handle() on an unknown class App\Utils\AdminMiddleware.                
+         🪪  class.notFound                                                                           
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols                         
+  :325   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------- 
+  Line   backend/api/20_curriculum/get-cv.php                         
+ ------ ------------------------------------------------------------- 
+  :8     Variable $routeParams might not be defined.                  
+         🪪  variable.undefined                                       
+  :138   Array has 2 duplicate keys with value ':id' (':id', ':id').  
+         🪪  array.duplicateKey                                       
+  :209   Array has 2 duplicate keys with value ':id' (':id', ':id').  
+         🪪  array.duplicateKey                                       
+  :289   Array has 2 duplicate keys with value ':id' (':id', ':id').  
+         🪪  array.duplicateKey                                       
+  :428   Array has 2 duplicate keys with value ':id' (':id', ':id').  
+         🪪  array.duplicateKey                                       
+  :467   Array has 2 duplicate keys with value ':id' (':id', ':id').  
+         🪪  array.duplicateKey                                       
+  :536   Array has 2 duplicate keys with value ':id' (':id', ':id').  
+         🪪  array.duplicateKey                                       
+  :595   Variable $conn might not be defined.                         
+         🪪  variable.undefined                                       
+  :624   Variable $conn might not be defined.                         
+         🪪  variable.undefined                                       
+ ------ ------------------------------------------------------------- 
+
+ ------ --------------------------------------------- 
+  Line   backend/api/20_curriculum/pdf-cv.php         
+ ------ --------------------------------------------- 
+  :16    Negated boolean expression is always false.  
+         🪪  booleanNot.alwaysFalse                   
+ ------ --------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------- 
+  Line   backend/api/20_curriculum/post-cv.php                                                        
+ ------ --------------------------------------------------------------------------------------------- 
+  :10    Variable $routeParams might not be defined.                                                  
+         🪪  variable.undefined                                                                       
+  :20    Negated boolean expression is always false.                                                  
+         🪪  booleanNot.alwaysFalse                                                                   
+  :154   Variable $userUuid might not be defined.                                                     
+         🪪  variable.undefined                                                                       
+  :166   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :261   Variable $userUuid might not be defined.                                                     
+         🪪  variable.undefined                                                                       
+  :273   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :379   Variable $userUuid might not be defined.                                                     
+         🪪  variable.undefined                                                                       
+  :391   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :463   Variable $userUuid might not be defined.                                                     
+         🪪  variable.undefined                                                                       
+  :475   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :567   Variable $userUuid might not be defined.                                                     
+         🪪  variable.undefined                                                                       
+  :579   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :648   Variable $userUuid might not be defined.                                                     
+         🪪  variable.undefined                                                                       
+  :658   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :725   Variable $userUuid might not be defined.                                                     
+         🪪  variable.undefined                                                                       
+  :735   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+  :798   Variable $userUuid might not be defined.                                                     
+         🪪  variable.undefined                                                                       
+  :808   Parameter #3 $meta of static method App\Utils\Response::success() expects array, int given.  
+         🪪  argument.type                                                                            
+ ------ --------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------- 
+  Line   backend/api/20_curriculum/put-cv.php         
+ ------ --------------------------------------------- 
+  :11    Variable $routeParams might not be defined.  
+         🪪  variable.undefined                       
+  :21    Negated boolean expression is always false.  
+         🪪  booleanNot.alwaysFalse                   
+  :282   Variable $userUuid might not be defined.     
+         🪪  variable.undefined                       
+  :405   Variable $userUuid might not be defined.     
+         🪪  variable.undefined                       
+  :497   Variable $userUuid might not be defined.     
+         🪪  variable.undefined                       
+  :640   Variable $userUuid might not be defined.     
+         🪪  variable.undefined                       
+  :746   Variable $userUuid might not be defined.     
+         🪪  variable.undefined                       
+  :868   Variable $userUuid might not be defined.     
+         🪪  variable.undefined                       
+  :971   Variable $userUuid might not be defined.     
+         🪪  variable.undefined                       
+ ------ --------------------------------------------- 
+
+ ------ --------------------------------------------- 
+  Line   backend/api/21_agenda/get-agenda.php         
+ ------ --------------------------------------------- 
+  :104   Negated boolean expression is always false.  
+         🪪  booleanNot.alwaysFalse                   
+ ------ --------------------------------------------- 
+
+ ------ --------------------------------------------------------------------------------------------------------------------------------------------- 
+  Line   backend/api/22_cron/cron-agenda-dia.php                                                                                                      
+ ------ --------------------------------------------------------------------------------------------------------------------------------------------- 
+  :179   Call to function is_array() with array will always evaluate to true.                                                                         
+         🪪  function.alreadyNarrowedType                                                                                                             
+         💡  Because the type is coming from a PHPDoc, you can turn off this check by setting treatPhpDocTypesAsCertain: false in your phpstan.neon.  
+  :180   Call to function is_array() with array will always evaluate to true.                                                                         
+         🪪  function.alreadyNarrowedType                                                                                                             
+         💡  Because the type is coming from a PHPDoc, you can turn off this check by setting treatPhpDocTypesAsCertain: false in your phpstan.neon.  
+ ------ --------------------------------------------------------------------------------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/contactes/post-contactes.php                              
+ ------ ---------------------------------------------------------------------- 
+  :20    Function verificarToken not found.                                    
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :27    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :33    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :39    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :45    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :51    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :57    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :63    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :69    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :75    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :94    Variable $nom might not be defined.                                   
+         🪪  variable.undefined                                                
+  :95    Variable $cognoms might not be defined.                               
+         🪪  variable.undefined                                                
+  :97    Variable $tel_1 might not be defined.                                 
+         🪪  variable.undefined                                                
+  :103   Variable $tipus might not be defined.                                 
+         🪪  variable.undefined                                                
+  :104   Variable $pais might not be defined.                                  
+         🪪  variable.undefined                                                
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   backend/api/contactes/put-contactes.php                               
+ ------ ---------------------------------------------------------------------- 
+  :20    Function verificarToken not found.                                    
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :29    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :35    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :41    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :47    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :53    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :59    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :65    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :71    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :77    Function data_input not found.                                        
+         🪪  function.notFound                                                 
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols  
+  :97    Variable $nom might not be defined.                                   
+         🪪  variable.undefined                                                
+  :98    Variable $cognoms might not be defined.                               
+         🪪  variable.undefined                                                
+  :100   Variable $tel_1 might not be defined.                                 
+         🪪  variable.undefined                                                
+  :106   Variable $tipus might not be defined.                                 
+         🪪  variable.undefined                                                
+  :107   Variable $pais might not be defined.                                  
+         🪪  variable.undefined                                                
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------ 
+  Line   backend/routes/area-privada-administradors.php  
+ ------ ------------------------------------------------ 
+  :27    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :30    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :31    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :32    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :33    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :36    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :37    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :38    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :42    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :43    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :44    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :46    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :47    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :48    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :51    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :52    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :53    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :55    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :57    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :58    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :60    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :61    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :62    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :63    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :66    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :67    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :68    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :70    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :71    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :72    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :76    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :77    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :78    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :79    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :80    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :83    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :84    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :85    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :86    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :89    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :90    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :91    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :92    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :93    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :94    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :97    Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :100   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :101   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :102   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :103   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :104   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :105   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :106   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :107   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :108   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :110   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :111   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :112   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :115   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :116   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :117   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :118   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :119   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :120   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :121   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :122   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :125   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :126   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :127   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :130   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :131   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :132   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :133   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :134   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :135   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :136   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :137   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :138   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :139   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :140   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :141   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :142   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :143   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :144   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :145   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :146   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :147   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :150   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :151   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :152   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :155   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :156   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :157   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :158   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :161   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :164   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :165   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :166   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :168   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :170   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :171   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :173   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :174   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :175   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :176   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :177   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :178   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :179   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :180   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :181   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :182   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :183   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :184   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :185   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :186   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :189   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :190   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :191   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :194   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :195   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :196   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :199   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :200   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :201   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :204   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :205   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :206   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :209   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :210   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :211   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :212   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :213   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :214   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :217   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :218   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :219   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :220   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :222   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :223   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :224   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :226   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :227   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :228   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :229   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :230   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :233   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :234   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :235   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :236   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :239   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :240   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :243   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :244   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :245   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :246   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :247   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :248   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :249   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :250   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :251   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :252   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :253   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :254   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :255   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :256   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :257   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :258   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :259   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :260   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :261   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :262   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :263   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :264   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :265   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :266   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :267   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :270   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :271   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :272   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :273   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :274   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :275   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :278   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+  :279   Variable $url might not be defined.             
+         🪪  variable.undefined                          
+ ------ ------------------------------------------------ 
+
+ [ERROR] Found 707 errors                                                                                               
+
