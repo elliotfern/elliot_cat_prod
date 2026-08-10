@@ -6,14 +6,21 @@ use DateTime;
 use IntlDateFormatter;
 use App\Config\DatabaseConnection;
 use App\Config\Database;
+use App\Utils\Locales;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Utils\Uuid;
 
 class CurriculumPdfService
 {
     public function build(int $id, int $locale): array
     {
+
+        $localeUuid = Locales::toUuid($locale);
+        $localeBin  = $localeUuid !== null ? Uuid::toBinary($localeUuid) : null;
+
+
         $conn = DatabaseConnection::getConnection();
         $db   = new Database();
         $pdo  = $db->getPdo();
@@ -47,7 +54,7 @@ class CurriculumPdfService
 
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
-        $stmt->bindValue(':locale', $locale, \PDO::PARAM_INT);
+        $stmt->bindValue(':locale', $localeBin, \PDO::PARAM_LOB);
         $stmt->execute();
 
         $perfilI18n = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -108,7 +115,7 @@ class CurriculumPdfService
 
             $stmt = $conn->prepare($sql);
             $stmt->bindValue(':id', $exp['id'], \PDO::PARAM_INT);
-            $stmt->bindValue(':locale', $locale, \PDO::PARAM_INT);
+            $stmt->bindValue(':locale', $localeBin, \PDO::PARAM_LOB);
             $stmt->execute();
 
             $experiencies[$index]['i18n'] = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -144,7 +151,7 @@ class CurriculumPdfService
 
             $stmt = $conn->prepare($sql);
             $stmt->bindValue(':id', $edu['id'], \PDO::PARAM_INT);
-            $stmt->bindValue(':locale', $locale, \PDO::PARAM_INT);
+            $stmt->bindValue(':locale', $localeBin, \PDO::PARAM_LOB);
             $stmt->execute();
 
             $educacions[$index]['i18n'] = $stmt->fetch(\PDO::FETCH_ASSOC);

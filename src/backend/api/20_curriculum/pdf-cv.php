@@ -206,6 +206,8 @@ foreach ($educacions as $edu) {
 // Dompdf
 // ==========================
 $localeMap = [1 => 'ca', 2 => 'en', 3 => 'es', 4 => 'it'];
+
+
 $langCode  = $localeMap[$locale] ?? 'ca';
 
 $filename = "cv_elliot_fernandez_{$langCode}.pdf";
