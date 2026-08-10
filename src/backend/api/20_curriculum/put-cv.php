@@ -26,29 +26,6 @@ if (!$conn) {
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: PUT");
 
-/*
-// Definir el dominio permitido
-$allowedOrigin = APP_DOMAIN;
-
-// Llamar a la función para verificar el referer
-checkReferer($allowedOrigin);
-
-// Verificar que el método de la solicitud sea GET
-if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
-    header('HTTP/1.1 405 Method Not Allowed');
-    echo json_encode(['error' => 'Method not allowed']);
-    exit();
-}
-
-// Requiere ADMIN por token (user_type === 1)
-if (!isAuthenticatedAdmin()) {
-    http_response_code(403);
-    echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-    exit;
-}
-
-$userUuid = getAuthenticatedUserUuid(); // para auditoría, si la soportas
-*/
 // PUT : Perfil curriculum
 // URL: https://elliot.cat/api/curriculum/post/perfilCV
 if ($slug === "perfilCV") {
@@ -164,21 +141,6 @@ if ($slug === "perfilCV") {
         $stmt->bindValue(':visibilitat', $visibilitat, PDO::PARAM_INT);
 
         $stmt->execute();
-
-        // Auditoría
-        $tipusOperacio = "UPDATE";
-        /* $detalls = "Actualització perfil CV: {$nom_complet} ({$email})";
-
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            $tipusOperacio,
-            $detalls,
-            Tables::CURRICULUM_PERFIL,
-            $id
-        );
-        */
-
         $conn->commit();
 
         Response::success(
@@ -276,7 +238,7 @@ if ($slug === "perfilCV") {
         else                   $stmt->bindValue(':sumari', $sumari, PDO::PARAM_STR);
 
         $stmt->execute();
-
+        $conn->commit();
 
         Response::success(
             MissatgesAPI::success('update'),
@@ -387,18 +349,6 @@ if ($slug === "perfilCV") {
         $stmt->bindValue(':visible', $visible, PDO::PARAM_INT);
 
         $stmt->execute();
-
-        // Auditoría
-        $detalls = sprintf("Update link id=%d perfil_id=%d label=%s url=%s", $id, $perfil_id, (string)($label ?? ''), $url);
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            "UPDATE",
-            $detalls,
-            'db_curriculum_links',
-            $id
-        );
-
         $conn->commit();
 
         Response::success(
