@@ -214,10 +214,15 @@ if ($slug === "perfilCV") {
 
     // Datos
     $perfil_id = $toInt($data['perfil_id'] ?? 1) ?? 1;
-    $locale    = $toInt($data['locale'] ?? null);
+    $locale    = $data['locale'];
     $titular   = $trimOrNull($data['titular'] ?? null);
     $sumari    = $trimOrNull($data['sumari'] ?? null);
     $id    = $data['id'];
+
+    $locale_bin = $locale !== null
+        ? Uuid::toBinary($locale)
+        : null;
+
 
     // —— Validación
     $errors = [];
@@ -247,7 +252,7 @@ if ($slug === "perfilCV") {
         $sqlChk = "SELECT id FROM db_curriculum_perfil_i18n WHERE perfil_id = :perfil_id AND locale = :locale LIMIT 1";
         $stChk = $conn->prepare($sqlChk);
         $stChk->bindValue(':perfil_id', $perfil_id, PDO::PARAM_INT);
-        $stChk->bindValue(':locale', $locale, PDO::PARAM_INT);
+        $stChk->bindValue(':locale', $locale_bin, PDO::PARAM_LOB);
         $stChk->execute();
         $existsId = $stChk->fetchColumn();
 
@@ -265,7 +270,7 @@ if ($slug === "perfilCV") {
         $stmt = $conn->prepare($sql);
 
         $stmt->bindValue(':$id', $id, PDO::PARAM_INT);
-        $stmt->bindValue(':$locale', $locale, PDO::PARAM_INT);
+        $stmt->bindValue(':$locale', $locale_bin, PDO::PARAM_LOB);
 
         if ($titular === null) $stmt->bindValue(':titular', null, PDO::PARAM_NULL);
         else                   $stmt->bindValue(':titular', $titular, PDO::PARAM_STR);
