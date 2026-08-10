@@ -110,6 +110,7 @@ foreach ($habilitats as $h) {
         $icon    = '<img src="' . $iconUrl . '" class="skill-icon" alt="' . $nom . '">';
     }
     $habilitatHtml .= '<div class="skill">' . $icon . '<span>' . $nom . '</span></div>';
+    //                                                    👆 esto es lo que quieres quitar
 }
 
 // Experiències

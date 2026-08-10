@@ -106,14 +106,13 @@
             margin-right: 10px;
             margin-bottom: 6px;
             text-align: center;
-            font-size: 9px;
         }
 
         .skill-icon {
-            width: 18px;
-            height: 18px;
+            height: 22px;
+            width: auto;
             display: block;
-            margin: 0 auto 2px auto;
+            margin: 0 auto;
         }
 
         /* Blocs exp / edu */
@@ -206,6 +205,7 @@
     <div class="links"><?= $linksHtml ?></div>
 
     <hr class="divider">
+
 
     <!-- Habilitats -->
     <div class="section-title"><?= $HEADINGS['habilitats'][$locale] ?? 'Skills' ?></div>
