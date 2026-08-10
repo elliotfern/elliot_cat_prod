@@ -111,7 +111,7 @@
         .skill-icon {
             height: 22px !important;
             width: auto !important;
-            max-width: 30px !important;
+            max-width: 70px !important;
             display: block;
             margin: 0 auto;
         }

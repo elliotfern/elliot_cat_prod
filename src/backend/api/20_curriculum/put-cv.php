@@ -701,9 +701,13 @@ if ($slug === "perfilCV") {
     $institucio_localitzacio = isset($data['institucio_localitzacio']) ? trim((string)$data['institucio_localitzacio']) : null;
     $data_inici              = !empty($data['data_inici']) ? $data['data_inici'] : null;
     $data_fi                 = !empty($data['data_fi']) ? $data['data_fi'] : null;
-    $logo_id                 = !empty($data['logo_id']) ? (int)$data['logo_id'] : null;
+    $logo_id                 = $data['logo_id'];
     $posicio                 = isset($data['posicio']) ? (int)$data['posicio'] : 0;
     $visible                 = isset($data['visible']) ? (int)!!$data['visible'] : 1;
+
+    $logo_id_bin = $logo_id !== null
+        ? Uuid::toBinary($logo_id)
+        : null;
 
     try {
         $conn->beginTransaction();
@@ -751,8 +755,7 @@ if ($slug === "perfilCV") {
         if ($data_fi === null) $stmt->bindValue(':data_fi', null, PDO::PARAM_NULL);
         else                   $stmt->bindValue(':data_fi', $data_fi, PDO::PARAM_STR);
 
-        if ($logo_id === null) $stmt->bindValue(':logo_id', null, PDO::PARAM_NULL);
-        else                   $stmt->bindValue(':logo_id', $logo_id, PDO::PARAM_INT);
+        $stmt->bindValue(':logo_id', $logo_id_bin, PDO::PARAM_LOB);
 
         $stmt->bindValue(':posicio', $posicio, PDO::PARAM_INT);
         $stmt->bindValue(':visible', $visible, PDO::PARAM_INT);
