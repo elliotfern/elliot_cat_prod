@@ -223,7 +223,6 @@ if ($slug === "perfilCV") {
         ? Uuid::toBinary($locale)
         : null;
 
-
     // —— Validación
     $errors = [];
     if (!$perfil_id || $perfil_id < 1) {
@@ -231,8 +230,6 @@ if ($slug === "perfilCV") {
     }
     if ($locale === null) {
         $errors[] = ValidacioErrors::requerit('locale');
-    } elseif ($locale < 1) {
-        $errors[] = ValidacioErrors::invalid('locale');
     }
 
     if ($titular === null)                    $errors[] = ValidacioErrors::requerit('titular');
@@ -249,7 +246,7 @@ if ($slug === "perfilCV") {
         $conn->beginTransaction();
 
         // Verificar que existe ese perfil_id + locale
-        $sqlChk = "SELECT id FROM db_curriculum_perfil_i18n WHERE perfil_id = :perfil_id AND locale = :locale LIMIT 1";
+        $sqlChk = "SELECT id FROM db_curriculum_perfil_i18n WHERE perfil_id = :perfil_id AND locale = :locale";
         $stChk = $conn->prepare($sqlChk);
         $stChk->bindValue(':perfil_id', $perfil_id, PDO::PARAM_INT);
         $stChk->bindValue(':locale', $locale_bin, PDO::PARAM_LOB);
@@ -269,8 +266,8 @@ if ($slug === "perfilCV") {
                  WHERE id = :id";
         $stmt = $conn->prepare($sql);
 
-        $stmt->bindValue(':$id', $id, PDO::PARAM_INT);
-        $stmt->bindValue(':$locale', $locale_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->bindValue(':locale', $locale_bin, PDO::PARAM_LOB);
 
         if ($titular === null) $stmt->bindValue(':titular', null, PDO::PARAM_NULL);
         else                   $stmt->bindValue(':titular', $titular, PDO::PARAM_STR);
@@ -280,18 +277,6 @@ if ($slug === "perfilCV") {
 
         $stmt->execute();
 
-        // Auditoría
-        $detalls = sprintf("Actualització perfil_i18n perfil_id=%d, locale=%d, titular=%s", $perfil_id, $locale, (string)($titular ?? ''));
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            "UPDATE",
-            $detalls,
-            'db_curriculum_perfil_i18n',
-            $existsId
-        );
-
-        $conn->commit();
 
         Response::success(
             MissatgesAPI::success('update'),
@@ -443,8 +428,12 @@ if ($slug === "perfilCV") {
     // Datos
     $id        = $toIntOrNull($data['id'] ?? null);      // obligatorio para UPDATE
     $nom       = $trimOrNull($data['nom'] ?? null);
-    $imatge_id = $toIntOrNull($data['imatge_id'] ?? null);
+    $imatge_id = $data['imatge_id'];
     $posicio   = $toIntOrNull($data['posicio'] ?? 0) ?? 0;
+
+    $imatge_id_bin = $imatge_id !== null
+        ? Uuid::toBinary($imatge_id)
+        : null;
 
     // Validaciones
     $errors = [];
@@ -487,25 +476,10 @@ if ($slug === "perfilCV") {
 
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
-
-        if ($imatge_id === null) $stmt->bindValue(':imatge_id', null, PDO::PARAM_NULL);
-        else                     $stmt->bindValue(':imatge_id', $imatge_id, PDO::PARAM_INT);
-
+        $stmt->bindValue(':imatge_id', $imatge_id_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':posicio', $posicio, PDO::PARAM_INT);
 
         $stmt->execute();
-
-        // Auditoría
-        $detalls = sprintf("Update habilitat id=%d, nom=%s, posicio=%d", $id, $nom, $posicio);
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            "UPDATE",
-            $detalls,
-            'db_curriculum_habilitats',
-            $id
-        );
-
         $conn->commit();
 
         Response::success(
@@ -533,14 +507,22 @@ if ($slug === "perfilCV") {
     // Datos
     $empresa              = $trimOrNull($data['empresa'] ?? null);
     $empresa_url          = $trimOrNull($data['empresa_url'] ?? null);
-    $empresa_localitzacio = $trimOrNull($data['empresa_localitzacio'] ?? null); // UUID texto o ''/null
+    $empresa_localitzacio = $data['empresa_localitzacio']; // UUID texto o ''/null
     $data_inici           = $trimOrNull($data['data_inici'] ?? null);
     $data_fi              = $trimOrNull($data['data_fi'] ?? null);
     $is_current           = $toBoolInt($data['is_current'] ?? 0);
-    $logo_empresa         = $toIntOrNull($data['logo_empresa'] ?? null);
+    $logo_empresa         = $data['logo_empresa'];
     $posicio              = $toIntOrNull($data['posicio'] ?? 0) ?? 0;
     $visible              = $toBoolInt($data['visible'] ?? 1);
     $id                   = (int)($data['id'] ?? 0);
+
+    $empresa_localitzacio_bin = $empresa_localitzacio !== null
+        ? Uuid::toBinary($empresa_localitzacio)
+        : null;
+
+    $logo_empresa_bin = $logo_empresa !== null
+        ? Uuid::toBinary($logo_empresa)
+        : null;
 
     // Validaciones
     $errors = [];
@@ -591,10 +573,6 @@ if ($slug === "perfilCV") {
             Response::error(MissatgesAPI::error('not_found'), ["Experiència id {$id} no existeix"], 404);
         }
 
-        $empresa_localitzacio_bin = $empresa_localitzacio !== null
-            ? Uuid::toBinary($empresa_localitzacio)
-            : null;
-
         // UPDATE (incluye updated_at si lo tienes en la tabla)
         $sql = "UPDATE db_curriculum_experiencia_professional
                    SET empresa = :empresa,
@@ -616,39 +594,20 @@ if ($slug === "perfilCV") {
         if ($empresa_url === null) $stmt->bindValue(':empresa_url', null, PDO::PARAM_NULL);
         else                       $stmt->bindValue(':empresa_url', $empresa_url, PDO::PARAM_STR);
 
-        if ($empresa_localitzacio_bin === null) {
-            $stmt->bindValue(':empresa_localitzacio', null, PDO::PARAM_NULL);
-        } else {
-            $stmt->bindValue(':empresa_localitzacio', $empresa_localitzacio_bin, PDO::PARAM_LOB);
-        }
-
+        $stmt->bindValue(':empresa_localitzacio', $empresa_localitzacio_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':data_inici', $data_inici, PDO::PARAM_STR);
 
         if ($data_fi === null) $stmt->bindValue(':data_fi', null, PDO::PARAM_NULL);
         else                   $stmt->bindValue(':data_fi', $data_fi, PDO::PARAM_STR);
 
         $stmt->bindValue(':is_current', $is_current, PDO::PARAM_INT);
-
-        if ($logo_empresa === null) $stmt->bindValue(':logo_empresa', null, PDO::PARAM_NULL);
-        else                        $stmt->bindValue(':logo_empresa', $logo_empresa, PDO::PARAM_INT);
+        $stmt->bindValue(':logo_empresa', $logo_empresa_bin, PDO::PARAM_LOB);
 
         $stmt->bindValue(':posicio', $posicio, PDO::PARAM_INT);
         $stmt->bindValue(':visible', $visible, PDO::PARAM_INT);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
         $stmt->execute();
-
-        // Auditoría
-        $detalls = sprintf("Actualització experiència empresa=%s, data_inici=%s", $empresa, $data_inici);
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            "UPDATE",
-            $detalls,
-            'db_curriculum_experiencia_professional',
-            $id
-        );
-
         $conn->commit();
 
         Response::success(
@@ -675,10 +634,14 @@ if ($slug === "perfilCV") {
     // Datos (id es obligatorio para actualizar)
     $id             = $toIntOrNull($data['id'] ?? null);
     $experiencia_id = $toIntOrNull($data['experiencia_id'] ?? null);
-    $locale         = $toIntOrNull($data['locale'] ?? null);
+    $locale         = $data['locale'];
     $rol_titol      = $trimOrNull($data['rol_titol'] ?? null);
     $sumari         = $trimOrNull($data['sumari'] ?? null);
     $fites          = $trimOrNull($data['fites'] ?? null);
+
+    $locale_bin = $locale !== null
+        ? Uuid::toBinary($locale)
+        : null;
 
     // Validaciones
     $errors = [];
@@ -727,7 +690,7 @@ if ($slug === "perfilCV") {
         $stmt = $conn->prepare($sql);
         $stmt->bindValue(':id',             $id,             PDO::PARAM_INT);
         $stmt->bindValue(':experiencia_id', $experiencia_id, PDO::PARAM_INT);
-        $stmt->bindValue(':locale',         $locale,         PDO::PARAM_INT);
+        $stmt->bindValue(':locale',         $locale_bin,         PDO::PARAM_LOB);
         $stmt->bindValue(':rol_titol',      $rol_titol,      PDO::PARAM_STR);
 
         if ($sumari === null) $stmt->bindValue(':sumari', null, PDO::PARAM_NULL);
@@ -737,24 +700,6 @@ if ($slug === "perfilCV") {
         else                  $stmt->bindValue(':fites', $fites, PDO::PARAM_STR);
 
         $stmt->execute();
-
-        // Auditoría
-        $detalls = sprintf(
-            "Update experiència_i18n id=%d, experiencia_id=%d, locale=%d, rol=%s",
-            $id,
-            $experiencia_id,
-            $locale,
-            $rol_titol
-        );
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            "UPDATE",
-            $detalls,
-            'db_curriculum_experiencia_professional_i18n',
-            $id
-        );
-
         $conn->commit();
 
         Response::success(
@@ -863,20 +808,6 @@ if ($slug === "perfilCV") {
         $stmt->bindValue(':visible', $visible, PDO::PARAM_INT);
 
         $stmt->execute();
-
-        // Auditoría
-        $tipusOperacio = "UPDATE";
-        $detalls = "Actualització educació id=$id: " . $institucio;
-
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            $tipusOperacio,
-            $detalls,
-            Tables::CURRICULUM_EDUCACIO,
-            $id
-        );
-
         $conn->commit();
 
         Response::success(

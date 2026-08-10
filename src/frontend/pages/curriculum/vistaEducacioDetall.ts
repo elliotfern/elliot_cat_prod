@@ -1,6 +1,7 @@
 import { api } from '../../core/api/client';
 import { EducacioCv } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
+import { LOCALES } from '../../utils/locales/locales';
 import { DOMAIN_IMG } from '../../utils/urls';
 
 const esc = (s: unknown) =>
@@ -14,13 +15,6 @@ const spinner = () =>
      <div class="spinner-border me-2" role="status"></div>
      Carregant…
    </div>`;
-
-const LOCALES: Record<number, string> = {
-  1: 'Català',
-  2: 'English',
-  3: 'Castellano',
-  4: 'Italiano',
-};
 
 function capitalizeFirst(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);

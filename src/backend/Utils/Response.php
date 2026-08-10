@@ -43,7 +43,11 @@ class Response
         'receptor_id',
         'subcategoria_id',
         'img_perfil',
-        'localitzacio_ciutat'
+        'localitzacio_ciutat',
+        'locale',
+        'empresa_localitzacio',
+        'logo_empresa',
+        'institucio_localitzacio'
     ];
 
     public static function success(

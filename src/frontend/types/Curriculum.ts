@@ -25,7 +25,7 @@ export type Vis = 0 | 1 | boolean;
 export interface PerfilCVI18n {
   id: number;
   perfil_id: number;
-  locale: number; // 1=ca, 3=es, 2=en, 4=it
+  locale: string; // 1=ca, 3=es, 2=en, 4=it
   titular: string;
   sumari: string;
 }
@@ -71,8 +71,8 @@ export interface EducacioCvI18n {
 export interface ExperienciaCv {
   [key: string]: unknown;
   id: number;
-  logo_empresa: number;
-  empresa_localitzacio: number;
+  logo_empresa: string;
+  empresa_localitzacio: string;
   empresa: string;
   empresa_url?: string | null;
   data_inici: string;
@@ -94,7 +94,7 @@ export interface ExperienciaCv {
 export interface ExperienciaCvI18n {
   [key: string]: unknown;
   experiencia_id: number;
-  locale: number;
+  locale: string;
   fites: string;
   rol_titol: string;
   sumari?: string | null;

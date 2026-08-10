@@ -5,7 +5,7 @@ import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
-export async function formPerfilI18n(isUpdate: boolean, locale?: number) {
+export async function formPerfilI18n(isUpdate: boolean, locale?: string) {
   const form = document.getElementById('formCVPerfilI18n');
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnCVPerfili18n') as HTMLButtonElement;

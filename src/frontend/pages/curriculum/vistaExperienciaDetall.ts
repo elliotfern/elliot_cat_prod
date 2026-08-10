@@ -1,6 +1,7 @@
 import { api } from '../../core/api/client';
 import { ExperienciaCv } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
+import { localeCode, localeCurrentLabel, localeLabel } from '../../utils/locales/locales';
 import { DOMAIN_IMG } from '../../utils/urls';
 
 const esc = (s: unknown) =>
@@ -11,46 +12,25 @@ const esc = (s: unknown) =>
 
 const spinner = () => `<div class="d-flex align-items-center"><div class="spinner-border me-2" role="status"></div> Carregant…</div>`;
 
-const LOCALES: Record<number, string> = {
-  1: 'Català',
-  2: 'English',
-  3: 'Castellano',
-  4: 'Italiano',
-};
-
-const LOCALE_CODES: Record<number, string> = {
-  1: 'ca-ES',
-  2: 'en-US',
-  3: 'es-ES',
-  4: 'it-IT',
-};
-
-const CURRENT_LABEL: Record<number, string> = {
-  1: 'actualitat',
-  2: 'current',
-  3: 'actualidad',
-  4: 'attuale',
-};
-
 function capitalizeFirst(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function fmtDateLocale(dateStr?: string | null, locale: number = 1): string {
+function fmtDateLocale(dateStr?: string | null, locale?: string): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr ?? '';
 
-  const lang = LOCALE_CODES[locale] ?? 'ca-ES';
+  const lang = localeCode(locale ?? '');
   const mes = d.toLocaleDateString(lang, { month: 'long' });
   const any = d.toLocaleDateString(lang, { year: 'numeric' });
 
   return `${capitalizeFirst(mes)} ${any}`;
 }
 
-function fmtPeriode(exp: ExperienciaCv, locale: number): string {
+function fmtPeriode(exp: ExperienciaCv, locale: string): string {
   if (exp.is_current === 1 || exp.is_current === true) {
-    return `${fmtDateLocale(exp.data_inici, locale)} - ${CURRENT_LABEL[locale] ?? 'actual'}`;
+    return `${fmtDateLocale(exp.data_inici, locale)} - ${localeCurrentLabel(locale)}`;
   }
   return `${fmtDateLocale(exp.data_inici, locale)} - ${fmtDateLocale(exp.data_fi, locale)}`;
 }
@@ -64,7 +44,7 @@ function renderTabs(exp: ExperienciaCv): string {
     .map(
       (t, idx) => `
       <button class="tab-btn ${idx === 0 ? 'active' : ''}" data-target="pane-${t.locale}">
-        ${LOCALES[t.locale] ?? 'Idioma ' + t.locale}
+        ${esc(localeLabel(t.locale))}
       </button>
     `
     )
@@ -124,13 +104,10 @@ function initTabs(root: HTMLElement) {
       const targetId = btn.dataset.target;
       if (!targetId) return;
 
-      // desactivar todo
       buttons.forEach((b) => b.classList.remove('active'));
       panes.forEach((p) => p.classList.remove('active'));
 
-      // activar botón
       btn.classList.add('active');
-      // activar panel correspondiente
       const pane = root.querySelector<HTMLElement>(`#${targetId}`);
       if (pane) {
         pane.classList.add('active');
@@ -151,7 +128,7 @@ export async function vistaExperienciaDetall(id: number): Promise<void> {
       id,
     });
     root.innerHTML = renderExperiencia(data);
-    initTabs(root); // 👉 inicializar las pestañas
+    initTabs(root);
   } catch (error) {
     console.error(error);
     root.innerHTML = `<div class="alert alert-danger">${esc(error)}</div>`;

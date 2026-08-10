@@ -1,13 +1,7 @@
 import { api } from '../../core/api/client';
 import { PerfilCVI18n } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
-
-const LOCALES = [
-  { id: 1, code: 'ca', label: 'Català' },
-  { id: 3, code: 'es', label: 'Castellà' },
-  { id: 2, code: 'en', label: 'Anglès' },
-  { id: 4, code: 'it', label: 'Italià' },
-] as const;
+import { LOCALES } from '../../utils/locales/locales';
 
 const esc = (s: unknown) =>
   String(s ?? '')
@@ -23,10 +17,10 @@ const spinner = () => `<div class="d-flex align-items-center"><div class="spinne
 
 const errorBox = (msg: string) => `<div class="alert alert-danger" role="alert">${esc(msg)}</div>`;
 
-const localeLabel = (loc: number) => LOCALES.find((l) => l.id === loc)?.label ?? `Locale ${loc}`;
+const localeLabel = (loc: string) => LOCALES.find((l) => l.id === loc)?.label ?? `Locale ${loc}`;
 
 // URL del botón de edición
-const editUrl = (locale: number) => `${window.location.origin}/gestio/curriculum/modifica-perfil-i18n/1/${locale}`;
+const editUrl = (locale: string) => `${window.location.origin}/gestio/curriculum/modifica-perfil-i18n/1/${locale}`;
 
 function layoutHTML(perfilId: number) {
   const tabs = LOCALES.map(
@@ -57,15 +51,15 @@ export async function vistaPerfilCVi18n(id = 1): Promise<void> {
   const tabBar = root.querySelector('.nav-tabs') as HTMLElement;
 
   // Cache por locale
-  const cache = new Map<number, PerfilCVI18n>();
+  const cache = new Map<string, PerfilCVI18n>();
 
   // Locale inicial (query ?locale=… o catalán)
   const qs = new URLSearchParams(window.location.search);
-  const initial = Number(qs.get('locale')) || 1;
+  const initial = qs.get('locale') || LOCALES[0].id; // por defecto, català
 
-  const setActive = (locale: number) => {
+  const setActive = (locale: string) => {
     tabBar.querySelectorAll<HTMLButtonElement>('.nav-link').forEach((btn) => {
-      const isActive = Number(btn.dataset.locale) === locale;
+      const isActive = btn.dataset.locale === locale;
       btn.classList.toggle('active', isActive);
       btn.setAttribute('aria-selected', String(isActive));
     });
@@ -88,7 +82,7 @@ export async function vistaPerfilCVi18n(id = 1): Promise<void> {
     `;
   };
 
-  const loadLocale = async (locale: number) => {
+  const loadLocale = async (locale: string) => {
     setActive(locale);
     // cache
     if (cache.has(locale)) {
@@ -116,8 +110,8 @@ export async function vistaPerfilCVi18n(id = 1): Promise<void> {
   tabBar.addEventListener('click', (ev) => {
     const btn = (ev.target as HTMLElement).closest<HTMLButtonElement>('.nav-link');
     if (!btn) return;
-    const locale = Number(btn.dataset.locale);
-    if (!Number.isFinite(locale)) return;
+    const locale = btn.dataset.locale;
+    if (!locale) return;
     loadLocale(locale);
   });
 

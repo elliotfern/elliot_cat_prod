@@ -4,6 +4,7 @@ use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Utils\Uuid;
 
 $slug = $routeParams[0];
 $db = new Database();
@@ -41,7 +42,7 @@ if ($slug === "perfilCV") {
             LEFT JOIN %s AS co ON ci.pais_id = co.id
             WHERE c.id = :id
             SQL;
- 
+
     $query = sprintf(
         $sql,
         qi(Tables::CURRICULUM_PERFIL, $pdo),
@@ -82,7 +83,8 @@ if ($slug === "perfilCV") {
 } else if ($slug === "perfilCVi18n") {
 
     $perfilId = isset($_GET['id']) ? (int)$_GET['id'] : null;
-    $locale   = isset($_GET['locale']) ? (int)$_GET['locale'] : null;
+    $locale = $_GET['locale'] ?? null;
+    $locale_bin = Uuid::toBinary($locale);
 
     $db = new Database();
 
@@ -99,7 +101,7 @@ if ($slug === "perfilCV") {
     );
 
     try {
-        $params = [':perfil_id' => $perfilId, ':locale' => $locale];
+        $params = [':perfil_id' => $perfilId, ':locale' => $locale_bin];
         $row = $db->getData($query, $params, true);
 
         if (empty($row)) {
@@ -347,7 +349,6 @@ if ($slug === "perfilCV") {
     }
 
     try {
-        /** @var PDO $conn */
         // 1. Datos principales
 
         $sql = <<<SQL
@@ -368,37 +369,34 @@ if ($slug === "perfilCV") {
             qi(Tables::DB_PAISOS, $pdo)
         );
 
-        $stmtMain = $conn->prepare($query);
-        $stmtMain->bindValue(':id', (int)$id, PDO::PARAM_INT);
-        $stmtMain->execute();
-        $main = $stmtMain->fetch(PDO::FETCH_ASSOC);
+        $params = [':id' => $id];
+        $stmtMain = $db->getData($query, $params, true);
 
-        if (!$main) {
+        if (!$stmtMain) {
             Response::error(MissatgesAPI::error('not_found'), [], 404);
         }
 
         // 2. Traducciones (i18n)
 
-        $sql = <<<SQL
+        $sql2 = <<<SQL
                 SELECT i.id AS idi18n, i.experiencia_id, i.locale, i.rol_titol, i.sumari, i.fites
                 FROM %s i
                 WHERE i.experiencia_id = :id
                 ORDER BY i.locale ASC
             SQL;
 
-        $query = sprintf(
-            $sql,
+        $query2 = sprintf(
+            $sql2,
             qi(Tables::CURRICULUM_EXPERIENCIA_PROFESSIONAL_I18N, $pdo)
         );
 
-        $stmtI18n = $conn->prepare($query);
-        $stmtI18n->bindValue(':id', (int)$id, PDO::PARAM_INT);
-        $stmtI18n->execute();
-        $i18nRows = $stmtI18n->fetchAll(PDO::FETCH_ASSOC);
+
+        $params2 = [':id' => $id];
+        $stmtI18n = $db->getData($query2, $params2);
 
         // 3. Combinamos
-        $result = $main;
-        $result['i18n'] = $i18nRows;
+        $result = $stmtMain;
+        $result['i18n'] = $stmtI18n;
 
         Response::success(
             message: MissatgesAPI::success('get'),
@@ -425,7 +423,7 @@ if ($slug === "perfilCV") {
 
     try {
 
-        $params = [':id' => $id, ':id' => $id];
+        $params = [':id' => $id];
         $row = $db->getData($query, $params, true);
 
         if (empty($row)) {
@@ -464,7 +462,7 @@ if ($slug === "perfilCV") {
 
     try {
 
-        $params = [':id' => $id, ':id' => $id];
+        $params = [':id' => $id];
         $row = $db->getData($query, $params, true);
 
         if (empty($row)) {
@@ -533,7 +531,7 @@ if ($slug === "perfilCV") {
     );
 
     try {
-        $params = [':id' => $id, ':id' => $id];
+        $params = [':id' => $id];
         $row = $db->getData($query, $params, true);
 
         if (empty($row)) {
@@ -592,10 +590,8 @@ if ($slug === "perfilCV") {
             qi(Tables::DB_PAISOS, $pdo)
         );
 
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        $main = $stmt->fetch(PDO::FETCH_ASSOC);
+        $params = [':id' => $id];
+        $main = $db->getData($sql, $params, true);
 
         if (!$main) {
             Response::error(
@@ -608,7 +604,7 @@ if ($slug === "perfilCV") {
 
         // --- 2. Traduccions ---
 
-        $sql = <<<SQL
+        $sql2 = <<<SQL
                 SELECT 
                 id, educacio_id, locale, grau, notes
                 FROM %s
@@ -617,14 +613,12 @@ if ($slug === "perfilCV") {
             SQL;
 
         $query = sprintf(
-            $sql,
+            $sql2,
             qi(Tables::CURRICULUM_EDUCACIO_I18N, $pdo)
         );
 
-        $stmt2 = $conn->prepare($query);
-        $stmt2->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt2->execute();
-        $i18n = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+        $params2 = [':id' => $id];
+        $i18n = $db->getData($query, $params2);
 
         $main['i18n'] = $i18n;
 
