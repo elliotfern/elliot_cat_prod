@@ -1,5 +1,6 @@
 <?php
 
+use App\Config\Database;
 use Ramsey\Uuid\Uuid as ramsey;
 use App\Utils\Uuid;
 use App\Utils\Response;
@@ -7,17 +8,20 @@ use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Utils\ImageService;
 
-global $conn;
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+$db = new Database();
+$pdo = $db->getPdo();
 
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 function isUuid($s)
 {
@@ -30,7 +34,7 @@ function isUuid($s)
 function optionalField(array $data, string $key)
 {
     return (array_key_exists($key, $data) && $data[$key] !== '' && $data[$key] !== null)
-        ? data_input($data[$key])
+        ? $data[$key]
         : (array_key_exists($key, $data) ? null : '__MISSING__');
 }
 
@@ -45,10 +49,10 @@ function optionalIntField(array $data, string $key, array &$errors)
     return (int)$data[$key];
 }
 
-function deletePersonGroups(PDO $conn, string $personaIdBin): void
+function deletePersonGroups(PDO $pdo, string $personaIdBin): void
 {
     $sql = "DELETE FROM " . Tables::PERSONES_GRUPS_RELACIONS . " WHERE persona_id = :persona_id";
-    $st = $conn->prepare($sql);
+    $st = $pdo->prepare($sql);
     $st->bindValue(':persona_id', $personaIdBin, PDO::PARAM_LOB);
 
     if (!$st->execute()) {
@@ -56,7 +60,7 @@ function deletePersonGroups(PDO $conn, string $personaIdBin): void
     }
 }
 
-function insertPersonGroups(PDO $conn, string $personaIdBin, array $grupIds): void
+function insertPersonGroups(PDO $pdo, string $personaIdBin, array $grupIds): void
 {
     if (empty($grupIds)) return;
 
@@ -69,7 +73,7 @@ function insertPersonGroups(PDO $conn, string $personaIdBin, array $grupIds): vo
         )
     ";
 
-    $stmt = $conn->prepare($sql);
+    $stmt = $pdo->prepare($sql);
 
     foreach ($grupIds as $gid) {
 
@@ -167,7 +171,7 @@ if (isset($_GET['persona'])) {
         $nomImatge = pathinfo($file['name'], PATHINFO_FILENAME);
 
         $alt = !empty($_POST['alt'])
-            ? data_input($_POST['alt'])
+            ? $_POST['alt']
             : $nomImatge;
 
         $img_uuid = ImageService::createFromUpload(
@@ -175,7 +179,7 @@ if (isset($_GET['persona'])) {
             1,
             $nomImatge,
             $alt,
-            $conn
+            $pdo
         );
 
         $img_id_bin = Uuid::toBinary($img_uuid);
@@ -225,16 +229,15 @@ if (isset($_GET['persona'])) {
         exit;
     }
 
-    global $conn;
 
     try {
 
         $personaIdBin = Uuid::toBinary($id);
 
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         // check exists
-        $st = $conn->prepare("
+        $st = $pdo->prepare("
             SELECT 1 FROM " . Tables::PERSONES . "
             WHERE id = :id LIMIT 1
         ");
@@ -242,7 +245,7 @@ if (isset($_GET['persona'])) {
         $st->execute();
 
         if (!$st->fetchColumn()) {
-            $conn->rollBack();
+            $pdo->rollBack();
             Response::error(MissatgesAPI::error('not_found'), ['id' => $id], 404);
             exit;
         }
@@ -340,7 +343,7 @@ if (isset($_GET['persona'])) {
                 LIMIT 1
             ";
 
-            $stmt = $conn->prepare($sql);
+            $stmt = $pdo->prepare($sql);
 
             $stmt->bindValue(':id', $personaIdBin, PDO::PARAM_LOB);
 
@@ -349,7 +352,7 @@ if (isset($_GET['persona'])) {
             }
 
             if (!$stmt->execute()) {
-                $conn->rollBack();
+                $pdo->rollBack();
                 Response::error(MissatgesAPI::error('db_error'), $stmt->errorInfo(), 500);
                 exit;
             }
@@ -357,29 +360,29 @@ if (isset($_GET['persona'])) {
 
         // groups replace
         if ($hasGrups) {
-            deletePersonGroups($conn, $personaIdBin);
+            deletePersonGroups($pdo, $personaIdBin);
 
             if (is_array($grup_ids)) {
 
                 $grup_ids = array_values(array_filter($grup_ids));
 
                 if (!empty($grup_ids)) {
-                    insertPersonGroups($conn, $personaIdBin, $grup_ids);
+                    insertPersonGroups($pdo, $personaIdBin, $grup_ids);
                 }
             }
         }
 
-        $conn->commit();
+        $pdo->commit();
 
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
         exit;
     } catch (\Throwable $e) {
 
-        if ($conn->inTransaction()) $conn->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
 
         Response::error(
             MissatgesAPI::error('internal_error'),
@@ -434,20 +437,17 @@ if (isset($_GET['persona'])) {
         exit;
     }
 
-    global $conn; // PDO (como en tu POST persona)
-    // Si usas $db->getData / $db->execute, te lo adapto, pero este es el estilo PDO.
-
     try {
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         // 1) comprobar que existe
         $qChk = "SELECT 1 FROM " . Tables::PERSONES_GRUPS . " WHERE id = :id LIMIT 1";
-        $stChk = $conn->prepare($qChk);
+        $stChk = $pdo->prepare($qChk);
         $stChk->bindValue(':id', uuid::toBinary($id), PDO::PARAM_STR);
         $stChk->execute();
 
         if (!$stChk->fetchColumn()) {
-            $conn->rollBack();
+            $pdo->rollBack();
             Response::error(MissatgesAPI::error('not_found'), ['grupPersona' => 'not_found'], 404);
             exit;
         }
@@ -461,13 +461,13 @@ if (isset($_GET['persona'])) {
             LIMIT 1
         ";
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
 
         $stmt->bindValue(':id', uuid::toBinary($id), PDO::PARAM_STR);
         $stmt->bindValue(':grup_ca', $grup_ca, PDO::PARAM_STR);
 
         if (!$stmt->execute()) {
-            $conn->rollBack();
+            $pdo->rollBack();
             Response::error(MissatgesAPI::error('db_error'), [
                 'sqlState' => $stmt->errorCode(),
                 'info' => $stmt->errorInfo(),
@@ -475,18 +475,18 @@ if (isset($_GET['persona'])) {
             exit;
         }
 
-        $conn->commit();
+        $pdo->commit();
 
         Response::success(
             MissatgesAPI::success('update'),
             [
                 'id' => $id,
             ],
-            200
+            httpCode: 200
         );
         exit;
     } catch (\Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
 
         Response::error(
             MissatgesAPI::error('internal_error'),
@@ -495,7 +495,7 @@ if (isset($_GET['persona'])) {
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
             ],
-            500
+            httpCode: 500
         );
         exit;
     }

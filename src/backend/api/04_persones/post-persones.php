@@ -1,5 +1,6 @@
 <?php
 
+use App\Config\Database;
 use Ramsey\Uuid\Uuid as ramsey;
 use App\Utils\Uuid;
 use App\Utils\Response;
@@ -7,18 +8,21 @@ use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Utils\ImageService;
 
-global $conn;
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+$db = new Database();
+$pdo = $db->getPdo();
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Response::error(MissatgesAPI::error('method_not_allowed'), [], 405);
@@ -36,13 +40,13 @@ function requireField(array $data, string $key, array &$errors)
         $errors[$key] = 'required';
         return null;
     }
-    return data_input($data[$key]);
+    return $data[$key];
 }
 
 function optionalField(array $data, string $key)
 {
     return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
-        ? data_input($data[$key])
+        ? $data[$key]
         : null;
 }
 
@@ -58,11 +62,11 @@ function optionalIntField(array $data, string $key, array &$errors)
 
 /**
  * Inserta relaciones persona->grup
- * @param PDO $conn
+ * @param PDO $pdo
  * @param string $personaIdBin (BINARY(16) bytes)
  * @param array $grupIds (uuid strings)
  */
-function insertPersonGroups(PDO $conn, string $personaIdBin, array $grupIds): void
+function insertPersonGroups(PDO $pdo, string $personaIdBin, array $grupIds): void
 {
     if (empty($grupIds)) return;
 
@@ -74,7 +78,7 @@ function insertPersonGroups(PDO $conn, string $personaIdBin, array $grupIds): vo
       UNHEX(REPLACE(:grup_id, '-', ''))
     )
   ";
-    $stmt = $conn->prepare($sql);
+    $stmt = $pdo->prepare($sql);
 
     foreach ($grupIds as $gid) {
         $gid = trim((string)$gid);
@@ -159,7 +163,7 @@ if (isset($_GET['persona'])) {
         $nomImatge = pathinfo($file['name'], PATHINFO_FILENAME);
 
         $alt = !empty($data['alt'])
-            ? data_input($data['alt'])
+            ? $data['alt']
             : $nomImatge;
 
         $img_uuid = ImageService::createFromUpload(
@@ -167,7 +171,7 @@ if (isset($_GET['persona'])) {
             1, // PERSONA / AVATAR
             $nomImatge,
             $alt,
-            $conn
+            $pdo
         );
 
         $img_id_bin = Uuid::toBinary($img_uuid);
@@ -218,18 +222,16 @@ if (isset($_GET['persona'])) {
     $created_at = (new DateTime())->format('Y-m-d H:i:s.u');
     $updated_at = $created_at;
 
-    global $conn; // PDO
-
     try {
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         // (Opcional) asegurar slug único
         $qChk = "SELECT 1 FROM " . Tables::PERSONES . " WHERE slug = :slug LIMIT 1";
-        $stChk = $conn->prepare($qChk);
+        $stChk = $pdo->prepare($qChk);
         $stChk->bindValue(':slug', $slug, PDO::PARAM_STR);
         $stChk->execute();
         if ($stChk->fetchColumn()) {
-            $conn->rollBack();
+            $pdo->rollBack();
             Response::error(MissatgesAPI::error('invalid_data'), ['slug' => 'already_exists'], 409);
             exit;
         }
@@ -262,7 +264,7 @@ if (isset($_GET['persona'])) {
                     :created_at, :updated_at
                 )";
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
 
         $stmt->bindValue(':id', $uuid_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':pais_autor_id', $pais_autor_bin, PDO::PARAM_LOB);
@@ -303,7 +305,7 @@ if (isset($_GET['persona'])) {
         $stmt->bindValue(':updated_at', $updated_at, PDO::PARAM_STR);
 
         if (!$stmt->execute()) {
-            $conn->rollBack();
+            $pdo->rollBack();
             Response::error(MissatgesAPI::error('db_error'), [
                 'sqlState' => $stmt->errorCode(),
                 'info' => $stmt->errorInfo(),
@@ -313,10 +315,10 @@ if (isset($_GET['persona'])) {
 
         // Insert relaciones grups
         if (!empty($grup_ids)) {
-            insertPersonGroups($conn, $uuid_bin, $grup_ids);
+            insertPersonGroups($pdo, $uuid_bin, $grup_ids);
         }
 
-        $conn->commit();
+        $pdo->commit();
 
         Response::success(
             MissatgesAPI::success('create'),
@@ -324,11 +326,11 @@ if (isset($_GET['persona'])) {
                 'id' => $uuid->toString(),
                 'slug' => $slug,
             ],
-            201
+            httpCode: 201
         );
         exit;
     } catch (\Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
 
         Response::error(
             MissatgesAPI::error('internal_error'),
@@ -375,19 +377,17 @@ if (isset($_GET['persona'])) {
     $uuidBytes  = $uuid->getBytes();   // BINARY(16)
     $uuidString = $uuid->toString();   // devolver al FE
 
-    global $conn; // PDO
-
     try {
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         // (Opcional) evitar duplicados exactos por nombre CA (si te interesa)
         // Si NO quieres esta regla, borra este bloque.
         $qChk = "SELECT 1 FROM db_persones_grups WHERE grup_ca = :grup_ca LIMIT 1";
-        $stChk = $conn->prepare($qChk);
+        $stChk = $pdo->prepare($qChk);
         $stChk->bindValue(':grup_ca', $grup_ca, PDO::PARAM_STR);
         $stChk->execute();
         if ($stChk->fetchColumn()) {
-            $conn->rollBack();
+            $pdo->rollBack();
             Response::error(MissatgesAPI::error('invalid_data'), ['grup_ca' => 'already_exists'], 409);
             exit;
         }
@@ -403,13 +403,13 @@ if (isset($_GET['persona'])) {
             )
         ";
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
 
         $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
         $stmt->bindValue(':grup_ca', $grup_ca, PDO::PARAM_STR);
 
         if (!$stmt->execute()) {
-            $conn->rollBack();
+            $pdo->rollBack();
             Response::error(MissatgesAPI::error('db_error'), [
                 'sqlState' => $stmt->errorCode(),
                 'info' => $stmt->errorInfo(),
@@ -417,18 +417,18 @@ if (isset($_GET['persona'])) {
             exit;
         }
 
-        $conn->commit();
+        $pdo->commit();
 
         Response::success(
             MissatgesAPI::success('create'),
             [
                 'id' => $uuidString,
             ],
-            201
+            httpCode: 201
         );
         exit;
     } catch (\Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
 
         Response::error(
             MissatgesAPI::error('internal_error'),
