@@ -39,6 +39,172 @@ async function loadGrups() {
   }
 }
 
+async function createGrup(nom: string, slug: string): Promise<Grup | null> {
+  try {
+    const response = await fetch(`${API_BASE}/biblioteca/post/grupLlibre`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nom: nom.trim(),
+        slug: slug.trim(),
+      }),
+    });
+
+    const result = await response.json();
+
+    console.log('Resposta crear grup:', result);
+
+    if (!response.ok || !result.success) {
+      console.error('createGrup failed:', result);
+      return null;
+    }
+
+    const grup: Grup = {
+      id: result.data.id,
+      nom: result.data.nom,
+    };
+
+    grupsList.push(grup);
+
+    return grup;
+  } catch (error) {
+    console.error('createGrup failed:', error);
+    return null;
+  }
+}
+
+function initTestCreateGrupUI() {
+  const btnAddGrup = document.getElementById('addGrupBtn');
+  const container = document.getElementById('grupsContainer');
+
+  if (!btnAddGrup || !container) return;
+
+  // Contenedor de botones
+  const buttonsWrapper = document.createElement('div');
+  buttonsWrapper.className = 'd-flex gap-2 mb-3';
+
+  // Botón Nova col·lecció
+  const newGrupBtn = document.createElement('button');
+  newGrupBtn.type = 'button';
+  newGrupBtn.className = 'btn btn-sm btn-secondary mt-2';
+  newGrupBtn.textContent = '+ Nova col·lecció';
+
+  // Insertar al lado de "Afegir col·lecció"
+  btnAddGrup.parentElement?.appendChild(newGrupBtn);
+
+  // Contenedor formulario
+  const formWrapper = document.createElement('div');
+  formWrapper.className = 'border rounded p-3 mb-3 d-none';
+
+  formWrapper.innerHTML = `
+    <div class="mb-3">
+      <label for="newGrupNom" class="form-label">
+        Nom
+      </label>
+      <input
+        type="text"
+        id="newGrupNom"
+        class="form-control"
+      >
+    </div>
+
+    <div class="mb-3">
+      <label for="newGrupSlug" class="form-label">
+        Slug
+      </label>
+      <input
+        type="text"
+        id="newGrupSlug"
+        class="form-control"
+      >
+    </div>
+
+    <button
+      type="button"
+      id="createGrupBtn"
+      class="btn btn-primary"
+    >
+      Crear col·lecció
+    </button>
+
+    <div id="createGrupMessage" class="mt-3"></div>
+  `;
+
+  // El formulario aparece debajo de los botones
+  btnAddGrup.parentElement?.insertAdjacentElement('afterend', formWrapper);
+
+  const nomInput = formWrapper.querySelector('#newGrupNom') as HTMLInputElement;
+
+  const slugInput = formWrapper.querySelector('#newGrupSlug') as HTMLInputElement;
+
+  const createBtn = formWrapper.querySelector('#createGrupBtn') as HTMLButtonElement;
+
+  const message = formWrapper.querySelector('#createGrupMessage') as HTMLDivElement;
+
+  newGrupBtn.addEventListener('click', () => {
+    const isHidden = formWrapper.classList.contains('d-none');
+
+    if (isHidden) {
+      formWrapper.classList.remove('d-none');
+      nomInput.focus();
+    } else {
+      formWrapper.classList.add('d-none');
+    }
+  });
+
+  createBtn.addEventListener('click', async () => {
+    const nom = nomInput.value.trim();
+    const slug = slugInput.value.trim();
+
+    message.innerHTML = '';
+
+    if (!nom || !slug) {
+      message.innerHTML = `
+        <div class="alert alert-warning mb-0">
+          Cal indicar el nom i el slug.
+        </div>
+      `;
+      return;
+    }
+
+    createBtn.disabled = true;
+
+    const grup = await createGrup(nom, slug);
+    if (grup) {
+      createGrupSelect(grup.id);
+    }
+
+    createBtn.disabled = false;
+
+    if (!grup) {
+      message.innerHTML = `
+        <div class="alert alert-danger mb-0">
+          No s’ha pogut crear la col·lecció.
+        </div>
+      `;
+      return;
+    }
+
+    message.innerHTML = `
+      <div class="alert alert-success mb-0">
+        Col·lecció creada correctament.
+      </div>
+    `;
+
+    nomInput.value = '';
+    slugInput.value = '';
+
+    // Ocultar formulario después de crear
+    setTimeout(() => {
+      formWrapper.classList.add('d-none');
+      message.innerHTML = '';
+    }, 1500);
+  });
+}
+
 function createAuthorSelect(selectedValue: string | null = null) {
   const wrapper = document.createElement('div');
   wrapper.className = 'd-flex gap-2 mb-2';
@@ -133,6 +299,8 @@ function initGrupUI() {
   btn?.addEventListener('click', () => {
     createGrupSelect();
   });
+
+  initTestCreateGrupUI();
 }
 
 export async function formLlibre(isUpdate: boolean, id?: string) {
@@ -158,6 +326,12 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
     }
 
     divTitol.innerHTML = `<h2>Modificació dades Llibre</h2>`;
+
+    const btnTornar = document.getElementById('btnTornar') as HTMLAnchorElement;
+
+    if (btnTornar && data.slug) {
+      btnTornar.href = `/gestio/biblioteca/fitxa-llibre/${data.slug}`;
+    }
 
     const fileInput = document.getElementById('img_upload') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
@@ -203,6 +377,13 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
     divTitol.innerHTML = `<h2>Creació de nou Llibre</h2>`;
     btnSubmit.textContent = 'Inserir dades';
 
+    const btnTornar = document.getElementById('btnTornar') as HTMLAnchorElement;
+
+    if (btnTornar) {
+      btnTornar.textContent = 'Llistat llibres';
+      btnTornar.href = `/gestio/biblioteca/llistat-llibres`;
+    }
+
     const autorsContainer = document.getElementById('autorsContainer');
     if (autorsContainer) autorsContainer.innerHTML = '';
 
@@ -218,6 +399,24 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
 
     form.addEventListener('submit', function (event) {
       transmissioDadesDB(event, 'POST', 'formLlibre', `${API_BASE}/biblioteca/post/llibre`, true);
+    });
+
+    form.addEventListener('form:success', (event) => {
+      const customEvent = event as CustomEvent;
+
+      const response = customEvent.detail;
+
+      const slug = response?.data?.slug;
+
+      if (!slug) return;
+
+      const btnVeureFitxa = document.getElementById('btnVeureFitxa') as HTMLAnchorElement;
+
+      if (!btnVeureFitxa) return;
+
+      btnVeureFitxa.href = `/gestio/biblioteca/fitxa-llibre/${slug}`;
+
+      btnVeureFitxa.classList.remove('d-none');
     });
   }
 

@@ -22,7 +22,7 @@ export interface PersonaApi {
   ciutatNaixement: string | null;
   ciutatDefuncio: string | null;
 
-  sexe_id: number | null;
+  sexe_id: string;
 
   web: string | null;
   descripcio: string | null;
@@ -37,6 +37,20 @@ export interface PersonaApi {
 // -------------------------
 // SAFE DATE
 // -------------------------
+
+function getGenereLabel(sexeId: string): string {
+  switch (Number(sexeId)) {
+    case 1:
+      return 'Home';
+
+    case 2:
+      return 'Dona';
+
+    default:
+      return '';
+  }
+}
+
 function safeDate(date?: string | null): string {
   return date ? formatData(date) : '';
 }
@@ -101,7 +115,7 @@ export function mapPersona(api: PersonaApi): PersonaView {
     ciutatDefuncio: api.ciutatDefuncio ?? null,
 
     paisAutor: api.pais_ca ?? '',
-    sexe: api.sexe_id === 1 ? 'Home' : api.sexe_id === 2 ? 'Dona' : '',
+    sexe_id: api.sexe_id ?? null,
 
     grupsText: '',
     grups: Array.isArray(api.grups) ? api.grups.map((g) => g.nom) : [],
@@ -151,7 +165,7 @@ export function mapPersonaToFitxa(persona: PersonaView) {
 
     {
       label: 'Gènere',
-      value: persona.sexe,
+      value: getGenereLabel(persona.sexe_id),
     },
 
     ...(persona.grups.length

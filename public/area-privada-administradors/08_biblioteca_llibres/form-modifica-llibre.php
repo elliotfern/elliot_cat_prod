@@ -111,18 +111,27 @@
       </button>
     </div>
 
-    <div class="container" style="margin-top:20px">
-      <div class="row">
-        <div class="col-6 text-left">
-          <a class="btn btn-secondary" href="">Tornar</a>
-        </div>
-        <div class="col-6 text-right derecha">
-          <button id="btn" type="submit" class="btn btn-primary">Afegir</button>
+    <hr>
+    <div class="col-12 mt-4">
+      <div class="d-flex justify-content-between">
+        <a id="btnTornar" class="btn btn-secondary" href="#">
+          Fitxa llibre
+        </a>
+
+        <div class="d-flex gap-2">
+          <a
+            id="btnVeureFitxa"
+            class="btn btn-success d-none"
+            href="#">
+            Veure fitxa
+          </a>
+
+          <button id="btn" type="submit" class="btn btn-primary">
+            Afegir
+          </button>
         </div>
       </div>
     </div>
+
   </form>
-</div>
-
-
 </div>

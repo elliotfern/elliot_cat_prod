@@ -288,9 +288,8 @@ if ($slug === 'llibre') {
     exit;
   }
 
-  // INSERIR NOU LLIBRE
-} else if (isset($_GET['grupLlibre'])) {
-
+  // INSERIR NOU GRUP LLIBRE
+} else if ($slug === 'grupLlibre') {
   // Leer JSON
   $input_data = file_get_contents("php://input");
   $data = json_decode($input_data, true);

@@ -25,7 +25,7 @@ export interface Persona {
   institucio_localitzacio: number;
 
   // --- PERSONA / AUTOR (alineado con DB)
-  sexe_id: number;
+  sexe_id: string;
   pais_autor_id: number;
   img_id: number;
 

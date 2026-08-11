@@ -27,7 +27,7 @@ export interface PersonaView {
   ciutatDefuncio: string | null;
 
   paisAutor: string;
-  sexe: string;
+  sexe_id: string;
   grupsText: string;
   grups: string[];
 }
