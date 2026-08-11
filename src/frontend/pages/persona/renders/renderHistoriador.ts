@@ -5,6 +5,7 @@ type LlibreAutor = {
   slug: string;
   titol: string;
   any?: number | null;
+  id: string;
 };
 
 export async function renderHistoriador(persona: PersonaView) {
@@ -53,7 +54,7 @@ export async function renderHistoriador(persona: PersonaView) {
 
                   <td class="text-end">
                     <a
-                      href="/gestio/biblioteca/modifica-llibre/${l.slug}"
+                      href="/gestio/biblioteca/modifica-llibre/${l.id}"
                       class="btn btn-sm btn-outline-warning"
                     >
                       Modifica

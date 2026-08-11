@@ -123,6 +123,9 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   let filteredData = [...data];
   let activeButtonFilter: string | null = null;
 
+  let sortField: string | null = null;
+  let sortDirection: 'asc' | 'desc' | null = null;
+
   // =========================
   // ELEMENTS
   // =========================
@@ -181,6 +184,33 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
       .filter(Boolean);
   }
 
+  function applySort() {
+    if (!sortField || !sortDirection) return;
+
+    const field = sortField;
+    const direction = sortDirection;
+
+    const column = columns.find((col) => String(col.field) === field);
+
+    if (!column) return;
+
+    filteredData.sort((a, b) => {
+      const valueA = column.sortValue ? column.sortValue(a) : getNestedValue(a, field);
+
+      const valueB = column.sortValue ? column.sortValue(b) : getNestedValue(b, field);
+
+      const aString = String(valueA ?? '');
+      const bString = String(valueB ?? '');
+
+      const comparison = aString.localeCompare(bString, 'ca', {
+        numeric: true,
+        sensitivity: 'base',
+      });
+
+      return direction === 'asc' ? comparison : -comparison;
+    });
+  }
+
   // =========================
   // FILTER LOGIC
   // =========================
@@ -213,6 +243,8 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
         return filterKeys.some((key) => normalizeText(String(getNestedValue(row, String(key)) ?? '')).includes(search));
       });
 
+    applySort();
+
     currentPage = 1;
     renderTable();
   }
@@ -223,10 +255,49 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
 
   function renderTable() {
     thead.innerHTML = `
-      <tr>
-        ${columns.map((col) => `<th>${col.header}</th>`).join('')}
-      </tr>
-    `;
+  <tr>
+    ${columns
+      .map((col) => {
+        let indicator = '';
+
+        if (sortField === col.field) {
+          if (sortDirection === 'asc') {
+            indicator = ' ↑';
+          } else if (sortDirection === 'desc') {
+            indicator = ' ↓';
+          }
+        }
+
+        return `
+          <th data-sort-field="${String(col.field)}" style="cursor: pointer;">
+            ${col.header}${indicator}
+          </th>
+        `;
+      })
+      .join('')}
+  </tr>
+`;
+
+    thead.querySelectorAll('th').forEach((th) => {
+      th.addEventListener('click', () => {
+        const field = th.dataset.sortField;
+
+        if (!field) return;
+
+        if (sortField !== field) {
+          sortField = field;
+          sortDirection = 'asc';
+        } else if (sortDirection === 'asc') {
+          sortDirection = 'desc';
+        } else {
+          sortField = null;
+          sortDirection = null;
+        }
+
+        applySort();
+        renderTable();
+      });
+    });
 
     const start = (currentPage - 1) * rowsPerPage;
     const rowsToShow = filteredData.slice(start, start + rowsPerPage);

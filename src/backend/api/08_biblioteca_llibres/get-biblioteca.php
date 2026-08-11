@@ -344,7 +344,8 @@ if ($slug === 'totsLlibres') {
                         b.any,
                         b.titol_original AS titol,
                         b.titol_catala,
-                        b.slug
+                        b.slug,
+                        b.id
                     FROM %s AS b
                     LEFT JOIN %s AS la ON b.id = la.llibre_id
                     WHERE la.autor_id = :autor_id

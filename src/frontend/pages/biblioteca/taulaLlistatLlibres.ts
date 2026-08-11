@@ -6,7 +6,7 @@ import { DOMAIN_WEB } from '../../utils/urls';
 import { buildFrontUrl, getLangPrefix } from '../../utils/locales/getLangPrefix';
 
 function renderAutorsCell(row: Llibre, basePrefix: string): string {
-  const base = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-autor/`;
+  const base = `${DOMAIN_WEB}/${basePrefix}/base-dades-persones/fitxa-persona/`;
   const autors = Array.isArray((row as any).autors) ? (row as any).autors : [];
   if (autors.length === 0) return '';
 
@@ -42,13 +42,14 @@ export async function taulaLlistatLlibres() {
   const columns: TaulaDinamica<Llibre>[] = [
     {
       header: 'Llibre',
-      field: 'titol',
+      field: 'titol_original',
       render: (_: unknown, row: Llibre) => `<a href="${buildFrontUrl(`biblioteca/fitxa-llibre/${row.slug}`)}">${row.titol_original}</a>`,
     },
     {
       header: 'Autor/a',
-      field: 'autors' as any, // por si tu generic exige field existente
+      field: 'autors',
       render: (_: unknown, row: Llibre) => renderAutorsCell(row, basePrefix),
+      sortValue: (row: Llibre) => (row.autors ?? []).map((autor) => `${autor.nom ?? ''} ${autor.cognoms ?? ''}`.trim()).join(', '),
     },
     {
       header: 'Gènere',

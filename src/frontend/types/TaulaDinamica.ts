@@ -4,6 +4,7 @@ export type TaulaDinamica<T extends object> = {
   header: string;
   field: keyof T;
   render?: (value: unknown, row: T) => RenderResult;
+  sortValue?: (row: T) => string | number | null;
 };
 
 export type RenderTableOptions<T extends object> = {
