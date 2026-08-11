@@ -46,14 +46,11 @@ if ($slug === 'totsLlibres') {
             b.any,
             b.slug,
             g.tema AS nomGenCat,
-            sg.sub_tema,
-            c.nom AS nom_grup,
-            c.id AS grup_id
+            sg.sub_tema
         FROM %s AS b
         LEFT JOIN %s AS sg ON b.sub_tema_id = sg.id
         LEFT JOIN %s AS g ON sg.tema_id = g.id
         LEFT JOIN %s AS be ON b.editorial_id = be.id
-        LEFT JOIN %s AS c ON b.grup = c.id
         WHERE b.tipus_id = :tipus_id
         ORDER BY b.titol_original ASC
         SQL;
@@ -63,8 +60,7 @@ if ($slug === 'totsLlibres') {
             qi(Tables::LLIBRES, $pdo),
             qi(Tables::AUX_SUB_TEMES, $pdo),
             qi(Tables::AUX_TEMES, $pdo),
-            qi(Tables::LLIBRES_EDITORIALS, $pdo),
-            qi(Tables::LLIBRES_GRUP, $pdo)
+            qi(Tables::LLIBRES_EDITORIALS, $pdo)
         );
 
         // 1) Libros
@@ -79,11 +75,10 @@ if ($slug === 'totsLlibres') {
         // normalizar libros (UUID primero)
         foreach ($books as &$b) {
             $b['id'] = Uuid::toString($b['id']);
-            $b['grup_id'] = $b['grup_id'] ? Uuid::toString($b['grup_id']) : null;
         }
         unset($b);
 
-        // 2) Autores (MEJOR QUERY)
+        // 2) Autores
         $sql = <<<SQL
             SELECT
                 la.llibre_id,
@@ -101,23 +96,43 @@ if ($slug === 'totsLlibres') {
             qi(Tables::PERSONES, $pdo)
         );
 
-        // ejecutar
         $authors = $db->getData($queryAuthors);
 
-        // normalizar autores
         foreach ($authors as &$a) {
             $a['llibre_id'] = Uuid::toString($a['llibre_id']);
             $a['autor_id']  = Uuid::toString($a['autor_id']);
         }
         unset($a);
 
-        // 3) indexación
+        // 3) Col·leccions (grup) — ahora N:M vía taula intermèdia
+        $sql = <<<SQL
+            SELECT
+                lg.llibre_id,
+                lg.grup_id,
+                g.nom,
+                g.slug
+            FROM %s AS lg
+            INNER JOIN %s AS g ON g.id = lg.grup_id
+            SQL;
+
+        $queryGrups = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_GRUP_LLIBRES, $pdo),
+            qi(Tables::LLIBRES_GRUP, $pdo)
+        );
+
+        $grups = $db->getData($queryGrups);
+
+        foreach ($grups as &$g) {
+            $g['llibre_id'] = Uuid::toString($g['llibre_id']);
+            $g['grup_id']   = Uuid::toString($g['grup_id']);
+        }
+        unset($g);
+
+        // 4) indexación
         $authorsByBook = [];
-
         foreach ($authors as $a) {
-            $bookId = $a['llibre_id'];
-
-            $authorsByBook[$bookId][] = [
+            $authorsByBook[$a['llibre_id']][] = [
                 'id' => $a['autor_id'],
                 'nom' => $a['nom'],
                 'cognoms' => $a['cognoms'],
@@ -125,9 +140,19 @@ if ($slug === 'totsLlibres') {
             ];
         }
 
-        // 4) merge final
+        $grupsByBook = [];
+        foreach ($grups as $g) {
+            $grupsByBook[$g['llibre_id']][] = [
+                'id' => $g['grup_id'],
+                'nom' => $g['nom'],
+                'slug' => $g['slug'],
+            ];
+        }
+
+        // 5) merge final
         foreach ($books as &$b) {
             $b['autors'] = $authorsByBook[$b['id']] ?? [];
+            $b['grups']  = $grupsByBook[$b['id']] ?? [];
         }
         unset($b);
 
@@ -377,10 +402,9 @@ if ($slug === 'totsLlibres') {
                     b.estat_id,
                     b.slug,
                     b.any,
-                    b.grup,
                     b.dateCreated,
                     b.dateModified,
-                    b.lang,
+                    b.idioma_id,
                     b.img_id,
                     i.nameImg,
                     i.alt,
@@ -393,9 +417,7 @@ if ($slug === 'totsLlibres') {
                     p.id AS autor_id,
                     p.nom AS autor_nom,
                     p.cognoms AS autor_cognoms,
-                    p.slug AS autor_slug,
-                    c.nom AS nom_grup,
-                    c.id AS idGrup
+                    p.slug AS autor_slug
                 FROM %s AS b
                 LEFT JOIN %s AS la ON la.llibre_id = b.id
                 LEFT JOIN %s AS p ON p.id = la.autor_id
@@ -403,10 +425,9 @@ if ($slug === 'totsLlibres') {
                 LEFT JOIN %s AS t ON b.tipus_id = t.id
                 LEFT JOIN %s AS e ON b.editorial_id = e.id
                 LEFT JOIN %s AS el ON b.estat_id = el.id
-                LEFT JOIN %s AS id ON b.lang = id.id
+                LEFT JOIN %s AS id ON b.idioma_id = id.id
                 LEFT JOIN %s AS sub_tema ON sub_tema.id = b.sub_tema_id
                 LEFT JOIN %s AS tema ON sub_tema.tema_id = tema.id
-                LEFT JOIN %s AS c ON b.grup = c.id
                 WHERE b.slug = :slug
                 SQL;
 
@@ -421,8 +442,7 @@ if ($slug === 'totsLlibres') {
             qi(Tables::LLIBRES_ESTAT, $pdo),
             qi(Tables::AUX_IDIOMES, $pdo),
             qi(Tables::AUX_SUB_TEMES, $pdo),
-            qi(Tables::AUX_TEMES, $pdo),
-            qi(Tables::LLIBRES_GRUP, $pdo)
+            qi(Tables::AUX_TEMES, $pdo)
         );
 
         $params = [':slug' => $slugLlibre];
@@ -445,12 +465,11 @@ if ($slug === 'totsLlibres') {
             'any'         => $first['any'],
             'dateCreated' => $first['dateCreated'],
             'dateModified' => $first['dateModified'],
-            'lang'        => $first['lang'],
+            'idioma_id'        => $first['idioma_id'],
             'img_id'         => $first['img_id'],
             'alt'         => $first['alt'],
             'estat_id'       => $first['estat_id'],      // int
             'nomEstat'    => $first['nomEstat'],   // texto
-            'grup'    => $first['grup'],
 
             'tipus_id'    => $first['tipus_id'],
             'editorial_id' => $first['editorial_id'],
@@ -463,11 +482,12 @@ if ($slug === 'totsLlibres') {
 
             'sub_tema' => $first['sub_tema'],
             'tema'     => $first['tema'],
-            'nom_grup'    => $first['nom_grup'],
-            'idGrup'    => $first['idGrup'],
 
             // 2) autores
             'autors'      => [],
+
+            // 3) col·leccions
+            'grups'       => [],
         ];
 
         // 2) Construir array de autores (deduplicado por seguridad)
@@ -489,6 +509,33 @@ if ($slug === 'totsLlibres') {
             ];
         }
 
+        // 3) Col·leccions (grup) — query aparte para evitar producto cartesiano con autors
+        $sqlGrups = <<<SQL
+                SELECT
+                    g.id,
+                    g.nom,
+                    g.slug
+                FROM %s AS lg
+                INNER JOIN %s AS g ON g.id = lg.grup_id
+                WHERE lg.llibre_id = :id
+            SQL;
+
+        $queryGrups = sprintf(
+            $sqlGrups,
+            qi(Tables::LLIBRES_GRUP_LLIBRES, $pdo),
+            qi(Tables::LLIBRES_GRUP, $pdo)
+        );
+
+        $grupRows = $db->getData($queryGrups, [':id' => $first['id']]);
+
+        foreach ($grupRows as $g) {
+            $result['grups'][] = [
+                'id'   => Uuid::toString($g['id']),
+                'nom'  => $g['nom'],
+                'slug' => $g['slug'],
+            ];
+        }
+
         Response::success(
             message: MissatgesAPI::success('get'),
             data: $result,
@@ -507,7 +554,7 @@ if ($slug === 'totsLlibres') {
     }
 
     // 6) Book page
-    // ruta GET => "/api/biblioteca/get/llibreId?id=23refswerwr"
+    // ruta GET => "/api/biblioteca/get/llibreId?id=444443"
 } else if ($slug === 'llibreId') {
 
     $id = $_GET['id'] ?? null;
@@ -530,10 +577,9 @@ if ($slug === 'totsLlibres') {
                     b.estat_id,
                     b.slug,
                     b.any,
-                    b.grup,
                     b.dateCreated,
                     b.dateModified,
-                    b.lang,
+                    b.idioma_id,
                     b.img_id,
                     p.id AS autor_id,
                     p.nom AS autor_nom,
@@ -570,11 +616,10 @@ if ($slug === 'totsLlibres') {
             'any'         => $first['any'],
             'dateCreated' => $first['dateCreated'],
             'dateModified' => $first['dateModified'],
-            'lang'        => $first['lang'],
+            'idioma_id'        => $first['idioma_id'],
             'img_id'         => $first['img_id'],
             'alt'         => $first['alt'],
             'estat_id'       => $first['estat_id'],      // int
-            'grup'    => $first['grup'],
             'tipus_id'    => $first['tipus_id'],
             'editorial_id' => $first['editorial_id'],
             'sub_tema_id' => $first['sub_tema_id'],
@@ -582,6 +627,9 @@ if ($slug === 'totsLlibres') {
 
             // 2) autores
             'autors'      => [],
+
+            // 3) col·leccions
+            'grups'       => [],
         ];
 
         // 2) Construir array de autores (deduplicado por seguridad)
@@ -603,6 +651,33 @@ if ($slug === 'totsLlibres') {
             ];
         }
 
+        // 3) Col·leccions (grup) — query aparte para evitar producto cartesiano con autors
+        $sqlGrups = <<<SQL
+                SELECT
+                    g.id,
+                    g.nom,
+                    g.slug
+                FROM %s AS lg
+                INNER JOIN %s AS g ON g.id = lg.grup_id
+                WHERE lg.llibre_id = :id
+            SQL;
+
+        $queryGrups = sprintf(
+            $sqlGrups,
+            qi(Tables::LLIBRES_GRUP_LLIBRES, $pdo),
+            qi(Tables::LLIBRES_GRUP, $pdo)
+        );
+
+        $grupRows = $db->getData($queryGrups, [':id' => uuid::toBinary($id)]);
+
+        foreach ($grupRows as $g) {
+            $result['grups'][] = [
+                'id'   => Uuid::toString($g['id']),
+                'nom'  => $g['nom'],
+                'slug' => $g['slug'],
+            ];
+        }
+
         Response::success(
             message: MissatgesAPI::success('get'),
             data: $result,
@@ -619,6 +694,52 @@ if ($slug === 'totsLlibres') {
         ]);
         exit;
     }
+
+    //TotsGrups
+
+} else if ($slug === 'totsGrups') {
+
+    try {
+
+        $sql = <<<SQL
+        SELECT
+            id,
+            nom,
+            slug
+        FROM %s
+        ORDER BY nom ASC
+        SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_GRUP, $pdo)
+        );
+
+        $grups = $db->getData($query);
+
+        foreach ($grups as &$g) {
+            $g['id'] = Uuid::toString($g['id']);
+        }
+        unset($g);
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $grups,
+            httpCode: 200
+        );
+        exit;
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
+
     // 10) image author
     // ruta GET => "/api/biblioteca/get/auxiliarImatgesAutor"
 } else if ($slug == 'auxiliarImatgesAutor') {

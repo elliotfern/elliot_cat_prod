@@ -2,7 +2,7 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Llibre } from '../../types/Llibre';
-import { API_BASE, DOMAIN_WEB } from '../../utils/urls';
+import { DOMAIN_WEB } from '../../utils/urls';
 import { buildFrontUrl, getLangPrefix } from '../../utils/locales/getLangPrefix';
 
 function renderAutorsCell(row: Llibre, basePrefix: string): string {
@@ -16,6 +16,20 @@ function renderAutorsCell(row: Llibre, basePrefix: string): string {
       const fullName = [a.nom, a.cognoms].filter(Boolean).join(' ').trim();
       const label = fullName || a.slug;
       const href = `${base}${encodeURIComponent(a.slug)}`;
+      return `<a href="${href}">${label}</a>`;
+    })
+    .join(' / ');
+}
+function renderGrupsCell(row: Llibre, basePrefix: string): string {
+  const base = `${DOMAIN_WEB}/${basePrefix}/biblioteca/fitxa-colleccio/`;
+  const grups = row.grups ?? [];
+  if (grups.length === 0) return '';
+
+  return grups
+    .filter((g) => g.slug.length > 0)
+    .map((g) => {
+      const label = g.nom || g.slug;
+      const href = `${base}${encodeURIComponent(g.slug)}`;
       return `<a href="${href}">${label}</a>`;
     })
     .join(' / ');
@@ -50,10 +64,8 @@ export async function taulaLlistatLlibres() {
 
     {
       header: 'Col·lecció',
-      field: 'nom_grup',
-      render: (_: unknown, row: Llibre) => {
-        return row.nom_grup;
-      },
+      field: 'grups' as any,
+      render: (_: unknown, row: Llibre) => renderGrupsCell(row, basePrefix),
     },
 
     {
@@ -68,7 +80,7 @@ export async function taulaLlistatLlibres() {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: Llibre) => `
-        <a href="${DOMAIN_WEB}/gestio/biblioteca/modifica-llibre/${encodeURIComponent(row.slug)}">
+        <a href="${DOMAIN_WEB}/gestio/biblioteca/modifica-llibre/${encodeURIComponent(row.id)}">
           <button type="button" class="button btn-petit">Modifica</button>
         </a>`,
     });

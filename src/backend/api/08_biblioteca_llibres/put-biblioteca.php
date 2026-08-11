@@ -12,18 +12,17 @@ $slug = $routeParams[0] ?? null;
 
 $db = new Database();
 $pdo = $db->getPdo();
-global $conn;
 
 header('Content-Type: application/json; charset=utf-8');
 
 // CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-  corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+  corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
   http_response_code(204);
   exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 
 function isUuid($s)
@@ -41,13 +40,13 @@ function requireField(array $data, string $key, array &$errors)
     $errors[$key] = 'required';
     return null;
   }
-  return data_input($data[$key]);
+  return $data[$key];
 }
 
 function optionalField(array $data, string $key)
 {
   return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
-    ? data_input($data[$key])
+    ? $data[$key]
     : null;
 }
 
@@ -76,9 +75,8 @@ if ($slug === 'llibre') {
   $tipus_id      = requireField($data, 'tipus_id', $errors);
   $editorial_id  = requireField($data, 'editorial_id', $errors);
   $sub_tema_id   = requireField($data, 'sub_tema_id', $errors);
-  $grup          = requireField($data, 'grup', $errors);
   $estat_id      = requireField($data, 'estat_id', $errors);
-  $lang          = requireField($data, 'lang', $errors);
+  $idioma_id          = requireField($data, 'idioma_id', $errors);
 
   // OPTIONAL
   $titol_catala = optionalField($data, 'titol_catala');
@@ -86,7 +84,6 @@ if ($slug === 'llibre') {
   if (!isUuid($tipus_id)) $errors['tipus_id'] = 'invalid_uuid';
   if (!isUuid($editorial_id)) $errors['editorial_id'] = 'invalid_uuid';
   if (!isUuid($sub_tema_id)) $errors['sub_tema_id'] = 'invalid_uuid';
-  if (!isUuid($grup)) $errors['grup'] = 'invalid_uuid';
 
   if (!empty($errors)) {
     Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
@@ -107,7 +104,7 @@ if ($slug === 'llibre') {
     $file = $_FILES['img_upload'];
     $nom = pathinfo($file['name'], PATHINFO_FILENAME);
     $alt = !empty($data['img'])
-      ? data_input($data['img'])
+      ? $data['img']
       : $nom;
 
     $img_uuid = ImageService::createFromUpload(
@@ -115,7 +112,7 @@ if ($slug === 'llibre') {
       2,
       $nom,
       $alt,
-      $conn
+      $pdo
     );
 
     $img_id_bin = Uuid::toBinary($img_uuid);
@@ -135,15 +132,14 @@ if ($slug === 'llibre') {
       editorial_id = :editorial_id,
       sub_tema_id = :sub_tema_id,
       estat_id = :estat_id,
-      lang = :lang,
-      grup = :grup,
+      idioma_id = :idioma_id,
       img_id = :img_id,
       dateModified = NOW()
     WHERE id = :id";
 
   try {
 
-    $stmt = $conn->prepare($sql);
+    $stmt = $pdo->prepare($sql);
 
     $stmt->execute([
       ':id' => $id_bin,
@@ -155,8 +151,7 @@ if ($slug === 'llibre') {
       ':editorial_id' => Uuid::toBinary($editorial_id),
       ':sub_tema_id' => Uuid::toBinary($sub_tema_id),
       ':estat_id' => Uuid::toBinary($estat_id),
-      ':lang' => (int)$lang,
-      ':grup' => Uuid::toBinary($grup),
+      ':idioma_id' => Uuid::toBinary($idioma_id),
       ':img_id' => $img_id_bin
     ]);
 
@@ -164,7 +159,7 @@ if ($slug === 'llibre') {
     // AUTORS SYNC
     // ==============================
 
-    $conn->prepare("
+    $pdo->prepare("
       DELETE FROM " . Tables::LLIBRES_AUTORS . "
       WHERE llibre_id = :id
     ")->execute([':id' => $id_bin]);
@@ -173,7 +168,7 @@ if ($slug === 'llibre') {
 
     if (is_array($autors) && !empty($autors)) {
 
-      $stmtAutor = $conn->prepare("
+      $stmtAutor = $pdo->prepare("
         INSERT INTO " . Tables::LLIBRES_AUTORS . "
         (llibre_id, autor_id)
         VALUES (:llibre_id, :autor_id)
@@ -189,13 +184,42 @@ if ($slug === 'llibre') {
       }
     }
 
+    // ==============================
+    // GRUPS SYNC (col·leccions)
+    // ==============================
+
+    $pdo->prepare("
+      DELETE FROM " . Tables::LLIBRES_GRUP_LLIBRES . "
+      WHERE llibre_id = :id
+    ")->execute([':id' => $id_bin]);
+
+    $grups = $data['grups'] ?? [];
+
+    if (is_array($grups) && !empty($grups)) {
+
+      $stmtGrup = $pdo->prepare("
+        INSERT INTO " . Tables::LLIBRES_GRUP_LLIBRES . "
+        (llibre_id, grup_id)
+        VALUES (:llibre_id, :grup_id)
+      ");
+
+      foreach ($grups as $grupId) {
+        if (!isUuid($grupId)) continue;
+
+        $stmtGrup->execute([
+          ':llibre_id' => $id_bin,
+          ':grup_id' => Uuid::toBinary($grupId),
+        ]);
+      }
+    }
+
     Response::success(
       MissatgesAPI::success('update'),
       [
         'id' => $id,
         'slug' => $slugInput
       ],
-      200
+      httpCode: 200
     );
     exit;
   } catch (\Throwable $e) {

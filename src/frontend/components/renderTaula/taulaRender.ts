@@ -33,7 +33,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   function renderFilters() {
     if (!filterByField) return;
 
-    const values = data.map((row) => getNestedValue(row, filterByField)).filter(Boolean) as string[];
+    const values = data.flatMap((row) => getFilterParts(getNestedValue(row, filterByField)));
 
     const counts = values.reduce((acc: Record<string, number>, value) => {
       const key = String(value);

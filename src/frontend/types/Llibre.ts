@@ -9,13 +9,12 @@ export interface Llibre {
   any: string;
   sub_genere_cat: string;
   nomGenCat: string;
-  nom_grup: string;
+  grups?: { id: string; nom: string; slug: string }[];
   id_autor?: string;
   autorSlug?: string;
   nom: string;
   cognoms?: string | null;
   llibreSlug?: string;
-  idGrup: string;
   dateCreated: string | null;
   dateModified: string | null;
   img_id: string;
@@ -25,9 +24,8 @@ export interface Llibre {
   idioma_ca: string | null;
   estat_id: string;
   nomEstat: string;
-  lang: string;
+  idioma_id: string;
   editorial_id: string;
-  grup: string;
   tipus_id: string;
   sub_tema_id: string;
   tema: string;

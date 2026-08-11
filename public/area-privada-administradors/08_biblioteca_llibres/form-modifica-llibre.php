@@ -54,19 +54,13 @@
 
     <div class="col-md-4">
       <label>Idioma:</label>
-      <select class="form-select" name="lang" id="lang" value="">
+      <select class="form-select" name="idioma_id" id="idioma_id" value="">
       </select>
     </div>
 
     <div class="col-md-4">
       <label>Tipus:</label>
       <select class="form-select" name="tipus_id" id="tipus_id"></select>
-      </select>
-    </div>
-
-    <div class="col-md-4">
-      <label>Col·lecció:</label>
-      <select class="form-select" name="grup" id="grup" value="">
       </select>
     </div>
 
@@ -102,6 +96,18 @@
 
       <button type="button" class="btn btn-sm btn-secondary mt-2" id="addAutorBtn">
         + Afegir autor
+      </button>
+    </div>
+
+    <hr>
+    <h4>Col·leccions del llibre:</h4>
+    <div class="col-md-6">
+      <label>Col·leccions:</label>
+
+      <div id="grupsContainer"></div>
+
+      <button type="button" class="btn btn-sm btn-secondary mt-2" id="addGrupBtn">
+        + Afegir col·lecció
       </button>
     </div>
 

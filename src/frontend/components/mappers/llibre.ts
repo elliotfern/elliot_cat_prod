@@ -18,6 +18,20 @@ function renderAutorsHtml(autors?: Llibre['autors']): string {
     .join(' / ');
 }
 
+function renderGrupsHtml(grups?: Llibre['grups']): string {
+  if (!grups?.length) return '';
+
+  return grups
+    .map((g) => {
+      if (!g.slug) return g.nom;
+
+      return `<a href="/gestio/biblioteca/fitxa-colleccio/${g.slug}">
+                ${g.nom}
+              </a>`;
+    })
+    .join(' / ');
+}
+
 export function mapLlibreToFitxa(api: Llibre) {
   return {
     title: api.titol_original,
@@ -65,6 +79,10 @@ export function mapLlibreToFitxa(api: Llibre) {
       {
         label: 'Subgènere',
         value: api.sub_tema ?? '',
+      },
+      {
+        label: 'Col·leccions',
+        value: renderGrupsHtml(api.grups),
       },
       {
         label: 'Estat',
