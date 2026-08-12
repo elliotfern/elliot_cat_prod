@@ -1,26 +1,20 @@
 <?php
 
+use App\Utils\Routes;
+use App\Utils\Button;
+
 /** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
-<div class="container">
+<div id="barraNavegacioContenidor"></div>
 
-    <div id="barraNavegacioContenidor"></div>
+<h1>Biblioteca</h1>
+<h2>Llistat de grups de llibres</h2>
 
-    <div class="contingut">
-
-        <h1>Biblioteca</h1>
-        <h2>Llistat de grups de llibres</h2>
-
-        <div id="isAdminButton" style="display: none;">
-            <?php if ($viewModel->isAdmin) : ?>
-                <p>
-                    <button onclick="window.location.href='<?php echo $url['biblioteca']; ?>/nou-grup/'" class="button btn-gran btn-secondari">Afegir grup</button>
-                </p>
-            <?php endif; ?>
-        </div>
-
-        <div id="taulaLlistatGrups"></div>
-
+<?php if ($viewModel->isAdmin) : ?>
+    <div class="d-flex flex-wrap gap-2 my-3">
+        <?= Button::create('Crear col·lecció', Routes::biblioteca()->novaColeccio())  ?>
     </div>
-</div>
+<?php endif; ?>
+
+<div id="taulaLlistatGrups"></div>

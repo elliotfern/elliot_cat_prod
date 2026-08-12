@@ -3,7 +3,6 @@
 use App\Application\Ciutat\Presenter\CiutatResponse;
 use App\Application\Pais\Presenter\PaisResponse;
 use App\Config\Database;
-use App\Config\DatabaseConnection;
 use App\Infrastructure\Persistence\Ciutat\MysqlCiutatRepository;
 use App\Infrastructure\Persistence\Pais\MysqlPaisRepository;
 use App\Infrastructure\Security\Auth\AuthFactory;
@@ -17,7 +16,7 @@ use App\Utils\Validator;
 $slug = $routeParams[0] ?? null;
 
 $db = new Database();
-$pdo = DatabaseConnection::getConnection();
+$pdo = $db->getPdo();
 
 $paisRepository = new MysqlPaisRepository($pdo);
 
@@ -1404,14 +1403,16 @@ if ($slug === 'directors') {
 } else if ($slug === "subtemes") {
 
     $sql = <<<SQL
-            SELECT s.id, s.sub_tema
+            SELECT s.id, CONCAT(s.sub_tema, ' (', t.tema, ')') AS sub_tema
             FROM %s AS s
+            LEFT JOIN %s AS t ON s.tema_id = t.id
             ORDER BY s.sub_tema ASC
             SQL;
 
     $query = sprintf(
         $sql,
         qi(Tables::DB_SUBTEMES, $pdo),
+        qi(Tables::DB_TEMES, $pdo),
 
     );
 

@@ -1,6 +1,6 @@
-<div class="barraNavegacioContenidor"></div>
+<div id="barraNavegacioContenidor"></div>
 
-<div class="container form">
+<div class="form">
   <h2>Base de dades: Biblioteca</h2>
   <h4 id="titolForm"></h4>
 
@@ -43,12 +43,6 @@
     <div class="col-md-4">
       <label> Editorial:</label>
       <select class="form-select" name="editorial_id" id="editorial_id"></select>
-      </select>
-    </div>
-
-    <div class="col-md-4">
-      <label>Tema:</label>
-      <select class="form-select" name="sub_tema_id" id="sub_tema_id" value="">
       </select>
     </div>
 
@@ -97,6 +91,13 @@
       <button type="button" class="btn btn-sm btn-secondary mt-2" id="addAutorBtn">
         + Afegir autor
       </button>
+    </div>
+
+    <hr>
+    <h4>Subgènere del llibre:</h4>
+    <div class="col-md-6">
+      <label>Tema:</label>
+      <div id="temaContainer"></div>
     </div>
 
     <hr>

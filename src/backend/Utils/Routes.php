@@ -10,4 +10,14 @@ class Routes
     {
         return new ComptabilitatRoutes();
     }
+
+    public static function biblioteca(): BibliotecaRoutes
+    {
+        return new BibliotecaRoutes();
+    }
+
+    public static function persona(): PersonaRoutes
+    {
+        return new PersonaRoutes();
+    }
 }

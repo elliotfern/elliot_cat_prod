@@ -16,6 +16,7 @@ class AppRoutes
         'homepage'      => '/',
         'comptabilitat' => '/comptabilitat',
         'persones'      => '/base-dades-persones',
+        'persona'      => '/base-dades-persones',
         'programacio'   => '/programacio',
         'projectes'     => '/projectes',
         'contactes'     => '/agenda-contactes',

@@ -1,5 +1,8 @@
 <?php
 
+use App\Utils\Routes;
+use App\Utils\Button;
+
 /** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
@@ -7,23 +10,19 @@
 
 <h1>Biblioteca de llibres</h1>
 
-<div id="isAdminButton" style="display: none;">
-    <?php if ($viewModel->isAdmin) : ?>
-        <p>
-            <button onclick="window.location.href='/nou-llibre/'" class="button btn-gran btn-secondari">Afegir llibre</button>
+<?php if ($viewModel->isAdmin) : ?>
+    <div class="d-flex flex-wrap gap-2 my-3">
+        <?=
+        Button::create('Crear llibre', Routes::biblioteca()->nouLlibre()) .
+            Button::create('Crear autor', Routes::persona()->novaPersona()) .
+            Button::create('Crear col·lecció', Routes::biblioteca()->novaColeccio()) ?>
+    </div>
 
-            <button onclick="window.location.href='/nova-persona/'" class="button btn-gran btn-secondari">Afegir autor/a</button>
-            <button onclick="window.location.href='/nou-grup/'" class="button btn-gran btn-secondari">Afegir grup llibre</button>
-        </p>
-    <?php endif; ?>
-</div>
-
-<div class="alert alert-success quadre">
-    <ul class="llistat">
-        <!-- Admin: /gestio/... -->
-        <li><a href="biblioteca/llistat-llibres">Llistat de llibres</a></li>
-        <li><a href="biblioteca/llistat-autors">Llistat d'autors/es</a></li>
-        <li><a href="biblioteca/llistat-grups">Llistat de grups de llibres</a></li>
-
-    </ul>
-</div>
+    <div class="alert alert-success quadre">
+        <ul class="llistat">
+            <li><a href="<?= Routes::biblioteca()->llistatLlibres() ?>">Llistat de llibres</a></li>
+            <li><a href="<?= Routes::biblioteca()->llistatAutors() ?>">Llistat d'autors/es</a></li>
+            <li><a href="<?= Routes::biblioteca()->llistatColeccions() ?>">Llistat de grups de llibres</a></li>
+        </ul>
+    </div>
+<?php endif; ?>

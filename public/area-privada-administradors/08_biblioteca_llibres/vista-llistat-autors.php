@@ -1,5 +1,8 @@
 <?php
 
+use App\Utils\Routes;
+use App\Utils\Button;
+
 /** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
@@ -8,12 +11,10 @@
 <h1>Biblioteca</h1>
 <h2>Llistat d'autors</h2>
 
-<div id="isAdminButton" style="display: none;">
-  <?php if ($viewModel->isAdmin) : ?>
-    <p>
-      <button onclick="window.location.href='<?php echo $url['persona']; ?>/nova-persona/'" class="button btn-gran btn-secondari">Afegir autor</button>
-    </p>
-  <?php endif; ?>
-</div>
+<?php if ($viewModel->isAdmin) : ?>
+  <div class="d-flex flex-wrap gap-2 my-3">
+    <?= Button::create('Crear autor', Routes::persona()->novaPersona())  ?>
+  </div>
+<?php endif; ?>
 
 <div id="taulaLlistatAutors"></div>
