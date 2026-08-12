@@ -32,6 +32,7 @@ export interface Llibre {
   descripcio: string | null;
   sub_tema: string;
   autors?: AutorData[];
+  etiquetes?: { id: string; nom: string; slug: string }[];
 }
 
 type AutorData = {

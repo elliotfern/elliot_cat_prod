@@ -32,6 +32,12 @@ function renderGrupsHtml(grups?: Llibre['grups']): string {
     .join(' / ');
 }
 
+function renderEtiquetesHtml(etiquetes?: Llibre['etiquetes']): string {
+  if (!etiquetes?.length) return '';
+
+  return etiquetes.map((e) => e.nom).join(' / ');
+}
+
 export function mapLlibreToFitxa(api: Llibre) {
   return {
     title: api.titol_original,
@@ -83,6 +89,10 @@ export function mapLlibreToFitxa(api: Llibre) {
       {
         label: 'Col·leccions',
         value: renderGrupsHtml(api.grups),
+      },
+      {
+        label: 'Etiquetes',
+        value: renderEtiquetesHtml(api.etiquetes),
       },
       {
         label: 'Estat',

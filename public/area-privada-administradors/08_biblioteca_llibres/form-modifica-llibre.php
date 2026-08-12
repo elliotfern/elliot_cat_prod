@@ -113,6 +113,18 @@
     </div>
 
     <hr>
+    <h4>Etiquetes del llibre:</h4>
+    <div class="col-md-6">
+      <label>Etiquetes:</label>
+
+      <div id="etiquetesContainer"></div>
+
+      <button type="button" class="btn btn-sm btn-secondary mt-2" id="addEtiquetaBtn">
+        + Afegir etiqueta
+      </button>
+    </div>
+
+    <hr>
     <div class="col-12 mt-4">
       <div class="d-flex justify-content-between">
         <a id="btnTornar" class="btn btn-secondary" href="#">

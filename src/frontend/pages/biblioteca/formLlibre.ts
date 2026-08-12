@@ -16,6 +16,11 @@ type Grup = {
   nom: string;
 };
 
+type Etiqueta = {
+  id: string;
+  nom: string;
+};
+
 type SubTema = {
   id: string;
   sub_tema: string;
@@ -24,6 +29,7 @@ type SubTema = {
 
 let autorsList: Autor[] = [];
 let grupsList: Grup[] = [];
+let etiquetesList: Etiqueta[] = [];
 let subtemesList: SubTema[] = [];
 let temesList: Tema[] = [];
 
@@ -59,6 +65,16 @@ async function loadGrups() {
     console.error('loadGrups failed:', error);
 
     grupsList = [];
+  }
+}
+
+async function loadEtiquetes() {
+  try {
+    etiquetesList = await api.get<Etiqueta[]>(`biblioteca/get/totsEtiquetes`);
+  } catch (error) {
+    console.error('loadEtiquetes failed:', error);
+
+    etiquetesList = [];
   }
 }
 
@@ -105,6 +121,44 @@ async function createGrup(nom: string, slug: string): Promise<Grup | null> {
     return grup;
   } catch (error) {
     console.error('createGrup failed:', error);
+
+    return null;
+  }
+}
+
+async function createEtiqueta(nom: string, slug: string): Promise<Etiqueta | null> {
+  try {
+    const response = await fetch(`${API_BASE}/biblioteca/post/etiqueta`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nom: nom.trim(),
+        slug: slug.trim(),
+      }),
+    });
+
+    const result = await response.json();
+
+    console.log('Resposta crear etiqueta:', result);
+
+    if (!response.ok || !result.success) {
+      console.error('createEtiqueta failed:', result);
+      return null;
+    }
+
+    const etiqueta: Etiqueta = {
+      id: result.data.id,
+      nom: result.data.nom,
+    };
+
+    etiquetesList.push(etiqueta);
+
+    return etiqueta;
+  } catch (error) {
+    console.error('createEtiqueta failed:', error);
 
     return null;
   }
@@ -464,6 +518,137 @@ function initTestCreateGrupUI() {
   });
 }
 
+function initTestCreateEtiquetaUI() {
+  const btnAddEtiqueta = document.getElementById('addEtiquetaBtn');
+  const container = document.getElementById('etiquetesContainer');
+
+  if (!btnAddEtiqueta || !container) return;
+
+  const buttonsWrapper = document.createElement('div');
+
+  buttonsWrapper.className = 'd-flex gap-2 mb-3';
+
+  const newEtiquetaBtn = document.createElement('button');
+
+  newEtiquetaBtn.type = 'button';
+  newEtiquetaBtn.className = 'btn btn-sm btn-secondary mt-2';
+  newEtiquetaBtn.textContent = '+ Nova etiqueta';
+
+  btnAddEtiqueta.parentElement?.appendChild(newEtiquetaBtn);
+
+  const formWrapper = document.createElement('div');
+
+  formWrapper.className = 'border rounded p-3 mb-3 d-none';
+
+  formWrapper.innerHTML = `
+    <div class="mb-3">
+      <label for="newEtiquetaNom" class="form-label">
+        Nom
+      </label>
+
+      <input
+        type="text"
+        id="newEtiquetaNom"
+        class="form-control"
+      >
+    </div>
+
+    <div class="mb-3">
+      <label for="newEtiquetaSlug" class="form-label">
+        Slug
+      </label>
+
+      <input
+        type="text"
+        id="newEtiquetaSlug"
+        class="form-control"
+      >
+    </div>
+
+    <button
+      type="button"
+      id="createEtiquetaBtn"
+      class="btn btn-primary"
+    >
+      Crear etiqueta
+    </button>
+
+    <div id="createEtiquetaMessage" class="mt-3"></div>
+  `;
+
+  btnAddEtiqueta.parentElement?.insertAdjacentElement('afterend', formWrapper);
+
+  const nomInput = formWrapper.querySelector('#newEtiquetaNom') as HTMLInputElement;
+
+  const slugInput = formWrapper.querySelector('#newEtiquetaSlug') as HTMLInputElement;
+
+  const createBtn = formWrapper.querySelector('#createEtiquetaBtn') as HTMLButtonElement;
+
+  const message = formWrapper.querySelector('#createEtiquetaMessage') as HTMLDivElement;
+
+  newEtiquetaBtn.addEventListener('click', () => {
+    const isHidden = formWrapper.classList.contains('d-none');
+
+    if (isHidden) {
+      formWrapper.classList.remove('d-none');
+      nomInput.focus();
+    } else {
+      formWrapper.classList.add('d-none');
+    }
+  });
+
+  createBtn.addEventListener('click', async () => {
+    const nom = nomInput.value.trim();
+    const slug = slugInput.value.trim();
+
+    message.innerHTML = '';
+
+    if (!nom || !slug) {
+      message.innerHTML = `
+        <div class="alert alert-warning mb-0">
+          Cal indicar el nom i el slug.
+        </div>
+      `;
+
+      return;
+    }
+
+    createBtn.disabled = true;
+
+    const etiqueta = await createEtiqueta(nom, slug);
+
+    if (etiqueta) {
+      createEtiquetaSelect(etiqueta.id);
+    }
+
+    createBtn.disabled = false;
+
+    if (!etiqueta) {
+      message.innerHTML = `
+        <div class="alert alert-danger mb-0">
+          No s’ha pogut crear l’etiqueta.
+        </div>
+      `;
+
+      return;
+    }
+
+    message.innerHTML = `
+      <div class="alert alert-success mb-0">
+        Etiqueta creada correctament.
+      </div>
+    `;
+
+    nomInput.value = '';
+    slugInput.value = '';
+
+    setTimeout(() => {
+      formWrapper.classList.add('d-none');
+      message.innerHTML = '';
+    }, 1500);
+  });
+}
+
 function createAuthorSelect(selectedValue: string | null = null) {
   const wrapper = document.createElement('div');
 
@@ -556,6 +741,52 @@ function createGrupSelect(selectedValue: string | null = null) {
   container?.appendChild(wrapper);
 }
 
+function createEtiquetaSelect(selectedValue: string | null = null) {
+  const wrapper = document.createElement('div');
+
+  wrapper.className = 'd-flex gap-2 mb-2';
+
+  const select = document.createElement('select');
+
+  select.name = 'etiquetes[]';
+  select.className = 'form-select';
+
+  const empty = document.createElement('option');
+
+  empty.value = '';
+  empty.textContent = '-- Selecciona etiqueta --';
+
+  select.appendChild(empty);
+
+  for (const etiqueta of etiquetesList) {
+    const option = document.createElement('option');
+
+    option.value = String(etiqueta.id);
+    option.textContent = etiqueta.nom;
+
+    if (selectedValue && String(selectedValue) === String(etiqueta.id)) {
+      option.selected = true;
+    }
+
+    select.appendChild(option);
+  }
+
+  const removeBtn = document.createElement('button');
+
+  removeBtn.type = 'button';
+  removeBtn.className = 'btn btn-danger';
+  removeBtn.textContent = '✕';
+
+  removeBtn.onclick = () => wrapper.remove();
+
+  wrapper.appendChild(select);
+  wrapper.appendChild(removeBtn);
+
+  const container = document.getElementById('etiquetesContainer');
+
+  container?.appendChild(wrapper);
+}
+
 function initAuthorUI() {
   const btn = document.getElementById('addAutorBtn');
 
@@ -574,6 +805,16 @@ function initGrupUI() {
   initTestCreateGrupUI();
 }
 
+function initEtiquetaUI() {
+  const btn = document.getElementById('addEtiquetaBtn');
+
+  btn?.addEventListener('click', () => {
+    createEtiquetaSelect();
+  });
+
+  initTestCreateEtiquetaUI();
+}
+
 export async function formLlibre(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formLlibre');
 
@@ -583,7 +824,7 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
 
   if (!divTitol || !btnSubmit || !form) return;
 
-  await Promise.all([loadAutors(), loadGrups(), loadSubTemes(), loadTemes()]);
+  await Promise.all([loadAutors(), loadGrups(), loadEtiquetes(), loadSubTemes(), loadTemes()]);
 
   let data: Partial<Llibre> = {};
 
@@ -624,6 +865,12 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
       grupsContainer.innerHTML = '';
     }
 
+    const etiquetesContainer = document.getElementById('etiquetesContainer');
+
+    if (etiquetesContainer) {
+      etiquetesContainer.innerHTML = '';
+    }
+
     const temaContainer = document.getElementById('temaContainer');
 
     if (temaContainer) {
@@ -632,6 +879,7 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
 
     initAuthorUI();
     initGrupUI();
+    initEtiquetaUI();
 
     createTemaSelect(data.sub_tema_id ? String(data.sub_tema_id) : null);
 
@@ -653,6 +901,14 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
       }
     } else {
       createGrupSelect();
+    }
+
+    if (data?.etiquetes?.length) {
+      for (const etiqueta of data.etiquetes) {
+        createEtiquetaSelect(String(etiqueta.id));
+      }
+    } else {
+      createEtiquetaSelect();
     }
 
     btnSubmit.textContent = 'Modificar dades';
@@ -689,6 +945,12 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
       grupsContainer.innerHTML = '';
     }
 
+    const etiquetesContainer = document.getElementById('etiquetesContainer');
+
+    if (etiquetesContainer) {
+      etiquetesContainer.innerHTML = '';
+    }
+
     const temaContainer = document.getElementById('temaContainer');
 
     if (temaContainer) {
@@ -697,9 +959,11 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
 
     initAuthorUI();
     initGrupUI();
+    initEtiquetaUI();
 
     createAuthorSelect();
     createGrupSelect();
+    createEtiquetaSelect();
 
     createTemaSelect();
     initCreateTemaUI();

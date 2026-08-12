@@ -213,6 +213,35 @@ if ($slug === 'llibre') {
       }
     }
 
+    // ==============================
+    // ETIQUETES SYNC
+    // ==============================
+
+    $pdo->prepare("
+      DELETE FROM " . Tables::LLIBRES_ETIQUETES_LLIBRES . "
+      WHERE llibre_id = :id
+    ")->execute([':id' => $id_bin]);
+
+    $etiquetes = $data['etiquetes'] ?? [];
+
+    if (is_array($etiquetes) && !empty($etiquetes)) {
+
+      $stmtEtiqueta = $pdo->prepare("
+        INSERT INTO " . Tables::LLIBRES_ETIQUETES_LLIBRES . "
+        (llibre_id, etiqueta_id)
+        VALUES (:llibre_id, :etiqueta_id)
+      ");
+
+      foreach ($etiquetes as $etiquetaId) {
+        if (!isUuid($etiquetaId)) continue;
+
+        $stmtEtiqueta->execute([
+          ':llibre_id' => $id_bin,
+          ':etiqueta_id' => Uuid::toBinary($etiquetaId),
+        ]);
+      }
+    }
+
     Response::success(
       MissatgesAPI::success('update'),
       [

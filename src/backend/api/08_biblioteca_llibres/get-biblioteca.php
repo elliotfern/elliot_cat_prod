@@ -129,6 +129,31 @@ if ($slug === 'totsLlibres') {
         }
         unset($g);
 
+        // 3.5) Etiquetes — misma lógica que grups, query aparte
+        $sql = <<<SQL
+            SELECT
+                le.llibre_id,
+                le.etiqueta_id,
+                e.nom,
+                e.slug
+            FROM %s AS le
+            INNER JOIN %s AS e ON e.id = le.etiqueta_id
+            SQL;
+
+        $queryEtiquetes = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_ETIQUETES_LLIBRES, $pdo),
+            qi(Tables::LLIBRES_ETIQUETES, $pdo)
+        );
+
+        $etiquetes = $db->getData($queryEtiquetes);
+
+        foreach ($etiquetes as &$e) {
+            $e['llibre_id']   = Uuid::toString($e['llibre_id']);
+            $e['etiqueta_id'] = Uuid::toString($e['etiqueta_id']);
+        }
+        unset($e);
+
         // 4) indexación
         $authorsByBook = [];
         foreach ($authors as $a) {
@@ -149,10 +174,20 @@ if ($slug === 'totsLlibres') {
             ];
         }
 
+        $etiquetesByBook = [];
+        foreach ($etiquetes as $e) {
+            $etiquetesByBook[$e['llibre_id']][] = [
+                'id' => $e['etiqueta_id'],
+                'nom' => $e['nom'],
+                'slug' => $e['slug'],
+            ];
+        }
+
         // 5) merge final
         foreach ($books as &$b) {
             $b['autors'] = $authorsByBook[$b['id']] ?? [];
             $b['grups']  = $grupsByBook[$b['id']] ?? [];
+            $b['etiquetes'] = $etiquetesByBook[$b['id']] ?? [];
         }
         unset($b);
 
@@ -489,6 +524,9 @@ if ($slug === 'totsLlibres') {
 
             // 3) col·leccions
             'grups'       => [],
+
+            // 4) etiquetes
+            'etiquetes'   => [],
         ];
 
         // 2) Construir array de autores (deduplicado por seguridad)
@@ -534,6 +572,33 @@ if ($slug === 'totsLlibres') {
                 'id'   => Uuid::toString($g['id']),
                 'nom'  => $g['nom'],
                 'slug' => $g['slug'],
+            ];
+        }
+
+        // 4) Etiquetes — mismo patrón que grups, query aparte
+        $sqlEtiquetes = <<<SQL
+                SELECT
+                    e.id,
+                    e.nom,
+                    e.slug
+                FROM %s AS le
+                INNER JOIN %s AS e ON e.id = le.etiqueta_id
+                WHERE le.llibre_id = :id
+            SQL;
+
+        $queryEtiquetes = sprintf(
+            $sqlEtiquetes,
+            qi(Tables::LLIBRES_ETIQUETES_LLIBRES, $pdo),
+            qi(Tables::LLIBRES_ETIQUETES, $pdo)
+        );
+
+        $etiquetaRows = $db->getData($queryEtiquetes, [':id' => $first['id']]);
+
+        foreach ($etiquetaRows as $e) {
+            $result['etiquetes'][] = [
+                'id'   => Uuid::toString($e['id']),
+                'nom'  => $e['nom'],
+                'slug' => $e['slug'],
             ];
         }
 
@@ -631,6 +696,9 @@ if ($slug === 'totsLlibres') {
 
             // 3) col·leccions
             'grups'       => [],
+
+            // 4) Etiquetes
+            'etiqueres'   => [],
         ];
 
         // 2) Construir array de autores (deduplicado por seguridad)
@@ -676,6 +744,33 @@ if ($slug === 'totsLlibres') {
                 'id'   => Uuid::toString($g['id']),
                 'nom'  => $g['nom'],
                 'slug' => $g['slug'],
+            ];
+        }
+
+        // 4) Etiquetes — mismo patrón que grups, query aparte
+        $sqlEtiquetes = <<<SQL
+                SELECT
+                    e.id,
+                    e.nom,
+                    e.slug
+                FROM %s AS le
+                INNER JOIN %s AS e ON e.id = le.etiqueta_id
+                WHERE le.llibre_id = :id
+            SQL;
+
+        $queryEtiquetes = sprintf(
+            $sqlEtiquetes,
+            qi(Tables::LLIBRES_ETIQUETES_LLIBRES, $pdo),
+            qi(Tables::LLIBRES_ETIQUETES, $pdo)
+        );
+
+        $etiquetaRows = $db->getData($queryEtiquetes, [':id' => uuid::toBinary($id)]);
+
+        foreach ($etiquetaRows as $e) {
+            $result['etiquetes'][] = [
+                'id'   => Uuid::toString($e['id']),
+                'nom'  => $e['nom'],
+                'slug' => $e['slug'],
             ];
         }
 
@@ -1065,6 +1160,51 @@ if ($slug === 'totsLlibres') {
         );
     } catch (\Throwable $e) {
         http_response_code(500);
+        echo json_encode([
+            'error' => 'Internal error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ]);
+        exit;
+    }
+
+    // 12) Llistat Etiquetes llibres
+    // ruta GET => "/api/biblioteca/get/totsEtiquetes"
+} else if ($slug === 'totsEtiquetes') {
+
+    try {
+
+        $sql = <<<SQL
+        SELECT
+            id,
+            nom,
+            slug
+        FROM %s
+        ORDER BY nom ASC
+        SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::LLIBRES_ETIQUETES, $pdo)
+        );
+
+        $etiquetes = $db->getData($query);
+
+        foreach ($etiquetes as &$e) {
+            $e['id'] = Uuid::toString($e['id']);
+        }
+        unset($e);
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $etiquetes,
+            httpCode: 200
+        );
+        exit;
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
         echo json_encode([
             'error' => 'Internal error',
             'message' => $e->getMessage(),

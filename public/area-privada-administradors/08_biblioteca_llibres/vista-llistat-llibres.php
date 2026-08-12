@@ -13,7 +13,7 @@ use App\Utils\Button;
 
 <?php if ($viewModel->isAdmin) : ?>
   <div class="d-flex flex-wrap gap-2 my-3">
-    <?= Button::create('Crear col·lecció', Routes::biblioteca()->nouLlibre())  ?>
+    <?= Button::create('Crear llibre', Routes::biblioteca()->nouLlibre())  ?>
   </div>
 <?php endif; ?>
 

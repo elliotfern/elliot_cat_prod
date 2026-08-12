@@ -255,6 +255,38 @@ if ($slug === 'llibre') {
         }
       }
 
+      // ===============================
+      // ETIQUETES (RELACIÓN N:M LLIBRE)
+      // ===============================
+
+      $etiquetes = $data['etiquetes'] ?? [];
+
+      if (!is_array($etiquetes)) {
+        $etiquetes = [];
+      }
+
+      if (!empty($etiquetes)) {
+
+        $sqlEtiqueta = "
+          INSERT IGNORE INTO " . Tables::LLIBRES_ETIQUETES_LLIBRES . "
+          (llibre_id, etiqueta_id)
+          VALUES
+          (:llibre_id, :etiqueta_uuid)
+      ";
+
+        $stmtEtiqueta = $pdo->prepare($sqlEtiqueta);
+
+        foreach ($etiquetes as $etiquetaId) {
+
+          if (!isUuid($etiquetaId)) continue;
+
+          $stmtEtiqueta->execute([
+            ':llibre_id' => $uuidBytes,
+            ':etiqueta_uuid' => Uuid::toBinary($etiquetaId),
+          ]);
+        }
+      }
+
       Response::success(
         MissatgesAPI::success('create'),
         [
@@ -333,6 +365,98 @@ if ($slug === 'llibre') {
   $uuidString = $uuid->toString();  // para devolver al frontend si quieres
 
   $sql = "INSERT INTO " . Tables::LLIBRES_GRUP . " (
+              id, nom, slug
+          ) VALUES (
+              :id, :nom, :slug
+          )";
+
+  try {
+    $stmt = $pdo->prepare($sql);
+
+    // ID UUIDv7 binario
+    $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
+    $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
+    $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
+
+    if ($stmt->execute()) {
+      Response::success(
+        MissatgesAPI::success('create'),
+        [
+          'id'   => $uuidString,
+          'nom' => $nom,
+        ],
+        httpCode: 201
+      );
+      exit;
+    }
+
+    Response::error(
+      MissatgesAPI::error('db_error'),
+      [
+        'sqlState' => $stmt->errorCode(),
+        'info' => $stmt->errorInfo(),
+      ],
+      500
+    );
+    exit;
+  } catch (\Throwable $e) {
+    Response::error(
+      MissatgesAPI::error('internal_error'),
+      [
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+      ],
+      httpCode: 500
+    );
+    exit;
+  }
+
+  // INSERIR NOVA ETIQUETA LLIBRE
+} else if ($slug === 'etiqueta') {
+  // Leer JSON
+  $input_data = file_get_contents("php://input");
+  $data = json_decode($input_data, true);
+
+  if (!is_array($data)) {
+    Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+    exit;
+  }
+
+  // Helpers
+  function requireField(array $data, string $key, array &$errors)
+  {
+    if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+      $errors[$key] = 'required';
+      return null;
+    }
+    return $data[$key];
+  }
+
+  function optionalField(array $data, string $key)
+  {
+    return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
+      ? $data[$key]
+      : null;
+  }
+
+  // Validación
+  $errors = [];
+
+  $nom = requireField($data, 'nom', $errors);
+  $slug = requireField($data, 'slug', $errors);
+
+  if (!empty($errors)) {
+    Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+    exit;
+  }
+
+  // Generar UUIDv7
+  $uuid = ramseny::uuid7();
+  $uuidBytes = $uuid->getBytes();   // para BINARY(16)
+  $uuidString = $uuid->toString();  // para devolver al frontend si quieres
+
+  $sql = "INSERT INTO " . Tables::LLIBRES_ETIQUETES . " (
               id, nom, slug
           ) VALUES (
               :id, :nom, :slug
