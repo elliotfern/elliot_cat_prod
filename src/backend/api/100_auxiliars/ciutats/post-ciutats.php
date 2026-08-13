@@ -1,40 +1,32 @@
 <?php
 
+use Ramsey\Uuid\Uuid;
+use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Config\DatabaseConnection;
-use Ramsey\Uuid\Uuid;
 
-$conn = DatabaseConnection::getConnection();
-
-if (!$conn) {
-    die("No se pudo establecer conexión a la base de datos.");
-}
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+$db = new Database();
+$pdo = $db->getPdo();
 
 // JSON siempre
 header('Content-Type: application/json; charset=utf-8');
 
 // CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 // SOLO POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
     exit();
-}
-
-// ADMIN REQUIRED
-if (!isAuthenticatedAdmin()) {
-    http_response_code(403);
-    echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-    exit;
 }
 
 // INPUT
@@ -82,7 +74,7 @@ if (!empty($errors)) {
 }
 
 try {
-    $conn->beginTransaction();
+    $pdo->beginTransaction();
 
     // 🔥 UUID v7 (ID ciudad)
     $uuid = Uuid::uuid7();
@@ -101,7 +93,7 @@ try {
         VALUES
         (:id, :ciutat, :ciutat_ca, :ciutat_en, :descripcio, :pais_id, UTC_TIMESTAMP(), UTC_TIMESTAMP())";
 
-    $stmt = $conn->prepare($sql);
+    $stmt = $pdo->prepare($sql);
 
     // ID (UUID v7 binario)
     $stmt->bindValue(':id', $idBytes, PDO::PARAM_LOB);
@@ -118,19 +110,24 @@ try {
 
     $stmt->execute();
 
-    $conn->commit();
+    $pdo->commit();
 
     Response::success(
         MissatgesAPI::success('insert'),
-        ['id' => $idText],
-        201
+        [
+            'id' => $idText,
+            'ciutat' => $ciutat,
+            'ciutat_ca'    => $ciutat_ca,
+            'ciutat_en' => $ciutat_en,
+        ],
+        httpCode: 201
     );
 } catch (Throwable $e) {
-    if ($conn->inTransaction()) $conn->rollBack();
+    if ($pdo->inTransaction()) $pdo->rollBack();
 
     Response::error(
         MissatgesAPI::error('errorBD'),
         [$e->getMessage()],
-        500
+        httpCode: 500
     );
 }

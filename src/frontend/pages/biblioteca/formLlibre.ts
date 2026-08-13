@@ -27,11 +27,29 @@ type SubTema = {
   tema: string;
 };
 
+type Pais = {
+  id: string;
+  pais_ca: string;
+};
+
+type Idioma = {
+  id: string;
+  idioma_ca: string;
+};
+
+type Editorial = {
+  id: string;
+  editorial: string;
+};
+
 let autorsList: Autor[] = [];
 let grupsList: Grup[] = [];
 let etiquetesList: Etiqueta[] = [];
 let subtemesList: SubTema[] = [];
 let temesList: Tema[] = [];
+let paisosList: Pais[] = [];
+let idiomesList: Idioma[] = [];
+let editorialsList: Editorial[] = [];
 
 interface Tema {
   id: string;
@@ -85,6 +103,36 @@ async function loadSubTemes() {
     console.error('loadTemes failed:', error);
 
     subtemesList = [];
+  }
+}
+
+async function loadPaisos() {
+  try {
+    paisosList = await api.get<Pais[]>(`auxiliars/get/paisos`);
+  } catch (error) {
+    console.error('loadPaisos failed:', error);
+
+    paisosList = [];
+  }
+}
+
+async function loadIdiomes() {
+  try {
+    idiomesList = await api.get<Idioma[]>(`auxiliars/get/llengues`);
+  } catch (error) {
+    console.error('loadIdiomes failed:', error);
+
+    idiomesList = [];
+  }
+}
+
+async function loadEditorials() {
+  try {
+    editorialsList = await api.get<Editorial[]>(`auxiliars/get/editorials`);
+  } catch (error) {
+    console.error('loadEditorials failed:', error);
+
+    editorialsList = [];
   }
 }
 
@@ -201,6 +249,78 @@ async function createTema(nom: string, temaId: string): Promise<SubTema | null> 
   }
 }
 
+async function createIdioma(idiomaCa: string): Promise<Idioma | null> {
+  try {
+    const response = await fetch(`${API_BASE}/auxiliars/post/idioma`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        idioma_ca: idiomaCa.trim(),
+      }),
+    });
+
+    const result = await response.json();
+
+    console.log('Resposta crear idioma:', result);
+
+    if (!response.ok || !result.success) {
+      console.error('createIdioma failed:', result);
+      return null;
+    }
+
+    const idioma: Idioma = {
+      id: result.data.id,
+      idioma_ca: result.data.idioma_ca,
+    };
+
+    idiomesList.push(idioma);
+
+    return idioma;
+  } catch (error) {
+    console.error('createIdioma failed:', error);
+
+    return null;
+  }
+}
+
+async function createEditorial(payload: { editorial: string; pais_id: string; web: string }): Promise<Editorial | null> {
+  try {
+    const response = await fetch(`${API_BASE}/auxiliars/post/editorial`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    console.log('Resposta crear editorial:', result);
+
+    if (!response.ok || !result.success) {
+      console.error('createEditorial failed:', result);
+      return null;
+    }
+
+    const editorial: Editorial = {
+      id: result.data.id,
+      editorial: result.data.editorial,
+    };
+
+    editorialsList.push(editorial);
+
+    return editorial;
+  } catch (error) {
+    console.error('createEditorial failed:', error);
+
+    return null;
+  }
+}
+
 function createTemaSelect(selectedValue: string | null = null) {
   const container = document.getElementById('temaContainer');
 
@@ -298,6 +418,13 @@ function initCreateTemaUI() {
   `;
 
   container.appendChild(formWrapper);
+
+  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
+  formWrapper.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  });
 
   const nomInput = formWrapper.querySelector('#newTemaNom') as HTMLInputElement;
 
@@ -447,6 +574,13 @@ function initTestCreateGrupUI() {
 
   btnAddGrup.parentElement?.insertAdjacentElement('afterend', formWrapper);
 
+  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
+  formWrapper.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  });
+
   const nomInput = formWrapper.querySelector('#newGrupNom') as HTMLInputElement;
 
   const slugInput = formWrapper.querySelector('#newGrupSlug') as HTMLInputElement;
@@ -578,6 +712,13 @@ function initTestCreateEtiquetaUI() {
 
   btnAddEtiqueta.parentElement?.insertAdjacentElement('afterend', formWrapper);
 
+  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
+  formWrapper.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  });
+
   const nomInput = formWrapper.querySelector('#newEtiquetaNom') as HTMLInputElement;
 
   const slugInput = formWrapper.querySelector('#newEtiquetaSlug') as HTMLInputElement;
@@ -641,6 +782,332 @@ function initTestCreateEtiquetaUI() {
 
     nomInput.value = '';
     slugInput.value = '';
+
+    setTimeout(() => {
+      formWrapper.classList.add('d-none');
+      message.innerHTML = '';
+    }, 1500);
+  });
+}
+
+function populateIdiomaSelect(selectedValue: string | null) {
+  const select = document.getElementById('idioma_id') as HTMLSelectElement | null;
+
+  if (!select) return;
+
+  select.innerHTML = '';
+
+  const empty = document.createElement('option');
+  empty.value = '';
+  empty.textContent = '-- Selecciona idioma --';
+  select.appendChild(empty);
+
+  for (const idioma of idiomesList) {
+    const option = document.createElement('option');
+
+    option.value = String(idioma.id);
+    option.textContent = idioma.idioma_ca;
+
+    if (selectedValue && String(selectedValue) === String(idioma.id)) {
+      option.selected = true;
+    }
+
+    select.appendChild(option);
+  }
+}
+
+function initCreateIdiomaUI() {
+  const container = document.getElementById('inputIdioma');
+
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const newIdiomaBtn = document.createElement('button');
+
+  newIdiomaBtn.type = 'button';
+  newIdiomaBtn.className = 'btn btn-sm btn-secondary mt-2';
+  newIdiomaBtn.textContent = '+ Afegir idioma';
+
+  container.appendChild(newIdiomaBtn);
+
+  const formWrapper = document.createElement('div');
+
+  formWrapper.className = 'border rounded p-3 mt-2 d-none';
+
+  formWrapper.innerHTML = `
+    <div class="mb-3">
+      <label for="newIdiomaCa" class="form-label">
+        Nom (català)
+      </label>
+
+      <input
+        type="text"
+        id="newIdiomaCa"
+        class="form-control"
+      >
+    </div>
+
+    <button
+      type="button"
+      id="createIdiomaBtn"
+      class="btn btn-primary"
+    >
+      Crear idioma
+    </button>
+
+    <div id="createIdiomaMessage" class="mt-3"></div>
+  `;
+
+  container.appendChild(formWrapper);
+
+  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
+  formWrapper.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  });
+
+  const caInput = formWrapper.querySelector('#newIdiomaCa') as HTMLInputElement;
+  const createBtn = formWrapper.querySelector('#createIdiomaBtn') as HTMLButtonElement;
+  const message = formWrapper.querySelector('#createIdiomaMessage') as HTMLDivElement;
+
+  newIdiomaBtn.addEventListener('click', () => {
+    const isHidden = formWrapper.classList.contains('d-none');
+
+    if (isHidden) {
+      formWrapper.classList.remove('d-none');
+      caInput.focus();
+    } else {
+      formWrapper.classList.add('d-none');
+    }
+  });
+
+  createBtn.addEventListener('click', async () => {
+    const idiomaCa = caInput.value.trim();
+
+    message.innerHTML = '';
+
+    if (!idiomaCa) {
+      message.innerHTML = `
+        <div class="alert alert-warning mb-0">
+          Cal indicar el nom de l’idioma.
+        </div>
+      `;
+
+      return;
+    }
+
+    createBtn.disabled = true;
+
+    const idioma = await createIdioma(idiomaCa);
+
+    createBtn.disabled = false;
+
+    if (!idioma) {
+      message.innerHTML = `
+        <div class="alert alert-danger mb-0">
+          No s’ha pogut crear l’idioma.
+        </div>
+      `;
+
+      return;
+    }
+
+    populateIdiomaSelect(idioma.id);
+
+    message.innerHTML = `
+      <div class="alert alert-success mb-0">
+        Idioma creat correctament.
+      </div>
+    `;
+
+    caInput.value = '';
+
+    setTimeout(() => {
+      formWrapper.classList.add('d-none');
+      message.innerHTML = '';
+    }, 1500);
+  });
+}
+
+function populateEditorialSelect(selectedValue: string | null) {
+  const select = document.getElementById('editorial_id') as HTMLSelectElement | null;
+
+  if (!select) return;
+
+  select.innerHTML = '';
+
+  const empty = document.createElement('option');
+  empty.value = '';
+  empty.textContent = '-- Selecciona editorial --';
+  select.appendChild(empty);
+
+  for (const editorial of editorialsList) {
+    const option = document.createElement('option');
+
+    option.value = String(editorial.id);
+    option.textContent = editorial.editorial;
+
+    if (selectedValue && String(selectedValue) === String(editorial.id)) {
+      option.selected = true;
+    }
+
+    select.appendChild(option);
+  }
+}
+
+function initCreateEditorialUI() {
+  const container = document.getElementById('inputEditorial');
+
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const newEditorialBtn = document.createElement('button');
+
+  newEditorialBtn.type = 'button';
+  newEditorialBtn.className = 'btn btn-sm btn-secondary mt-2';
+  newEditorialBtn.textContent = '+ Afegir editorial';
+
+  container.appendChild(newEditorialBtn);
+
+  const formWrapper = document.createElement('div');
+
+  formWrapper.className = 'border rounded p-3 mt-2 d-none';
+
+  formWrapper.innerHTML = `
+    <div class="mb-3">
+      <label for="newEditorialNom" class="form-label">
+        Nom
+      </label>
+
+      <input
+        type="text"
+        id="newEditorialNom"
+        class="form-control"
+      >
+    </div>
+
+    <div class="mb-3">
+      <label for="newEditorialPaisId" class="form-label">
+        País
+      </label>
+
+      <select
+        id="newEditorialPaisId"
+        class="form-select"
+      >
+        <option value="">-- Selecciona país --</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="newEditorialWeb" class="form-label">
+        Web
+      </label>
+
+      <input
+        type="text"
+        id="newEditorialWeb"
+        class="form-control"
+      >
+    </div>
+
+    <button
+      type="button"
+      id="createEditorialBtn"
+      class="btn btn-primary"
+    >
+      Crear editorial
+    </button>
+
+    <div id="createEditorialMessage" class="mt-3"></div>
+  `;
+
+  container.appendChild(formWrapper);
+
+  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
+  formWrapper.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  });
+
+  const nomInput = formWrapper.querySelector('#newEditorialNom') as HTMLInputElement;
+  const paisSelect = formWrapper.querySelector('#newEditorialPaisId') as HTMLSelectElement;
+  const webInput = formWrapper.querySelector('#newEditorialWeb') as HTMLInputElement;
+  const createBtn = formWrapper.querySelector('#createEditorialBtn') as HTMLButtonElement;
+  const message = formWrapper.querySelector('#createEditorialMessage') as HTMLDivElement;
+
+  // Reutilitza la llista de paisos ja carregada
+  for (const pais of paisosList) {
+    const option = document.createElement('option');
+
+    option.value = String(pais.id);
+    option.textContent = pais.pais_ca;
+
+    paisSelect.appendChild(option);
+  }
+
+  newEditorialBtn.addEventListener('click', () => {
+    const isHidden = formWrapper.classList.contains('d-none');
+
+    if (isHidden) {
+      formWrapper.classList.remove('d-none');
+      nomInput.focus();
+    } else {
+      formWrapper.classList.add('d-none');
+    }
+  });
+
+  createBtn.addEventListener('click', async () => {
+    const nom = nomInput.value.trim();
+    const paisId = paisSelect.value;
+
+    message.innerHTML = '';
+
+    if (!nom || !paisId) {
+      message.innerHTML = `
+        <div class="alert alert-warning mb-0">
+          Cal indicar el nom i el país.
+        </div>
+      `;
+
+      return;
+    }
+
+    createBtn.disabled = true;
+
+    const editorial = await createEditorial({
+      editorial: nom,
+      pais_id: paisId,
+      web: webInput.value.trim(),
+    });
+
+    createBtn.disabled = false;
+
+    if (!editorial) {
+      message.innerHTML = `
+        <div class="alert alert-danger mb-0">
+          No s’ha pogut crear l’editorial.
+        </div>
+      `;
+
+      return;
+    }
+
+    populateEditorialSelect(editorial.id);
+
+    message.innerHTML = `
+      <div class="alert alert-success mb-0">
+        Editorial creada correctament.
+      </div>
+    `;
+
+    nomInput.value = '';
+    paisSelect.value = '';
+    webInput.value = '';
 
     setTimeout(() => {
       formWrapper.classList.add('d-none');
@@ -824,7 +1291,7 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
 
   if (!divTitol || !btnSubmit || !form) return;
 
-  await Promise.all([loadAutors(), loadGrups(), loadEtiquetes(), loadSubTemes(), loadTemes()]);
+  await Promise.all([loadAutors(), loadGrups(), loadEtiquetes(), loadSubTemes(), loadTemes(), loadPaisos(), loadIdiomes(), loadEditorials()]);
 
   let data: Partial<Llibre> = {};
 
@@ -886,6 +1353,12 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
     initCreateTemaUI();
 
     renderFormInputs(data);
+
+    populateIdiomaSelect(data.idioma_id ? String(data.idioma_id) : null);
+    initCreateIdiomaUI();
+
+    populateEditorialSelect(data.editorial_id ? String(data.editorial_id) : null);
+    initCreateEditorialUI();
 
     if (data?.autors?.length) {
       for (const autor of data.autors) {
@@ -968,6 +1441,12 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
     createTemaSelect();
     initCreateTemaUI();
 
+    populateIdiomaSelect(null);
+    initCreateIdiomaUI();
+
+    populateEditorialSelect(null);
+    initCreateEditorialUI();
+
     form.addEventListener('submit', function (event) {
       transmissioDadesDB(event, 'POST', 'formLlibre', `${API_BASE}/biblioteca/post/llibre`, true);
     });
@@ -992,8 +1471,6 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
   }
 
   await auxiliarSelect(data.img_id ?? 0, 'imatgesLlibres', 'img_id', 'alt');
-  await auxiliarSelect(data.idioma_id ?? 0, 'llengues', 'idioma_id', 'idioma_ca');
   await auxiliarSelect(data.estat_id ?? 0, 'estatLlibre', 'estat_id', 'estat');
-  await auxiliarSelect(data.editorial_id ?? 0, 'editorials', 'editorial_id', 'editorial');
   await auxiliarSelect(data.tipus_id ?? 0, 'tipusLlibre', 'tipus_id', 'nomTipus');
 }

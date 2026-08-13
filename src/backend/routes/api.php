@@ -197,6 +197,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/auxiliars/post/{slug}' => [
+        'view' => '../src/backend/api/100_auxiliars/post-auxiliars.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     // XARXES SOCIALS
     '/api/xarxes-socials/post/bluesky' => [
         'view' => '../src/backend/api/12_xarxes_socials/post-bluesky.php',
@@ -543,6 +551,23 @@ $routes = [
 
     '/api/projectes/put/{slug}' => [
         'view' => '../src/backend/api/06_projectes/put-projectes.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    // PAISOS
+    '/api/paisos/post' => [
+        'view' => '../src/backend/api/24_paisos/post-paisos.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/paisos/put' => [
+        'view' => '../src/backend/api/24_paisos/put-paisos.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,

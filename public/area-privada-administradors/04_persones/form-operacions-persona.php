@@ -1,6 +1,6 @@
 <div id="barraNavegacioContenidor"></div>
 
-<div class="container form">
+<div class="form">
 
   <h2 class="mb-4">Base de dades de persones</h2>
   <div id="titolForm"></div>
@@ -108,6 +108,10 @@
       <label for="grup_ids" class="form-label fw-medium">Classificació (professió)</label>
       <select class="form-select" name="grup_ids[]" id="grup_ids" multiple></select>
     </div>
+
+    <hr>
+    <div id="inputPais" class="col-md-12"> </div>
+    <div id="inputCiutat" class="col-md-12"> </div>
 
     <hr class="my-4">
 

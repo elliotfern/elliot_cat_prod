@@ -66,17 +66,23 @@
 
     <hr>
 
-    <div class="col-md-">
+    <div id="inputEditorial" class="col-md-12"> </div>
+    <div id="inputIdioma" class="col-md-12"> </div>
+
+    <hr>
+    <h4>Imatge del llibre:</h4>
+
+    <div class="col-md-6">
       <label>Imatge coberta existent:</label>
       <select class="form-select" name="img_id" id="img_id"></select>
     </div>
 
-    <div class="col-md-">
+    <div class="col-md-6">
       <label>O puja una nova imatge:</label>
       <input class="form-control" type="file" name="img_upload" id="img_upload" accept="image/*">
     </div>
 
-    <div class="col-md-">
+    <div class="col-md-6">
       <label>Nom Imatge:</label>
       <input class="form-control" type="text" name="alt" id="alt"></select>
     </div>
