@@ -44,6 +44,6 @@ export async function formLink(isUpdate: boolean, id?: string) {
   }
 
   await auxiliarSelect(data.sub_tema_id ?? 0, 'subtemes', 'sub_tema_id', 'sub_tema');
-  await auxiliarSelect(data.lang ?? 0, 'llengues', 'lang', 'idioma_ca');
+  await auxiliarSelect(data.idioma_id ?? 0, 'llengues', 'idioma_id', 'idioma_ca');
   await auxiliarSelect(data.tipus ?? 0, 'tipusLinks', 'tipus', 'tipus');
 }

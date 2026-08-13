@@ -1,7 +1,6 @@
-<div class="barraNavegacioContenidor">
-</div>
+<div id="barraNavegacioContenidor"></div>
 
-<div class="container-fluid form">
+<div class="form">
     <div id="titolForm"></div>
 
     <div class="alert alert-success" id="okMessage" style="display:none">
@@ -22,17 +21,30 @@
         </div>
 
         <div class="col-md-4">
+            <label>Ordre:</label>
+            <input class="form-control" type="text" name="ordre" id="ordre" value="">
         </div>
 
-        <div class="container" style="margin-top:25px">
-            <div class="row">
-                <div class="col-6 text-left">
-                    <a href="#" onclick="window.history.back()" class="btn btn-secondary">Tornar enrere</a>
-                </div>
-                <div class="col-6 text-right derecha">
+        <div class="col-md-4">
+        </div>
 
-                    <button type="submit" class="btn btn-primary" id="btnTema">Modificar dades</button>
+        <div class="col-12 mt-4">
+            <div class="d-flex justify-content-between">
+                <a id="btnTornar" class="btn btn-secondary" href="#">
+                    Fitxa enllaç
+                </a>
 
+                <div class="d-flex gap-2">
+                    <a
+                        id="btnVeureFitxa"
+                        class="btn btn-success d-none"
+                        href="#">
+                        Veure fitxa
+                    </a>
+
+                    <button id="btnTema" type="submit" class="btn btn-primary">
+                        Afegir
+                    </button>
                 </div>
             </div>
         </div>

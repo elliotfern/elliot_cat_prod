@@ -19,7 +19,7 @@ export async function taulaLlistatTemes() {
   });
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/adreces/get/llistatTemes`,
+    url: `adreces/get/llistatTemes`,
     containerId: 'taulaLlistatTemes',
     columns,
     filterKeys: ['tema'],

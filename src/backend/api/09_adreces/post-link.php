@@ -2,70 +2,56 @@
 
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use App\Utils\Tables;
-use App\Config\Audit;
 use App\Config\Database;
-use App\Utils\Uuid as UtilsUuid;
 use App\Utils\ValidacioErrors;
-use Ramsey\Uuid\Uuid;
+use App\Utils\Uuid;
+use Ramsey\Uuid\Uuid as Ramsey;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
 $db = new Database();
 $pdo = $db->getPdo();
 
-/*
- * BACKEND DB LINKS
- * FUNCIONS
- * @
- */
-
-// Configuración de cabeceras para aceptar JSON y responder JSON
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: POST");
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
-// Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   header('HTTP/1.1 405 Method Not Allowed');
   echo json_encode(['error' => 'Method not allowed']);
   exit();
 }
 
-// a) Inserir link
 if ($slug === 'link') {
-  // 📨 Entrada JSON
   $inputData = file_get_contents('php://input');
   $data = json_decode($inputData, true) ?: [];
 
   $errors = [];
 
-  // ✅ Generar ID (UUIDv7) en el servidor
-  try {
-    $idText = Uuid::uuid7()->toString();
-  } catch (Throwable $t) {
-    Response::error(MissatgesAPI::error('errorServidor'), ['No s’ha pogut generar l’UUID'], 500);
-  }
+  $uuid = Ramsey::uuid7();
+  $uuidBytes = $uuid->getBytes();
+  $idText = $uuid->toString(); // <-- FIX: faltaba definir esto
 
-  // 📥 Campos
   $nom          = isset($data['nom']) ? trim((string)$data['nom']) : null;
   $web          = isset($data['web']) ? trim((string)$data['web']) : null;
   $subTemaIdTxt = isset($data['sub_tema_id']) ? trim((string)$data['sub_tema_id']) : null;
-  $lang         = isset($data['lang']) ? (int)$data['lang'] : null;
+  $idiomaIdTxt  = isset($data['idioma_id']) ? trim((string)$data['idioma_id']) : null;
   $tipus        = isset($data['tipus']) ? (int)$data['tipus'] : null;
 
-  // 🔎 Validacions bàsiques
+  $uuidRegex = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i';
+
   if (empty($subTemaIdTxt)) {
     $errors[] = ValidacioErrors::requerit('sub_tema_id');
-  } elseif (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i', $subTemaIdTxt)) {
+  } elseif (!preg_match($uuidRegex, $subTemaIdTxt)) {
     $errors[] = ValidacioErrors::format('sub_tema_id');
   }
 
-  if ($lang === null) {
-    $errors[] = ValidacioErrors::requerit('lang');
-  } elseif ($lang < 0) {
-    $errors[] = ValidacioErrors::format('lang');
+  // FIX: validar también el formato de idioma_id, no solo que no sea null
+  if (empty($idiomaIdTxt)) {
+    $errors[] = ValidacioErrors::requerit('idioma');
+  } elseif (!preg_match($uuidRegex, $idiomaIdTxt)) {
+    $errors[] = ValidacioErrors::format('idioma');
   }
 
   if ($tipus === null) {
@@ -74,14 +60,10 @@ if ($slug === 'link') {
 
   if (empty($web)) {
     $errors[] = ValidacioErrors::requerit('web');
-  } else {
-    // Validación simple de URL (permite http/https)
-    if (!filter_var($web, FILTER_VALIDATE_URL)) {
-      $errors[] = ValidacioErrors::format('web');
-    }
+  } elseif (!filter_var($web, FILTER_VALIDATE_URL)) {
+    $errors[] = ValidacioErrors::format('web');
   }
 
-  // (Opcional) límites de longitud
   $maxNom = 5000;
   if ($nom !== null && $nom !== '' && mb_strlen($nom) > $maxNom) {
     $errors[] = ValidacioErrors::massaLlarg('nom', $maxNom);
@@ -93,13 +75,16 @@ if ($slug === 'link') {
 
   if (!empty($errors)) {
     Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    exit(); // FIX: asegurar que no continúa ejecutando tras el error
   }
 
+  // Solo convertir a binario cuando ya sabemos que el formato es válido
+  $subTema_id_bin = Uuid::toBinary($subTemaIdTxt);
+  $idioma_id_bin  = Uuid::toBinary($idiomaIdTxt);
 
   try {
-    // ✅ Comprovar que el sub_tema existeix
-    $check = $pdo->prepare("SELECT 1 FROM aux_sub_temes WHERE id = uuid_text_to_bin(:sub_tema_id) LIMIT 1");
-    $check->bindValue(':sub_tema_id', $subTemaIdTxt, PDO::PARAM_STR);
+    $check = $pdo->prepare("SELECT 1 FROM aux_sub_temes WHERE id = :sub_tema_id LIMIT 1");
+    $check->bindValue(':sub_tema_id', $subTema_id_bin, PDO::PARAM_LOB); // FIX: comparar binario con binario, no el texto
     $check->execute();
     if (!$check->fetchColumn()) {
       Response::error(
@@ -107,43 +92,24 @@ if ($slug === 'link') {
         [ValidacioErrors::noExisteix('sub_tema_id')],
         404
       );
+      exit(); // FIX
     }
 
-    // INSERT
     $sql = "INSERT INTO db_links (
-                id, nom, web, sub_tema_id, lang, tipus, dateCreated, dateModified
+                id, nom, web, sub_tema_id, idioma_id, tipus, dateCreated, dateModified
             ) VALUES (
-                uuid_text_to_bin(:id),
-                :nom,
-                :web,
-                uuid_text_to_bin(:sub_tema_id),
-                :lang,
-                :tipus,
-                CURDATE(),
-                CURDATE()
+                :id, :nom, :web, :sub_tema_id, :idioma_id, :tipus, CURDATE(), CURDATE()
             )";
 
     $stmt = $pdo->prepare($sql);
-
-    // Bindings (nota: nom puede ser NULL)
-    $stmt->bindValue(':id', $idText, PDO::PARAM_STR);
+    $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
     $stmt->bindValue(':nom', ($nom === '' ? null : $nom), $nom === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
     $stmt->bindValue(':web', $web, PDO::PARAM_STR);
-    $stmt->bindValue(':sub_tema_id', $subTemaIdTxt, PDO::PARAM_STR);
-    $stmt->bindValue(':lang', $lang, PDO::PARAM_INT);
+    $stmt->bindValue(':sub_tema_id', $subTema_id_bin, PDO::PARAM_LOB);
+    $stmt->bindValue(':idioma_id', $idioma_id_bin, PDO::PARAM_LOB);
     $stmt->bindValue(':tipus', $tipus, PDO::PARAM_INT);
 
     $stmt->execute();
-
-    // 📝 Audit
-    Audit::registrarCanvi(
-      $pdo,
-      "elliot",
-      'INSERT',
-      "Creació link ($idText) per sub_tema $subTemaIdTxt",
-      Tables::DB_LINKS,
-      $idText // si Audit espera binari, adapta-ho
-    );
 
     Response::success(
       MissatgesAPI::success('create'),
@@ -152,7 +118,7 @@ if ($slug === 'link') {
         'nom'          => $nom,
         'web'          => $web,
         'sub_tema_id'  => $subTemaIdTxt,
-        'lang'         => $lang,
+        'idioma_id'    => $idiomaIdTxt,
         'tipus'        => $tipus,
         'dateCreated'  => date('Y-m-d'),
         'dateModified' => date('Y-m-d'),
@@ -162,10 +128,13 @@ if ($slug === 'link') {
   } catch (PDOException $e) {
     if ((int)($e->errorInfo[1] ?? 0) === 1062) {
       Response::error(MissatgesAPI::error('duplicat'), ['Registre duplicat'], 409);
+      exit(); // FIX
     }
     Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    exit(); // FIX
   }
 } else if ($slug === 'tema') {
+
   // 📨 Entrada JSON
   $inputData = file_get_contents('php://input');
   $data = json_decode($inputData, true) ?: [];
@@ -174,17 +143,30 @@ if ($slug === 'link') {
 
   // ✅ Generar ID (UUIDv7) en el servidor
   try {
-    $idText = Uuid::uuid7()->toString(); // p. ej. "018f6a9b-3b1a-7c3e-8a4b-9f2a1c0b7d2e"
+    $idText = Ramsey::uuid7()->toString(); // FIX: alias explícito para evitar colisión de nombres
   } catch (Throwable $t) {
     Response::error(MissatgesAPI::error('errorServidor'), ['No s\'ha pogut generar l\'UUID'], 500);
+    exit(); // FIX: sin esto, $idText queda indefinida y el código sigue
   }
 
-  // 📥 Campos opcionales (trim y null si vacío)
+  // 📥 Campos
   $tema = isset($data['tema']) ? trim((string)$data['tema']) : null;
 
-  // 🔎 Validació: almenys un idioma amb text
-  if (($tema === null || $tema === '')) {
-    $errors[] = ValidacioErrors::requerit('almenys_un_idioma');
+  // 📥 NUEVO: ordre (int, puede llegar como string desde el formulario)
+  $ordre = 0; // valor por defecto
+  if (isset($data['ordre']) && $data['ordre'] !== '' && $data['ordre'] !== null) {
+    $ordreRaw = $data['ordre'];
+    if (!is_numeric($ordreRaw) || (int)$ordreRaw != $ordreRaw) {
+      // rechaza no numéricos y decimales (p. ej. "3.5"); si quieres permitir decimales, quita la 2ª condición
+      $errors[] = ValidacioErrors::format('ordre');
+    } else {
+      $ordre = (int)$ordreRaw;
+    }
+  }
+
+  // 🔎 Validació: tema requerit
+  if ($tema === null || $tema === '') {
+    $errors[] = ValidacioErrors::requerit('tema');
   }
 
   // (Opcional) Límits de longitud bàsics
@@ -198,51 +180,45 @@ if ($slug === 'link') {
 
   if (!empty($errors)) {
     Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+    exit(); // FIX
   }
 
   try {
     $sql = "INSERT INTO aux_temes (
-                id, tema
+                id, tema, ordre
             ) VALUES (
-                uuid_text_to_bin(:id), :tema
+                :id, :tema, :ordre
             )";
 
     $stmt = $pdo->prepare($sql);
 
-    $stmt->bindValue(':id', $idText, PDO::PARAM_STR);
+    $stmt->bindValue(':id', $idText, PDO::PARAM_LOB);
     $stmt->bindValue(':tema', ($tema === '' ? null : $tema), $tema === '' ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':ordre', $ordre, PDO::PARAM_INT); // FIX: nuevo campo
 
     $stmt->execute();
-
-    // 📝 Audit
-    Audit::registrarCanvi(
-      $pdo,
-      "elliot",
-      'INSERT',
-      "Creació nou tema ($idText)",
-      Tables::DB_TEMES,
-      $idText // si el teu Audit espera binari, adapta-ho
-    );
 
     Response::success(
       MissatgesAPI::success('create'),
       [
-        'id' => $idText, // retornem el UUID text
-        'tema' => [
-          'ca' => $tema,
-        ],
+        'id' => $idText,
+        'tema' => $tema,
+        'ordre' => $ordre, // FIX: devolver también el valor guardado
       ],
       httpCode: 201
     );
+    exit(); // FIX
   } catch (PDOException $e) {
-    if ((int)$e->errorInfo[1] === 1062) { // Duplicate entry
+    if ((int)($e->errorInfo[1] ?? 0) === 1062) { // Duplicate entry
       Response::error(
         MissatgesAPI::error('duplicat'),
         ['Ja existeix un registre amb aquest id.'],
         409
       );
+      exit(); // FIX
     }
     Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    exit(); // FIX
   }
 } else if ($slug === 'subtema') {
   // 📨 Entrada JSON
@@ -253,20 +229,26 @@ if ($slug === 'link') {
 
   // ✅ Generar ID (UUIDv7) en el servidor
   try {
-    $idText = Uuid::uuid7()->toString();
+    $idText = Ramsey::uuid7()->toString(); // FIX: alias, evita colisión con App\Utils\Uuid
   } catch (Throwable $t) {
     Response::error(
       MissatgesAPI::error('errorServidor'),
-      ['No s’ha pogut generar l’UUID'],
+      ['No s\'ha pogut generar l\'UUID'],
       500
     );
+    exit(); // FIX: sin esto, $idText queda indefinida y el código sigue
   }
 
   // 🔎 Validació tema_id
-  $temaIdText = (string)$data['tema_id'];
+  $temaIdText = isset($data['tema_id']) ? trim((string)$data['tema_id']) : null; // FIX: isset antes de castear
+  $uuidRegex = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f][0-9a-f]{3}-[0-9a-f][0-9a-f]{3}-[0-9a-f]{12}$/i';
+
   if (empty($temaIdText)) {
     $errors[] = ValidacioErrors::requerit('tema_id');
+  } elseif (!preg_match($uuidRegex, $temaIdText)) {
+    $errors[] = ValidacioErrors::format('tema_id'); // FIX: faltaba validar formato
   }
+
   // 🔎 Validació sub_tema
   $sub = isset($data['sub_tema'])
     ? trim((string)$data['sub_tema'])
@@ -293,12 +275,13 @@ if ($slug === 'link') {
       $errors,
       400
     );
+    exit(); // FIX
   }
 
   try {
 
-    $temaIdBin = UtilsUuid::toBinary($temaIdText);
-    $idBin = UtilsUuid::toBinary($idText);
+    $temaIdBin = Uuid::toBinary($temaIdText); // FIX: clase correcta (Uuid, no UtilsUuid)
+    $idBin = Uuid::toBinary($idText);
 
     // ✅ Comprovem que el tema pare existeix
     $check = $pdo->prepare(
@@ -308,7 +291,7 @@ if ($slug === 'link') {
     $check->bindValue(
       ':tema_id',
       $temaIdBin,
-      PDO::PARAM_STR
+      PDO::PARAM_LOB // FIX: binario, no STR
     );
 
     $check->execute();
@@ -320,6 +303,7 @@ if ($slug === 'link') {
         [ValidacioErrors::noExisteix('tema_id')],
         404
       );
+      exit(); // FIX
     }
 
     // INSERT
@@ -338,13 +322,13 @@ if ($slug === 'link') {
     $stmt->bindValue(
       ':id',
       $idBin,
-      PDO::PARAM_STR
+      PDO::PARAM_LOB // FIX: binario, no STR
     );
 
     $stmt->bindValue(
       ':tema_id',
       $temaIdBin,
-      PDO::PARAM_STR
+      PDO::PARAM_LOB // FIX: binario, no STR
     );
 
     $stmt->bindValue(
@@ -365,13 +349,15 @@ if ($slug === 'link') {
       ],
       httpCode: 201
     );
+    exit(); // FIX
   } catch (PDOException $e) {
-    if ((int)$e->errorInfo[1] === 1062) {
+    if ((int)($e->errorInfo[1] ?? 0) === 1062) {
       Response::error(
         MissatgesAPI::error('duplicat'),
         ['Registre duplicat'],
         409
       );
+      exit(); // FIX
     }
 
     Response::error(
@@ -379,6 +365,7 @@ if ($slug === 'link') {
       [$e->getMessage()],
       500
     );
+    exit(); // FIX
   }
 } else {
   // response output - data error

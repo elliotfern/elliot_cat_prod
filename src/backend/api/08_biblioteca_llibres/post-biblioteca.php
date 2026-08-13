@@ -53,8 +53,6 @@ if ($slug === 'llibre') {
     exit;
   }
 
-
-
   // Helpers
   function requireField(array $data, string $key, array &$errors)
   {
@@ -94,8 +92,6 @@ if ($slug === 'llibre') {
 
   // 1) caso upload
   if ($hasImage) {
-
-
 
     $file = $_FILES['img_upload'];
 

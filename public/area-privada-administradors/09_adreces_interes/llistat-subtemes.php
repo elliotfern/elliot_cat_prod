@@ -1,17 +1,20 @@
 <?php
 
+use App\Utils\Routes;
+use App\Utils\Button;
+
 /** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
 <div id="barraNavegacioContenidor"></div>
 
 <h1>Adreces d'interés: llistat Sub-temes</h1>
+
 <?php if ($viewModel->isAdmin) : ?>
-    <p>
-        <button onclick="window.location.href='<?php echo $url['auxiliar']; ?>/nou-subtema/'" class="button btn-gran btn-secondari">Afegir sub-tema</button>
-    </p>
+    <div class="d-flex flex-wrap gap-2 my-3">
+        <?= Button::create('Crear sub-tema', Routes::auxiliars()->nouSubTema()) ?>
+    </div>
+
+    <div id="taulaLlistatSubTemes"></div>
+
 <?php endif; ?>
-
-<div id="taulaLlistatSubTemes"></div>
-
-</div>

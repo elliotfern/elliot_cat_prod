@@ -75,7 +75,7 @@ if ($slug === 'llistatTemes') {
             LEFT JOIN %s AS s ON s.id = l.sub_tema_id
             LEFT JOIN %s AS st ON s.tema_id = st.id
             LEFT JOIN %s AS t ON l.tipus = t.id
-            LEFT JOIN %s AS i ON l.lang = i.id
+            LEFT JOIN %s AS i ON l.idioma_id = i.id
             ORDER BY l.nom ASC
             SQL;
 
@@ -210,9 +210,9 @@ if ($slug === 'llistatTemes') {
     $id = $_GET['id'];
 
     $sql = <<<SQL
-            SELECT l.id, l.sub_tema_id, l.web, l.nom, l.tipus, l.lang
+            SELECT l.id, l.sub_tema_id, l.web, l.nom, l.tipus, l.idioma_id
             FROM db_links AS l
-            WHERE l.id = uuid_text_to_bin(:id)
+            WHERE l.id = :id
             SQL;
 
     $query = sprintf(
@@ -222,7 +222,7 @@ if ($slug === 'llistatTemes') {
 
     try {
 
-        $params = [':id' => $id];
+        $params = [':id' => Uuid::toBinary($id)];
         $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
@@ -253,12 +253,12 @@ if ($slug === 'llistatTemes') {
     $id = $_GET['id'];
 
     $sql = <<<SQL
-            SELECT l.id, l.sub_tema_id, l.web, l.nom, l.tipus, l.lang, l.dateCreated, l.dateModified, st.sub_tema, t.tema, lt.tipus
+            SELECT l.id, l.sub_tema_id, l.web, l.nom, l.tipus, l.idioma_id, l.dateCreated, l.dateModified, st.sub_tema, t.tema, lt.tipus
             FROM %s AS l
             LEFT JOIN %s AS st ON l.sub_tema_id = st.id
             LEFT JOIN %s AS t ON st.tema_id = t.id
             LEFT JOIN %s AS lt ON l.tipus = lt.id
-            WHERE l.sub_tema_id = uuid_text_to_bin(:id)
+            WHERE l.sub_tema_id = :id
             ORDER BY l.nom ASC
             SQL;
 
@@ -270,17 +270,9 @@ if ($slug === 'llistatTemes') {
         qi(Tables::DB_LINKS_TIPUS, $pdo),
     );
 
-
-    $sql = <<<SQL
-            SELECT st.id, st.tema_id, st.sub_tema, t.tema
-            FROM %s AS st
-            LEFT JOIN %s AS t ON st.tema_id = t.id
-            ORDER BY st.sub_tema ASC
-            SQL;
-
     try {
 
-        $params = [':id' => $id];
+        $params = [':id' => Uuid::toBinary($id)];
         $result = $db->getData($query, $params, false);
 
         if (empty($result)) {
@@ -305,6 +297,51 @@ if ($slug === 'llistatTemes') {
         );
     }
 
+    // 5) Ruta per treure els enllaços d'un tema
+    // ruta GET => "/api/adreces/temaId=11"
+} elseif ($slug === 'temaId') {
+    $id = $_GET['id'];
+
+    $sql = <<<SQL
+            SELECT t.id, t.tema, t.ordre
+            FROM %s AS t
+            WHERE t.id = :id
+            LIMIT 1
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_TEMES, $pdo),
+    );
+
+    try {
+
+        $params = [':id' => Uuid::toBinary($id)];
+        $result = $db->getData($query, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+
     // 5) Ruta per modificar un subTema
     // ruta GET => "/api/adreces/detallsSubTemaId=11"
 } elseif ($slug === 'detallsSubTemaId') {
@@ -313,7 +350,7 @@ if ($slug === 'llistatTemes') {
     $sql = <<<SQL
             SELECT st.id, st.tema_id, st.sub_tema
             FROM %s AS st
-            WHERE st.id = uuid_text_to_bin(:id)
+            WHERE st.id = :id
             SQL;
 
     $query = sprintf(
@@ -323,7 +360,7 @@ if ($slug === 'llistatTemes') {
 
     try {
 
-        $params = [':id' => $id];
+        $params = [':id' => Uuid::toBinary($id)];
         $result = $db->getData($query, $params, true);
 
         if (empty($result)) {

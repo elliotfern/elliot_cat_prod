@@ -1,7 +1,6 @@
-<div class="barraNavegacioContenidor">
-</div>
+<div id="barraNavegacioContenidor"></div>
 
-<div class="container-fluid form">
+<div class="form">
 
     <div id="titolForm"></div>
 
@@ -34,11 +33,11 @@
 
         <div class="col-md-4">
             <label>Idioma:</label>
-            <select class="form-select" name="lang" id="lang" value="">
+            <select class="form-select" name="idioma_id" id="idioma_id" value="">
             </select>
         </div>
 
-        <div class="col-md-4">
+        <div class=" col-md-4">
             <label>Tipus enllaç:</label>
             <select class="form-select" name="tipus" id="tipus" value="">
             </select>
@@ -47,18 +46,27 @@
         <div class="col-md-4">
         </div>
 
-        <div class="container" style="margin-top:25px">
-            <div class="row">
-                <div class="col-6 text-left">
-                    <a href="#" onclick="window.history.back()" class="btn btn-secondary">Tornar enrere</a>
-                </div>
-                <div class="col-6 text-right derecha">
+        <div class="col-12 mt-4">
+            <div class="d-flex justify-content-between">
+                <a id="btnTornar" class="btn btn-secondary" href="#">
+                    Fitxa enllaç
+                </a>
 
-                    <button type="submit" id="btnLink" class="btn btn-primary">Modifica enllaç</button>
+                <div class="d-flex gap-2">
+                    <a
+                        id="btnVeureFitxa"
+                        class="btn btn-success d-none"
+                        href="#">
+                        Veure fitxa
+                    </a>
 
+                    <button id="btnLink" type="submit" class="btn btn-primary">
+                        Afegir
+                    </button>
                 </div>
             </div>
         </div>
+
     </form>
 
 </div>

@@ -11,5 +11,5 @@ export interface Link {
   sub_tema: string;
   tipus: string;
   sub_tema_id: string;
-  lang: string;
+  idioma_id: string;
 }

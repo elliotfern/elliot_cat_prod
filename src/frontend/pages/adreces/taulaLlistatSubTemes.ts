@@ -28,7 +28,7 @@ export async function taulaLlistatSubTemes() {
   });
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/adreces/get/llistatSubTemes`,
+    url: `adreces/get/llistatSubTemes`,
     containerId: 'taulaLlistatSubTemes',
     columns,
     filterKeys: ['tema'],

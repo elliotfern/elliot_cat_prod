@@ -20,4 +20,14 @@ class Routes
     {
         return new PersonaRoutes();
     }
+
+    public static function adreces(): AdrecesRoutes
+    {
+        return new AdrecesRoutes();
+    }
+
+    public static function auxiliars(): AuxiliarsRoutes
+    {
+        return new AuxiliarsRoutes();
+    }
 }
