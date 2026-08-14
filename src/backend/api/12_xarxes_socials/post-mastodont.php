@@ -64,7 +64,6 @@ if ($imagen) {
     ]);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $mediaParams);
     $mediaResponse = curl_exec($ch);
-    curl_close($ch);
 
     // Verificar si hubo un error al subir la imagen
     if (curl_errno($ch)) {
@@ -116,6 +115,3 @@ if (curl_errno($ch)) {
 
 // Mostrar la respuesta del servidor de Mastodon
 echo json_encode(['success' => '✅ Missatge publicat a Mastodon.', 'response' => json_decode($response, true)], JSON_PRETTY_PRINT);
-
-// Cerrar la conexión cURL
-curl_close($ch);

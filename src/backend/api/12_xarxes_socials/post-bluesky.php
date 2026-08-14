@@ -72,7 +72,6 @@ if (curl_errno($ch)) {
 }
 
 $authInfo = json_decode($response, true);
-curl_close($ch);
 
 if (!isset($authInfo['accessJwt'])) {
     http_response_code(401);
@@ -116,7 +115,6 @@ if (isset($_FILES["imagen"])) {
         exit();
     }
 
-    curl_close($ch);
     $uploadResponse = json_decode($response, true);
 
     if (isset($uploadResponse["blob"]["ref"]['$link'])) {
@@ -187,7 +185,5 @@ if (curl_errno($ch)) {
     echo json_encode(['error' => 'Error en la solicitud CURL al crear la publicación: ' . curl_error($ch)]);
     exit();
 }
-
-curl_close($ch);
 
 echo json_encode(['success' => '✅ Missatge publicat a Bluesky.', 'response' => json_decode($response)], JSON_PRETTY_PRINT);

@@ -1,5 +1,8 @@
 <?php
 
+use App\Utils\Routes;
+use App\Utils\Button;
+
 /** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
@@ -7,25 +10,22 @@
 
 <h1>Arts escèniques, cinema i televisió</h1>
 
-
 <?php if ($viewModel->isAdmin) : ?>
-    <p>
-        <button onclick="window.location.href='<?php echo $url['cinema']; ?>/nova-pelicula/'" class="button btn-gran btn-secondari">Afegir pel·lícula</button>
+    <div class="d-flex flex-wrap gap-2 my-3">
+        <?=
+        Button::create('Crear pel·lícula', Routes::cinema()->novaPelicula()) .
+            Button::create('Crear sèrie tv', Routes::cinema()->novaSerie()) .
+            Button::create('Crear obra teatre', Routes::cinema()->novaObraTeatre()) .
+            Button::create('Crear fitxa persona', Routes::persona()->novaPersona()) ?>
+    </div>
 
-        <button onclick="window.location.href='<?php echo $url['cinema']; ?>/nova-serie/'" class="button btn-gran btn-secondari">Afegir sèrie tv</button>
-
-        <button onclick="window.location.href='<?php echo $url['cinema']; ?>/nova-obra-teatre/'" class="button btn-gran btn-secondari">Afegir obra de teatre</button>
-
-        <button onclick="window.location.href='<?php echo $url['persona']; ?>/nova-persona/'" class="button btn-gran btn-secondari">Afegir actor/a o director/a</button>
-    </p>
+    <div class="alert alert-success quadre">
+        <ul class="llistat">
+            <li><a href="<?= Routes::cinema()->llistatPelicules() ?>">Llistat de pel·lícules</a></li>
+            <li><a href="<?= Routes::cinema()->llistatSeries() ?>">Llistat de sèries tv</a></li>
+            <li><a href="<?= Routes::cinema()->llistatObresTeatre() ?>">Llistat d'obres de teatre</a></li>
+            <li><a href="<?= Routes::cinema()->llistatActors() ?>">Llistat d'actors/es</a></li>
+            <li><a href="<?= Routes::cinema()->llistatDirectors() ?>">Llistat de directors/es</a></li>
+        </ul>
+    </div>
 <?php endif; ?>
-
-<div class="alert alert-success quadre">
-    <ul class="llistat">
-        <li><a href="<?php echo $url['cinema']; ?>/llistat-pelicules">Llistat de pel·lícules</a></li>
-        <li><a href="<?php echo $url['cinema']; ?>/llistat-series">Llistat de sèries de televisió</a></li>
-        <li><a href="<?php echo $url['cinema']; ?>/llistat-obres-teatre">Llistat d'obres de teatre</a></li>
-        <li><a href="<?php echo $url['cinema']; ?>/llistat-actors">Llistat d'actors/es</a></li>
-        <li><a href="<?php echo $url['cinema']; ?>/llistat-directors">Llistat de directors/es</a></li>
-    </ul>
-</div>

@@ -2,8 +2,6 @@
 
 namespace App\Utils;
 
-
-
 class Routes
 {
     public static function comptabilitat(): ComptabilitatRoutes
@@ -29,5 +27,10 @@ class Routes
     public static function auxiliars(): AuxiliarsRoutes
     {
         return new AuxiliarsRoutes();
+    }
+
+    public static function cinema(): CinemaRoutes
+    {
+        return new CinemaRoutes();
     }
 }

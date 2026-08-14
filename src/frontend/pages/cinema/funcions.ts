@@ -5,6 +5,9 @@ import { fitxaPelicula } from './fitxaPelicula';
 import { fitxaSerie } from './fitxaSerie';
 import { formSerie } from './formSerie';
 import { formPelicula } from './formPelicula';
+import { taulaLlistatSeries } from './taulaLlistatSeries';
+import { taulaLlistatActors } from './taulaLlistatActors';
+import { taulaLlistatDirectors } from './taulaLlistatDirectors';
 
 export async function cinema() {
   const url = window.location.href;
@@ -23,8 +26,14 @@ export async function cinema() {
     formSerie(false);
   } else if (slug === 'llistat-pelicules') {
     taulaLlistatPelicules();
+  } else if (slug === 'llistat-series') {
+    taulaLlistatSeries();
+  } else if (slug === 'llistat-actors') {
+    taulaLlistatActors();
+  } else if (slug === 'llistat-directors') {
+    taulaLlistatDirectors();
   } else if (slug === 'fitxa-pelicula') {
-    const url = 'cinema/get/pelicula?peliSlug=';
+    const url = 'cinema/get/pelicula';
     fitxaPelicula(url, idSlug);
   } else if (slug === 'fitxa-serie') {
     const url = 'cinema/get/serie';

@@ -26,6 +26,11 @@
         </div>
 
         <div class="col-md-4">
+        </div>
+
+        <hr>
+
+        <div class="col-md-4">
             <label>Categoria enllaç:</label>
             <select class="form-select" name="sub_tema_id" id="sub_tema_id" value="">
             </select>
@@ -43,8 +48,10 @@
             </select>
         </div>
 
-        <div class="col-md-4">
-        </div>
+        <div id="inputSubTema" class="col-md-12"> </div>
+        <div id="inputIdioma" class="col-md-12"> </div>
+
+        <hr>
 
         <div class="col-12 mt-4">
             <div class="d-flex justify-content-between">

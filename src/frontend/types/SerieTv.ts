@@ -18,9 +18,12 @@ export type SerieTv = {
   img_id: string;
   idioma_ca: string;
   pais_ca: string;
+  country: string;
   nameImg: string;
   genere: string;
   nom: string;
   cognoms: string;
   slugDirector: string;
+  any_defuncio: string;
+  any_naixement: string;
 };

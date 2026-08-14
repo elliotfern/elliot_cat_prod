@@ -23,7 +23,6 @@ function hacerLlamadaAPI(string $url)
     $response = curl_exec($ch);
     $curlErr  = curl_error($ch);
     $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
 
     if ($response === false) {
         die("Error en cURL: {$curlErr}");

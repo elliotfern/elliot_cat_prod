@@ -33,7 +33,6 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
 ]);
 
 $response = curl_exec($ch);
-curl_close($ch);
 
 // Decodificar la respuesta JSON en un array PHP
 $responseData = json_decode($response, true);

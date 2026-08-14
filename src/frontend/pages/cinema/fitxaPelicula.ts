@@ -2,10 +2,10 @@ import { api } from '../../core/api/client';
 import { mapPeliculaToFitxa } from '../../components/mappers/pelicula';
 import { renderFitxa } from '../../utils/renderFitxa';
 
-export async function fitxaPelicula(baseUrl: string, slug: string) {
+export async function fitxaPelicula(baseUrl: string, peliSlug: string) {
   try {
     const pelicula = await api.get<Pelicula>(baseUrl, {
-      slug,
+      peliSlug,
     });
 
     const fitxa = mapPeliculaToFitxa(pelicula);

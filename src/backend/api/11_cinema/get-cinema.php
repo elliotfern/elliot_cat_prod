@@ -19,12 +19,12 @@ header('Content-Type: application/json; charset=utf-8');
 header("Access-Control-Allow-Methods: GET");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 
 // Verificar que el método de la solicitud sea GET
@@ -38,8 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // GET : llistat de pelicules
 // URL: https://elliot.cat/api/cinema/get/pelicules
 if ($slug === "pelicules") {
-
-    AdminMiddleware::handle();
 
     $sql = <<<SQL
                 SELECT c.id, c.pelicula, c.pelicula_ca, c.any, d.nom, d.cognoms, p.pais_ca, g.genere, i.idioma_ca, c.slug, d.slug AS director_slug
@@ -89,8 +87,6 @@ if ($slug === "pelicules") {
     // GET : llistat de sèries tv
     // URL: https://elliot.cat/api/cinema/get/series
 } else if ($slug === "series") {
-
-    AdminMiddleware::handle();
 
     $sql = <<<SQL
                 SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, g.genere, c.pais_ca, tv.slug, d.slug AS slugDirector
@@ -142,7 +138,6 @@ if ($slug === "pelicules") {
 } else if ($slug === "serie") {
 
     $serie = $_GET['slug'];
-    AdminMiddleware::handle();
 
     $sql = <<<SQL
                 SELECT tv.id, tv.name, tv.slug, tv.startYear, tv.endYear, tv.season, tv.chapter, tv.director_id, tv.idioma_id, tv.genere_id, tv.pais_id, tv.img_id, tv.descripcio, tv.dateCreated, tv.dateModified,
@@ -199,7 +194,6 @@ if ($slug === "pelicules") {
 } else if ($slug === "serieIntranet") {
 
     $id = $_GET['id'];
-    AdminMiddleware::handle();
 
     /**
      * =========================
@@ -308,7 +302,6 @@ if ($slug === "pelicules") {
 } else if ($slug === "peliculaIntranet") {
 
     $id = $_GET['id'];
-    AdminMiddleware::handle();
 
     /**
      * =========================
@@ -414,7 +407,6 @@ if ($slug === "pelicules") {
     // URL: https://elliot.cat/api/cinema/get/pelicula?peliSlug=io-capitano
 } else if ($slug === "pelicula") {
 
-    AdminMiddleware::handle();
     $peli = $_GET['peliSlug'];
 
     $sql = <<<SQL
@@ -470,7 +462,6 @@ if ($slug === "pelicules") {
     // URL: "https://elliot.cat/api/cinema/get/actors-serie?serie=id"
 } else if ($slug === "actors-serie") {
     $serie = $_GET['serie'];
-    AdminMiddleware::handle();
 
     $sql = <<<SQL
                 SELECT a.nom, a.cognoms, a.id AS actor_id, sa.role, img.nameImg, sa.id, a.slug
@@ -521,7 +512,6 @@ if ($slug === "pelicules") {
 } elseif ($slug === 'actors-pelicula') {
 
     $peli = $_GET['peli'];
-    AdminMiddleware::handle();
 
     $sql = <<<SQL
                 SELECT a.nom, a.cognoms, a.id AS actor_id, sa.role, img.nameImg, sa.id, a.slug
@@ -571,8 +561,6 @@ if ($slug === "pelicules") {
     // ruta GET => "/api/cinema/get/actors"
 } else if ($slug === "actors") {
 
-    AdminMiddleware::handle();
-
     $sql = <<<SQL
                 SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais_ca, i.nameImg, a.any_naixement, a.any_defuncio, a.slug
                 FROM %s AS a
@@ -593,6 +581,56 @@ if ($slug === "pelicules") {
 
     try {
         $id_grup = '0197b0881a27723c8ca798b4d32a01ee';
+        $id_grup_bin = uuid::toBinary($id_grup);
+        $params = [':grup' => $id_grup_bin];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // 1) Llistat directors
+    // ruta GET => "/api/cinema/get/directors"
+} else if ($slug === "directors") {
+
+    $sql = <<<SQL
+                SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais_ca, i.nameImg, a.any_naixement, a.any_defuncio, a.slug
+                FROM %s AS a
+                INNER JOIN %s g ON a.id = g.persona_id
+                LEFT JOIN %s AS c ON a.pais_autor_id = c.id
+                LEFT JOIN %s AS i ON a.img_id = i.id
+                WHERE g.grup_id = :grup
+                ORDER BY a.cognoms ASC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_PERSONES, $pdo),
+        qi(Tables::DB_PERSONES_GRUPS_RELACIONS, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_IMATGES, $pdo),
+    );
+
+    try {
+        $id_grup = '0197b088-1a27-723c-8ca7-98b4d2fe6c29';
         $id_grup_bin = uuid::toBinary($id_grup);
         $params = [':grup' => $id_grup_bin];
         $result = $db->getData($query, $params);
@@ -667,7 +705,6 @@ if ($slug === "pelicules") {
     // ruta GET => "/api/cinema/get/actor-pelicules?actor=id"
 } else if ($slug === "actor-pelicules") {
     $actor = $_GET['actor'];
-    AdminMiddleware::handle();
 
     $sql = <<<SQL
                 SELECT p.pelicula AS titol, sa.role, p.any AS anyInici, p.slug
@@ -717,7 +754,6 @@ if ($slug === "pelicules") {
 } else if ($slug === "actor-series") {
 
     $actor = $_GET['actor'];
-    AdminMiddleware::handle();
 
     $sql = <<<SQL
                 SELECT s.name AS titol, sa.role, s.startYear AS anyInici, s.endYear AS anyFi, s.slug

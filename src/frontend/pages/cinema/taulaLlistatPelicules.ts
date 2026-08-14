@@ -32,7 +32,7 @@ export async function taulaLlistatPelicules() {
   }
 
   renderDynamicTable({
-    url: `/cinema/get/pelicules`,
+    url: `cinema/get/pelicules`,
     containerId: 'taulaLlistatPelicules',
     columns,
     filterKeys: ['nom', 'cognoms', 'pelicula'],

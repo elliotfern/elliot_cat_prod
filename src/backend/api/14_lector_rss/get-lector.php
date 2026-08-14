@@ -87,7 +87,6 @@ function obtenerContenidoURL($url)
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_USERAGENT, "PHP RSS Reader");
     $data = curl_exec($ch);
-    curl_close($ch);
 
     return $data;
 }

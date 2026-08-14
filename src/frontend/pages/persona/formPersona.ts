@@ -17,17 +17,6 @@ type Ciutat = {
 };
 
 let paisosList: Pais[] = [];
-let ciutatsList: Ciutat[] = [];
-
-async function loadCiutats() {
-  try {
-    ciutatsList = await api.get<Ciutat[]>(`auxiliars/get/ciutats`);
-  } catch (error) {
-    console.error('loadCiutats failed:', error);
-
-    ciutatsList = [];
-  }
-}
 
 async function createCiutat(payload: { ciutat: string; ciutat_ca: string; ciutat_en: string; descripcio: string; pais_id: string }): Promise<Ciutat | null> {
   try {
@@ -49,44 +38,14 @@ async function createCiutat(payload: { ciutat: string; ciutat_ca: string; ciutat
       return null;
     }
 
-    const ciutat: Ciutat = {
+    return {
       id: result.data.id,
       ciutat: result.data.ciutat,
     };
-
-    ciutatsList.push(ciutat);
-
-    return ciutat;
   } catch (error) {
     console.error('createCiutat failed:', error);
 
     return null;
-  }
-}
-
-function populateCiutatSelect(selectId: string, selectedValue: string | null) {
-  const select = document.getElementById(selectId) as HTMLSelectElement | null;
-
-  if (!select) return;
-
-  select.innerHTML = '';
-
-  const empty = document.createElement('option');
-  empty.value = '';
-  empty.textContent = '-- Selecciona ciutat --';
-  select.appendChild(empty);
-
-  for (const ciutat of ciutatsList) {
-    const option = document.createElement('option');
-
-    option.value = String(ciutat.id);
-    option.textContent = ciutat.ciutat;
-
-    if (selectedValue && String(selectedValue) === String(ciutat.id)) {
-      option.selected = true;
-    }
-
-    select.appendChild(option);
   }
 }
 
@@ -184,6 +143,13 @@ function initCreateCiutatUI() {
 
   container.appendChild(formWrapper);
 
+  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran (excepte al textarea)
+  formWrapper.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+      e.preventDefault();
+    }
+  });
+
   const nomInput = formWrapper.querySelector('#newCiutatNom') as HTMLInputElement;
   const caInput = formWrapper.querySelector('#newCiutatCa') as HTMLInputElement;
   const enInput = formWrapper.querySelector('#newCiutatEn') as HTMLInputElement;
@@ -251,12 +217,13 @@ function initCreateCiutatUI() {
       return;
     }
 
-    // Actualitza les opcions dels dos selects (naixement i defunció) sense forçar cap selecció
+    // Refresca els dos selects (naixement i defunció) via auxiliarSelect, preservant
+    // el que ja tinguessin seleccionat i sense forçar la ciutat nova en cap.
     const naixementSelect = document.getElementById('ciutat_naixement_id') as HTMLSelectElement | null;
     const defuncioSelect = document.getElementById('ciutat_defuncio_id') as HTMLSelectElement | null;
 
-    populateCiutatSelect('ciutat_naixement_id', naixementSelect?.value || null);
-    populateCiutatSelect('ciutat_defuncio_id', defuncioSelect?.value || null);
+    await auxiliarSelect(naixementSelect?.value || 0, 'ciutats', 'ciutat_naixement_id', 'ciutat');
+    await auxiliarSelect(defuncioSelect?.value || 0, 'ciutats', 'ciutat_defuncio_id', 'ciutat');
 
     message.innerHTML = `
       <div class="alert alert-success mb-0">
@@ -315,6 +282,8 @@ async function createPais(paisCa: string, paisEn: string): Promise<Pais | null> 
       pais_ca: result.data.pais_ca,
     };
 
+    // Es manté a paisosList perquè el mini-formulari de "crear ciutat" té el seu propi
+    // select de país (no gestionat per Choices) que es construeix a partir d'aquesta llista.
     paisosList.push(pais);
 
     return pais;
@@ -322,32 +291,6 @@ async function createPais(paisCa: string, paisEn: string): Promise<Pais | null> 
     console.error('createPais failed:', error);
 
     return null;
-  }
-}
-
-function populatePaisSelect(selectedValue: string | null) {
-  const select = document.getElementById('pais_autor_id') as HTMLSelectElement | null;
-
-  if (!select) return;
-
-  select.innerHTML = '';
-
-  const empty = document.createElement('option');
-  empty.value = '';
-  empty.textContent = '-- Selecciona país --';
-  select.appendChild(empty);
-
-  for (const pais of paisosList) {
-    const option = document.createElement('option');
-
-    option.value = String(pais.id);
-    option.textContent = pais.pais_ca;
-
-    if (selectedValue && String(selectedValue) === String(pais.id)) {
-      option.selected = true;
-    }
-
-    select.appendChild(option);
   }
 }
 
@@ -408,6 +351,13 @@ function initCreatePaisUI() {
 
   container.appendChild(formWrapper);
 
+  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
+  formWrapper.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  });
+
   const caInput = formWrapper.querySelector('#newPaisCa') as HTMLInputElement;
   const enInput = formWrapper.querySelector('#newPaisEn') as HTMLInputElement;
   const createBtn = formWrapper.querySelector('#createPaisBtn') as HTMLButtonElement;
@@ -456,7 +406,7 @@ function initCreatePaisUI() {
       return;
     }
 
-    populatePaisSelect(pais.id);
+    await auxiliarSelect(pais.id, 'paisos', 'pais_autor_id', 'pais_ca');
 
     message.innerHTML = `
       <div class="alert alert-success mb-0">
@@ -534,11 +484,10 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
   await auxiliarSelect(data.mes_defuncio ?? 0, 'calendariMesos', 'mes_defuncio', 'mes');
 
   await loadPaisos();
-  populatePaisSelect(data.pais_autor_id ? String(data.pais_autor_id) : null);
   initCreatePaisUI();
+  await auxiliarSelect(data.pais_autor_id ?? 0, 'paisos', 'pais_autor_id', 'pais_ca');
 
-  await loadCiutats();
-  populateCiutatSelect('ciutat_naixement_id', data.ciutat_naixement_id ? String(data.ciutat_naixement_id) : null);
-  populateCiutatSelect('ciutat_defuncio_id', data.ciutat_defuncio_id ? String(data.ciutat_defuncio_id) : null);
   initCreateCiutatUI();
+  await auxiliarSelect(data.ciutat_naixement_id ?? 0, 'ciutats', 'ciutat_naixement_id', 'ciutat');
+  await auxiliarSelect(data.ciutat_defuncio_id ?? 0, 'ciutats', 'ciutat_defuncio_id', 'ciutat');
 }
