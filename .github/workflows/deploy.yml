@@ -143,16 +143,18 @@ jobs:
           REMOTE_DIR="/home/epgylzqu/elliot.cat/"
 
           rsync -az --delete \
-            --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
-            --exclude ".git/" \
-            --exclude ".github/" \
-            --exclude "node_modules/" \
-            --exclude ".env" \
-            --exclude ".env.*" \
-            --exclude "var/" \
-            --exclude "*.log" \
-            -e "ssh" \
-            ./ "$REMOTE:$REMOTE_DIR"
+          --info=progress2 \
+          --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
+          --exclude ".git/" \
+          --exclude ".github/" \
+          --exclude "node_modules/" \
+          --exclude ".env" \
+          --exclude ".env.*" \
+          --exclude "var/" \
+          --exclude "*.log" \
+          --exclude "vendor/" \
+          -e "ssh" \
+          ./ "$REMOTE:$REMOTE_DIR"
 
       # 15) Verify deploy
       - name: Verify version on server
@@ -163,4 +165,11 @@ jobs:
 
             echo \"---- dist folder ----\"
             ls -lh /home/epgylzqu/elliot.cat/public/dist/ || true
+          '"
+
+      - name: Install PHP deps on server
+        run: |
+          ssh epgylzqu@87.98.230.129 "bash -lc '
+            cd /home/epgylzqu/elliot.cat/
+            composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
           '"
