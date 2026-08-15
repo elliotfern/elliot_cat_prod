@@ -1,7 +1,15 @@
 <?php
+
+use App\Config\Database;
+use App\Utils\MissatgesAPI;
+use App\Utils\Response;
+
+$db = new Database();
+$pdo = $db->getPdo();
+
 header("Content-Type: application/json");
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('HTTP/1.1 405 Method Not Allowed');
@@ -30,6 +38,23 @@ function generateEncryptedPassword($password, $token)
 // a) Inserir link
 if (isset($_GET['clau'])) {
 
+    // Helpers
+    function requireField(array $data, string $key, array &$errors)
+    {
+        if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+            $errors[$key] = 'required';
+            return null;
+        }
+        return $data[$key];
+    }
+
+    function optionalField(array $data, string $key)
+    {
+        return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
+            ? $data[$key]
+            : null;
+    }
+
     // Cargar el archivo .env
     $token = $_ENV['ENCRYPTATION_TOKEN'] ?? null;
 
@@ -44,66 +69,74 @@ if (isset($_GET['clau'])) {
         exit();
     }
 
-    // Ahora puedes acceder a los datos como un array asociativo
-    $hasError = false; // Inicializamos la variable $hasError como false
+    // Validación
+    $errors = [];
 
-    $servei               = !empty($data['servei']) ? data_input($data['servei']) : ($hasError = true);
-    $usuari         = !empty($data['usuari']) ? data_input($data['usuari']) : ($hasError = true);
-    $tipus        = !empty($data['tipus']) ? data_input($data['tipus']) : ($hasError = true);
-    $web          = !empty($data['web']) ? data_input($data['web']) : ($hasError = false);
-    $notes          = !empty($data['notes']) ? data_input($data['notes']) : ($hasError = false);
-    $password          = !empty($data['password']) ? data_input($data['password']) : ($hasError = true);
-    $clau2f = !empty($data['clau2f']) ? data_input($data['clau2f']) : NULL;
+    $servei = requireField($data, 'servei', $errors);
+    $usuari = requireField($data, 'usuari', $errors);
+    $tipus = requireField($data, 'tipus', $errors);
 
-    if (!$hasError) {
-        $result = generateEncryptedPassword($password, $token);
-        $hashedPassword = $result['encryptedPassword'];
-        $iv = $result['iv'];
+    $web = optionalField($data, 'web');
+    $notes = optionalField($data, 'notes');
+    $password = optionalField($data, 'password');
+    $clau2f = optionalField($data, 'clau2f');
 
-        if ($clau2f !== NULL) {
-            $result2 = generateEncryptedPassword($clau2f, $token);
-            $hashedclau2f = $result2['encryptedPassword'];
-            $iv2f = $result2['iv'];
-        } else {
-            $hashedclau2f = NULL;
-            $iv2f = NULL;
-        }
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, httpCode: 400);
+        exit;
+    }
 
+    $result = generateEncryptedPassword($password, $token);
+    $hashedPassword = $result['encryptedPassword'];
+    $iv = $result['iv'];
 
-        // Asignar valores adicionales
-        $timestamp = date('Y-m-d');
-        $dateCreated = $timestamp;
-
-        global $conn;
-        /** @var PDO $conn */
-        // Construcción dinámica del query dependiendo de si se actualiza la contraseña o no
-        $query = "INSERT INTO db_vault SET servei = :servei, usuari = :usuari, tipus = :tipus, web = :web, notes = :notes, dateCreated = :dateCreated, password = :password, iv = :iv, clau2f = :clau2f, iv2f = :iv2f";
-        $params = [
-            ':servei' => $servei,
-            ':usuari' => $usuari,
-            ':tipus' => $tipus,
-            ':web' => $web,
-            ':notes' => $notes,
-            ':dateCreated' => $dateCreated,
-            ':password' => $hashedPassword,
-            ':iv' => $iv,
-            ':clau2f' => $hashedclau2f,
-            ':iv2f' => $iv2f,
-        ];
-
-        try {
-            $stmt = $conn->prepare($query);
-            $stmt->execute($params);
-
-            echo json_encode(['status' => 'success', 'message' => 'Vault creat correctament']);
-        } catch (PDOException $e) {
-            echo json_encode(['status' => 'error', 'message' => 'Error en l\'actualització de les dades.']);
-        }
+    if ($clau2f !== NULL) {
+        $result2 = generateEncryptedPassword($clau2f, $token);
+        $hashedclau2f = $result2['encryptedPassword'];
+        $iv2f = $result2['iv'];
     } else {
-        $response['status'] = 'error';
+        $hashedclau2f = NULL;
+        $iv2f = NULL;
+    }
 
-        header("Content-Type: application/json");
-        echo json_encode($response);
+    // Asignar valores adicionales
+    $timestamp = date('Y-m-d');
+    $dateCreated = $timestamp;
+
+    // Construcción dinámica del query dependiendo de si se actualiza la contraseña o no
+    $query = "INSERT INTO db_vault SET servei = :servei, usuari = :usuari, tipus = :tipus, web = :web, notes = :notes, dateCreated = :dateCreated, password = :password, iv = :iv, clau2f = :clau2f, iv2f = :iv2f";
+    $params = [
+        ':servei' => $servei,
+        ':usuari' => $usuari,
+        ':tipus' => $tipus,
+        ':web' => $web,
+        ':notes' => $notes,
+        ':dateCreated' => $dateCreated,
+        ':password' => $hashedPassword,
+        ':iv' => $iv,
+        ':clau2f' => $hashedclau2f,
+        ':iv2f' => $iv2f,
+    ];
+
+    try {
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            ['id' => 'id'],
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ],
+            httpCode: 500
+        );
     }
 } else {
     // response output - data error

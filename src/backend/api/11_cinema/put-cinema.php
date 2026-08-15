@@ -231,7 +231,7 @@ if (isset($_GET['pelicula'])) {
     Response::success(
       MissatgesAPI::success('update'),
       ['id' => $idText],
-      200
+      httpCode: 200
     );
   } catch (Throwable $e) {
 

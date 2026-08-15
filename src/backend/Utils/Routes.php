@@ -33,4 +33,9 @@ class Routes
     {
         return new CinemaRoutes();
     }
+
+    public static function vault(): VaultRoutes
+    {
+        return new VaultRoutes();
+    }
 }

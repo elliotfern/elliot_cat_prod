@@ -114,6 +114,10 @@ class Tables
     public const DB_VIATGES_ESPAIS = 'db_viatges_espais';
     public const DB_VIATGES_ESPAIS_TIPUS = 'db_viatges_espais_tipus';
 
+    // VAULT
+    public const DB_VAULT = 'db_vault';
+    public const DB_VAULT_TIPUS = 'db_vault_type';
+
     // Agrega aquí todas las tablas que necesites usar
 
     // Método para obtener todas las tablas (opcional)

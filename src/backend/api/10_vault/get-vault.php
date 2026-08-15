@@ -1,12 +1,16 @@
 <?php
 
+use App\Config\Database;
 use App\Vault\Adapters\Inbound\VaultController;
 use App\Vault\Core\Services\VaultService;
 use App\Vault\Adapters\Outbound\DatabasePasswordRepository;
-use App\Config\DatabaseConnection;
 use App\Infrastructure\Security\Auth\AuthFactory;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
+use App\Utils\Tables;
+
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
@@ -32,7 +36,8 @@ if (isset($_GET['llistat_serveis'])) {
     AuthFactory::admin()->handle();
 
     // Conectar a la base de datos
-    $pdo = DatabaseConnection::getConnection();
+    $db = new Database();
+    $pdo = $db->getPdo();
 
     // Crear el repositorio
     $passwordRepository = new DatabasePasswordRepository($pdo);
@@ -70,10 +75,11 @@ if (isset($_GET['llistat_serveis'])) {
     }
 } elseif (isset($_GET['id']) && is_numeric($_GET['id'])) {
     // Conectar a la base de datos
-    $conn = DatabaseConnection::getConnection();
+    $db = new Database();
+    $pdo = $db->getPdo();
 
     // Crear el repositorio
-    $passwordRepository = new DatabasePasswordRepository($conn);
+    $passwordRepository = new DatabasePasswordRepository($pdo);
 
     // Pasar el repositorio a VaultService
     $vaultService = new VaultService($passwordRepository);
@@ -111,40 +117,58 @@ if (isset($_GET['llistat_serveis'])) {
 } else if (isset($_GET['serveiId'])) {
     $id = $_GET['serveiId'];
 
-    $query = "SELECT v.id, v.servei, v.usuari, v.tipus, v.web, v.notes
-    FROM db_vault AS v
-    WHERE v.id = :id";
+    $db = new Database();
+    $pdo = $db->getPdo();
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $sql = <<<SQL
+                SELECT v.id, v.servei, v.usuari, v.tipus, v.web, v.notes
+                FROM %s AS v
+                WHERE v.id = :id;
+                SQL;
 
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_VAULT, $pdo)
+    );
 
-    // Ejecutar la consulta
-    $stmt->execute();
+    try {
+        $params = [':id' => $id];
+        $result = $db->getData($query, $params, true);
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-
-    // Recopilar los resultados
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-
 
     // Verificar si se ha recibido un parámetro válido
 } else if (isset($_GET['tipusServeis'])) {
+
+    $db = new Database();
+    $pdo = $db->getPdo();
 
     $query = "SELECT v.id, v.tipus
     FROM db_vault_type AS v
     ORDER BY v.tipus";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -166,12 +190,13 @@ if (isset($_GET['llistat_serveis'])) {
 } elseif ((isset($_GET['type']) && $_GET['type'] == 'codigo2f') && (isset($_GET['id2F']))) {
     // Obtener el ID desde el parámetro GET
     $id = $_GET['id2F'];
+
     // Conectar a la base de datos
-    // Conectar a la base de datos
-    $conn = DatabaseConnection::getConnection();
+    $db = new Database();
+    $pdo = $db->getPdo();
 
     // Crear el repositorio
-    $passwordRepository = new DatabasePasswordRepository($conn);
+    $passwordRepository = new DatabasePasswordRepository($pdo);
 
     // Pasar el repositorio a VaultService
     $vaultService = new VaultService($passwordRepository);

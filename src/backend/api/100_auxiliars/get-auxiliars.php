@@ -2354,6 +2354,45 @@ if ($slug === 'directors') {
             500
         );
     }
+} else if ($slug === "tipusServeis") {
+
+    $sql = <<<SQL
+            SELECT v.id, v.tipus
+            FROM %s AS v
+            ORDER BY v.tipus
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_VAULT_TIPUS, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

@@ -5,7 +5,6 @@ use App\Utils\Tables;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Uuid;
-use App\Utils\AdminMiddleware;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;

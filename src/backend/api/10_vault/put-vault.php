@@ -1,7 +1,15 @@
 <?php
+
+use App\Config\Database;
+use App\Utils\MissatgesAPI;
+use App\Utils\Response;
+
+$db = new Database();
+$pdo = $db->getPdo();
+
 header("Content-Type: application/json");
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     header('HTTP/1.1 405 Method Not Allowed');
@@ -30,6 +38,23 @@ function generateEncryptedPassword($password, $token)
 // a) Inserir link
 if (isset($_GET['clau'])) {
 
+    // Helpers
+    function requireField(array $data, string $key, array &$errors)
+    {
+        if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
+            $errors[$key] = 'required';
+            return null;
+        }
+        return $data[$key];
+    }
+
+    function optionalField(array $data, string $key)
+    {
+        return (isset($data[$key]) && $data[$key] !== '' && $data[$key] !== null)
+            ? $data[$key]
+            : null;
+    }
+
     // Cargar el archivo .env
     $token = $_ENV['ENCRYPTATION_TOKEN'] ?? null;
 
@@ -44,24 +69,28 @@ if (isset($_GET['clau'])) {
         exit();
     }
 
-    // Ahora puedes acceder a los datos como un array asociativo
-    $hasError = false; // Inicializamos la variable $hasError como false
+    // Validación
+    $errors = [];
 
-    $servei               = !empty($data['servei']) ? data_input($data['servei']) : ($hasError = true);
-    $usuari         = !empty($data['usuari']) ? data_input($data['usuari']) : ($hasError = true);
-    $tipus        = !empty($data['tipus']) ? data_input($data['tipus']) : ($hasError = true);
-    $web          = !empty($data['web']) ? data_input($data['web']) : ($hasError = false);
-    $notes          = !empty($data['notes']) ? data_input($data['notes']) : ($hasError = false);
-    $id                  = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
+    $id = requireField($data, 'id', $errors);
+    $servei = requireField($data, 'servei', $errors);
+    $usuari = requireField($data, 'usuari', $errors);
+    $tipus = requireField($data, 'tipus', $errors);
 
+    $web = optionalField($data, 'web');
+    $notes = optionalField($data, 'notes');
+    $password = optionalField($data, 'password');
+    $clau2f = optionalField($data, 'clau2f');
+
+    if (!empty($errors)) {
+        Response::error(MissatgesAPI::error('validacio'), $errors, httpCode: 400);
+        exit;
+    }
 
     // Asignar valores adicionales
     $timestamp = date('Y-m-d');
     $dateModified = $timestamp;
 
-
-    global $conn;
-    /** @var PDO $conn */
     // Construcción dinámica del query dependiendo de si se actualiza la contraseña o no
     $query = "UPDATE db_vault SET servei = :servei, usuari = :usuari, tipus = :tipus, web = :web, notes = :notes, dateModified = :dateModified";
     $params = [
@@ -100,12 +129,24 @@ if (isset($_GET['clau'])) {
     $params[':id'] = $id;
 
     try {
-        $stmt = $conn->prepare($query);
+        $stmt = $pdo->prepare($query);
         $stmt->execute($params);
 
-        echo json_encode(['status' => 'success', 'message' => 'Usuari actualitzat correctament']);
+        Response::success(
+            MissatgesAPI::success('update'),
+            ['id' => $id],
+            httpCode: 200
+        );
     } catch (PDOException $e) {
-        echo json_encode(['status' => 'error', 'message' => 'Error en l\'actualització de les dades.']);
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine()
+            ],
+            httpCode: 500
+        );
     }
 } else {
     // response output - data error

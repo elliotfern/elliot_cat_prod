@@ -484,7 +484,7 @@ if ($slug === 'llibre') {
         'sqlState' => $stmt->errorCode(),
         'info' => $stmt->errorInfo(),
       ],
-      500
+      httpCode:500
     );
     exit;
   } catch (\Throwable $e) {
