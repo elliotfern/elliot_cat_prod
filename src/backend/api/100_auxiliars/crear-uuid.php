@@ -7,7 +7,7 @@ use App\Utils\Uuid;
 // ─────────────────────────────────────────────
 // CONFIGURACIÓ: ajusta aquests valors
 // ─────────────────────────────────────────────
-$taula = 'db_vault';       // Nom de la taula a actualitzar
+$taula = 'db_contactes';       // Nom de la taula a actualitzar
 $columnaId = 'id';          // Nom de la columna PK (BINARY(16))
 $columnaFiltre = 'id';      // Columna que fem servir per identificar la fila (ex: alguna PK antiga o rowid)
 // ─────────────────────────────────────────────

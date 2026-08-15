@@ -306,8 +306,24 @@ $routes = [
     ],
 
     // AGENDA CONTACTES
-    '/api/contactes/get' => [
+    '/api/contactes/get/{slug}' => [
         'view' => '../src/backend/api/contactes/get-contactes.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/contactes/post' => [
+        'view' => '../src/backend/api/contactes/post-contactes.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/contactes/put' => [
+        'view' => '../src/backend/api/contactes/put-contactes.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,

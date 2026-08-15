@@ -12,6 +12,8 @@ export interface Contacte {
   tel_2: string;
   tel_3: string;
   id: number;
+  tipus_id: string;
+  pais_id: string;
   tipus: string;
-  country: string;
+  pais_ca: string;
 }

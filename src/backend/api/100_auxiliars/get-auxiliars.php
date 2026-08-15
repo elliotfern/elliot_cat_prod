@@ -2393,6 +2393,45 @@ if ($slug === 'directors') {
             500
         );
     }
+} else if ($slug === "tipusContacte") {
+
+    $sql = <<<SQL
+            SELECT t.id, t.tipus
+            FROM %s AS t
+            ORDER BY t.tipus ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_CONTACTES_TIPUS, $pdo),
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

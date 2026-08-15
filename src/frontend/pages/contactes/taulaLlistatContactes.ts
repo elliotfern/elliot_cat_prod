@@ -49,7 +49,7 @@ export async function taulaLlistatContactes() {
       },
     },
     { header: 'Tipus', field: 'tipus' },
-    { header: 'País', field: 'country' },
+    { header: 'País', field: 'pais_ca' },
     {
       header: 'Data naixement',
       field: 'tema',
@@ -73,7 +73,7 @@ export async function taulaLlistatContactes() {
   }
 
   renderDynamicTable({
-    url: `/contactes/get/?contactes`,
+    url: `contactes/get/llistatContactes`,
     containerId: 'taulaLlistatContactes',
     columns,
     filterKeys: ['nom', 'cognoms'],

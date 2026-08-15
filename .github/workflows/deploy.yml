@@ -143,7 +143,6 @@ jobs:
           REMOTE_DIR="/home/epgylzqu/elliot.cat/"
 
           rsync -az --delete \
-          --info=progress2 \
           --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
           --exclude ".git/" \
           --exclude ".github/" \

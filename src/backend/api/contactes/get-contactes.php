@@ -1,87 +1,128 @@
 <?php
 
+use App\Config\Database;
+use App\Utils\Tables;
+use App\Utils\Response;
+use App\Utils\MissatgesAPI;
+use App\Utils\Uuid;
 
-// 1) Llistat contactes
-// ruta GET => "/api/contactes/get/?type=contactes"
-if (isset($_GET['contactes'])) {
-    global $conn;
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+$db = new Database();
+$pdo = $db->getPdo();
 
-    $query = "SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, t.tipus, p.pais_ca AS country, c.adreca
-            FROM db_contactes AS c
-            LEFT JOIN aux_contactes_tipus AS t ON c.tipus = t.id
-            LEFT JOIN db_geo_paisos AS p ON c.pais = p.id
-            ORDER BY c.cognoms ASC";
+// Siempre JSON
+header('Content-Type: application/json; charset=utf-8');
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
+// Configuración de cabeceras para aceptar JSON y responder JSON
+header("Access-Control-Allow-Methods: GET");
 
-    // Ejecutar la consulta
-    $stmt->execute();
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
+    http_response_code(204);
+    exit;
+}
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
+
+
+// Verificar que el método de la solicitud sea GET
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    header('HTTP/1.1 405 Method Not Allowed');
+    echo json_encode(['error' => 'Method not allowed']);
+    exit();
+}
+
+
+// GET : llistat de contactes
+// URL: https://elliot.cat/api/contactes/get/llistatContactes
+if ($slug === "llistatContactes") {
+
+    $sql = <<<SQL
+                SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, t.tipus, p.pais_ca, c.adreca
+                FROM %s AS c
+                LEFT JOIN %s AS t ON c.tipus_id = t.id
+                LEFT JOIN %s AS p ON c.pais_id = p.id
+                ORDER BY c.cognoms ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_CONTACTES, $pdo),
+        qi(Tables::DB_CONTACTES_TIPUS, $pdo),
+        qi(Tables::DB_PAISOS, $pdo)
+    );
+
+    try {
+        $result = $db->getData($query, [], false);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-
-    // 3) Contacte ID
-    // ruta GET => "/api/contactes/get/?type=contacte&id=1"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'contacte' && isset($_GET['id'])) {
+    // RUTA GET - contacteId
+} else if ($slug === 'contacteId') {
     $id = $_GET['id'];
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, t.id AS tipus_id, t.tipus, c.adreca, p.id AS pais_id, p.pais_ca AS country
-            FROM db_contactes AS c
-            LEFT JOIN aux_contactes_tipus AS t ON c.tipus = t.id
-            LEFT JOIN db_geo_paisos AS p ON c.pais = p.id
-            WHERE c.id = $id"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
 
-    // 4) Llistat tipus de contacte
-    // ruta GET => "/api/contactes/get/?type=tipus-contacte"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'tipus-contacte') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT t.id, t.tipus
-            FROM aux_contactes_tipus AS t
-            ORDER BY t.tipus ASC"
+    $sql = <<<SQL
+                SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, c.pais_id, c.tipus_id, c.adreca,
+                t.tipus, p.pais_ca
+                FROM %s AS c
+                LEFT JOIN %s AS t ON c.tipus_id = t.id
+                LEFT JOIN %s AS p ON c.pais_id = p.id
+                WHERE c.id = :id
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_CONTACTES, $pdo),
+        qi(Tables::DB_CONTACTES_TIPUS, $pdo),
+        qi(Tables::DB_PAISOS, $pdo)
     );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
+
+    try {
+        $params = [':id' => Uuid::toBinary($id)];
+        $result = $db->getData($query, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-    echo json_encode($data);
-    // 5) Llistat paisos
-    // ruta GET => "/api/contactes/get/?type=paisos"
-} elseif (isset($_GET['type']) && $_GET['type'] == 'paisos') {
-    global $conn;
-    $data = array();
-    $stmt = $conn->prepare(
-        "SELECT c.id, c.pais_ca AS country
-            FROM db_geo_paisos AS c
-            ORDER BY c.pais_ca ASC"
-    );
-    $stmt->execute();
-    if ($stmt->rowCount() === 0) echo ('No rows');
-    while ($users = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $data[] = $users;
-    }
-    echo json_encode($data);
 } else {
     // Si 'type', 'id' o 'token' están ausentes o 'type' no es 'user' en la URL
     header('HTTP/1.1 403 Forbidden');

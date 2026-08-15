@@ -118,6 +118,10 @@ class Tables
     public const DB_VAULT = 'db_vault';
     public const DB_VAULT_TIPUS = 'db_vault_type';
 
+    // AGENDA CONTACTES
+    public const DB_CONTACTES = 'db_contactes';
+    public const DB_CONTACTES_TIPUS = 'aux_contactes_tipus';
+
     // Agrega aquí todas las tablas que necesites usar
 
     // Método para obtener todas las tablas (opcional)

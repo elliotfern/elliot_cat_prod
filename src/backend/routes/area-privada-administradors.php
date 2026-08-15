@@ -95,6 +95,8 @@ $routes = [
 
     // 07. Agenda contactes
     APP_GESTIO . $url['contactes'] => route(APP_INTRANET_DIR . APP_CONTACTES_DIR . 'index.php'),
+    APP_GESTIO . $url['contactes'] . '/modifica-contacte/{id}' => route(APP_INTRANET_DIR . APP_CONTACTES_DIR . 'form-contacte.php'),
+    APP_GESTIO . $url['contactes'] . '/nou-contacte' => route(APP_INTRANET_DIR . APP_CONTACTES_DIR . 'form-contacte.php'),
 
     // 08. Biblioteca
     APP_GESTIO . $url['biblioteca'] => route(APP_INTRANET_DIR . APP_BIBLIOTECA_DIR . 'index.php'),

@@ -38,4 +38,9 @@ class Routes
     {
         return new VaultRoutes();
     }
+
+    public static function contactes(): ContacteRoutes
+    {
+        return new ContacteRoutes();
+    }
 }
