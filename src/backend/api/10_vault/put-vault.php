@@ -3,6 +3,7 @@
 use App\Config\Database;
 use App\Utils\MissatgesAPI;
 use App\Utils\Response;
+use App\Utils\Uuid;
 
 $db = new Database();
 $pdo = $db->getPdo();
@@ -63,7 +64,6 @@ if (isset($_GET['clau'])) {
 
     // Verificar si se recibieron datos
     if ($data === null) {
-        // Error al decodificar JSON
         header('HTTP/1.1 400 Bad Request');
         echo json_encode(['error' => 'Error decoding JSON data']);
         exit();
@@ -82,24 +82,40 @@ if (isset($_GET['clau'])) {
     $password = optionalField($data, 'password');
     $clau2f = optionalField($data, 'clau2f');
 
+    // Validar format UUID de id i tipus abans de convertir-los a binari
+    $regexUuid = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
+
+    if ($id !== null && !preg_match($regexUuid, $id)) {
+        $errors['id'] = 'format_invalid';
+    }
+
+    if ($tipus !== null && !preg_match($regexUuid, $tipus)) {
+        $errors['tipus'] = 'format_invalid';
+    }
+
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, httpCode: 400);
         exit;
     }
+
+    // Convertir id i tipus (UUID strings) a binari
+    $idBinari = Uuid::toBinary($id);
+    $tipusIdBinari = Uuid::toBinary($tipus);
 
     // Asignar valores adicionales
     $timestamp = date('Y-m-d');
     $dateModified = $timestamp;
 
     // Construcción dinámica del query dependiendo de si se actualiza la contraseña o no
-    $query = "UPDATE db_vault SET servei = :servei, usuari = :usuari, tipus = :tipus, web = :web, notes = :notes, dateModified = :dateModified";
-    $params = [
-        ':servei' => $servei,
-        ':usuari' => $usuari,
-        ':tipus' => $tipus,
-        ':web' => $web,
-        ':notes' => $notes,
-        ':dateModified' => $dateModified,
+    $query = "UPDATE db_vault SET servei = :servei, usuari = :usuari, tipus_id = :tipus_id, web = :web, notes = :notes, dateModified = :dateModified";
+
+    $binds = [
+        ':servei' => [$servei, PDO::PARAM_STR],
+        ':usuari' => [$usuari, PDO::PARAM_STR],
+        ':tipus_id' => [$tipusIdBinari, PDO::PARAM_LOB],
+        ':web' => [$web, PDO::PARAM_STR],
+        ':notes' => [$notes, PDO::PARAM_STR],
+        ':dateModified' => [$dateModified, PDO::PARAM_STR],
     ];
 
     // Si el password viene lleno, lo incluimos
@@ -110,8 +126,8 @@ if (isset($_GET['clau'])) {
         $iv = $result['iv'];
         $query .= ", password = :password";
         $query .= ", iv = :iv";
-        $params[':password'] = $hashedPassword;
-        $params[':iv'] = $iv;
+        $binds[':password'] = [$hashedPassword, PDO::PARAM_STR];
+        $binds[':iv'] = [$iv, PDO::PARAM_STR];
     }
 
     if (!empty($data['clau2f'])) {
@@ -121,16 +137,21 @@ if (isset($_GET['clau'])) {
         $iv2f = $result2['iv'];
         $query .= ", clau2f = :clau2f";
         $query .= ", iv2f = :iv2f";
-        $params[':clau2f'] = $hashedclau2f;
-        $params[':iv2f'] = $iv2f;
+        $binds[':clau2f'] = [$hashedclau2f, PDO::PARAM_STR];
+        $binds[':iv2f'] = [$iv2f, PDO::PARAM_STR];
     }
 
     $query .= " WHERE id = :id";
-    $params[':id'] = $id;
+    $binds[':id'] = [$idBinari, PDO::PARAM_LOB];
 
     try {
         $stmt = $pdo->prepare($query);
-        $stmt->execute($params);
+
+        foreach ($binds as $param => [$value, $type]) {
+            $stmt->bindValue($param, $value, $type);
+        }
+
+        $stmt->execute();
 
         Response::success(
             MissatgesAPI::success('update'),
@@ -149,9 +170,7 @@ if (isset($_GET['clau'])) {
         );
     }
 } else {
-    // response output - data error
     $response['status'] = 'error';
-
     header("Content-Type: application/json");
     echo json_encode($response);
 }

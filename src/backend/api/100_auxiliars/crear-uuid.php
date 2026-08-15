@@ -1,47 +1,58 @@
 <?php
 
-declare(strict_types=1);
+use App\Config\Database;
+use Ramsey\Uuid\Uuid as Ramsey;
+use App\Utils\Uuid;
 
-use Ramsey\Uuid\Uuid;
+// ─────────────────────────────────────────────
+// CONFIGURACIÓ: ajusta aquests valors
+// ─────────────────────────────────────────────
+$taula = 'db_vault_type';       // Nom de la taula a actualitzar
+$columnaId = 'id';          // Nom de la columna PK (BINARY(16))
+$columnaFiltre = 'id';      // Columna que fem servir per identificar la fila (ex: alguna PK antiga o rowid)
+// ─────────────────────────────────────────────
 
-global $conn;
+$db = new Database(); // O com instanciïs la teva connexió
+$pdo = $db->getPdo();
 
-// Obtener filas
-$stmt = $conn->query('
-    SELECT id_esdeveniment
-    FROM db_agenda_esdeveniments
-');
+try {
+    $pdo->beginTransaction();
 
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // 1. Seleccionar files que necessiten un nou UUID
+    //    (ajusta el WHERE segons el teu cas: id IS NULL, id = '', etc.)
+    $stmtSelect = $pdo->prepare("SELECT `$columnaFiltre` FROM `$taula` WHERE `$columnaId`");
+    $stmtSelect->execute();
+    $files = $stmtSelect->fetchAll(PDO::FETCH_ASSOC);
 
-if (!$rows) {
-    exit("No rows found\n");
-}
+    if (empty($files)) {
+        echo "No hi ha files per actualitzar.\n";
+        $pdo->rollBack();
+        exit(0);
+    }
 
-// Preparar UPDATE
-$upd = $conn->prepare('
-    UPDATE db_agenda_esdeveniments
-    SET id = :id
-    WHERE id_esdeveniment = :id_esdeveniment
-');
-
-foreach ($rows as $row) {
-
-    $uuidBinary = Uuid::uuid7()->getBytes();
-
-    $upd->bindValue(
-        ':id',
-        $uuidBinary,
-        PDO::PARAM_LOB
+    // 2. Preparar la sentència d'UPDATE
+    $stmtUpdate = $pdo->prepare(
+        "UPDATE `$taula` SET `$columnaId` = :nouId WHERE `$columnaFiltre` = :filtre"
     );
 
-    $upd->bindValue(
-        ':id_esdeveniment',
-        (int)$row['id_esdeveniment'],
-        PDO::PARAM_INT
-    );
+    $comptador = 0;
 
-    $upd->execute();
+    foreach ($files as $fila) {
+        $nouUuid = Ramsey::uuid7();
+        $nouUuidBinari = Uuid::toBinary($nouUuid->toString());
+
+        $stmtUpdate->bindValue(':nouId', $nouUuidBinari, PDO::PARAM_LOB);
+        $stmtUpdate->bindValue(':filtre', $fila[$columnaFiltre]);
+        $stmtUpdate->execute();
+
+        $comptador++;
+    }
+
+    $pdo->commit();
+
+    echo "Actualitzades $comptador files amb nou UUID v7.\n";
+} catch (Exception $e) {
+    $pdo->rollBack();
+    echo "Error: " . $e->getMessage() . "\n";
+    exit(1);
 }
-
-echo "Backfill OK\n";

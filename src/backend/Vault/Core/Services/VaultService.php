@@ -22,13 +22,13 @@ class VaultService implements PasswordServiceInterface
     }
 
     // Método que obtiene una contraseña y la desencripta
-    public function getPasswordDesencrypt(int $serviceId): array
+    public function getPasswordDesencrypt(string $serviceId): array
     {
         return $this->passwordRepository->getPasswordDesencrypt($serviceId);
     }
 
     // Método que obtiene una contraseña y la desencripta
-    public function getClau2FDesencrypt(int $serviceId): array
+    public function getClau2FDesencrypt(string $serviceId): array
     {
         return $this->passwordRepository->getClau2FDesencrypt($serviceId);
     }

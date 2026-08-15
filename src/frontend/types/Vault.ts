@@ -3,7 +3,7 @@ export interface Vault {
   servei: string;
   usuari: string;
   password: string;
-  tipus: string;
+  tipus_id: string;
   dateModified: string;
   web: string;
   id: number;

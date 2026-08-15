@@ -2,6 +2,8 @@
 
 namespace App\Vault\Adapters\Outbound;
 
+use App\Config\Database;
+use App\Utils\Uuid;
 use App\Vault\Core\Ports\Out\PasswordRepositoryInterface;
 use PDO;
 
@@ -9,22 +11,31 @@ class DatabasePasswordRepository implements PasswordRepositoryInterface
 {
     private $conn;
 
+
     // Constructor para recibir la conexión PDO
     public function __construct(PDO $conn)
     {
-        $this->conn = $conn;
+
+        $db = new Database();
+        $pdo = $db->getPdo();
+        $this->conn = $pdo;
     }
 
     public function getPasswords(): array
     {
         try {
             $sql = "SELECT v.id, v.servei, v.usuari, t.tipus, v.web, v.dateModified
-            FROM db_vault AS v
-            LEFT JOIN db_vault_type AS t ON v.tipus = t.id
-            ORDER BY v.servei ASC";
+        FROM db_vault AS v
+        LEFT JOIN db_vault_type AS t ON v.tipus_id = t.id
+        ORDER BY v.servei ASC";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute();
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($results as &$row) {
+                $row['id'] = Uuid::toString($row['id']);
+            }
+
             return $results;
         } catch (\PDOException $e) {
             error_log('Error al obtener las contraseñas: ' . $e->getMessage());
@@ -32,14 +43,16 @@ class DatabasePasswordRepository implements PasswordRepositoryInterface
         }
     }
 
-    public function getPasswordDesencrypt(int $serviceId): array
+    public function getPasswordDesencrypt(string $serviceId): array
     {
+        $id_bin = Uuid::toBinary($serviceId);
+
         try {
             $sql = "SELECT v.password, v.iv
             FROM db_vault AS v
             WHERE id = :vaultId";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindParam(':vaultId', $serviceId, PDO::PARAM_INT);
+            $stmt->bindParam(':vaultId', $id_bin, PDO::PARAM_LOB);
             $stmt->execute();
             $data = $stmt->fetch();
 
@@ -60,21 +73,22 @@ class DatabasePasswordRepository implements PasswordRepositoryInterface
                 return ['password' => $decryptedPassword];
             }
 
-            return null;
+            return [];
         } catch (\PDOException $e) {
             error_log('Error al obtener las contraseñas: ' . $e->getMessage());
             return [];
         }
     }
 
-    public function getClau2FDesencrypt(int $serviceId): array
+    public function getClau2FDesencrypt(string $serviceId): array
     {
+        $id_bin = Uuid::toBinary($serviceId);
         try {
             $sql = "SELECT v.clau2f, v.iv2f
             FROM db_vault AS v
             WHERE id = :vaultId";
             $stmt = $this->conn->prepare($sql);
-            $stmt->bindParam(':vaultId', $serviceId, PDO::PARAM_INT);
+            $stmt->bindParam(':vaultId', $id_bin, PDO::PARAM_LOB);
             $stmt->execute();
             $data = $stmt->fetch();
 
@@ -155,7 +169,7 @@ class DatabasePasswordRepository implements PasswordRepositoryInterface
                 return ['code' => $totpCode];
             }
 
-            return null;
+            return [];
         } catch (\PDOException $e) {
             error_log('Error al obtener las contraseñas: ' . $e->getMessage());
             return [];

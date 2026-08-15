@@ -4,7 +4,7 @@ import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 import { API_BASE } from '../../utils/urls';
 
-export async function formVault(isUpdate: boolean, idUuid?: number) {
+export async function formVault(isUpdate: boolean, idUuid?: string) {
   let data: Partial<Vault> = {};
 
   const form = document.getElementById('formVault');
@@ -48,5 +48,5 @@ export async function formVault(isUpdate: boolean, idUuid?: number) {
     });
   }
 
-  await auxiliarSelect(data.tipus ?? '', 'tipusServeis', 'tipus', 'tipus');
+  await auxiliarSelect(data.tipus_id ?? '', 'tipusServeis', 'tipus_id', 'tipus');
 }

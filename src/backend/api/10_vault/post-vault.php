@@ -3,6 +3,8 @@
 use App\Config\Database;
 use App\Utils\MissatgesAPI;
 use App\Utils\Response;
+use App\Utils\Uuid;
+use Ramsey\Uuid\Uuid as Ramsey;
 
 $db = new Database();
 $pdo = $db->getPdo();
@@ -63,7 +65,6 @@ if (isset($_GET['clau'])) {
 
     // Verificar si se recibieron datos
     if ($data === null) {
-        // Error al decodificar JSON
         header('HTTP/1.1 400 Bad Request');
         echo json_encode(['error' => 'Error decoding JSON data']);
         exit();
@@ -80,6 +81,11 @@ if (isset($_GET['clau'])) {
     $notes = optionalField($data, 'notes');
     $password = optionalField($data, 'password');
     $clau2f = optionalField($data, 'clau2f');
+
+    // Validar format UUID de tipus abans de convertir-lo a binari
+    if ($tipus !== null && !preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $tipus)) {
+        $errors['tipus'] = 'format_invalid';
+    }
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('validacio'), $errors, httpCode: 400);
@@ -99,32 +105,38 @@ if (isset($_GET['clau'])) {
         $iv2f = NULL;
     }
 
+    // Generar nou UUID v7 pel id
+    $novaId = Ramsey::uuid7();
+    $idBinari = Uuid::toBinary($novaId->toString());
+
+    // Convertir tipus (UUID string) a binari per tipus_id
+    $tipusIdBinari = Uuid::toBinary($tipus);
+
     // Asignar valores adicionales
     $timestamp = date('Y-m-d');
     $dateCreated = $timestamp;
 
-    // Construcción dinámica del query dependiendo de si se actualiza la contraseña o no
-    $query = "INSERT INTO db_vault SET servei = :servei, usuari = :usuari, tipus = :tipus, web = :web, notes = :notes, dateCreated = :dateCreated, password = :password, iv = :iv, clau2f = :clau2f, iv2f = :iv2f";
-    $params = [
-        ':servei' => $servei,
-        ':usuari' => $usuari,
-        ':tipus' => $tipus,
-        ':web' => $web,
-        ':notes' => $notes,
-        ':dateCreated' => $dateCreated,
-        ':password' => $hashedPassword,
-        ':iv' => $iv,
-        ':clau2f' => $hashedclau2f,
-        ':iv2f' => $iv2f,
-    ];
+    $query = "INSERT INTO db_vault SET id = :id, servei = :servei, usuari = :usuari, tipus_id = :tipus_id, web = :web, notes = :notes, dateCreated = :dateCreated, password = :password, iv = :iv, clau2f = :clau2f, iv2f = :iv2f";
+    $stmt = $pdo->prepare($query);
+
+    $stmt->bindValue(':id', $idBinari, PDO::PARAM_LOB);
+    $stmt->bindValue(':servei', $servei);
+    $stmt->bindValue(':usuari', $usuari);
+    $stmt->bindValue(':tipus_id', $tipusIdBinari, PDO::PARAM_LOB);
+    $stmt->bindValue(':web', $web);
+    $stmt->bindValue(':notes', $notes);
+    $stmt->bindValue(':dateCreated', $dateCreated);
+    $stmt->bindValue(':password', $hashedPassword);
+    $stmt->bindValue(':iv', $iv);
+    $stmt->bindValue(':clau2f', $hashedclau2f);
+    $stmt->bindValue(':iv2f', $iv2f);
 
     try {
-        $stmt = $pdo->prepare($query);
-        $stmt->execute($params);
+        $stmt->execute();
 
         Response::success(
             MissatgesAPI::success('create'),
-            ['id' => 'id'],
+            ['id' => $novaId->toString()],
             httpCode: 200
         );
     } catch (PDOException $e) {
@@ -139,9 +151,7 @@ if (isset($_GET['clau'])) {
         );
     }
 } else {
-    // response output - data error
     $response['status'] = 'error';
-
     header("Content-Type: application/json");
     echo json_encode($response);
 }

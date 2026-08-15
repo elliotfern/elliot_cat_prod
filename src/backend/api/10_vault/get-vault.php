@@ -8,6 +8,7 @@ use App\Infrastructure\Security\Auth\AuthFactory;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Utils\Uuid;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
@@ -73,7 +74,7 @@ if (isset($_GET['llistat_serveis'])) {
         );
         return;
     }
-} elseif (isset($_GET['id']) && is_numeric($_GET['id'])) {
+} else if (isset($_GET['id'])) {
     // Conectar a la base de datos
     $db = new Database();
     $pdo = $db->getPdo();
@@ -87,11 +88,11 @@ if (isset($_GET['llistat_serveis'])) {
     // Pasar el servicio correctamente a VaultController
     $passwordController = new VaultController($vaultService);
 
-    // Obtener el user_id
-    $userId = isset($_GET['id']) ? (int)$_GET['id'] : 1;
+    // Obtener el id del servicio
+    $serviceId = $_GET['id'];
 
     // Llamar al método getPasswords con el ID dinámico
-    $passwords = $passwordController->getPasswordDesencrypt($userId);
+    $passwords = $passwordController->getPasswordDesencrypt($serviceId);
 
     // Verificar que hemos obtenido un array de datos
     header('Content-Type: application/json');
@@ -121,7 +122,7 @@ if (isset($_GET['llistat_serveis'])) {
     $pdo = $db->getPdo();
 
     $sql = <<<SQL
-                SELECT v.id, v.servei, v.usuari, v.tipus, v.web, v.notes
+                SELECT v.id, v.servei, v.usuari, v.tipus_id, v.web, v.notes
                 FROM %s AS v
                 WHERE v.id = :id;
                 SQL;
@@ -132,7 +133,7 @@ if (isset($_GET['llistat_serveis'])) {
     );
 
     try {
-        $params = [':id' => $id];
+        $params = [':id' => Uuid::toBinary($id)];
         $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
@@ -204,11 +205,11 @@ if (isset($_GET['llistat_serveis'])) {
     // Pasar el servicio correctamente a VaultController
     $passwordController = new VaultController($vaultService);
 
-    // Obtener el user_id
-    $userId = isset($_GET['id2F']) ? (int)$_GET['id2F'] : 1;
+    // Obtener el service_id
+    $serviceId = $_GET['id2F'];
 
     // Llamar al método getPasswords con el ID dinámico
-    $passwords = $passwordController->getClau2FDesencrypt($userId);
+    $passwords = $passwordController->getClau2FDesencrypt($serviceId);
 
     // Verificar que hemos obtenido un array de datos
     header('Content-Type: application/json');

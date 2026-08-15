@@ -7,11 +7,6 @@ import { api } from '../../core/api/client';
 
 export async function serveisVaultApi() {
   const isAdmin = await getIsAdmin(); // Comprobar si es admin
-  let gestioUrl: string = '';
-
-  if (isAdmin) {
-    gestioUrl = '/gestio';
-  }
 
   const columns: TaulaDinamica<Vault>[] = [
     {
@@ -40,7 +35,7 @@ export async function serveisVaultApi() {
         </div>
       `,
     },
-    { header: 'Tipus', field: 'tipus' },
+    { header: 'Tipus', field: 'tipus_id' },
     {
       header: 'Data modificació',
       field: 'dateModified',
@@ -56,7 +51,7 @@ export async function serveisVaultApi() {
       header: '',
       field: 'id',
       render: (_: unknown, row: Vault) => `
-        <a href="https://${window.location.host}${gestioUrl}/claus-privades/modifica-vault/${row.id}">
+        <a href="/gestio/claus-privades/modifica-vault/${row.id}">
            <button type="button" class="button btn-petit">Modifica</button></a>`,
     });
 
@@ -64,7 +59,7 @@ export async function serveisVaultApi() {
       header: '',
       field: 'id',
       render: (_: unknown, row: Vault) => `
-        <a href="https://${window.location.host}${gestioUrl}/claus-privades/modifica-vault/${row.id}">
+        <a href="/gestio/claus-privades/modifica-vault/${row.id}">
            <button type="button" class="btn-petit btn-secondari">Elimina</button></a>`,
     });
   }
@@ -74,24 +69,22 @@ export async function serveisVaultApi() {
     containerId: 'taulaLlistatVault',
     columns,
     filterKeys: ['servei'],
-    filterByField: 'tipus',
+    filterByField: 'tipus_id',
   });
 
   document.getElementById('taulaLlistatVault')?.addEventListener('click', (event) => {
     const target = event.target as HTMLElement;
 
-    // Busca si se ha hecho clic en un botón con clase `.show-pass-btn`
     if (target.classList.contains('show-pass-btn')) {
-      const id = parseInt(target.getAttribute('data-id') || '', 10);
-      if (!isNaN(id)) {
+      const id = target.getAttribute('data-id');
+      if (id) {
         showPass(id);
       }
     }
 
-    // Busca si se ha hecho clic en un botón con clase `.show-clau2f-btn`
     if (target.classList.contains('show-clau2f-btn')) {
-      const id = parseInt(target.getAttribute('data-id') || '', 10);
-      if (!isNaN(id)) {
+      const id = target.getAttribute('data-id');
+      if (id) {
         show2FACode(id);
       }
     }
@@ -99,7 +92,7 @@ export async function serveisVaultApi() {
 }
 
 // Función para mostrar/ocultar la contraseña
-async function showPass(id: number): Promise<void> {
+async function showPass(id: string): Promise<void> {
   const inputField = document.getElementById(`passw-${id}`) as HTMLInputElement | null;
 
   if (!inputField) return;
@@ -138,7 +131,7 @@ async function showPass(id: number): Promise<void> {
 }
 
 // Función para mostrar/ocultar el código 2FA
-async function show2FACode(id: number): Promise<void> {
+async function show2FACode(id: string): Promise<void> {
   const inputField = document.getElementById(`clau2f-${id}`) as HTMLInputElement | null;
 
   if (!inputField) {

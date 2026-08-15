@@ -30,7 +30,7 @@ class VaultController
     }
 
     // Método para obtener las contraseñas de un "vault" (bóveda)
-    public function getPasswordDesencrypt(int $serviceId)
+    public function getPasswordDesencrypt(string $serviceId)
     {
         // Llamamos al servicio VaultService para obtener las contraseñas
         $passwords = $this->vaultService->getPasswordDesencrypt($serviceId);
@@ -45,7 +45,7 @@ class VaultController
     }
 
     // Método para obtener las contraseñas de un "vault" (bóveda)
-    public function getClau2FDesencrypt(int $serviceId)
+    public function getClau2FDesencrypt(string $serviceId)
     {
         // Llamamos al servicio VaultService para obtener las contraseñas
         $passwords = $this->vaultService->getClau2FDesencrypt($serviceId);

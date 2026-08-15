@@ -48,7 +48,7 @@
 
         <div class="col-md-4">
             <label>Tipus de servei:</label>
-            <select class="form-select" name="tipus" id="tipus" value="">
+            <select class="form-select" name="tipus_id" id="tipus_id" value="">
             </select>
         </div>
 
