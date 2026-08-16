@@ -43,4 +43,9 @@ class Routes
     {
         return new ContacteRoutes();
     }
+
+    public static function salut(): SalutRoutes
+    {
+        return new SalutRoutes();
+    }
 }

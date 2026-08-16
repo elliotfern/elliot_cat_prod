@@ -590,5 +590,30 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    // SALUT
+    '/api/salut/get/{slug}' => [
+        'view' => '../src/backend/api/25_salut/get-salut.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/salut/post/{slug}' => [
+        'view' => '../src/backend/api/25_salut/post-salut.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/salut/put/{slug}' => [
+        'view' => '../src/backend/api/25_salut/put-salut.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 ];
 return $routes;

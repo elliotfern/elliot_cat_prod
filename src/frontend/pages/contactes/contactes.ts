@@ -1,5 +1,4 @@
 import { getPageType } from '../../utils/urlPath';
-import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { taulaLlistatContactes } from './taulaLlistatContactes';
 import { formContacte } from './formContacte';
 

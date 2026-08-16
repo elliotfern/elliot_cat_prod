@@ -25,6 +25,7 @@ import { agenda } from './pages/agenda/agenda';
 import { projectes } from './pages/projectes/projectes';
 import { initUserAreaButton } from './components/header/userAreaButton';
 import { blog } from './pages/blog/blog';
+import { salut } from './pages/salut/salut';
 
 function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
   if (document.getElementById(id)) {
@@ -128,6 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
     curriculum();
   } else if (pageType[1] === 'agenda') {
     agenda();
+  } else if (pageType[1] === 'salut') {
+    salut();
   } else if (pageType.includes('projectes')) {
     // si es una pantalla que inyecta forms tarde, espera al contenedor
     whenElementExists('taskForm', () => projectes(), 6000);

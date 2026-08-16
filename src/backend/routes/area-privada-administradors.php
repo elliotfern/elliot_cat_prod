@@ -279,6 +279,13 @@ $routes = [
     // Taulell pendents
     APP_GESTIO . $url['taulell_pendents'] . "/legalitzacio-titol" => route(APP_INTRANET_DIR . APP_TAULELL_DIR . 'titol_llicenciatura.php'),
     APP_GESTIO . $url['taulell_pendents'] . "/declaracio-valor-titol" => route(APP_INTRANET_DIR . APP_TAULELL_DIR . 'declaracio_valor_titol.php'),
+
+    // 25. Salut
+    APP_GESTIO . $url['salut'] => route(APP_INTRANET_DIR . APP_SALUT . 'index.php'),
+    APP_GESTIO . $url['salut'] . "/llistat-medicaments" => route(APP_INTRANET_DIR . APP_SALUT . 'llistat-medicaments.php'),
+    APP_GESTIO . $url['salut'] . "/recepta-medicaments-colesterol" => route(APP_INTRANET_DIR . APP_SALUT . 'recepta-medicaments-colesterol.php'),
+    APP_GESTIO . $url['salut'] . "/dades-doctor-trento" => route(APP_INTRANET_DIR . APP_SALUT . 'dades-doctor-trento.php'),
+
 ];
 
 return $routes;
