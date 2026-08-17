@@ -75,7 +75,7 @@ if (isset($_GET['clau'])) {
     $id = requireField($data, 'id', $errors);
     $servei = requireField($data, 'servei', $errors);
     $usuari = requireField($data, 'usuari', $errors);
-    $tipus = requireField($data, 'tipus', $errors);
+    $tipus = requireField($data, 'tipus_id', $errors);
 
     $web = optionalField($data, 'web');
     $notes = optionalField($data, 'notes');
@@ -90,7 +90,7 @@ if (isset($_GET['clau'])) {
     }
 
     if ($tipus !== null && !preg_match($regexUuid, $tipus)) {
-        $errors['tipus'] = 'format_invalid';
+        $errors['tipus_id'] = 'format_invalid';
     }
 
     if (!empty($errors)) {

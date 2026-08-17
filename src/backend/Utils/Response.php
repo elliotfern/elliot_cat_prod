@@ -47,7 +47,11 @@ class Response
         'locale',
         'empresa_localitzacio',
         'logo_empresa',
-        'institucio_localitzacio'
+        'institucio_localitzacio',
+        'idMedicament',
+        'patologia_id',
+        'medicament_id',
+        'facultatiu_id',
     ];
 
     public static function success(

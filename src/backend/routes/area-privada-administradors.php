@@ -283,8 +283,18 @@ $routes = [
     // 25. Salut
     APP_GESTIO . $url['salut'] => route(APP_INTRANET_DIR . APP_SALUT . 'index.php'),
     APP_GESTIO . $url['salut'] . "/llistat-medicaments" => route(APP_INTRANET_DIR . APP_SALUT . 'llistat-medicaments.php'),
-    APP_GESTIO . $url['salut'] . "/recepta-medicaments-colesterol" => route(APP_INTRANET_DIR . APP_SALUT . 'recepta-medicaments-colesterol.php'),
+    APP_GESTIO . $url['salut'] . "/llistat-patologies" => route(APP_INTRANET_DIR . APP_SALUT . 'llistat-patologies.php'),
+    APP_GESTIO . $url['salut'] . "/llistat-facultatius" => route(APP_INTRANET_DIR . APP_SALUT . 'llistat-facultatius.php'),
     APP_GESTIO . $url['salut'] . "/dades-doctor-trento" => route(APP_INTRANET_DIR . APP_SALUT . 'dades-doctor-trento.php'),
+
+    APP_GESTIO . $url['salut'] . "/nou-facultatiu" => route(APP_INTRANET_DIR . APP_SALUT . 'form-facultatiu.php'),
+    APP_GESTIO . $url['salut'] . "/modifica-facultatiu/{id}" => route(APP_INTRANET_DIR . APP_SALUT . 'form-facultatiu.php'),
+
+    APP_GESTIO . $url['salut'] . "/nou-medicament" => route(APP_INTRANET_DIR . APP_SALUT . 'form-medicament.php'),
+    APP_GESTIO . $url['salut'] . "/modifica-medicament/{id}" => route(APP_INTRANET_DIR . APP_SALUT . 'form-medicament.php'),
+
+    APP_GESTIO . $url['salut'] . "/nova-patologia" => route(APP_INTRANET_DIR . APP_SALUT . 'form-patologia.php'),
+    APP_GESTIO . $url['salut'] . "/modifica-patologia/{id}" => route(APP_INTRANET_DIR . APP_SALUT . 'form-patologia.php'),
 
 ];
 

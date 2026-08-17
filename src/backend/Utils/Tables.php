@@ -122,6 +122,13 @@ class Tables
     public const DB_CONTACTES = 'db_contactes';
     public const DB_CONTACTES_TIPUS = 'aux_contactes_tipus';
 
+    // SALUT
+    public const DB_SALUT_PATOLOGIES = 'db_salut_patologies';
+    public const DB_SALUT_MEDICAMENTS = 'db_salut_medicaments';
+    public const DB_SALUT_FACULTATIUS = 'db_salut_facultatius';
+    public const DB_SALUT_PATOLOGIES_MEDICAMENTS = 'db_salut_patologia_medicaments';
+    public const DB_SALUT_RECEPTES = 'db_salut_receptes_sollicituds';
+
     // Agrega aquí todas las tablas que necesites usar
 
     // Método para obtener todas las tablas (opcional)
