@@ -6,7 +6,7 @@
 <div id="barraNavegacioContenidor"></div>
 
 <h1>Ràdio online</h1>
-<h3>Catalunya Música</h3>
+<h3>iCatfm</h3>
 
 <div class="player-radio">
     <div id="logo" class="logo-radio"></div>

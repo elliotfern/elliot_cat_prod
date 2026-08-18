@@ -439,7 +439,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/radio/get' => [
+    '/api/radio/get/{slug}' => [
         'view' => '../src/backend/api/19_radio/get-radio.php',
         'needs_session' => false,
         'header_footer' => false,

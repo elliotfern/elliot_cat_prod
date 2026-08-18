@@ -48,4 +48,9 @@ class Routes
     {
         return new SalutRoutes();
     }
+
+    public static function radio(): RadioRoutes
+    {
+        return new RadioRoutes();
+    }
 }

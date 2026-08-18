@@ -10,6 +10,7 @@ error_log
 # Compilados
 /dist/
 /public/dist/
+/public/img/
 
 # Entorno y configuración local
 .env

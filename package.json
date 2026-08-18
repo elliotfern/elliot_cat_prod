@@ -37,6 +37,7 @@
   "homepage": "https://github.com/elliotfern/elliotfern-intranet#readme",
   "dependencies": {
     "choices.js": "^11.2.3",
+    "hls.js": "^1.7.0",
     "leaflet": "^1.9.4",
     "trix": "^2.1.19"
   }

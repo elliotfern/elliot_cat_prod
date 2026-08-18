@@ -26,6 +26,7 @@ import { projectes } from './pages/projectes/projectes';
 import { initUserAreaButton } from './components/header/userAreaButton';
 import { blog } from './pages/blog/blog';
 import { salut } from './pages/salut/salut';
+import { radio } from './pages/radio/radio';
 
 function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
   if (document.getElementById(id)) {
@@ -131,6 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
     agenda();
   } else if (pageType[1] === 'salut') {
     salut();
+  } else if (pageType[1] === 'radio') {
+    radio();
   } else if (pageType.includes('projectes')) {
     // si es una pantalla que inyecta forms tarde, espera al contenedor
     whenElementExists('taskForm', () => projectes(), 6000);

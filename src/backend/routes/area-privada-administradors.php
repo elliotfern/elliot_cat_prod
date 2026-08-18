@@ -239,7 +239,17 @@ $routes = [
 
     // RADIO ONLINE
     APP_GESTIO . $url['radio'] => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'index.php'),
-    APP_GESTIO . $url['radio'] . '/catmusica' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'catmusica.php'),
+    APP_GESTIO . $url['radio'] . '/rai-radio-3' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'rai-radio-3.php'),
+    APP_GESTIO . $url['radio'] . '/catalunya-musica' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'catmusica.php'),
+    APP_GESTIO . $url['radio'] . '/icatfm' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'icatfm.php'),
+    APP_GESTIO . $url['radio'] . '/catalunya-informacio' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'catinfo.php'),
+    APP_GESTIO . $url['radio'] . '/bbc-4' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'bbc4.php'),
+    APP_GESTIO . $url['radio'] . '/bbc-6' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'bbc6.php'),
+    APP_GESTIO . $url['radio'] . '/france-culture' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'france-culture.php'),
+    APP_GESTIO . $url['radio'] . '/france-inter' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'france-inter.php'),
+    APP_GESTIO . $url['radio'] . '/france-musique' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'france-musique.php'),
+    APP_GESTIO . $url['radio'] . '/radio-municipal-terrassa' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'radiomunicipalterrassa.php'),
+
 
     // CURRICULUM
     APP_GESTIO . $url['curriculum'] => route(APP_INTRANET_DIR . APP_CV_DIR . 'index.php'),
