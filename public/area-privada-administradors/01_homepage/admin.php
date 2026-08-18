@@ -45,6 +45,7 @@ use App\Utils\Url;
             <li><a href="<?php echo Url::intranet('agenda'); ?>">21. Agenda</a></li>
             <li><a href="<?php echo Url::intranet('taulell-pendents'); ?>">22. Taulell temes pendents</a></li>
             <li><a href="<?php echo Url::intranet('salut'); ?>">25. Salut</a></li>
+            <li><a href="<?php echo Url::intranet('dades'); ?>">26. Organització dades</a></li>
         </ul>
     </div>
 

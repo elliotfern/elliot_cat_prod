@@ -53,4 +53,9 @@ class Routes
     {
         return new RadioRoutes();
     }
+
+    public static function dades(): DadesRoutes
+    {
+        return new DadesRoutes();
+    }
 }

@@ -33,6 +33,7 @@ define('APP_CV_DIR', '20_curriculum/');
 define('APP_AGENDA_DIR', '21_agenda/');
 define('APP_TAULELL_DIR', '22_taulell_pendents/');
 define('APP_SALUT', '25_salut/');
+define('APP_DADES', '26_dades/');
 
 // definicio de url
 $url = [
@@ -59,4 +60,5 @@ $url = [
     'agenda' => '/agenda',
     'taulell_pendents' => '/taulell-pendents',
     'salut'           => '/salut',
+    'dades'           => '/dades',
 ];

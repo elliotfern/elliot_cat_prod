@@ -306,6 +306,9 @@ $routes = [
     APP_GESTIO . $url['salut'] . "/nova-patologia" => route(APP_INTRANET_DIR . APP_SALUT . 'form-patologia.php'),
     APP_GESTIO . $url['salut'] . "/modifica-patologia/{id}" => route(APP_INTRANET_DIR . APP_SALUT . 'form-patologia.php'),
 
+    // DIRECTORI DADES
+    APP_GESTIO . $url['dades'] => route(APP_INTRANET_DIR . APP_DADES . 'index.php'),
+
 ];
 
 return $routes;
