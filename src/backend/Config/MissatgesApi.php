@@ -29,6 +29,7 @@ class MissatgesAPI
             'errorEndPoint' => "Aquesta operació no és vàlida.",
             'duplicat' => "Ja existeix un valor a la base de dades amb el mateix nom.",
             'admin' => "Accés no autoritzat (admin requerit)",
+            'error_imatge_not_exists' => "No s'ha pujat cap fitxer o s'ha produit un error en la càrrega",
         ];
         return $messages[$key] ?? $messages['default'];
     }

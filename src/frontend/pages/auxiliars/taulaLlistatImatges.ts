@@ -40,12 +40,12 @@ export async function taulaLlistatImatges() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Imatge) => `<a a id="${row.id}" title="Modifica" href=/gestio/auxiliars/modifica-imatge/${row.id}"><button class="btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Imatge) => `<a a id="${row.id}" title="Modifica" href="/gestio/auxiliars/modifica-imatge/${row.id}"><button class="btn btn-warning btn-sm">Modifica</button></a>`,
     });
   }
 
   renderDynamicTable({
-    url: `/auxiliars/get/llistatCompletImatges`,
+    url: `auxiliars/get/llistatCompletImatges`,
     containerId: 'taulaLlistatImatges',
     columns,
     filterKeys: ['nom'],

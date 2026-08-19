@@ -3,10 +3,10 @@
 <div class="form">
     <div id="titolForm"></div>
 
-    <div class="alert alert-success" id="okMessage" style="display:none">
+    <div class="alert alert-success d-none" id="okMessage">
         <div id="okText"></div>
     </div>
-    <div class="alert alert-danger" id="errMessage" style="display:none">
+    <div class="alert alert-danger d-none" id="errMessage">
         <div id="errText"></div>
     </div>
 

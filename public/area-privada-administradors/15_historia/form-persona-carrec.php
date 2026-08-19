@@ -45,10 +45,10 @@ if ($modificaBtn === 1) {
     }
     ?>
 
-    <div class="alert alert-success" id="missatgeOk" style="display:none" role="alert">
+    <div class="alert alert-success d-none" id="missatgeOk" role="alert">
     </div>
 
-    <div class="alert alert-danger" id="missatgeErr" style="display:none" role="alert">
+    <div class="alert alert-danger d-none" id="missatgeErr" role="alert">
     </div>
 
     <form method="POST" action="" id="formPersonaCarrec" class="row g-3">

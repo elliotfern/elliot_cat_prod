@@ -1,14 +1,10 @@
 <?php
 
-use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
-
-$db = new Database();
-$pdo = $db->getPdo();
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');

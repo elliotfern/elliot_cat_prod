@@ -16,7 +16,7 @@ $pdo = $db->getPdo();
 header('Content-Type: application/json; charset=utf-8');
 
 // CORS
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;

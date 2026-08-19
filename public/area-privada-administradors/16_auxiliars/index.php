@@ -1,5 +1,8 @@
 <?php
 
+use App\Utils\Routes;
+use App\Utils\Button;
+
 /** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
@@ -7,29 +10,27 @@
 
 
 <h1>Taules auxiliars</h1>
+
 <?php if ($viewModel->isAdmin) : ?>
-    <p>
-        <button onclick="window.location.href='<?php echo $url['auxiliars']; ?>/nova-imatge/'" class="button btn-gran btn-secondari">Afegir imatge</button>
+    <div class="d-flex flex-wrap gap-2 my-3">
+        <?= Button::create('Nova imatge', Routes::auxiliars()->nouImatge()) .
+            Button::create('Nova galeria imatges', Routes::auxiliars()->novaGaleriaImatges()) .
+            Button::create('Alta ciutat', Routes::auxiliars()->novaCiutat()) .
+            Button::create('Alta país', Routes::auxiliars()->nouPais()) .
+            Button::create('Alta professió', Routes::auxiliars()->nouGrup())
+        ?>
+    </div>
 
-        <button onclick="window.location.href='<?php echo $url['auxiliars']; ?>/nova-ciutat/'" class="button btn-gran btn-secondari">Afegir ciutat</button>
+    <div class="alert alert-success quadre">
+        <ul class="llistat">
+            <li><a href="<?= Routes::auxiliars()->llistatImatges() ?>">Llistat d'imatges</a></li>
+            <li><a href="<?= Routes::auxiliars()->llistatGaleriesImatges() ?>">Llistat de galeries d'imatges</a></li>
+            <li><a href="<?= Routes::auxiliars()->llistatCiutats() ?>">Llistat de ciutats</a></li>
+            <li><a href="<?= Routes::auxiliars()->llistatPaisos() ?>">Llistat de païsps</a></li>
+            <li><a href="<?= Routes::auxiliars()->llistatProfessions() ?>">Llistat de grups / professions de persones</a></li>
+            <li><a href="<?= Routes::auxiliars()->llistatTemes() ?>">Llistat de temes</a></li>
+            <li><a href="<?= Routes::auxiliars()->llistatSubTemes() ?>">Llistat de subtemes</a></li>
+        </ul>
+    </div>
 
-        <button onclick="window.location.href='<?php echo $url['auxiliars']; ?>/nou-pais/'" class="button btn-gran btn-secondari">Afegir país</button>
-
-        <button onclick="window.location.href='<?php echo $url['auxiliars']; ?>/nou-grup/'" class="button btn-gran btn-secondari">Afegir grup/professió</button>
-
-        <button onclick="window.location.href='<?php echo $url['auxiliars']; ?>/nou-tema/'" class="button btn-gran btn-secondari">Afegir tema</button>
-
-        <button onclick="window.location.href='<?php echo $url['auxiliars']; ?>/nou-subtema/'" class="button btn-gran btn-secondari">Afegir subtema</button>
-    </p>
 <?php endif; ?>
-
-<div class="alert alert-success quadre">
-    <ul class="llistat">
-        <li><a href="<?php echo $url['auxiliars']; ?>/llistat-imatges">Llistat d'imatges</a></li>
-        <li><a href="<?php echo $url['auxiliars']; ?>/llistat-ciutats">Llistat de ciutats</a></li>
-        <li><a href="<?php echo $url['auxiliars']; ?>/llistat-paisos">Llistat de paisos</a></li>
-        <li><a href="<?php echo $url['auxiliars']; ?>/llistat-grups">Llistat de grups / professions de persones</a></li>
-        <li><a href="<?php echo $url['auxiliars']; ?>/llistat-temes">Llistat temes</a></li>
-        <li><a href="<?php echo $url['auxiliars']; ?>/llistat-subtemes">Llistat de subtemes</a></li>
-    </ul>
-</div>

@@ -3,11 +3,11 @@
         <div class="card-body">
             <div class="container">
                 <h3>Registre nou usuari</h3>
-                <div class="alert alert-success" id="missatgeOk" style="display:none" role="alert">
+                <div class="alert alert-success d-none" id="missatgeOk" role="alert">
                     <strong>Alta correcte!</strong>
                 </div>
 
-                <div class="alert alert-danger" id="missatgeErr" style="display:none" role="alert">
+                <div class="alert alert-danger d-none" id="missatgeErr" role="alert">
                     <strong>Error en les dades</strong>
                 </div>
 

@@ -6,11 +6,11 @@
 
   <div id="titolForm" class="mb-4"></div>
 
-  <div class="alert alert-success" id="okMessage" style="display:none" role="alert">
+  <div class="alert alert-success d-none" id="okMessage" role="alert">
     <div id="okText"></div>
   </div>
 
-  <div class="alert alert-danger" id="errMessage" style="display:none" role="alert">
+  <div class="alert alert-danger d-none" id="errMessage" role="alert">
     <div id="errText"></div>
   </div>
 

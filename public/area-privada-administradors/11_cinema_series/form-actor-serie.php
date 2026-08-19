@@ -44,10 +44,10 @@ if ($modificaBtn === 1) {
   }
   ?>
 
-  <div class="alert alert-success" id="missatgeOk" style="display:none">
+  <div class="alert alert-success d-none" id="missatgeOk">
   </div>
 
-  <div class="alert alert-danger" id="missatgeErr" style="display:none;">
+  <div class="alert alert-danger d-none" id="missatgeErr">
   </div>
 
 

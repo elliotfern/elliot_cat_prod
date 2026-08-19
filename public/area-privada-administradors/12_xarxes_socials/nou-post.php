@@ -2,8 +2,8 @@
 
     <div class="form">
         <h2>Publicar a Xarxes socials (Mastodon i Bluesky)</h2>
-        <div class="alert alert-success" id="mensajeExito" style="display:none"></div>
-        <div class="alert alert-danger" id="mensajeErr" style="display:none"></div>
+        <div class="alert alert-success d-none" id="mensajeExito"></div>
+        <div class="alert alert-danger d-none" id="mensajeErr"></div>
 
         <form action="" method="POST" enctype="multipart/form-data" id="blueskyForm">
             <div class="form-espai">

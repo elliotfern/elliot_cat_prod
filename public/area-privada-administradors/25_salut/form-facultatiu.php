@@ -4,11 +4,11 @@
     <h2>Base de dades: Salut</h2>
     <h4 id="titolForm"></h4>
 
-    <div id="okMessage" class="alert alert-success" style="display:none">
+    <div id="okMessage" class="alert alert-success d-none">
         <span id="okText"></span>
     </div>
 
-    <div id="errMessage" class="alert alert-danger" style="display:none">
+    <div id="errMessage" class="alert alert-danger d-none">
         <span id="errText"></span>
     </div>
 

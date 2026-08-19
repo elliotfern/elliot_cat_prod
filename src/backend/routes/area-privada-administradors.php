@@ -189,8 +189,14 @@ $routes = [
 
     // 16. Auxiliars
     APP_GESTIO . $url['auxiliars'] => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'index.php'),
-    APP_GESTIO . $url['auxiliars'] . '/llistat-imatges' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'llistat-imatges.php'),
-    APP_GESTIO . $url['auxiliars'] . '/nova-imatge' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/form-inserir-imatge.php'),
+    APP_GESTIO . $url['auxiliars'] . '/llistat-imatges' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/llistat-imatges.php'),
+    APP_GESTIO . $url['auxiliars'] . '/nova-imatge' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/form-imatge.php'),
+    APP_GESTIO . $url['auxiliars'] . '/modifica-imatge/{id}' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/form-imatge.php'),
+
+    APP_GESTIO . $url['auxiliars'] . '/llistat-galeries-imatges' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/llistat-galeries-imatges.php'),
+    APP_GESTIO . $url['auxiliars'] . '/nova-galeria-imatges' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/form-galeria-imatges.php'),
+    APP_GESTIO . $url['auxiliars'] . '/modifica-galeria-imatges/{id}' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/form-galeria-imatges.php'),
+    APP_GESTIO . $url['auxiliars'] . '/fitxa-galeria-imatges/{id}' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/fitxa-galeria-imatges.php'),
 
     // Auxiliars > ciutats
     APP_GESTIO . $url['auxiliars'] . '/nova-ciutat' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'ciutats/form-ciutat.php'),

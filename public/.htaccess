@@ -9,6 +9,9 @@ RewriteEngine On RewriteBase /
 
 RewriteCond %{REQUEST_FILENAME} -f [OR] RewriteCond %{REQUEST_FILENAME} -d RewriteRule ^ - [L]
 
+RewriteRule ^img/ - [L]
+RewriteRule \.(js|css|png|jpg|jpeg|gif|svg|ico|txt)$ - [L]
+
 # API
 
 RewriteRule ^api/ index.php [QSA,L]

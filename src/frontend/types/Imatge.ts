@@ -1,6 +1,6 @@
 export interface Imatge {
   slug: string;
-  id: number;
+  id: string;
   dateCreated: string;
   nom: string;
   name: string;

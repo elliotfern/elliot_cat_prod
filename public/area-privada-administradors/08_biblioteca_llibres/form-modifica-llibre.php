@@ -4,15 +4,15 @@
   <h2>Base de dades: Biblioteca</h2>
   <h4 id="titolForm"></h4>
 
-  <div id="okMessage" class="alert alert-success" style="display:none">
+  <div id="okMessage" class="alert alert-success d-none">
     <span id="okText"></span>
   </div>
 
-  <div id="errMessage" class="alert alert-danger" style="display:none">
+  <div id="errMessage" class="alert alert-danger d-none">
     <span id="errText"></span>
   </div>
 
-  <div class="progress mt-2" style="display:none" id="uploadProgress">
+  <div class="progress mt-2 d-none" id="uploadProgress">
     <div id="uploadProgressBar" class="progress-bar" style="width:0%">0%</div>
   </div>
 

@@ -3,11 +3,15 @@ import { formSubTema } from '../adreces/formSubTema';
 import { formTema } from '../adreces/formTema';
 import { taulaLlistatSubTemes } from '../adreces/taulaLlistatSubTemes';
 import { taulaLlistatTemes } from '../adreces/taulaLlistatTemes';
+import { fitxaGaleriaImatge } from './fitxaGaleriaImatges';
 import { formCiutat } from './formCiutat';
+import { formGaleriaImatges } from './formGaleriaImatges';
 import { formGrupPersones } from './formGrupPersones';
+import { formImatge } from './formImatge';
 import { formPais } from './formPais';
 import { taulaLlistatGrupsPersones } from './llistatGrup';
 import { taulaLlistatCiutats } from './taulaLlistatCiutats';
+import { taulaLlistatGaleriaImatges } from './taulaLlistatGaleriaImatges';
 import { taulaLlistatImatges } from './taulaLlistatImatges';
 import { taulaLlistatPaisos } from './taulaLlistatPaisos';
 
@@ -18,6 +22,18 @@ export function auxiliars() {
   const id = pageType[3];
   if ([pageType[2]].includes('llistat-imatges')) {
     taulaLlistatImatges();
+  } else if ([pageType[2]].includes('nova-imatge')) {
+    formImatge(false);
+  } else if ([pageType[2]].includes('modifica-imatge')) {
+    formImatge(true, id);
+  } else if ([pageType[2]].includes('nova-galeria-imatges')) {
+    formGaleriaImatges(false);
+  } else if ([pageType[2]].includes('modifica-galeria-imatges')) {
+    formGaleriaImatges(true, id);
+  } else if ([pageType[2]].includes('fitxa-galeria-imatges')) {
+    fitxaGaleriaImatge(id);
+  } else if ([pageType[2]].includes('llistat-galeries-imatges')) {
+    taulaLlistatGaleriaImatges();
   } else if ([pageType[2]].includes('nova-ciutat')) {
     formCiutat(false);
   } else if ([pageType[2]].includes('modifica-ciutat')) {

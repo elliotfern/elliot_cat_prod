@@ -196,7 +196,7 @@ function uploadWithProgress(method: string, url: string, form: HTMLFormElement):
 /**
  * MAIN FUNCTION
  */
-export async function transmissioDadesDB(event: Event, method: string, formId: string, url: string, neteja: boolean = true, successBehavior: SuccessBehavior = 'none', preProcessFormData?: (data: Record<string, unknown>) => Record<string, unknown>): Promise<ApiResponse | void> {
+export async function transmissioDadesDB(event: Event, method: string, formId: string, url: string, neteja: boolean = true, successBehavior: SuccessBehavior = 'none', preProcessFormData?: (data: Record<string, unknown>) => Record<string, unknown>, forceMultipart: boolean = false): Promise<ApiResponse | void> {
   event.preventDefault();
 
   const form = document.getElementById(formId) as HTMLFormElement;
@@ -210,9 +210,16 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
   try {
     const hasFile = form.querySelector('input[type="file"]') !== null;
 
+    const useMultipart = hasFile || forceMultipart;
+
     let response: ApiResponse;
 
-    if (hasFile) {
+    if (useMultipart) {
+      console.log('UPLOAD:', {
+        method,
+        url,
+        hasFile,
+      });
       response = await uploadWithProgress(method, url, form);
     } else {
       let data = formDataToObject(form);
