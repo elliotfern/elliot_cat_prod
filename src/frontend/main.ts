@@ -27,6 +27,7 @@ import { initUserAreaButton } from './components/header/userAreaButton';
 import { blog } from './pages/blog/blog';
 import { salut } from './pages/salut/salut';
 import { radio } from './pages/radio/radio';
+import { galeriaImatgesPublica } from './pages/auxiliars/fitxaGaleriaImatgesPublica';
 
 function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
   if (document.getElementById(id)) {
@@ -162,5 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
     areaPrivadaUsuaris();
   } else if (pageType[1] === 'blog' || pageType[0] === 'blog') {
     blog();
+  } else if (pageType[0] === 'imatges' && pageType[1] === 'galeria') {
+    const id = pageType[2];
+    galeriaImatgesPublica(id);
   }
 });

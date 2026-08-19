@@ -32,6 +32,10 @@ $routes = [
     '/historia' => route_public('./web-publica/historia.php'),
     '/historia/curs/{slug}' => route_public('./web-publica/curs.php'),
     '/historia/article/{slug}' => route_public('./web-publica/article.php'),
+
+    // GALERIA IMATGES
+    '/imatges/galeria/{slug}' => route_public('./web-publica/galeria-imatges.php'),
+
 ];
 
 return $routes;

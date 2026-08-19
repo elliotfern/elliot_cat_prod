@@ -426,6 +426,8 @@ if ($slug === 'imatges') {
     // ============================================================
 
     $nomGaleria = trim($_POST['nom'] ?? '');
+    $publica = isset($_POST['publica']) ? 1 : 0;
+    $slugGaleria = trim($_POST['slug'] ?? '');
     $directori = trim($_POST['directori'] ?? '');
 
     // Normalizar nombre del directorio
@@ -701,6 +703,8 @@ if ($slug === 'imatges') {
         (
             id,
             nom,
+            slug,
+            publica,
             directori,
             alt,
             dateCreated
@@ -709,6 +713,8 @@ if ($slug === 'imatges') {
         (
             :id,
             :nom,
+            :slug,
+            :publica,
             :directori,
             :alt,
             :dateCreated
@@ -727,6 +733,18 @@ if ($slug === 'imatges') {
             ':nom',
             $nomGaleria,
             PDO::PARAM_STR
+        );
+
+        $stmtGallery->bindValue(
+            ':slug',
+            $slugGaleria,
+            PDO::PARAM_STR
+        );
+
+        $stmtGallery->bindValue(
+            ':publica',
+            $publica,
+            PDO::PARAM_INT
         );
 
         $stmtGallery->bindValue(

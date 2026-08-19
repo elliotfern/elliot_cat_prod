@@ -18,6 +18,8 @@ interface GaleriaImatges {
   nom: string;
   directori: string;
   alt: string | null;
+  publica: number;
+  slug: string;
   dateCreated: string | null;
   dateModified: string | null;
   imatges: ImatgeGaleria[];
@@ -35,13 +37,9 @@ const MEDIA_URL = `${DOMAIN_IMG}/img/galeria-imatges`;
 
 export async function formGaleriaImatges(isUpdate: boolean, id?: string): Promise<void> {
   const form = document.getElementById('galeriaImgForm') as HTMLFormElement | null;
-
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
-
   const btnSubmit = document.getElementById('btnForm') as HTMLButtonElement | null;
-
   const btnAfegirImatge = document.getElementById('btnAfegirImatge') as HTMLButtonElement | null;
-
   const imatgesContainer = document.getElementById('imatgesContainer') as HTMLDivElement | null;
 
   if (!form || !divTitol || !btnSubmit || !btnAfegirImatge || !imatgesContainer) {
@@ -80,10 +78,10 @@ export async function formGaleriaImatges(isUpdate: boolean, id?: string): Promis
       // --------------------------------------------------------
 
       const nomInput = document.getElementById('nom') as HTMLInputElement | null;
-
       const directoriInput = document.getElementById('directori') as HTMLInputElement | null;
-
       const altInput = document.getElementById('alt') as HTMLTextAreaElement | null;
+      const slugInput = document.getElementById('slug') as HTMLTextAreaElement | null;
+      const publicaInput = document.getElementById('publica') as HTMLInputElement | null;
 
       if (nomInput) {
         nomInput.value = data.nom;
@@ -96,6 +94,14 @@ export async function formGaleriaImatges(isUpdate: boolean, id?: string): Promis
 
       if (altInput) {
         altInput.value = data.alt ?? '';
+      }
+
+      if (slugInput) {
+        slugInput.value = data.slug ?? '';
+      }
+
+      if (publicaInput) {
+        publicaInput.checked = data.publica === 1;
       }
 
       // --------------------------------------------------------

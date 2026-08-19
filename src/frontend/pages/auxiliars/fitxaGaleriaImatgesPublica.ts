@@ -5,7 +5,6 @@ interface ImatgeGaleria {
   id: string;
   nameImg: string;
   extension: string;
-  typeImg: number;
   nom: string;
   alt: string | null;
   ordre: number;
@@ -14,10 +13,9 @@ interface ImatgeGaleria {
 interface GaleriaImatges {
   id: string;
   nom: string;
+  slug: string;
   directori: string;
   alt: string | null;
-  dateCreated: string | null;
-  dateModified: string | null;
   imatges: ImatgeGaleria[];
 }
 
@@ -28,11 +26,11 @@ interface GaleriaImatges {
 const MEDIA_URL = `${DOMAIN_IMG}/img/galeria-imatges`;
 
 // ============================================================
-// FITXA GALERIA IMATGES
+// GALERIA PÚBLICA
 // ============================================================
 
-export async function fitxaGaleriaImatge(id: string): Promise<void> {
-  const container = document.getElementById('FitxaGaleriaImatges');
+export async function galeriaImatgesPublica(slug: string): Promise<void> {
+  const container = document.getElementById('GaleriaImatges');
 
   if (!container) {
     return;
@@ -45,13 +43,37 @@ export async function fitxaGaleriaImatge(id: string): Promise<void> {
     // OBTENER GALERÍA
     // ==========================================================
 
-    const data = await api.get<GaleriaImatges>('auxiliars/imatges/get/galeriaImatgesId', { id });
+    const data = await api.get<GaleriaImatges>('public/imatges/get/galeriaImatgesId', { slug });
 
     // ==========================================================
     // ORDENAR IMÁGENES
     // ==========================================================
 
     const imatges = [...data.imatges].sort((a, b) => a.ordre - b.ordre);
+
+    // ==========================================================
+    // TÍTULO
+    // ==========================================================
+
+    const titol = document.createElement('div');
+
+    titol.className = 'mb-4';
+
+    titol.innerHTML = `
+      <h3>${escapeHtml(data.nom)}</h3>
+
+      ${
+        data.alt
+          ? `
+            <p class="text-muted">
+              ${escapeHtml(data.alt)}
+            </p>
+          `
+          : ''
+      }
+    `;
+
+    container.appendChild(titol);
 
     // ==========================================================
     // CONTENEDOR GALERÍA
@@ -86,6 +108,8 @@ export async function fitxaGaleriaImatge(id: string): Promise<void> {
     imatges.forEach((imatge) => {
       const imageUrl = `${MEDIA_URL}/` + `${encodeURIComponent(data.directori)}/` + `${encodeURIComponent(imatge.nameImg)}.` + `${encodeURIComponent(imatge.extension)}`;
 
+      const alt = imatge.alt ?? imatge.nom;
+
       const col = document.createElement('div');
 
       col.className = 'col-6 col-md-4 col-lg-3';
@@ -94,17 +118,17 @@ export async function fitxaGaleriaImatge(id: string): Promise<void> {
         <div class="card h-100">
 
           <a
-            href="${imageUrl}"
+            href="${escapeHtmlAttribute(imageUrl)}"
             class="galeria-imatge-link"
             data-bs-toggle="modal"
             data-bs-target="#modalGaleriaImatge"
-            data-image="${imageUrl}"
-            data-alt="${escapeHtmlAttribute(imatge.alt ?? imatge.nom)}"
+            data-image="${escapeHtmlAttribute(imageUrl)}"
+            data-alt="${escapeHtmlAttribute(alt)}"
           >
 
             <img
-              src="${imageUrl}"
-              alt="${escapeHtmlAttribute(imatge.alt ?? imatge.nom)}"
+              src="${escapeHtmlAttribute(imageUrl)}"
+              alt="${escapeHtmlAttribute(alt)}"
               class="card-img-top"
               style="
                 height: 180px;
@@ -122,9 +146,11 @@ export async function fitxaGaleriaImatge(id: string): Promise<void> {
 
             ${
               imatge.alt
-                ? `<p class="card-text small text-muted mb-0">
+                ? `
+                  <p class="card-text small text-muted mb-0">
                     ${escapeHtml(imatge.alt)}
-                  </p>`
+                  </p>
+                `
                 : ''
             }
 
@@ -148,11 +174,9 @@ export async function fitxaGaleriaImatge(id: string): Promise<void> {
     // EVENTOS MODAL
     // ==========================================================
 
-    const modal = document.getElementById('modalGaleriaImatge');
-
     const modalImage = document.getElementById('modalGaleriaImatgeImg') as HTMLImageElement | null;
 
-    if (!modal || !modalImage) {
+    if (!modalImage) {
       return;
     }
 
@@ -182,7 +206,7 @@ export async function fitxaGaleriaImatge(id: string): Promise<void> {
       });
     });
   } catch (error) {
-    console.error('Error obtenint la galeria:', error);
+    console.error('Error obtenint la galeria pública:', error);
 
     container.innerHTML = `
       <div class="alert alert-danger">

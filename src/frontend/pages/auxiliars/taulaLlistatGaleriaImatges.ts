@@ -7,6 +7,8 @@ interface GaleriaImatges {
   id: string;
   nom: string;
   directori: string;
+  slug: string;
+  publica: number;
   alt: string | null;
   dateCreated: string | null;
   dateModified: string | null;
@@ -39,6 +41,34 @@ export async function taulaLlistatGaleriaImatges() {
     {
       header: 'Directori',
       field: 'directori',
+    },
+
+    // ============================================================
+    // PUBLICA
+    // ============================================================
+
+    {
+      header: 'Publica',
+      field: 'publica',
+      render: (_: unknown, row: GaleriaImatges) => {
+        if (row.publica !== 1) {
+          return '';
+        }
+
+        return `
+          <a
+            href="/imatges/galeria/${encodeURIComponent(row.slug)}"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Veure galeria a la web">
+            <button
+              type="button"
+              class="btn btn-success btn-sm">
+              Web
+            </button>
+          </a>
+        `;
+      },
     },
 
     // ============================================================
@@ -106,7 +136,7 @@ export async function taulaLlistatGaleriaImatges() {
     url: 'auxiliars/imatges/get/galeriaImatges',
     containerId: 'taulaLlistatGaleriesImatges',
     columns,
-    filterKeys: ['nom', 'directori', 'alt'],
+    filterKeys: ['nom', 'directori', 'slug', 'alt'],
     filterByField: 'nom',
   });
 }

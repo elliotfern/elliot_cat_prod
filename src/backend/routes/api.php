@@ -174,7 +174,7 @@ $routes = [
     // BD AUXILIARS
     '/api/auxiliars/imatges/get/{slug}' => [
         'view' => '../src/backend/api/100_auxiliars/imatges/get-imatges.php',
-        'needs_session' => false,
+        'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true
@@ -182,7 +182,7 @@ $routes = [
 
     '/api/auxiliars/imatges/post/{slug}' => [
         'view' => '../src/backend/api/100_auxiliars/imatges/post-imatges.php',
-        'needs_session' => false,
+        'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true
@@ -190,7 +190,7 @@ $routes = [
 
     '/api/auxiliars/imatges/put/{slug}' => [
         'view' => '../src/backend/api/100_auxiliars/imatges/put-imatges.php',
-        'needs_session' => false,
+        'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true
@@ -625,6 +625,15 @@ $routes = [
 
     '/api/salut/put/{slug}' => [
         'view' => '../src/backend/api/25_salut/put-salut.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    // API IMATGES -WEB PUBLICA
+    '/api/public/imatges/get/{slug}' => [
+        'view' => '../src/backend/api/100_auxiliars/imatges/get-public-imatges.php',
         'needs_session' => false,
         'header_footer' => false,
         'header_menu_footer' => false,

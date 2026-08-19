@@ -27,9 +27,8 @@
       </h4>
     </div>
 
-
     <!-- Nom de la galeria -->
-    <div class="col-md-6">
+    <div class="col-md-4">
       <label for="nom" class="form-label">
         Nom <span class="text-danger">*</span>
       </label>
@@ -44,7 +43,7 @@
 
 
     <!-- Directori -->
-    <div class="col-md-6">
+    <div class="col-md-4">
       <label for="directori" class="form-label">
         Directori <span class="text-danger">*</span>
       </label>
@@ -61,6 +60,19 @@
       </div>
     </div>
 
+    <!-- Slug galeria -->
+    <div class="col-md-4">
+      <label for="nom" class="form-label">
+        Slug <span class="text-danger">*</span>
+      </label>
+
+      <input
+        type="text"
+        class="form-control"
+        id="slug"
+        name="slug"
+        required>
+    </div>
 
     <!-- Descripció -->
     <div class="col-12">
@@ -73,6 +85,21 @@
         id="alt"
         name="alt"
         rows="4"></textarea>
+    </div>
+
+    <div class="form-check mb-3">
+      <input
+        type="checkbox"
+        class="form-check-input"
+        id="publica"
+        name="publica"
+        value="1">
+
+      <label
+        class="form-check-label"
+        for="publica">
+        Galeria pública
+      </label>
     </div>
 
 

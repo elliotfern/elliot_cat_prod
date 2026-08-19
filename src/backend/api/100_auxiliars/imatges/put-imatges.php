@@ -626,7 +626,8 @@ if ($slug === 'imatges') {
 
     $nomGaleria = trim($_POST['nom'] ?? '');
     $altGaleria = trim($_POST['alt'] ?? '');
-
+    $publica = isset($_POST['publica']) ? 1 : 0;
+    $slugGaleria = trim($_POST['slug'] ?? '');
 
     // ============================================================
     // VALIDAR NOMBRE
@@ -1503,6 +1504,8 @@ if ($slug === 'imatges') {
             SET
                 nom = :nom,
                 alt = :alt,
+                publica = :publica,
+                slug = :slug;
                 dateModified = :dateModified
             WHERE id = :id
         ");
@@ -1528,6 +1531,18 @@ if ($slug === 'imatges') {
             $altGaleria !== ''
                 ? PDO::PARAM_STR
                 : PDO::PARAM_NULL
+        );
+
+        $stmtGallery->bindValue(
+            ':slug',
+            $slugGaleria,
+            PDO::PARAM_STR
+        );
+
+        $stmtGallery->bindValue(
+            ':publica',
+            $publica,
+            PDO::PARAM_INT
         );
 
         $stmtUpdateGallery->bindValue(
