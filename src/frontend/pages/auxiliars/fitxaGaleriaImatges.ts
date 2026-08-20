@@ -9,6 +9,8 @@ interface ImatgeGaleria {
   nom: string;
   alt: string | null;
   ordre: number;
+  any: string | null;
+  dataImatge: string | null;
 }
 
 interface GaleriaImatges {
@@ -16,6 +18,8 @@ interface GaleriaImatges {
   nom: string;
   directori: string;
   alt: string | null;
+  any: string | null;
+  dataImatge: string | null;
   dateCreated: string | null;
   dateModified: string | null;
   imatges: ImatgeGaleria[];
@@ -128,6 +132,17 @@ export async function fitxaGaleriaImatge(id: string): Promise<void> {
                 : ''
             }
 
+             <p class="card-text small text-muted mb-0">
+              ${
+                imatge.dataImatge
+                  ? (() => {
+                      const [year, month, day] = imatge.dataImatge.split(' ')[0].split('-');
+                      return `${day}/${month}/${year}`;
+                    })()
+                  : (imatge.any ?? '')
+              }
+            </p>
+                      
           </div>
 
         </div>

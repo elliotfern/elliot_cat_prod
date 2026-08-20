@@ -29,34 +29,20 @@ $allowedOrigins = [
     'https://elliot.local',
 ];
 
-if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
-    corsAllow($allowedOrigins);
-    http_response_code(204);
+if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
+
+    Response::error(
+        'Mètode no vàlid.',
+        [],
+        httpCode: 405
+    );
+
     exit;
 }
 
 corsAllow($allowedOrigins);
 
 if ($slug === 'imatges') {
-
-    // ============================================================
-    // VERIFICAR MÉTODO
-    // ============================================================
-    //
-    // El formulario utiliza POST + _method=PUT porque necesitamos
-    // multipart/form-data para poder recibir archivos.
-    //
-
-    if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
-
-        Response::error(
-            'Mètode no vàlid.',
-            [],
-            httpCode: 405
-        );
-
-        exit;
-    }
 
     // ============================================================
     // FUNCIONES AUXILIARES
@@ -84,6 +70,12 @@ if ($slug === 'imatges') {
     $type = isset($_POST['typeImg'])
         ? (int) $_POST['typeImg']
         : 0;
+
+    $dataImatge = trim($_POST['dataImatge'] ?? '');
+
+    $any = isset($_POST['any']) && $_POST['any'] !== ''
+        ? (int) $_POST['any']
+        : null;
 
 
     // ============================================================
@@ -128,12 +120,40 @@ if ($slug === 'imatges') {
         18 => 'usuaris-avatar',
         19 => 'web-icones',
         20 => 'logos-empreses',
+        22 => 'galeria-imatges',
     ];
 
     if (!isset($allowed_types[$type])) {
         $errors['typeImg'] = 'invalid_value';
     }
 
+    // ============================================================
+    // VALIDAR ANY
+    // ============================================================
+
+    if ($any !== null && ($any < 1900 || $any > 2040)) {
+
+        $errors['any'] = 'invalid_value';
+    }
+
+    // ============================================================
+    // VALIDAR DATA IMATGE
+    // ============================================================
+
+    if ($dataImatge !== '') {
+
+        $dateTime = DateTime::createFromFormat(
+            'Y-m-d\TH:i',
+            $dataImatge
+        );
+
+        if (
+            $dateTime === false ||
+            $dateTime->format('Y-m-d\TH:i') !== $dataImatge
+        ) {
+            $errors['dataImatge'] = 'invalid_value';
+        }
+    }
 
     // ============================================================
     // SI HAY ERRORES DE VALIDACIÓN
@@ -468,6 +488,8 @@ if ($slug === 'imatges') {
             typeImg = :typeImg,
             alt = :alt,
             nom = :nom,
+            dataImatge = :dataImatge,
+            any = :any,
             dateModified = :dateModified
         WHERE id = :id
     ";
@@ -509,6 +531,24 @@ if ($slug === 'imatges') {
             ':nom',
             $nom,
             PDO::PARAM_STR
+        );
+
+        $stmt->bindValue(
+            ':dataImatge',
+            $dataImatge !== ''
+                ? str_replace('T', ' ', $dataImatge) . ':00'
+                : null,
+            $dataImatge !== ''
+                ? PDO::PARAM_STR
+                : PDO::PARAM_NULL
+        );
+
+        $stmt->bindValue(
+            ':any',
+            $any,
+            $any !== null
+                ? PDO::PARAM_INT
+                : PDO::PARAM_NULL
         );
 
         $stmt->bindValue(
@@ -933,6 +973,8 @@ if ($slug === 'imatges') {
                 typeImg,
                 nom,
                 alt,
+                dataImatge,
+                any,
                 dateCreated
             )
             VALUES
@@ -943,6 +985,8 @@ if ($slug === 'imatges') {
                 :typeImg,
                 :nom,
                 :alt,
+                :dataImatge,
+                :any,
                 :dateCreated
             )
         ");
@@ -979,6 +1023,8 @@ if ($slug === 'imatges') {
             SET
                 nom = :nom,
                 alt = :alt,
+                dataImatge = :dataImatge,
+                any = :any,
                 dateModified = :dateModified
             WHERE id = :id
         ");
@@ -1021,6 +1067,12 @@ if ($slug === 'imatges') {
             $nomImatge = trim($imageData['nom'] ?? '');
             $altImatge = trim($imageData['alt'] ?? '');
 
+            $dataImatge = trim($imageData['dataImatge'] ?? '');
+
+            $any = isset($imageData['any']) && $imageData['any'] !== ''
+                ? (int) $imageData['any']
+                : null;
+
 
             // ====================================================
             // VALIDAR NOMBRE
@@ -1035,6 +1087,41 @@ if ($slug === 'imatges') {
                 );
             }
 
+            // ====================================================
+            // VALIDAR ANY
+            // ====================================================
+
+            if ($any !== null && ($any < 1900 || $any > 2040)) {
+
+                throw new RuntimeException(
+                    'El año de la imagen número '
+                        . ($index + 1)
+                        . ' no es válido.'
+                );
+            }
+
+            // ====================================================
+            // VALIDAR DATAIMATGE
+            // ====================================================
+
+            if ($dataImatge !== '') {
+
+                $dateTime = DateTime::createFromFormat(
+                    'Y-m-d\TH:i',
+                    $dataImatge
+                );
+
+                if (
+                    $dateTime === false ||
+                    $dateTime->format('Y-m-d\TH:i') !== $dataImatge
+                ) {
+                    throw new RuntimeException(
+                        'La fecha de la imagen número '
+                            . ($index + 1)
+                            . ' no es válida.'
+                    );
+                }
+            }
 
             // ====================================================
             // IMAGEN EXISTENTE
@@ -1090,6 +1177,33 @@ if ($slug === 'imatges') {
                     );
                 }
 
+                // Actualizar orden
+                $stmtUpdateOrder = $pdo->prepare("
+                    UPDATE db_img_galeries_img
+                    SET ordre = :ordre
+                    WHERE galeria_id = :galeria_id
+                    AND imatge_id = :imatge_id
+                ");
+
+                $stmtUpdateOrder->bindValue(
+                    ':galeria_id',
+                    $galleryId,
+                    PDO::PARAM_LOB
+                );
+
+                $stmtUpdateOrder->bindValue(
+                    ':imatge_id',
+                    $imageId,
+                    PDO::PARAM_LOB
+                );
+
+                $stmtUpdateOrder->bindValue(
+                    ':ordre',
+                    $index + 1,
+                    PDO::PARAM_INT
+                );
+
+                $stmtUpdateOrder->execute();
 
                 // ------------------------------------------------
                 // Actualizar imagen
@@ -1114,6 +1228,24 @@ if ($slug === 'imatges') {
                         : null,
                     $altImatge !== ''
                         ? PDO::PARAM_STR
+                        : PDO::PARAM_NULL
+                );
+
+                $stmtUpdateImage->bindValue(
+                    ':dataImatge',
+                    $dataImatge !== ''
+                        ? str_replace('T', ' ', $dataImatge) . ':00'
+                        : null,
+                    $dataImatge !== ''
+                        ? PDO::PARAM_STR
+                        : PDO::PARAM_NULL
+                );
+
+                $stmtUpdateImage->bindValue(
+                    ':any',
+                    $any,
+                    $any !== null
+                        ? PDO::PARAM_INT
                         : PDO::PARAM_NULL
                 );
 
@@ -1450,6 +1582,24 @@ if ($slug === 'imatges') {
             );
 
             $stmtInsertImage->bindValue(
+                ':dataImatge',
+                $dataImatge !== ''
+                    ? str_replace('T', ' ', $dataImatge) . ':00'
+                    : null,
+                $dataImatge !== ''
+                    ? PDO::PARAM_STR
+                    : PDO::PARAM_NULL
+            );
+
+            $stmtInsertImage->bindValue(
+                ':any',
+                $any,
+                $any !== null
+                    ? PDO::PARAM_INT
+                    : PDO::PARAM_NULL
+            );
+
+            $stmtInsertImage->bindValue(
                 ':dateCreated',
                 $dateModified,
                 PDO::PARAM_STR
@@ -1505,7 +1655,7 @@ if ($slug === 'imatges') {
                 nom = :nom,
                 alt = :alt,
                 publica = :publica,
-                slug = :slug;
+                slug = :slug,
                 dateModified = :dateModified
             WHERE id = :id
         ");
@@ -1533,13 +1683,13 @@ if ($slug === 'imatges') {
                 : PDO::PARAM_NULL
         );
 
-        $stmtGallery->bindValue(
+        $stmtUpdateGallery->bindValue(
             ':slug',
             $slugGaleria,
             PDO::PARAM_STR
         );
 
-        $stmtGallery->bindValue(
+        $stmtUpdateGallery->bindValue(
             ':publica',
             $publica,
             PDO::PARAM_INT

@@ -192,6 +192,7 @@ $routes = [
     APP_GESTIO . $url['auxiliars'] . '/llistat-imatges' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/llistat-imatges.php'),
     APP_GESTIO . $url['auxiliars'] . '/nova-imatge' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/form-imatge.php'),
     APP_GESTIO . $url['auxiliars'] . '/modifica-imatge/{id}' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/form-imatge.php'),
+    APP_GESTIO . $url['auxiliars'] . '/fitxa-imatge/{id}' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/fitxa-imatge.php'),
 
     APP_GESTIO . $url['auxiliars'] . '/llistat-galeries-imatges' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/llistat-galeries-imatges.php'),
     APP_GESTIO . $url['auxiliars'] . '/nova-galeria-imatges' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/form-galeria-imatges.php'),

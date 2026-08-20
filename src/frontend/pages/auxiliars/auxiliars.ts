@@ -4,6 +4,7 @@ import { formTema } from '../adreces/formTema';
 import { taulaLlistatSubTemes } from '../adreces/taulaLlistatSubTemes';
 import { taulaLlistatTemes } from '../adreces/taulaLlistatTemes';
 import { fitxaGaleriaImatge } from './fitxaGaleriaImatges';
+import { fitxaImatge } from './fitxaImatge';
 import { formCiutat } from './formCiutat';
 import { formGaleriaImatges } from './formGaleriaImatges';
 import { formGrupPersones } from './formGrupPersones';
@@ -34,6 +35,8 @@ export function auxiliars() {
     fitxaGaleriaImatge(id);
   } else if ([pageType[2]].includes('llistat-galeries-imatges')) {
     taulaLlistatGaleriaImatges();
+  } else if ([pageType[2]].includes('fitxa-imatge')) {
+    fitxaImatge(id);
   } else if ([pageType[2]].includes('nova-ciutat')) {
     formCiutat(false);
   } else if ([pageType[2]].includes('modifica-ciutat')) {

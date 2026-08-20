@@ -151,7 +151,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   paginationNav.setAttribute('aria-label', 'Paginació');
 
   const pagination = document.createElement('ul');
-  pagination.className = 'pagination justify-content-center mt-3';
+  pagination.className = 'pagination justify-content-center flex-wrap mt-3';
 
   paginationNav.appendChild(pagination);
 

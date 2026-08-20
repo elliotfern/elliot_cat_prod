@@ -11,6 +11,8 @@ interface ImatgeGaleria {
   nom: string;
   alt: string | null;
   ordre: number;
+  dataImatge: string | null;
+  any: number | null;
 }
 
 interface GaleriaImatges {
@@ -306,6 +308,58 @@ function crearBloqueImatgeExistente(container: HTMLDivElement, imatge: ImatgeGal
 
         </div>
 
+                <hr>
+
+        <!-- ================================================== -->
+        <!-- DATA IMATGE -->
+        <!-- ================================================== -->
+
+        <div class="col-md-4">
+
+          <label
+            for="imatge-${index}-dataImatge"
+            class="form-label">
+
+            Data imatge (automàtic)
+
+          </label>
+
+          <input
+            type="datetime-local"
+            class="form-control"
+            id="imatge-${index}-dataImatge"
+            name="imatges[${index}][dataImatge]"
+            value="${formatDatetimeLocal(imatge.dataImatge)}">
+
+        </div>
+
+        <!-- ================================================== -->
+        <!-- ANY -->
+        <!-- ================================================== -->
+
+        <div class="col-md-4">
+
+          <label
+            for="imatge-${index}-any"
+            class="form-label">
+
+            Any (opcional)
+
+          </label>
+
+          <input
+            type="number"
+            class="form-control"
+            id="imatge-${index}-any"
+            name="imatges[${index}][any]"
+            value="${imatge.any ?? ''}"
+            min="1900"
+            max="2040">
+
+        </div>
+
+        <hr>
+
 
       </div>
 
@@ -434,6 +488,56 @@ function crearBloqueImatge(container: HTMLDivElement): void {
 
         </div>
 
+                <hr>
+
+        <!-- ================================================== -->
+        <!-- DATA IMATGE -->
+        <!-- ================================================== -->
+
+        <div class="col-md-4">
+
+          <label
+            for="imatge-${index}-dataImatge"
+            class="form-label">
+
+            Data imatge (automàtic)
+
+          </label>
+
+          <input
+            type="datetime-local"
+            class="form-control"
+            id="imatge-${index}-dataImatge"
+            name="imatges[${index}][dataImatge]">
+
+        </div>
+
+        <!-- ================================================== -->
+        <!-- ANY -->
+        <!-- ================================================== -->
+
+        <div class="col-md-4">
+
+          <label
+            for="imatge-${index}-any"
+            class="form-label">
+
+            Any (opcional)
+
+          </label>
+
+          <input
+            type="number"
+            class="form-control"
+            id="imatge-${index}-any"
+            name="imatges[${index}][any]"
+            min="1900"
+            max="2040">
+
+        </div>
+
+        <hr>
+
 
       </div>
 
@@ -540,4 +644,12 @@ function escapeHtml(value: string): string {
 
 function escapeHtmlAttribute(value: string): string {
   return escapeHtml(value);
+}
+
+function formatDatetimeLocal(value: string | null): string {
+  if (!value) {
+    return '';
+  }
+
+  return value.replace(' ', 'T').slice(0, 16);
 }

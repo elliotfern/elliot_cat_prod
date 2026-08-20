@@ -62,6 +62,42 @@
       </select>
     </div>
 
+    <!--  -->
+    <div class="col-md-4">
+    </div>
+
+    <hr>
+
+    <!-- Data foto -->
+    <div class="col-md-4">
+      <label for="dataImatge" class="form-label">
+        Data imatge (automàtic)
+      </label>
+
+      <input
+        type="datetime-local"
+        class="form-control"
+        id="dataImatge"
+        name="dataImatge">
+    </div>
+
+    <!-- Any foto -->
+    <div class="col-md-4">
+      <label for="any" class="form-label">
+        Any (opcional)
+      </label>
+
+      <input
+        type="number"
+        class="form-control"
+        id="any"
+        name="any"
+        min="1900"
+        max="2040">
+    </div>
+
+    <hr>
+
     <!-- Descripció -->
     <div class="col-12">
       <label for="alt" class="form-label">

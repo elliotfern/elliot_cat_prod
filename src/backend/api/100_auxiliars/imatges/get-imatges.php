@@ -42,7 +42,7 @@ if ($slug === 'imatgeId') {
     $id = $_GET['id'] ?? null;
 
     $sql = <<<SQL
-            SELECT i.id, i.nameImg, i.extension, i.typeImg, i.nom, i.alt, i.dateCreated, i.dateModified
+            SELECT i.id, i.nameImg, i.extension, i.typeImg, i.nom, i.alt, i.dateCreated, i.dateModified, i.any, i.dataImatge
             FROM %s i
             WHERE i.id = :id
             SQL;
@@ -151,10 +151,11 @@ if ($slug === 'imatgeId') {
                     i.typeImg,
                     i.nom,
                     i.alt,
+                    i.any, 
+                    i.dataImatge,
                     gi.ordre
                 FROM %s gi
-                INNER JOIN %s i
-                    ON i.id = gi.imatge_id
+                INNER JOIN %s i ON i.id = gi.imatge_id
                 WHERE gi.galeria_id = :galeria_id
                 ORDER BY gi.ordre ASC
                 SQL;

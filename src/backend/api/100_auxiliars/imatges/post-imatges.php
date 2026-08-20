@@ -59,14 +59,13 @@ if ($slug === 'imatges') {
         empty($_FILES['fileToUpload']) ||
         $_FILES['fileToUpload']['error'] !== UPLOAD_ERR_OK
     ) {
-        $errors = [
-            'File error'
-        ];
 
         Response::error(
             MissatgesAPI::error('error_imatge_not_exists'),
-            $errors,
-            400
+            [
+                'fileToUpload' => 'No se ha recibido correctamente el archivo.'
+            ],
+            httpCode: 400
         );
 
         exit;
@@ -80,9 +79,11 @@ if ($slug === 'imatges') {
     $nom = trim($_POST['nom'] ?? '');
     $alt = trim($_POST['alt'] ?? '');
 
+    // Año opcional
+    $any = trim($_POST['any'] ?? '');
 
-    // El nombre es obligatorio
     if ($nom === '') {
+
         Response::error(
             'El nom és obligatori.',
             [
@@ -96,12 +97,42 @@ if ($slug === 'imatges') {
 
 
     // ============================================================
+    // VALIDAR AÑO
+    // ============================================================
+
+    $anyValue = null;
+
+    if ($any !== '') {
+
+        if (
+            !ctype_digit($any) ||
+            (int) $any < 1000 ||
+            (int) $any > 9999
+        ) {
+
+            Response::error(
+                'L\'any no és vàlid.',
+                [
+                    'any' => 'L\'any ha de ser un valor entre 1000 i 9999.'
+                ],
+                httpCode: 400
+            );
+
+            exit;
+        }
+
+        $anyValue = (int) $any;
+    }
+
+
+    // ============================================================
     // CONFIGURACIÓN DE RUTAS
     // ============================================================
 
     $servidorMedia = $_ENV['MEDIA_LOCAL_PATH'] ?? null;
 
     if (!$servidorMedia) {
+
         Response::error(
             MissatgesAPI::error('internal_error'),
             [
@@ -140,9 +171,11 @@ if ($slug === 'imatges') {
         18 => 'usuaris-avatar',
         19 => 'web-icones',
         20 => 'logos-empreses',
+        22 => 'galeria-imatges',
     ];
 
     if (!isset($allowed_types[$type])) {
+
         Response::error(
             'Tipus d\'imatge no vàlid.',
             [
@@ -167,14 +200,12 @@ if ($slug === 'imatges') {
 
         if (!mkdir($target_dir, 0777, true)) {
 
-            $errors = [
-                $target_dir
-            ];
-
             Response::error(
                 MissatgesAPI::error('No se pudo crear el directorio.'),
-                $errors,
-                500
+                [
+                    $target_dir
+                ],
+                httpCode: 500
             );
 
             exit;
@@ -182,19 +213,20 @@ if ($slug === 'imatges') {
     }
 
 
-    // Verificar permisos de escritura
-    if (!is_writable($target_dir)) {
+    // ============================================================
+    // VERIFICAR PERMISOS
+    // ============================================================
 
-        $errors = [
-            $target_dir
-        ];
+    if (!is_writable($target_dir)) {
 
         Response::error(
             MissatgesAPI::error(
                 'El directorio no tiene permisos de escritura.'
             ),
-            $errors,
-            500
+            [
+                $target_dir
+            ],
+            httpCode: 500
         );
 
         exit;
@@ -202,21 +234,27 @@ if ($slug === 'imatges') {
 
 
     // ============================================================
-    // VALIDAR ARCHIVO
+    // ARCHIVO
     // ============================================================
 
     $file = $_FILES['fileToUpload'];
 
-    $max_file_size = 2 * 1024 * 1024; // 2 MB
+    $max_file_size = 10 * 1024 * 1024;
 
     $finfo = new finfo(FILEINFO_MIME_TYPE);
 
     $mimeType = $finfo->file($file['tmp_name']);
+    $maxWidth = 2000;
+    $maxHeight = 2000;
 
+    // ============================================================
+    // TIPOS MIME PERMITIDOS
+    // ============================================================
+
+    // GIF eliminado intencionadamente.
     $allowed_mime_types = [
         'image/jpeg' => 'jpg',
         'image/png'  => 'png',
-        'image/gif'  => 'gif',
     ];
 
     if (
@@ -224,19 +262,54 @@ if ($slug === 'imatges') {
         !isset($allowed_mime_types[$mimeType])
     ) {
 
-        $errors = [
-            'File error'
-        ];
-
         Response::error(
             MissatgesAPI::error(
                 'El archivo es demasiado grande o no es un tipo de imagen permitido.'
             ),
-            $errors,
-            400
+            [
+                'fileToUpload' => 'Solo se permiten imágenes JPEG y PNG de máximo 10 MB.'
+            ],
+            httpCode: 400
         );
 
         exit;
+    }
+
+
+    // ============================================================
+    // OBTENER FECHA EXIF
+    // ============================================================
+
+    $dataImatge = null;
+
+    if (
+        $mimeType === 'image/jpeg' &&
+        function_exists('exif_read_data')
+    ) {
+
+        $exif = @exif_read_data(
+            $file['tmp_name'],
+            'EXIF',
+            true
+        );
+
+        if (
+            isset($exif['EXIF']['DateTimeOriginal']) &&
+            is_string($exif['EXIF']['DateTimeOriginal'])
+        ) {
+
+            $dateOriginal = DateTime::createFromFormat(
+                'Y:m:d H:i:s',
+                $exif['EXIF']['DateTimeOriginal']
+            );
+
+            if ($dateOriginal !== false) {
+
+                $dataImatge = $dateOriginal->format(
+                    'Y-m-d H:i:s'
+                );
+            }
+        }
     }
 
 
@@ -248,31 +321,251 @@ if ($slug === 'imatges') {
 
     $nameImg = bin2hex(random_bytes(16));
 
-    $uniqueName = $nameImg . '.' . $extension;
-
-    $targetFile = $target_dir . $uniqueName;
+    $targetFile = $target_dir
+        . $nameImg
+        . '.'
+        . $extension;
 
 
     // ============================================================
-    // MOVER ARCHIVO AL SERVIDOR
+    // PROCESAR, REDIMENSIONAR Y OPTIMIZAR IMAGEN
     // ============================================================
 
-    if (!move_uploaded_file($file['tmp_name'], $targetFile)) {
+    switch ($mimeType) {
 
-        $errors = [
-            'File error'
-        ];
+        // --------------------------------------------------------
+        // JPEG
+        // --------------------------------------------------------
+
+        case 'image/jpeg':
+
+            $sourceImage = imagecreatefromjpeg($file['tmp_name']);
+
+            if ($sourceImage === false) {
+
+                Response::error(
+                    MissatgesAPI::error('internal_error'),
+                    [
+                        'message' => 'No se pudo procesar la imagen JPEG.'
+                    ],
+                    httpCode: 400
+                );
+
+                exit;
+            }
+
+            break;
+
+
+        // --------------------------------------------------------
+        // PNG
+        // --------------------------------------------------------
+
+        case 'image/png':
+
+            $sourceImage = imagecreatefrompng($file['tmp_name']);
+
+            if ($sourceImage === false) {
+
+                Response::error(
+                    MissatgesAPI::error('internal_error'),
+                    [
+                        'message' => 'No se pudo procesar la imagen PNG.'
+                    ],
+                    httpCode: 400
+                );
+
+                exit;
+            }
+
+            // Mantener transparencia
+            imagealphablending(
+                $sourceImage,
+                false
+            );
+
+            imagesavealpha(
+                $sourceImage,
+                true
+            );
+
+            break;
+
+
+        default:
+
+            Response::error(
+                MissatgesAPI::error('internal_error'),
+                [
+                    'message' => 'Formato de imagen no permitido.'
+                ],
+                httpCode: 400
+            );
+
+            exit;
+    }
+
+
+    // ============================================================
+    // DIMENSIONES ORIGINALES
+    // ============================================================
+
+    $originalWidth = imagesx($sourceImage);
+    $originalHeight = imagesy($sourceImage);
+
+
+    // ============================================================
+    // CALCULAR NUEVAS DIMENSIONES
+    // ============================================================
+
+    $newWidth = $originalWidth;
+    $newHeight = $originalHeight;
+
+    if (
+        $originalWidth > $maxWidth ||
+        $originalHeight > $maxHeight
+    ) {
+
+        $scale = min(
+            $maxWidth / $originalWidth,
+            $maxHeight / $originalHeight
+        );
+
+        $newWidth = (int) round($originalWidth * $scale);
+        $newHeight = (int) round($originalHeight * $scale);
+    }
+
+
+    // ============================================================
+    // CREAR IMAGEN DESTINO
+    // ============================================================
+
+    $destinationImage = imagecreatetruecolor(
+        $newWidth,
+        $newHeight
+    );
+
+
+    // ============================================================
+    // MANTENER TRANSPARENCIA PNG
+    // ============================================================
+
+    if ($mimeType === 'image/png') {
+
+        imagealphablending(
+            $destinationImage,
+            false
+        );
+
+        imagesavealpha(
+            $destinationImage,
+            true
+        );
+
+        $transparent = imagecolorallocatealpha(
+            $destinationImage,
+            0,
+            0,
+            0,
+            127
+        );
+
+        imagefill(
+            $destinationImage,
+            0,
+            0,
+            $transparent
+        );
+    }
+
+
+    // ============================================================
+    // REDIMENSIONAR
+    // ============================================================
+
+    if (!imagecopyresampled(
+        $destinationImage,
+        $sourceImage,
+        0,
+        0,
+        0,
+        0,
+        $newWidth,
+        $newHeight,
+        $originalWidth,
+        $originalHeight
+    )) {
+
+        unset($sourceImage);
+        unset($destinationImage);
 
         Response::error(
-            MissatgesAPI::error(
-                'Hubo un problema al mover el archivo al servidor.'
-            ),
-            $errors,
-            500
+            MissatgesAPI::error('internal_error'),
+            [
+                'message' => 'No se pudo redimensionar la imagen.'
+            ],
+            httpCode: 500
         );
 
         exit;
     }
+
+
+    // ============================================================
+    // GUARDAR IMAGEN OPTIMIZADA
+    // ============================================================
+
+    if ($mimeType === 'image/jpeg') {
+
+        if (!imagejpeg(
+            $destinationImage,
+            $targetFile,
+            85
+        )) {
+
+            unset($sourceImage);
+            unset($destinationImage);
+
+            Response::error(
+                MissatgesAPI::error('internal_error'),
+                [
+                    'message' => 'No se pudo guardar la imagen JPEG.'
+                ],
+                httpCode: 500
+            );
+
+            exit;
+        }
+    } elseif ($mimeType === 'image/png') {
+
+        if (!imagepng(
+            $destinationImage,
+            $targetFile,
+            6
+        )) {
+
+            unset($sourceImage);
+            unset($destinationImage);
+
+            Response::error(
+                MissatgesAPI::error('internal_error'),
+                [
+                    'message' => 'No se pudo guardar la imagen PNG.'
+                ],
+                httpCode: 500
+            );
+
+            exit;
+        }
+    }
+
+
+    // ============================================================
+    // LIBERAR RECURSOS GD
+    // ============================================================
+
+    unset($sourceImage);
+    unset($destinationImage);
 
 
     // ============================================================
@@ -290,10 +583,10 @@ if ($slug === 'imatges') {
 
         $uuid = Uuid::uuid7();
 
-        // BINARY(16) para la BD
+        // BINARY(16)
         $id = $uuid->getBytes();
 
-        // UUID en formato texto para la API
+        // UUID texto para API
         $idString = $uuid->toString();
 
 
@@ -302,7 +595,7 @@ if ($slug === 'imatges') {
         // ========================================================
 
         $sql = "
-        INSERT INTO db_img
+            INSERT INTO db_img
             (
                 id,
                 nameImg,
@@ -310,9 +603,11 @@ if ($slug === 'imatges') {
                 typeImg,
                 alt,
                 nom,
-                dateCreated
+                dateCreated,
+                dataImatge,
+                any
             )
-        VALUES
+            VALUES
             (
                 :id,
                 :nameImg,
@@ -320,11 +615,14 @@ if ($slug === 'imatges') {
                 :typeImg,
                 :alt,
                 :nom,
-                :dateCreated
+                :dateCreated,
+                :dataImatge,
+                :any
             )
-    ";
+        ";
 
         $stmt = $pdo->prepare($sql);
+
 
         $stmt->bindValue(
             ':id',
@@ -352,8 +650,12 @@ if ($slug === 'imatges') {
 
         $stmt->bindValue(
             ':alt',
-            $alt !== '' ? $alt : null,
-            $alt !== '' ? PDO::PARAM_STR : PDO::PARAM_NULL
+            $alt !== ''
+                ? $alt
+                : null,
+            $alt !== ''
+                ? PDO::PARAM_STR
+                : PDO::PARAM_NULL
         );
 
         $stmt->bindValue(
@@ -368,6 +670,22 @@ if ($slug === 'imatges') {
             PDO::PARAM_STR
         );
 
+        $stmt->bindValue(
+            ':dataImatge',
+            $dataImatge,
+            $dataImatge !== null
+                ? PDO::PARAM_STR
+                : PDO::PARAM_NULL
+        );
+
+        $stmt->bindValue(
+            ':any',
+            $anyValue,
+            $anyValue !== null
+                ? PDO::PARAM_INT
+                : PDO::PARAM_NULL
+        );
+
 
         // ========================================================
         // EJECUTAR
@@ -377,13 +695,15 @@ if ($slug === 'imatges') {
 
 
         // ========================================================
-        // RESPUESTA CORRECTA
+        // RESPUESTA
         // ========================================================
 
         Response::success(
             MissatgesAPI::success('create'),
             [
-                'id' => $idString
+                'id' => $idString,
+                'dataImatge' => $dataImatge,
+                'any' => $anyValue,
             ],
             httpCode: 201
         );
@@ -392,7 +712,7 @@ if ($slug === 'imatges') {
     } catch (\Throwable $e) {
 
         // ========================================================
-        // SI FALLA LA BD, ELIMINAR ARCHIVO SUBIDO
+        // SI FALLA BD, ELIMINAR ARCHIVO
         // ========================================================
 
         if (file_exists($targetFile)) {
@@ -417,8 +737,8 @@ if ($slug === 'imatges') {
 
     // ============================================================
     // ENDPOINT
+    // Galeria imatges
     // ============================================================
-
 } else if ($slug === 'galeria-imatges') {
 
     // ============================================================
@@ -471,7 +791,6 @@ if ($slug === 'imatges') {
         exit;
     }
 
-
     // ============================================================
     // VALIDAR DIRECTORIO
     // ============================================================
@@ -488,7 +807,6 @@ if ($slug === 'imatges') {
 
         exit;
     }
-
 
     // El directorio solo puede contener:
     // letras, números, guión y guión bajo.
@@ -512,7 +830,6 @@ if ($slug === 'imatges') {
 
         exit;
     }
-
 
     // ============================================================
     // ARCHIVOS
@@ -558,6 +875,7 @@ if ($slug === 'imatges') {
 
     $noms = [];
     $alts = [];
+    $anys = [];
 
     if (isset($_POST['imatges']) && is_array($_POST['imatges'])) {
 
@@ -565,6 +883,7 @@ if ($slug === 'imatges') {
 
             $noms[$index] = trim($imatge['nom'] ?? '');
             $alts[$index] = trim($imatge['alt'] ?? '');
+            $anys[$index] = trim($imatge['any'] ?? '');
         }
     }
 
@@ -781,7 +1100,9 @@ if ($slug === 'imatges') {
             typeImg,
             nom,
             alt,
-            dateCreated
+            dateCreated,
+            dataImatge,
+            any
         )
         VALUES
         (
@@ -791,7 +1112,9 @@ if ($slug === 'imatges') {
             :typeImg,
             :nom,
             :alt,
-            :dateCreated
+            :dateCreated,
+            :dataImatge,
+            :any
         )
     ");
 
@@ -893,6 +1216,39 @@ if ($slug === 'imatges') {
 
 
             $extension = $allowedMimeTypes[$mimeType];
+
+            // ----------------------------------------------------
+            // Obtener fecha EXIF
+            // ----------------------------------------------------
+
+            $dataImatge = null;
+
+            if (
+                $mimeType === 'image/jpeg' &&
+                function_exists('exif_read_data')
+            ) {
+                $exif = @exif_read_data(
+                    $tmpName,
+                    'EXIF',
+                    true
+                );
+
+                if (
+                    isset($exif['EXIF']['DateTimeOriginal']) &&
+                    is_string($exif['EXIF']['DateTimeOriginal'])
+                ) {
+                    $dateOriginal = DateTime::createFromFormat(
+                        'Y:m:d H:i:s',
+                        $exif['EXIF']['DateTimeOriginal']
+                    );
+
+                    if ($dateOriginal !== false) {
+                        $dataImatge = $dateOriginal->format(
+                            'Y-m-d H:i:s'
+                        );
+                    }
+                }
+            }
 
 
             // ----------------------------------------------------
@@ -1111,6 +1467,23 @@ if ($slug === 'imatges') {
 
             $nomImatge = trim($noms[$index] ?? '');
             $altImatge = trim($alts[$index] ?? '');
+            $anyImatge = trim($anys[$index] ?? '');
+
+            $anyValue = null;
+
+            if ($anyImatge !== '') {
+                if (
+                    !ctype_digit($anyImatge) ||
+                    (int) $anyImatge < 1000 ||
+                    (int) $anyImatge > 2040
+                ) {
+                    throw new RuntimeException(
+                        "L'any de la imagen número " . ($index + 1) . " no és vàlid."
+                    );
+                }
+
+                $anyValue = (int) $anyImatge;
+            }
 
 
             if ($nomImatge === '') {
@@ -1165,6 +1538,22 @@ if ($slug === 'imatges') {
                 ':dateCreated',
                 $dateCreated,
                 PDO::PARAM_STR
+            );
+
+            $stmtImage->bindValue(
+                ':dataImatge',
+                $dataImatge,
+                $dataImatge !== null
+                    ? PDO::PARAM_STR
+                    : PDO::PARAM_NULL
+            );
+
+            $stmtImage->bindValue(
+                ':any',
+                $anyValue,
+                $anyValue !== null
+                    ? PDO::PARAM_INT
+                    : PDO::PARAM_NULL
             );
 
             $stmtImage->execute();
