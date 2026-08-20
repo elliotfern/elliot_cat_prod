@@ -196,6 +196,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/auxiliars/imatges/delete/{slug}' => [
+        'view' => '../src/backend/api/100_auxiliars/imatges/delete-imatges.php',
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     // BD AUXILIARS
     '/api/auxiliars/get/' => [
         'view' => '../src/backend/api/100_auxiliars/get-auxiliars.php',

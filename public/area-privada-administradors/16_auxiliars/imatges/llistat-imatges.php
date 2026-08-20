@@ -14,4 +14,5 @@
      <?= Button::create('Nova imatge', Routes::auxiliars()->nouImatge()) ?>
  </div>
 
+ <div id="avis-alert" class="mb-3"></div>
  <div id="taulaLlistatImatges"></div>
