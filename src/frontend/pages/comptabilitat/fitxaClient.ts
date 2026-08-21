@@ -42,7 +42,7 @@ function renderClient(response: Client) {
 
       <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0">
-          ${v(client.clientNom)} ${v(client.clientCognoms)}
+          ${v(client.nom)} ${v(client.cognoms)}
         </h4>
 
         <span class="badge bg-primary">
@@ -64,27 +64,27 @@ function renderClient(response: Client) {
           <!-- CONTACTE -->
           <div class="col-md-6">
             <h6 class="text-muted mb-2">Contacte</h6>
-            <p class="mb-1"><strong>Email:</strong> ${v(client.clientEmail)}</p>
-            <p class="mb-1"><strong>Telèfon:</strong> ${v(client.clientTelefon)}</p>
-            <p class="mb-1"><strong>Web:</strong> ${v(client.clientWeb)}</p>
+            <p class="mb-1"><strong>Email:</strong> ${v(client.email)}</p>
+            <p class="mb-1"><strong>Telèfon:</strong> ${v(client.telefon)}</p>
+            <p class="mb-1"><strong>Web:</strong> ${v(client.web)}</p>
           </div>
 
           <!-- FISCAL -->
           <div class="col-md-6">
             <h6 class="text-muted mb-2">Dades fiscals</h6>
-            <p class="mb-1"><strong>NIF:</strong> ${v(client.clientNIF)}</p>
-            <p class="mb-1"><strong>Empresa:</strong> ${v(client.clientEmpresa)}</p>
+            <p class="mb-1"><strong>NIF:</strong> ${v(client.nif)}</p>
+            <p class="mb-1"><strong>Empresa:</strong> ${v(client.empresa)}</p>
           </div>
 
           <!-- ADREÇA -->
           <div class="col-12">
             <h6 class="text-muted mb-2">Adreça</h6>
-            <p class="mb-1">${v(client.clientAdreca)}</p>
+            <p class="mb-1">${v(client.adreca)}</p>
             <p class="mb-1">
-              ${v(client.clientCP)} · ${v(client.ciutat_final)}
+              ${v(client.cp)} · ${v(client.ciutat_id)}
             </p>
             <p class="mb-1">
-              ${v(client.provincia_ca)} · ${v(client.pais_ca)}
+              ${v(client.provincia_id)} · ${v(client.pais_id)}
             </p>
           </div>
 
@@ -93,7 +93,7 @@ function renderClient(response: Client) {
       </div>
 
       <div class="card-footer text-muted small">
-        Data d'alta: ${formatDataCatala(v(client.clientRegistre))}
+        Data d'alta: ${formatDataCatala(v(client.registre))}
       </div>
 
     </div>

@@ -25,6 +25,8 @@ final class ClientMapper
             paisId: $row['pais_id'],
             telefon: $row['telefon'],
             estatId: $row['estat_id'],
+            num: (int) $row['num'],
+            estat: $row['estat'],
             registre: new \DateTimeImmutable($row['registre'])
         );
     }

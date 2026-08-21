@@ -22,6 +22,8 @@ final class Client
         private string $paisId,
         private ?string $telefon,
         private string $estatId,
+        private int $num,
+        private string $estat,
         private \DateTimeImmutable $registre
     ) {}
 
@@ -93,6 +95,16 @@ final class Client
     public function estatId(): string
     {
         return $this->estatId;
+    }
+
+    public function num(): int
+    {
+        return $this->num;
+    }
+
+    public function estat(): string
+    {
+        return $this->estat;
     }
 
     public function registre(): \DateTimeImmutable

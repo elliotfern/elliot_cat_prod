@@ -25,16 +25,15 @@ header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: GET");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
-
 
 // Verificar que el método de la solicitud sea GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
     exit();
@@ -42,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 
 
 // GET : Llistat clients
-// ruta => "https://elliot.cat/api/comptabilitat/get/clients"
+// ruta => "api/comptabilitat/get/clients"
 if ($slug === 'clients') {
 
     AuthFactory::admin()->handle();

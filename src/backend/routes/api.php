@@ -614,6 +614,24 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+
+    // PROVINCIES
+    '/api/provincies/post' => [
+        'view' => '../src/backend/api/24_paisos/post-provincies.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/provincies/put' => [
+        'view' => '../src/backend/api/24_paisos/put-provincies.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     // SALUT
     '/api/salut/get/{slug}' => [
         'view' => '../src/backend/api/25_salut/get-salut.php',

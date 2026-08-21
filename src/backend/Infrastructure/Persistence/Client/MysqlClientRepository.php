@@ -18,19 +18,8 @@ final class MysqlClientRepository implements ClientRepositoryInterface
     public function findById(ClientId $id): ?Client
     {
         $clientsTable = $this->db->qi(Tables::DB_COMPTABILITAT_CLIENTS);
-        //$citiesTable = $this->db->qi(Tables::DB_CIUTATS);
-        //$countriesTable = $this->db->qi(Tables::DB_PAISOS);
-        //$provincesTable = $this->db->qi(Tables::DB_PROVINCIES);
-        //$statusTable = $this->db->qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT);
-        /* COALESCE(ci.ciutat_ca, ci.ciutat) AS ciutat_final,
-            co.pais_ca,
-            cou.provincia_ca,
-            s.estat
-            LEFT JOIN {$citiesTable} AS ci ON c.ciutat_id = ci.id
-        LEFT JOIN {$countriesTable} AS co ON c.pais_id = co.id
-        LEFT JOIN {$provincesTable} AS cou ON c.provincia_id = cou.id
-        LEFT JOIN {$statusTable} AS s ON c.estat_id = s.id
-            */
+        $clientsTable2 = $this->db->qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT);
+
         $sql = "SELECT
             c.id,
             c.nom,
@@ -46,8 +35,11 @@ final class MysqlClientRepository implements ClientRepositoryInterface
             c.pais_id,
             c.telefon,
             c.registre,
-            c.estat_id           
+            c.estat_id,
+            e.num,
+            e.estat
         FROM {$clientsTable} AS c
+        INNER JOIN {$clientsTable2} AS e ON c.estat_id = e.id
         WHERE c.id = :id
         LIMIT 1";
 
@@ -71,9 +63,9 @@ final class MysqlClientRepository implements ClientRepositoryInterface
     public function findAll(): array
     {
         $clientsTable = $this->db->qi(Tables::DB_COMPTABILITAT_CLIENTS);
+        $clientsTable2 = $this->db->qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT);
 
-        $sql = "
-        SELECT
+        $sql = "SELECT
             c.id,
             c.nom,
             c.cognoms,
@@ -88,8 +80,11 @@ final class MysqlClientRepository implements ClientRepositoryInterface
             c.pais_id,
             c.telefon,
             c.registre,
-            c.estat_id
+            c.estat_id,
+            e.num,
+            e.estat
         FROM {$clientsTable} AS c
+        INNER JOIN {$clientsTable2} AS e ON c.estat_id = e.id
         ORDER BY c.cognoms ASC
     ";
 

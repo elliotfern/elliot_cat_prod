@@ -1110,7 +1110,7 @@ if ($slug === 'directors') {
 } else if ($slug === 'estatsClients') {
 
     $sql = <<<SQL
-            SELECT s.estat, s.id
+            SELECT CONCAT(s.ordre, ' - ', s.estat) AS estat, s.id
             FROM %s AS s
             ORDER BY s.ordre ASC
             SQL;

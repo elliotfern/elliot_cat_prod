@@ -24,6 +24,8 @@ final class ClientResponse
             'pais_id' => Uuid::toString($client->paisId()),
             'telefon' => $client->telefon(),
             'estat_id' => Uuid::toString($client->estatId()),
+            'num' => $client->num(),
+            'estat' => $client->estat(),
             'registre' => $client->registre()->format('Y-m-d')
         ];
     }

@@ -1,5 +1,4 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Client } from '../../types/Client';
@@ -8,13 +7,22 @@ import { Button } from '../../ui/button';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';
 import { mostrar } from '../../utils/renderText';
 
-function getEstatBadgeClass(ordre: number): string {
-  if (ordre <= 2) return 'bg-secondary';
-  if (ordre <= 4) return 'bg-info';
-  if (ordre <= 6) return 'bg-warning';
-  if (ordre <= 8) return 'bg-primary';
-  if (ordre <= 10) return 'bg-success';
+function getEstatBadgeClass(num: number): string {
+  if (num <= 2) return 'bg-secondary';
+  if (num <= 4) return 'bg-info';
+  if (num <= 6) return 'bg-warning';
+  if (num <= 8) return 'bg-primary';
+  if (num <= 10) return 'bg-success';
+
   return 'bg-dark';
+}
+
+function renderEstatBadge(row: Client): string {
+  return `
+    <span class="badge ${getEstatBadgeClass(row.num)}">
+      ${mostrar(row.estat, '-')}
+    </span>
+  `;
 }
 
 export async function taulaLlistatClients() {
@@ -23,33 +31,46 @@ export async function taulaLlistatClients() {
   const columns: TaulaDinamica<Client>[] = [
     {
       header: 'Client',
-      field: 'clientNom',
-      render: (_: unknown, row: Client) => `<a id="${row.id}" href="${INTRANET_URLS.COMPTABILITAT.CLIENT_FITXA_ID(row.id)}">
-      ${mostrar(row.clientNom, '')} ${mostrar(row.clientCognoms, '')}</a>`,
+      field: 'nom',
+      render: (_value: unknown, row: Client) => `
+        <a
+          id="${row.id}"
+          href="${INTRANET_URLS.COMPTABILITAT.CLIENT_FITXA_ID(row.id)}"
+        >
+          ${mostrar(row.nom, '')}
+          ${mostrar(row.cognoms, '')}
+        </a>
+      `,
     },
 
     {
       header: 'Empresa',
-      field: 'clientEmpresa',
-      render: (_: unknown, row: Client) => `${mostrar(row.clientEmpresa, '-')}`,
+      field: 'empresa',
+      render: (_value: unknown, row: Client) => mostrar(row.empresa, '-'),
     },
 
     {
       header: 'Email',
-      field: 'clientEmail',
-      render: (_: unknown, row: Client) => `${row.clientEmail}`,
+      field: 'email',
+      render: (_value: unknown, row: Client) => mostrar(row.email, '-'),
+    },
+
+    {
+      header: 'Telèfon',
+      field: 'telefon',
+      render: (_value: unknown, row: Client) => mostrar(row.telefon, '-'),
     },
 
     {
       header: 'Estat',
-      field: 'estat',
-      render: (_: unknown, row: Client) => {
-        const classe = getEstatBadgeClass(row.ordre);
-        return `
-          <span class="badge ${classe}">
-            ${row.estat}
-          </span>`;
-      },
+      field: 'num',
+      render: (_value: unknown, row: Client) => renderEstatBadge(row),
+    },
+
+    {
+      header: 'Registre',
+      field: 'registre',
+      render: (_value: unknown, row: Client) => mostrar(row.registre, '-'),
     },
   ];
 
@@ -57,7 +78,7 @@ export async function taulaLlistatClients() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_, { id }) => Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(id)),
+      render: (_value: unknown, row: Client) => Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(row.id)),
     });
   }
 
@@ -65,7 +86,5 @@ export async function taulaLlistatClients() {
     url: API_URLS.GET.CLIENTS,
     containerId: 'taulaLlistatClients',
     columns,
-    filterKeys: ['pais_ca'],
-    //filterByField: 'pais_ca',
   });
 }

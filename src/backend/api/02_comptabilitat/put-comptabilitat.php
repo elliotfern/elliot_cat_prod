@@ -6,22 +6,19 @@ use App\Utils\Tables;
 use App\Config\Audit;
 use App\Utils\ValidacioErrors;
 use App\Config\Database;
-use App\Config\DatabaseConnection;
 use App\Utils\Uuid;
 use App\Utils\Schema\SchemaProcessor;
-use App\Modules\Clients\Schema\ClientSchema;
 use App\Modules\Pressupostos\Schema\PressupostSchema;
 use App\Modules\Emissors\Schema\EmissorSchema;
 use App\Utils\Schema\SchemaValidationException;
-use App\Services\ClientService;
 
 /** @var array $routeParams */
-/** @var array $conn */
 $slug = $routeParams[0] ?? null;
+
 $db = new Database();
 $pdo = $db->getPdo();
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 // Check if the request method is PUT
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
@@ -30,63 +27,128 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     exit();
 }
 
-// Requiere ADMIN por token (user_type === 1)
-if (!isAuthenticatedAdmin()) {
-    http_response_code(403);
-    echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-    exit;
-}
-
-$conn = DatabaseConnection::getConnection();
-$userUuid = getAuthenticatedUserUuid(); // para auditoría, si la soportas
-
-if (!$conn) {
-    die("No se pudo establecer conexión a la base de datos.");
-}
-
 // Configuración de cabeceras para aceptar JSON y responder JSON
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: PUT");
 
 if ($slug === 'clients') {
 
-    AdminMiddleware::handle();
-
     $raw = file_get_contents('php://input');
     $data = json_decode($raw, true);
 
     if (!is_array($data)) {
         Response::error(
-            message: MissatgesAPI::error('validacio'),
-            errors: ['JSON invàlid'],
+            message: 'Dades JSON no vàlides.',
             httpCode: 400
         );
         return;
     }
 
-    $clientService = new ClientService($db);
+    // ID obligatori
+    if (empty($data['id'])) {
+        Response::error(
+            message: 'L\'ID del client és obligatori.',
+            httpCode: 400
+        );
+        return;
+    }
+
+    // Camps obligatoris
+    $requiredFields = [
+        'nom',
+        'email',
+        'adreca',
+        'ciutat_id',
+        'provincia_id',
+        'pais_id',
+        'estat_id',
+    ];
+
+    foreach ($requiredFields as $field) {
+        if (!isset($data[$field]) || $data[$field] === '') {
+            Response::error(
+                message: "El camp {$field} és obligatori.",
+                httpCode: 422
+            );
+            return;
+        }
+    }
 
     try {
+        // Comprovar que existeix el client
+        $stmt = $pdo->prepare("
+            SELECT id
+            FROM db_comptabilitat_clients
+            WHERE id = :id
+            LIMIT 1
+        ");
 
-        $result = $clientService->update($data);
+        $stmt->execute([
+            ':id' => Uuid::toBinary($data['id']),
+        ]);
+
+        if (!$stmt->fetch()) {
+            Response::error(
+                message: 'Client no trobat.',
+                httpCode: 404
+            );
+            return;
+        }
+
+        $id_bin = Uuid::toBinary($data['id']);
+        $ciutat_id_bin = Uuid::toBinary($data['ciutat_id']);
+        $provincia_id_bin = Uuid::toBinary($data['provincia_id']);
+        $pais_id_bin = Uuid::toBinary($data['pais_id']);
+        $estat_id_bin = Uuid::toBinary($data['estat_id']);
+
+        // Actualitzar
+        $sql = "UPDATE db_comptabilitat_clients
+            SET
+                nom = :nom,
+                cognoms = :cognoms,
+                email = :email,
+                web = :web,
+                nif = :nif,
+                empresa = :empresa,
+                adreca = :adreca,
+                cp = :cp,
+                ciutat_id = :ciutat_id,
+                provincia_id = :provincia_id,
+                pais_id = :pais_id,
+                telefon = :telefon,
+                estat_id = :estat_id
+            WHERE id = :id";
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->bindValue(':id', $id_bin, PDO::PARAM_STR);
+        $stmt->bindValue(':nom', $data['nom'], PDO::PARAM_STR);
+        $stmt->bindValue(':cognoms', $data['cognoms'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':email', $data['email'], PDO::PARAM_STR);
+        $stmt->bindValue(':web', $data['web'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':nif', $data['nif'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':empresa', $data['empresa'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':adreca', $data['adreca'], PDO::PARAM_STR);
+        $stmt->bindValue(':cp', $data['cp'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':ciutat_id', $ciutat_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':provincia_id', $provincia_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':pais_id', $pais_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':telefon', $data['telefon'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':estat_id', $estat_id_bin, PDO::PARAM_LOB);
+
+        $stmt->execute();
 
         Response::success(
             message: MissatgesAPI::success('update'),
-            data: $result,
+            data: [
+                'id' => $data['id'],
+            ],
             httpCode: 200
         );
-    } catch (SchemaValidationException $e) {
+    } catch (\PDOException $e) {
 
         Response::error(
-            message: MissatgesAPI::error('validacio'),
-            errors: $e->toApiArray(),
-            httpCode: 400
-        );
-    } catch (Throwable $e) {
-
-        Response::error(
-            message: MissatgesAPI::error('errorBD'),
-            errors: [$e->getMessage()],
+            message: $e->getMessage(),
             httpCode: 500
         );
     }

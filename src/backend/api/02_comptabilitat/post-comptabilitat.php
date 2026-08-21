@@ -5,37 +5,27 @@ use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Config\Audit;
 use App\Utils\ValidacioErrors;
-use App\Config\DatabaseConnection;
 use App\Config\Database;
 use App\Utils\Uuid;
 use Ramsey\Uuid\Uuid as ramsey;
 use App\Utils\Schema\SchemaProcessor;
-use App\Utils\AdminMiddleware;
-use App\Services\ClientService;
 use App\Modules\Pressupostos\Schema\PressupostSchema;
 use App\Modules\Emissors\Schema\EmissorSchema;
 use App\Utils\Schema\SchemaValidationException;
 
 /** @var array $routeParams */
-/** @var array $conn */
 $slug = $routeParams[0] ?? null;
+
 $db = new Database();
 $pdo = $db->getPdo();
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
     exit();
-}
-
-
-$conn = DatabaseConnection::getConnection();
-
-if (!$conn) {
-    die("No se pudo establecer conexión a la base de datos.");
 }
 
 // Configuración de cabeceras para aceptar JSON y responder JSON
@@ -86,42 +76,117 @@ function generarNumeroFactura(PDO $db): string
 
 if ($slug === 'clients') {
 
-
     $raw = file_get_contents('php://input');
     $data = json_decode($raw, true);
 
     if (!is_array($data)) {
         Response::error(
-            message: MissatgesAPI::error('validacio'),
-            errors: ['JSON invàlid'],
+            message: 'Dades JSON no vàlides.',
             httpCode: 400
         );
         return;
     }
 
-    //$clientService = new ClientService($db);
+    // Camps obligatoris
+    $requiredFields = [
+        'nom',
+        'email',
+        'adreca',
+        'ciutat_id',
+        'provincia_id',
+        'pais_id',
+        'estat_id',
+    ];
+
+    foreach ($requiredFields as $field) {
+        if (!isset($data[$field]) || $data[$field] === '') {
+            Response::error(
+                message: "El camp {$field} és obligatori.",
+                httpCode: 422
+            );
+            return;
+        }
+    }
 
     try {
 
-        $result = $clientService->create($data);
+        // Generar UUIDv7
+        $id = ramsey::uuid7();
+        $uuidBytes = $id->getBytes();   // para BINARY(16)
+        $uuidString = Uuid::toBinary($id);
+
+        $registre = date('Y-m-d');
+
+        $ciutat_id_bin = Uuid::toBinary($data['ciutat_id']);
+        $provincia_id_bin = Uuid::toBinary($data['provincia_id']);
+        $pais_id_bin = Uuid::toBinary($data['pais_id']);
+        $estat_id_bin = Uuid::toBinary($data['estat_id']);
+
+        $stmt = $pdo->prepare("
+            INSERT INTO db_comptabilitat_clients (
+                id,
+                nom,
+                cognoms,
+                email,
+                web,
+                nif,
+                empresa,
+                adreca,
+                cp,
+                ciutat_id,
+                provincia_id,
+                pais_id,
+                telefon,
+                estat_id,
+                registre
+            ) VALUES (
+                :id,
+                :nom,
+                :cognoms,
+                :email,
+                :web,
+                :nif,
+                :empresa,
+                :adreca,
+                :cp,
+                :ciutat_id,
+                :provincia_id,
+                :pais_id,
+                :telefon,
+                :estat_id,
+                :registre
+            )
+        ");
+
+        $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_STR);
+        $stmt->bindValue(':nom', $data['nom'], PDO::PARAM_STR);
+        $stmt->bindValue(':cognoms', $data['cognoms'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':email', $data['email'], PDO::PARAM_STR);
+        $stmt->bindValue(':web', $data['web'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':nif', $data['nif'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':empresa', $data['empresa'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':adreca', $data['adreca'], PDO::PARAM_STR);
+        $stmt->bindValue(':cp', $data['cp'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':ciutat_id', $ciutat_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':provincia_id', $provincia_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':pais_id', $pais_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':telefon', $data['telefon'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':estat_id', $estat_id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':registre', $registre, PDO::PARAM_STR);
+
+        $stmt->execute();
 
         Response::success(
             message: MissatgesAPI::success('create'),
-            data: $result,
+            data: [
+                'id' => $uuidString,
+            ],
             httpCode: 201
         );
-    } catch (SchemaValidationException $e) {
+    } catch (\PDOException $e) {
 
         Response::error(
-            message: MissatgesAPI::error('validacio'),
-            errors: $e->toApiArray(),
-            httpCode: 400
-        );
-    } catch (Throwable $e) {
-
-        Response::error(
-            message: MissatgesAPI::error('errorBD'),
-            errors: [$e->getMessage()],
+            message: $e->getMessage(),
             httpCode: 500
         );
     }
