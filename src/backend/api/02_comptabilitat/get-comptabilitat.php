@@ -66,21 +66,72 @@ if ($slug === 'clients') {
     AuthFactory::admin()->handle();
     $id = $_GET['id'] ?? null;
 
-    $client = $clientService->getById($id);
+    $sql = <<<SQL
+            SELECT
+                c.id,
+                c.nom,
+                c.cognoms,
+                c.email,
+                c.web,
+                c.nif,
+                c.empresa,
+                c.adreca,
+                c.cp,
+                c.ciutat_id,
+                c.provincia_id,
+                c.pais_id,
+                c.telefon,
+                c.registre,
+                c.estat_id,
+                e.num,
+                e.estat,
+                p.provincia_ca,
+                pa.pais_ca,
+                ci.ciutat_ca
+            FROM %s AS c
+            INNER JOIN %s AS e ON c.estat_id = e.id
+            LEFT JOIN %s AS p ON c.provincia_id = p.id
+            LEFT JOIN %s AS pa ON c.pais_id = pa.id
+            LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
+            WHERE c.id = :id
+            LIMIT 1
+            SQL;
 
-    if (!$client) {
-        Response::error(
-            message: MissatgesAPI::error('not_found'),
-            httpCode: 404
-        );
-        return;
-    }
-
-    Response::success(
-        message: MissatgesAPI::success('get'),
-        data: ClientResponse::toArray($client),
-        httpCode: 200
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
+        qi(Tables::DB_PROVINCIES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo),
     );
+
+    try {
+
+        $params = [':id' => uuid::toBinary($id)];
+        $result = $db->getData($query, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // GET : Pressupostos enviats a client ID
     // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostosClientId?id=i89jnbd"

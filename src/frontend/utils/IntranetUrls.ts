@@ -7,8 +7,8 @@ export const ENDPOINTS = {
   EMISSOR_FITXA: 'fitxa-emissor',
   CLIENT_MODIFICA: 'modifica-client',
   CLIENT_FITXA: 'fitxa-client',
-  PROVEIDOR_MODIFICA: 'modifica-client',
-  PROVEIDOR_FITXA: 'fitxa-client',
+  PROVEIDOR_MODIFICA: 'modifica-proveidor',
+  PROVEIDOR_FITXA: 'fitxa-proveidor',
 } as const;
 
 // Mapa de recursos disponibles

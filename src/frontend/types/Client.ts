@@ -16,6 +16,9 @@ export interface Client {
   registre: string | null;
   num: number;
   estat: string;
+  provincia_ca: string | null;
+  ciutat_ca: string | null;
+  pais_ca: string | null;
 }
 
 export interface FacturaClient {

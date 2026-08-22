@@ -81,10 +81,10 @@ function renderClient(response: Client) {
             <h6 class="text-muted mb-2">Adreça</h6>
             <p class="mb-1">${v(client.adreca)}</p>
             <p class="mb-1">
-              ${v(client.cp)} · ${v(client.ciutat_id)}
+              ${v(client.cp)} · ${v(client.ciutat_ca)}
             </p>
             <p class="mb-1">
-              ${v(client.provincia_id)} · ${v(client.pais_id)}
+              ${v(client.provincia_ca)} · ${v(client.pais_ca)}
             </p>
           </div>
 
