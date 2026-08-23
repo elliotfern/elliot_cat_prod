@@ -4,7 +4,7 @@
  * FUNCIONS INSERIR CONTACTE
  */
 
-use Ramsey\Uuid\Uuid as ramsey;
+use Ramsey\Uuid\Uuid as Ramsey;
 use App\Utils\Uuid;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
@@ -12,38 +12,39 @@ use App\Config\Database;
 
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
+
 $db = new Database();
 $pdo = $db->getPdo();
 
-// Siempre JSON
+// Sempre JSON
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-  corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
+  corsAllow([
+    'https://elliot.cat',
+    'https://dev.elliot.cat',
+    'https://elliot.local'
+  ]);
+
   http_response_code(204);
   exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
+corsAllow([
+  'https://elliot.cat',
+  'https://dev.elliot.cat',
+  'https://elliot.local'
+]);
 
-// Check if the request method is POST
+// Només POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   header('HTTP/1.1 405 Method Not Allowed');
   echo json_encode(['error' => 'Method not allowed']);
   exit();
 }
 
-// a) Inserir contacte
 
 // Helpers
-function requireField(array $data, string $key, array &$errors)
-{
-  if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
-    $errors[$key] = 'required';
-    return null;
-  }
-  return $data[$key];
-}
 
 function optionalField(array $data, string $key)
 {
@@ -52,73 +53,169 @@ function optionalField(array $data, string $key)
     : null;
 }
 
+
+// Llegir JSON
+
 $inputData = file_get_contents('php://input');
 $data = json_decode($inputData, true);
 
-// Verificar si se recibieron datos
 if ($data === null) {
   header('HTTP/1.1 400 Bad Request');
   echo json_encode(['error' => 'Error decoding JSON data']);
   exit();
 }
 
-// Validación
+
+// Validació
+
 $errors = [];
 
-$nom = requireField($data, 'nom', $errors);
-$cognoms = requireField($data, 'cognoms', $errors);
-$tel_1 = requireField($data, 'tel_1', $errors);
-$tipus = requireField($data, 'tipus_id', $errors);
-$pais = requireField($data, 'pais_id', $errors);
+$tipusPersona = optionalField($data, 'tipus_persona');
 
-$tel_2 = optionalField($data, 'tel_2');
-$tel_3 = optionalField($data, 'tel_3');
-$adreca = optionalField($data, 'adreca');
-$data_naixement = optionalField($data, 'data_naixement');
-$web = optionalField($data, 'web');
+$nom = optionalField($data, 'nom');
+$cognoms = optionalField($data, 'cognoms');
+$empresa = optionalField($data, 'empresa');
+$nif = optionalField($data, 'nif');
 $email = optionalField($data, 'email');
+$tel1 = optionalField($data, 'tel_1');
+$tel2 = optionalField($data, 'tel_2');
+$adreca = optionalField($data, 'adreca');
+$cp = optionalField($data, 'cp');
+$ciutatId = optionalField($data, 'ciutat_id');
+$provinciaId = optionalField($data, 'provincia_id');
+$paisId = optionalField($data, 'pais_id');
+$web = optionalField($data, 'web');
+$dataNaixement = optionalField($data, 'data_naixement');
 
-// Validar format UUID de tipus i pais abans de convertir-los a binari
+// tipus_persona és obligatori
+$tipusPersonaValids = [
+  'FAMILIA',
+  'AMICS',
+  'EMPRESA',
+  'ALTRES'
+];
+
+if ($tipusPersona === null) {
+  $errors['tipus_persona'] = 'required';
+} elseif (!in_array($tipusPersona, $tipusPersonaValids, true)) {
+  $errors['tipus_persona'] = 'format_invalid';
+}
+
+
+// Validar UUID dels camps relacionals
+
 $regexUuid = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
 
-if ($tipus !== null && !preg_match($regexUuid, $tipus)) {
-  $errors['tipus'] = 'format_invalid';
+foreach (
+  [
+    'ciutat_id' => $ciutatId,
+    'provincia_id' => $provinciaId,
+    'pais_id' => $paisId
+  ] as $field => $value
+) {
+
+  if ($value !== null && !preg_match($regexUuid, $value)) {
+    $errors[$field] = 'format_invalid';
+  }
 }
 
-if ($pais !== null && !preg_match($regexUuid, $pais)) {
-  $errors['pais'] = 'format_invalid';
-}
 
 if (!empty($errors)) {
-  Response::error(MissatgesAPI::error('validacio'), $errors, httpCode: 400);
+  Response::error(
+    MissatgesAPI::error('validacio'),
+    $errors,
+    httpCode: 400
+  );
+
   exit;
 }
 
-// Generar nou UUID v7 pel id
+
+// Generar nou UUID v7
+
 $novaId = Ramsey::uuid7();
-$idBinari = Uuid::toBinary($novaId->toString());
 
-// Convertir tipus i pais (UUID strings) a binari
-$tipusIdBinari = Uuid::toBinary($tipus);
-$paisIdBinari = Uuid::toBinary($pais);
+$idBinari = Uuid::toBinary(
+  $novaId->toString()
+);
 
-$query = "INSERT INTO db_contactes SET id = :id, nom = :nom, cognoms = :cognoms, email = :email, tel_1 = :tel_1, tel_2 = :tel_2, tel_3 = :tel_3, adreca = :adreca, data_naixement = :data_naixement, web = :web, tipus_id = :tipus_id, pais_id = :pais_id";
+
+// Convertir UUIDs a binari
+
+$ciutatIdBinari = $ciutatId !== null
+  ? Uuid::toBinary($ciutatId)
+  : null;
+
+$provinciaIdBinari = $provinciaId !== null
+  ? Uuid::toBinary($provinciaId)
+  : null;
+
+$paisIdBinari = $paisId !== null
+  ? Uuid::toBinary($paisId)
+  : null;
+
+
+// INSERT
+
+$query = "
+    INSERT INTO db_contactes (
+        id,
+        tipus_persona,
+        nom,
+        cognoms,
+        empresa,
+        nif,
+        email,
+        tel_1,
+        tel_2,
+        adreca,
+        data_naixement,
+        cp,
+        ciutat_id,
+        provincia_id,
+        pais_id,
+        web
+    ) VALUES (
+        :id,
+        :tipus_persona,
+        :nom,
+        :cognoms,
+        :empresa,
+        :nif,
+        :email,
+        :tel_1,
+        :tel_2,
+        :adreca,
+        :data_naixement,
+        :cp,
+        :ciutat_id,
+        :provincia_id,
+        :pais_id,
+        :web
+    )
+";
+
 $stmt = $pdo->prepare($query);
 
 $stmt->bindValue(':id', $idBinari, PDO::PARAM_LOB);
+$stmt->bindValue(':tipus_persona', $tipusPersona, PDO::PARAM_STR);
 $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
 $stmt->bindValue(':cognoms', $cognoms, PDO::PARAM_STR);
+$stmt->bindValue(':empresa', $empresa, PDO::PARAM_STR);
+$stmt->bindValue(':nif', $nif, PDO::PARAM_STR);
 $stmt->bindValue(':email', $email, PDO::PARAM_STR);
-$stmt->bindValue(':tel_1', $tel_1, PDO::PARAM_STR);
-$stmt->bindValue(':tel_2', $tel_2, PDO::PARAM_STR);
-$stmt->bindValue(':tel_3', $tel_3, PDO::PARAM_STR);
+$stmt->bindValue(':tel_1', $tel1, PDO::PARAM_STR);
+$stmt->bindValue(':tel_2', $tel2, PDO::PARAM_STR);
 $stmt->bindValue(':adreca', $adreca, PDO::PARAM_STR);
-$stmt->bindValue(':data_naixement', $data_naixement, PDO::PARAM_STR);
-$stmt->bindValue(':web', $web, PDO::PARAM_STR);
-$stmt->bindValue(':tipus_id', $tipusIdBinari, PDO::PARAM_LOB);
+$stmt->bindValue(':data_naixement', $dataNaixement, PDO::PARAM_STR);
+$stmt->bindValue(':cp', $cp, PDO::PARAM_STR);
+$stmt->bindValue(':ciutat_id', $ciutatIdBinari, PDO::PARAM_LOB);
+$stmt->bindValue(':provincia_id', $provinciaIdBinari, PDO::PARAM_LOB);
 $stmt->bindValue(':pais_id', $paisIdBinari, PDO::PARAM_LOB);
+$stmt->bindValue(':web', $web, PDO::PARAM_STR);
 
 try {
+
   $stmt->execute();
 
   Response::success(
@@ -127,6 +224,7 @@ try {
     httpCode: 200
   );
 } catch (PDOException $e) {
+
   Response::error(
     MissatgesAPI::error('errorBD'),
     [

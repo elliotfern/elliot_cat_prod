@@ -39,17 +39,28 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 if ($slug === "llistatContactes") {
 
     $sql = <<<SQL
-                SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, t.tipus, p.pais_ca, c.adreca
-                FROM %s AS c
-                LEFT JOIN %s AS t ON c.tipus_id = t.id
-                LEFT JOIN %s AS p ON c.pais_id = p.id
-                ORDER BY c.cognoms ASC
-            SQL;
+        SELECT
+            c.id,
+            c.tipus_persona,
+            c.nom,
+            c.cognoms,
+            c.empresa,
+            c.nif,
+            c.email,
+            c.tel_1,
+            c.tel_2,
+            c.data_naixement,
+            c.web,
+            p.pais_ca,
+            c.adreca
+        FROM %s AS c
+        LEFT JOIN %s AS p ON c.pais_id = p.id
+        ORDER BY c.cognoms ASC
+    SQL;
 
     $query = sprintf(
         $sql,
         qi(Tables::DB_CONTACTES, $pdo),
-        qi(Tables::DB_CONTACTES_TIPUS, $pdo),
         qi(Tables::DB_PAISOS, $pdo)
     );
 
@@ -83,10 +94,25 @@ if ($slug === "llistatContactes") {
     $id = $_GET['id'];
 
     $sql = <<<SQL
-                SELECT c.id, c.nom, c.cognoms, c.email, c.tel_1, c.tel_2, c.tel_3, c.data_naixement, c.web, c.pais_id, c.tipus_id, c.adreca,
-                t.tipus, p.pais_ca
+                SELECT
+                    c.id,
+                    c.nom,
+                    c.cognoms,
+                    c.empresa,
+                    c.nif,
+                    c.email,
+                    c.tel_1,
+                    c.tel_2,
+                    c.data_naixement,
+                    c.web,
+                    c.adreca,
+                    c.cp,
+                    c.ciutat_id,
+                    c.provincia_id,
+                    c.pais_id,
+                    c.tipus_persona,
+                    p.pais_ca
                 FROM %s AS c
-                LEFT JOIN %s AS t ON c.tipus_id = t.id
                 LEFT JOIN %s AS p ON c.pais_id = p.id
                 WHERE c.id = :id
             SQL;
@@ -94,7 +120,6 @@ if ($slug === "llistatContactes") {
     $query = sprintf(
         $sql,
         qi(Tables::DB_CONTACTES, $pdo),
-        qi(Tables::DB_CONTACTES_TIPUS, $pdo),
         qi(Tables::DB_PAISOS, $pdo)
     );
 

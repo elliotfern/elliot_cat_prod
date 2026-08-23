@@ -12,8 +12,8 @@ export interface Client {
   provincia_id: string | null;
   pais_id: string | null;
   estat_id: string | null;
-  telefon: string | null;
-  registre: string | null;
+  tel_1: string | null;
+  created_at: string | null;
   num: number;
   estat: string;
   provincia_ca: string | null;

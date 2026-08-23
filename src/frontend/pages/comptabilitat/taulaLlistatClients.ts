@@ -57,8 +57,8 @@ export async function taulaLlistatClients() {
 
     {
       header: 'Telèfon',
-      field: 'telefon',
-      render: (_value: unknown, row: Client) => mostrar(row.telefon, '-'),
+      field: 'tel_1',
+      render: (_value: unknown, row: Client) => mostrar(row.tel_1, '-'),
     },
 
     {
@@ -69,8 +69,8 @@ export async function taulaLlistatClients() {
 
     {
       header: 'Registre',
-      field: 'registre',
-      render: (_value: unknown, row: Client) => mostrar(row.registre, '-'),
+      field: 'created_at',
+      render: (_value: unknown, row: Client) => mostrar(row.created_at, '-'),
     },
   ];
 

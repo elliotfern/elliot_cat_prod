@@ -46,18 +46,93 @@ if ($slug === 'clients') {
 
     AuthFactory::admin()->handle();
 
-    $clients = $clientService->getAll();
+    $sql = <<<SQL
+            SELECT
+                c.id,
+                c.tipus_persona,
+                c.nom,
+                c.cognoms,
+                c.empresa,
+                c.email,
+                c.web,
+                c.nif,
+                c.tel_1,
+                c.tel_2,
+                c.adreca,
+                c.cp,
+                c.ciutat_id,
+                c.provincia_id,
+                c.pais_id,
+                c.data_naixement,
 
-    $data = array_map(
-        fn($client) => ClientResponse::toArray($client),
-        $clients
+                cc.id AS client_id,
+                cc.estat_id,
+                cc.created_at,
+
+                e.num,
+                e.estat,
+
+                p.provincia_ca,
+                pa.pais_ca,
+                ci.ciutat_ca
+
+            FROM %s AS cc
+
+            INNER JOIN %s AS c
+                ON cc.contacte_id = c.id
+
+            INNER JOIN %s AS e
+                ON cc.estat_id = e.id
+
+            LEFT JOIN %s AS p
+                ON c.provincia_id = p.id
+
+            LEFT JOIN %s AS pa
+                ON c.pais_id = pa.id
+
+            LEFT JOIN %s AS ci
+                ON c.ciutat_id = ci.id
+
+            ORDER BY
+                c.cognoms ASC,
+                c.nom ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_CONTACTES, $pdo),
+        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
+        qi(Tables::DB_PROVINCIES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo)
     );
 
-    Response::success(
-        message: MissatgesAPI::success('get'),
-        data: $data,
-        httpCode: 200
-    );
+    try {
+
+        $result = $db->getData($query, [], false);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // GET : Detalls client ID
     // ruta => "https://elliot.cat/api/comptabilitat/get/clientId?id=i89jnbd"
@@ -66,40 +141,62 @@ if ($slug === 'clients') {
     AuthFactory::admin()->handle();
     $id = $_GET['id'] ?? null;
 
+    $id = $_GET['id'] ?? null;
+
     $sql = <<<SQL
-            SELECT
-                c.id,
-                c.nom,
-                c.cognoms,
-                c.email,
-                c.web,
-                c.nif,
-                c.empresa,
-                c.adreca,
-                c.cp,
-                c.ciutat_id,
-                c.provincia_id,
-                c.pais_id,
-                c.telefon,
-                c.registre,
-                c.estat_id,
-                e.num,
-                e.estat,
-                p.provincia_ca,
-                pa.pais_ca,
-                ci.ciutat_ca
-            FROM %s AS c
-            INNER JOIN %s AS e ON c.estat_id = e.id
-            LEFT JOIN %s AS p ON c.provincia_id = p.id
-            LEFT JOIN %s AS pa ON c.pais_id = pa.id
-            LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
-            WHERE c.id = :id
-            LIMIT 1
-            SQL;
+        SELECT
+            c.id,
+            c.nom,
+            c.cognoms,
+            c.email,
+            c.web,
+            c.nif,
+            c.empresa,
+            c.adreca,
+            c.cp,
+            c.ciutat_id,
+            c.provincia_id,
+            c.pais_id,
+            c.tel_1,
+            c.tel_2,
+            
+            cl.id AS client_id,
+            cl.contacte_id,
+            cl.estat_id,
+
+            e.num,
+            e.estat,
+
+            p.provincia_ca,
+            pa.pais_ca,
+            ci.ciutat_ca
+
+        FROM %s AS cl
+
+        INNER JOIN %s AS c
+            ON cl.contacte_id = c.id
+
+        INNER JOIN %s AS e
+            ON cl.estat_id = e.id
+
+        LEFT JOIN %s AS p
+            ON c.provincia_id = p.id
+
+        LEFT JOIN %s AS pa
+            ON c.pais_id = pa.id
+
+        LEFT JOIN %s AS ci
+            ON c.ciutat_id = ci.id
+
+        WHERE c.id = :id
+
+        LIMIT 1
+    SQL;
 
     $query = sprintf(
         $sql,
         qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_CONTACTES, $pdo),
         qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
         qi(Tables::DB_PROVINCIES, $pdo),
         qi(Tables::DB_PAISOS, $pdo),
@@ -108,7 +205,7 @@ if ($slug === 'clients') {
 
     try {
 
-        $params = [':id' => uuid::toBinary($id)];
+        $params = [':id' => Uuid::toBinary($id)];
         $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
@@ -829,29 +926,45 @@ SQL;
 
     AuthFactory::admin()->handle();
 
+    AuthFactory::admin()->handle();
+
     $sql = <<<SQL
-        SELECT 
-            id,
-            nom,
-            nif,
-            adreca,
-            ciutat,
-            codi_postal,
-            pais,
-            telefon,
-            email,
-            web,
-            contacte,
-            notes,
-            created_at,
-            updated_at
-        FROM %s
-        ORDER BY nom ASC
+        SELECT
+            c.id,
+            c.nom,
+            c.cognoms,
+            c.empresa,
+            c.email,
+            c.web,
+            c.nif,
+            c.adreca,
+            c.cp,
+            c.ciutat_id,
+            c.provincia_id,
+            c.pais_id,
+            c.tel_1,
+            c.tel_2,
+            p.contacte_id,
+            p.created_at,
+            p.updated_at,
+            prov.provincia_ca,
+            pa.pais_ca,
+            ci.ciutat_ca
+        FROM %s AS p
+        INNER JOIN %s AS c ON p.contacte_id = c.id
+        LEFT JOIN %s AS prov ON c.provincia_id = prov.id
+        LEFT JOIN %s AS pa ON c.pais_id = pa.id
+        LEFT JOIN %s AS ci ON c.ciutat_id = ci.id
+        ORDER BY c.nom ASC
     SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo)
+        qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo),
+        qi(Tables::DB_CONTACTES, $pdo),
+        qi(Tables::DB_PROVINCIES, $pdo),
+        qi(Tables::DB_PAISOS, $pdo),
+        qi(Tables::DB_CIUTATS, $pdo),
     );
 
     try {

@@ -65,7 +65,7 @@ function renderClient(response: Client) {
           <div class="col-md-6">
             <h6 class="text-muted mb-2">Contacte</h6>
             <p class="mb-1"><strong>Email:</strong> ${v(client.email)}</p>
-            <p class="mb-1"><strong>Telèfon:</strong> ${v(client.telefon)}</p>
+            <p class="mb-1"><strong>Telèfon:</strong> ${v(client.tel_1)}</p>
             <p class="mb-1"><strong>Web:</strong> ${v(client.web)}</p>
           </div>
 
@@ -93,7 +93,7 @@ function renderClient(response: Client) {
       </div>
 
       <div class="card-footer text-muted small">
-        Data d'alta: ${formatDataCatala(v(client.registre))}
+        Data d'alta: ${formatDataCatala(v(client.created_at))}
       </div>
 
     </div>

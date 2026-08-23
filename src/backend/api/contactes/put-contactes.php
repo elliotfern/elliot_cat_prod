@@ -10,7 +10,11 @@ $pdo = $db->getPdo();
 
 header("Content-Type: application/json");
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
+corsAllow([
+  'https://elliot.cat',
+  'https://dev.elliot.cat',
+  'https://elliot.local'
+]);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
   header('HTTP/1.1 405 Method Not Allowed');
@@ -18,15 +22,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
   exit();
 }
 
-// a) Modificar contacte
 
 // Helpers
+
 function requireField(array $data, string $key, array &$errors)
 {
   if (!isset($data[$key]) || $data[$key] === '' || $data[$key] === null) {
     $errors[$key] = 'required';
     return null;
   }
+
   return $data[$key];
 }
 
@@ -37,6 +42,9 @@ function optionalField(array $data, string $key)
     : null;
 }
 
+
+// Llegir JSON
+
 $inputData = file_get_contents('php://input');
 $data = json_decode($inputData, true);
 
@@ -46,69 +54,138 @@ if ($data === null) {
   exit();
 }
 
-// Validación
+
+// Validació
+
 $errors = [];
 
 $id = requireField($data, 'id', $errors);
-$nom = requireField($data, 'nom', $errors);
-$cognoms = requireField($data, 'cognoms', $errors);
-$tel_1 = requireField($data, 'tel_1', $errors);
-$tipus = requireField($data, 'tipus_id', $errors);
-$pais = requireField($data, 'pais_id', $errors);
+$tipusPersona = requireField($data, 'tipus_persona', $errors);
 
-$tel_2 = optionalField($data, 'tel_2');
-$tel_3 = optionalField($data, 'tel_3');
-$adreca = optionalField($data, 'adreca');
-$data_naixement = optionalField($data, 'data_naixement');
-$web = optionalField($data, 'web');
+$nom = optionalField($data, 'nom');
+$cognoms = optionalField($data, 'cognoms');
+$empresa = optionalField($data, 'empresa');
+$nif = optionalField($data, 'nif');
 $email = optionalField($data, 'email');
+$tel_1 = optionalField($data, 'tel_1');
+$tel_2 = optionalField($data, 'tel_2');
+$data_naixement = optionalField($data, 'data_naixement');
+$adreca = optionalField($data, 'adreca');
+$cp = optionalField($data, 'cp');
+$ciutatId = optionalField($data, 'ciutat_id');
+$provinciaId = optionalField($data, 'provincia_id');
+$paisId = optionalField($data, 'pais_id');
+$web = optionalField($data, 'web');
 
-// Validar format UUID de id, tipus i pais abans de convertir-los a binari
+
+// Valors vàlids de tipus_persona
+
+$tipusPersonaValids = [
+  'FAMILIA',
+  'AMICS',
+  'EMPRESA',
+  'ALTRES'
+];
+
+if (
+  $tipusPersona !== null &&
+  !in_array($tipusPersona, $tipusPersonaValids, true)
+) {
+  $errors['tipus_persona'] = 'format_invalid';
+}
+
+
+// Validar UUID
+
 $regexUuid = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
 
-if ($id !== null && !preg_match($regexUuid, $id)) {
-  $errors['id'] = 'format_invalid';
+foreach (
+  [
+    'id' => $id,
+    'ciutat_id' => $ciutatId,
+    'provincia_id' => $provinciaId,
+    'pais_id' => $paisId
+  ] as $field => $value
+) {
+
+  if ($value !== null && !preg_match($regexUuid, $value)) {
+    $errors[$field] = 'format_invalid';
+  }
 }
 
-if ($tipus !== null && !preg_match($regexUuid, $tipus)) {
-  $errors['tipus'] = 'format_invalid';
-}
-
-if ($pais !== null && !preg_match($regexUuid, $pais)) {
-  $errors['pais'] = 'format_invalid';
-}
 
 if (!empty($errors)) {
-  Response::error(MissatgesAPI::error('validacio'), $errors, httpCode: 400);
+  Response::error(
+    MissatgesAPI::error('validacio'),
+    $errors,
+    httpCode: 400
+  );
+
   exit;
 }
 
-// Convertir id, tipus i pais (UUID strings) a binari
-$idBinari = Uuid::toBinary($id);
-$tipusIdBinari = Uuid::toBinary($tipus);
-$paisIdBinari = Uuid::toBinary($pais);
 
-// Construcció dinàmica del query
-$query = "UPDATE db_contactes SET nom = :nom, cognoms = :cognoms, email = :email, tel_1 = :tel_1, tel_2 = :tel_2, tel_3 = :tel_3, adreca = :adreca, data_naixement = :data_naixement, web = :web, tipus_id = :tipus_id, pais_id = :pais_id";
+// Convertir UUIDs a binari
+
+$idBinari = Uuid::toBinary($id);
+
+$ciutatIdBinari = $ciutatId !== null
+  ? Uuid::toBinary($ciutatId)
+  : null;
+
+$provinciaIdBinari = $provinciaId !== null
+  ? Uuid::toBinary($provinciaId)
+  : null;
+
+$paisIdBinari = $paisId !== null
+  ? Uuid::toBinary($paisId)
+  : null;
+
+
+// UPDATE
+
+$query = "
+  UPDATE db_contactes SET
+    tipus_persona = :tipus_persona,
+    nom = :nom,
+    cognoms = :cognoms,
+    empresa = :empresa,
+    nif = :nif,
+    email = :email,
+    tel_1 = :tel_1,
+    tel_2 = :tel_2,
+    data_naixement = :data_naixement,
+    adreca = :adreca,
+    cp = :cp,
+    ciutat_id = :ciutat_id,
+    provincia_id = :provincia_id,
+    pais_id = :pais_id,
+    web = :web
+  WHERE id = :id
+";
 
 $binds = [
+  ':tipus_persona' => [$tipusPersona, PDO::PARAM_STR],
   ':nom' => [$nom, PDO::PARAM_STR],
   ':cognoms' => [$cognoms, PDO::PARAM_STR],
+  ':empresa' => [$empresa, PDO::PARAM_STR],
+  ':nif' => [$nif, PDO::PARAM_STR],
   ':email' => [$email, PDO::PARAM_STR],
   ':tel_1' => [$tel_1, PDO::PARAM_STR],
   ':tel_2' => [$tel_2, PDO::PARAM_STR],
-  ':tel_3' => [$tel_3, PDO::PARAM_STR],
-  ':adreca' => [$adreca, PDO::PARAM_STR],
   ':data_naixement' => [$data_naixement, PDO::PARAM_STR],
-  ':web' => [$web, PDO::PARAM_STR],
-  ':tipus_id' => [$tipusIdBinari, PDO::PARAM_LOB],
+  ':adreca' => [$adreca, PDO::PARAM_STR],
+  ':cp' => [$cp, PDO::PARAM_STR],
+  ':ciutat_id' => [$ciutatIdBinari, PDO::PARAM_LOB],
+  ':provincia_id' => [$provinciaIdBinari, PDO::PARAM_LOB],
   ':pais_id' => [$paisIdBinari, PDO::PARAM_LOB],
+  ':web' => [$web, PDO::PARAM_STR],
+  ':id' => [$idBinari, PDO::PARAM_LOB],
 ];
 
-$query .= " WHERE id = :id";
-$binds[':id'] = [$idBinari, PDO::PARAM_LOB];
 
 try {
+
   $stmt = $pdo->prepare($query);
 
   foreach ($binds as $param => [$value, $type]) {
@@ -123,6 +200,7 @@ try {
     httpCode: 200
   );
 } catch (PDOException $e) {
+
   Response::error(
     MissatgesAPI::error('errorBD'),
     [

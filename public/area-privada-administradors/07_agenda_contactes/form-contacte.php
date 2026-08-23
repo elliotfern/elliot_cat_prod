@@ -1,107 +1,239 @@
 <?php
 
+use App\Utils\Url;
+
 /** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
 <div id="barraNavegacioContenidor"></div>
 
 <div class="form">
-  <h2>Base de dades: Agenda de contactes</h2>
-  <h4 id="titolForm"></h4>
 
-  <div id="okMessage" class="alert alert-success d-none">
-    <span id="okText"></span>
+  <h1>Gestió Contactes</h1>
+  <h3><span id="titolForm"></span></h3>
+
+  <div class="alert alert-success d-none" id="okMessage" role="alert">
+    <div id="okText"></div>
   </div>
 
-  <div id="errMessage" class="alert alert-danger d-none">
-    <span id="errText"></span>
+  <div class="alert alert-danger d-none" id="errMessage" role="alert">
+    <div id="errText"></div>
   </div>
 
-  <form id="formContacte" class="row g-3">
+  <form method="POST" action="" id="formContacte" class="needs-validation" novalidate>
 
-    <input type="hidden" id="id" name="id" value="">
+    <input type="hidden" id="id" name="id">
 
-    <div class="col-md-4">
-      <label>Nom:</label>
-      <input class="form-control" type="text" name="nom" id="nom" value="">
-    </div>
+    <div class="row g-3">
 
-    <div class="col-md-4">
-      <label>Cognoms:</label>
-      <input class="form-control" type="text" name="cognoms" id="cognoms" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Telèfon 1:</label>
-      <input class="form-control" type="text" name="tel_1" id="tel_1" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Telèfon 2:</label>
-      <input class="form-control" type="text" name="tel_2" id="tel_2" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Telèfon 3:</label>
-      <input class="form-control" type="text" name="tel_3" id="tel_3" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Correu electrònic:</label>
-      <input class="form-control" type="text" name="email" id="email" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Adreça:</label>
-      <input class="form-control" type="text" name="adreca" id="adreca" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Data naixement:</label>
-      <input class="form-control" type="text" name="data_naixement" id="data_naixement" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Pàgina web:</label>
-      <input class="form-control" type="text" name="web" id="web" value="">
-    </div>
-
-    <div class="col-md-4">
-      <label>Tipus de contacte:</label>
-      <select class="form-select" name="tipus_id" id="tipus_id">
-      </select>
-    </div>
-
-    <div class="col-md-4">
-      <label>País:</label>
-      <select class="form-select" name="pais_id" id="pais_id">
-      </select>
-    </div>
-
-    <div class="col-md-4">
-    </div>
-
-    <div id="inputPais" class="col-md-12"> </div>
-
-    <div class="col-12 mt-4">
-      <div class="d-flex justify-content-between">
-        <a id="btnTornar" class="btn btn-secondary" href="#">
-          Fitxa llibre
-        </a>
-
-        <div class="d-flex gap-2">
-          <a
-            id="btnVeureFitxa"
-            class="btn btn-success d-none"
-            href="#">
-            Veure fitxa
-          </a>
-
-          <button id="btnForm" type="submit" class="btn btn-primary">
-            Afegir
-          </button>
-        </div>
+      <!-- TIPUS DE CONTACTE -->
+      <div class="col-md-4">
+        <label for="tipus_persona" class="form-label">Tipus de contacte *</label>
+        <select
+          class="form-select"
+          id="tipus_persona"
+          name="tipus_persona"
+          required>
+          <option value="">Selecciona un tipus</option>
+          <option value="FAMILIA">Família</option>
+          <option value="AMICS">Amics</option>
+          <option value="EMPRESA">Empresa</option>
+          <option value="ALTRES">Altres</option>
+        </select>
+        <div class="invalid-feedback" id="error-tipus_persona"></div>
       </div>
+
+      <!-- NOM -->
+      <div class="col-md-4">
+        <label for="nom" class="form-label">Nom *</label>
+        <input
+          type="text"
+          class="form-control"
+          id="nom"
+          name="nom"
+          maxlength="255"
+          required>
+        <div class="invalid-feedback" id="error-nom"></div>
+      </div>
+
+      <!-- COGNOMS -->
+      <div class="col-md-4">
+        <label for="cognoms" class="form-label">Cognoms</label>
+        <input
+          type="text"
+          class="form-control"
+          id="cognoms"
+          name="cognoms"
+          maxlength="255">
+        <div class="invalid-feedback" id="error-cognoms"></div>
+      </div>
+
+      <!-- EMPRESA -->
+      <div class="col-md-4">
+        <label for="empresa" class="form-label">Empresa</label>
+        <input
+          type="text"
+          class="form-control"
+          id="empresa"
+          name="empresa"
+          maxlength="255">
+        <div class="invalid-feedback" id="error-empresa"></div>
+      </div>
+
+      <!-- NIF -->
+      <div class="col-md-4">
+        <label for="nif" class="form-label">NIF</label>
+        <input
+          type="text"
+          class="form-control"
+          id="nif"
+          name="nif"
+          maxlength="20">
+        <div class="invalid-feedback" id="error-nif"></div>
+      </div>
+
+      <!-- EMAIL -->
+      <div class="col-md-4">
+        <label for="email" class="form-label">Email</label>
+        <input
+          type="email"
+          class="form-control"
+          id="email"
+          name="email"
+          maxlength="255">
+        <div class="invalid-feedback" id="error-email"></div>
+      </div>
+
+      <!-- WEB -->
+      <div class="col-md-4">
+        <label for="web" class="form-label">Web</label>
+        <input
+          type="url"
+          class="form-control"
+          id="web"
+          name="web"
+          maxlength="255"
+          placeholder="https://exemple.com">
+        <div class="invalid-feedback" id="error-web"></div>
+      </div>
+
+      <!-- TELÈFON 1 -->
+      <div class="col-md-4">
+        <label for="tel_1" class="form-label">Telèfon 1</label>
+        <input
+          type="tel"
+          class="form-control"
+          id="tel_1"
+          name="tel_1"
+          maxlength="255">
+        <div class="invalid-feedback" id="error-tel_1"></div>
+      </div>
+
+      <!-- TELÈFON 2 -->
+      <div class="col-md-4">
+        <label for="tel_2" class="form-label">Telèfon 2</label>
+        <input
+          type="tel"
+          class="form-control"
+          id="tel_2"
+          name="tel_2"
+          maxlength="255">
+        <div class="invalid-feedback" id="error-tel_2"></div>
+      </div>
+
+      <hr>
+
+      <!-- DATA NAIXEMENT -->
+      <div class="col-md-4">
+        <label for="data_naixement" class="form-label">Data de naixement</label>
+        <input
+          type="date"
+          class="form-control"
+          id="data_naixement"
+          name="data_naixement">
+        <div class="invalid-feedback" id="error-data_naixement"></div>
+      </div>
+
+      <hr>
+
+      <!-- ADREÇA -->
+      <div class="col-md-8">
+        <label for="adreca" class="form-label">Adreça</label>
+        <input
+          type="text"
+          class="form-control"
+          id="adreca"
+          name="adreca"
+          maxlength="255">
+        <div class="invalid-feedback" id="error-adreca"></div>
+      </div>
+
+      <!-- CP -->
+      <div class="col-md-4">
+        <label for="cp" class="form-label">Codi Postal</label>
+        <input
+          type="text"
+          class="form-control"
+          id="cp"
+          name="cp"
+          maxlength="20">
+        <div class="invalid-feedback" id="error-cp"></div>
+      </div>
+
+      <!-- CIUTAT -->
+      <div class="col-md-4">
+        <label for="ciutat_id" class="form-label">Ciutat</label>
+        <select
+          class="form-select"
+          id="ciutat_id"
+          name="ciutat_id"></select>
+        <div class="invalid-feedback" id="error-ciutat_id"></div>
+      </div>
+
+      <!-- PROVÍNCIA -->
+      <div class="col-md-4">
+        <label for="provincia_id" class="form-label">Província</label>
+        <select
+          class="form-select"
+          id="provincia_id"
+          name="provincia_id"></select>
+        <div class="invalid-feedback" id="error-provincia_id"></div>
+      </div>
+
+      <!-- PAÍS -->
+      <div class="col-md-4">
+        <label for="pais_id" class="form-label">País</label>
+        <select
+          class="form-select"
+          id="pais_id"
+          name="pais_id"></select>
+        <div class="invalid-feedback" id="error-pais_id"></div>
+      </div>
+
+      <hr>
+
+      <div id="inputCiutat" class="col-md-12"></div>
+      <div id="inputProvincia" class="col-md-12"></div>
+      <div id="inputPais" class="col-md-12"></div>
+
+    </div>
+
+    <!-- BOTONES -->
+    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+
+      <a
+        href="<?php echo Url::intranet('agenda-contactes'); ?>/llistat-contactes"
+        class="btn btn-outline-secondary">
+        ← Tornar enrere
+      </a>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        id="btnForm">
+        Introduir dades
+      </button>
+
     </div>
 
   </form>

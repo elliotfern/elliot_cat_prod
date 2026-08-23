@@ -1,7 +1,5 @@
 export interface Contacte {
-  slug: string;
   url: string;
-  idTema: number;
   nom: string;
   cognoms: string;
   linkId: number;
@@ -10,10 +8,13 @@ export interface Contacte {
   email: string;
   tel_1: string;
   tel_2: string;
-  tel_3: string;
   id: number;
   tipus_id: string;
   pais_id: string;
   tipus: string;
   pais_ca: string;
+  empresa: string;
+  tipus_persona: string;
+  provincia_id: string;
+  ciutat_id: string;
 }

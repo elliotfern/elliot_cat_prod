@@ -11,55 +11,68 @@ export async function taulaLlistatContactes() {
     {
       header: 'Nom i cognoms',
       field: 'cognoms',
-      render: (_: unknown, row: Contacte) => `${row.nom} ${row.cognoms}`,
+      render: (_: unknown, row: Contacte) => `${row.nom} ${row.cognoms ?? ''}`,
+    },
+    {
+      header: 'Empresa',
+      field: 'empresa',
     },
     {
       header: 'Dades contacte',
-      field: 'cognoms',
+      field: 'email',
       render: (_: unknown, row: Contacte) => {
-        // Inicializamos un array para almacenar los elementos válidos
         const contactLinks = [];
 
-        // Verificamos si el correo electrónico no está vacío o es nulo y lo agregamos como enlace mailto
-        if (row.email && row.email !== '') {
+        if (row.email) {
           contactLinks.push(`<a href="mailto:${row.email}">${row.email}</a>`);
         }
 
-        // Verificamos si el teléfono 1 no está vacío o es nulo y lo agregamos como enlace tel:
-        if (row.tel_1 && row.tel_1 !== '') {
+        if (row.tel_1) {
           contactLinks.push(`<a href="tel:${row.tel_1}">${row.tel_1}</a>`);
         }
 
-        // Verificamos si el teléfono 2 no está vacío o es nulo y lo agregamos como enlace tel:
-        if (row.tel_2 && row.tel_2 !== '') {
+        if (row.tel_2) {
           contactLinks.push(`<a href="tel:${row.tel_2}">${row.tel_2}</a>`);
         }
 
-        // Verificamos si el teléfono 3 no está vacío o es nulo y lo agregamos como enlace tel:
-        if (row.tel_3 && row.tel_3 !== '') {
-          contactLinks.push(`<a href="tel:${row.tel_3}">${row.tel_3}</a>`);
-        }
+        return contactLinks.join(' / ');
+      },
+    },
+    {
+      header: 'Tipus',
+      field: 'tipus_persona',
+      render: (_: unknown, row: Contacte) => {
+        switch (row.tipus_persona) {
+          case 'FAMILIA':
+            return '<span class="badge bg-success">Família</span>';
 
-        // Si hay algún dato válido en el array, los unimos con " / " y los devolvemos
-        if (contactLinks.length > 0) {
-          return contactLinks.join(' / ');
-        } else {
-          return ''; // Si no hay datos, devolvemos una cadena vacía
+          case 'AMICS':
+            return '<span class="badge bg-primary">Amics</span>';
+
+          case 'EMPRESA':
+            return '<span class="badge bg-warning text-dark">Empresa</span>';
+
+          case 'ALTRES':
+            return '<span class="badge bg-secondary">Altres</span>';
+
+          default:
+            return '';
         }
       },
     },
-    { header: 'Tipus', field: 'tipus' },
-    { header: 'País', field: 'pais_ca' },
+    {
+      header: 'País',
+      field: 'pais_ca',
+    },
     {
       header: 'Data naixement',
       field: 'tema',
       render: (_: unknown, row: Contacte) => {
-        // Verificamos si data_naixement tiene un valor válido (no null, no vacío)
-        if (row.data_naixement && row.data_naixement !== null && row.data_naixement !== '') {
-          return formatNaixementEdat(row.data_naixement); // Si es válido, mostramos la fecha formateada
-        } else {
-          return ''; // Si es null o vacío, no mostramos nada
+        if (row.data_naixement) {
+          return formatNaixementEdat(row.data_naixement);
         }
+
+        return '';
       },
     },
   ];
@@ -68,7 +81,10 @@ export async function taulaLlistatContactes() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Contacte) => `<a id="${row.idTema}" title="Modifica" href="/gestio/agenda-contactes/modifica-contacte/${row.id}"><button type="button" class="button btn-petit">Modifica</button></a>`,
+      render: (_: unknown, row: Contacte) =>
+        `<a id="${row.id}" title="Modifica" href="/gestio/agenda-contactes/modifica-contacte/${row.id}">
+          <button type="button" class="btn btn-warning btn-sm">Modifica</button>
+        </a>`,
     });
   }
 
@@ -76,7 +92,7 @@ export async function taulaLlistatContactes() {
     url: `contactes/get/llistatContactes`,
     containerId: 'taulaLlistatContactes',
     columns,
-    filterKeys: ['nom', 'cognoms'],
-    filterByField: 'tipus',
+    filterKeys: ['nom', 'cognoms', 'empresa'],
+    filterByField: 'tipus_persona',
   });
 }
