@@ -20,6 +20,7 @@ export interface Factura {
   recurrent: boolean;
   frequencia: 'mensual' | 'trimestral' | 'anual' | null;
   productes?: ProducteFactura[];
+  empresa: string;
 }
 
 export interface ProducteFactura {

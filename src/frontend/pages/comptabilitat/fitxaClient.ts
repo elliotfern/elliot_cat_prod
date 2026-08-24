@@ -1,7 +1,9 @@
 import { api } from '../../core/api/client';
 import { Client } from '../../types/Client';
+import { Button } from '../../ui/button';
 import { API_URLS } from '../../utils/apiUrls';
 import { formatDataCatala } from '../../utils/formataData';
+import { INTRANET_URLS } from '../../utils/IntranetUrls';
 import { renderClientFactures } from './fitxaClientFactures';
 import { renderClientPressupostos } from './fitxaClientPressupostos';
 
@@ -49,12 +51,7 @@ function renderClient(response: Client) {
           ${v(client.estat)}
         </span>
 
-        <a
-          href="/gestio/comptabilitat/modifica-client/${client.id}"
-          class="btn btn-secondary btn-sm">
-          Modifica client
-        </a>
-
+        ${Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(client.id))}
       </div>
 
       <div class="card-body">

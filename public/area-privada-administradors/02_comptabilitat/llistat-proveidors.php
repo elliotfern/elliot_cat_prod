@@ -1,18 +1,21 @@
 <?php
 
-use App\Utils\Url;
+use App\Utils\Routes;
+use App\Utils\Button;
+
+/** @var App\Infrastructure\View\ViewModel $viewModel */
 ?>
 
 <div id="barraNavegacioContenidor"></div>
+
 <h1>Gestió Comptabilitat i Clients</h1>
-<h2>Llistat de Proveïdors</h2>
+<h3>Llistat de Proveïdors</h3>
 
-<div class="d-flex flex-wrap gap-2 my-3">
-    <a
-        href="<?php echo Url::intranet('comptabilitat'); ?>/nou-proveidor"
-        class="btn btn-secondary btn-sm">
-        Crear proveidor
-    </a>
-</div>
+<?php if ($viewModel->isAdmin) : ?>
+    <div class="d-flex flex-wrap gap-2 my-3">
+        <?= Button::create('Crear proveïdor', Routes::contactes()->nouContacte()) ?>
+    </div>
 
-<div id="taulaLlistatProveidors"></div>
+    <div id="taulaLlistatProveidors"></div>
+
+<?php endif; ?>

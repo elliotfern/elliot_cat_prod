@@ -14,15 +14,6 @@ class ComptabilitatRoutes
     // -------------------------
     // CREAR
     // -------------------------
-    public function nouClient(): string
-    {
-        return $this->base() . '/nou-client';
-    }
-
-    public function nouProveidor(): string
-    {
-        return $this->base() . '/nou-proveidor';
-    }
 
     public function nouPressupost(): string
     {

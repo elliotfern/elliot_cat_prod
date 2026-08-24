@@ -12,8 +12,8 @@ use App\Utils\Button;
 <?php if ($viewModel->isAdmin) : ?>
   <div class="d-flex flex-wrap gap-2 my-3">
     <?=
-    Button::create('Crear client', Routes::comptabilitat()->nouClient()) .
-      Button::create('Crear proveïdor', Routes::comptabilitat()->nouProveidor()) .
+    Button::create('Crear client', Routes::contactes()->nouContacte()) .
+      Button::create('Crear proveïdor', Routes::contactes()->nouContacte()) .
       Button::create('Crear pressupost', Routes::comptabilitat()->nouPressupost()) .
       Button::create('Crear factura', Routes::comptabilitat()->novaFactura()) .
       Button::create('Crear factura proveïdor', Routes::comptabilitat()->novaFacturaProveidor()) ?>

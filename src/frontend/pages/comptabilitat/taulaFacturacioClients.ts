@@ -1,18 +1,15 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { formatData } from '../../utils/formataData';
-import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Factura } from '../../types/Factura';
 import { API_URLS } from '../../utils/apiUrls';
-import { DOMAIN_WEB } from '../../utils/urls';
+import { api } from '../../core/api/client';
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
-// 👉 Generador PDF por idioma
-async function generatePDF(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'it', fileName?: string, btn?: HTMLButtonElement | null) {
+// Generador PDF por idioma
+async function generatePDF(invoiceId: string, lang: 'ca' | 'es' | 'en' | 'it', fileName?: string, btn?: HTMLButtonElement | null) {
   const prevLabel = btn?.textContent;
+
   if (btn) {
     btn.disabled = true;
     btn.textContent = 'Generant...';
@@ -20,17 +17,27 @@ async function generatePDF(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'it', f
 
   try {
     const endpoint = API_URLS.GET.INVOICE_PDF(invoiceId, lang);
-    const res = await fetch(endpoint, { credentials: 'include' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-    const blob = await res.blob();
+    const response = await fetch(endpoint, {
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const blob = await response.blob();
+
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement('a');
     a.href = url;
     a.download = fileName || `invoice_${invoiceId}_${lang}.pdf`;
+
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+
     URL.revokeObjectURL(url);
   } catch (e) {
     console.error('Error al generar el PDF:', e);
@@ -43,8 +50,10 @@ async function generatePDF(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'it', f
   }
 }
 
-async function sendInvoiceEmail(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'it', btn?: HTMLButtonElement | null) {
-  const prev = btn?.textContent;
+// Enviar factura por email
+async function sendInvoiceEmail(invoiceId: string, lang: 'ca' | 'es' | 'en' | 'it', btn?: HTMLButtonElement | null) {
+  const prevLabel = btn?.textContent;
+
   if (btn) {
     btn.disabled = true;
     btn.textContent = 'Enviant…';
@@ -52,14 +61,8 @@ async function sendInvoiceEmail(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'i
 
   try {
     const endpoint = API_URLS.POST.ENVIAR_FACTURA_EMAIL(invoiceId, lang);
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-    if (json?.status !== 'success') throw new Error(json?.message || 'Error API');
+
+    await api.post(endpoint);
 
     alert('Enviat correctament ✅');
   } catch (e) {
@@ -68,19 +71,23 @@ async function sendInvoiceEmail(invoiceId: number, lang: 'ca' | 'es' | 'en' | 'i
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = prev || 'Enviar';
+      btn.textContent = prevLabel || 'Enviar';
     }
   }
 }
 
+// Emissors
 const EMISSORS: Record<string, string> = {
-  1: 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
-  2: 'Autònom Irlanda (1 novembre 2022 - 29 març 2026)',
-  3: 'Partita Iva Itàlia (30 març 2026 - )',
+  '019e3ebaf71370c2860a40a79fb5ad7b': 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
+
+  '019e3ebaf71370c2860a40a7a078beb4': 'Autònom Irlanda (1 novembre 2022 - 29 març 2026)',
+
+  '019e3ebaf71370c2860a40a7a15db129': 'Partita Iva Itàlia (30 març 2026 - )',
 };
 
 export function renderTitolEmissor(emissorId: string) {
   const container = document.getElementById('titolTipusFactura');
+
   if (!container) return;
 
   const titol = EMISSORS[emissorId] || 'Emissor desconegut';
@@ -92,77 +99,165 @@ export async function taulaFacturacioClients(id: string) {
   const isAdmin = await getIsAdmin();
 
   const columns: TaulaDinamica<Factura>[] = [
+    // NUMERO FACTURA
     {
       header: 'Num',
       field: 'numero_factura',
       render: (_: unknown, row: Factura) =>
-        `<a id="${row.id}" href="/gestio/comptabilitat/fitxa-factura-client/${row.id}">
+        `<a
+          id="${row.id}"
+          href="/gestio/comptabilitat/fitxa-factura-client/${row.id}">
           ${row.numero_factura}
         </a>`,
     },
+
+    // EMPRESA / CLIENT
     {
       header: 'Empresa',
-      field: 'clientEmpresa',
-      render: (_: unknown, row: Factura) => `${row.clientEmpresa ? row.clientEmpresa : `${row.clientNom} ${row.clientCognoms}`}`,
+      field: 'empresa',
+      render: (_: unknown, row: Factura) => (row.empresa ? row.empresa : `${row.nom} ${row.cognoms}`),
     },
+
+    // DATA
     {
       header: 'Data factura',
       field: 'data_factura',
-      render: (_: unknown, row: Factura) => {
-        return formatData(row.data_factura);
-      },
+      render: (_: unknown, row: Factura) => formatData(row.data_factura),
     },
+
+    // CONCEPTE
     {
       header: 'Concepte',
       field: 'concepte',
     },
+
+    // TOTAL
     {
       header: 'Total',
       field: 'total_factura',
       render: (_: unknown, row: Factura) => `${row.total_factura}€`,
     },
+
+    // ESTAT
     {
       header: 'Estat',
       field: 'estat',
-      render: (_: unknown, row: Factura) => `<button class="btn-petit btn-primari">${row.estat}</button>`,
+      render: (_: unknown, row: Factura) =>
+        `<span class="badge bg-primary">
+          ${row.estat}
+        </span>`,
     },
+
+    // PDF
     {
       header: 'PDF',
       field: 'id',
       render: (_: unknown, row: Factura) => `
-        <div class="btn-group separat">
-          <button class="btn-petit btn-secondari js-pdf" data-invoice-id="${row.id}" data-lang="ca">PDF (CA)</button>
-          <button class="btn-petit btn-secondari js-pdf" data-invoice-id="${row.id}" data-lang="es">PDF (ES)</button>
-          <button class="btn-petit btn-secondari js-pdf" data-invoice-id="${row.id}" data-lang="en">PDF (EN)</button>
-          <button class="btn-petit btn-secondari js-pdf" data-invoice-id="${row.id}" data-lang="it">PDF (IT)</button>
+        <div
+          class="btn-group"
+          role="group"
+          aria-label="Generar PDF">
+
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary js-pdf"
+            data-invoice-id="${row.id}"
+            data-lang="ca">
+            CA
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary js-pdf"
+            data-invoice-id="${row.id}"
+            data-lang="es">
+            ES
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary js-pdf"
+            data-invoice-id="${row.id}"
+            data-lang="en">
+            EN
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary js-pdf"
+            data-invoice-id="${row.id}"
+            data-lang="it">
+            IT
+          </button>
+
         </div>
       `,
     },
+
+    // EMAIL
     {
       header: 'Enviar email',
       field: 'id',
       render: (_: unknown, row: Factura) => `
-        <div class="btn-group separat">
-          <button class="btn-petit btn-secondari js-send" data-invoice-id="${row.id}" data-lang="ca">CA</button>
-          <button class="btn-petit btn-secondari js-send" data-invoice-id="${row.id}" data-lang="es">ES</button>
-          <button class="btn-petit btn-secondari js-send" data-invoice-id="${row.id}" data-lang="en">EN</button>
-          <button class="btn-petit btn-secondari js-send" data-invoice-id="${row.id}" data-lang="it">IT</button>
+        <div
+          class="btn-group"
+          role="group"
+          aria-label="Enviar email">
+
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary js-send"
+            data-invoice-id="${row.id}"
+            data-lang="ca">
+            CA
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary js-send"
+            data-invoice-id="${row.id}"
+            data-lang="es">
+            ES
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary js-send"
+            data-invoice-id="${row.id}"
+            data-lang="en">
+            EN
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm btn-secondary js-send"
+            data-invoice-id="${row.id}"
+            data-lang="it">
+            IT
+          </button>
+
         </div>
       `,
     },
   ];
 
   if (isAdmin) {
-    columns.push({
+    const columnaAccions: TaulaDinamica<Factura> = {
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Factura) => `
-        <a href="/gestio/comptabilitat/modifica-factura/${row.id}">
-          <button class="btn-petit">Modifica</button>
-        </a>`,
-    });
+      render: (_: unknown, row: Factura): string => `
+      <a
+        href="/gestio/comptabilitat/modifica-factura/${row.id}"
+        class="btn btn-sm btn-warning">
+        Modifica
+      </a>
+    `,
+    };
+
+    columns.push(columnaAccions);
   }
 
+  // TABLA
   renderDynamicTable({
     url: `${API_URLS.GET.FACTURACIO_CLIENTS}?id=${id}`,
     containerId: 'taulaLlistatFactures',
@@ -171,28 +266,41 @@ export async function taulaFacturacioClients(id: string) {
     filterByField: 'any',
   });
 
-  const container = document.getElementById('taulaLlistatFactures');
+  // TITULO EMISOR
   renderTitolEmissor(id);
+
+  // EVENTOS
+  const container = document.getElementById('taulaLlistatFactures');
 
   container?.addEventListener('click', (ev) => {
     const target = ev.target as HTMLElement;
 
+    // PDF
     const btnPdf = target.closest<HTMLButtonElement>('.js-pdf');
+
     if (btnPdf) {
-      const idNum = Number(btnPdf.dataset.invoiceId);
+      const invoiceId = btnPdf.dataset.invoiceId;
+
       const lang = btnPdf.dataset.lang as 'ca' | 'es' | 'en' | 'it';
-      if (!idNum || !lang) return;
-      void generatePDF(idNum, lang);
+
+      if (!invoiceId || !lang) return;
+
+      void generatePDF(invoiceId, lang, undefined, btnPdf);
+
       return;
     }
 
+    // EMAIL
     const btnSend = target.closest<HTMLButtonElement>('.js-send');
+
     if (btnSend) {
-      const idNum = Number(btnSend.dataset.invoiceId);
+      const invoiceId = btnSend.dataset.invoiceId;
+
       const lang = btnSend.dataset.lang as 'ca' | 'es' | 'en' | 'it';
-      if (!idNum || !lang) return;
-      void sendInvoiceEmail(idNum, lang, btnSend);
-      return;
+
+      if (!invoiceId || !lang) return;
+
+      void sendInvoiceEmail(invoiceId, lang, btnSend);
     }
   });
 }

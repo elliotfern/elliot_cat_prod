@@ -4,14 +4,17 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { API_URLS } from '../../utils/apiUrls';
 
-const RECEPTORS: Record<number, string> = {
-  1: 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
-  2: 'Autònom Irlanda (1 novembre 2022 - 29 març 2026)',
-  3: 'Partita Iva Itàlia (30 març 2026 - )',
-  4: 'Despeses personals',
+const RECEPTORS: Record<string, string> = {
+  '019e3ebaf71370c2860a40a79fb5ad7b': 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
+
+  '019e3ebaf71370c2860a40a7a078beb4': 'Autònom Irlanda (1 novembre 2022 - 29 març 2026)',
+
+  '019e3ebaf71370c2860a40a7a15db129': 'Partita Iva Itàlia (30 març 2026 - )',
+
+  '019e3ebaf71370c2860a40a7a241e107': 'Despeses personals',
 };
 
-export function renderTitolReceptor(receptorId: number) {
+export function renderTitolReceptor(receptorId: string) {
   const container = document.getElementById('titolTipusFactura');
   if (!container) return;
 
@@ -19,7 +22,7 @@ export function renderTitolReceptor(receptorId: number) {
   container.innerHTML = `<h3>${titol}</h3>`;
 }
 
-export async function taulaDespeses(receptorId: number, tipus_despesa: string) {
+export async function taulaDespeses(receptorId: string, tipus_despesa: string) {
   const isAdmin = await getIsAdmin();
 
   const columns: TaulaDinamica<any>[] = [

@@ -105,7 +105,8 @@ function i18nInvoice(string $lang): array
 
 function fetchInvoiceAndProducts(int $idInvoice): array
 {
-  $url     = "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id={$idInvoice}";
+  $web = $_ENV['DOMAIN_WEB'] ?? null;
+  $url     = $web . "/api/comptabilitat/get/facturaCompleta?id={$idInvoice}";
   $payload = hacerLlamadaAPI($url);
 
   $obj  = $payload['factura']  ?? null;
@@ -135,8 +136,13 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
   $nif           = $obj['clientNIF']        ?? '';
   $cp            = $obj['clientCP']         ?? '';
 
-  $facDate_net   = !empty($obj['yearInvoice'])      ? date('d/m/Y', strtotime($obj['yearInvoice']))      : '';
-  $facDue_net    = !empty($obj['data_venciment'])   ? date('d/m/Y', strtotime($obj['data_venciment']))   : '';
+  $facDate_net = !empty($obj['data_factura'])
+    ? date('d/m/Y', strtotime($obj['data_factura']))
+    : '';
+
+  $facDue_net = !empty($obj['data_venciment'])
+    ? date('d/m/Y', strtotime($obj['data_venciment']))
+    : '';
 
   $tipusPagament  = $obj['tipusNom']      ?? '';
   $notesPagament  = $obj['metodeNotes']   ?? '';

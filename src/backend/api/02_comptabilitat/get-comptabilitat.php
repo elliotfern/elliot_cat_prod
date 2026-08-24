@@ -1,6 +1,5 @@
 <?php
 
-use App\Application\Client\Presenter\ClientResponse;
 use App\Application\Client\Service\ClientService;
 use App\Config\Database;
 use App\Config\DatabaseConnection;
@@ -436,7 +435,7 @@ if ($slug === 'clients') {
     $emissor_id = isset($_GET['id']) ? $_GET['id'] : null;
 
     $sql = <<<SQL
-        SELECT 
+        SELECT
             ic.id,
             ic.numero_factura,
             ic.emissor_id,
@@ -453,19 +452,37 @@ if ($slug === 'clients') {
             ic.tipus_iva,
             ic.estat,
             ic.metode_pagament,
+
             vt.ivaPercen,
+
             ist.estat,
+
             pt.tipus AS tipusNom,
             pt.notes,
-            c.clientNom,
-            c.clientCognoms,
-            c.clientEmpresa
+
+            c.nom,
+            c.cognoms,
+            c.empresa
+
         FROM %s AS ic
-        LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
-        LEFT JOIN %s AS ist ON ist.id = ic.estat
-        LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
-        LEFT JOIN %s AS c ON ic.client_id = c.id
+
+        LEFT JOIN %s AS vt
+            ON ic.tipus_iva = vt.id
+
+        LEFT JOIN %s AS ist
+            ON ist.id = ic.estat
+
+        LEFT JOIN %s AS pt
+            ON ic.metode_pagament = pt.id
+
+        LEFT JOIN %s AS cl
+            ON ic.client_id = cl.id
+
+        LEFT JOIN %s AS c
+            ON cl.contacte_id = c.id
+
         WHERE ic.emissor_id = :emissor_id
+
         ORDER BY ic.id DESC
     SQL;
 
@@ -475,7 +492,8 @@ if ($slug === 'clients') {
         qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
         qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
         qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo)
+        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_CONTACTES, $pdo)
     );
 
     try {
@@ -508,74 +526,124 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id=1"
 } else if ($slug === 'facturaCompleta') {
 
-    AuthFactory::admin()->handle();
-
     $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
-    $pdf = isset($_GET['pdf']) ? true : false; // Parámetro opcional
 
     if (!$id) {
-        Response::error(MissatgesAPI::error('missing_id'), [], 400);
+        Response::error(
+            MissatgesAPI::error('missing_id'),
+            [],
+            400
+        );
         return;
     }
 
     try {
-        // 1️⃣ Factura principal + datos cliente + IVA + estado + método pago
+
+        // ---------------------------------------------------------
+        // 1. FACTURA + CLIENT + CONTACTE + EMISSOR
+        // ---------------------------------------------------------
+
         $sqlFactura = <<<SQL
-            SELECT 
+            SELECT
                 ic.id,
-                ic.client_id,
+                ic.numero_factura,
+
                 ic.emissor_id,
+                ic.client_id,
+
                 ic.concepte,
                 ic.data_factura,
-                ic.numero_factura,
                 YEAR(ic.data_factura) AS yearInvoice,
                 CONCAT('Any ', YEAR(ic.data_factura)) AS any,
                 ic.data_venciment,
+
                 ic.base_imposable,
                 ic.despeses_extra,
                 ic.total_factura,
                 ic.import_iva,
                 ic.tipus_iva,
+
                 ic.estat,
                 ic.metode_pagament,
+
                 ic.notes,
                 ic.projecte_id,
                 ic.arxiu_url,
                 ic.recurrent,
                 ic.frequencia,
+
                 vt.ivaPercen,
+
                 ist.estat AS estatNom,
+
                 pt.tipus AS tipusNom,
                 pt.notes AS metodeNotes,
-                c.clientNom,
-                c.clientCognoms,
-                c.clientEmpresa,
-                c.clientEmail,
-                c.clientWeb,
-                c.clientNIF,
-                c.clientAdreca,
-                ciu.ciutat AS clientCiutat,
+
+                -- CONTACTE DEL CLIENT
+                co.nom AS clientNom,
+                co.cognoms AS clientCognoms,
+                co.empresa AS clientEmpresa,
+                co.email AS clientEmail,
+                co.web AS clientWeb,
+                co.nif AS clientNIF,
+                co.adreca AS clientAdreca,
+                co.cp AS clientCP,
+
+                ciu.ciutat_ca AS clientCiutat,
                 pro.provincia_ca AS clientProvincia,
                 pa.pais_ca AS clientPais,
-                c.clientCP,
+
+                -- EMISSOR
                 e.nom AS emissorNom,
                 e.nif AS emissorNIF,
                 e.numero_iva AS emissorNumeroIVA,
                 e.adreca AS emissorAdreca,
                 e.telefon AS emissorTelefon,
                 e.email AS emissorEmail,
+
                 pai.pais_ca AS emissorPais
+
             FROM %s AS ic
-            LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
-            LEFT JOIN %s AS ist ON ist.id = ic.estat
-            LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
-            LEFT JOIN %s AS c ON ic.client_id = c.id
-            LEFT JOIN %s AS ciu ON ciu.id = c.ciutat_id
-            LEFT JOIN %s AS pro ON pro.id = c.provincia_id
-            LEFT JOIN %s AS pa ON pa.id = c.pais_id
-            LEFT JOIN %s AS e ON e.id = ic.emissor_id
-            LEFT JOIN %s AS pai ON pai.id = e.pais_id
+
+            LEFT JOIN %s AS vt
+                ON ic.tipus_iva = vt.id
+
+            LEFT JOIN %s AS ist
+                ON ic.estat = ist.id
+
+            LEFT JOIN %s AS pt
+                ON ic.metode_pagament = pt.id
+
+            -- CLIENT
+            LEFT JOIN %s AS c
+                ON ic.client_id = c.id
+
+            -- CONTACTE
+            LEFT JOIN %s AS co
+                ON c.contacte_id = co.id
+
+            -- CIUTAT DEL CONTACTE
+            LEFT JOIN %s AS ciu
+                ON co.ciutat_id = ciu.id
+
+            -- PROVÍNCIA DEL CONTACTE
+            LEFT JOIN %s AS pro
+                ON co.provincia_id = pro.id
+
+            -- PAÍS DEL CONTACTE
+            LEFT JOIN %s AS pa
+                ON co.pais_id = pa.id
+
+            -- EMISSOR
+            LEFT JOIN %s AS e
+                ON ic.emissor_id = e.id
+
+            -- PAÍS DE L'EMISSOR
+            LEFT JOIN %s AS pai
+                ON e.pais_id = pai.id
+
             WHERE ic.id = :id
+
             LIMIT 1
         SQL;
 
@@ -586,32 +654,50 @@ if ($slug === 'clients') {
             qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
             qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
             qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+            qi(Tables::DB_CONTACTES, $pdo),
             qi(Tables::DB_CIUTATS, $pdo),
             qi(Tables::DB_PROVINCIES, $pdo),
             qi(Tables::DB_PAISOS, $pdo),
             qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo),
-            qi(Tables::DB_PAISOS, $pdo),
+            qi(Tables::DB_PAISOS, $pdo)
         );
 
-        $result = $db->getData($queryFactura, [':id' => $id], true);
+        $result = $db->getData(
+            $queryFactura,
+            [':id' => $id],
+            true
+        );
 
         if (!$result) {
-            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
             return;
         }
 
-        // 2️⃣ Productos asociados por numero_factura
+
+        // ---------------------------------------------------------
+        // 2. PRODUCTES DE LA FACTURA
+        // ---------------------------------------------------------
+
         $sqlProductes = <<<SQL
-            SELECT 
+            SELECT
                 p.id,
                 p.factura_id,
-                pd.producte,
                 p.producte_id,
+                pd.producte,
                 p.descripcio,
                 p.preu
+
             FROM %s AS p
-            LEFT JOIN %s AS pd ON pd.id = p.producte_id
-            WHERE p.factura_id = :numero_factura
+
+            LEFT JOIN %s AS pd
+                ON pd.id = p.producte_id
+
+            WHERE p.factura_id = :factura_id
+
             ORDER BY p.id ASC
         SQL;
 
@@ -621,20 +707,36 @@ if ($slug === 'clients') {
             qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
         );
 
-        $productes = $db->getData($queryProductes, [':numero_factura' => $result['numero_factura']], false);
+        $productes = $db->getData(
+            $queryProductes,
+            [':factura_id' => $result['id']],
+            false
+        );
 
-        // 3️⃣ Devolvemos todo junto
+
+        // ---------------------------------------------------------
+        // 3. RESPUESTA
+        // ---------------------------------------------------------
+
         Response::success(
-            MissatgesAPI::success('get'),
-            [
+            message: MissatgesAPI::success('get'),
+            data: [
                 'factura' => $result,
                 'productes' => $productes
             ],
             httpCode: 200
         );
     } catch (PDOException $e) {
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [
+                'message' => $e->getMessage()
+            ],
+            500
+        );
     }
+
 
     // GET : Llistat despeses
     // ruta => "https://elliot.cat/api/comptabilitat/get/despeses?receptor_id={id}&tipus_despesa={personal|professional}"
@@ -642,11 +744,11 @@ if ($slug === 'clients') {
 
     AuthFactory::admin()->handle();
 
-    $receptor_id = isset($_GET['receptor_id']) ? (int) $_GET['receptor_id'] : null;
+    $receptor_id = isset($_GET['receptor_id']) ? $_GET['receptor_id'] : null;
     $tipus_despesa = isset($_GET['tipus_despesa']) ? $_GET['tipus_despesa'] : null;
 
     $sql = <<<SQL
-        SELECT 
+        SELECT
             d.id,
             d.data,
             YEAR(d.data) AS yearDespesa,
@@ -668,12 +770,17 @@ if ($slug === 'clients') {
             d.recurrent,
             d.frequencia,
             d.notes,
-            p.nom AS proveidorNom,
+
+            pc.nom AS proveidorNom,
+            pc.empresa AS proveidorEmpresa,
             p.id AS proveidorId,
+
             c.nom AS nomCategoria,
             s.nom AS nomSubCategoria
+
         FROM %s AS d
         LEFT JOIN %s AS p ON d.proveidor_id = p.id
+        LEFT JOIN %s AS pc ON p.contacte_id = pc.id
         LEFT JOIN %s AS c ON d.categoria_id = c.id
         LEFT JOIN %s AS s ON d.subcategoria_id = s.id
         WHERE d.tipus_despesa = :tipus_despesa
@@ -685,6 +792,7 @@ SQL;
         $sql,
         qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo),
         qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo),
+        qi(Tables::DB_CONTACTES, $pdo),
         qi(Tables::DB_COMPTABILITAT_CATEGORIES_DESPESA, $pdo),
         qi(Tables::DB_COMPTABILITAT_SUBCATEGORIES_DESPESA, $pdo)
     );
@@ -693,7 +801,7 @@ SQL;
 
         $params = [
             'tipus_despesa' => $tipus_despesa,
-            'receptor_id' => $receptor_id
+            'receptor_id' => Uuid::toBinary($receptor_id)
         ];
 
         $result = $db->getData($query, $params);
