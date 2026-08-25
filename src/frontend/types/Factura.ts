@@ -13,6 +13,7 @@ export interface Factura {
   import_iva: number;
   tipus_iva: number;
   estat: number;
+  estat_id: number;
   metode_pagament: number;
   notes: string | null;
   projecte_id: number | null;

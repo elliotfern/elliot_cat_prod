@@ -6,117 +6,265 @@ import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
 export async function formFacturaClient(isUpdate: boolean, id?: string) {
-  const form = document.getElementById('formFacturaClient') as HTMLFormElement;
-  const divTitol = document.getElementById('titolForm') as HTMLDivElement;
-  const btnSubmit = document.getElementById('btnFactura') as HTMLButtonElement;
+  const form = document.getElementById('formFacturaClient') as HTMLFormElement | null;
+  const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
+  const btnSubmit = document.getElementById('btnFactura') as HTMLButtonElement | null;
+
   if (!divTitol || !btnSubmit || !form) return;
 
   let data: Partial<Factura> = {};
 
+  /*
+   * ============================================================
+   * UPDATE
+   * ============================================================
+   */
+
   if (id && isUpdate) {
     try {
-      data = await api.get<Factura>(API_URLS.GET.FACTURA_CLIENT_ID, {
+      /*
+       * La API devuelve:
+       *
+       * {
+       *   factura: {...},
+       *   productes: [...]
+       * }
+       *
+       * Por tanto NO podemos tratar directamente la respuesta
+       * como una Factura.
+       */
+
+      const response = await api.get<{
+        factura: Factura;
+        productes: ProducteFactura[];
+      }>(API_URLS.GET.FACTURA_CLIENT_ID, {
         id,
       });
-    } catch (error) {
-      console.error(error);
 
+      data = response.factura ?? {};
+
+      /*
+       * Inicializar productos existentes
+       */
+      await initProductesFactura(response.productes ?? []);
+    } catch (error) {
+      console.error('Error obtenint la factura:', error);
       return;
     }
 
-    // Inicializar productos
-    initProductesFactura(data.productes ?? []);
+    /*
+     * Título
+     */
+    divTitol.innerHTML = `
+      <h2>Modificació dades Factura client</h2>
+    `;
 
-    divTitol.innerHTML = `<h2>Modificació dades Factura client</h2>`;
+    /*
+     * Pintar inputs del formulario
+     */
     renderFormInputs(data);
 
-    const idValue = document.querySelector('#id') as HTMLInputElement | null;
-    const idFactura = document.querySelector('#numero_factura') as HTMLInputElement | null;
+    /*
+     * Hidden fields
+     */
+    const idValue = document.querySelector<HTMLInputElement>('#id');
+    const idFactura = document.querySelector<HTMLInputElement>('#numero_factura');
 
-    if (idValue && idFactura) {
-      idValue.value = String(data.id);
-      idFactura.value = String(data.numero_factura);
+    if (idValue) {
+      idValue.value = data.id != null ? String(data.id) : '';
     }
 
-    btnSubmit.textContent = 'Modificar dades';
-    form.addEventListener('submit', (event) => transmissioDadesDB(event, 'PUT', 'formFacturaClient', API_URLS.PUT.FACTURA_CLIENT, true, 'none', preProcessFacturaFormData));
-  } else {
-    divTitol.innerHTML = `<h2>Creació de nova factura</h2>`;
-    btnSubmit.textContent = 'Inserir dades';
-    form.addEventListener('submit', (event) => transmissioDadesDB(event, 'POST', 'formFacturaClient', API_URLS.POST.FACTURA_CLIENT, true, 'none', preProcessFacturaFormData));
+    if (idFactura) {
+      idFactura.value = data.numero_factura != null ? String(data.numero_factura) : '';
+    }
 
-    initProductesFactura([]);
+    /*
+     * Botón
+     */
+    btnSubmit.textContent = 'Modificar dades';
+
+    /*
+     * Submit UPDATE
+     */
+    form.addEventListener('submit', (event) => {
+      transmissioDadesDB(event, 'PUT', 'formFacturaClient', API_URLS.PUT.FACTURA_CLIENT, true, 'none', preProcessFacturaFormData);
+    });
+
+    /*
+     * ============================================================
+     * CREATE
+     * ============================================================
+     */
+  } else {
+    divTitol.innerHTML = `
+      <h2>Creació de nova factura</h2>
+    `;
+
+    btnSubmit.textContent = 'Inserir dades';
+
+    form.addEventListener('submit', (event) => {
+      transmissioDadesDB(event, 'POST', 'formFacturaClient', API_URLS.POST.FACTURA_CLIENT, true, 'none', preProcessFacturaFormData);
+    });
+
+    await initProductesFactura([]);
   }
 
-  // Cargar selects
-  await auxiliarSelect(data.client_id ?? 0, 'clients', 'client_id', 'empresa');
+  /*
+   * ============================================================
+   * SELECTS AUXILIARS
+   * ============================================================
+   */
+
+  await auxiliarSelect(data.client_id ?? '', 'clients', 'client_id', 'empresa');
+
   await auxiliarSelect(data.tipus_iva ?? 0, 'tipusIVA', 'tipus_iva', 'ivaPercen');
-  await auxiliarSelect(data.estat ?? 0, 'estatFacturacio', 'estat', 'estat');
+
+  await auxiliarSelect(data.estat_id ?? 0, 'estatFacturacio', 'estat', 'estat');
+
   await auxiliarSelect(data.metode_pagament ?? 0, 'tipusPagament', 'metode_pagament', 'tipus_notes');
-  await auxiliarSelect(data.emissor_id ?? 0, 'emissors', 'emissor_id', 'nom');
+
+  await auxiliarSelect(data.emissor_id ?? '', 'emissors', 'emissor_id', 'nom');
+
   await auxiliarSelect(data.projecte_id ?? 0, 'projectes', 'projecte_id', 'name');
 
+  /*
+   * Factura recurrent
+   */
   initRecurrentFrecuencia(data);
 }
 
 /**
- * Preprocesa los datos del formulario de factura antes de enviar
+ * ============================================================
+ * PREPROCESAR FORMULARIO
+ * ============================================================
  */
 function preProcessFacturaFormData(rawData: Record<string, any>): Record<string, any> {
-  // Tomamos el hidden input id
+  /*
+   * ID factura
+   */
   const idInput = document.querySelector<HTMLInputElement>('#id');
-  const idValue = idInput ? Number(idInput.value) : null;
 
-  const idInput2 = document.querySelector<HTMLInputElement>('#numero_factura');
-  const idValue2 = idInput2?.value || null;
+  const idValue = idInput?.value ? Number(idInput.value) : null;
 
-  // Recoger productos de la tabla
-  const producteIds = Array.from(document.querySelectorAll<HTMLInputElement | HTMLSelectElement>('select[name="producte_id[]"]')).map((el) => Number(el.value));
+  /*
+   * Número factura
+   */
+  const numeroFacturaInput = document.querySelector<HTMLInputElement>('#numero_factura');
+
+  const numeroFactura = numeroFacturaInput?.value || null;
+
+  /*
+   * ============================================================
+   * PRODUCTES
+   * ============================================================
+   */
+
+  const producteIds = Array.from(document.querySelectorAll<HTMLSelectElement>('select[name="producte_id[]"]'))
+    .map((el) => el.value)
+    .filter((value) => value !== '')
+    .map((value) => Number(value));
+
   const descripcions = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="descripcio[]"]')).map((el) => el.value);
-  const preus = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="preu[]"]')).map((el) => Number(el.value));
 
-  // Mapear a array de objetos
-  const productes = producteIds.map((id, idx) => ({
-    producte_id: id,
-    descripcio: descripcions[idx] ?? '',
-    preu: preus[idx] ?? 0,
+  const preus = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="preu[]"]')).map((el) => {
+    const value = el.value.replace(',', '.');
+
+    return value !== '' ? Number(value) : 0;
+  });
+
+  const productes = producteIds.map((producteId, index) => ({
+    producte_id: producteId,
+    descripcio: descripcions[index] ?? '',
+    preu: preus[index] ?? 0,
   }));
 
+  /*
+   * ============================================================
+   * RESULTADO
+   * ============================================================
+   */
+
   return {
-    id: idValue, // ✅ aquí incluimos el id para el PUT
-    numero_factura: idValue2,
-    client_id: rawData.client_id ? Number(rawData.client_id) : null,
+    /*
+     * Factura
+     */
+    id: idValue,
+
+    numero_factura: numeroFactura,
+
+    /*
+     * IMPORTANTE:
+     * client_id y emissor_id son UUID.
+     * NO utilizar Number().
+     */
+    client_id: rawData.client_id != null && rawData.client_id !== '' ? String(rawData.client_id) : null,
+
+    emissor_id: rawData.emissor_id != null && rawData.emissor_id !== '' ? String(rawData.emissor_id) : null,
+
     concepte: rawData.concepte ?? null,
+
     data_factura: rawData.data_factura ?? null,
+
     data_venciment: rawData.data_venciment ?? null,
-    base_imposable: rawData.base_imposable != null ? Number(rawData.base_imposable) : 0,
-    despeses_extra: rawData.despeses_extra != null ? Number(rawData.despeses_extra) : 0,
-    total_factura: rawData.total_factura != null ? Number(rawData.total_factura) : 0,
-    import_iva: rawData.import_iva != null ? Number(rawData.import_iva) : 0,
-    tipus_iva: rawData.tipus_iva != null ? Number(rawData.tipus_iva) : 0,
-    estat: rawData.estat != null ? Number(rawData.estat) : 0,
-    metode_pagament: rawData.metode_pagament != null ? Number(rawData.metode_pagament) : 0,
-    emissor_id: rawData.emissor_id != null ? Number(rawData.emissor_id) : 0,
-    projecte_id: rawData.projecte_id != null ? Number(rawData.projecte_id) : 0,
+
+    /*
+     * Importes
+     */
+    base_imposable: rawData.base_imposable != null && rawData.base_imposable !== '' ? Number(String(rawData.base_imposable).replace(',', '.')) : 0,
+
+    despeses_extra: rawData.despeses_extra != null && rawData.despeses_extra !== '' ? Number(String(rawData.despeses_extra).replace(',', '.')) : 0,
+
+    total_factura: rawData.total_factura != null && rawData.total_factura !== '' ? Number(String(rawData.total_factura).replace(',', '.')) : 0,
+
+    import_iva: rawData.import_iva != null && rawData.import_iva !== '' ? Number(String(rawData.import_iva).replace(',', '.')) : 0,
+
+    /*
+     * Selects numéricos
+     */
+    tipus_iva: rawData.tipus_iva != null && rawData.tipus_iva !== '' ? Number(rawData.tipus_iva) : 0,
+
+    estat: rawData.estat != null && rawData.estat !== '' ? Number(rawData.estat) : 0,
+
+    metode_pagament: rawData.metode_pagament != null && rawData.metode_pagament !== '' ? Number(rawData.metode_pagament) : 0,
+
+    projecte_id: rawData.projecte_id != null && rawData.projecte_id !== '' ? Number(rawData.projecte_id) : 0,
+
+    /*
+     * Otros campos
+     */
     notes: rawData.notes ?? null,
+
     arxiu_url: rawData.arxiu_url ?? null,
+
     recurrent: rawData.recurrent ? 1 : 0,
+
     frequencia: rawData.recurrent ? rawData.frequencia || null : null,
+
+    /*
+     * Productos
+     */
     productes,
   };
 }
 
+/**
+ * ============================================================
+ * PRODUCTES DE LA FACTURA
+ * ============================================================
+ */
 export async function initProductesFactura(existingProducts: ProducteFactura[] = []) {
-  const addBtn = document.getElementById('addProducte') as HTMLButtonElement;
+  const addBtn = document.getElementById('addProducte') as HTMLButtonElement | null;
 
-  const tbody = document.querySelector('#tableProductesFactura tbody') as HTMLTableSectionElement;
+  const tbody = document.querySelector('#tableProductesFactura tbody') as HTMLTableSectionElement | null;
 
   if (!addBtn || !tbody) return;
 
-  /*
-   * Carregar productes
-   */
+  // Referencia segura para TypeScript dentro de las funciones internas
+  const tableBody = tbody;
 
+  /*
+   * Cargar catálogo de productos
+   */
   let productes: {
     id: number;
     producte: string;
@@ -130,15 +278,13 @@ export async function initProductesFactura(existingProducts: ProducteFactura[] =
       }[]
     >(API_URLS.GET.PRODUCTES);
   } catch (error) {
-    console.error(error);
-
+    console.error('Error carregant productes:', error);
     return;
   }
 
   /*
    * Crear fila
    */
-
   function crearFila(product?: ProducteFactura) {
     const row = document.createElement('tr');
 
@@ -197,44 +343,60 @@ export async function initProductesFactura(existingProducts: ProducteFactura[] =
       </td>
     `;
 
-    row.querySelector('.removeProducte')?.addEventListener('click', () => row.remove());
+    row.querySelector('.removeProducte')?.addEventListener('click', () => {
+      row.remove();
+    });
 
-    tbody.appendChild(row);
+    tableBody.appendChild(row);
   }
 
   /*
-   * Afegir fila
+   * Añadir producto
    */
-
-  addBtn.addEventListener('click', () => crearFila());
+  addBtn.addEventListener('click', () => {
+    crearFila();
+  });
 
   /*
-   * Productes existents
+   * Productos existentes
    */
-
-  existingProducts.forEach((p) => crearFila(p));
+  existingProducts.forEach((product) => {
+    crearFila(product);
+  });
 }
 
-export function initRecurrentFrecuencia(data?: any) {
-  const checkbox = document.getElementById('recurrent') as HTMLInputElement;
-  const select = document.getElementById('frequencia') as HTMLSelectElement;
+/**
+ * ============================================================
+ * FACTURA RECURRENT
+ * ============================================================
+ */
+export function initRecurrentFrecuencia(data?: Partial<Factura>) {
+  const checkbox = document.getElementById('recurrent') as HTMLInputElement | null;
+
+  const select = document.getElementById('frequencia') as HTMLSelectElement | null;
 
   if (!checkbox || !select) return;
 
-  // Estado inicial (modo UPDATE)
+  /*
+   * Estado inicial
+   */
   if (data) {
     checkbox.checked = Boolean(data.recurrent);
+
     select.disabled = !checkbox.checked;
+
     select.value = data.frequencia ?? '';
   }
 
-  // Evento cambio checkbox
+  /*
+   * Cambio checkbox
+   */
   checkbox.addEventListener('change', () => {
     if (checkbox.checked) {
       select.disabled = false;
     } else {
       select.disabled = true;
-      select.value = ''; // limpiamos
+      select.value = '';
     }
   });
 }

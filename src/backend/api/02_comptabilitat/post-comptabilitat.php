@@ -191,6 +191,7 @@ if ($slug === 'clients') {
         );
     }
 } else if ($slug === 'facturaClient') {
+
     $inputData = file_get_contents('php://input');
     $data = json_decode($inputData, true);
 
@@ -203,84 +204,236 @@ if ($slug === 'clients') {
         return;
     }
 
+    /*
+     * -------------------------------------------------------
+     * Helpers
+     * -------------------------------------------------------
+     */
 
-    // Normalizar
-    $emissor_id     = $data['emissor_id'];
-    $client_id      = $data['client_id'];
-    $tipus_iva      = $data['tipus_iva'] ?? null;
-    $estat      = $data['estat'] ?? null;
-    $metode_pagament      = $data['metode_pagament'] ?? null;
-    $projecte_id      = $data['projecte_id'] ?? null;
+    $trimOrNull = static fn($v): ?string =>
+    $v === null ? null : (trim((string)$v) ?: null);
 
-    $concepte      = $data['concepte'] ?? null;
-    $notes      = $data['notes'] ?? null;
-    $arxiu_url      = $data['arxiu_url'] ?? null;
+    $toIntOrNull = static fn($v): ?int =>
+    is_numeric($v) ? (int)$v : null;
 
-    $data_factura   = $data['data_factura'] ?? null;
-    $data_venciment   = $data['data_venciment'] ?? null;
+    $dateOrNull = static fn($v): ?string => (
+        is_string($v) &&
+        preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)
+    )
+        ? $v
+        : null;
 
-    $total_factura  = $data['total_factura'] ?? null;
-    $base_imposable  = $data['base_imposable'] ?? null;
-    $despeses_extra  = $data['despeses_extra'] ?? null;
-    $import_iva  = $data['import_iva'] ?? null;
+    $toDecimal = static function ($v): ?string {
 
-    $recurrent   = $data['recurrent'] ?? null;
-    $frequencia  = $data['frequencia'] ?? null;
+        if ($v === null || $v === '') {
+            return null;
+        }
 
-    if (!$recurrent) {
-        $frequencia = null;
-    }
+        $value = str_replace(
+            [',', ' ', "\u{00A0}"],
+            ['.', '', ''],
+            (string)$v
+        );
+
+        return preg_match('/^-?\d+(\.\d{1,4})?$/', $value)
+            ? $value
+            : null;
+    };
+
+    /*
+     * -------------------------------------------------------
+     * Datos
+     * -------------------------------------------------------
+     */
+
+    $emissor_id = $trimOrNull($data['emissor_id'] ?? null);
+    $client_id  = $trimOrNull($data['client_id'] ?? null);
+
+    $concepte = $trimOrNull($data['concepte'] ?? null);
+
+    $data_factura   = $dateOrNull($data['data_factura'] ?? null);
+    $data_venciment = $dateOrNull($data['data_venciment'] ?? null);
+
+    $base_imposable = $toDecimal($data['base_imposable'] ?? null);
+    $despeses_extra = $toDecimal($data['despeses_extra'] ?? 0);
+    $total_factura  = $toDecimal($data['total_factura'] ?? null);
+    $import_iva     = $toDecimal($data['import_iva'] ?? null);
+
+    $tipus_iva       = $toIntOrNull($data['tipus_iva'] ?? null);
+    $estat           = $toIntOrNull($data['estat'] ?? null);
+    $metode_pagament = $toIntOrNull($data['metode_pagament'] ?? null);
+    $projecte_id     = $toIntOrNull($data['projecte_id'] ?? null);
+
+    $notes     = $trimOrNull($data['notes'] ?? null);
+    $arxiu_url = $trimOrNull($data['arxiu_url'] ?? null);
+
+    $recurrent = isset($data['recurrent'])
+        ? (int)$data['recurrent']
+        : 0;
+
+    $frequencia = $recurrent
+        ? $trimOrNull($data['frequencia'] ?? null)
+        : null;
 
     $detallsProductes = $data['productes'] ?? [];
 
-    // Validación
     /*
+     * -------------------------------------------------------
+     * Validación
+     * -------------------------------------------------------
+     */
+
     $errors = [];
 
-    Validator::required($errors, 'emissor_id', $emissor_id);
-    Validator::required($errors, 'client_id', $client_id);
-    Validator::required($errors, 'concepte', $concepte);
+    if ($emissor_id === null) {
+        $errors[] = ValidacioErrors::requerit('emissor_id');
+    }
 
-    Validator::date($errors, 'data_factura', $data_factura);
-    Validator::date($errors, 'data_venciment', $data_venciment);
+    if ($client_id === null) {
+        $errors[] = ValidacioErrors::requerit('client_id');
+    }
 
-    Validator::required($errors, 'base_imposable', $base_imposable);
-    Validator::required($errors, 'total_factura', $total_factura);
-    Validator::required($errors, 'import_iva', $import_iva);
-    Validator::required($errors, 'tipus_iva', $tipus_iva);
-    Validator::required($errors, 'estat', $estat);
-    Validator::required($errors, 'metode_pagament', $metode_pagament);
+    if ($data_factura === null) {
+        $errors[] = ValidacioErrors::dataNoValida('data_factura');
+    }
 
+    if ($data_venciment === null) {
+        $errors[] = ValidacioErrors::dataNoValida('data_venciment');
+    }
+
+    if ($base_imposable === null) {
+        $errors[] = ValidacioErrors::requerit('base_imposable');
+    }
+
+    if ($total_factura === null) {
+        $errors[] = ValidacioErrors::requerit('total_factura');
+    }
+
+    if ($import_iva === null) {
+        $errors[] = ValidacioErrors::requerit('import_iva');
+    }
+
+    if ($tipus_iva === null) {
+        $errors[] = ValidacioErrors::requerit('tipus_iva');
+    }
+
+    if ($estat === null) {
+        $errors[] = ValidacioErrors::requerit('estat');
+    }
+
+    if ($metode_pagament === null) {
+        $errors[] = ValidacioErrors::requerit('metode_pagament');
+    }
 
     if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            $errors,
+            400
+        );
+        return;
     }
-*/
+
+    /*
+     * -------------------------------------------------------
+     * UUID -> BINARY(16)
+     * -------------------------------------------------------
+     */
+
     try {
-        global $conn, $userUuid;
-        $conn->beginTransaction();
 
-        $numero_factura = generarNumeroFactura($conn);
+        $emissorIdBinary = uuid::toBinary($emissor_id);
+        $clientIdBinary  = uuid::toBinary($client_id);
+    } catch (Throwable $e) {
 
-        // Inserta factura
-        $table = qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo);
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['UUID invàlid'],
+            400
+        );
+        return;
+    }
+
+    /*
+     * -------------------------------------------------------
+     * Transacción
+     * -------------------------------------------------------
+     */
+
+    try {
+
+        $pdo->beginTransaction();
+
+        /*
+         * ---------------------------------------------------
+         * Generar número factura
+         * ---------------------------------------------------
+         */
+
+        $numero_factura = generarNumeroFactura($pdo);
+
+        /*
+         * ---------------------------------------------------
+         * Insertar factura
+         * ---------------------------------------------------
+         */
+
+        $table = qi(
+            Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS,
+            $pdo
+        );
 
         $sql = <<<SQL
-                INSERT INTO {$table}
-                (numero_factura, emissor_id, client_id, concepte, data_factura, data_venciment,
-                base_imposable, despeses_extra, total_factura, import_iva, tipus_iva, estat,
-                metode_pagament, notes, projecte_id, arxiu_url, recurrent, frequencia)
-                VALUES
-                (:numero_factura, :emissor_id, :client_id, :concepte, :data_factura, :data_venciment,
-                :base_imposable, :despeses_extra, :total_factura, :import_iva, :tipus_iva, :estat,
-                :metode_pagament, :notes, :projecte_id, :arxiu_url, :recurrent, :frequencia)
-                SQL;
+            INSERT INTO {$table}
+            (
+                numero_factura,
+                emissor_id,
+                client_id,
+                concepte,
+                data_factura,
+                data_venciment,
+                base_imposable,
+                despeses_extra,
+                total_factura,
+                import_iva,
+                tipus_iva,
+                estat,
+                metode_pagament,
+                notes,
+                projecte_id,
+                arxiu_url,
+                recurrent,
+                frequencia
+            )
+            VALUES
+            (
+                :numero_factura,
+                :emissor_id,
+                :client_id,
+                :concepte,
+                :data_factura,
+                :data_venciment,
+                :base_imposable,
+                :despeses_extra,
+                :total_factura,
+                :import_iva,
+                :tipus_iva,
+                :estat,
+                :metode_pagament,
+                :notes,
+                :projecte_id,
+                :arxiu_url,
+                :recurrent,
+                :frequencia
+            )
+        SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
+
         $stmt->execute([
             ':numero_factura' => $numero_factura,
-            ':emissor_id' => $emissor_id,
-            ':client_id' => $client_id,
+            ':emissor_id' => $emissorIdBinary,
+            ':client_id' => $clientIdBinary,
             ':concepte' => $concepte,
             ':data_factura' => $data_factura,
             ':data_venciment' => $data_venciment,
@@ -297,51 +450,100 @@ if ($slug === 'clients') {
             ':recurrent' => $recurrent,
             ':frequencia' => $frequencia,
         ]);
-        $newId = (int)$conn->lastInsertId();
 
-        // Inserta productos
-        if (!empty($detallsProductes)) {
+        $newId = (int)$pdo->lastInsertId();
 
-            $table = qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES, $pdo);
+        /*
+         * ---------------------------------------------------
+         * Insertar productos
+         * ---------------------------------------------------
+         */
+
+        if (is_array($detallsProductes) && !empty($detallsProductes)) {
+
+            $tableProductes = qi(
+                Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES,
+                $pdo
+            );
 
             $sqlProd = <<<SQL
-                INSERT INTO {$table}
-                (factura_id, producte_id, descripcio, preu)
+                INSERT INTO {$tableProductes}
+                (
+                    factura_id,
+                    producte_id,
+                    descripcio,
+                    preu
+                )
                 VALUES
-                (:factura_id, :producte_id, :descripcio, :preu)
-                SQL;
+                (
+                    :factura_id,
+                    :producte_id,
+                    :descripcio,
+                    :preu
+                )
+            SQL;
 
-            $stmtProd = $conn->prepare($sqlProd);
+            $stmtProd = $pdo->prepare($sqlProd);
 
             foreach ($detallsProductes as $p) {
+
+                $producteId = $toIntOrNull(
+                    $p['producte_id'] ?? null
+                );
+
+                $descripcio = $trimOrNull(
+                    $p['descripcio'] ?? null
+                );
+
+                $preu = $toDecimal(
+                    $p['preu'] ?? null
+                );
+
+                /*
+                 * Si no hay producto seleccionado,
+                 * no insertamos la línea.
+                 */
+                if ($producteId === null) {
+                    continue;
+                }
+
                 $stmtProd->execute([
-                    ':factura_id' => $numero_factura,
-                    ':producte_id' => $p['producte_id'] ?? null,
-                    ':descripcio' => $p['descripcio'] ?? null,
-                    ':preu' => $p['preu'] ?? null
+                    ':factura_id' => $newId,
+                    ':producte_id' => $producteId,
+                    ':descripcio' => $descripcio,
+                    ':preu' => $preu,
                 ]);
             }
         }
 
-        // Auditoría
-        Audit::registrarCanvi(
-            $conn,
-            1,
-            "INSERT",
-            sprintf("Creació factura client=%d concepte=%s data=%s", $client_id, $concepte, $data_factura),
-            'db_comptabilitat_facturacio_clients',
-            $newId
-        );
 
-        $conn->commit();
+        /*
+         * ---------------------------------------------------
+         * Commit
+         * ---------------------------------------------------
+         */
+
+        $pdo->commit();
+
         Response::success(
             message: MissatgesAPI::success('create'),
-            data: ['id' => $newId, 'numero_factura' => $numero_factura],
+            data: [
+                'id' => $newId,
+                'numero_factura' => $numero_factura
+            ],
             httpCode: 200
         );
     } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 
     // POST : Crear nou emissor
@@ -392,7 +594,7 @@ if ($slug === 'clients') {
     // -------------------------
     try {
 
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         $table = qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo);
 
@@ -403,7 +605,7 @@ if ($slug === 'clients') {
         (:id, :nom, :nif, :numero_iva, :pais_id, :adreca, :telefon, :email, NOW(), NOW())
     SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
 
         $stmt->bindValue(':id', $id, PDO::PARAM_LOB);
         $stmt->bindValue(':nom', $emissorData['nom'], PDO::PARAM_STR);
@@ -437,35 +639,15 @@ if ($slug === 'clients') {
 
         $stmt->execute();
 
-        // -------------------------
-        // AUDITORÍA
-        // -------------------------
-        $detalls = sprintf(
-            "Creació emissor: %s (%s)",
-            $emissorData['nom'],
-            $emissorData['email'] ?? '-'
-        );
-
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            "INSERT",
-            $detalls,
-            'db_comptabilitat_emissors',
-            $id
-        );
-
-        $conn->commit();
-
         Response::success(
             MissatgesAPI::success('create'),
             ['id' => $id],
-            201
+            httpCode: 201
         );
     } catch (Throwable $e) {
 
-        if ($conn->inTransaction()) {
-            $conn->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
         }
 
         Response::error(
@@ -517,7 +699,7 @@ if ($slug === 'clients') {
     }
 
     try {
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         $table = qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo);
         $sql = <<<SQL
@@ -527,7 +709,7 @@ if ($slug === 'clients') {
                   (:producte, :descripcio, :actiu, :unitat, :preu_recomanat)
                 SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
 
         $stmt->bindValue(':producte', $producte, PDO::PARAM_STR);
         $stmt->bindValue(':descripcio', $descripcio, $descripcio !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
@@ -536,17 +718,13 @@ if ($slug === 'clients') {
         $stmt->bindValue(':preu_recomanat', $preu_recomanat, $preu_recomanat !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
 
         $stmt->execute();
-        $newId = (int)$conn->lastInsertId();
+        $newId = (int)$pdo->lastInsertId();
 
-        // Auditoría
-        $detalls = sprintf("Creació producte: %s", $producte);
-        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_cataleg_productes', $newId);
+        $pdo->commit();
 
-        $conn->commit();
-
-        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+        Response::success(MissatgesAPI::success('create'), ['id' => $newId], httpCode: 201);
     } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 } else if ($slug === 'proveidor') {
@@ -610,7 +788,7 @@ if ($slug === 'clients') {
     }
 
     try {
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         $table = qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo);
         $sql = <<<SQL
@@ -620,7 +798,7 @@ if ($slug === 'clients') {
                   (:nom, :nif, :adreca, :ciutat, :codi_postal, :pais, :telefon, :email, :web, :contacte, :notes)
                 SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
         $stmt->bindValue(':nif', $nif ?? null, $nif !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':adreca', $adreca ?? null, $adreca !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
@@ -634,17 +812,13 @@ if ($slug === 'clients') {
         $stmt->bindValue(':notes', $notes ?? null, $notes !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
 
         $stmt->execute();
-        $newId = (int)$conn->lastInsertId();
+        $newId = (int)$pdo->lastInsertId();
 
-        // Auditoría
-        $detalls = sprintf("Creació proveïdor: %s (%s)", $nom, $email ?? '-');
-        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_proveidors', $newId);
+        $pdo->commit();
 
-        $conn->commit();
-
-        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+        Response::success(MissatgesAPI::success('create'), ['id' => $newId], httpCode: 201);
     } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
@@ -712,7 +886,7 @@ if ($slug === 'clients') {
     }
 
     try {
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         $table = qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo);
         $sql = <<<SQL
@@ -726,7 +900,7 @@ if ($slug === 'clients') {
                  :deduible, :recurrent, :frequencia, :notes)
                 SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
 
         $stmt->bindValue(':data', $data_factura, PDO::PARAM_STR);
         $stmt->bindValue(':data_pagament', $data_pagament ?? null, $data_pagament !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
@@ -751,17 +925,13 @@ if ($slug === 'clients') {
         $stmt->bindValue(':notes', $notes ?? null, $notes !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
 
         $stmt->execute();
-        $newId = (int)$conn->lastInsertId();
+        $newId = (int)$pdo->lastInsertId();
 
-        // Auditoría
-        $detalls = sprintf("Creació despesa: %s (%s)", $concepte, $proveidor_id);
-        Audit::registrarCanvi($conn, $userUuid, "INSERT", $detalls, 'db_comptabilitat_despeses', $newId);
+        $pdo->commit();
 
-        $conn->commit();
-
-        Response::success(MissatgesAPI::success('create'), ['id' => $newId], 201);
+        Response::success(MissatgesAPI::success('create'), ['id' => $newId], httpCode: 201);
     } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
@@ -807,7 +977,7 @@ if ($slug === 'clients') {
 
     try {
 
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         $table = qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo);
 
@@ -839,26 +1009,17 @@ if ($slug === 'clients') {
             $pressupostData['import']
         );
 
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            "INSERT",
-            $detalls,
-            'db_comptabilitat_pressupostos',
-            $id
-        );
-
-        $conn->commit();
+        $pdo->commit();
 
         Response::success(
             MissatgesAPI::success('create'),
             ['id' => $id],
-            201
+            httpCode: 201
         );
     } catch (Throwable $e) {
 
-        if ($conn->inTransaction()) {
-            $conn->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
         }
 
         Response::error(

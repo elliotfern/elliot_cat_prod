@@ -232,54 +232,121 @@ if ($slug === 'clients') {
     // GET : Pressupostos enviats a client ID
     // ruta => "https://elliot.cat/api/comptabilitat/get/pressupostosClientId?id=i89jnbd"
 } else if ($slug === 'pressupostosClientId') {
-
     AuthFactory::admin()->handle();
 
-    $id = $_GET['id'];
+    $id = $_GET['id'] ?? null;
 
-    $sql = <<<SQL
-            SELECT 
-            p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at, c.id AS idClient, e.estat, s.producte, YEAR(p.data) AS any
-            FROM %s AS p
-            LEFT JOIN %s AS c ON p.client_id = c.id
-            LEFT JOIN %s AS e ON p.estat_id = e.id
-            LEFT JOIN %s AS s ON p.servei_id = s.id2
-            WHERE c.id = :id
-            ORDER BY p.data DESC
-            SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo),
-    );
+    if (!$id) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['Falta el paràmetre id'],
+            400
+        );
+        return;
+    }
 
     try {
 
-        $params = [':id' => uuid::toBinary($id)];
-        $result = $db->getData($query, $params, false);
+        /*
+     * Convertim l'UUID del client a BINARY(16)
+     */
+        $clientIdBinary = uuid::toBinary($id);
 
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
+        /*
+     * -------------------------------------------------------
+     * Pressupostos del client
+     * -------------------------------------------------------
+     */
+
+        $sql = <<<SQL
+        SELECT
+            p.id,
+            p.concepte,
+            p.client_id,
+            p.servei_id,
+            p.estat_id,
+            p.import,
+            p.data,
+            p.created_at,
+            p.modified_at,
+
+            c.id AS idClient,
+
+            e.estat,
+
+            s.producte,
+
+            YEAR(p.data) AS any
+
+        FROM %s AS p
+
+        LEFT JOIN %s AS c
+            ON p.client_id = c.id
+
+        LEFT JOIN %s AS e
+            ON p.estat_id = e.id
+
+        LEFT JOIN %s AS s
+            ON p.servei_id = s.id2
+
+        WHERE p.client_id = :id
+
+        ORDER BY p.data DESC
+    SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo),
+            qi(Tables::DB_CONTACTES, $pdo),
+            qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
+            qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo)
+        );
+
+        /*
+     * -------------------------------------------------------
+     * Executar
+     * -------------------------------------------------------
+     */
+
+        $params = [
+            ':id' => $clientIdBinary
+        ];
+
+        $result = $db->getData(
+            $query,
+            $params,
+            false
+        );
+
+        /*
+     * -------------------------------------------------------
+     * Resposta
+     *
+     * Si no hi ha pressupostos, retornem array buit.
+     * NO és un error.
+     * -------------------------------------------------------
+     */
 
         Response::success(
             message: MissatgesAPI::success('get'),
-            data: $result,
+            data: [
+                'pressupostos' => $result ?? []
+            ],
             httpCode: 200
         );
     } catch (PDOException $e) {
+
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
             500
+        );
+    } catch (Throwable $e) {
+
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            [$e->getMessage()],
+            400
         );
     }
 
@@ -293,7 +360,7 @@ if ($slug === 'clients') {
     $sql = <<<SQL
             SELECT 
             p.id, p.concepte, p.client_id, p.servei_id, p.estat_id, p.import, p.data, p.created_at, p.modified_at,
-            c.id AS idClient, c.clientNom, c.clientCognoms, c.clientEmail, c.clientEmpresa, e.estat, s.producte, YEAR(p.data) AS any
+            c.id AS idClient, c.nom AS clientNom, c.cognoms AS clientCognoms, c.email AS clientEmail, c.empresa AS clientEmpresa, e.estat, s.producte, YEAR(p.data) AS any
             FROM %s AS p
             LEFT JOIN %s AS c ON p.client_id = c.id
             LEFT JOIN %s AS e ON p.estat_id = e.id
@@ -305,7 +372,7 @@ if ($slug === 'clients') {
     $query = sprintf(
         $sql,
         qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_CONTACTES, $pdo),
         qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
         qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo),
     );
@@ -343,86 +410,173 @@ if ($slug === 'clients') {
 
     AuthFactory::admin()->handle();
 
-    $id = $_GET['id'];
+    $id = $_GET['id'] ?? null;
 
-    $sql = <<<SQL
-        SELECT 
-            ic.id,
-            ic.numero_factura,
-            ic.emissor_id,
-            ic.client_id,
-            ic.concepte,
-            ic.data_factura,
-            YEAR(ic.data_factura) AS yearInvoice,
-            CONCAT('Any ', YEAR(ic.data_factura)) AS any,
-            ic.data_venciment,
-            ic.base_imposable,
-            ic.despeses_extra,
-            ic.total_factura,
-            ic.import_iva,
-            ic.tipus_iva,
-            ic.estat,
-            ic.metode_pagament,
-            vt.ivaPercen,
-            ist.estat,
-            pt.tipus AS tipusNom,
-            pt.notes,
-            c.clientNom,
-            c.clientCognoms,
-            c.clientEmpresa
-        FROM %s AS ic
-        LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
-        LEFT JOIN %s AS ist ON ist.id = ic.estat
-        LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
-        LEFT JOIN %s AS c ON ic.client_id = c.id
-        WHERE c.id = :id
-        ORDER BY ic.data_factura DESC
-    SQL;
-
-    $query = sprintf(
-        $sql,
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo)
-    );
-
-    $sql2 = <<<SQL
-        SELECT  
-            SUM(ic.total_factura) AS total_facturat
-            FROM %s ic
-            WHERE ic.client_id = :id
-    SQL;
-
-    $query2 = sprintf(
-        $sql2,
-        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo)
-    );
+    if (!$id) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['Falta el paràmetre id'],
+            400
+        );
+    }
 
     try {
-        $params = [':id' => uuid::toBinary($id)];
-        $factures = $db->getData($query, $params, false);
 
-        $totalRow = $db->getData($query2, $params, false);
+        /*
+         * Convertim l'UUID del client a BINARY(16)
+         */
+        $clientIdBinary = uuid::toBinary($id);
+
+        /*
+         * -------------------------------------------------------
+         * Factures del client
+         * -------------------------------------------------------
+         */
+
+        $sql = <<<SQL
+            SELECT
+                ic.id,
+                ic.numero_factura,
+
+                ic.emissor_id,
+                ic.client_id,
+
+                ic.concepte,
+                ic.data_factura,
+
+                YEAR(ic.data_factura) AS yearInvoice,
+                CONCAT('Any ', YEAR(ic.data_factura)) AS any,
+
+                ic.data_venciment,
+
+                ic.base_imposable,
+                ic.despeses_extra,
+                ic.total_factura,
+                ic.import_iva,
+
+                ic.tipus_iva,
+                vt.ivaPercen,
+
+                ic.estat AS estat_id,
+                ist.estat AS estat,
+
+                ic.metode_pagament,
+                pt.tipus AS tipus,
+                pt.notes AS metode_notes,
+
+                ic.notes,
+                ic.projecte_id,
+                ic.arxiu_url,
+
+                ic.recurrent,
+                ic.frequencia,
+
+                c.nom AS clientNom,
+                c.cognoms AS clientCognoms,
+                c.empresa AS clientEmpresa
+
+            FROM %s AS ic
+
+            LEFT JOIN %s AS vt
+                ON ic.tipus_iva = vt.id
+
+            LEFT JOIN %s AS ist
+                ON ist.id = ic.estat
+
+            LEFT JOIN %s AS pt
+                ON ic.metode_pagament = pt.id
+
+            LEFT JOIN %s AS c
+                ON ic.client_id = c.id
+
+            WHERE ic.client_id = :id
+
+            ORDER BY ic.data_factura DESC
+        SQL;
+
+        $query = sprintf(
+            $sql,
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_IVA, $pdo),
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_ESTAT, $pdo),
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_TIPUS_PAGAMENT, $pdo),
+            qi(Tables::DB_CONTACTES, $pdo)
+        );
+
+        /*
+         * -------------------------------------------------------
+         * Total facturat pel client
+         * -------------------------------------------------------
+         */
+
+        $sql2 = <<<SQL
+            SELECT
+                COALESCE(SUM(ic.total_factura), 0) AS total_facturat
+            FROM %s AS ic
+            WHERE ic.client_id = :id
+        SQL;
+
+        $query2 = sprintf(
+            $sql2,
+            qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo)
+        );
+
+        /*
+         * -------------------------------------------------------
+         * Executar
+         * -------------------------------------------------------
+         */
+
+        $params = [
+            ':id' => $clientIdBinary
+        ];
+
+        $factures = $db->getData(
+            $query,
+            $params,
+            false
+        );
+
+        $totalRow = $db->getData(
+            $query2,
+            $params,
+            false
+        );
 
         $total = $totalRow[0]['total_facturat'] ?? 0;
+
+        /*
+         * -------------------------------------------------------
+         * Si no hi ha factures
+         * -------------------------------------------------------
+         *
+         * No és un error.
+         * Retornem una resposta correcta amb array buit.
+         */
 
         Response::success(
             MissatgesAPI::success('get'),
             [
                 'factures' => $factures ?? [],
                 'totals' => [
-                    'total_facturat' => (float)$total
+                    'total_facturat' => (float) $total
                 ]
             ],
             httpCode: 200
         );
     } catch (PDOException $e) {
+
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
             500
+        );
+    } catch (Throwable $e) {
+
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            [$e->getMessage()],
+            400
         );
     }
 
@@ -563,7 +717,7 @@ if ($slug === 'clients') {
                 ic.import_iva,
                 ic.tipus_iva,
 
-                ic.estat,
+                ic.estat AS estat_id,
                 ic.metode_pagament,
 
                 ic.notes,
@@ -574,76 +728,64 @@ if ($slug === 'clients') {
 
                 vt.ivaPercen,
 
-                ist.estat AS estatNom,
+                ist.estat,
 
-                pt.tipus AS tipusNom,
-                pt.notes AS metodeNotes,
+                pt.tipus,
+                pt.notes,
 
                 -- CONTACTE DEL CLIENT
-                co.nom AS clientNom,
-                co.cognoms AS clientCognoms,
-                co.empresa AS clientEmpresa,
-                co.email AS clientEmail,
-                co.web AS clientWeb,
-                co.nif AS clientNIF,
-                co.adreca AS clientAdreca,
-                co.cp AS clientCP,
+                co.nom,
+                co.cognoms,
+                co.empresa,
+                co.email,
+                co.web,
+                co.nif,
+                co.adreca,
+                co.cp,
 
-                ciu.ciutat_ca AS clientCiutat,
-                pro.provincia_ca AS clientProvincia,
-                pa.pais_ca AS clientPais,
+                ciu.ciutat_ca,
+                pro.provincia_ca,
+                pa.pais_ca,
 
                 -- EMISSOR
-                e.nom AS emissorNom,
-                e.nif AS emissorNIF,
-                e.numero_iva AS emissorNumeroIVA,
-                e.adreca AS emissorAdreca,
-                e.telefon AS emissorTelefon,
-                e.email AS emissorEmail,
+                e.nom AS nomEmissor,
+                e.nif AS nifEmissor,
+                e.numero_iva,
+                e.adreca AS adrecaEmissor,
+                e.telefon AS telefonEmissor,
+                e.email AS emailEmissor,
 
-                pai.pais_ca AS emissorPais
+                pai.pais_ca AS pais_caEmissor
 
             FROM %s AS ic
+            LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
 
-            LEFT JOIN %s AS vt
-                ON ic.tipus_iva = vt.id
+            LEFT JOIN %s AS ist ON ic.estat = ist.id
 
-            LEFT JOIN %s AS ist
-                ON ic.estat = ist.id
-
-            LEFT JOIN %s AS pt
-                ON ic.metode_pagament = pt.id
+            LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
 
             -- CLIENT
-            LEFT JOIN %s AS c
-                ON ic.client_id = c.id
+            LEFT JOIN %s AS c ON ic.client_id = c.id
 
             -- CONTACTE
-            LEFT JOIN %s AS co
-                ON c.contacte_id = co.id
+            LEFT JOIN %s AS co ON c.contacte_id = co.id
 
             -- CIUTAT DEL CONTACTE
-            LEFT JOIN %s AS ciu
-                ON co.ciutat_id = ciu.id
+            LEFT JOIN %s AS ciu ON co.ciutat_id = ciu.id
 
             -- PROVÍNCIA DEL CONTACTE
-            LEFT JOIN %s AS pro
-                ON co.provincia_id = pro.id
+            LEFT JOIN %s AS pro ON co.provincia_id = pro.id
 
             -- PAÍS DEL CONTACTE
-            LEFT JOIN %s AS pa
-                ON co.pais_id = pa.id
+            LEFT JOIN %s AS pa ON co.pais_id = pa.id
 
             -- EMISSOR
-            LEFT JOIN %s AS e
-                ON ic.emissor_id = e.id
+            LEFT JOIN %s AS e ON ic.emissor_id = e.id
 
             -- PAÍS DE L'EMISSOR
-            LEFT JOIN %s AS pai
-                ON e.pais_id = pai.id
+            LEFT JOIN %s AS pai ON e.pais_id = pai.id
 
             WHERE ic.id = :id
-
             LIMIT 1
         SQL;
 
@@ -1267,7 +1409,7 @@ SQL;
     $query = sprintf(
         $sql,
         qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo),
-        qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
+        qi(Tables::DB_CONTACTES, $pdo),
         qi(Tables::DB_COMPTABILITAT_CLIENTS_ESTAT, $pdo),
         qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo),
     );

@@ -36,7 +36,7 @@ export function comptabilitat() {
   } else if (pageType[2] === 'modifica-factura') {
     formFacturaClient(true, id);
   } else if (pageType[2] === 'fitxa-factura-client') {
-    detallsFacturaClients();
+    detallsFacturaClients(Number(id));
   } else if (pageType[2] === 'llistat-clients') {
     taulaLlistatClients();
   } else if (pageType[2] === 'nou-client') {

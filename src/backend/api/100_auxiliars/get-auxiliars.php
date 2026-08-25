@@ -1151,15 +1151,23 @@ if ($slug === 'directors') {
 } else if ($slug === "clients") {
 
     $sql = <<<SQL
-            SELECT c.id, c.empresa
-            FROM %s AS c
-            ORDER BY c.empresa ASC
-            SQL;
+        SELECT
+            c.id AS client_id,
+            c.contacte_id,
+
+            co.id,
+            co.nom,
+            co.cognoms,
+            co.empresa
+        FROM %s AS c
+        INNER JOIN %s AS co ON c.contacte_id = co.id
+        ORDER BY co.empresa ASC, co.nom ASC, co.cognoms ASC
+    SQL;
 
     $query = sprintf(
         $sql,
         qi(Tables::DB_COMPTABILITAT_CLIENTS, $pdo),
-
+        qi(Tables::DB_CONTACTES, $pdo)
     );
 
     try {

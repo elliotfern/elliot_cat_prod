@@ -109,7 +109,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   if (!Array.isArray(data) || data.length === 0) {
     container.innerHTML = `
       <div class="alert alert-info">
-        No hi ha dades.
+        No hi ha dades disponibles.
       </div>
     `;
     return;

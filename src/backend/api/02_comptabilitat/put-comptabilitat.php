@@ -152,134 +152,397 @@ if ($slug === 'clients') {
             httpCode: 500
         );
     }
-} else if ($slug === 'facturaClient' && $_SERVER['REQUEST_METHOD'] === 'PUT') {
+} else if ($slug === 'facturaClient') {
+
     $inputData = file_get_contents('php://input');
     $data = json_decode($inputData, true);
 
     if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['JSON invàlid'],
+            400
+        );
+        return;
     }
 
-    // Helpers
-    $trimOrNull = static fn($v): ?string => $v === null ? null : (trim((string)$v) ?: null);
-    $toIntOrNull = static fn($v): ?int => is_numeric($v) ? (int)$v : null;
-    $dateOrNull = static fn($v): ?string => (is_string($v) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) ? $v : null;
-    $toDecimal = static fn($v): ?string => $v === null ? null : (preg_match('/^-?\d+(\.\d{1,4})?$/', str_replace(',', '.', str_replace([' ', "\u{00A0}"], '', (string)$v))) ? str_replace(',', '.', (string)$v) : null);
+    // ---------------------------------------------------------
+    // HELPERS
+    // ---------------------------------------------------------
 
-    // --- Campos según la BD ---
-    $id             = $toIntOrNull($data['id'] ?? null);
-    $numero_factura = $trimOrNull($data['numero_factura'] ?? null);
-    $emissor_id     = $toIntOrNull($data['emissor_id'] ?? null);
-    $client_id      = $toIntOrNull($data['client_id'] ?? null);
-    $concepte       = $trimOrNull($data['concepte'] ?? null);
-    $data_factura   = $dateOrNull($data['data_factura'] ?? null);
-    $data_venciment = $dateOrNull($data['data_venciment'] ?? null);
-    $base_imposable = $toDecimal($data['base_imposable'] ?? null);
-    $despeses_extra = $toDecimal($data['despeses_extra'] ?? 0);
-    $total_factura  = $toDecimal($data['total_factura'] ?? null);
-    $import_iva     = $toDecimal($data['import_iva'] ?? null);
-    $tipus_iva      = $toIntOrNull($data['tipus_iva'] ?? null);
-    $estat          = $toIntOrNull($data['estat'] ?? null);
-    $metode_pagament = $toIntOrNull($data['metode_pagament'] ?? null);
-    $notes          = $trimOrNull($data['notes'] ?? null);
-    $projecte_id    = $toIntOrNull($data['projecte_id'] ?? null);
-    $arxiu_url      = $trimOrNull($data['arxiu_url'] ?? null);
-    $recurrent      = isset($data['recurrent']) ? (int)$data['recurrent'] : 0;
-    $frequencia     = $recurrent ? $trimOrNull($data['frequencia'] ?? null) : null;
-    $productes      = $data['productes'] ?? [];
+    $trimOrNull = static function ($v): ?string {
+        if ($v === null) {
+            return null;
+        }
 
-    // --- Validación ---
+        $value = trim((string)$v);
+
+        return $value !== '' ? $value : null;
+    };
+
+    $toIntOrNull = static function ($v): ?int {
+        return is_numeric($v) ? (int)$v : null;
+    };
+
+    // UUID como string
+    $uuidOrNull = static function ($v): ?string {
+        if ($v === null) {
+            return null;
+        }
+
+        $value = trim((string)$v);
+
+        return $value !== '' ? $value : null;
+    };
+
+    $dateOrNull = static function ($v): ?string {
+        if (!is_string($v)) {
+            return null;
+        }
+
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)
+            ? $v
+            : null;
+    };
+
+    $toDecimal = static function ($v): ?string {
+
+        if ($v === null || $v === '') {
+            return null;
+        }
+
+        $value = str_replace(
+            [',', ' ', "\u{00A0}"],
+            ['.', '', ''],
+            (string)$v
+        );
+
+        return preg_match('/^-?\d+(\.\d{1,4})?$/', $value)
+            ? $value
+            : null;
+    };
+
+
+    // ---------------------------------------------------------
+    // DATOS FACTURA
+    // ---------------------------------------------------------
+
+    $id = $toIntOrNull(
+        $data['id'] ?? null
+    );
+
+    $numero_factura = $trimOrNull(
+        $data['numero_factura'] ?? null
+    );
+
+    // UUID
+    $emissor_id = $uuidOrNull(
+        $data['emissor_id'] ?? null
+    );
+
+    // UUID
+    $client_id = $uuidOrNull(
+        $data['client_id'] ?? null
+    );
+
+    $concepte = $trimOrNull(
+        $data['concepte'] ?? null
+    );
+
+    $data_factura = $dateOrNull(
+        $data['data_factura'] ?? null
+    );
+
+    $data_venciment = $dateOrNull(
+        $data['data_venciment'] ?? null
+    );
+
+    $base_imposable = $toDecimal(
+        $data['base_imposable'] ?? null
+    );
+
+    $despeses_extra = $toDecimal(
+        $data['despeses_extra'] ?? 0
+    );
+
+    $total_factura = $toDecimal(
+        $data['total_factura'] ?? null
+    );
+
+    $import_iva = $toDecimal(
+        $data['import_iva'] ?? null
+    );
+
+    $tipus_iva = $toIntOrNull(
+        $data['tipus_iva'] ?? null
+    );
+
+    $estat = $toIntOrNull(
+        $data['estat'] ?? null
+    );
+
+    $metode_pagament = $toIntOrNull(
+        $data['metode_pagament'] ?? null
+    );
+
+    $notes = $trimOrNull(
+        $data['notes'] ?? null
+    );
+
+    $projecte_id = $toIntOrNull(
+        $data['projecte_id'] ?? null
+    );
+
+    $arxiu_url = $trimOrNull(
+        $data['arxiu_url'] ?? null
+    );
+
+    $recurrent = !empty($data['recurrent']) ? 1 : 0;
+
+    $frequencia = $recurrent
+        ? $trimOrNull($data['frequencia'] ?? null)
+        : null;
+
+    $productes = $data['productes'] ?? [];
+
+
+    // ---------------------------------------------------------
+    // VALIDACIÓN
+    // ---------------------------------------------------------
+
     $errors = [];
-    if ($id === null)             $errors[] = ValidacioErrors::requerit('id');
-    if ($client_id === null)      $errors[] = ValidacioErrors::requerit('client_id');
-    if ($data_factura === null)   $errors[] = ValidacioErrors::dataNoValida('data_factura');
-    if ($data_venciment === null) $errors[] = ValidacioErrors::dataNoValida('data_venciment');
-    if ($base_imposable === null) $errors[] = ValidacioErrors::requerit('base_imposable');
-    if ($total_factura === null)  $errors[] = ValidacioErrors::requerit('total_factura');
-    if ($import_iva === null)     $errors[] = ValidacioErrors::requerit('import_iva');
-    if ($tipus_iva === null)      $errors[] = ValidacioErrors::requerit('tipus_iva');
-    if ($metode_pagament === null) $errors[] = ValidacioErrors::requerit('metode_pagament');
+
+    if ($id === null) {
+        $errors[] = ValidacioErrors::requerit('id');
+    }
+
+    if ($client_id === null) {
+        $errors[] = ValidacioErrors::requerit('client_id');
+    }
+
+    if ($data_factura === null) {
+        $errors[] = ValidacioErrors::dataNoValida('data_factura');
+    }
+
+    if ($data_venciment === null) {
+        $errors[] = ValidacioErrors::dataNoValida('data_venciment');
+    }
+
+    if ($base_imposable === null) {
+        $errors[] = ValidacioErrors::requerit('base_imposable');
+    }
+
+    if ($total_factura === null) {
+        $errors[] = ValidacioErrors::requerit('total_factura');
+    }
+
+    if ($import_iva === null) {
+        $errors[] = ValidacioErrors::requerit('import_iva');
+    }
+
+    if ($tipus_iva === null) {
+        $errors[] = ValidacioErrors::requerit('tipus_iva');
+    }
+
+    if ($metode_pagament === null) {
+        $errors[] = ValidacioErrors::requerit('metode_pagament');
+    }
+
+    if (!is_array($productes)) {
+        $errors[] = 'El camp productes ha de ser un array.';
+    }
 
     if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('validacio'), $errors, 400);
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            $errors,
+            400
+        );
+        return;
     }
 
+
+    // ---------------------------------------------------------
+    // UPDATE
+    // ---------------------------------------------------------
+
     try {
-        global $conn, $userUuid;
-        $conn->beginTransaction();
 
-        // --- Update factura ---
-        $table = qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo);
+        $pdo->beginTransaction();
+
+
+        // -----------------------------------------------------
+        // 1. ACTUALIZAR FACTURA
+        // -----------------------------------------------------
+
+        $tableFactura = qi(
+            Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS,
+            $pdo
+        );
+
         $sql = <<<SQL
-                UPDATE {$table}
-                    SET clientNom = :clientNom,
-                       clientCognoms = :clientCognoms,
-                       clientEmail = :clientEmail,
-                       clientWeb = :clientWeb,
-                       clientNIF = :clientNIF,
-                       clientEmpresa = :clientEmpresa,
-                       clientAdreca = :clientAdreca,
-                       clientCP = :clientCP,
-                       ciutat_id = :ciutat_id,
-                       provincia_id = :provincia_id,
-                       pais_id = :pais_id,
-                       clientTelefon = :clientTelefon,
-                       clientStatus = :clientStatus,
-                       clientRegistre = :clientRegistre
-                    WHERE id = :id
-                SQL;
+            UPDATE {$tableFactura}
+            SET
+                numero_factura = :numero_factura,
+                emissor_id = :emissor_id,
+                client_id = :client_id,
+                concepte = :concepte,
+                data_factura = :data_factura,
+                data_venciment = :data_venciment,
+                base_imposable = :base_imposable,
+                despeses_extra = :despeses_extra,
+                total_factura = :total_factura,
+                import_iva = :import_iva,
+                tipus_iva = :tipus_iva,
+                estat = :estat,
+                metode_pagament = :metode_pagament,
+                notes = :notes,
+                projecte_id = :projecte_id,
+                arxiu_url = :arxiu_url,
+                recurrent = :recurrent,
+                frequencia = :frequencia
+            WHERE id = :id
+        SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
+
+        $emissorIdBinary = $emissor_id !== null
+            ? Uuid::toBinary($emissor_id)
+            : null;
+
+        $clientIdBinary = $client_id !== null
+            ? Uuid::toBinary($client_id)
+            : null;
+
         $stmt->execute([
-            ':id'             => $id,
-            ':emissor_id'     => $emissor_id,
-            ':client_id'      => $client_id,
-            ':concepte'       => $concepte,
-            ':data_factura'   => $data_factura,
-            ':data_venciment' => $data_venciment,
-            ':base_imposable' => $base_imposable,
-            ':despeses_extra' => $despeses_extra,
-            ':total_factura'  => $total_factura,
-            ':import_iva'     => $import_iva,
-            ':tipus_iva'      => $tipus_iva,
-            ':estat'          => $estat,
+            ':id'              => $id,
+            ':numero_factura'  => $numero_factura,
+            ':emissor_id'      => $emissorIdBinary,
+            ':client_id'       => $clientIdBinary,
+            ':concepte'        => $concepte,
+            ':data_factura'    => $data_factura,
+            ':data_venciment'  => $data_venciment,
+            ':base_imposable'  => $base_imposable,
+            ':despeses_extra'  => $despeses_extra,
+            ':total_factura'   => $total_factura,
+            ':import_iva'      => $import_iva,
+            ':tipus_iva'       => $tipus_iva,
+            ':estat'           => $estat,
             ':metode_pagament' => $metode_pagament,
-            ':notes'          => $notes,
-            ':projecte_id'    => $projecte_id,
-            ':arxiu_url'      => $arxiu_url,
-            ':recurrent'      => $recurrent,
-            ':frequencia'     => $frequencia,
+            ':notes'           => $notes,
+            ':projecte_id'     => $projecte_id,
+            ':arxiu_url'       => $arxiu_url,
+            ':recurrent'       => $recurrent,
+            ':frequencia'      => $frequencia,
         ]);
 
-        // --- Productos ---
-        $conn->prepare("DELETE FROM db_comptabilitat_facturacio_clients_productes WHERE factura_id = :id")
-            ->execute([':id' => $numero_factura]);
+
+        // -----------------------------------------------------
+        // 2. ELIMINAR PRODUCTOS ACTUALES
+        // -----------------------------------------------------
+
+        $tableProductes = qi(
+            Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES,
+            $pdo
+        );
+
+        $sqlDelete = <<<SQL
+            DELETE FROM {$tableProductes}
+            WHERE factura_id = :factura_id
+        SQL;
+
+        $stmtDelete = $pdo->prepare($sqlDelete);
+
+        $stmtDelete->execute([
+            ':factura_id' => $id
+        ]);
+
+
+        // -----------------------------------------------------
+        // 3. INSERTAR PRODUCTOS NUEVOS
+        // -----------------------------------------------------
 
         if (!empty($productes)) {
-            $sqlProd = "INSERT INTO db_comptabilitat_facturacio_clients_productes
-                        (factura_id, producte_id, descripcio, preu)
-                        VALUES (:factura_id, :producte_id, :descripcio, :preu)";
-            $stmtProd = $conn->prepare($sqlProd);
 
-            foreach ($productes as $p) {
-                $stmtProd->execute([
-                    ':factura_id' => $numero_factura,
-                    ':producte_id' => $toIntOrNull($p['producte_id'] ?? null),
-                    ':descripcio' => $trimOrNull($p['descripcio'] ?? null),
-                    ':preu'       => $toDecimal($p['preu'] ?? null),
+            $sqlProducte = <<<SQL
+                INSERT INTO {$tableProductes}
+                (
+                    factura_id,
+                    producte_id,
+                    descripcio,
+                    preu
+                )
+                VALUES
+                (
+                    :factura_id,
+                    :producte_id,
+                    :descripcio,
+                    :preu
+                )
+            SQL;
+
+            $stmtProducte = $pdo->prepare($sqlProducte);
+
+            foreach ($productes as $producte) {
+
+                if (!is_array($producte)) {
+                    continue;
+                }
+
+                $producte_id = $toIntOrNull(
+                    $producte['producte_id'] ?? null
+                );
+
+                $descripcio = $trimOrNull(
+                    $producte['descripcio'] ?? null
+                );
+
+                $preu = $toDecimal(
+                    $producte['preu'] ?? null
+                );
+
+                // Si no hay producto seleccionado,
+                // no insertamos la fila.
+                if ($producte_id === null) {
+                    continue;
+                }
+
+                $stmtProducte->execute([
+                    ':factura_id'  => $id,
+                    ':producte_id' => $producte_id,
+                    ':descripcio'  => $descripcio,
+                    ':preu'        => $preu,
                 ]);
             }
         }
 
-        // --- Auditoría ---
-        $detalls = sprintf("Actualització factura client=%d concepte=%s data=%s", $client_id, $concepte, $data_factura);
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_facturacio_clients', $id);
 
-        $conn->commit();
-        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
+        // -----------------------------------------------------
+        // 4. AUDITORÍA
+        // -----------------------------------------------------
+
+        // -----------------------------------------------------
+        // 5. COMMIT
+        // -----------------------------------------------------
+
+        $pdo->commit();
+
+        Response::success(
+            MissatgesAPI::success('update'),
+            ['id' => $id],
+            httpCode: 200
+        );
     } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 } else if ($slug === 'proveidor') {
     $raw  = file_get_contents('php://input');
@@ -347,7 +610,7 @@ if ($slug === 'clients') {
     }
 
     try {
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         $table = qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo);
         $sql = <<<SQL
@@ -368,7 +631,7 @@ if ($slug === 'clients') {
                     WHERE id = :id
                 SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
         $stmt->bindValue(':nif', $nif ?? null, $nif !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':adreca', $adreca ?? null, $adreca !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
@@ -384,15 +647,11 @@ if ($slug === 'clients') {
 
         $stmt->execute();
 
-        // Auditoría
-        $detalls = sprintf("Modificació proveïdor: %s (%s)", $nom, $email ?? '-');
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_proveidors', $id);
+        $pdo->commit();
 
-        $conn->commit();
-
-        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
+        Response::success(MissatgesAPI::success('update'), ['id' => $id], httpCode: 200);
     } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
@@ -457,10 +716,10 @@ if ($slug === 'clients') {
     }
 
     try {
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         // Recuperamos estado previo para auditoría
-        $prev = $conn->prepare("SELECT * FROM db_comptabilitat_despeses WHERE id = :id LIMIT 1");
+        $prev = $pdo->prepare("SELECT * FROM db_comptabilitat_despeses WHERE id = :id LIMIT 1");
         $prev->execute([':id' => $id]);
         $prevData = $prev->fetch(PDO::FETCH_ASSOC);
         if (!$prevData) {
@@ -498,7 +757,7 @@ if ($slug === 'clients') {
                     WHERE id = :id
                 SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':data', $data_factura, PDO::PARAM_STR);
         $stmt->bindValue(':data_pagament', $data_pagament ?? null, $data_pagament !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':concepte', $concepte, PDO::PARAM_STR);
@@ -523,16 +782,11 @@ if ($slug === 'clients') {
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
         $stmt->execute();
+        $pdo->commit();
 
-        // Auditoría
-        $detalls = sprintf("Actualització despesa: %s (%s)", $concepte, $proveidor_id);
-        Audit::registrarCanvi($conn, $userUuid, "UPDATE", $detalls, 'db_comptabilitat_despeses', $id);
-
-        $conn->commit();
-
-        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
+        Response::success(MissatgesAPI::success('update'), ['id' => $id], httpCode: 200);
     } catch (Throwable $e) {
-        if ($conn->inTransaction()) $conn->rollBack();
+        if ($pdo->inTransaction()) $pdo->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
@@ -577,7 +831,7 @@ if ($slug === 'clients') {
 
     try {
 
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         $table = qi(Tables::DB_COMPTABILITAT_PRESSUPOSTOS, $pdo);
 
@@ -587,7 +841,7 @@ if ($slug === 'clients') {
         $check->execute();
 
         if (!$check->fetchColumn()) {
-            $conn->rollBack();
+            $pdo->rollBack();
 
             Response::error(
                 MissatgesAPI::error('notFound'),
@@ -631,26 +885,17 @@ if ($slug === 'clients') {
             $pressupostData['import']
         );
 
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            "UPDATE",
-            $detalls,
-            'db_comptabilitat_pressupostos',
-            $id
-        );
-
-        $conn->commit();
+        $pdo->commit();
 
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
     } catch (Throwable $e) {
 
-        if ($conn->inTransaction()) {
-            $conn->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
         }
 
         Response::error(
@@ -707,7 +952,7 @@ if ($slug === 'clients') {
     // -------------------------
     try {
 
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         $table = qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo);
 
@@ -725,7 +970,7 @@ if ($slug === 'clients') {
         WHERE id = :id
     SQL;
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $pdo->prepare($sql);
 
         $stmt->bindValue(':id', $id, PDO::PARAM_LOB);
 
@@ -773,26 +1018,17 @@ if ($slug === 'clients') {
             $emissorData['email'] ?? '-'
         );
 
-        Audit::registrarCanvi(
-            $conn,
-            $userUuid,
-            "UPDATE",
-            $detalls,
-            'db_comptabilitat_emissors',
-            $id
-        );
-
-        $conn->commit();
+        $pdo->commit();
 
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
-            200
+            httpCode: 200
         );
     } catch (Throwable $e) {
 
-        if ($conn->inTransaction()) {
-            $conn->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
         }
 
         Response::error(

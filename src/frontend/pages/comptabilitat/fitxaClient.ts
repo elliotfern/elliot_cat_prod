@@ -43,15 +43,21 @@ function renderClient(response: Client) {
     <div class="card shadow-sm">
 
       <div class="card-header d-flex justify-content-between align-items-center">
+
         <h4 class="mb-0">
           ${v(client.nom)} ${v(client.cognoms)}
         </h4>
 
-        <span class="badge bg-primary">
-          ${v(client.estat)}
-        </span>
+        <div class="d-flex align-items-center gap-2">
 
-        ${Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(client.id))}
+          <span class="badge bg-primary">
+            ${v(client.estat)}
+          </span>
+
+          <span id="btnModificarClient"></span>
+
+        </div>
+
       </div>
 
       <div class="card-body">
@@ -76,10 +82,15 @@ function renderClient(response: Client) {
           <!-- ADREÇA -->
           <div class="col-12">
             <h6 class="text-muted mb-2">Adreça</h6>
-            <p class="mb-1">${v(client.adreca)}</p>
+
+            <p class="mb-1">
+              ${v(client.adreca)}
+            </p>
+
             <p class="mb-1">
               ${v(client.cp)} · ${v(client.ciutat_ca)}
             </p>
+
             <p class="mb-1">
               ${v(client.provincia_ca)} · ${v(client.pais_ca)}
             </p>
@@ -95,4 +106,11 @@ function renderClient(response: Client) {
 
     </div>
   `;
+
+  // Botó modificar
+  const btnContainer = document.getElementById('btnModificarClient');
+
+  if (btnContainer) {
+    btnContainer.appendChild(Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(client.id)));
+  }
 }

@@ -6,7 +6,7 @@
 <div id="fitxaClient"></div>
 
 <hr>
-<div id="clientPresupostos" class="mb-4"></div>
+<div id="clientPressupostos" class="mb-4"></div>
 
 <hr>
 <div id="facturesTotals"></div>
