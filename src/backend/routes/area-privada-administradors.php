@@ -47,6 +47,8 @@ $routes = [
     APP_GESTIO . $url['comptabilitat'] . '/modifica-factura/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'form-factura-client.php'),
     APP_GESTIO . $url['comptabilitat'] . '/fitxa-factura-client/{id}' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'detalls-factura-client.php'),
 
+    APP_GESTIO . $url['comptabilitat'] . '/resum-facturacio' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'resum-facturacio.php'),
+
     // 02.4 Facturacio rebuda despeses
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-proveidors-partita-iva' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-proveidors.php'),
     APP_GESTIO . $url['comptabilitat'] . '/facturacio-proveidors-autonom-irlanda' => route(APP_INTRANET_DIR . APP_COMPTABILITAT_DIR . 'llistat-factures-proveidors.php'),

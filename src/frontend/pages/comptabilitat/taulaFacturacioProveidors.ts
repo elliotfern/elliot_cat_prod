@@ -4,7 +4,7 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { API_URLS } from '../../utils/apiUrls';
 
-const RECEPTORS: Record<string, string> = {
+export const RECEPTORS: Record<string, string> = {
   '019e3ebaf71370c2860a40a79fb5ad7b': 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
 
   '019e3ebaf71370c2860a40a7a078beb4': 'Autònom Irlanda (1 novembre 2022 - 29 març 2026)',

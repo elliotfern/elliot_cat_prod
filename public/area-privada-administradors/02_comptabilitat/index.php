@@ -40,11 +40,9 @@ use App\Utils\Button;
       <li><a href="<?= Routes::comptabilitat()->facturesClientsPartitaIva() ?>">Llistat de factures enviades a clients (Partita IVA Italia)</a></li>
       <li><a href="<?= Routes::comptabilitat()->facturesClientsAutonomIrlanda() ?>">Llistat de factures enviades a clients (Autònom Irlanda)</a></li>
       <li><a href="<?= Routes::comptabilitat()->facturesClientsHispantic() ?>">Llistat de factures enviades a clients (HispanTIC LTD Irlanda)</a></li>
-
-      <li><a href="<?= Routes::comptabilitat()->facturacioAnys() ?>">Facturació detallada per anys</a></li>
     </ul>
 
-    <h4>Comptabilitat (beneficis detallats):</h4>
+    <h4>Comptabilitat (resum general detallat):</h4>
     <ul>
       <li><a href="<?= Routes::comptabilitat()->facturacioAnys() ?>">Facturació detallada per anys</a></li>
     </ul>

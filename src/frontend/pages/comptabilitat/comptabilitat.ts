@@ -2,6 +2,7 @@ import { getPageType } from '../../utils/urlPath';
 import { detallsFacturaClients } from './detallsFacturaClient';
 import { fitxaClient } from './fitxaClient';
 import { fitxaPressupost } from './fitxaPressupost';
+import { renderComptabilitat } from './fitxaResumFacturacio';
 import { formClient } from './formClient';
 import { formDespesa } from './formDespesa';
 import { formEmissor } from './formEmissor';
@@ -91,5 +92,7 @@ export function comptabilitat() {
     formPressupost(true, id);
   } else if (pageType[2] === 'fitxa-pressupost') {
     fitxaPressupost(id);
+  } else if (pageType[2] === 'resum-facturacio') {
+    renderComptabilitat();
   }
 }

@@ -1024,8 +1024,64 @@ SQL;
             500
         );
     }
+
+    // GET : Llistat d'emissors per comptabilitat
+    // ruta => "api/comptabilitat/get/emissorsComptabilitat"
+} else if ($slug === 'emissorsComptabilitat') {
+
+    AuthFactory::admin()->handle();
+
+    $sql = <<<SQL
+        SELECT
+            e.id,
+            e.nom,
+            e.dataInici,
+            e.dataFi
+        FROM %s AS e
+        WHERE e.id <> :emissor_personal
+        ORDER BY e.dataInici DESC
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
+    );
+
+    try {
+
+        $params = [
+            ':emissor_personal' => uuid::toBinary(
+                '019e3ebaf71370c2860a40a7a241e107'
+            ),
+        ];
+
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // GET : Obtenir emissor per ID
-    // ruta => "https://elliot.cat/api/comptabilitat/get/emissorId?id={id}"
+    // ruta => "api/comptabilitat/get/emissorId?id={id}"
 } else if ($slug === 'emissorId') {
 
     AuthFactory::admin()->handle();
@@ -1033,7 +1089,7 @@ SQL;
     $emissor_id = $_GET['id'];
 
     $sql = <<<SQL
-        SELECT e.id, e.nom, e.nif, e.numero_iva, p.pais_ca, e.adreca, e.telefon, e.email, e.pais_id
+        SELECT e.id, e.nom, e.nif, e.numero_iva, p.pais_ca, e.adreca, e.telefon, e.email, e.pais_id, e.dataInici, e.dataFi
         FROM %s AS e
         LEFT JOIN %s AS p ON e.pais_id = p.id
         WHERE e.id = :emissor_id
@@ -1433,6 +1489,251 @@ SQL;
             httpCode: 200
         );
     } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // GET : Resum comptable
+    // ruta => "api/comptabilitat/get/resum?emissor_id={id}&exercici=2026"
+} else if ($slug === 'resum') {
+    AuthFactory::admin()->handle();
+
+    $emissor_id = $_GET['emissor_id'] ?? null;
+    $exercici = isset($_GET['exercici'])
+        ? (int) $_GET['exercici']
+        : null;
+
+    if (!$emissor_id || !$exercici) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['emissor_id i exercici són obligatoris'],
+            400
+        );
+        return;
+    }
+
+    $dataIniciExercici = sprintf('%04d-01-01', $exercici);
+    $dataFiExercici = sprintf('%04d-12-31', $exercici);
+
+    $sql = <<<SQL
+        SELECT
+            e.dataInici,
+            e.dataFi,
+
+            COALESCE(
+                (
+                    SELECT SUM(f.total_factura)
+                    FROM %s AS f
+                    WHERE f.emissor_id = e.id
+                      AND f.data_factura BETWEEN
+                          GREATEST(e.dataInici, :data_inici_exercici_ingressos)
+                          AND
+                          LEAST(e.dataFi, :data_fi_exercici_ingressos)
+                ),
+                0
+            ) AS ingressos,
+
+            COALESCE(
+                (
+                    SELECT SUM(d.total)
+                    FROM %s AS d
+                    WHERE d.receptor_id = e.id
+                      AND d.pagat = 1
+                      AND d.data_pagament IS NOT NULL
+                      AND d.data_pagament BETWEEN
+                          GREATEST(e.dataInici, :data_inici_exercici_despeses)
+                          AND
+                          LEAST(e.dataFi, :data_fi_exercici_despeses)
+                ),
+                0
+            ) AS despeses
+
+        FROM %s AS e
+        WHERE e.id = :emissor_id
+        LIMIT 1
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo),
+        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
+    );
+
+    try {
+
+        $params = [
+            ':emissor_id' => uuid::toBinary($emissor_id),
+
+            ':data_inici_exercici_ingressos' => $dataIniciExercici,
+            ':data_fi_exercici_ingressos' => $dataFiExercici,
+
+            ':data_inici_exercici_despeses' => $dataIniciExercici,
+            ':data_fi_exercici_despeses' => $dataFiExercici,
+        ];
+
+        $result = $db->getData($query, $params, true);
+
+        if (!$result) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        $ingressos = (float) $result['ingressos'];
+        $despeses = (float) $result['despeses'];
+
+        $resultat = round($ingressos - $despeses, 2);
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: [
+                'exercici' => $exercici,
+                'ingressos' => $ingressos,
+                'despeses' => $despeses,
+                'resultat' => $resultat,
+            ],
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+    // GET : Obtenir evolució mensual de comptabilitat
+    // ruta => "api/comptabilitat/get/evolucioMensual?emissor_id={id}&exercici={any}"
+} else if ($slug === 'evolucioMensual') {
+
+    AuthFactory::admin()->handle();
+
+    $emissor_id = $_GET['emissor_id'] ?? null;
+    $exercici = isset($_GET['exercici'])
+        ? (int) $_GET['exercici']
+        : null;
+
+    if (!$emissor_id || !$exercici) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['emissor_id i exercici són obligatoris'],
+            400
+        );
+        return;
+    }
+
+    $dataIniciExercici = sprintf('%04d-01-01', $exercici);
+    $dataFiExercici = sprintf('%04d-12-31', $exercici);
+
+    $sql = <<<SQL
+        SELECT
+            m.mes,
+
+            COALESCE(
+                (
+                    SELECT SUM(f.total_factura)
+                    FROM %s AS f
+                    WHERE f.emissor_id = e.id
+                      AND f.data_factura BETWEEN
+                          GREATEST(e.dataInici, :data_inici_exercici_ingressos)
+                          AND
+                          LEAST(e.dataFi, :data_fi_exercici_ingressos)
+                      AND MONTH(f.data_factura) = m.mes
+                ),
+                0
+            ) AS ingressos,
+
+            COALESCE(
+                (
+                    SELECT SUM(d.total)
+                    FROM %s AS d
+                    WHERE d.receptor_id = e.id
+                      AND d.pagat = 1
+                      AND d.data_pagament IS NOT NULL
+                      AND d.data_pagament BETWEEN
+                          GREATEST(e.dataInici, :data_inici_exercici_despeses)
+                          AND
+                          LEAST(e.dataFi, :data_fi_exercici_despeses)
+                      AND MONTH(d.data_pagament) = m.mes
+                ),
+                0
+            ) AS despeses
+
+        FROM (
+            SELECT 1 AS mes
+            UNION ALL SELECT 2
+            UNION ALL SELECT 3
+            UNION ALL SELECT 4
+            UNION ALL SELECT 5
+            UNION ALL SELECT 6
+            UNION ALL SELECT 7
+            UNION ALL SELECT 8
+            UNION ALL SELECT 9
+            UNION ALL SELECT 10
+            UNION ALL SELECT 11
+            UNION ALL SELECT 12
+        ) AS m
+
+        INNER JOIN %s AS e
+            ON e.id = :emissor_id
+
+        ORDER BY m.mes ASC
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS, $pdo),
+        qi(Tables::DB_COMPTABILITAT_DESPESES, $pdo),
+        qi(Tables::DB_COMPTABILITAT_EMISSORS, $pdo)
+    );
+
+    try {
+
+        $params = [
+            ':emissor_id' => uuid::toBinary($emissor_id),
+
+            ':data_inici_exercici_ingressos' => $dataIniciExercici,
+            ':data_fi_exercici_ingressos' => $dataFiExercici,
+
+            ':data_inici_exercici_despeses' => $dataIniciExercici,
+            ':data_fi_exercici_despeses' => $dataFiExercici,
+        ];
+
+        $result = $db->getData($query, $params);
+
+        $mesos = [];
+
+        foreach ($result as $row) {
+
+            $ingressos = round((float) $row['ingressos'], 2);
+            $despeses = round((float) $row['despeses'], 2);
+            $resultat = round($ingressos - $despeses, 2);
+
+            $mesos[] = [
+                'mes' => (int) $row['mes'],
+                'ingressos' => $ingressos,
+                'despeses' => $despeses,
+                'resultat' => $resultat,
+            ];
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: [
+                'exercici' => $exercici,
+                'mesos' => $mesos,
+            ],
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],

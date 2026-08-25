@@ -86,7 +86,7 @@ class ComptabilitatRoutes
 
     public function facturacioAnys(): string
     {
-        return $this->base() . '/facturacio-anys';
+        return $this->base() . '/resum-facturacio';
     }
 
     // -------------------------
