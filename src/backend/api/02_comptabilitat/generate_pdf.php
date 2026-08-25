@@ -30,6 +30,7 @@ function i18nInvoice(string $lang): array
       'due_date'             => 'Data de venciment',
       'payment_method'       => 'Forma de pagament',
       'billed_to'            => 'Facturat a:',
+      'emissor'              => 'Emissor:',
       'details'              => 'DETALLS DE LA FACTURA',
       'description'          => 'Descripció',
       'total'                => 'Total',
@@ -49,6 +50,7 @@ function i18nInvoice(string $lang): array
       'due_date'             => 'Fecha de vencimiento',
       'payment_method'       => 'Forma de pago',
       'billed_to'            => 'Facturado a:',
+      'emissor'              => 'Emisor:',
       'details'              => 'DETALLES DE LA FACTURA',
       'description'          => 'Descripción',
       'total'                => 'Total',
@@ -68,6 +70,7 @@ function i18nInvoice(string $lang): array
       'due_date'             => 'Due date',
       'payment_method'       => 'Payment method',
       'billed_to'            => 'Billed to:',
+      'emissor'              => 'From:',
       'details'              => 'INVOICE DETAILS',
       'description'          => 'Description',
       'total'                => 'Total',
@@ -87,6 +90,7 @@ function i18nInvoice(string $lang): array
       'due_date'             => 'Scadenza',
       'payment_method'       => 'Metodo di pagamento',
       'billed_to'            => 'Fatturato a:',
+      'emissor'              => 'Emittente:',
       'details'              => 'DETTAGLI DELLA FATTURA',
       'description'          => 'Descrizione',
       'total'                => 'Totale',
@@ -126,15 +130,15 @@ function fetchInvoiceAndProducts(int $idInvoice): array
 function buildInvoiceHtml(array $obj, array $arr2, array $T): string
 {
   $id_factura    = $obj['numero_factura'];
-  $empresa       = $obj['clientEmpresa']    ?? '';
-  $nomClient     = $obj['clientNom']        ?? '';
-  $cognoms       = $obj['clientCognoms']    ?? '';
-  $adreca        = $obj['clientAdreca']     ?? '';
-  $ciutat        = $obj['clientCiutat']     ?? '';
-  $provincia     = $obj['clientProvincia']  ?? '';
-  $pais          = $obj['clientPais']       ?? '';
-  $nif           = $obj['clientNIF']        ?? '';
-  $cp            = $obj['clientCP']         ?? '';
+  $empresa   = $obj['empresa']       ?? '';
+  $nomClient = $obj['nom']           ?? '';
+  $cognoms   = $obj['cognoms']       ?? '';
+  $adreca    = $obj['adreca']        ?? '';
+  $ciutat    = $obj['ciutat_ca']     ?? '';
+  $provincia = $obj['provincia_ca']  ?? '';
+  $pais      = $obj['pais_ca']       ?? '';
+  $nif       = $obj['nif']           ?? '';
+  $cp        = $obj['cp']            ?? '';
 
   $facDate_net = !empty($obj['data_factura'])
     ? date('d/m/Y', strtotime($obj['data_factura']))
@@ -144,20 +148,21 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
     ? date('d/m/Y', strtotime($obj['data_venciment']))
     : '';
 
-  $tipusPagament  = $obj['tipusNom']      ?? '';
-  $notesPagament  = $obj['metodeNotes']   ?? '';
+  $tipusPagament = $obj['tipus']  ?? '';
+  $notesPagament = $obj['notes']  ?? '';
 
   $subTotal      = (float)($obj['base_imposable'] ?? 0);
   $facVAT        = (float)($obj['import_iva']     ?? 0);
   $total         = (float)($obj['total_factura']  ?? 0);
+  $ivaPercentatge = (float)($obj['ivaPercen'] ?? 0);
 
-  $emissorNom        = $obj['emissorNom']        ?? '';
-  $emissorNIF        = $obj['emissorNIF']        ?? '';
-  $emissorNumeroIVA  = $obj['emissorNumeroIVA']  ?? '';
-  $emissorPais       = $obj['emissorPais']       ?? '';
-  $emissorAdreca     = $obj['emissorAdreca']     ?? '';
-  $emissorTelefon    = $obj['emissorTelefon']    ?? '';
-  $emissorEmail      = $obj['emissorEmail']      ?? '';
+  $emissorNom       = $obj['nomEmissor']     ?? '';
+  $emissorNIF       = $obj['nifEmissor']     ?? '';
+  $emissorNumeroIVA = $obj['numero_iva']     ?? '';
+  $emissorPais      = $obj['pais_caEmissor'] ?? '';
+  $emissorAdreca    = $obj['adrecaEmissor']  ?? '';
+  $emissorTelefon   = $obj['telefonEmissor'] ?? '';
+  $emissorEmail     = $obj['emailEmissor']   ?? '';
 
   $footerOwner = htmlspecialchars($T['footer_owner'] ?? 'Hispantic - Elliot Fernandez Hernandez');
   $pageLabel   = htmlspecialchars($T['page'] ?? 'Pàgina');
@@ -183,6 +188,15 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
 <head>
 <meta charset="UTF-8">
 <style>
+      html,
+      body {
+          background: #ffffff !important;
+      }
+
+      .invoice,
+      .invoice * {
+          background-color: #ffffff;
+      }
     @page {
         margin: 20mm 15mm 20mm 15mm;
     }
@@ -244,6 +258,29 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
         font-size: 8px;
         color: #555;
     }
+    .client-box,
+    
+    .emissor-box {
+          background: #ffffff !important;
+          background-color: #ffffff !important;
+      }
+
+    .invoice-parties th {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    text-align: left !important;
+    vertical-align: top;
+    font-size: 11px;
+     font-weight: normal;
+    }
+
+    .legal {
+    margin-top: 65px;
+    }
+
+    .pagament{
+    margin-top: 65px;
+    }
 </style>
 </head>
 <body>
@@ -264,11 +301,10 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
 </div>
 
 <table>
-    <thead>
-        <tr>
+    <tr class="invoice-parties">
             <th style="width:50%;">
                 <strong>' . htmlspecialchars($T['billed_to']) . '</strong><br>
-                ' . htmlspecialchars($empresa) . '<br>
+                <strong>' . htmlspecialchars($empresa) . '</strong><br>
                 ' . htmlspecialchars(trim($nomClient . ' ' . $cognoms)) . '<br>
                 NIF: ' . htmlspecialchars($nif) . '<br>
                 ' . htmlspecialchars($adreca) . '<br>
@@ -276,6 +312,7 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
                 ' . htmlspecialchars($pais) . '
             </th>
             <th style="width:50%;">
+             <strong>' . htmlspecialchars($T['emissor']) . '</strong><br>
                 <strong>' . htmlspecialchars($emissorNom) . '</strong><br>
                 NIF: '          . htmlspecialchars($emissorNIF)       . '<br>
                 Partita Iva: '  . htmlspecialchars($emissorNumeroIVA) . '<br>
@@ -283,11 +320,10 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
                 '               . htmlspecialchars($emissorPais)      . '<br>
                 '               . htmlspecialchars($emissorTelefon)   . ' - ' . htmlspecialchars($emissorEmail) . '
             </th>
-        </tr>
-    </thead>
+    </tr>
 </table>
 
-<h4 style="text-align:center;">' . htmlspecialchars($T['details']) . '</h4>
+<h4 style="text-align:center;font-size:20px">' . htmlspecialchars($T['details']) . '</h4>
 
 <table>
     <thead>
