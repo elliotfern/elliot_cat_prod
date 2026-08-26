@@ -1,5 +1,7 @@
+import { DOMAIN_WEB } from '../../utils/urls';
+
 export async function obtenerTemperaturaTrento(): Promise<string> {
-  const url = 'api/meteo/get';
+  const url = `${DOMAIN_WEB}/api/meteo/get`;
 
   try {
     const response = await fetch(url);

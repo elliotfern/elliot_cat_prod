@@ -1,10 +1,12 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
+import { Button } from '../../ui/button';
 import { API_URLS } from '../../utils/apiUrls';
+import { INTRANET_URLS } from '../../utils/IntranetUrls';
 
 interface Producte {
-  id: number;
+  id: string;
   producte: string;
   descripcio?: string;
   unitat?: string;
@@ -50,10 +52,7 @@ export async function taulaLlistatProductes() {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: Producte) =>
-        `<a id="${row.id}" title="Modifica" href="/gestio/comptabilitat/modifica-producte/${row.id}">
-          <button class="btn-petit">Modifica</button>
-        </a>`,
+      render: (_, { id }) => Button.edit('Modifica', INTRANET_URLS.COMPTABILITAT.PRODUCTE_MODIFICA(id)),
     });
   }
 

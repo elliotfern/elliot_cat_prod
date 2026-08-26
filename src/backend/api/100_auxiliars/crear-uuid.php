@@ -7,8 +7,8 @@ use App\Utils\Uuid;
 // ─────────────────────────────────────────────
 // CONFIGURACIÓ: ajusta aquests valors
 // ─────────────────────────────────────────────
-$taula = 'db_contactes';       // Nom de la taula a actualitzar
-$columnaId = 'id';          // Nom de la columna PK (BINARY(16))
+$taula = 'db_comptabilitat_facturacio_clients';       // Nom de la taula a actualitzar
+$columnaId = 'id2';          // Nom de la columna PK (BINARY(16))
 $columnaFiltre = 'id';      // Columna que fem servir per identificar la fila (ex: alguna PK antiga o rowid)
 // ─────────────────────────────────────────────
 
@@ -20,7 +20,7 @@ try {
 
     // 1. Seleccionar files que necessiten un nou UUID
     //    (ajusta el WHERE segons el teu cas: id IS NULL, id = '', etc.)
-    $stmtSelect = $pdo->prepare("SELECT `$columnaFiltre` FROM `$taula` WHERE `$columnaId`");
+    $stmtSelect = $pdo->prepare("SELECT `$columnaFiltre` FROM `$taula`");
     $stmtSelect->execute();
     $files = $stmtSelect->fetchAll(PDO::FETCH_ASSOC);
 

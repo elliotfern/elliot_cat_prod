@@ -681,7 +681,7 @@ if ($slug === 'clients') {
     // ruta => "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id=1"
 } else if ($slug === 'facturaCompleta') {
 
-    $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+    $id = isset($_GET['id']) ? $_GET['id'] : null;
 
     if (!$id) {
         Response::error(
@@ -807,7 +807,7 @@ if ($slug === 'clients') {
 
         $result = $db->getData(
             $queryFactura,
-            [':id' => $id],
+            [':id' => Uuid::toBinary($id)],
             true
         );
 
@@ -1181,16 +1181,16 @@ SQL;
 
     // GET : Obtenir producte per ID
     // ruta => "https://elliot.cat/api/comptabilitat/get/producteId?id={id}"
-} else if ($slug === 'producteId' && isset($_GET['id'])) {
+} else if ($slug === 'producteId') {
 
     AuthFactory::admin()->handle();
 
-    $producte_id = (int) $_GET['id'];
+    $producte_id = $_GET['id'];
 
     $sql = <<<SQL
         SELECT id, producte, descripcio, actiu, unitat, preu_recomanat
         FROM %s
-        WHERE id = :producte_id
+        WHERE id = :id
         LIMIT 1
     SQL;
 
@@ -1201,7 +1201,7 @@ SQL;
 
     try {
 
-        $params = [':producte_id' => $producte_id];
+        $params = [':id' => Uuid::toBinary($producte_id)];
         $result = $db->getData($query, $params, true);
 
         if (!$result) {

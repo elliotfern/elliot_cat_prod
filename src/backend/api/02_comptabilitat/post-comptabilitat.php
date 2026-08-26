@@ -555,9 +555,9 @@ if ($slug === 'clients') {
 
         $sql = <<<SQL
         INSERT INTO {$table}
-        (id, nom, nif, numero_iva, pais_id, adreca, telefon, email, created_at, updated_at)
+        (id, nom, nif, numero_iva, pais_id, adreca, telefon, email, dataInici, dataFi, created_at, updated_at)
         VALUES
-        (:id, :nom, :nif, :numero_iva, :pais_id, :adreca, :telefon, :email, NOW(), NOW())
+        (:id, :nom, :nif, :numero_iva, :pais_id, :adreca, :telefon, :email, :dataInici, :dataFi, NOW(), NOW())
     SQL;
 
         $stmt = $pdo->prepare($sql);
@@ -591,6 +591,9 @@ if ($slug === 'clients') {
             $emissorData['email'] ?? null,
             $emissorData['email'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
         );
+
+        $stmt->bindValue(':dataInici', $emissorData['dataInici'], PDO::PARAM_STR);
+        $stmt->bindValue(':dataFi', $emissorData['dataFi'], PDO::PARAM_STR);
 
         $stmt->execute();
 
@@ -630,6 +633,9 @@ if ($slug === 'clients') {
     $toIntOrNull = static fn($v): ?int => (is_numeric($v) ? (int)$v : null);
 
     // Datos
+    $id_bin        = ramsey::uuid7()->getBytes();
+    $id_string = Uuid::toString($id_bin);
+
     $producte       = $trimOrNull($data['producte'] ?? null);
     $descripcio     = $trimOrNull($data['descripcio'] ?? null);
     $actiu          = $toIntOrNull($data['actiu'] ?? 1) ?? 1;
@@ -659,13 +665,14 @@ if ($slug === 'clients') {
         $table = qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo);
         $sql = <<<SQL
                 INSERT INTO {$table}
-                  (producte, descripcio, actiu, unitat, preu_recomanat)
+                  (id, producte, descripcio, actiu, unitat, preu_recomanat)
                 VALUES
-                  (:producte, :descripcio, :actiu, :unitat, :preu_recomanat)
+                  (:id, :producte, :descripcio, :actiu, :unitat, :preu_recomanat)
                 SQL;
 
         $stmt = $pdo->prepare($sql);
 
+        $stmt->bindValue(':id', $id_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':producte', $producte, PDO::PARAM_STR);
         $stmt->bindValue(':descripcio', $descripcio, $descripcio !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
         $stmt->bindValue(':actiu', $actiu, PDO::PARAM_INT);
@@ -673,11 +680,9 @@ if ($slug === 'clients') {
         $stmt->bindValue(':preu_recomanat', $preu_recomanat, $preu_recomanat !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
 
         $stmt->execute();
-        $newId = (int)$pdo->lastInsertId();
-
         $pdo->commit();
 
-        Response::success(MissatgesAPI::success('create'), ['id' => $newId], httpCode: 201);
+        Response::success(MissatgesAPI::success('create'), ['id' => $id_string], httpCode: 201);
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);

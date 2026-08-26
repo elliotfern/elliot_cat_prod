@@ -9,6 +9,7 @@ export type IntranetUrls = {
     PRESSUPOST_MODIFICA_ID: (id: string) => string;
     FACTURA_MODIFICA_ID: (id: number) => string;
     FACTURA_DESPESA_MODIFICA: (id: string) => string;
+    PRODUCTE_MODIFICA: (id: string) => string;
   };
 
   CONTACTES: {

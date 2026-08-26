@@ -16,7 +16,7 @@ export async function formProducte(isUpdate: boolean, id?: string) {
   // Si es actualización, cargamos los datos
   if (isUpdate && id) {
     try {
-      data = await api.get<Producte>(`comptabilitat/get/pressupostId`, {
+      data = await api.get<Producte>(`comptabilitat/get/producteId`, {
         id,
       });
     } catch (error) {

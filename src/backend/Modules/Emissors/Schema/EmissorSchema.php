@@ -42,6 +42,17 @@ class EmissorSchema
                 'rules' => 'nullable|email|max:255',
                 'label' => 'Email',
             ],
+
+            'dataInici' => [
+                'rules' => 'required|date|max:255',
+                'label' => 'Data inici',
+            ],
+
+            'dataFi' => [
+                'rules' => 'required|date|max:255',
+                'label' => 'Data fi',
+            ],
+
         ];
     }
 
@@ -88,6 +99,17 @@ class EmissorSchema
                 'rules' => 'nullable|email|max:255',
                 'label' => 'Email',
             ],
+
+            'dataInici' => [
+                'rules' => 'required|date|max:255',
+                'label' => 'Data inici',
+            ],
+
+            'dataFi' => [
+                'rules' => 'required|date|max:255',
+                'label' => 'Data fi',
+            ],
+
         ];
     }
 }

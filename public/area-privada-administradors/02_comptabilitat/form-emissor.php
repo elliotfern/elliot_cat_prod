@@ -97,6 +97,26 @@ use App\Utils\Url;
                 <div class="invalid-feedback" id="error-email"></div>
             </div>
 
+            <hr>
+            <!-- DATA INICI -->
+            <div class="col-md-4">
+                <label for="dataInici" class="form-label">Data d'inici activitat</label>
+                <input type="date"
+                    class="form-control"
+                    id="dataInici"
+                    name="dataInici" />
+                <div class="invalid-feedback" id="error-dataInici"></div>
+            </div>
+
+            <div class="col-md-4">
+                <label for="dataFi" class="form-label">Data de fi activitat</label>
+                <input type="date"
+                    class="form-control"
+                    id="dataFi"
+                    name="dataFi" />
+                <div class="invalid-feedback" id="error-dataFi"></div>
+            </div>
+
         </div>
 
         <!-- BOTONES -->

@@ -460,9 +460,7 @@ if ($slug === 'clients') {
                     continue;
                 }
 
-                $producte_id = $toIntOrNull(
-                    $producte['producte_id'] ?? null
-                );
+                $producte_id = $producte['producte_id'] ?? null;
 
                 $descripcio = $trimOrNull(
                     $producte['descripcio'] ?? null
@@ -877,6 +875,8 @@ if ($slug === 'clients') {
             adreca = :adreca,
             telefon = :telefon,
             email = :email,
+            dataInici = :dataInici,
+            dataFi = :dataFi,
             updated_at = NOW()
         WHERE id = :id
     SQL;
@@ -918,6 +918,9 @@ if ($slug === 'clients') {
             $emissorData['email'] !== null ? PDO::PARAM_STR : PDO::PARAM_NULL
         );
 
+        $stmt->bindValue(':dataInici', $emissorData['dataInici'], PDO::PARAM_STR);
+        $stmt->bindValue(':dataFi', $emissorData['dataFi'], PDO::PARAM_STR);
+
         $stmt->execute();
 
         // -------------------------
@@ -934,6 +937,116 @@ if ($slug === 'clients') {
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
+            httpCode: 200
+        );
+    } catch (Throwable $e) {
+
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+} else if ($slug === "producte") {
+    $raw  = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+
+    if (!is_array($data)) {
+        Response::error(
+            MissatgesAPI::error('validacio'),
+            ['JSON invàlid'],
+            400
+        );
+        return;
+    }
+
+    // ID obligatori
+    if (empty($data['id'])) {
+        Response::error(
+            message: 'L\'ID del producte és obligatori.',
+            httpCode: 400
+        );
+        return;
+    }
+
+    // Camps obligatoris
+    $requiredFields = [
+        'id',
+        'producte',
+    ];
+
+    foreach ($requiredFields as $field) {
+        if (!isset($data[$field]) || $data[$field] === '') {
+            Response::error(
+                message: "El camp {$field} és obligatori.",
+                httpCode: 422
+            );
+            return;
+        }
+    }
+
+    // UUIDs
+    $id_bin = Uuid::toBinary($data['id']);
+
+    $producte  = isset($data['producte']) ? $data['producte'] : null;
+    $descripcio  = isset($data['descripcio']) ? $data['descripcio'] : null;
+    $unitat   = isset($data['unitat']) ? $data['unitat'] : null;
+    $preu_recomanat   = isset($data['preu_recomanat']) ? $data['preu_recomanat'] : null;
+    $actiu   = isset($data['actiu']) ? $data['actiu'] : null;
+
+    try {
+
+        $pdo->beginTransaction();
+
+        $table = qi(Tables::DB_COMPTABILITAT_CATALEG_PRODUCTES, $pdo);
+
+        // 🔎 comprovar existència
+        $check = $pdo->prepare("SELECT id FROM {$table} WHERE id = :id LIMIT 1");
+        $check->bindValue(':id', $id_bin, PDO::PARAM_LOB);
+        $check->execute();
+
+        if (!$check->fetchColumn()) {
+            $pdo->rollBack();
+
+            Response::error(
+                MissatgesAPI::error('notFound'),
+                ['Pressupost no trobat'],
+                404
+            );
+            return;
+        }
+
+        // UPDATE
+        $sql = <<<SQL
+        UPDATE {$table}
+        SET
+            producte = :producte,
+            descripcio = :descripcio,
+            unitat = :unitat,
+            preu_recomanat = :preu_recomanat,
+            actiu = :actiu
+        WHERE id = :id
+    SQL;
+
+        $stmt = $pdo->prepare($sql);
+
+        $stmt->bindValue(':id', $id_bin, PDO::PARAM_LOB);
+        $stmt->bindValue(':producte', $producte, PDO::PARAM_STR);
+        $stmt->bindValue(':descripcio', $descripcio, PDO::PARAM_STR);
+        $stmt->bindValue(':unitat', $unitat, PDO::PARAM_STR);
+        $stmt->bindValue(':preu_recomanat', (float)$preu_recomanat, PDO::PARAM_STR);
+        $stmt->bindValue(':actiu', $actiu, PDO::PARAM_INT);
+
+        $stmt->execute();
+        $pdo->commit();
+
+        Response::success(
+            MissatgesAPI::success('update'),
+            ['id' => $id_bin],
             httpCode: 200
         );
     } catch (Throwable $e) {

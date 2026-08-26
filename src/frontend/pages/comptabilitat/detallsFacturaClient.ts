@@ -161,7 +161,7 @@ function valueOrDash(value: unknown): string {
 // API
 // ============================================================
 
-async function getInvoiceData(id: number): Promise<{
+async function getInvoiceData(id: string): Promise<{
   factura: Invoice;
   productes: InvoiceLine[];
 }> {
@@ -649,7 +649,7 @@ function renderInvoiceExtra(container: HTMLElement, inv: Invoice): void {
 // INIT
 // ============================================================
 
-export async function detallsFacturaClients(idFactura: number): Promise<void> {
+export async function detallsFacturaClients(idFactura: string): Promise<void> {
   const invoiceId = idFactura;
 
   if (!invoiceId) {

@@ -13,6 +13,7 @@ export const ENDPOINTS = {
   CONTACTE_MODIFICA: 'modifica-contacte',
   FACTURA_MODIFICA: 'modifica-factura',
   FACTURA_DESPESA_MODIFICA: 'modifica-factura-proveidor',
+  PRODUCTE_MODIFICA: 'modifica-producte',
 } as const;
 
 // Mapa de recursos disponibles
@@ -41,6 +42,7 @@ export const INTRANET_URLS: IntranetUrls = {
     PRESSUPOST_MODIFICA_ID: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.PRESSUPOST_MODIFICA}/${encodeURIComponent(id)}`,
     FACTURA_MODIFICA_ID: (id: number) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.FACTURA_MODIFICA}/${encodeURIComponent(id)}`,
     FACTURA_DESPESA_MODIFICA: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.FACTURA_DESPESA_MODIFICA}/${encodeURIComponent(id)}`,
+    PRODUCTE_MODIFICA: (id: string) => `${INTRANET_WEB}/${MODUL.COMPTABILITAT}/${ENDPOINTS.PRODUCTE_MODIFICA}/${encodeURIComponent(id)}`,
   },
 
   CONTACTES: {
