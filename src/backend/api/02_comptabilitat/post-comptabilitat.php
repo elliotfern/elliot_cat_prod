@@ -50,7 +50,7 @@ function generarNumeroFactura(PDO $db): string
         FROM {$table}
         WHERE numero_factura LIKE :yearPrefix
         AND numero_factura LIKE '%-C'
-        ORDER BY id DESC
+        ORDER BY created_at DESC
         LIMIT 1
         SQL;
 
@@ -168,15 +168,15 @@ if ($slug === 'clients') {
     $trimOrNull = static fn($v): ?string =>
     $v === null ? null : (trim((string)$v) ?: null);
 
-    $toIntOrNull = static fn($v): ?int =>
-    is_numeric($v) ? (int)$v : null;
-
     $dateOrNull = static fn($v): ?string => (
         is_string($v) &&
         preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)
     )
         ? $v
         : null;
+
+    $toIntOrNull = static fn($v): ?int =>
+    is_numeric($v) ? (int)$v : null;
 
     $toDecimal = static function ($v): ?string {
 
@@ -190,7 +190,10 @@ if ($slug === 'clients') {
             (string)$v
         );
 
-        return preg_match('/^-?\d+(\.\d{1,4})?$/', $value)
+        return preg_match(
+            '/^-?\d+(\.\d{1,4})?$/',
+            $value
+        )
             ? $value
             : null;
     };
@@ -201,6 +204,12 @@ if ($slug === 'clients') {
      * -------------------------------------------------------
      */
 
+    // UUID v7 de la factura
+    $uuid = Ramsey::uuid7();
+
+    // BINARY(16)
+    $uuidBytes = $uuid->getBytes();
+
     $emissor_id = $trimOrNull($data['emissor_id'] ?? null);
     $client_id  = $trimOrNull($data['client_id'] ?? null);
 
@@ -209,18 +218,45 @@ if ($slug === 'clients') {
     $data_factura   = $dateOrNull($data['data_factura'] ?? null);
     $data_venciment = $dateOrNull($data['data_venciment'] ?? null);
 
-    $base_imposable = $toDecimal($data['base_imposable'] ?? null);
-    $despeses_extra = $toDecimal($data['despeses_extra'] ?? 0);
-    $total_factura  = $toDecimal($data['total_factura'] ?? null);
-    $import_iva     = $toDecimal($data['import_iva'] ?? null);
+    $base_imposable = $toDecimal(
+        $data['base_imposable'] ?? null
+    );
 
-    $tipus_iva       = $toIntOrNull($data['tipus_iva'] ?? null);
-    $estat           = $toIntOrNull($data['estat'] ?? null);
-    $metode_pagament = $toIntOrNull($data['metode_pagament'] ?? null);
-    $projecte_id     = $toIntOrNull($data['projecte_id'] ?? null);
+    $despeses_extra = $toDecimal(
+        $data['despeses_extra'] ?? 0
+    );
 
-    $notes     = $trimOrNull($data['notes'] ?? null);
-    $arxiu_url = $trimOrNull($data['arxiu_url'] ?? null);
+    $total_factura = $toDecimal(
+        $data['total_factura'] ?? null
+    );
+
+    $import_iva = $toDecimal(
+        $data['import_iva'] ?? null
+    );
+
+    $tipus_iva = $toIntOrNull(
+        $data['tipus_iva'] ?? null
+    );
+
+    $estat = $toIntOrNull(
+        $data['estat'] ?? null
+    );
+
+    $metode_pagament = $toIntOrNull(
+        $data['metode_pagament'] ?? null
+    );
+
+    $projecte_id = $toIntOrNull(
+        $data['projecte_id'] ?? null
+    );
+
+    $notes = $trimOrNull(
+        $data['notes'] ?? null
+    );
+
+    $arxiu_url = $trimOrNull(
+        $data['arxiu_url'] ?? null
+    );
 
     $recurrent = isset($data['recurrent'])
         ? (int)$data['recurrent']
@@ -234,7 +270,7 @@ if ($slug === 'clients') {
 
     /*
      * -------------------------------------------------------
-     * Validación
+     * Validació
      * -------------------------------------------------------
      */
 
@@ -297,8 +333,8 @@ if ($slug === 'clients') {
 
     try {
 
-        $emissorIdBinary = uuid::toBinary($emissor_id);
-        $clientIdBinary  = uuid::toBinary($client_id);
+        $emissorIdBinary = Uuid::toBinary($emissor_id);
+        $clientIdBinary  = Uuid::toBinary($client_id);
     } catch (Throwable $e) {
 
         Response::error(
@@ -306,6 +342,7 @@ if ($slug === 'clients') {
             ['UUID invàlid'],
             400
         );
+
         return;
     }
 
@@ -341,6 +378,7 @@ if ($slug === 'clients') {
         $sql = <<<SQL
             INSERT INTO {$table}
             (
+                id,
                 numero_factura,
                 emissor_id,
                 client_id,
@@ -362,6 +400,7 @@ if ($slug === 'clients') {
             )
             VALUES
             (
+                :id,
                 :numero_factura,
                 :emissor_id,
                 :client_id,
@@ -386,27 +425,26 @@ if ($slug === 'clients') {
         $stmt = $pdo->prepare($sql);
 
         $stmt->execute([
-            ':numero_factura' => $numero_factura,
-            ':emissor_id' => $emissorIdBinary,
-            ':client_id' => $clientIdBinary,
-            ':concepte' => $concepte,
-            ':data_factura' => $data_factura,
-            ':data_venciment' => $data_venciment,
-            ':base_imposable' => $base_imposable,
-            ':despeses_extra' => $despeses_extra,
-            ':total_factura' => $total_factura,
-            ':import_iva' => $import_iva,
-            ':tipus_iva' => $tipus_iva,
-            ':estat' => $estat,
+            ':id'              => $uuidBytes,
+            ':numero_factura'  => $numero_factura,
+            ':emissor_id'      => $emissorIdBinary,
+            ':client_id'       => $clientIdBinary,
+            ':concepte'        => $concepte,
+            ':data_factura'    => $data_factura,
+            ':data_venciment'  => $data_venciment,
+            ':base_imposable'  => $base_imposable,
+            ':despeses_extra'  => $despeses_extra,
+            ':total_factura'   => $total_factura,
+            ':import_iva'      => $import_iva,
+            ':tipus_iva'       => $tipus_iva,
+            ':estat'           => $estat,
             ':metode_pagament' => $metode_pagament,
-            ':notes' => $notes,
-            ':projecte_id' => $projecte_id,
-            ':arxiu_url' => $arxiu_url,
-            ':recurrent' => $recurrent,
-            ':frequencia' => $frequencia,
+            ':notes'           => $notes,
+            ':projecte_id'     => $projecte_id,
+            ':arxiu_url'       => $arxiu_url,
+            ':recurrent'       => $recurrent,
+            ':frequencia'      => $frequencia,
         ]);
-
-        $newId = (int)$pdo->lastInsertId();
 
         /*
          * ---------------------------------------------------
@@ -414,7 +452,10 @@ if ($slug === 'clients') {
          * ---------------------------------------------------
          */
 
-        if (is_array($detallsProductes) && !empty($detallsProductes)) {
+        if (
+            is_array($detallsProductes) &&
+            !empty($detallsProductes)
+        ) {
 
             $tableProductes = qi(
                 Tables::DB_COMPTABILITAT_FACTURACIO_CLIENTS_PRODUCTES,
@@ -442,7 +483,10 @@ if ($slug === 'clients') {
 
             foreach ($detallsProductes as $p) {
 
-                $producteId = $toIntOrNull(
+                /*
+                 * producte_id AHORA ES BINARY(16)
+                 */
+                $producteId = $trimOrNull(
                     $p['producte_id'] ?? null
                 );
 
@@ -462,15 +506,30 @@ if ($slug === 'clients') {
                     continue;
                 }
 
+                /*
+                 * Convertir UUID del producto
+                 * a BINARY(16)
+                 */
+                try {
+
+                    $producteIdBinary = Uuid::toBinary(
+                        $producteId
+                    );
+                } catch (Throwable $e) {
+
+                    throw new RuntimeException(
+                        'UUID de producte invàlid: ' . $producteId
+                    );
+                }
+
                 $stmtProd->execute([
-                    ':factura_id' => $newId,
-                    ':producte_id' => $producteId,
+                    ':factura_id' => $uuidBytes,
+                    ':producte_id' => $producteIdBinary,
                     ':descripcio' => $descripcio,
                     ':preu' => $preu,
                 ]);
             }
         }
-
 
         /*
          * ---------------------------------------------------
@@ -483,7 +542,7 @@ if ($slug === 'clients') {
         Response::success(
             message: MissatgesAPI::success('create'),
             data: [
-                'id' => $newId,
+                'id' => Uuid::toString($uuidBytes),
                 'numero_factura' => $numero_factura
             ],
             httpCode: 200
@@ -500,6 +559,7 @@ if ($slug === 'clients') {
             500
         );
     }
+
 
     // POST : Crear nou emissor
 } else if ($slug === 'emissor') {

@@ -144,7 +144,7 @@ function preProcessFacturaFormData(rawData: Record<string, any>): Record<string,
    */
   const idInput = document.querySelector<HTMLInputElement>('#id');
 
-  const idValue = idInput?.value ? Number(idInput.value) : null;
+  const idValue = idInput?.value ? String(idInput.value) : null;
 
   /*
    * Número factura
@@ -161,8 +161,7 @@ function preProcessFacturaFormData(rawData: Record<string, any>): Record<string,
 
   const producteIds = Array.from(document.querySelectorAll<HTMLSelectElement>('select[name="producte_id[]"]'))
     .map((el) => el.value)
-    .filter((value) => value !== '')
-    .map((value) => Number(value));
+    .filter((value) => value !== '');
 
   const descripcions = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="descripcio[]"]')).map((el) => el.value);
 
@@ -266,14 +265,14 @@ export async function initProductesFactura(existingProducts: ProducteFactura[] =
    * Cargar catálogo de productos
    */
   let productes: {
-    id: number;
+    id: string;
     producte: string;
   }[] = [];
 
   try {
     productes = await api.get<
       {
-        id: number;
+        id: string;
         producte: string;
       }[]
     >(API_URLS.GET.PRODUCTES);

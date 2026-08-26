@@ -25,7 +25,9 @@ export interface Factura {
 }
 
 export interface ProducteFactura {
-  producte_id: number | null;
-  descripcio: string;
-  preu: number;
+  id?: string;
+  factura_id?: string;
+  producte_id: string | null;
+  descripcio: string | null;
+  preu: number | null;
 }
