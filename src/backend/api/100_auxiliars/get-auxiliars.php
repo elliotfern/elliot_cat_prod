@@ -2346,7 +2346,6 @@ if ($slug === 'directors') {
 
     // Array estático de métodos de pago
     $metodes = [
-        ['id' => 'cap', 'label' => 'Cap'],
         ['id' => 'mensual',    'label' => 'Mensual'],
         ['id' => 'trimestral',    'label' => 'Trimestral'],
         ['id' => 'anual',    'label' => 'Anual'],

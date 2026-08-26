@@ -5,6 +5,7 @@ import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Factura } from '../../types/Factura';
 import { API_URLS } from '../../utils/apiUrls';
 import { api } from '../../core/api/client';
+import { formatEuro } from '../../utils/locales/formatEuro';
 
 // Generador PDF por idioma
 async function generatePDF(invoiceId: string, lang: 'ca' | 'es' | 'en' | 'it', fileName?: string, btn?: HTMLButtonElement | null) {
@@ -135,7 +136,7 @@ export async function taulaFacturacioClients(id: string) {
     {
       header: 'Total',
       field: 'total_factura',
-      render: (_: unknown, row: Factura) => `${row.total_factura}€`,
+      render: (_: unknown, row: Factura) => `${formatEuro(row.total_factura)}`,
     },
 
     // ESTAT

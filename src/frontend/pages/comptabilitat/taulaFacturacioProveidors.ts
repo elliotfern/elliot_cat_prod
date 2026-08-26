@@ -5,6 +5,7 @@ import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { API_URLS } from '../../utils/apiUrls';
 import { Button } from '../../ui/button';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';
+import { formatEuro } from '../../utils/locales/formatEuro';
 
 export const RECEPTORS: Record<string, string> = {
   '019e3ebaf71370c2860a40a79fb5ad7b': 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
@@ -34,14 +35,14 @@ export async function taulaDespeses(receptorId: string, tipus_despesa: string) {
       header: 'Proveïdor',
       field: 'proveidorNom',
       render: (_: unknown, row: any) => `
-        <a href="/gestio/comptabilitat/fitxa-proveidor/${row.proveidorId}">
+        <a href="/gestio/comptabilitat/fitxa-proveidor/${row.proveidor_id}">
           ${row.proveidorNom}
         </a>`,
     },
     { header: 'Categoria', field: 'nomCategoria' },
-    { header: 'Base', field: 'base_imposable', render: (_: unknown, row: any) => `${row.base_imposable}€` },
-    { header: 'IVA', field: 'import_iva', render: (_: unknown, row: any) => `${row.import_iva}€` },
-    { header: 'Total', field: 'total', render: (_: unknown, row: any) => `<strong>${row.total}€</strong>` },
+    { header: 'Base', field: 'base_imposable', render: (_: unknown, row: any) => `${formatEuro(row.base_imposable)}` },
+    { header: 'IVA', field: 'import_iva', render: (_: unknown, row: any) => `${formatEuro(row.import_iva)}` },
+    { header: 'Total', field: 'total', render: (_: unknown, row: any) => `<strong>${formatEuro(row.total)}</strong>` },
     {
       header: 'Pagat',
       field: 'pagat',
