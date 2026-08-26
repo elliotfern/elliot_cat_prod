@@ -13,16 +13,19 @@ export interface Client {
   pais_id: string | null;
   estat_id: string | null;
   tel_1: string | null;
+  tel_2: string | null;
   created_at: string | null;
+  updated_at: string | null;
   num: number;
   estat: string;
   provincia_ca: string | null;
   ciutat_ca: string | null;
   pais_ca: string | null;
+  contacte_id: string;
 }
 
 export interface FacturaClient {
-  id: string;
+  id: number;
   numero_factura: string;
   concepte: string | null;
 
@@ -51,7 +54,7 @@ export interface PressupostClient {
   created_at: string;
   modified_at: string;
 
-  estatNom: string | null;
+  estat: string | null;
   producte: string | null;
   any: number;
 }

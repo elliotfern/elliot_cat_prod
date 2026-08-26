@@ -666,5 +666,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    // API METEO
+    '/api/meteo/get' => [
+        'view' => '../src/backend/api/100_auxiliars/get-meteo.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
 ];
 return $routes;

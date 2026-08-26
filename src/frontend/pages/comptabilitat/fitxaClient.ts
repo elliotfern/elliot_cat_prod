@@ -50,25 +50,27 @@ function renderClient(response: Client) {
 
         <div class="d-flex align-items-center gap-2">
 
-          <span class="badge bg-primary">
-            ${v(client.estat)}
-          </span>
-
-          <span id="btnModificarClient"></span>
+        <span id="btnModificarContacte"></span>
+         <span id="btnModificarClient"></span>
 
         </div>
 
       </div>
 
       <div class="card-body">
+        <div class="col-md-4" style="margin-bottom:25px">
+          <span class="badge bg-primary">
+            ${v(client.estat)}
+          </span>
+        </div>
 
         <div class="row g-4">
 
-          <!-- CONTACTE -->
+              <!-- CONTACTE -->
           <div class="col-md-6">
             <h6 class="text-muted mb-2">Contacte</h6>
             <p class="mb-1"><strong>Email:</strong> ${v(client.email)}</p>
-            <p class="mb-1"><strong>Telèfon:</strong> ${v(client.tel_1)}</p>
+            <p class="mb-1"><strong>Telèfon:</strong> ${v(client.tel_1)} - ${v(client.tel_2)}</p>
             <p class="mb-1"><strong>Web:</strong> ${v(client.web)}</p>
           </div>
 
@@ -101,16 +103,27 @@ function renderClient(response: Client) {
       </div>
 
       <div class="card-footer text-muted small">
-        Data d'alta: ${formatDataCatala(v(client.created_at))}
+        <div>
+          Data d'alta: ${client.created_at ? formatDataCatala(client.created_at) : '—'}
+        </div>
+        <div>
+          Darrera actualització: ${client.updated_at ? formatDataCatala(client.updated_at) : '—'}
+        </div>
       </div>
 
     </div>
   `;
 
   // Botó modificar
-  const btnContainer = document.getElementById('btnModificarClient');
+  const btnContainer = document.getElementById('btnModificarContacte');
 
   if (btnContainer) {
-    btnContainer.appendChild(Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(client.id)));
+    btnContainer.appendChild(Button.edit('Modifica contacte', INTRANET_URLS.CONTACTES.CONTACTE_MODIFICA_ID(client.id)));
+  }
+
+  const btnContainer2 = document.getElementById('btnModificarClient');
+
+  if (btnContainer2) {
+    btnContainer2.appendChild(Button.edit2('Modifica client', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(client.id)));
   }
 }

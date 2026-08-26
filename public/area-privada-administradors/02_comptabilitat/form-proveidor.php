@@ -1,3 +1,8 @@
+<?php
+
+use App\Utils\Url;
+?>
+
 <div id="barraNavegacioContenidor"></div>
 
 <div class="container-fluid form">
@@ -17,70 +22,33 @@
 
         <input type="hidden" id="id" name="id" />
 
-        <div class="col-md-6">
-            <label for="nom">Nom:</label>
-            <input class="form-control" type="text" name="nom" id="nom" required />
+        <!-- CONTACTE ID -->
+        <div class="col-md-4">
+            <label for="contacte_id" class="form-label">Proveidor *</label>
+            <select
+                class="form-select"
+                id="contacte_id"
+                name="contacte_id"
+                required></select>
+            <div class="invalid-feedback" id="error-contacte_id"></div>
         </div>
 
-        <div class="col-md-6">
-            <label for="nif">NIF:</label>
-            <input class="form-control" type="text" name="nif" id="nif" />
-        </div>
+        <!-- BOTONES -->
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
 
-        <div class="col-md-6">
-            <label for="adreca">Adreça:</label>
-            <input class="form-control" type="text" name="adreca" id="adreca" />
-        </div>
+            <a
+                href="<?php echo Url::intranet('comptabilitat'); ?>/llistat-proveidors"
+                class="btn btn-outline-secondary">
+                ← Tornar enrere
+            </a>
 
-        <div class="col-md-6">
-            <label for="ciutat">Ciutat:</label>
-            <input class="form-control" type="text" name="ciutat" id="ciutat" />
-        </div>
+            <button
+                type="submit"
+                class="btn btn-primary"
+                id="btnProveidor">
+                Introduir dades
+            </button>
 
-        <div class="col-md-6">
-            <label for="codi_postal">Codi Postal:</label>
-            <input class="form-control" type="text" name="codi_postal" id="codi_postal" />
-        </div>
-
-        <div class="col-md-6">
-            <label for="pais">País:</label>
-            <input class="form-control" type="text" name="pais" id="pais" />
-        </div>
-
-        <div class="col-md-6">
-            <label for="telefon">Telèfon:</label>
-            <input class="form-control" type="text" name="telefon" id="telefon" />
-        </div>
-
-        <div class="col-md-6">
-            <label for="email">Email:</label>
-            <input class="form-control" type="email" name="email" id="email" />
-        </div>
-
-        <div class="col-md-6">
-            <label for="web">Web:</label>
-            <input class="form-control" type="text" name="web" id="web" />
-        </div>
-
-        <div class="col-md-6">
-            <label for="contacte">Contacte:</label>
-            <input class="form-control" type="text" name="contacte" id="contacte" />
-        </div>
-
-        <div class="col-12">
-            <label for="notes">Notes:</label>
-            <textarea class="form-control" name="notes" id="notes" rows="4"></textarea>
-        </div>
-
-        <div class="container" style="margin-top:25px">
-            <div class="row">
-                <div class="col-6 text-left">
-                    <!-- Espai per botons extra -->
-                </div>
-                <div class="col-6 text-right derecha">
-                    <button type="submit" class="btn btn-primary" id="btnProveidor">Desar Proveïdor</button>
-                </div>
-            </div>
         </div>
 
     </form>

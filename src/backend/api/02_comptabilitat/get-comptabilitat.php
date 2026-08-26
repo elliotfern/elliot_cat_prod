@@ -63,10 +63,11 @@ if ($slug === 'clients') {
                 c.provincia_id,
                 c.pais_id,
                 c.data_naixement,
+                c.created_at,
+                c.updated_at,
 
                 cc.id AS client_id,
                 cc.estat_id,
-                cc.created_at,
 
                 e.num,
                 e.estat,
@@ -270,7 +271,7 @@ if ($slug === 'clients') {
             p.created_at,
             p.modified_at,
 
-            c.id AS idClient,
+            c.id AS contacte_id,
 
             e.estat,
 
@@ -1251,8 +1252,8 @@ SQL;
             c.tel_1,
             c.tel_2,
             p.contacte_id,
-            p.created_at,
-            p.updated_at,
+            c.created_at,
+            c.updated_at,
             prov.provincia_ca,
             pa.pais_ca,
             ci.ciutat_ca
@@ -1317,28 +1318,30 @@ SQL;
 
     $sql = <<<SQL
         SELECT 
-            id,
-            nom,
-            nif,
-            adreca,
-            ciutat,
-            codi_postal,
-            pais,
-            telefon,
-            email,
-            web,
-            contacte,
-            notes,
-            created_at,
-            updated_at
-        FROM %s
-        WHERE id = :id
+            c.id,
+            c.nom,
+            c.nif,
+            c.adreca,
+            c.ciutat_id,
+            c.cp,
+            c.pais_id,
+            c.tel_1,
+            c.tel_2,
+            c.email,
+            c.web,
+            p.contacte_id,
+            c.created_at,
+            c.updated_at
+        FROM %s AS c
+        LEFT JOIN %s AS p ON c.id = p.contacte_id
+        WHERE c.id = :id
         LIMIT 1
     SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo)
+        qi(Tables::DB_CONTACTES, $pdo),
+        qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo),
     );
 
     try {
@@ -1373,7 +1376,7 @@ SQL;
 
     AuthFactory::admin()->handle();
 
-    $despesa_id = isset($_GET['id']) ? (int) $_GET['id'] : null;
+    $despesa_id = isset($_GET['id']) ? $_GET['id'] : null;
 
     if (!$despesa_id) {
         Response::error(
@@ -1401,8 +1404,6 @@ SQL;
             categoria_id,
             subcategoria_id,
             tipus_despesa,
-            client_id,
-            projecte_id,
             arxiu_url,
             deduible,
             recurrent,
@@ -1421,7 +1422,7 @@ SQL;
     );
 
     try {
-        $params = ['id' => $despesa_id];
+        $params = ['id' => Uuid::toBinary($despesa_id)];
         $result = $db->getData($query, $params, true);
 
         if (empty($result)) {

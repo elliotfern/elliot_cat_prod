@@ -11,4 +11,5 @@ export interface Proveidor {
   web?: string;
   contacte?: string;
   notes?: string;
+  contacte_id: string;
 }

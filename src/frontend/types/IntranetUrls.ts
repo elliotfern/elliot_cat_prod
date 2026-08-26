@@ -6,5 +6,12 @@ export type IntranetUrls = {
     CLIENT_FITXA_ID: (id: string) => string;
     PROVEIDOR_FITXA_ID: (id: string) => string;
     PROVEIDOR_MODIFICA_ID: (id: string) => string;
+    PRESSUPOST_MODIFICA_ID: (id: string) => string;
+    FACTURA_MODIFICA_ID: (id: number) => string;
+    FACTURA_DESPESA_MODIFICA: (id: string) => string;
+  };
+
+  CONTACTES: {
+    CONTACTE_MODIFICA_ID: (id: string) => string;
   };
 };

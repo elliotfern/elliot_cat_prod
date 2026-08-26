@@ -3,6 +3,8 @@ import { formatData } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { API_URLS } from '../../utils/apiUrls';
+import { Button } from '../../ui/button';
+import { INTRANET_URLS } from '../../utils/IntranetUrls';
 
 export const RECEPTORS: Record<string, string> = {
   '019e3ebaf71370c2860a40a79fb5ad7b': 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
@@ -44,7 +46,7 @@ export async function taulaDespeses(receptorId: string, tipus_despesa: string) {
       header: 'Pagat',
       field: 'pagat',
       render: (_: unknown, row: any) =>
-        `<button class="btn-petit ${row.pagat ? 'btn-primari' : 'btn-secondari'}">
+        `<button class="btn btn-sm ${row.pagat ? 'btn-secondary' : 'btn-primary'}">
           ${row.pagat ? 'Pagat' : 'Pendent'}
         </button>`,
     },
@@ -54,10 +56,7 @@ export async function taulaDespeses(receptorId: string, tipus_despesa: string) {
     columns.push({
       header: 'Accions',
       field: 'id',
-      render: (_: unknown, row: any) => `
-        <a href="/gestio/comptabilitat/modifica-factura-proveidor/${row.id}">
-          <button class="btn-petit">Modifica</button>
-        </a>`,
+      render: (_, { id }) => Button.edit('Modifica', INTRANET_URLS.COMPTABILITAT.FACTURA_DESPESA_MODIFICA(id)),
     });
   }
 

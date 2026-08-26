@@ -28,6 +28,7 @@ import { blog } from './pages/blog/blog';
 import { salut } from './pages/salut/salut';
 import { radio } from './pages/radio/radio';
 import { galeriaImatgesPublica } from './pages/auxiliars/fitxaGaleriaImatgesPublica';
+import { obtenerTemperaturaTrento } from './pages/auxiliars/meteoTrento';
 
 function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
   if (document.getElementById(id)) {
@@ -94,8 +95,13 @@ document.addEventListener('trix-initialize', function (event) {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  main();
+});
+
+async function main() {
   const url = window.location.href;
   const pageType = getPageType(url);
+  console.log(pageType);
 
   void initUserAreaButton();
   barraNavegacio();
@@ -106,9 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutButton.addEventListener('click', logout);
   }
 
-  console.log(process.env.API_BASE);
-
-  console.log(pageType);
   if (pageType[0] === 'entrada') {
     loginPage();
   } else if (pageType[0] === 'nou-usuari') {
@@ -166,5 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
   } else if (pageType[0] === 'imatges' && pageType[1] === 'galeria') {
     const id = pageType[2];
     galeriaImatgesPublica(id);
+  } else if (pageType[0] === 'gestio' || pageType[1] === 'admin') {
+    const temperaturaTrento = document.getElementById('temperaturaTrento');
+
+    if (temperaturaTrento) {
+      temperaturaTrento.innerHTML = await obtenerTemperaturaTrento();
+    }
   }
-});
+}

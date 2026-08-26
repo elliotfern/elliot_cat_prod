@@ -89,12 +89,7 @@ if ($slug === 'clients') {
 
     // Camps obligatoris
     $requiredFields = [
-        'nom',
-        'email',
-        'adreca',
-        'ciutat_id',
-        'provincia_id',
-        'pais_id',
+        'contacte_id',
         'estat_id',
     ];
 
@@ -115,64 +110,24 @@ if ($slug === 'clients') {
         $uuidBytes = $id->getBytes();   // para BINARY(16)
         $uuidString = Uuid::toBinary($id);
 
-        $registre = date('Y-m-d');
-
-        $ciutat_id_bin = Uuid::toBinary($data['ciutat_id']);
-        $provincia_id_bin = Uuid::toBinary($data['provincia_id']);
-        $pais_id_bin = Uuid::toBinary($data['pais_id']);
+        $contacte_bin = Uuid::toBinary($data['contacte_id']);
         $estat_id_bin = Uuid::toBinary($data['estat_id']);
 
         $stmt = $pdo->prepare("
             INSERT INTO db_comptabilitat_clients (
                 id,
-                nom,
-                cognoms,
-                email,
-                web,
-                nif,
-                empresa,
-                adreca,
-                cp,
-                ciutat_id,
-                provincia_id,
-                pais_id,
-                telefon,
-                estat_id,
-                registre
+                contacte_id,
+                estat_id
             ) VALUES (
                 :id,
-                :nom,
-                :cognoms,
-                :email,
-                :web,
-                :nif,
-                :empresa,
-                :adreca,
-                :cp,
-                :ciutat_id,
-                :provincia_id,
-                :pais_id,
-                :telefon,
+                :contacte_id,
                 :estat_id,
-                :registre
             )
         ");
 
         $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_STR);
-        $stmt->bindValue(':nom', $data['nom'], PDO::PARAM_STR);
-        $stmt->bindValue(':cognoms', $data['cognoms'] ?? null, PDO::PARAM_STR);
-        $stmt->bindValue(':email', $data['email'], PDO::PARAM_STR);
-        $stmt->bindValue(':web', $data['web'] ?? null, PDO::PARAM_STR);
-        $stmt->bindValue(':nif', $data['nif'] ?? null, PDO::PARAM_STR);
-        $stmt->bindValue(':empresa', $data['empresa'] ?? null, PDO::PARAM_STR);
-        $stmt->bindValue(':adreca', $data['adreca'], PDO::PARAM_STR);
-        $stmt->bindValue(':cp', $data['cp'] ?? null, PDO::PARAM_STR);
-        $stmt->bindValue(':ciutat_id', $ciutat_id_bin, PDO::PARAM_LOB);
-        $stmt->bindValue(':provincia_id', $provincia_id_bin, PDO::PARAM_LOB);
-        $stmt->bindValue(':pais_id', $pais_id_bin, PDO::PARAM_LOB);
-        $stmt->bindValue(':telefon', $data['telefon'] ?? null, PDO::PARAM_STR);
+        $stmt->bindValue(':contacte_id', $contacte_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':estat_id', $estat_id_bin, PDO::PARAM_LOB);
-        $stmt->bindValue(':registre', $registre, PDO::PARAM_STR);
 
         $stmt->execute();
 
@@ -659,7 +614,7 @@ if ($slug === 'clients') {
 
     // POST : Crear nou producte
     // ruta => "https://elliot.cat/api/comptabilitat/post/producte"
-} else if ($slug === 'producte' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+} else if ($slug === 'producte') {
 
     $raw  = file_get_contents('php://input');
     $data = json_decode($raw, true);
@@ -735,52 +690,33 @@ if ($slug === 'clients') {
         Response::error(MissatgesAPI::error('validacio'), ['JSON invàlid'], 400);
     }
 
-    // Helpers
-    $trimOrNull  = static fn($v): ?string => (is_string($v) && trim($v) !== '') ? trim($v) : null;
+    // Camps obligatoris
+    $requiredFields = [
+        'contacte_id',
+    ];
 
-    // Datos
-    $nom        = $trimOrNull($data['nom'] ?? null);
-    $nif        = $trimOrNull($data['nif'] ?? null);
-    $adreca     = $trimOrNull($data['adreca'] ?? null);
-    $ciutat     = $trimOrNull($data['ciutat'] ?? null);
-    $codi_postal = $trimOrNull($data['codi_postal'] ?? null);
-    $pais       = $trimOrNull($data['pais'] ?? null);
-    $telefon    = $trimOrNull($data['telefon'] ?? null);
-    $email      = $trimOrNull($data['email'] ?? null);
-    $web        = $trimOrNull($data['web'] ?? null);
-    $contacte   = $trimOrNull($data['contacte'] ?? null);
-    $notes      = $trimOrNull($data['notes'] ?? null);
+    foreach ($requiredFields as $field) {
+        if (!isset($data[$field]) || $data[$field] === '') {
+            Response::error(
+                message: "El camp {$field} és obligatori.",
+                httpCode: 422
+            );
+            return;
+        }
+    }
+
+    // Generar UUIDv7
+    $id = ramsey::uuid7();
+    $uuidBytes = $id->getBytes();   // para BINARY(16)
+    $uuidString = Uuid::toBinary($id);
+
+    $contacte_bin = Uuid::toBinary($data['contacte_id']);
 
     // Validación
     $errors = [];
-    if ($nom === null) {
-        $errors[] = ValidacioErrors::requerit('nom');
-    } elseif (mb_strlen($nom) > 255) {
-        $errors[] = ValidacioErrors::massaLlarg('nom', 255);
-    }
-    if ($nif !== null && mb_strlen($nif) > 20) {
-        $errors[] = ValidacioErrors::massaLlarg('nif', 20);
-    }
-    if ($codi_postal !== null && mb_strlen($codi_postal) > 20) {
-        $errors[] = ValidacioErrors::massaLlarg('codi_postal', 20);
-    }
-    if ($ciutat !== null && mb_strlen($ciutat) > 100) {
-        $errors[] = ValidacioErrors::massaLlarg('ciutat', 100);
-    }
-    if ($pais !== null && mb_strlen($pais) > 50) {
-        $errors[] = ValidacioErrors::massaLlarg('pais', 50);
-    }
-    if ($telefon !== null && mb_strlen($telefon) > 30) {
-        $errors[] = ValidacioErrors::massaLlarg('telefon', 30);
-    }
-    if ($email !== null && mb_strlen($email) > 100) {
-        $errors[] = ValidacioErrors::massaLlarg('email', 100);
-    }
-    if ($web !== null && mb_strlen($web) > 100) {
-        $errors[] = ValidacioErrors::massaLlarg('web', 100);
-    }
-    if ($contacte !== null && mb_strlen($contacte) > 100) {
-        $errors[] = ValidacioErrors::massaLlarg('contacte', 100);
+
+    if ($contacte_bin === null) {
+        $errors[] = ValidacioErrors::requerit('contacte_id');
     }
 
     if (!empty($errors)) {
@@ -793,30 +729,20 @@ if ($slug === 'clients') {
         $table = qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo);
         $sql = <<<SQL
                 INSERT INTO {$table}
-                    (nom, nif, adreca, ciutat, codi_postal, pais, telefon, email, web, contacte, notes)
+                    (id, contacte_id)
                 VALUES
-                  (:nom, :nif, :adreca, :ciutat, :codi_postal, :pais, :telefon, :email, :web, :contacte, :notes)
+                  (:id, :contacte_id)
                 SQL;
 
         $stmt = $pdo->prepare($sql);
-        $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
-        $stmt->bindValue(':nif', $nif ?? null, $nif !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':adreca', $adreca ?? null, $adreca !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':ciutat', $ciutat ?? null, $ciutat !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':codi_postal', $codi_postal ?? null, $codi_postal !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':pais', $pais ?? null, $pais !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':telefon', $telefon ?? null, $telefon !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':email', $email ?? null, $email !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':web', $web ?? null, $web !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':contacte', $contacte ?? null, $contacte !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
-        $stmt->bindValue(':notes', $notes ?? null, $notes !== null ? PDO::PARAM_STR : PDO::PARAM_NULL);
+
+        $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
+        $stmt->bindValue(':contacte_id', $contacte_bin, PDO::PARAM_LOB);
 
         $stmt->execute();
-        $newId = (int)$pdo->lastInsertId();
-
         $pdo->commit();
 
-        Response::success(MissatgesAPI::success('create'), ['id' => $newId], httpCode: 201);
+        Response::success(MissatgesAPI::success('create'), ['id' => $uuidString], httpCode: 201);
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);

@@ -2,6 +2,7 @@ import { api } from '../../core/api/client';
 import { Proveidor } from '../../types/Proveidor';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
+import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
 export async function formProveidor(isUpdate: boolean, id?: string) {
@@ -42,4 +43,6 @@ export async function formProveidor(isUpdate: boolean, id?: string) {
       transmissioDadesDB(event, 'POST', 'formProveidor', API_URLS.POST.PROVEIDOR, true);
     });
   }
+  // --- Selects auxiliares (preselección segura) ---
+  await auxiliarSelect(data.contacte_id ?? 0, 'proveidors', 'contacte_id', 'proveidor');
 }

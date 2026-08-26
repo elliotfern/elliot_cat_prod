@@ -42,11 +42,18 @@ export async function taulaProveidors() {
   ];
 
   if (isAdmin) {
-    columns.push({
-      header: 'Accions',
-      field: 'id',
-      render: (_, { id }) => Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.PROVEIDOR_MODIFICA_ID(id)),
-    });
+    columns.push(
+      {
+        header: '',
+        field: 'id',
+        render: (_, { id }) => Button.edit('Modifica contacte', INTRANET_URLS.CONTACTES.CONTACTE_MODIFICA_ID(id)),
+      },
+      {
+        header: '',
+        field: 'id',
+        render: (_, { id }) => Button.edit2('Modifica proveïdor', INTRANET_URLS.COMPTABILITAT.PROVEIDOR_MODIFICA_ID(id)),
+      }
+    );
   }
 
   renderDynamicTable({

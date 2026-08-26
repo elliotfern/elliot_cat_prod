@@ -45,10 +45,6 @@ function renderPressupost(pressupost: Pressupost) {
         </div>
 
         <div class="text-end">
-          <span class="badge bg-light text-dark">
-            ${pressupost.estat ?? 'Sense estat'}
-          </span>
-
            <a
           href="/gestio/comptabilitat/modifica-pressupost/${pressupost.id}"
           class="btn btn-secondary btn-sm">
@@ -59,6 +55,11 @@ function renderPressupost(pressupost: Pressupost) {
       </div>
 
       <div class="card-body">
+        <div class="col-md-4" style="margin-bottom:25px">
+            <span class="badge bg-primary">
+               ${pressupost.estat ?? 'Sense estat'}
+            </span>
+          </div>
 
         <!-- TITOL -->
         <h4 class="mb-3">${pressupost.concepte}</h4>
@@ -121,21 +122,17 @@ function renderPressupost(pressupost: Pressupost) {
             </div>
           </div>
 
-          <!-- IDS DEBUG (opcional però útil en admin) -->
-          <div class="col-12">
-            <div class="small text-muted mt-2">
-              client_id: ${pressupost.client_id} <br>
-              servei_id: ${pressupost.servei_id} <br>
-              estat_id: ${pressupost.estat_id}
-            </div>
-          </div>
-
         </div>
       </div>
 
-      <div class="card-footer text-muted small">
-        Creat: ${formatDate(pressupost.created_at)} · Modificat: ${formatDate(pressupost.modified_at)}
-      </div>
+            <div class="card-footer text-muted small">
+              <div>
+                Data d'alta: ${pressupost.created_at ? formatDate(pressupost.created_at) : '—'}
+              </div>
+              <div>
+                Darrera actualització: ${pressupost.modified_at ? formatDate(pressupost.modified_at) : '—'}
+              </div>
+            </div>
 
     </div>
   `;

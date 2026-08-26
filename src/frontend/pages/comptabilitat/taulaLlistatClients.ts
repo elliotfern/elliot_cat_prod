@@ -66,20 +66,21 @@ export async function taulaLlistatClients() {
       field: 'num',
       render: (_value: unknown, row: Client) => renderEstatBadge(row),
     },
-
-    {
-      header: 'Registre',
-      field: 'created_at',
-      render: (_value: unknown, row: Client) => mostrar(row.created_at, '-'),
-    },
   ];
 
   if (isAdmin) {
-    columns.push({
-      header: 'Accions',
-      field: 'id',
-      render: (_value: unknown, row: Client) => Button.edit('Modificar', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(row.id)),
-    });
+    columns.push(
+      {
+        header: '',
+        field: 'id',
+        render: (_, { id }) => Button.edit('Modifica contacte', INTRANET_URLS.CONTACTES.CONTACTE_MODIFICA_ID(id)),
+      },
+      {
+        header: '',
+        field: 'id',
+        render: (_, { id }) => Button.edit2('Modifica client', INTRANET_URLS.COMPTABILITAT.CLIENT_MODIFICA_ID(id)),
+      }
+    );
   }
 
   renderDynamicTable({

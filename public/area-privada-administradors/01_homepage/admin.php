@@ -7,9 +7,14 @@ use App\Utils\Url;
 
 <div id="barraNavegacioContenidor"></div>
 
-<h1>Intranet</h1>
+
 <?php if ($viewModel->isAdmin) : ?>
+
+    <div id="temperaturaTrento" class="alert alert-warning" style="margin-top:20px;margin-bottom:25px">-</div>
+
     <div class="alert alert-success">
+        <h2>Índex general Intranet</h2>
+        <br>
         <h4>Taulell temes pendents</h4>
         <ul>
             <li><a href="<?php echo Url::intranet('taulell_legalitzacio'); ?>">Legalització títol llicenciatura d'història</a></li>

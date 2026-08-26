@@ -15,6 +15,10 @@ export class Button {
     return this.base(label, url, 'btn btn-warning btn-sm');
   }
 
+  static edit2(label: string, url: string): HTMLAnchorElement {
+    return this.base(label, url, 'btn btn-success btn-sm');
+  }
+
   static delete(label: string, url: string): HTMLAnchorElement {
     return this.base(label, url, 'btn btn-danger btn-sm');
   }

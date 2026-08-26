@@ -1,8 +1,13 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
+import { getIsAdmin } from '../../services/auth/isAdmin';
 import { PressupostClient } from '../../types/Client';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
+import { Button } from '../../ui/button';
+import { INTRANET_URLS } from '../../utils/IntranetUrls';
+import { formatEuro } from '../../utils/locales/formatEuro';
 
-export function renderClientPressupostos(clientId: string) {
+export async function renderClientPressupostos(clientId: string) {
+  const isAdmin = await getIsAdmin();
   const columns: TaulaDinamica<PressupostClient>[] = [
     {
       header: 'Concepte',
@@ -18,14 +23,14 @@ export function renderClientPressupostos(clientId: string) {
 
     {
       header: 'Estat',
-      field: 'estatNom',
-      render: (_: unknown, row: PressupostClient) => `<span class="badge bg-secondary">${row.estatNom ?? ''}</span>`,
+      field: 'estat',
+      render: (_: unknown, row: PressupostClient) => `<span class="badge bg-secondary">${row.estat ?? ''}</span>`,
     },
 
     {
       header: 'Import',
       field: 'import',
-      render: (_: unknown, row: PressupostClient) => (row.import != null ? `${Number(row.import).toFixed(2)} €` : ''),
+      render: (_: unknown, row: PressupostClient) => (row.import != null ? `${formatEuro(row.import)}` : ''),
     },
 
     {
@@ -33,13 +38,15 @@ export function renderClientPressupostos(clientId: string) {
       field: 'data',
       render: (_: unknown, row: PressupostClient) => (row.data ? new Date(row.data).toLocaleDateString('ca-ES') : ''),
     },
-
-    {
-      header: 'Any',
-      field: 'any',
-      render: (_: unknown, row: PressupostClient) => `${row.any ?? ''}`,
-    },
   ];
+
+  if (isAdmin) {
+    columns.push({
+      header: '',
+      field: 'id',
+      render: (_, { id }) => Button.edit('Modifica', INTRANET_URLS.COMPTABILITAT.PRESSUPOST_MODIFICA_ID(id)),
+    });
+  }
 
   renderDynamicTable({
     url: `comptabilitat/get/pressupostosClientId?id=${clientId}`,

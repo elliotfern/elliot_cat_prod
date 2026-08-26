@@ -1158,10 +1158,17 @@ if ($slug === 'directors') {
             co.id,
             co.nom,
             co.cognoms,
-            co.empresa
+            co.empresa,
+            CONCAT(
+            co.nom,
+            ' ',
+            co.cognoms,
+            ' (',
+            co.empresa,
+            ')') AS client
         FROM %s AS c
         INNER JOIN %s AS co ON c.contacte_id = co.id
-        ORDER BY co.empresa ASC, co.nom ASC, co.cognoms ASC
+        ORDER BY client ASC
     SQL;
 
     $query = sprintf(
@@ -2093,14 +2100,20 @@ if ($slug === 'directors') {
 } else if ($slug === "proveidors") {
 
     $sql = <<<SQL
-            SELECT p.id, p.nom
+            SELECT p.id, p.nom, CONCAT(
+            p.nom,
+            ' ',
+            p.cognoms,
+            ' (',
+            p.empresa,
+            ')') AS proveidor
             FROM %s AS p
             ORDER BY p.nom ASC
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::DB_COMPTABILITAT_PROVEIDORS, $pdo),
+        qi(Tables::DB_CONTACTES, $pdo),
 
     );
 

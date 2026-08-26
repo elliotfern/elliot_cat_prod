@@ -13,7 +13,8 @@ use App\Utils\Button;
 
 <?php if ($viewModel->isAdmin) : ?>
     <div class="d-flex flex-wrap gap-2 my-3">
-        <?= Button::create('Crear proveïdor', Routes::contactes()->nouContacte()) ?>
+        <?= Button::create('Crear contacte', Routes::contactes()->nouContacte()) .
+            Button::create('Crear proveïdor', Routes::comptabilitat()->nouProveidor()) ?>
     </div>
 
     <div id="taulaLlistatProveidors"></div>

@@ -42,7 +42,7 @@ export async function formDespesa(isUpdate: boolean, id?: string) {
   }
 
   // --- Selects auxiliares ---
-  await auxiliarSelect(data.proveidor_id ?? null, 'proveidors', 'proveidor_id', 'nom');
+  await auxiliarSelect(data.proveidor_id ?? null, 'proveidors', 'proveidor_id', 'proveidor');
   await auxiliarSelect(data.receptor_id ?? null, 'emissors', 'receptor_id', 'nom');
   await auxiliarSelect(data.categoria_id ?? null, 'categories_despeses', 'categoria_id', 'nom');
   await auxiliarSelect(data.subcategoria_id ?? null, 'sub_categories_despeses', 'subcategoria_id', 'nom');
@@ -50,5 +50,5 @@ export async function formDespesa(isUpdate: boolean, id?: string) {
   await auxiliarSelect(data.tipus_despesa ?? null, 'tipus_despeses', 'tipus_despesa', 'label');
   await auxiliarSelect(data.frequencia ?? null, 'frequencies', 'frequencia', 'label');
   await auxiliarSelect(data.projecte_id ?? null, 'projectes', 'projecte_id', 'name');
-  await auxiliarSelect(data.client_id ?? null, 'clients', 'client_id', 'clientEmpresa');
+  await auxiliarSelect(data.client_id ?? null, 'clients', 'client_id', 'client');
 }
