@@ -11,11 +11,21 @@ export async function taulaLlistatContactes() {
     {
       header: 'Nom i cognoms',
       field: 'cognoms',
-      render: (_: unknown, row: Contacte) => `${row.nom} ${row.cognoms ?? ''}`,
+      render: (_: unknown, row: Contacte) => {
+        const nom = row.nom?.trim() ?? '';
+        const cognoms = row.cognoms?.trim() ?? '';
+
+        const nomComplet = `${nom} ${cognoms}`.trim();
+
+        return nomComplet || '-';
+      },
     },
     {
       header: 'Empresa',
       field: 'empresa',
+      render: (_: unknown, row: Contacte) => {
+        return row.empresa?.trim() || '-';
+      },
     },
     {
       header: 'Dades contacte',
@@ -65,10 +75,10 @@ export async function taulaLlistatContactes() {
       field: 'actiu',
       render: (_: unknown, row: Contacte) => {
         switch (row.actiu) {
-          case 1:
+          case '1':
             return '<span class="badge bg-success">Actiu</span>';
 
-          case 0:
+          case '0':
             return '<span class="badge bg-secondary">Arxivat</span>';
 
           default:
