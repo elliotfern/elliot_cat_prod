@@ -9,7 +9,12 @@ use App\Utils\MissatgesAPI;
 use App\Utils\Mailer;
 
 $slug      = isset($routeParams[0]) ? (string)$routeParams[0] : '';
-$idInvoice = isset($routeParams[1]) && ctype_digit((string)$routeParams[1]) ? (int)$routeParams[1] : 0;
+$idInvoice = $routeParams[1] ?? null;
+
+if (!$idInvoice) {
+  throw new RuntimeException('ID de factura no vàlid');
+}
+
 $lang      = strtolower($routeParams[2] ?? 'ca');
 
 /* -----------------------------------------------------------
@@ -107,10 +112,10 @@ function i18nInvoice(string $lang): array
   return $i18n[$lang];
 }
 
-function fetchInvoiceAndProducts(int $idInvoice): array
+function fetchInvoiceAndProducts(string $idInvoice): array
 {
   $web = $_ENV['DOMAIN_WEB'] ?? null;
-  $url     = $web . "/api/comptabilitat/get/facturaCompleta?id={$idInvoice}";
+  $url     = $web . "/api/comptabilitat/get/facturaCompleta?id=" . urlencode($idInvoice);
   $payload = hacerLlamadaAPI($url);
 
   $obj  = $payload['factura']  ?? null;
@@ -422,16 +427,16 @@ if ($slug === 'invoice-email') {
     [$obj, $arr2] = fetchInvoiceAndProducts($idInvoice);
     $pdf = generateInvoicePdfBinary($obj, $arr2, $T);
 
-    $clientEmail = $obj['clientEmail'] ?? '';
-    $nomClient   = trim(($obj['clientNom'] ?? '') . ' ' . ($obj['clientCognoms'] ?? ''));
-    $empresa     = $obj['clientEmpresa'] ?? '';
+    $clientEmail = $obj['email'] ?? '';
+    $nomClient   = trim(($obj['nom'] ?? '') . ' ' . ($obj['cognoms'] ?? ''));
+    $empresa     = $obj['empresa'] ?? '';
 
     if (!filter_var($clientEmail, FILTER_VALIDATE_EMAIL)) {
       Response::error(MissatgesAPI::error('validacio'), ['Email del client no vàlid o inexistent'], 400);
     }
 
     $any        = (int)($obj['yearInvoice'] ?? date('Y'));
-    $id_factura = (int)$obj['id'];
+    $id_factura = $obj['numero_factura'];
 
     $subject = [
       'ca' => "Factura #{$id_factura}",
@@ -440,7 +445,8 @@ if ($slug === 'invoice-email') {
       'it' => "Fattura #{$id_factura}",
     ][$lang] ?? "Invoice #{$id_factura}";
 
-    $cta = "https://elliot.cat/api/comptabilitat/pdf/invoice-pdf/{$idInvoice}/{$lang}";
+    $web = $_ENV['DOMAIN_WEB'] ?? null;
+    $cta = $web . "/api/comptabilitat/pdf/invoice-pdf/" . urlencode($idInvoice) . "/" . urlencode($lang);
 
     $emailHtml = '
 <!DOCTYPE html><html lang="' . $lang . '"><head>
@@ -456,7 +462,7 @@ if ($slug === 'invoice-email') {
         <tr><td style="padding:24px;">
           <h2 style="margin:0 0 8px 0;font-size:20px;">' . htmlspecialchars(['ca' => 'Hola ', 'es' => 'Hola ', 'en' => 'Hello ', 'it' => 'Salve '][$lang]) . htmlspecialchars($nomClient ?: $empresa) . '</h2>
           <p style="margin:0 0 16px 0;font-size:14px;">' . htmlspecialchars(['ca' => 'Adjunt trobaràs la teva factura en format PDF.', 'es' => 'Adjuntas encontrarás tu factura en formato PDF.', 'en' => 'Please find attached your invoice in PDF format.', 'it' => 'In allegato trovi la tua fattura in formato PDF.'][$lang]) . '</p>
-          <p style="margin:0 0 20px 0;font-size:14px;"><strong>' . htmlspecialchars(['ca' => 'Factura núm.', 'es' => 'Factura n.º', 'en' => 'Invoice number', 'it' => 'Numero fattura'][$lang]) . ':</strong> ' . $id_factura . '/' . $any . '</p>
+          <p style="margin:0 0 20px 0;font-size:14px;"><strong>' . htmlspecialchars(['ca' => 'Factura núm.', 'es' => 'Factura n.º', 'en' => 'Invoice number', 'it' => 'Numero fattura'][$lang]) . ':</strong> ' . $id_factura . '</p>
           <p style="margin:20px 0 0 0;font-size:13px;color:#555;">' . htmlspecialchars(['ca' => 'Gràcies per la teva confiança.', 'es' => 'Gracias por tu confianza.', 'en' => 'Thanks for your trust.', 'it' => 'Grazie per la fiducia.'][$lang]) . '</p>
         </td></tr>
         <tr><td style="background:#f0f2f6;padding:16px;text-align:center;font-size:12px;color:#6b7280;">

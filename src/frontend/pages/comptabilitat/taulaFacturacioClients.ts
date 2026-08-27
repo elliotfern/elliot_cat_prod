@@ -61,7 +61,7 @@ async function sendInvoiceEmail(invoiceId: string, lang: 'ca' | 'es' | 'en' | 'i
   }
 
   try {
-    const endpoint = API_URLS.POST.ENVIAR_FACTURA_EMAIL(invoiceId, lang);
+    const endpoint = `comptabilitat/pdf/invoice-email/${invoiceId}/${lang}`;
 
     await api.post(endpoint);
 
@@ -78,22 +78,33 @@ async function sendInvoiceEmail(invoiceId: string, lang: 'ca' | 'es' | 'en' | 'i
 }
 
 // Emissors
-const EMISSORS: Record<string, string> = {
-  '019e3ebaf71370c2860a40a79fb5ad7b': 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
+interface Emissor {
+  id: string;
+  nom: string;
+  dataInici: string | null;
+  dataFi: string | null;
+}
 
-  '019e3ebaf71370c2860a40a7a078beb4': 'Autònom Irlanda (1 novembre 2022 - 29 març 2026)',
-
-  '019e3ebaf71370c2860a40a7a15db129': 'Partita Iva Itàlia (30 març 2026 - )',
-};
-
-export function renderTitolEmissor(emissorId: string) {
+export async function renderTitolEmissor(emissorId: string): Promise<void> {
   const container = document.getElementById('titolTipusFactura');
 
   if (!container) return;
 
-  const titol = EMISSORS[emissorId] || 'Emissor desconegut';
+  try {
+    const emissors = await api.get<Emissor[]>('comptabilitat/get/emissorsComptabilitat');
 
-  container.innerHTML = `<h3>${titol}</h3>`;
+    const emissor = emissors.find((item) => item.id.replace(/-/g, '').toLowerCase() === emissorId.replace(/-/g, '').toLowerCase());
+
+    container.innerHTML = `
+      <h3>LListat factures: ${emissor?.nom ?? 'Emissor desconegut'}</h3>
+    `;
+  } catch (error) {
+    console.error('Error carregant emissor:', error);
+
+    container.innerHTML = `
+      <h3>Emissor desconegut</h3>
+    `;
+  }
 }
 
 export async function taulaFacturacioClients(id: string) {
@@ -116,7 +127,18 @@ export async function taulaFacturacioClients(id: string) {
     {
       header: 'Empresa',
       field: 'empresa',
-      render: (_: unknown, row: Factura) => (row.empresa ? row.empresa : `${row.nom} ${row.cognoms}`),
+      render: (_: unknown, row: Factura) => {
+        const nom = [row.nom, row.cognoms].filter(Boolean).join(' ');
+        const text = row.empresa?.trim() || nom || '—';
+
+        return `
+      <a
+        id="${row.client_id}"
+        href="/gestio/comptabilitat/fitxa-client/${row.client_id}">
+        ${text}
+      </a>
+    `;
+      },
     },
 
     // DATA

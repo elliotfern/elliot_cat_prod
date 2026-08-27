@@ -5,8 +5,8 @@ use App\Utils\Url;
 
 <div id="barraNavegacioContenidor"></div>
 <h1>Gestió Comptabilitat i Clients</h1>
-<h2>LListat factures - <div id="titolTipusFactura"></div>
-</h2>
+<div id="titolTipusFactura"></div>
+
 
 <div class="d-flex flex-wrap gap-2 my-3">
     <a

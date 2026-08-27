@@ -288,7 +288,7 @@ if ($slug === 'clients') {
             ON p.estat_id = e.id
 
         LEFT JOIN %s AS s
-            ON p.servei_id = s.id2
+            ON p.servei_id = s.id
 
         WHERE p.client_id = :id
 
@@ -365,7 +365,7 @@ if ($slug === 'clients') {
             FROM %s AS p
             LEFT JOIN %s AS c ON p.client_id = c.id
             LEFT JOIN %s AS e ON p.estat_id = e.id
-            LEFT JOIN %s AS s ON p.servei_id = s.id2
+            LEFT JOIN %s AS s ON p.servei_id = s.id
             WHERE p.id = :id
             LIMIT 1
             SQL;
@@ -678,7 +678,7 @@ if ($slug === 'clients') {
     }
 
     // GET : Detall d'una factura amb productes
-    // ruta => "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id=1"
+    // ruta => "https://elliot.cat/api/comptabilitat/get/facturaCompleta?id={uuid}"
 } else if ($slug === 'facturaCompleta') {
 
     $id = isset($_GET['id']) ? $_GET['id'] : null;
@@ -971,7 +971,7 @@ SQL;
     }
 
     // GET : Llistat d'emissors
-    // ruta => "https://elliot.cat/api/comptabilitat/get/emissors"
+    // ruta => "api/comptabilitat/get/emissors"
 } else if ($slug === 'emissors') {
 
     AuthFactory::admin()->handle();
@@ -1458,7 +1458,7 @@ SQL;
             FROM %s AS p
             LEFT JOIN %s AS c ON p.client_id = c.id
             LEFT JOIN %s AS e ON p.estat_id = e.id
-            LEFT JOIN %s AS s ON p.servei_id = s.id2
+            LEFT JOIN %s AS s ON p.servei_id = s.id
             ORDER BY p.data DESC
             SQL;
 
