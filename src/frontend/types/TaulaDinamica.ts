@@ -13,11 +13,18 @@ export type RenderTableOptions<T extends object> = {
   containerId: string;
   rowsPerPage?: number;
   filterKeys?: Array<keyof T>;
+
+  // Filtro simple — se mantiene por compatibilidad
   filterByField?: string;
 
-  // ✅ NOU (opt-in): permet split d'un string en múltiples valors per al filtre
+  // Nuevo: permite varios niveles de filtrado
+  filterByFields?: string[];
+
+  // Split de valores para filtros
   filterSplitBy?: Partial<Record<keyof T, string | RegExp>>;
-  filterSplitTrim?: boolean; // default true
+  filterSplitTrim?: boolean;
+
   renderHeader?: (raw: unknown) => string;
   dataKey?: string;
+  filterLabels?: Record<string, string>;
 };

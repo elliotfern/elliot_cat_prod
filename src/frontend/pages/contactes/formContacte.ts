@@ -613,6 +613,13 @@ export async function formContacte(isUpdate: boolean, idUuid?: string) {
 
     if (!response || !data) return;
 
+    // Estado del contacte
+    const actiuInput = document.getElementById('actiu') as HTMLInputElement | null;
+
+    if (actiuInput) {
+      actiuInput.checked = Number(data.actiu) === 1;
+    }
+
     divTitol.innerHTML = `<h2>Modificació dades contacte</h2>`;
 
     btnSubmit.textContent = 'Modificar dades';

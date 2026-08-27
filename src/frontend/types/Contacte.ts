@@ -17,4 +17,5 @@ export interface Contacte {
   tipus_persona: string;
   provincia_id: string;
   ciutat_id: string;
+  actiu: number;
 }

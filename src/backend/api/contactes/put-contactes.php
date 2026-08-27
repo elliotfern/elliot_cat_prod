@@ -76,6 +76,7 @@ $ciutatId = optionalField($data, 'ciutat_id');
 $provinciaId = optionalField($data, 'provincia_id');
 $paisId = optionalField($data, 'pais_id');
 $web = optionalField($data, 'web');
+$actiu = isset($data['actiu']) ? (int)$data['actiu'] : 1;
 
 
 // Valors vàlids de tipus_persona
@@ -160,7 +161,8 @@ $query = "
     ciutat_id = :ciutat_id,
     provincia_id = :provincia_id,
     pais_id = :pais_id,
-    web = :web
+    web = :web,
+    actiu = :actiu
   WHERE id = :id
 ";
 
@@ -181,6 +183,7 @@ $binds = [
   ':pais_id' => [$paisIdBinari, PDO::PARAM_LOB],
   ':web' => [$web, PDO::PARAM_STR],
   ':id' => [$idBinari, PDO::PARAM_LOB],
+  'actiu' => [$actiu, PDO::PARAM_INT],
 ];
 
 

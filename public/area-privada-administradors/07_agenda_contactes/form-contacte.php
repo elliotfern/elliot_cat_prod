@@ -43,6 +43,8 @@ use App\Utils\Url;
         <div class="invalid-feedback" id="error-tipus_persona"></div>
       </div>
 
+      <hr>
+
       <!-- NOM -->
       <div class="col-md-4">
         <label for="nom" class="form-label">Nom *</label>
@@ -216,6 +218,26 @@ use App\Utils\Url;
       <div id="inputProvincia" class="col-md-12"></div>
       <div id="inputPais" class="col-md-12"></div>
 
+    </div>
+
+    <hr>
+    <div class="form-check form-switch">
+      <input
+        type="hidden"
+        name="actiu"
+        value="0">
+
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="actiu"
+        name="actiu"
+        value="1"
+        checked>
+
+      <label class="form-check-label" for="actiu">
+        Contacte actiu
+      </label>
     </div>
 
     <!-- BOTONES -->

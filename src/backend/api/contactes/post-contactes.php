@@ -86,6 +86,7 @@ $provinciaId = optionalField($data, 'provincia_id');
 $paisId = optionalField($data, 'pais_id');
 $web = optionalField($data, 'web');
 $dataNaixement = optionalField($data, 'data_naixement');
+$actiu = isset($data['actiu']) ? (int)$data['actiu'] : 1;
 
 // tipus_persona és obligatori
 $tipusPersonaValids = [
@@ -174,7 +175,8 @@ $query = "
         ciutat_id,
         provincia_id,
         pais_id,
-        web
+        web,
+        actiu
     ) VALUES (
         :id,
         :tipus_persona,
@@ -191,7 +193,8 @@ $query = "
         :ciutat_id,
         :provincia_id,
         :pais_id,
-        :web
+        :web,
+        :actiu
     )
 ";
 
@@ -213,6 +216,7 @@ $stmt->bindValue(':ciutat_id', $ciutatIdBinari, PDO::PARAM_LOB);
 $stmt->bindValue(':provincia_id', $provinciaIdBinari, PDO::PARAM_LOB);
 $stmt->bindValue(':pais_id', $paisIdBinari, PDO::PARAM_LOB);
 $stmt->bindValue(':web', $web, PDO::PARAM_STR);
+$stmt->bindValue(':actiu', $actiu, PDO::PARAM_INT);
 
 try {
 

@@ -61,8 +61,20 @@ export async function taulaLlistatContactes() {
       },
     },
     {
-      header: 'País',
-      field: 'pais_ca',
+      header: 'Estat',
+      field: 'actiu',
+      render: (_: unknown, row: Contacte) => {
+        switch (row.actiu) {
+          case 1:
+            return '<span class="badge bg-success">Actiu</span>';
+
+          case 0:
+            return '<span class="badge bg-secondary">Arxivat</span>';
+
+          default:
+            return '';
+        }
+      },
     },
     {
       header: 'Data naixement',
@@ -93,6 +105,10 @@ export async function taulaLlistatContactes() {
     containerId: 'taulaLlistatContactes',
     columns,
     filterKeys: ['nom', 'cognoms', 'empresa'],
-    filterByField: 'tipus_persona',
+    filterByFields: ['tipus_persona', 'actiu'],
+    filterLabels: {
+      tipus_persona: 'Tipus contacte:',
+      actiu: 'Estat:',
+    },
   });
 }

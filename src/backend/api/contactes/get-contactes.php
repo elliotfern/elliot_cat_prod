@@ -52,7 +52,8 @@ if ($slug === "llistatContactes") {
             c.data_naixement,
             c.web,
             p.pais_ca,
-            c.adreca
+            c.adreca,
+            c.actiu
         FROM %s AS c
         LEFT JOIN %s AS p ON c.pais_id = p.id
         ORDER BY c.cognoms ASC
@@ -111,7 +112,8 @@ if ($slug === "llistatContactes") {
                     c.provincia_id,
                     c.pais_id,
                     c.tipus_persona,
-                    p.pais_ca
+                    p.pais_ca,
+                    c.actiu
                 FROM %s AS c
                 LEFT JOIN %s AS p ON c.pais_id = p.id
                 WHERE c.id = :id

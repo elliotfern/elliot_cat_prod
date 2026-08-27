@@ -21,7 +21,9 @@ function getNestedValue(obj: any, path?: string): unknown {
 }
 
 export async function renderDynamicTable<T extends Record<string, any>>(options: RenderTableOptions<T>): Promise<void> {
-  const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField, filterSplitBy, filterSplitTrim = true, dataKey } = options;
+  const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField, filterByFields = [], filterLabels, filterSplitBy, filterSplitTrim = true, dataKey } = options;
+
+  const filterFields = filterByFields.length > 0 ? filterByFields : filterByField ? [filterByField] : [];
 
   const container = document.getElementById(containerId);
 
@@ -31,44 +33,126 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   }
 
   function renderFilters() {
-    if (!filterByField) return;
-
-    const values = data.flatMap((row) => getFilterParts(getNestedValue(row, filterByField)));
-
-    const counts = values.reduce((acc: Record<string, number>, value) => {
-      const key = String(value);
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
-
-    const uniqueValues = Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ca', { sensitivity: 'base' }));
+    if (filterFields.length === 0) return;
 
     buttonContainer.innerHTML = '';
 
-    uniqueValues.forEach((value) => {
-      const count = counts[value];
-      const isActive = value === activeButtonFilter;
+    filterFields.forEach((field) => {
+      // ============================================================
+      // CONTADORES
+      // Calculamos los registros disponibles teniendo en cuenta
+      // los otros filtros activos, pero NO el filtro de este grupo.
+      // ============================================================
 
-      const btn = document.createElement('button');
+      const rowsForCounts = data.filter((row) => {
+        return Object.entries(activeButtonFilters).every(([activeField, activeValue]) => {
+          // No aplicar el filtro del propio grupo
+          if (activeField === field) return true;
 
-      btn.className = `
-      btn btn-sm d-flex align-items-center gap-2
-      ${isActive ? 'btn-primary' : 'btn-outline-primary'}
-    `;
+          if (!activeValue) return true;
 
-      btn.innerHTML = `
-      <span>${value}</span>
-      <span class="badge text-bg-secondary">${count}</span>
-    `;
+          const fieldValue = getNestedValue(row, activeField);
 
-      btn.onclick = () => {
-        activeButtonFilter = isActive ? null : value;
+          if (Array.isArray(fieldValue)) {
+            return fieldValue.map(String).includes(activeValue);
+          }
 
-        renderFilters(); // 🔥 IMPORTANTÍSIMO
-        applyFilters();
-      };
+          const parts = getFilterParts(fieldValue);
 
-      buttonContainer.appendChild(btn);
+          if (parts.length > 1) {
+            return parts.includes(activeValue);
+          }
+
+          return String(fieldValue ?? '') === activeValue;
+        });
+      });
+
+      // ============================================================
+      // VALORES
+      // Siempre obtenemos TODOS los valores disponibles del dataset
+      // original para que ningún botón desaparezca.
+      // ============================================================
+
+      const allValues = data.flatMap((row) => getFilterParts(getNestedValue(row, field)));
+
+      const uniqueValues = [...new Set(allValues)].sort((a, b) =>
+        a.localeCompare(b, 'ca', {
+          sensitivity: 'base',
+        })
+      );
+
+      // ============================================================
+      // CONTADORES
+      // ============================================================
+
+      const valuesForCounts = rowsForCounts.flatMap((row) => getFilterParts(getNestedValue(row, field)));
+
+      const counts = valuesForCounts.reduce((acc: Record<string, number>, value) => {
+        const key = String(value);
+        acc[key] = (acc[key] || 0) + 1;
+
+        return acc;
+      }, {});
+
+      // ============================================================
+      // GRUPO DEL FILTRO
+      // ============================================================
+
+      const filterGroup = document.createElement('div');
+      filterGroup.className = 'mb-3';
+
+      const title = document.createElement('div');
+      title.className = 'fw-semibold mb-2';
+      title.textContent = filterLabels?.[field] ?? field;
+
+      filterGroup.appendChild(title);
+
+      const buttons = document.createElement('div');
+      buttons.className = 'd-flex flex-wrap gap-2';
+
+      // ============================================================
+      // BOTONES
+      // ============================================================
+
+      uniqueValues.forEach((value) => {
+        const count = counts[value] ?? 0;
+
+        let labelValue = value;
+
+        if (field === 'actiu') {
+          labelValue = value === '1' ? 'Actius' : 'Arxivats';
+        }
+
+        const btn = document.createElement('button');
+
+        btn.type = 'button';
+
+        btn.className = `
+        btn btn-sm d-flex align-items-center gap-2
+        ${activeButtonFilters[field] === value ? 'btn-primary' : 'btn-outline-primary'}
+      `;
+
+        btn.innerHTML = `
+        <span>${labelValue}</span>
+        <span class="badge text-bg-secondary">${count}</span>
+      `;
+
+        btn.onclick = () => {
+          if (activeButtonFilters[field] === value) {
+            delete activeButtonFilters[field];
+          } else {
+            activeButtonFilters[field] = value;
+          }
+
+          renderFilters();
+          applyFilters();
+        };
+
+        buttons.appendChild(btn);
+      });
+
+      filterGroup.appendChild(buttons);
+      buttonContainer.appendChild(filterGroup);
     });
   }
 
@@ -122,6 +206,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   let currentPage = 1;
   let filteredData = [...data];
   let activeButtonFilter: string | null = null;
+  let activeButtonFilters: Record<string, string> = {};
 
   let sortField: string | null = null;
   let sortDirection: 'asc' | 'desc' | null = null;
@@ -135,7 +220,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   searchInput.placeholder = 'Cercar...';
 
   const buttonContainer = document.createElement('div');
-  buttonContainer.className = 'd-flex flex-wrap gap-2 mb-3';
+  buttonContainer.className = 'mb-3';
 
   const table = document.createElement('table');
   table.classList.add('table', 'table-striped', 'table-hover', 'table-bordered', 'align-middle');
@@ -168,13 +253,16 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase();
 
-  function getFilterParts(raw: unknown): string[] {
+  function getFilterParts(raw: unknown, field?: string): string[] {
     const s = String(raw ?? '');
+
     if (!s) return [];
 
-    if (!filterByField) return [s];
+    const filterField = field ?? filterByField;
 
-    const splitter = filterSplitBy?.[filterByField];
+    if (!filterField) return [s];
+
+    const splitter = filterSplitBy?.[filterField as keyof T];
 
     if (!splitter) return [s];
 
@@ -220,24 +308,25 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
 
     filteredData = data
       .filter((row) => {
-        if (!activeButtonFilter) return true;
-        if (!filterByField) return true;
+        // Aplicar todos los filtros seleccionados
+        return Object.entries(activeButtonFilters).every(([field, value]) => {
+          const fieldValue = getNestedValue(row, field);
 
-        const fieldValue = getNestedValue(row, filterByField);
+          if (Array.isArray(fieldValue)) {
+            return fieldValue.map(String).includes(value);
+          }
 
-        if (Array.isArray(fieldValue)) {
-          return fieldValue.map(String).includes(activeButtonFilter);
-        }
+          const parts = getFilterParts(fieldValue);
 
-        const parts = getFilterParts(fieldValue);
+          if (parts.length > 1) {
+            return parts.includes(value);
+          }
 
-        if (parts.length > 1) {
-          return parts.includes(activeButtonFilter);
-        }
-
-        return String(fieldValue ?? '') === activeButtonFilter;
+          return String(fieldValue ?? '') === value;
+        });
       })
       .filter((row) => {
+        // Buscador de texto
         if (!search) return true;
 
         return filterKeys.some((key) => normalizeText(String(getNestedValue(row, String(key)) ?? '')).includes(search));
@@ -368,7 +457,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
   tableWrapper.className = 'table-responsive';
   tableWrapper.appendChild(table);
 
-  if (filterByField) {
+  if (filterFields.length > 0) {
     container.appendChild(buttonContainer);
     renderFilters();
   }
