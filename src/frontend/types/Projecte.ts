@@ -10,10 +10,11 @@ export type ProjecteDetalls = {
   priority: number;
   client_id: number | null;
   client_name?: string | null;
-  budget_id: number | null;
-  invoice_id: number | null;
+  pressupost_id: number | null;
+  factura_id: number | null;
   created_at?: string;
   updated_at?: string;
+  nomCategoria: string;
 };
 
 export type TascaItem = {

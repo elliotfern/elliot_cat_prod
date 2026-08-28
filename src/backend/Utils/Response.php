@@ -53,7 +53,9 @@ class Response
         'medicament_id',
         'facultatiu_id',
         'contacte_id',
-        'producte_id'
+        'producte_id',
+        'pressupost_id',
+        'factura_id'
     ];
 
     public static function success(

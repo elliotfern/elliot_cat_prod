@@ -1,5 +1,4 @@
-<div class="barraNavegacioContenidor">
-</div>
+<div id="barraNavegacioContenidor"></div>
 
 <div class="d-flex align-items-start justify-content-between mb-3">
     <div class="d-flex flex-column">
@@ -82,15 +81,15 @@
         </div>
 
         <div class="col-12 col-md-4">
-            <label class="form-label" for="budget_id">Budget</label>
-            <select class="form-select" name="budget_id" id="budget_id">
+            <label class="form-label" for="pressupost_id">Pressupost</label>
+            <select class="form-select" name="pressupost_id" id="pressupost_id">
                 <option value="">—</option>
             </select>
         </div>
 
         <div class="col-12 col-md-4">
-            <label class="form-label" for="invoice_id">Invoice</label>
-            <select class="form-select" name="invoice_id" id="invoice_id">
+            <label class="form-label" for="factura_id">Factura</label>
+            <select class="form-select" name="factura_id" id="factura_id">
                 <option value="">—</option>
             </select>
         </div>

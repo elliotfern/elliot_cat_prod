@@ -94,6 +94,8 @@ $routes = [
     APP_GESTIO . $url['projectes'] . '/nova-tasca' => route(APP_INTRANET_DIR . APP_PROJECTES_DIR . 'form-tasca.php'),
     APP_GESTIO . $url['projectes'] . '/modifica-tasca/{id}' => route(APP_INTRANET_DIR . APP_PROJECTES_DIR . 'form-tasca.php'),
     APP_GESTIO . $url['projectes'] . '/fitxa-projecte/{id}' => route(APP_INTRANET_DIR . APP_PROJECTES_DIR . 'fitxa-projecte.php'),
+    APP_GESTIO . $url['projectes'] . '/llistat-projectes' => route(APP_INTRANET_DIR . APP_PROJECTES_DIR . 'llistat-projectes.php'),
+    APP_GESTIO . $url['projectes'] . '/llistat-tasques' => route(APP_INTRANET_DIR . APP_PROJECTES_DIR . 'llistat-tasques.php'),
 
     // 07. Agenda contactes
     APP_GESTIO . $url['contactes'] => route(APP_INTRANET_DIR . APP_CONTACTES_DIR . 'index.php'),

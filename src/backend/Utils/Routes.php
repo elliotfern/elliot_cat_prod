@@ -58,4 +58,9 @@ class Routes
     {
         return new DadesRoutes();
     }
+
+    public static function projectes(): ProjecteRoutes
+    {
+        return new ProjecteRoutes();
+    }
 }

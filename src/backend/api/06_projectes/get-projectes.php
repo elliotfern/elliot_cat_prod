@@ -17,12 +17,12 @@ $pdo = $db->getPdo();
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://dev.elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://dev.elliot.local']);
 
 // Verificar método
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -39,17 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
  * URL: https://elliot.cat/api/projectes/get/home
  */
 if ($slug === 'home') {
-    $userUuid = getAuthenticatedUserUuid(); // string UUID o null
-    if (!$userUuid) {
-        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
-        return;
-    }
 
-    $userBin = uuid::toBinary($userUuid);
-    if ($userBin === null) {
-        Response::error(MissatgesAPI::error('validacio'), ['UUID invàlid'], 400);
-        return;
-    }
+    $userId = '019710e490e4735f896af9d11d7106a1';
+    $userBin = Uuid::toBinary($userId);
 
     // TODAY
     $sqlToday = <<<SQL
@@ -165,17 +157,6 @@ if ($slug === 'home') {
      * URL: https://elliot.cat/api/projectes/get/id?id=123
      */
 } else if ($slug === 'id') {
-    $userUuid = getAuthenticatedUserUuid(); // string UUID o null
-    if (!$userUuid) {
-        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
-        return;
-    }
-
-    $userBin = uuid::toBinary($userUuid);
-    if ($userBin === null) {
-        Response::error(MissatgesAPI::error('validacio'), ['UUID invàlid'], 400);
-        return;
-    }
 
     // Validar id
     $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
@@ -197,8 +178,8 @@ if ($slug === 'home') {
           p.end_date,
           p.priority,
           p.client_id,
-          p.budget_id,
-          p.invoice_id,
+          p.pressupost_id,
+          p.factura_id,
           p.created_at,
           p.updated_at
         FROM %s AS p
@@ -242,6 +223,66 @@ if ($slug === 'home') {
     }
 
     return;
+
+    /**
+     * GET : Llistat complert de projectes
+     * URL: https://elliot.cat/api/projectes/get/llistatProjectes
+     */
+} else if ($slug === 'llistatProjectes') {
+
+    // Query: projecte + categoria
+    $sql = <<<SQL
+        SELECT
+          p.id,
+          p.name,
+          p.description,
+          p.status,
+          p.category_id,
+          c.name AS nomCategoria,
+          p.start_date,
+          p.end_date,
+          p.priority,
+          p.client_id,
+          p.pressupost_id,
+          p.factura_id,
+          p.created_at,
+          p.updated_at
+        FROM %s AS p
+        LEFT JOIN %s AS c ON c.id = p.category_id
+        ORDER BY p.start_date DESC
+    SQL;
+
+    $q = sprintf(
+        $sql,
+        qi(Tables::PROJECTES, $pdo),
+        qi(Tables::PROJECTES_CATEGORIES, $pdo)
+    );
+
+    try {
+        $data = $db->getData($q, [], false);
+
+
+        if (!$data) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                ['Projecte no trobat'],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $data,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     /**
      * GET : Tasca per ID

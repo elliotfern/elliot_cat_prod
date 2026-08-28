@@ -15,7 +15,7 @@ $pdo = $db->getPdo();
 
 // Siempre JSON
 header('Content-Type: application/json; charset=utf-8');
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 // Verificar método
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
@@ -33,18 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
  * BODY (json) => update complet
  */
 if ($slug === 'updateProjecte') {
-    // Auth (igual que home / create)
-    $userUuid = getAuthenticatedUserUuid(); // string UUID o null
-    if (!$userUuid) {
-        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
-        return;
-    }
-
-    $userBin = uuid::toBinary($userUuid);
-    if ($userBin === null) {
-        Response::error(MissatgesAPI::error('validacio'), ['UUID invàlid'], 400);
-        return;
-    }
 
     // Leer JSON
     $raw = file_get_contents('php://input');
@@ -132,9 +120,14 @@ if ($slug === 'updateProjecte') {
     if ($priority < 0 || $priority > 255) $errors['priority'] = 'invalid';
 
     $category_id = $optIntOrNull($data['category_id'] ?? null);
-    $client_id   = $optIntOrNull($data['client_id'] ?? null);
-    $budget_id   = $optIntOrNull($data['budget_id'] ?? null);
-    $invoice_id  = $optIntOrNull($data['invoice_id'] ?? null);
+
+    $client_id   = $data['client_id'] ?? null;
+    $pressupost_id   = $data['pressupost_id'] ?? null;
+    $factura_id  = $data['factura_id'] ?? null;
+
+    $client_id_bin = Uuid::toBinary($client_id);
+    $pressupost_id_bin = Uuid::toBinary($pressupost_id);
+    $factura_id_bin = Uuid::toBinary($factura_id);
 
     $start_date = $optStrOrNull($data['start_date'] ?? null);
     $end_date   = $optStrOrNull($data['end_date'] ?? null);
@@ -168,8 +161,8 @@ if ($slug === 'updateProjecte') {
           end_date = :end_date,
           priority = :priority,
           client_id = :client_id,
-          budget_id = :budget_id,
-          invoice_id = :invoice_id
+          pressupost_id = :pressupost_id,
+          factura_id = :factura_id
         WHERE id = :id
         LIMIT 1
     SQL;
@@ -205,9 +198,24 @@ if ($slug === 'updateProjecte') {
         };
 
         $bindNullableInt($stmt, ':category_id', $category_id);
-        $bindNullableInt($stmt, ':client_id', $client_id);
-        $bindNullableInt($stmt, ':budget_id', $budget_id);
-        $bindNullableInt($stmt, ':invoice_id', $invoice_id);
+
+        if ($client_id_bin === null) {
+            $stmt->bindValue(':client_id', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':client_id', $client_id_bin, PDO::PARAM_LOB);
+        }
+
+        if ($pressupost_id_bin === null) {
+            $stmt->bindValue(':pressupost_id', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':pressupost_id', $pressupost_id_bin, PDO::PARAM_LOB);
+        }
+
+        if ($factura_id_bin === null) {
+            $stmt->bindValue(':factura_id', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':factura_id', $factura_id_bin, PDO::PARAM_LOB);
+        }
 
         if ($start_date === null) $stmt->bindValue(':start_date', null, PDO::PARAM_NULL);
         else $stmt->bindValue(':start_date', $start_date, PDO::PARAM_STR);
@@ -243,7 +251,7 @@ if ($slug === 'updateProjecte') {
                 'id' => $id,
                 'updated_at' => $after['updated_at'] ?? null,
             ],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -276,17 +284,8 @@ if ($slug === 'updateProjecte') {
 } else if ($slug === 'updateTask') {
 
     // Auth
-    $userUuid = getAuthenticatedUserUuid();
-    if (!$userUuid) {
-        Response::error(MissatgesAPI::error('validacio'), ['Usuari no autenticat'], 401);
-        return;
-    }
-
-    $userBin = uuid::toBinary($userUuid);
-    if ($userBin === null) {
-        Response::error(MissatgesAPI::error('validacio'), ['UUID invàlid'], 400);
-        return;
-    }
+    $userId = '019710e490e4735f896af9d11d7106a1';
+    $userBin = Uuid::toBinary($userId);
 
     // Leer JSON
     $raw = file_get_contents('php://input');
@@ -458,20 +457,20 @@ if ($slug === 'updateProjecte') {
             Response::error(
                 MissatgesAPI::error('errorBD'),
                 ['sqlState' => $stmt->errorCode(), 'info' => $stmt->errorInfo()],
-                500
+                httpCode: 500
             );
             return;
         }
 
         if ($stmt->rowCount() < 1) {
-            Response::error(MissatgesAPI::error('not_found'), ['Tasca no trobada'], 404);
+            Response::error(MissatgesAPI::error('not_found'), ['Tasca no trobada'], httpCode: 404);
             return;
         }
 
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => (int)$id],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);

@@ -3,6 +3,7 @@ import { initProjecteDetalls } from './fitxaProjecte';
 import { formProjecte } from './formProjecte';
 import { formTask } from './formTasca';
 import { initProjectesHome } from './homeProjectes';
+import { taulaLlistatProjectes } from './taulaLlistatProjectes';
 
 export function projectes() {
   const pageType = getPageType(window.location.href);
@@ -19,33 +20,40 @@ export function projectes() {
 
   // /.../projectes
   if (!action) {
-    void initProjectesHome();
+    initProjectesHome();
     return;
   }
 
   switch (action) {
     case 'modifica-projecte':
-      void formProjecte(true, id);
+      formProjecte(true, id);
       break;
 
     case 'nou-projecte':
-      void formProjecte(false);
+      formProjecte(false);
       break;
 
     case 'nova-tasca':
-      console.log('hola');
-      void formTask(false);
+      formTask(false);
       break;
 
     case 'modifica-tasca':
-      void formTask(true, id);
+      formTask(true, id);
       break;
 
     case 'fitxa-projecte':
-      void initProjecteDetalls(id);
+      initProjecteDetalls(id);
+      break;
+
+    case 'llistat-projectes':
+      taulaLlistatProjectes();
+      break;
+
+    case 'llistat-tasques':
+      taulaLlistatProjectes();
       break;
 
     default:
-      void initProjectesHome();
+      initProjectesHome();
   }
 }

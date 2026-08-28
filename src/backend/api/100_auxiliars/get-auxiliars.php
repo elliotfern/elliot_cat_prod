@@ -1154,7 +1154,6 @@ if ($slug === 'directors') {
         SELECT
             c.id AS client_id,
             c.contacte_id,
-
             co.id,
             co.nom,
             co.cognoms,
@@ -1334,9 +1333,9 @@ if ($slug === 'directors') {
 } else if ($slug === "facturesClients") {
 
     $sql = <<<SQL
-            SELECT c.id, CONCAT(c.id, ' - ', c.facConcepte) AS facConcepte
+            SELECT c.id, CONCAT(c.numero_factura, ' - ', c.concepte) AS facConcepte
             FROM %s AS c
-            ORDER BY c.id DESC
+            ORDER BY c.data_factura DESC
             SQL;
 
     $query = sprintf(
