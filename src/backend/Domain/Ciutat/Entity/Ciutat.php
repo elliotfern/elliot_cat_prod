@@ -9,10 +9,7 @@ class Ciutat
     public function __construct(
         private string $id,
         private string $ciutat,
-        private ?string $ciutatCa,
-        private ?string $ciutatEn,
         private string $descripcio,
-        private string $ciutatFinal,
         private Pais $pais,
         private \DateTimeImmutable $createdAt,
         private \DateTimeImmutable $updatedAt
@@ -28,25 +25,11 @@ class Ciutat
         return $this->ciutat;
     }
 
-    public function getCiutatCa(): ?string
-    {
-        return $this->ciutatCa;
-    }
-
-    public function getCiutatEn(): ?string
-    {
-        return $this->ciutatEn;
-    }
-
     public function getDescripcio(): string
     {
         return $this->descripcio;
     }
 
-    public function getCiutatFinal(): ?string
-    {
-        return $this->ciutatFinal;
-    }
     public function getPais(): Pais
     {
         return $this->pais;
@@ -64,9 +47,6 @@ class Ciutat
 
     public function getNom(): string
     {
-        return $this->ciutatCa
-            ?? $this->ciutat
-            ?? $this->ciutatEn
-            ?? $this->ciutatFinal;
+        return $this->ciutat;
     }
 }

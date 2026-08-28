@@ -6,8 +6,7 @@ class Pais
 {
     public function __construct(
         private string $id,
-        private string $paisCa,
-        private ?string $paisEn,
+        private string $pais,
         private \DateTimeImmutable $createdAt,
         private \DateTimeImmutable $updatedAt
     ) {}
@@ -17,14 +16,9 @@ class Pais
         return $this->id;
     }
 
-    public function getPaisCa(): string
+    public function getPais(): string
     {
-        return $this->paisCa;
-    }
-
-    public function getPaisEn(): ?string
-    {
-        return $this->paisEn;
+        return $this->pais;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

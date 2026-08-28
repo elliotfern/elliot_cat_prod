@@ -44,5 +44,5 @@ export async function formEmissor(isUpdate: boolean, id?: string) {
   }
 
   // Omplir select de països
-  await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais_ca');
+  await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais');
 }

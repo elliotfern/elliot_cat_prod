@@ -87,7 +87,7 @@ export type ApiUrls = {
     EDUCACIO_CV_POST: string;
     PERSONA: (id: string) => string;
     CIUTAT: string;
-    PAIS: (id: string) => string;
+    PAIS: string;
     CLIENT: string;
     FACTURA_CLIENT: string;
     FACTURA_CLIENT_PRODUCTE: string;

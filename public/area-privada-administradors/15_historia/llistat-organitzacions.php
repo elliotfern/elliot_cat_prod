@@ -50,7 +50,7 @@
                 <img src="https://media.elliot.cat/img/historia-organitzacio/${author.nameImg}.jpg" style="height:70px">
               </a></td>
             <td><a id="${author.id}" title="Pàgina" href="https://${window.location.host}/gestio/historia/fitxa-organitzacio/${author.slug}">${author.nomOrg}<a></td>
-            <td>${author.pais_cat}</td>
+            <td>${author.pais}</td>
             <td>${author.dataDiss && author.dataDiss !== '0' ? `${author.dataFunda} - ${author.dataDiss}` : `${author.dataFunda} - present`}</td>
             <td>
               <a href="https://${window.location.host}/gestio/historia/modifica-organitzacio/${author.slug}">

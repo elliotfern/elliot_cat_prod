@@ -44,7 +44,7 @@ class MysqlPaisRepository implements PaisRepositoryInterface
         $stmt = $this->pdo->query("
             SELECT *
             FROM db_geo_paisos
-            ORDER BY pais_ca
+            ORDER BY pais
         ");
 
         $items = [];

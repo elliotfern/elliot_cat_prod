@@ -11,8 +11,7 @@ class MysqlPaisMapper
     {
         return new Pais(
             uuid::toString($row['id']),
-            $row['pais_ca'],
-            $row['pais_en'],
+            $row['pais'],
             new \DateTimeImmutable($row['created_at']),
             new \DateTimeImmutable($row['updated_at'])
         );

@@ -27,7 +27,7 @@ function renderTable(rows: EducacioCv[]): string {
   const body = rows
     .map((r) => {
       const logoUrl = r.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${r.nameImg}.png` : null;
-      const localitzacio = [r.ciutat, r.pais_ca].filter(Boolean).join(', ');
+      const localitzacio = [r.ciutat, r.pais].filter(Boolean).join(', ');
       const periode = `${fmtDate(r.data_inici)} - ${fmtDate(r.data_fi) || 'actualitat'}`;
 
       const editHref = `/gestio/curriculum/modifica-educacio/${r.id}`;

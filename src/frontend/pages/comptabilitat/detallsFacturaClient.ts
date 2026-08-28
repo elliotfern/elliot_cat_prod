@@ -62,9 +62,9 @@ interface Invoice {
   nif: string | null;
   adreca: string | null;
   cp: string | null;
-  ciutat_ca: string | null;
-  provincia_ca: string | null;
-  pais_ca: string | null;
+  ciutat: string | null;
+  provincia: string | null;
+  pais: string | null;
 
   // ==========================================================
   // EMISSOR
@@ -76,7 +76,7 @@ interface Invoice {
   emailEmissor: string | null;
   nifEmissor: string | null;
   adrecaEmissor: string | null;
-  pais_caEmissor: string | null;
+  paisEmissor: string | null;
 }
 
 interface InvoiceLine {
@@ -334,17 +334,17 @@ function renderParties(container: HTMLElement, inv: Invoice): void {
 
             <div class="mb-2">
               <strong>Ciutat:</strong>
-              ${valueOrDash(inv.ciutat_ca)}
+              ${valueOrDash(inv.ciutat)}
             </div>
 
             <div class="mb-2">
               <strong>Província:</strong>
-              ${valueOrDash(inv.provincia_ca)}
+              ${valueOrDash(inv.provincia)}
             </div>
 
             <div>
               <strong>País:</strong>
-              ${valueOrDash(inv.pais_ca)}
+              ${valueOrDash(inv.pais)}
             </div>
 
           </div>
@@ -396,7 +396,7 @@ function renderParties(container: HTMLElement, inv: Invoice): void {
 
             <div>
               <strong>País:</strong>
-              ${valueOrDash(inv.pais_caEmissor)}
+              ${valueOrDash(inv.paisEmissor)}
             </div>
 
           </div>

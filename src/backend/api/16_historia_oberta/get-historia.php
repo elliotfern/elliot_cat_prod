@@ -96,7 +96,7 @@ if ($slug === 'carrecsPersona') {
         SUBSTR(HEX(e.id), 21)
         )) AS id,
      e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, s.nomSubEtapa, p.etapaNom, 
-      COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat, co.pais_ca
+      c.ciutat, co.pais
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id
@@ -256,7 +256,7 @@ if ($slug === 'carrecsPersona') {
         SUBSTR(HEX(e.esdeCiutat), 13, 4),
         SUBSTR(HEX(e.esdeCiutat), 17, 4),
         SUBSTR(HEX(e.esdeCiutat), 21)
-        )) AS esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, i.alt
+        )) AS esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais, e.img, i.nameImg, i.alt
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id 
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id 
@@ -338,7 +338,7 @@ if ($slug === 'carrecsPersona') {
         SUBSTR(HEX(e.esdeCiutat), 17, 4),
         SUBSTR(HEX(e.esdeCiutat), 21)
         )) AS esdeCiutat,
-        e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais_ca, e.img, i.nameImg, i.alt
+        e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais, e.img, i.nameImg, i.alt
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id 
     LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id 
@@ -655,7 +655,7 @@ if ($slug === 'carrecsPersona') {
     // ruta GET => "/api/historia/get/paginaOrganitzacions"
 } else if ($slug === 'paginaOrganitzacions') {
 
-    $query = "SELECT o.id, o.nomOrg, o.slug, o.orgSig, o.dataFunda, o.dataDiss, c.pais_cat, i.nameImg, o.dateCreated, o.dateModified
+    $query = "SELECT o.id, o.nomOrg, o.slug, o.orgSig, o.dataFunda, o.dataDiss, c.pais, i.nameImg, o.dateCreated, o.dateModified
     FROM db_historia_organitzacions AS o
     LEFT JOIN db_countries AS c ON o.orgPais = c.id
     LEFT JOIN db_img AS i ON o.img = i.id
@@ -684,7 +684,7 @@ if ($slug === 'carrecsPersona') {
 } else if ($slug === 'fitxaOrganitzacio') {
     $slug = $_GET['slug'];
 
-    $query = "SELECT o.id, o.nomOrg, o.slug, o.orgSig, o.dataFunda, o.dataDiss, ci.ciutat, c.pais_ca, i.nameImg, o.dateCreated, o.dateModified,
+    $query = "SELECT o.id, o.nomOrg, o.slug, o.orgSig, o.dataFunda, o.dataDiss, ci.ciutat, c.pais, i.nameImg, o.dateCreated, o.dateModified,
     sp.nomSubEtapa, ph.etapaNom, ot.nomTipus, ip.ideologia, i.alt, o.nomOrgCast, o.nomOrgEng, o.nomOrgIt, o.orgPais, o.orgCiutat, o.orgSubEtapa, o.orgTipus, o.orgIdeologia, o.img
     FROM db_historia_organitzacions AS o
     LEFT JOIN db_countries AS c ON o.orgPais = c.id

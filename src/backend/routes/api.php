@@ -614,7 +614,6 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-
     // PROVINCIES
     '/api/provincies/post' => [
         'view' => '../src/backend/api/24_paisos/post-provincies.php',

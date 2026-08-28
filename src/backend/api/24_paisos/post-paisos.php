@@ -67,8 +67,7 @@ function optionalField(array $data, string $key)
 // Validación
 $errors = [];
 
-$pais_ca = requireField($data, 'pais_ca', $errors);
-$pais_en = optionalField($data, 'pais_en');
+$pais = requireField($data, 'pais', $errors);
 
 if (!empty($errors)) {
     Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
@@ -81,11 +80,10 @@ $uuidBytes = $uuid->getBytes();   // para BINARY(16)
 $uuidString = $uuid->toString();  // para devolver al frontend
 
 $sql = "INSERT INTO " . Tables::DB_PAISOS . " (
-              id, pais_ca, pais_en, created_at, updated_at
+              id, pais, created_at, updated_at
           ) VALUES (
               :id,
-              :pais_ca, 
-              :pais_en,
+              :pais,
               NOW(),
               NOW()
           )";
@@ -95,8 +93,7 @@ try {
 
     // ID UUIDv7 binario
     $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
-    $stmt->bindValue(':pais_ca', $pais_ca, PDO::PARAM_STR);
-    $stmt->bindValue(':pais_en', $pais_en, $pais_en === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+    $stmt->bindValue(':pais', $pais, PDO::PARAM_STR);
 
     if ($stmt->execute()) {
 
@@ -104,8 +101,7 @@ try {
             MissatgesAPI::success('create'),
             [
                 'id'      => $uuidString,
-                'pais_ca' => $pais_ca,
-                'pais_en' => $pais_en,
+                'pais' => $pais
             ],
             httpCode: 201
         );

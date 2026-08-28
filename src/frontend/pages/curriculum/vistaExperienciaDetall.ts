@@ -77,7 +77,7 @@ function renderTabs(exp: ExperienciaCv): string {
 
 function renderExperiencia(exp: ExperienciaCv): string {
   const logoUrl = exp.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${exp.nameImg}.png` : null;
-  const localitzacio = [exp.ciutat, exp.pais_ca].filter(Boolean).join(', ');
+  const localitzacio = [exp.ciutat, exp.pais].filter(Boolean).join(', ');
 
   return `
     <div class="mb-3">

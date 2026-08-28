@@ -359,6 +359,58 @@ if ($slug === 'catmusica') {
         data: $data,
         httpCode: 200
     );
+} else if ($slug === "radio3-rne") {
+header('Content-Type: application/json');
+
+    $url = 'https://www.rtve.es/servicios/programasRadio/R3.json?emision=ahora-sig';
+
+    $opts = [
+        "http" => [
+            "method" => "GET",
+            "header" => implode("\r\n", [
+                "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept: application/json",
+            ]),
+            "timeout" => 10,
+            "ignore_errors" => true, // para poder leer también el cuerpo si la BBC devuelve un error
+        ],
+    ];
+
+    $context = stream_context_create($opts);
+    $response = file_get_contents($url, false, $context);
+
+    if ($response === false) {
+        // Aquí seguirías con tu manejo de error habitual (Response::error + exit)
+        // pero ahora sí debería llegar contenido en vez de false.
+    }
+
+    // Comprobar el código HTTP real devuelto (viene en $http_response_header tras el file_get_contents)
+    $statusLine = $http_response_header[0] ?? '';
+    preg_match('/\d{3}/', $statusLine, $matches);
+    $statusCode = isset($matches[0]) ? (int) $matches[0] : 0;
+
+    if ($statusCode !== 200) {
+        // Log opcional: error_log("BBC API devolvió $statusCode: $response");
+        // Aquí tu Response::error(...) + exit() habitual
+    }
+
+    $data = json_decode($response, true);
+
+
+    if ($data === FALSE) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Error al obtener datos de la API externa']);
+        exit;
+    }
+
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: $data,
+        httpCode: 200
+    );
+
+
+
 } else {
     //
 }

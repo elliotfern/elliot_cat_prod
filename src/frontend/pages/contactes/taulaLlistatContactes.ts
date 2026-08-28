@@ -92,9 +92,9 @@ export async function taulaLlistatContactes() {
       render: (_: unknown, row: Contacte) => {
         if (row.data_naixement) {
           return formatNaixementEdat(row.data_naixement);
+        } else {
+          return '-';
         }
-
-        return '';
       },
     },
   ];

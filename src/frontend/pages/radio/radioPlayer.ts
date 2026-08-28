@@ -11,6 +11,7 @@ export interface ProgramaInfo {
   descripcion: string;
   inicio?: Date;
   fin?: Date;
+  presentador?: string;
 }
 
 export interface RadioPlayerIds {
@@ -168,6 +169,11 @@ export function initRadioPlayer(config: RadioPlayerConfig): void {
       const info = config.parsePrograma(raw);
 
       elPrograma.innerHTML = `<strong>${info.titulo}</strong>`;
+
+      if (info.presentador) {
+        elPrograma.innerHTML += `<div class="small text-muted">${info.presentador}</div>`;
+      }
+
       elDescripcion.innerHTML = info.descripcion;
 
       if (info.inicio && info.fin) {

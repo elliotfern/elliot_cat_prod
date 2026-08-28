@@ -16,8 +16,8 @@ export type SerieTv = {
   genere_id: string;
   pais_id: string;
   img_id: string;
-  idioma_ca: string;
-  pais_ca: string;
+  idioma: string;
+  pais: string;
   country: string;
   nameImg: string;
   genere: string;

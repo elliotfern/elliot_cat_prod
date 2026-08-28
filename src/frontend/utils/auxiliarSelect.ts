@@ -15,7 +15,7 @@ const isEmptySel = (v: unknown): boolean => v === null || v === undefined || v =
  * @param selected valor/es seleccionados (string|number|array) o null/undefined si no hay
  * @param api      nombre de recurso auxiliar (se concatena a /auxiliars/get/{api})
  * @param elementId id del <select>
- * @param valorText campo del item que se mostrará como etiqueta (p.ej. 'pais_ca')
+ * @param valorText campo del item que se mostrará como etiqueta (p.ej. 'pais')
  * @param fallbackValue valor a usar si selected es vacío
  * @param config   opciones extra para Choices
  */

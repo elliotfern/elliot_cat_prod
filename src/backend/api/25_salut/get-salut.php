@@ -258,7 +258,7 @@ if ($slug === "llistatPatologies") {
 
     $sql = <<<SQL
                 SELECT f.id, f.nom, f.direccio, f.ciutat_id, f.email, f.telefon, f.created_at, f.updated_at, f.especialitat,
-                    COALESCE(c.ciutat_ca, c.ciutat) AS nomCiutat
+                    c.ciutat AS nomCiutat
                 FROM %s AS f
                 LEFT JOIN %s AS c ON c.id = f.ciutat_id
             SQL;

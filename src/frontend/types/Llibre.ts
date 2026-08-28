@@ -21,7 +21,7 @@ export interface Llibre {
   nameImg: string;
   nomTipus: string | null;
   editorial: string | null;
-  idioma_ca: string | null;
+  idioma: string | null;
   estat_id: string;
   nomEstat: string;
   idioma_id: string;

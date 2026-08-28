@@ -24,7 +24,7 @@ if ($modificaBtn === 1) {
     // Llenar selects con opciones
     selectOmplirDades("/api/biblioteca/get/?type=auxiliarImatgesAutor", "", "img", "alt");
     selectOmplirDades("/api/biblioteca/get/?type=professio", "", "ocupacio", "professio_ca");
-    selectOmplirDades("/api/biblioteca/get/?type=pais", "", "paisAutor", "pais_cat");
+    selectOmplirDades("/api/biblioteca/get/?type=pais", "", "paisAutor", "pais");
     selectOmplirDades("/api/biblioteca/get/?type=grup", "", "grup", "grup_ca");
     selectOmplirDades("/api/biblioteca/get/?type=sexe", "", "sexe", "genereCa");
     selectOmplirDades("/api/biblioteca/get/?type=ciutat", "", "ciutatNaixement", "ciutat");
@@ -246,7 +246,7 @@ if ($modificaBtn === 1) {
         // Llenar selects con opciones
         selectOmplirDades("/api/biblioteca/get/?type=auxiliarImatgesAutor", data.idImg, "img", "alt");
         selectOmplirDades("/api/biblioteca/get/?type=professio", data.idOcupacio, "ocupacio", "professio_ca");
-        selectOmplirDades("/api/biblioteca/get/?type=pais", data.idPais, "paisAutor", "pais_cat");
+        selectOmplirDades("/api/biblioteca/get/?type=pais", data.idPais, "paisAutor", "pais");
         selectOmplirDades("/api/biblioteca/get/?type=grup", data.idGrup, "grup", "grup_ca");
         selectOmplirDades("/api/biblioteca/get/?type=sexe", data.idSexe, "sexe", "genereCa");
         selectOmplirDades("/api/biblioteca/get/?type=ciutat", data.idCiutatNaixement, "ciutatNaixement", "ciutat");

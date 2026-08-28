@@ -89,7 +89,7 @@ class CurriculumPdfService
 
         $sql = sprintf(
             "SELECT e.id, e.empresa, e.empresa_url, e.data_inici, e.data_fi, e.is_current,
-                i.nameImg, c.ciutat, co.pais_en AS pais_ca
+                i.nameImg, c.ciutat, co.pais
             FROM %s AS e
             LEFT JOIN %s i  ON e.logo_empresa = i.id
             LEFT JOIN %s c  ON e.empresa_localitzacio = c.id
@@ -124,10 +124,10 @@ class CurriculumPdfService
         $sql = sprintf(
             "SELECT e.id, e.institucio, e.institucio_url, e.data_inici, e.data_fi,
                 (SELECT nameImg FROM %s WHERE id = e.logo_id LIMIT 1) AS nameImg,
-                (SELECT ciutat_ca FROM %s WHERE id = e.institucio_localitzacio LIMIT 1) AS ciutat,
-                (SELECT pais_ca FROM %s WHERE id =
-                    (SELECT pais_ca FROM %s WHERE id = e.institucio_localitzacio LIMIT 1)
-                LIMIT 1) AS pais_ca
+                (SELECT ciutat FROM %s WHERE id = e.institucio_localitzacio LIMIT 1) AS ciutat,
+                (SELECT pais FROM %s WHERE id =
+                    (SELECT pais FROM %s WHERE id = e.institucio_localitzacio LIMIT 1)
+                LIMIT 1) AS pais
             FROM %s e
             ORDER BY e.posicio DESC",
             qi(Tables::DB_IMATGES, $pdo),

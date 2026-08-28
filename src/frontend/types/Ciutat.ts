@@ -1,8 +1,6 @@
 export interface Ciutat {
   id: number;
   ciutat: string;
-  ciutat_ca: string;
-  ciutat_en: string;
   updated_at: string;
   created_at: string;
   pais: Pais;
@@ -11,6 +9,5 @@ export interface Ciutat {
 
 interface Pais {
   id: string;
-  pais_ca: string;
-  pais_en: string;
+  pais: string;
 }

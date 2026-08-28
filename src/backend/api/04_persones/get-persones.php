@@ -52,7 +52,7 @@ if ($slug === 'llistatPersones') {
                 a.dia_defuncio,
                 a.mes_defuncio,
                 a.any_defuncio,
-                c.pais_ca,
+                c.pais,
                 i.nameImg,
                 COALESCE(
                     JSON_ARRAYAGG(g.grup_ca),
@@ -126,7 +126,7 @@ if ($slug === 'llistatPersones') {
             a.id,
             a.cognoms,
             a.nom,
-            p.pais_ca,
+            p.pais,
             a.any_naixement,
             a.any_defuncio,
             i.nameImg,
@@ -142,8 +142,8 @@ if ($slug === 'llistatPersones') {
             a.dia_naixement,
             a.mes_defuncio,
             a.dia_defuncio,
-            COALESCE(NULLIF(c1.ciutat_ca, ''), c1.ciutat) AS ciutatNaixement,
-            COALESCE(NULLIF(c2.ciutat_ca, ''), c2.ciutat) AS ciutatDefuncio,
+            c1.ciutat AS ciutatNaixement,
+            c2.ciutat AS ciutatDefuncio,
             g.id AS grup_id,
             g.grup_ca AS grup_nom,
 

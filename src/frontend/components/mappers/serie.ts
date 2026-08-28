@@ -15,8 +15,8 @@ interface SerieApi {
   img_id: string | undefined;
   descripcio: string | undefined;
 
-  idioma_ca: string | undefined;
-  pais_ca: string | undefined;
+  idioma: string | undefined;
+  pais: string | undefined;
   nameImg: string | undefined;
   genere: string | undefined;
   dateCreated?: string | undefined;
@@ -57,11 +57,11 @@ export function mapSerieToFitxa(api: SerieApi) {
       },
       {
         label: 'País',
-        value: api.pais_ca ?? '',
+        value: api.pais ?? '',
       },
       {
         label: 'Idioma original',
-        value: api.idioma_ca ?? '',
+        value: api.idioma ?? '',
       },
       {
         label: 'Anys emissió',

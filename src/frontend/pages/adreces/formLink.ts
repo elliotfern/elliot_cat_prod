@@ -14,7 +14,7 @@ type SubTema = {
 
 type Idioma = {
   id: string;
-  idioma_ca: string;
+  idioma: string;
 };
 
 interface Tema {
@@ -67,7 +67,7 @@ async function createTema(nom: string, temaId: string): Promise<SubTema | null> 
   }
 }
 
-async function createIdioma(idiomaCa: string): Promise<Idioma | null> {
+async function createIdioma(idioma: string): Promise<Idioma | null> {
   try {
     const response = await fetch(`${API_BASE}/auxiliars/post/idioma`, {
       method: 'POST',
@@ -76,7 +76,7 @@ async function createIdioma(idiomaCa: string): Promise<Idioma | null> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        idioma_ca: idiomaCa.trim(),
+        idioma: idioma.trim(),
       }),
     });
 
@@ -89,7 +89,7 @@ async function createIdioma(idiomaCa: string): Promise<Idioma | null> {
 
     return {
       id: result.data.id,
-      idioma_ca: result.data.idioma_ca,
+      idioma: result.data.idioma,
     };
   } catch (error) {
     console.error('createIdioma failed:', error);
@@ -261,13 +261,13 @@ function initCreateIdiomaUI() {
 
   formWrapper.innerHTML = `
     <div class="mb-3">
-      <label for="newIdiomaCa" class="form-label">
-        Nom (català)
+      <label for="newIdioma" class="form-label">
+        Nom idioma:
       </label>
 
       <input
         type="text"
-        id="newIdiomaCa"
+        id="newIdioma"
         class="form-control"
       >
     </div>
@@ -292,7 +292,7 @@ function initCreateIdiomaUI() {
     }
   });
 
-  const caInput = formWrapper.querySelector('#newIdiomaCa') as HTMLInputElement;
+  const caInput = formWrapper.querySelector('#newIdioma') as HTMLInputElement;
   const createBtn = formWrapper.querySelector('#createIdiomaBtn') as HTMLButtonElement;
   const message = formWrapper.querySelector('#createIdiomaMessage') as HTMLDivElement;
 
@@ -339,7 +339,7 @@ function initCreateIdiomaUI() {
     }
 
     // Mateix truc: recarrega via auxiliarSelect perquè Choices es reconstrueixi bé
-    await auxiliarSelect(idioma.id, 'llengues', 'idioma_id', 'idioma_ca');
+    await auxiliarSelect(idioma.id, 'llengues', 'idioma_id', 'idioma');
 
     message.innerHTML = `
       <div class="alert alert-success mb-0">
@@ -400,6 +400,6 @@ export async function formLink(isUpdate: boolean, id?: string) {
   initCreateIdiomaUI();
 
   await auxiliarSelect(data.sub_tema_id ?? 0, 'subtemes', 'sub_tema_id', 'sub_tema');
-  await auxiliarSelect(data.idioma_id ?? 0, 'llengues', 'idioma_id', 'idioma_ca');
+  await auxiliarSelect(data.idioma_id ?? 0, 'llengues', 'idioma_id', 'idioma');
   await auxiliarSelect(data.tipus ?? 0, 'tipusLinks', 'tipus', 'tipus');
 }

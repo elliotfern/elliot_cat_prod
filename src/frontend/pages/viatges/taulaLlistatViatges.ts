@@ -14,7 +14,7 @@ export async function taulaLlistatViatges() {
       render: (_: unknown, row: Viatge) => `<a href="/gestio/viatges/fitxa-viatge/${row.slug}">${row.viatge}</a>`,
     },
     { header: 'Descripció', field: 'descripcio' },
-    { header: 'País', field: 'pais_ca' },
+    { header: 'País', field: 'pais' },
     {
       header: 'Data',
       field: 'dataInici',
@@ -42,6 +42,6 @@ export async function taulaLlistatViatges() {
     containerId: 'taulaLlistatViatges',
     columns,
     filterKeys: ['viatge', 'descripcio'],
-    filterByField: 'pais_ca',
+    filterByField: 'pais',
   });
 }

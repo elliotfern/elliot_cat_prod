@@ -20,7 +20,7 @@ export async function taulaLlistatAutors() {
           ${row.autor_nom_complet}
         </a>`,
     },
-    { header: 'País', field: 'pais_ca' },
+    { header: 'País', field: 'pais' },
     { header: 'Professió', field: 'grup' },
     {
       header: 'Dates',

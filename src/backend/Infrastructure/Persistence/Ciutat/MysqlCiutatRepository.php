@@ -19,16 +19,11 @@ class MysqlCiutatRepository implements CiutatRepository
         $sql = "SELECT
                 c.id,
                 c.ciutat,
-                c.ciutat_ca,
-                c.ciutat_en,
                 c.descripcio,
-                COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final,
                 c.created_at,
                 c.updated_at,
-
                 p.id AS pais_id,
-                p.pais_ca,
-                p.pais_en,
+                p.pais,
                 p.created_at AS pais_created_at,
                 p.updated_at AS pais_updated_at
 
@@ -52,15 +47,11 @@ class MysqlCiutatRepository implements CiutatRepository
         $sql = "SELECT
             c.id,
             c.ciutat,
-            c.ciutat_ca,
-            c.ciutat_en,
             c.descripcio,
             c.created_at,
             c.updated_at,
-            COALESCE(NULLIF(c.ciutat_ca, ''), c.ciutat) AS ciutat_final,
             p.id AS pais_id,
-            p.pais_ca,
-            p.pais_en,
+            p.pais,
             p.created_at AS pais_created_at,
             p.updated_at AS pais_updated_at
 

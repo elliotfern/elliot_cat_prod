@@ -40,7 +40,7 @@ export async function taulaLlistatActors() {
         return `${!row.any_defuncio ? row.any_naixement : `${row.any_naixement} - ${row.any_defuncio}`}`;
       },
     },
-    { header: 'País', field: 'pais_ca' },
+    { header: 'País', field: 'pais' },
   ];
 
   if (isAdmin) {

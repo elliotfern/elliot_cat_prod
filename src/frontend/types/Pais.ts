@@ -1,7 +1,6 @@
 export interface Pais {
   id: string;
-  pais_ca: string;
-  pais_en: string;
+  pais: string;
   updated_at: string;
   created_at: string;
 }

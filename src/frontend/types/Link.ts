@@ -4,7 +4,7 @@ export interface Link {
   nom: string;
   linkId: number;
   dateCreated: string;
-  idioma_ca: string;
+  idioma: string;
   web: string;
   dateModified: string;
   tema: string;

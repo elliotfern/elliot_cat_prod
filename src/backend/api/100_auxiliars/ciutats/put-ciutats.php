@@ -14,23 +14,17 @@ if (!$conn) {
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
     exit();
-}
-
-if (!isAuthenticatedAdmin()) {
-    http_response_code(403);
-    echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-    exit;
 }
 
 $input = file_get_contents('php://input');
@@ -52,8 +46,6 @@ $reUUID = '~^[0-9a-f-]{36}$~i';
 // INPUT
 $id          = $trimOrNull($data['id'] ?? null);
 $ciutat      = $trimOrNull($data['ciutat'] ?? null);
-$ciutat_ca   = $trimOrNull($data['ciutat_ca'] ?? null);
-$ciutat_en   = $trimOrNull($data['ciutat_en'] ?? null);
 $descripcio  = $trimOrNull($data['descripcio'] ?? null);
 $pais_id     = $trimOrNull($data['pais_id'] ?? null);
 
@@ -99,8 +91,6 @@ try {
     // UPDATE
     $sql = "UPDATE db_geo_ciutats
             SET ciutat = :ciutat,
-                ciutat_ca = :ciutat_ca,
-                ciutat_en = :ciutat_en,
                 descripcio = :descripcio,
                 pais_id = :pais_id,
                 updated_at = UTC_TIMESTAMP()
@@ -111,21 +101,16 @@ try {
     $stmt->bindValue(':id', $idBytes, PDO::PARAM_LOB);
 
     $stmt->bindValue(':ciutat', $ciutat, PDO::PARAM_STR);
-    $stmt->bindValue(':ciutat_ca', $ciutat_ca, PDO::PARAM_STR);
-
-    $stmt->bindValue(':ciutat_en', $ciutat_en, $ciutat_en === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
     $stmt->bindValue(':descripcio', $descripcio, $descripcio === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
-
     $stmt->bindValue(':pais_id', $paisBytes, $paisBytes === null ? PDO::PARAM_NULL : PDO::PARAM_LOB);
 
     $stmt->execute();
-
     $conn->commit();
 
     Response::success(
         MissatgesAPI::success('update'),
         ['id' => $id],
-        200
+        httpCode: 200
     );
 } catch (Throwable $e) {
     if ($conn->inTransaction()) $conn->rollBack();

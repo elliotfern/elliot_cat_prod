@@ -7,12 +7,12 @@ import { API_BASE } from '../../utils/urls';
 
 type Pais = {
   id: string;
-  pais_ca: string;
+  pais: string;
 };
 
 type Provincia = {
   id: string;
-  provincia_ca: string;
+  provincia: string;
 };
 
 type Ciutat = {
@@ -28,7 +28,7 @@ let paisosList: Pais[] = [];
  * ============================================================
  */
 
-async function createCiutat(payload: { ciutat: string; ciutat_ca: string; ciutat_en: string; descripcio: string; pais_id: string }): Promise<Ciutat | null> {
+async function createCiutat(payload: { ciutat: string; descripcio: string; pais_id: string }): Promise<Ciutat | null> {
   try {
     const response = await fetch(`${API_BASE}/ciutats/post`, {
       method: 'POST',
@@ -79,36 +79,12 @@ function initCreateCiutatUI(): void {
   formWrapper.innerHTML = `
     <div class="mb-3">
       <label for="newCiutatNom" class="form-label">
-        Nom original
+        Nom ciutat
       </label>
 
       <input
         type="text"
         id="newCiutatNom"
-        class="form-control"
-      >
-    </div>
-
-    <div class="mb-3">
-      <label for="newCiutatCa" class="form-label">
-        Nom (català)
-      </label>
-
-      <input
-        type="text"
-        id="newCiutatCa"
-        class="form-control"
-      >
-    </div>
-
-    <div class="mb-3">
-      <label for="newCiutatEn" class="form-label">
-        Nom (anglès)
-      </label>
-
-      <input
-        type="text"
-        id="newCiutatEn"
         class="form-control"
       >
     </div>
@@ -159,10 +135,6 @@ function initCreateCiutatUI(): void {
 
   const nomInput = formWrapper.querySelector('#newCiutatNom') as HTMLInputElement;
 
-  const caInput = formWrapper.querySelector('#newCiutatCa') as HTMLInputElement;
-
-  const enInput = formWrapper.querySelector('#newCiutatEn') as HTMLInputElement;
-
   const paisSelect = formWrapper.querySelector('#newCiutatPaisId') as HTMLSelectElement;
 
   const descripcioInput = formWrapper.querySelector('#newCiutatDescripcio') as HTMLTextAreaElement;
@@ -176,7 +148,7 @@ function initCreateCiutatUI(): void {
     const option = document.createElement('option');
 
     option.value = pais.id;
-    option.textContent = pais.pais_ca;
+    option.textContent = pais.pais;
 
     paisSelect.appendChild(option);
   }
@@ -212,13 +184,12 @@ function initCreateCiutatUI(): void {
 
     const ciutat = await createCiutat({
       ciutat: nom,
-      ciutat_ca: caInput.value.trim(),
-      ciutat_en: enInput.value.trim(),
       descripcio: descripcioInput.value.trim(),
       pais_id: paisId,
     });
 
     createBtn.disabled = false;
+    console.log('Ciutat creada:', ciutat);
 
     if (!ciutat) {
       message.innerHTML = `
@@ -240,8 +211,6 @@ function initCreateCiutatUI(): void {
     `;
 
     nomInput.value = '';
-    caInput.value = '';
-    enInput.value = '';
     descripcioInput.value = '';
     paisSelect.value = '';
 
@@ -258,7 +227,7 @@ function initCreateCiutatUI(): void {
  * ============================================================
  */
 
-async function createProvincia(provinciaCa: string): Promise<Provincia | null> {
+async function createProvincia(nomProvincia: string): Promise<Provincia | null> {
   try {
     const response = await fetch(`${API_BASE}/provincies/post`, {
       method: 'POST',
@@ -267,7 +236,7 @@ async function createProvincia(provinciaCa: string): Promise<Provincia | null> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        provincia_ca: provinciaCa.trim(),
+        provincia: nomProvincia.trim(),
       }),
     });
 
@@ -280,7 +249,7 @@ async function createProvincia(provinciaCa: string): Promise<Provincia | null> {
 
     return {
       id: result.data.id,
-      provincia_ca: result.data.provincia_ca,
+      provincia: result.data.provincia,
     };
   } catch (error) {
     console.error('createProvincia failed:', error);
@@ -310,13 +279,13 @@ function initCreateProvinciaUI(): void {
 
   formWrapper.innerHTML = `
     <div class="mb-3">
-      <label for="newProvinciaCa" class="form-label">
-        Nom (català)
+      <label for="newProvincia" class="form-label">
+        Nom província
       </label>
 
       <input
         type="text"
-        id="newProvinciaCa"
+        id="newProvincia"
         class="form-control"
       >
     </div>
@@ -340,7 +309,7 @@ function initCreateProvinciaUI(): void {
     }
   });
 
-  const caInput = formWrapper.querySelector('#newProvinciaCa') as HTMLInputElement;
+  const provinciaInput = formWrapper.querySelector('#newProvincia') as HTMLInputElement;
 
   const createBtn = formWrapper.querySelector('#createProvinciaBtn') as HTMLButtonElement;
 
@@ -351,18 +320,18 @@ function initCreateProvinciaUI(): void {
 
     if (isHidden) {
       formWrapper.classList.remove('d-none');
-      caInput.focus();
+      provinciaInput.focus();
     } else {
       formWrapper.classList.add('d-none');
     }
   });
 
   createBtn.addEventListener('click', async () => {
-    const provinciaCa = caInput.value.trim();
+    const nomProvincia = provinciaInput.value.trim();
 
     message.innerHTML = '';
 
-    if (!provinciaCa) {
+    if (!nomProvincia) {
       message.innerHTML = `
         <div class="alert alert-warning mb-0">
           Cal indicar el nom de la província.
@@ -374,7 +343,7 @@ function initCreateProvinciaUI(): void {
 
     createBtn.disabled = true;
 
-    const provincia = await createProvincia(provinciaCa);
+    const provincia = await createProvincia(nomProvincia);
 
     createBtn.disabled = false;
 
@@ -389,7 +358,7 @@ function initCreateProvinciaUI(): void {
     }
 
     // Actualitzar el select principal del Client
-    await auxiliarSelect(provincia.id, 'provincies', 'provincia_id', 'provincia_ca');
+    await auxiliarSelect(provincia.id, 'provincies', 'provincia_id', 'provincia');
 
     message.innerHTML = `
       <div class="alert alert-success mb-0">
@@ -397,7 +366,7 @@ function initCreateProvinciaUI(): void {
       </div>
     `;
 
-    caInput.value = '';
+    provinciaInput.value = '';
 
     setTimeout(() => {
       formWrapper.classList.add('d-none');
@@ -422,7 +391,7 @@ async function loadPaisos(): Promise<void> {
   }
 }
 
-async function createPais(paisCa: string, paisEn: string): Promise<Pais | null> {
+async function createPais(nomPais: string): Promise<Pais | null> {
   try {
     const response = await fetch(`${API_BASE}/paisos/post`, {
       method: 'POST',
@@ -431,8 +400,7 @@ async function createPais(paisCa: string, paisEn: string): Promise<Pais | null> 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        pais_ca: paisCa.trim(),
-        pais_en: paisEn.trim(),
+        pais: nomPais.trim(),
       }),
     });
 
@@ -445,7 +413,7 @@ async function createPais(paisCa: string, paisEn: string): Promise<Pais | null> 
 
     const pais: Pais = {
       id: result.data.id,
-      pais_ca: result.data.pais_ca,
+      pais: result.data.pais,
     };
 
     paisosList.push(pais);
@@ -479,28 +447,17 @@ function initCreatePaisUI(): void {
 
   formWrapper.innerHTML = `
     <div class="mb-3">
-      <label for="newPaisCa" class="form-label">
-        Nom (català)
+      <label for="newPais" class="form-label">
+        Nom país:
       </label>
 
       <input
         type="text"
-        id="newPaisCa"
+        id="newPais"
         class="form-control"
       >
     </div>
 
-    <div class="mb-3">
-      <label for="newPaisEn" class="form-label">
-        Nom (anglès)
-      </label>
-
-      <input
-        type="text"
-        id="newPaisEn"
-        class="form-control"
-      >
-    </div>
 
     <button
       type="button"
@@ -521,9 +478,7 @@ function initCreatePaisUI(): void {
     }
   });
 
-  const caInput = formWrapper.querySelector('#newPaisCa') as HTMLInputElement;
-
-  const enInput = formWrapper.querySelector('#newPaisEn') as HTMLInputElement;
+  const paisInput = formWrapper.querySelector('#newPais') as HTMLInputElement;
 
   const createBtn = formWrapper.querySelector('#createPaisBtn') as HTMLButtonElement;
 
@@ -534,19 +489,18 @@ function initCreatePaisUI(): void {
 
     if (isHidden) {
       formWrapper.classList.remove('d-none');
-      caInput.focus();
+      paisInput.focus();
     } else {
       formWrapper.classList.add('d-none');
     }
   });
 
   createBtn.addEventListener('click', async () => {
-    const paisCa = caInput.value.trim();
-    const paisEn = enInput.value.trim();
+    const nomPais = paisInput.value.trim();
 
     message.innerHTML = '';
 
-    if (!paisCa) {
+    if (!nomPais) {
       message.innerHTML = `
         <div class="alert alert-warning mb-0">
           Cal indicar el nom en català.
@@ -558,11 +512,11 @@ function initCreatePaisUI(): void {
 
     createBtn.disabled = true;
 
-    const pais = await createPais(paisCa, paisEn);
+    const paisCreat = await createPais(nomPais);
 
     createBtn.disabled = false;
 
-    if (!pais) {
+    if (!paisCreat) {
       message.innerHTML = `
         <div class="alert alert-danger mb-0">
           No s’ha pogut crear el país.
@@ -573,7 +527,7 @@ function initCreatePaisUI(): void {
     }
 
     // Actualitzar el select principal del Client
-    await auxiliarSelect(pais.id, 'paisos', 'pais_id', 'pais_ca');
+    await auxiliarSelect(paisCreat.id, 'paisos', 'pais_id', 'pais');
 
     message.innerHTML = `
       <div class="alert alert-success mb-0">
@@ -581,8 +535,7 @@ function initCreatePaisUI(): void {
       </div>
     `;
 
-    caInput.value = '';
-    enInput.value = '';
+    paisInput.value = '';
 
     setTimeout(() => {
       formWrapper.classList.add('d-none');
@@ -646,10 +599,10 @@ export async function formContacte(isUpdate: boolean, idUuid?: string) {
   await loadPaisos();
 
   initCreatePaisUI();
-  await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais_ca');
+  await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais');
 
   initCreateProvinciaUI();
-  await auxiliarSelect(data.provincia_id ?? 0, 'provincies', 'provincia_id', 'provincia_ca');
+  await auxiliarSelect(data.provincia_id ?? 0, 'provincies', 'provincia_id', 'provincia');
 
   initCreateCiutatUI();
   await auxiliarSelect(data.ciutat_id ?? 0, 'ciutats', 'ciutat_id', 'ciutat');

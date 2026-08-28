@@ -51,7 +51,7 @@ if ($slug === "llistatContactes") {
             c.tel_2,
             c.data_naixement,
             c.web,
-            p.pais_ca,
+            p.pais,
             c.adreca,
             c.actiu
         FROM %s AS c
@@ -112,7 +112,7 @@ if ($slug === "llistatContactes") {
                     c.provincia_id,
                     c.pais_id,
                     c.tipus_persona,
-                    p.pais_ca,
+                    p.pais,
                     c.actiu
                 FROM %s AS c
                 LEFT JOIN %s AS p ON c.pais_id = p.id

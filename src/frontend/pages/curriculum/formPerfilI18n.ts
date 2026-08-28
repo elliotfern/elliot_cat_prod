@@ -47,5 +47,5 @@ export async function formPerfilI18n(isUpdate: boolean, locale?: string) {
   }
 
   await auxiliarSelect(data.perfil_id ?? 0, 'perfilsCV', 'perfil_id', 'nom_complet');
-  await auxiliarSelect(data.locale ?? 0, 'llengues', 'locale', 'idioma_ca');
+  await auxiliarSelect(data.locale ?? 0, 'llengues', 'locale', 'idioma');
 }

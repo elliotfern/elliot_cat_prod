@@ -5,7 +5,7 @@ export interface Emissor {
   nom: string;
   nif: string;
   numero_iva: string | null;
-  pais_ca: string | null;
+  pais: string | null;
   adreca: string | null;
   telefon: string | null;
   email: string | null;

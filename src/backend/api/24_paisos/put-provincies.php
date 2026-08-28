@@ -23,8 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
-// Check if the request method is POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+// Check if the request method is PUT
+if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     header('HTTP/1.1 405 Method Not Allowed');
     echo json_encode(['error' => 'Method not allowed']);
     exit();
@@ -36,8 +36,8 @@ function isUuid($s)
 }
 
 
-// INSERIR NOVA PROVINCIA
-// URL: 'api/provincies/post'
+// ACTUALITZAR PROVINCIA
+// URL: 'api/provincies/put'
 
 $input_data = file_get_contents("php://input");
 $data = json_decode($input_data, true);
@@ -67,41 +67,42 @@ function optionalField(array $data, string $key)
 // Validación
 $errors = [];
 
+$id = requireField($data, 'id', $errors);
 $provincia = requireField($data, 'provincia', $errors);
+
+if ($id !== null && !isUuid($id)) {
+    $errors['id'] = 'invalid';
+}
 
 if (!empty($errors)) {
     Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
     exit;
 }
 
-// Generar UUIDv7
-$uuid = ramseny::uuid7();
-$uuidBytes = $uuid->getBytes();   // para BINARY(16)
-$uuidString = $uuid->toString();  // para devolver al frontend
+// Convertir UUID string a BINARY(16)
+$uuid = ramseny::fromString($id);
+$uuidBytes = $uuid->getBytes();
 
-$sql = "INSERT INTO " . Tables::DB_PROVINCIES . " (
-              id, provincia
-          ) VALUES (
-              :id,
-              :provincia
-          )";
+$sql = "UPDATE " . Tables::DB_PROVINCIES . "
+        SET provincia = :provincia
+        WHERE id = :id";
 
 try {
     $stmt = $pdo->prepare($sql);
 
-    // ID UUIDv7 binario
+    // ID UUID binario
     $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
-    $stmt->bindValue(':provincia', $provincia, PDO::PARAM_STR);
+    $stmt->bindValue(':provincia', trim($provincia), PDO::PARAM_STR);
 
     if ($stmt->execute()) {
 
         Response::success(
-            MissatgesAPI::success('create'),
+            MissatgesAPI::success('update'),
             [
-                'id'      => $uuidString,
-                'provincia' => $provincia,
+                'id'        => $id,
+                'provincia' => trim($provincia),
             ],
-            httpCode: 201
+            httpCode: 200
         );
         exit;
     }

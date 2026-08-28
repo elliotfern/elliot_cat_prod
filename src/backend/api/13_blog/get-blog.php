@@ -345,7 +345,7 @@ if ($slug === 'llistatArticles') {
     $sqlLangs = sprintf(
         "SELECT DISTINCT
             l.id AS id,
-            l.idioma_ca AS label
+            l.idioma AS label
          FROM %s AS b
          INNER JOIN %s AS l ON b.lang = l.id
          WHERE b.lang IN ($inLang)
@@ -783,7 +783,7 @@ if ($slug === 'llistatArticles') {
         /**
          * 2) LANGS (solo los allowed)
          * - Los sacamos de tu tabla de idiomas
-         * - Nota: aquí uso idioma_ca como label, como en tu endpoint existente
+         * - Nota: aquí uso idioma como label, como en tu endpoint existente
          */
         $langPlaceholders = [];
         foreach ($allowedLangIds as $i => $_) $langPlaceholders[] = ':lang' . $i;
@@ -792,7 +792,7 @@ if ($slug === 'llistatArticles') {
         $sqlLangs = sprintf(
             "SELECT
                 l.id AS id,
-                TRIM(l.idioma_ca) AS label
+                TRIM(l.idioma) AS label
              FROM %s AS l
              WHERE l.id IN ($inLang)
              ORDER BY label ASC",

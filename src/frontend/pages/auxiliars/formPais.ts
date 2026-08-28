@@ -29,7 +29,7 @@ export async function formPais(isUpdate: boolean, id?: string) {
     renderFormInputs(data);
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formPais', API_URLS.PUT.PAIS(id));
+      transmissioDadesDB(event, 'PUT', 'formPais', API_URLS.PUT.PAIS);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nou País</h2>`;

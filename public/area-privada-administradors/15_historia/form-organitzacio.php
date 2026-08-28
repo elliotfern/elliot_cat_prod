@@ -26,7 +26,7 @@ if ($modificaBtn === 1) {
         selectOmplirDades("/api/historia/get/?llistatSubEtapes", "", "orgSubEtapa", "nomSubEtapa");
         selectOmplirDades("/api/historia/get/?llistatImatgesOrganitzacions", "", "img", "nom");
         selectOmplirDades("/api/historia/get/?llistatIdeologies", "", "orgIdeologia", "ideologia");
-        selectOmplirDades("/api/biblioteca/get/?type=pais", "", "orgPais", "pais_cat");
+        selectOmplirDades("/api/biblioteca/get/?type=pais", "", "orgPais", "pais");
         selectOmplirDades("/api/historia/get/?llistatTipusOrganitzacio", "", "orgTipus", "nomTipus");
     </script>
 <?php
@@ -204,7 +204,7 @@ if ($modificaBtn === 1) {
                 selectOmplirDades("/api/historia/get/?llistatSubEtapes", data.orgSubEtapa, "orgSubEtapa", "nomSubEtapa");
                 selectOmplirDades("/api/historia/get/?llistatImatgesOrganitzacions", data.img, "img", "nom");
                 selectOmplirDades("/api/historia/get/?llistatIdeologies", data.orgIdeologia, "orgIdeologia", "ideologia");
-                selectOmplirDades("/api/biblioteca/get/?type=pais", data.orgPais, "orgPais", "pais_cat");
+                selectOmplirDades("/api/biblioteca/get/?type=pais", data.orgPais, "orgPais", "pais");
                 selectOmplirDades("/api/historia/get/?llistatTipusOrganitzacio", data.orgTipus, "orgTipus", "nomTipus");
 
             })

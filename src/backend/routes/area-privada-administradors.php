@@ -258,7 +258,7 @@ $routes = [
     APP_GESTIO . $url['radio'] . '/france-inter' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'france-inter.php'),
     APP_GESTIO . $url['radio'] . '/france-musique' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'france-musique.php'),
     APP_GESTIO . $url['radio'] . '/radio-municipal-terrassa' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'radiomunicipalterrassa.php'),
-
+    APP_GESTIO . $url['radio'] . '/radio3-rne' => route(APP_INTRANET_DIR . APP_RADIO_DIR . 'radio3-rne.php'),
 
     // CURRICULUM
     APP_GESTIO . $url['curriculum'] => route(APP_INTRANET_DIR . APP_CV_DIR . 'index.php'),

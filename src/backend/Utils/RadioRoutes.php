@@ -64,6 +64,11 @@ class RadioRoutes
         return $this->base() . '/radio-municipal-terrassa';
     }
 
+    public function radio3(): string
+    {
+        return $this->base() . '/radio3-rne';
+    }
+
 
     // -------------------------
     // PAGINES

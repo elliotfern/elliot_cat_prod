@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 if ($slug === "pelicules") {
 
     $sql = <<<SQL
-                SELECT c.id, c.pelicula, c.pelicula_ca, c.any, d.nom, d.cognoms, p.pais_ca, g.genere, i.idioma_ca, c.slug, d.slug AS director_slug
+                SELECT c.id, c.pelicula, c.pelicula_ca, c.any, d.nom, d.cognoms, p.pais, g.genere, i.idioma, c.slug, d.slug AS director_slug
                 FROM %s AS c
                 LEFT JOIN %s AS d ON c.director_id = d.id
                 LEFT JOIN %s AS p ON c.pais_id = p.id
@@ -88,7 +88,7 @@ if ($slug === "pelicules") {
 } else if ($slug === "series") {
 
     $sql = <<<SQL
-                SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma_ca, g.genere, c.pais_ca, tv.slug, d.slug AS slugDirector
+                SELECT tv.id, tv.name, tv.startYear, tv.endYear,tv.season, tv.chapter, d.nom, d.cognoms, id.idioma, g.genere, c.pais, tv.slug, d.slug AS slugDirector
                 FROM %s AS tv
                 LEFT JOIN %s AS d ON tv.director_id = d.id
                 LEFT JOIN %s AS c ON tv.pais_id = c.id
@@ -140,7 +140,7 @@ if ($slug === "pelicules") {
 
     $sql = <<<SQL
                 SELECT tv.id, tv.name, tv.slug, tv.startYear, tv.endYear, tv.season, tv.chapter, tv.director_id, tv.idioma_id, tv.genere_id, tv.pais_id, tv.img_id, tv.descripcio, tv.dateCreated, tv.dateModified,
-                d.nom, d.cognoms, id.idioma_ca, c.pais_ca, img.nameImg, g.genere, d.id AS idDirector, d.slug AS slugDirector
+                d.nom, d.cognoms, id.idioma, c.pais, img.nameImg, g.genere, d.id AS idDirector, d.slug AS slugDirector
                 FROM %s AS tv
                 LEFT JOIN %s AS d ON tv.director_id = d.id
                 LEFT JOIN %s AS c ON tv.pais_id = c.id
@@ -409,7 +409,7 @@ if ($slug === "pelicules") {
     $peli = $_GET['peliSlug'];
 
     $sql = <<<SQL
-                SELECT p.id, p.pelicula, p.slug, p.pelicula_ca, p.any, p.descripcio, p.dateCreated, p.dateModified, p.director_id, p.genere_id, p.pais_id, p.idioma_id, p.imatge_id, d.nom, d.cognoms, id.idioma_ca, c.pais_ca, img.nameImg, g.genere, d.slug AS slugDirector
+                SELECT p.id, p.pelicula, p.slug, p.pelicula_ca, p.any, p.descripcio, p.dateCreated, p.dateModified, p.director_id, p.genere_id, p.pais_id, p.idioma_id, p.imatge_id, d.nom, d.cognoms, id.idioma, c.pais, img.nameImg, g.genere, d.slug AS slugDirector
                 FROM %s AS p
                 LEFT JOIN %s AS d ON p.director_id = d.id
                 LEFT JOIN %s AS c ON p.pais_id = c.id
@@ -561,7 +561,7 @@ if ($slug === "pelicules") {
 } else if ($slug === "actors") {
 
     $sql = <<<SQL
-                SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais_ca, i.nameImg, a.any_naixement, a.any_defuncio, a.slug
+                SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais, i.nameImg, a.any_naixement, a.any_defuncio, a.slug
                 FROM %s AS a
                 INNER JOIN %s g ON a.id = g.persona_id
                 LEFT JOIN %s AS c ON a.pais_autor_id = c.id
@@ -611,7 +611,7 @@ if ($slug === "pelicules") {
 } else if ($slug === "directors") {
 
     $sql = <<<SQL
-                SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais_ca, i.nameImg, a.any_naixement, a.any_defuncio, a.slug
+                SELECT a.id, a.cognoms, a.nom, CONCAT(a.cognoms, ', ', a.nom) AS nomComplet, c.pais, i.nameImg, a.any_naixement, a.any_defuncio, a.slug
                 FROM %s AS a
                 INNER JOIN %s g ON a.id = g.persona_id
                 LEFT JOIN %s AS c ON a.pais_autor_id = c.id
@@ -661,7 +661,7 @@ if ($slug === "pelicules") {
     // ruta GET => "/api/cinema/get/?director=?arron-sorkin"
 } else if ($slug === "director") {
 
-    $query = "SELECT a.id, a.cognoms, a.nom, i.nameImg, c.pais_cat, a.slug, a.anyNaixement, a.anyDefuncio, a.dateCreated, a.dateModified, pro.professio_ca, a.web, a.descripcio
+    $query = "SELECT a.id, a.cognoms, a.nom, i.nameImg, c.pais, a.slug, a.anyNaixement, a.anyDefuncio, a.dateCreated, a.dateModified, pro.professio_ca, a.web, a.descripcio
             FROM db_persones AS a
             LEFT JOIN db_img AS i ON a.img = i.id
             LEFT JOIN db_countries AS c ON a.paisAutor = c.id
@@ -675,7 +675,7 @@ if ($slug === "pelicules") {
     // ruta GET => "/api/cinema/get/?directorPelicules=?arron-sorkin"
 } else if ($slug === "directorPelicules") {
 
-    $query = "SELECT p.id, p.pelicula AS name, p.slug, p.any AS anyInici, i.nameImg, c.pais_cat, g.genere_ca
+    $query = "SELECT p.id, p.pelicula AS name, p.slug, p.any AS anyInici, i.nameImg, c.pais, g.genere_ca
             FROM 11_db_pelicules AS p
             LEFT JOIN db_img AS i ON p.img = i.id
             LEFT JOIN db_countries AS c ON p.pais = c.id
@@ -689,7 +689,7 @@ if ($slug === "pelicules") {
     // ruta GET => "/api/cinema/get/?directorSeries=?arron-sorkin"
 } else if ($slug === "directorSeries") {
 
-    $query = "SELECT s.id, s.name AS name, s.slug, s.startYear AS anyInici, s.endYear, i.nameImg, c.pais_cat, g.genere_ca
+    $query = "SELECT s.id, s.name AS name, s.slug, s.startYear AS anyInici, s.endYear, i.nameImg, c.pais, g.genere_ca
             FROM 11_db_cinema_series_tv AS s
             LEFT JOIN db_img AS i ON s.img = i.id
             LEFT JOIN db_countries AS c ON s.country = c.id

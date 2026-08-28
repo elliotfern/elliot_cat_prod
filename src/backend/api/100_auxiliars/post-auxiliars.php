@@ -16,7 +16,7 @@ $pdo = $db->getPdo();
 header('Content-Type: application/json; charset=utf-8');
 
 // CORS
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
@@ -68,7 +68,7 @@ if ($slug === 'idioma') {
     // Validación
     $errors = [];
 
-    $idioma_ca        = requireField($data, 'idioma_ca', $errors);
+    $idioma        = requireField($data, 'idioma', $errors);
 
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
@@ -82,24 +82,24 @@ if ($slug === 'idioma') {
 
     $sql = "INSERT INTO " . Tables::DB_IDIOMES . " (
                 id,
-                idioma_ca
+                idioma
             ) VALUES (
                 :id,
-                :idioma_ca
+                :idioma
             )";
 
     try {
         $stmt = $pdo->prepare($sql);
 
         $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
-        $stmt->bindValue(':idioma_ca', $idioma_ca, PDO::PARAM_STR);
+        $stmt->bindValue(':idioma', $idioma, PDO::PARAM_STR);
 
         if ($stmt->execute()) {
             Response::success(
                 MissatgesAPI::success('create'),
                 [
                     'id' => $uuidString,
-                    'idioma_ca' => $idioma_ca
+                    'idioma' => $idioma
                 ],
                 httpCode: 201
             );
@@ -126,7 +126,7 @@ if ($slug === 'idioma') {
         exit;
     }
     // ==============================
-    // POST IDIOMA
+    // POST EDITORIAL
     // ==============================
 } else if ($slug === 'editorial') {
 

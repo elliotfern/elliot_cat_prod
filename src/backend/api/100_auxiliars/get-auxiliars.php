@@ -215,9 +215,9 @@ if ($slug === 'directors') {
 } else if ($slug === "llengues") {
 
     $db = new Database();
-    $query = "SELECT i.id, i.idioma_ca
+    $query = "SELECT i.id, i.idioma
             FROM aux_idiomes AS i
-            ORDER BY i.idioma_ca ASC";
+            ORDER BY i.idioma ASC";
 
     try {
 
@@ -463,9 +463,9 @@ if ($slug === 'directors') {
 } else if ($slug === "provincies") {
 
     $sql = <<<SQL
-            SELECT p.id, p.provincia_ca
+            SELECT p.id, p.provincia
             FROM %s AS p
-            ORDER BY p.provincia_ca ASC
+            ORDER BY p.provincia ASC
             SQL;
 
     $query = sprintf(
@@ -691,7 +691,7 @@ if ($slug === 'directors') {
 
     $sql = <<<SQL
         SELECT
-          c.id, c.pais_ca, c.pais_en
+          c.id, c.pais
         FROM %s AS c
         WHERE c.id = :id
         LIMIT 1

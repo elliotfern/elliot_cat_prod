@@ -25,7 +25,7 @@ $slug = $routeParams[0];
             <p><strong>Etapa històrica: </strong> <span id="etapaNom"></span></p>
             <p><strong>Sub-etapa: </strong> <span id="nomSubEtapa"></span></p>
             <p><strong>Ciutat: </strong> <span id="ciutat"></span></p>
-            <p><strong>País: </strong> <span id="pais_ca"></span></p>
+            <p><strong>País: </strong> <span id="pais"></span></p>
         </div>
     </div>
 </div>
@@ -93,7 +93,7 @@ $slug = $routeParams[0];
                     document.getElementById('nomSubEtapa').textContent = data.nomSubEtapa;
                     document.getElementById('ciutat').textContent = data.ciutat;
                     document.getElementById('etapaNom').textContent = data.etapaNom;
-                    document.getElementById('pais_cat').textContent = data.pais_ca;
+                    document.getElementById('pais').textContent = data.pais;
                     document.getElementById('alt').textContent = data.alt;
 
                     const dataInici = formatData(data.esdeDataIDia, data.esdeDataIMes, data.esdeDataIAny);

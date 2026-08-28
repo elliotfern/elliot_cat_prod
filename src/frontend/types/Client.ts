@@ -18,9 +18,9 @@ export interface Client {
   updated_at: string | null;
   num: number;
   estat: string;
-  provincia_ca: string | null;
-  ciutat_ca: string | null;
-  pais_ca: string | null;
+  provincia: string | null;
+  ciutat: string | null;
+  pais: string | null;
   contacte_id: string;
 }
 

@@ -134,7 +134,7 @@ foreach ($experiencies as $exp) {
 
     $periode = htmlspecialchars($dataIni . ' - ' . $dataFi);
 
-    $loc = htmlspecialchars(implode(', ', array_filter([$exp['ciutat'] ?? '', $exp['pais_ca'] ?? ''])));
+    $loc = htmlspecialchars(implode(', ', array_filter([$exp['ciutat'] ?? '', $exp['pais'] ?? ''])));
     if ($loc) $periode .= ' · ' . $loc;
 
     $logoHtml = '';

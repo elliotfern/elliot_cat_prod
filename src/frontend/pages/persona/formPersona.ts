@@ -8,7 +8,7 @@ import { API_BASE } from '../../utils/urls';
 
 type Pais = {
   id: string;
-  pais_ca: string;
+  pais: string;
 };
 
 type Ciutat = {
@@ -18,7 +18,7 @@ type Ciutat = {
 
 let paisosList: Pais[] = [];
 
-async function createCiutat(payload: { ciutat: string; ciutat_ca: string; ciutat_en: string; descripcio: string; pais_id: string }): Promise<Ciutat | null> {
+async function createCiutat(payload: { ciutat: string; descripcio: string; pais_id: string }): Promise<Ciutat | null> {
   try {
     const response = await fetch(`${API_BASE}/ciutats/post`, {
       method: 'POST',
@@ -71,36 +71,12 @@ function initCreateCiutatUI() {
   formWrapper.innerHTML = `
     <div class="mb-3">
       <label for="newCiutatNom" class="form-label">
-        Nom original
+        Nom ciutat
       </label>
 
       <input
         type="text"
         id="newCiutatNom"
-        class="form-control"
-      >
-    </div>
-
-    <div class="mb-3">
-      <label for="newCiutatCa" class="form-label">
-        Nom (català)
-      </label>
-
-      <input
-        type="text"
-        id="newCiutatCa"
-        class="form-control"
-      >
-    </div>
-
-    <div class="mb-3">
-      <label for="newCiutatEn" class="form-label">
-        Nom (anglès)
-      </label>
-
-      <input
-        type="text"
-        id="newCiutatEn"
         class="form-control"
       >
     </div>
@@ -151,8 +127,6 @@ function initCreateCiutatUI() {
   });
 
   const nomInput = formWrapper.querySelector('#newCiutatNom') as HTMLInputElement;
-  const caInput = formWrapper.querySelector('#newCiutatCa') as HTMLInputElement;
-  const enInput = formWrapper.querySelector('#newCiutatEn') as HTMLInputElement;
   const paisSelect = formWrapper.querySelector('#newCiutatPaisId') as HTMLSelectElement;
   const descripcioInput = formWrapper.querySelector('#newCiutatDescripcio') as HTMLTextAreaElement;
   const createBtn = formWrapper.querySelector('#createCiutatBtn') as HTMLButtonElement;
@@ -163,7 +137,7 @@ function initCreateCiutatUI() {
     const option = document.createElement('option');
 
     option.value = String(pais.id);
-    option.textContent = pais.pais_ca;
+    option.textContent = pais.pais;
 
     paisSelect.appendChild(option);
   }
@@ -199,8 +173,6 @@ function initCreateCiutatUI() {
 
     const ciutat = await createCiutat({
       ciutat: nom,
-      ciutat_ca: caInput.value.trim(),
-      ciutat_en: enInput.value.trim(),
       descripcio: descripcioInput.value.trim(),
       pais_id: paisId,
     });
@@ -232,8 +204,6 @@ function initCreateCiutatUI() {
     `;
 
     nomInput.value = '';
-    caInput.value = '';
-    enInput.value = '';
     descripcioInput.value = '';
     paisSelect.value = '';
 
@@ -254,7 +224,7 @@ async function loadPaisos() {
   }
 }
 
-async function createPais(paisCa: string, paisEn: string): Promise<Pais | null> {
+async function createPais(nomPais: string): Promise<Pais | null> {
   try {
     const response = await fetch(`${API_BASE}/paisos/post`, {
       method: 'POST',
@@ -263,8 +233,7 @@ async function createPais(paisCa: string, paisEn: string): Promise<Pais | null> 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        pais_ca: paisCa.trim(),
-        pais_en: paisEn.trim(),
+        pais: nomPais.trim(),
       }),
     });
 
@@ -279,7 +248,7 @@ async function createPais(paisCa: string, paisEn: string): Promise<Pais | null> 
 
     const pais: Pais = {
       id: result.data.id,
-      pais_ca: result.data.pais_ca,
+      pais: result.data.pais,
     };
 
     // Es manté a paisosList perquè el mini-formulari de "crear ciutat" té el seu propi
@@ -315,25 +284,13 @@ function initCreatePaisUI() {
 
   formWrapper.innerHTML = `
     <div class="mb-3">
-      <label for="newPaisCa" class="form-label">
-        Nom (català)
+      <label for="newPais" class="form-label">
+        Nom País:
       </label>
 
       <input
         type="text"
-        id="newPaisCa"
-        class="form-control"
-      >
-    </div>
-
-    <div class="mb-3">
-      <label for="newPaisEn" class="form-label">
-        Nom (anglès)
-      </label>
-
-      <input
-        type="text"
-        id="newPaisEn"
+        id="newPais"
         class="form-control"
       >
     </div>
@@ -358,8 +315,7 @@ function initCreatePaisUI() {
     }
   });
 
-  const caInput = formWrapper.querySelector('#newPaisCa') as HTMLInputElement;
-  const enInput = formWrapper.querySelector('#newPaisEn') as HTMLInputElement;
+  const paisInput = formWrapper.querySelector('#newPais') as HTMLInputElement;
   const createBtn = formWrapper.querySelector('#createPaisBtn') as HTMLButtonElement;
   const message = formWrapper.querySelector('#createPaisMessage') as HTMLDivElement;
 
@@ -368,19 +324,18 @@ function initCreatePaisUI() {
 
     if (isHidden) {
       formWrapper.classList.remove('d-none');
-      caInput.focus();
+      paisInput.focus();
     } else {
       formWrapper.classList.add('d-none');
     }
   });
 
   createBtn.addEventListener('click', async () => {
-    const paisCa = caInput.value.trim();
-    const paisEn = enInput.value.trim();
+    const pais = paisInput.value.trim();
 
     message.innerHTML = '';
 
-    if (!paisCa) {
+    if (!pais) {
       message.innerHTML = `
         <div class="alert alert-warning mb-0">
           Cal indicar el nom en català.
@@ -392,11 +347,11 @@ function initCreatePaisUI() {
 
     createBtn.disabled = true;
 
-    const pais = await createPais(paisCa, paisEn);
+    const nomPais = await createPais(pais);
 
     createBtn.disabled = false;
 
-    if (!pais) {
+    if (!nomPais) {
       message.innerHTML = `
         <div class="alert alert-danger mb-0">
           No s’ha pogut crear el país.
@@ -406,7 +361,7 @@ function initCreatePaisUI() {
       return;
     }
 
-    await auxiliarSelect(pais.id, 'paisos', 'pais_autor_id', 'pais_ca');
+    await auxiliarSelect(nomPais.id, 'paisos', 'pais_autor_id', 'pais');
 
     message.innerHTML = `
       <div class="alert alert-success mb-0">
@@ -414,8 +369,7 @@ function initCreatePaisUI() {
       </div>
     `;
 
-    caInput.value = '';
-    enInput.value = '';
+    paisInput.value = '';
 
     setTimeout(() => {
       formWrapper.classList.add('d-none');
@@ -485,7 +439,7 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
 
   await loadPaisos();
   initCreatePaisUI();
-  await auxiliarSelect(data.pais_autor_id ?? 0, 'paisos', 'pais_autor_id', 'pais_ca');
+  await auxiliarSelect(data.pais_autor_id ?? 0, 'paisos', 'pais_autor_id', 'pais');
 
   initCreateCiutatUI();
   await auxiliarSelect(data.ciutat_naixement_id ?? 0, 'ciutats', 'ciutat_naixement_id', 'ciutat');

@@ -22,6 +22,7 @@ use App\Utils\Button;
             <li><a href="<?= Routes::radio()->franceculture() ?>">France Culture</a></li>
             <li><a href="<?= Routes::radio()->franceinter() ?>">France Inter</a></li>
             <li><a href="<?= Routes::radio()->francemusique() ?>">France Musique</a></li>
+            <li><a href="<?= Routes::radio()->radio3() ?>">Radio 3 - RNE</a></li>
             <li><a href="<?= Routes::radio()->radiomunicipalterrassa() ?>">Ràdio Municipal de Terrassa</a></li>
         </ul>
     </div>

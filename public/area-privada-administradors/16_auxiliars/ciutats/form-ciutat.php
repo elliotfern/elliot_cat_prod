@@ -1,10 +1,10 @@
-<div class="barraNavegacioContenidor">
-</div>
+<div id="barraNavegacioContenidor"></div>
 
-<div class="container-fluid form">
+<div class="form py-4">
 
-    <h2>Base de dades: ciutats</h2>
-    <div id="titolForm"></div>
+    <h2 class="mb-4">Base de dades: ciutats</h2>
+
+    <div id="titolForm" class="mb-3"></div>
 
     <div class="alert alert-success d-none" id="okMessage" role="alert">
         <div id="okText"></div>
@@ -12,50 +12,54 @@
 
     <div class="alert alert-danger d-none" id="errMessage" role="alert">
         <div id="errText"></div>
-
     </div>
 
-    <form method="POST" action="" class="row g-3" id="formCiutat" data-success-redirect-template="/gestio/base-dades-persones/fitxa-persona/{slug}">
+    <form method="POST" action="" class="row g-3" id="formCiutat">
 
         <input type="hidden" name="id" id="id" value="">
 
         <div class="col-md-4">
-            <label for="ciutat" class="form-label">Nom (llengua original) *</label>
-            <input type="text" class="form-control" id="ciutat" name="ciutat" required maxlength="150" />
-            <div class="invalid-feedback">Obligatori.</div>
-        </div>
-
-        <div class="col-md-4">
-            <label for="ciutat_ca" class="form-label">Nom (català) *</label>
-            <input type="text" class="form-control" id="ciutat_ca" name="ciutat_ca" maxlength="150" />
-            <div class="invalid-feedback">Obligatori.</div>
-        </div>
-
-        <div class="col-md-4">
-            <label for="ciutat_en" class="form-label">Nom (anglès)</label>
-            <input type="text" class="form-control" id="ciutat_en" name="ciutat_en" maxlength="150" />
+            <label for="ciutat" class="form-label">Nom *</label>
+            <input
+                type="text"
+                class="form-control"
+                id="ciutat"
+                name="ciutat"
+                maxlength="150"
+                required>
+            <div class="invalid-feedback">
+                Obligatori.
+            </div>
         </div>
 
         <div class="col-md-4">
             <label for="pais_id" class="form-label">País *</label>
-            <select class="form-select" id="pais_id" name="pais_id" required></select>
+            <select
+                class="form-select"
+                id="pais_id"
+                name="pais_id"
+                required></select>
         </div>
 
-        <div class="col-complet">
-            <label for="descripcio" class="form-label">Notes</label>
-            <textarea id="descripcio" name="descripcio" class="form-control" rows="4" maxlength="2000"></textarea>
+        <div class="col-12">
+            <label for="descripcio" class="form-label">Descripció</label>
+            <textarea
+                id="descripcio"
+                name="descripcio"
+                class="form-control"
+                rows="4"
+                maxlength="2000"></textarea>
         </div>
 
-        <div class="container" style="margin-top:25px">
-            <div class="row">
-                <div class="col-6 text-left">
-
-                </div>
-                <div class="col-6 text-right derecha">
-                    <button type="submit" class="btn btn-primary" id="btnCiutat">Introduir dades</button>
-                </div>
-            </div>
+        <div class="col-12 d-flex justify-content-end mt-4">
+            <button
+                type="submit"
+                class="btn btn-primary"
+                id="btnCiutat">
+                Introduir dades
+            </button>
         </div>
+
     </form>
 
 </div>

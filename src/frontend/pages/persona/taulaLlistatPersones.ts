@@ -18,9 +18,9 @@ export async function taulaLlistatPersones() {
                ${row.nom}  ${row.cognoms}
             </a>`;
       },
-    }, 
+    },
 
-    { header: 'País', field: 'pais_ca' },
+    { header: 'País', field: 'pais' },
 
     {
       header: 'Grup',

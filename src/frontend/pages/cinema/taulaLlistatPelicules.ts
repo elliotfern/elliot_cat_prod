@@ -19,7 +19,7 @@ export async function taulaLlistatPelicules() {
         return `<a id="${row.id}" title="Fitxa director" href="/gestio/base-dades-persones/fitxa-persona/${row.director_slug}">${row.nom} ${row.cognoms}</a>`;
       },
     },
-    { header: 'País', field: 'pais_ca' },
+    { header: 'País', field: 'pais' },
     { header: 'Gènere', field: 'genere' },
   ];
 
@@ -36,6 +36,6 @@ export async function taulaLlistatPelicules() {
     containerId: 'taulaLlistatPelicules',
     columns,
     filterKeys: ['nom', 'cognoms', 'pelicula'],
-    filterByField: 'pais_ca',
+    filterByField: 'pais',
   });
 }

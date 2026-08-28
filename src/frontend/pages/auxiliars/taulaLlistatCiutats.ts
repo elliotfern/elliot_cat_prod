@@ -15,21 +15,9 @@ export async function taulaLlistatCiutats() {
     },
 
     {
-      header: 'Ciutat (català)',
-      field: 'ciutat_ca',
-      render: (_: unknown, row: Ciutat) => {
-        if (row.ciutat_ca == null || row.ciutat_ca.trim() === '') {
-          return '';
-        }
-
-        return `<a id="${row.id}" href="/gestio/auxiliars/fitxa-ciutat/${row.id}">${row.ciutat_ca}</a>`;
-      },
-    },
-
-    {
       header: 'País',
       field: 'pais',
-      render: (_: unknown, row: Ciutat) => `<a id="${row.pais.id}" href="/gestio/auxiliars/fitxa-pais/${row.pais.id}">${row.pais.pais_ca}</a>`,
+      render: (_: unknown, row: Ciutat) => `<a id="${row.pais.id}" href="/gestio/auxiliars/fitxa-pais/${row.pais.id}">${row.pais.pais}</a>`,
     },
 
     {
@@ -52,6 +40,6 @@ export async function taulaLlistatCiutats() {
     containerId: 'taulaLlistatCiutats',
     columns,
     filterKeys: ['ciutat'],
-    filterByField: 'pais.pais_ca',
+    filterByField: 'pais',
   });
 }

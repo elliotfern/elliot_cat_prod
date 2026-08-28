@@ -72,9 +72,9 @@ if ($slug === 'clients') {
                 e.num,
                 e.estat,
 
-                p.provincia_ca,
-                pa.pais_ca,
-                ci.ciutat_ca
+                p.provincia,
+                pa.pais,
+                ci.ciutat
 
             FROM %s AS cc
 
@@ -167,9 +167,9 @@ if ($slug === 'clients') {
             e.num,
             e.estat,
 
-            p.provincia_ca,
-            pa.pais_ca,
-            ci.ciutat_ca
+            p.provincia,
+            pa.pais,
+            ci.ciutat
 
         FROM %s AS cl
 
@@ -744,9 +744,9 @@ if ($slug === 'clients') {
                 co.adreca,
                 co.cp,
 
-                ciu.ciutat_ca,
-                pro.provincia_ca,
-                pa.pais_ca,
+                ciu.ciutat,
+                pro.provincia,
+                pa.pais,
 
                 -- EMISSOR
                 e.nom AS nomEmissor,
@@ -756,7 +756,7 @@ if ($slug === 'clients') {
                 e.telefon AS telefonEmissor,
                 e.email AS emailEmissor,
 
-                pai.pais_ca AS pais_caEmissor
+                pai.pais AS paisEmissor
 
             FROM %s AS ic
             LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
@@ -983,7 +983,7 @@ SQL;
             e.nif, 
             e.numero_iva, 
             e.pais_id, 
-            p.pais_ca,
+            p.pais,
             e.adreca, 
             e.telefon, 
             e.email, 
@@ -1089,7 +1089,7 @@ SQL;
     $emissor_id = $_GET['id'];
 
     $sql = <<<SQL
-        SELECT e.id, e.nom, e.nif, e.numero_iva, p.pais_ca, e.adreca, e.telefon, e.email, e.pais_id, e.dataInici, e.dataFi
+        SELECT e.id, e.nom, e.nif, e.numero_iva, p.pais, e.adreca, e.telefon, e.email, e.pais_id, e.dataInici, e.dataFi
         FROM %s AS e
         LEFT JOIN %s AS p ON e.pais_id = p.id
         WHERE e.id = :emissor_id
@@ -1253,9 +1253,9 @@ SQL;
             p.contacte_id,
             c.created_at,
             c.updated_at,
-            prov.provincia_ca,
-            pa.pais_ca,
-            ci.ciutat_ca
+            prov.provincia,
+            pa.pais,
+            ci.ciutat
         FROM %s AS p
         INNER JOIN %s AS c ON p.contacte_id = c.id
         LEFT JOIN %s AS prov ON c.provincia_id = prov.id

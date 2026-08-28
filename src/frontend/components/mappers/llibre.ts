@@ -76,7 +76,7 @@ export function mapLlibreToFitxa(api: Llibre) {
       },
       {
         label: 'Idioma',
-        value: api.idioma_ca ?? '',
+        value: api.idioma ?? '',
       },
       {
         label: 'Gènere',

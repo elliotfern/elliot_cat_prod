@@ -43,6 +43,6 @@ export async function formEducacioi18(isUpdate: boolean, id?: number) {
     });
   }
 
-  await auxiliarSelect(data.locale ?? 0, 'llengues', 'locale', 'idioma_ca');
+  await auxiliarSelect(data.locale ?? 0, 'llengues', 'locale', 'idioma');
   await auxiliarSelect(data.educacio_id ?? 0, 'educacions', 'educacio_id', 'institucio_periode');
 }

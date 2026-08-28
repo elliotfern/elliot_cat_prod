@@ -48,5 +48,5 @@ export async function formExperienciesI18n(isUpdate: boolean, id?: number) {
   }
 
   await auxiliarSelect(data.experiencia_id ?? 0, 'experiencies', 'experiencia_id', 'empresa');
-  await auxiliarSelect(data.locale ?? 0, 'llengues', 'locale', 'idioma_ca');
+  await auxiliarSelect(data.locale ?? 0, 'llengues', 'locale', 'idioma');
 }

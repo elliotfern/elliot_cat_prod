@@ -10,14 +10,14 @@ export interface PerfilCV {
   nom_complet: string;
   tel: string | null;
   web: string | null;
-  ciutat_ca: string | null; // ci.ciutat
+  ciutat: string | null;
   nameImg: string | null; // i.nameImg
   disponibilitat: number | null;
   visibilitat: Vis;
   created_at: string; // ISO
   updated_at: string; // ISO
   adreca: string;
-  pais_ca: string;
+  pais: string;
 }
 
 export type Vis = 0 | 1 | boolean;
@@ -54,7 +54,7 @@ export interface EducacioCv {
   // extra de la API
   nameImg?: string | null;
   ciutat?: string | null;
-  pais_ca?: string | null;
+  pais?: string | null;
   i18n: EducacioCvI18n[];
 }
 
@@ -86,7 +86,7 @@ export interface ExperienciaCv {
 
   nameImg?: string | null;
   ciutat?: string | null;
-  pais_ca?: string | null;
+  pais?: string | null;
 
   i18n: ExperienciaCvI18n[];
 }

@@ -12,7 +12,7 @@ export interface Contacte {
   tipus_id: string;
   pais_id: string;
   tipus: string;
-  pais_ca: string;
+  pais: string;
   empresa: string;
   tipus_persona: string;
   provincia_id: string;

@@ -139,9 +139,9 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
   $nomClient = $obj['nom']           ?? '';
   $cognoms   = $obj['cognoms']       ?? '';
   $adreca    = $obj['adreca']        ?? '';
-  $ciutat    = $obj['ciutat_ca']     ?? '';
-  $provincia = $obj['provincia_ca']  ?? '';
-  $pais      = $obj['pais_ca']       ?? '';
+  $ciutat    = $obj['ciutat']     ?? '';
+  $provincia = $obj['provincia']  ?? '';
+  $pais      = $obj['pais']       ?? '';
   $nif       = $obj['nif']           ?? '';
   $cp        = $obj['cp']            ?? '';
 
@@ -164,7 +164,7 @@ function buildInvoiceHtml(array $obj, array $arr2, array $T): string
   $emissorNom       = $obj['nomEmissor']     ?? '';
   $emissorNIF       = $obj['nifEmissor']     ?? '';
   $emissorNumeroIVA = $obj['numero_iva']     ?? '';
-  $emissorPais      = $obj['pais_caEmissor'] ?? '';
+  $emissorPais      = $obj['paisEmissor'] ?? '';
   $emissorAdreca    = $obj['adrecaEmissor']  ?? '';
   $emissorTelefon   = $obj['telefonEmissor'] ?? '';
   $emissorEmail     = $obj['emailEmissor']   ?? '';

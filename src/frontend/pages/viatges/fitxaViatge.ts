@@ -27,7 +27,7 @@ export async function fitxaViatge() {
     details: {
       Titol: result.viatge,
       Descripció: result.descripcio,
-      País: result.pais_ca,
+      País: result.pais,
       'Data inici': formatDataCatala(result.dataInici),
       'Data fi': formatDataCatala(result.dataFi),
       'Data de creació': result.dateCreated,

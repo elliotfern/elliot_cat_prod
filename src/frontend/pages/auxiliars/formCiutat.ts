@@ -43,5 +43,5 @@ export async function formCiutat(isUpdate: boolean, id?: string) {
     });
   }
 
-  await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais_ca');
+  await auxiliarSelect(data.pais_id ?? 0, 'paisos', 'pais_id', 'pais');
 }

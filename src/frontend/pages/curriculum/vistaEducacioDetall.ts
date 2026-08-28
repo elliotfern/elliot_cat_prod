@@ -71,7 +71,7 @@ function renderTabs(ed: EducacioCv): string {
 function renderEducacio(ed: EducacioCv): string {
   const logoUrl = ed.nameImg ? `${DOMAIN_IMG}/img/logos-empreses/${ed.nameImg}.png` : null;
 
-  const localitzacio = [ed.ciutat, ed.pais_ca].filter(Boolean).join(', ');
+  const localitzacio = [ed.ciutat, ed.pais].filter(Boolean).join(', ');
 
   const periode = ed.data_inici ? `${fmtDate(ed.data_inici)} - ${ed.data_fi ? fmtDate(ed.data_fi) : 'actualitat'}` : '';
 

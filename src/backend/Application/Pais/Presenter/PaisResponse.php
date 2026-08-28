@@ -10,8 +10,7 @@ class PaisResponse
     {
         return [
             'id' => $pais->getId(),
-            'pais_ca' => $pais->getPaisCa(),
-            'pais_en' => $pais->getPaisEn(),
+            'pais' => $pais->getPais(),
         ];
     }
 }

@@ -9,6 +9,7 @@ import { initFranceMusiquePlayer } from './franceMusique';
 import { initIcatFmPlayer } from './icatfm';
 import { initRadioMunicipalTerrassaPlayer } from './radioMunicipalTerrassa';
 import { initRaiRadio3Player } from './raiRadio3';
+import { initRadio3RNEPlayer } from './rneRadio3';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -34,6 +35,8 @@ export function radio() {
     initFranceMusiquePlayer();
   } else if (pageType[2] === 'radio-municipal-terrassa') {
     initRadioMunicipalTerrassaPlayer();
+  } else if (pageType[2] === 'radio3-rne') {
+    initRadio3RNEPlayer();
   } else if (pageType[1] === 'radio') {
     //
   }

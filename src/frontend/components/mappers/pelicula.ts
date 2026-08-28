@@ -8,8 +8,8 @@ interface PeliculaApi {
   any: string | number | null;
   descripcio: string | null;
   nameImg: string | null;
-  pais_ca: string | null;
-  idioma_ca: string | null;
+  pais: string | null;
+  idioma: string | null;
   genere: string | null;
   dateCreated?: string | undefined;
   dateModified?: string | undefined;
@@ -53,11 +53,11 @@ export function mapPeliculaToFitxa(api: PeliculaApi) {
       },
       {
         label: 'País',
-        value: api.pais_ca ?? '',
+        value: api.pais ?? '',
       },
       {
         label: 'Idioma original',
-        value: api.idioma_ca ?? '',
+        value: api.idioma ?? '',
       },
       {
         label: "Any d'estrena",

@@ -3,7 +3,7 @@ export interface Evento {
   slug: string;
   esdeNom: string;
   ciutat: string;
-  pais_cat: string;
+  pais: string;
   etapaNom: string;
   nomSubEtapa: string;
   esdeDataIDia: number;

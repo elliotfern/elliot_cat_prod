@@ -49,8 +49,6 @@ $reUUID = '~^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$~i';
 
 // INPUT FIELDS
 $ciutat      = $trimOrNull($data['ciutat'] ?? null);
-$ciutat_ca   = $trimOrNull($data['ciutat_ca'] ?? null);
-$ciutat_en   = $trimOrNull($data['ciutat_en'] ?? null);
 $descripcio  = $trimOrNull($data['descripcio'] ?? null);
 $pais_id     = $trimOrNull($data['pais_id'] ?? null);
 
@@ -59,10 +57,6 @@ $errors = [];
 
 if (!$ciutat) {
     $errors[] = 'Camp "ciutat" requerit.';
-}
-
-if (!$ciutat_ca) {
-    $errors[] = 'Camp "ciutat_ca" requerit.';
 }
 
 if ($pais_id !== null && !preg_match($reUUID, $pais_id)) {
@@ -89,9 +83,9 @@ try {
 
     // INSERT
     $sql = "INSERT INTO db_geo_ciutats
-        (id, ciutat, ciutat_ca, ciutat_en, descripcio, pais_id, created_at, updated_at)
+        (id, ciutat, descripcio, pais_id, created_at, updated_at)
         VALUES
-        (:id, :ciutat, :ciutat_ca, :ciutat_en, :descripcio, :pais_id, UTC_TIMESTAMP(), UTC_TIMESTAMP())";
+        (:id, :ciutat, :descripcio, :pais_id, UTC_TIMESTAMP(), UTC_TIMESTAMP())";
 
     $stmt = $pdo->prepare($sql);
 
@@ -100,9 +94,6 @@ try {
 
     // TEXTOS
     $stmt->bindValue(':ciutat', $ciutat, PDO::PARAM_STR);
-    $stmt->bindValue(':ciutat_ca', $ciutat_ca, PDO::PARAM_STR);
-
-    $stmt->bindValue(':ciutat_en', $ciutat_en, $ciutat_en === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
     $stmt->bindValue(':descripcio', $descripcio, $descripcio === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 
     // UUID pais (binario)
@@ -117,8 +108,6 @@ try {
         [
             'id' => $idText,
             'ciutat' => $ciutat,
-            'ciutat_ca'    => $ciutat_ca,
-            'ciutat_en' => $ciutat_en,
         ],
         httpCode: 201
     );

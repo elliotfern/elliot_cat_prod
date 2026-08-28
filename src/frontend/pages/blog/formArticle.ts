@@ -49,7 +49,7 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
       auxiliarSelect(current.categoria ?? '', 'temes', 'categoria', 'tema'),
 
       // Idiomes (int): taula d'idiomes amb id + nom
-      auxiliarSelect(current.lang ?? 1, 'llengues', 'lang', 'idioma_ca'),
+      auxiliarSelect(current.lang ?? 1, 'llengues', 'lang', 'idioma'),
 
       // Estat (varchar): si ho tens en taula, sinó també es pot omplir amb constants al TS (però tu has dit dinàmic)
       auxiliarSelect(current.post_status ?? 'publicat', 'estatsPublicacio', 'post_status', 'post_status'),

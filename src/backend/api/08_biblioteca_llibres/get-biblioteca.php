@@ -312,7 +312,7 @@ if ($slug === 'totsLlibres') {
                 a.slug,
                 a.any_naixement,
                 a.any_defuncio,
-                c.pais_ca,
+                c.pais,
                 i.nameImg,
                 GROUP_CONCAT(DISTINCT g.grup_ca ORDER BY g.grup_ca SEPARATOR ', ') AS grup
             FROM %s AS a
@@ -446,7 +446,7 @@ if ($slug === 'totsLlibres') {
                     i.alt,
                     t.nomTipus,
                     e.editorial,
-                    id.idioma_ca,
+                    id.idioma,
                     el.estat AS nomEstat,
                     sub_tema.sub_tema,
                     tema.tema,
@@ -514,7 +514,7 @@ if ($slug === 'totsLlibres') {
             'nameImg'     => $first['nameImg'],
             'nomTipus'    => $first['nomTipus'],
             'editorial'   => $first['editorial'],
-            'idioma_ca'   => $first['idioma_ca'],
+            'idioma'   => $first['idioma'],
 
             'sub_tema' => $first['sub_tema'],
             'tema'     => $first['tema'],
@@ -971,9 +971,9 @@ if ($slug === 'totsLlibres') {
 
     try {
         $sql = <<<SQL
-                SELECT l.id, l.idioma_ca 
+                SELECT l.id, l.idioma 
                 FROM %s AS l
-                ORDER BY l.idioma_ca ASC
+                ORDER BY l.idioma ASC
                 SQL;
 
         $query = sprintf(

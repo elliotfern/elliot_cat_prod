@@ -90,11 +90,11 @@ function renderClient(response: Client) {
             </p>
 
             <p class="mb-1">
-              ${v(client.cp)} · ${v(client.ciutat_ca)}
+              ${v(client.cp)} · ${v(client.ciutat)}
             </p>
 
             <p class="mb-1">
-              ${v(client.provincia_ca)} · ${v(client.pais_ca)}
+              ${v(client.provincia)} · ${v(client.pais)}
             </p>
           </div>
 

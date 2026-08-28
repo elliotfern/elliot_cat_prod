@@ -70,7 +70,7 @@ if ($slug === 'llistatTemes') {
 } else if ($slug === 'llistatLinks') {
 
     $sql = <<<SQL
-            SELECT l.id, l.nom, l.web, l.dateCreated, l.dateModified, st.tema, s.sub_tema, t.tipus, i.idioma_ca
+            SELECT l.id, l.nom, l.web, l.dateCreated, l.dateModified, st.tema, s.sub_tema, t.tipus, i.idioma
             FROM %s AS l
             LEFT JOIN %s AS s ON s.id = l.sub_tema_id
             LEFT JOIN %s AS st ON s.tema_id = st.id

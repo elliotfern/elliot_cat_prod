@@ -54,7 +54,7 @@ function renderCard(d: PerfilCV): string {
           <div class="col">
             <h2 class="h4 mb-1">${esc(d.nom_complet)}</h2>
             <div class="text-muted small">
-            <p><span><strong>Adreça:</strong> ${esc(d.adreca ?? '—')} (${esc(d.ciutat_ca ?? '—')} - ${esc(d.pais_ca ?? '—')} )</span></p>
+            <p><span><strong>Adreça:</strong> ${esc(d.adreca ?? '—')} (${esc(d.ciutat ?? '—')} - ${esc(d.pais ?? '—')} )</span></p>
             </div>
             <div class="mt-2">
               <p><a href="mailto:${esc(d.email)}" class="me-3">${esc(d.email)}</a></p>

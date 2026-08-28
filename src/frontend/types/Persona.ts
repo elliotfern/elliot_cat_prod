@@ -3,7 +3,7 @@ export interface Persona {
   nom: string;
   cognoms: string;
   autor_nom_complet: string;
-  pais_ca: string;
+  pais: string;
   dia_naixement: number;
   mes_naixement: number;
   any_naixement: number;

@@ -29,18 +29,23 @@ type SubTema = {
 
 type Pais = {
   id: string;
-  pais_ca: string;
+  pais: string;
 };
 
 type Idioma = {
   id: string;
-  idioma_ca: string;
+  idioma: string;
 };
 
 type Editorial = {
   id: string;
   editorial: string;
 };
+
+interface Tema {
+  id: string;
+  tema: string;
+}
 
 let autorsList: Autor[] = [];
 let grupsList: Grup[] = [];
@@ -51,90 +56,89 @@ let paisosList: Pais[] = [];
 let idiomesList: Idioma[] = [];
 let editorialsList: Editorial[] = [];
 
-interface Tema {
-  id: string;
-  tema: string;
-}
+/**
+ * ============================================================
+ * CÀRREGUES DE DADES AUXILIARS
+ * ============================================================
+ */
 
-async function loadTemes() {
+async function loadTemes(): Promise<void> {
   try {
     temesList = await api.get<Tema[]>(`auxiliars/get/temes`);
   } catch (error) {
-    console.error('loadAutors failed:', error);
-
+    console.error('loadTemes failed:', error);
     temesList = [];
   }
 }
 
-async function loadAutors() {
+async function loadAutors(): Promise<void> {
   try {
     autorsList = await api.get<Autor[]>(`biblioteca/get/totsAutors`);
   } catch (error) {
     console.error('loadAutors failed:', error);
-
     autorsList = [];
   }
 }
 
-async function loadGrups() {
+async function loadGrups(): Promise<void> {
   try {
     grupsList = await api.get<Grup[]>(`biblioteca/get/totsGrups`);
   } catch (error) {
     console.error('loadGrups failed:', error);
-
     grupsList = [];
   }
 }
 
-async function loadEtiquetes() {
+async function loadEtiquetes(): Promise<void> {
   try {
     etiquetesList = await api.get<Etiqueta[]>(`biblioteca/get/totsEtiquetes`);
   } catch (error) {
     console.error('loadEtiquetes failed:', error);
-
     etiquetesList = [];
   }
 }
 
-async function loadSubTemes() {
+async function loadSubTemes(): Promise<void> {
   try {
     subtemesList = await api.get<SubTema[]>(`auxiliars/get/subtemes`);
   } catch (error) {
-    console.error('loadTemes failed:', error);
-
+    console.error('loadSubTemes failed:', error);
     subtemesList = [];
   }
 }
 
-async function loadPaisos() {
+async function loadPaisos(): Promise<void> {
   try {
     paisosList = await api.get<Pais[]>(`auxiliars/get/paisos`);
   } catch (error) {
     console.error('loadPaisos failed:', error);
-
     paisosList = [];
   }
 }
 
-async function loadIdiomes() {
+async function loadIdiomes(): Promise<void> {
   try {
     idiomesList = await api.get<Idioma[]>(`auxiliars/get/llengues`);
   } catch (error) {
     console.error('loadIdiomes failed:', error);
-
     idiomesList = [];
   }
 }
 
-async function loadEditorials() {
+async function loadEditorials(): Promise<void> {
   try {
     editorialsList = await api.get<Editorial[]>(`auxiliars/get/editorials`);
   } catch (error) {
     console.error('loadEditorials failed:', error);
-
     editorialsList = [];
   }
 }
+
+/**
+ * ============================================================
+ * CREAR GRUP
+ * ============================================================
+ */
 
 async function createGrup(nom: string, slug: string): Promise<Grup | null> {
   try {
@@ -169,10 +173,15 @@ async function createGrup(nom: string, slug: string): Promise<Grup | null> {
     return grup;
   } catch (error) {
     console.error('createGrup failed:', error);
-
     return null;
   }
 }
+
+/**
+ * ============================================================
+ * CREAR ETIQUETA
+ * ============================================================
+ */
 
 async function createEtiqueta(nom: string, slug: string): Promise<Etiqueta | null> {
   try {
@@ -207,10 +216,15 @@ async function createEtiqueta(nom: string, slug: string): Promise<Etiqueta | nul
     return etiqueta;
   } catch (error) {
     console.error('createEtiqueta failed:', error);
-
     return null;
   }
 }
+
+/**
+ * ============================================================
+ * CREAR SUB-TEMA
+ * ============================================================
+ */
 
 async function createTema(nom: string, temaId: string): Promise<SubTema | null> {
   try {
@@ -244,10 +258,15 @@ async function createTema(nom: string, temaId: string): Promise<SubTema | null> 
     return subTema;
   } catch (error) {
     console.error('createTema failed:', error);
-
     return null;
   }
 }
+
+/**
+ * ============================================================
+ * CREAR IDIOMA
+ * ============================================================
+ */
 
 async function createIdioma(idiomaCa: string): Promise<Idioma | null> {
   try {
@@ -258,7 +277,7 @@ async function createIdioma(idiomaCa: string): Promise<Idioma | null> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        idioma_ca: idiomaCa.trim(),
+        idioma: idiomaCa.trim(),
       }),
     });
 
@@ -273,7 +292,7 @@ async function createIdioma(idiomaCa: string): Promise<Idioma | null> {
 
     const idioma: Idioma = {
       id: result.data.id,
-      idioma_ca: result.data.idioma_ca,
+      idioma: result.data.idioma,
     };
 
     idiomesList.push(idioma);
@@ -281,10 +300,15 @@ async function createIdioma(idiomaCa: string): Promise<Idioma | null> {
     return idioma;
   } catch (error) {
     console.error('createIdioma failed:', error);
-
     return null;
   }
 }
+
+/**
+ * ============================================================
+ * CREAR EDITORIAL
+ * ============================================================
+ */
 
 async function createEditorial(payload: { editorial: string; pais_id: string; web: string }): Promise<Editorial | null> {
   try {
@@ -316,12 +340,17 @@ async function createEditorial(payload: { editorial: string; pais_id: string; we
     return editorial;
   } catch (error) {
     console.error('createEditorial failed:', error);
-
     return null;
   }
 }
 
-function createTemaSelect(selectedValue: string | null = null) {
+/**
+ * ============================================================
+ * SELECT SUB-TEMA
+ * ============================================================
+ */
+
+function createTemaSelect(selectedValue: string | null = null): void {
   const container = document.getElementById('temaContainer');
 
   if (!container) return;
@@ -345,6 +374,7 @@ function createTemaSelect(selectedValue: string | null = null) {
     const option = document.createElement('option');
 
     option.value = String(subTema.id);
+
     option.textContent = subTema.tema ? `${subTema.sub_tema} (${subTema.tema})` : subTema.sub_tema;
 
     if (selectedValue && String(selectedValue) === String(subTema.id)) {
@@ -357,7 +387,13 @@ function createTemaSelect(selectedValue: string | null = null) {
   container.appendChild(select);
 }
 
-function initCreateTemaUI() {
+/**
+ * ============================================================
+ * CREAR SUB-TEMA UI
+ * ============================================================
+ */
+
+function initCreateTemaUI(): void {
   const container = document.getElementById('temaContainer');
 
   if (!container) return;
@@ -419,7 +455,6 @@ function initCreateTemaUI() {
 
   container.appendChild(formWrapper);
 
-  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
   formWrapper.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -492,7 +527,9 @@ function initCreateTemaUI() {
       const option = document.createElement('option');
 
       option.value = subTema.id;
+
       option.textContent = subTema.tema ? `${subTema.sub_tema} (${subTema.tema})` : subTema.sub_tema;
+
       option.selected = true;
 
       select.appendChild(option);
@@ -514,15 +551,17 @@ function initCreateTemaUI() {
   });
 }
 
-function initTestCreateGrupUI() {
+/**
+ * ============================================================
+ * CREAR GRUP UI
+ * ============================================================
+ */
+
+function initTestCreateGrupUI(): void {
   const btnAddGrup = document.getElementById('addGrupBtn');
   const container = document.getElementById('grupsContainer');
 
   if (!btnAddGrup || !container) return;
-
-  const buttonsWrapper = document.createElement('div');
-
-  buttonsWrapper.className = 'd-flex gap-2 mb-3';
 
   const newGrupBtn = document.createElement('button');
 
@@ -574,7 +613,6 @@ function initTestCreateGrupUI() {
 
   btnAddGrup.parentElement?.insertAdjacentElement('afterend', formWrapper);
 
-  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
   formWrapper.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -620,10 +658,6 @@ function initTestCreateGrupUI() {
 
     const grup = await createGrup(nom, slug);
 
-    if (grup) {
-      createGrupSelect(grup.id);
-    }
-
     createBtn.disabled = false;
 
     if (!grup) {
@@ -635,6 +669,8 @@ function initTestCreateGrupUI() {
 
       return;
     }
+
+    createGrupSelect(grup.id);
 
     message.innerHTML = `
       <div class="alert alert-success mb-0">
@@ -652,15 +688,17 @@ function initTestCreateGrupUI() {
   });
 }
 
-function initTestCreateEtiquetaUI() {
+/**
+ * ============================================================
+ * CREAR ETIQUETA UI
+ * ============================================================
+ */
+
+function initTestCreateEtiquetaUI(): void {
   const btnAddEtiqueta = document.getElementById('addEtiquetaBtn');
   const container = document.getElementById('etiquetesContainer');
 
   if (!btnAddEtiqueta || !container) return;
-
-  const buttonsWrapper = document.createElement('div');
-
-  buttonsWrapper.className = 'd-flex gap-2 mb-3';
 
   const newEtiquetaBtn = document.createElement('button');
 
@@ -712,7 +750,6 @@ function initTestCreateEtiquetaUI() {
 
   btnAddEtiqueta.parentElement?.insertAdjacentElement('afterend', formWrapper);
 
-  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
   formWrapper.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -758,10 +795,6 @@ function initTestCreateEtiquetaUI() {
 
     const etiqueta = await createEtiqueta(nom, slug);
 
-    if (etiqueta) {
-      createEtiquetaSelect(etiqueta.id);
-    }
-
     createBtn.disabled = false;
 
     if (!etiqueta) {
@@ -773,6 +806,8 @@ function initTestCreateEtiquetaUI() {
 
       return;
     }
+
+    createEtiquetaSelect(etiqueta.id);
 
     message.innerHTML = `
       <div class="alert alert-success mb-0">
@@ -790,7 +825,13 @@ function initTestCreateEtiquetaUI() {
   });
 }
 
-function populateIdiomaSelect(selectedValue: string | null) {
+/**
+ * ============================================================
+ * SELECT IDIOMA
+ * ============================================================
+ */
+
+function populateIdiomaSelect(selectedValue: string | null): void {
   const select = document.getElementById('idioma_id') as HTMLSelectElement | null;
 
   if (!select) return;
@@ -798,15 +839,17 @@ function populateIdiomaSelect(selectedValue: string | null) {
   select.innerHTML = '';
 
   const empty = document.createElement('option');
+
   empty.value = '';
   empty.textContent = '-- Selecciona idioma --';
+
   select.appendChild(empty);
 
   for (const idioma of idiomesList) {
     const option = document.createElement('option');
 
     option.value = String(idioma.id);
-    option.textContent = idioma.idioma_ca;
+    option.textContent = idioma.idioma;
 
     if (selectedValue && String(selectedValue) === String(idioma.id)) {
       option.selected = true;
@@ -816,12 +859,22 @@ function populateIdiomaSelect(selectedValue: string | null) {
   }
 }
 
-function initCreateIdiomaUI() {
+/**
+ * ============================================================
+ * CREAR IDIOMA UI
+ * ============================================================
+ */
+
+function initCreateIdiomaUI(): void {
   const container = document.getElementById('inputIdioma');
 
   if (!container) return;
 
-  container.innerHTML = '';
+  /*
+   * IMPORTANTE:
+   * No hacemos container.innerHTML = '' porque aquí ya existe
+   * el select principal #idioma_id.
+   */
 
   const newIdiomaBtn = document.createElement('button');
 
@@ -837,13 +890,13 @@ function initCreateIdiomaUI() {
 
   formWrapper.innerHTML = `
     <div class="mb-3">
-      <label for="newIdiomaCa" class="form-label">
+      <label for="newIdioma" class="form-label">
         Nom (català)
       </label>
 
       <input
         type="text"
-        id="newIdiomaCa"
+        id="newIdioma"
         class="form-control"
       >
     </div>
@@ -861,15 +914,16 @@ function initCreateIdiomaUI() {
 
   container.appendChild(formWrapper);
 
-  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
   formWrapper.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
     }
   });
 
-  const caInput = formWrapper.querySelector('#newIdiomaCa') as HTMLInputElement;
+  const caInput = formWrapper.querySelector('#newIdioma') as HTMLInputElement;
+
   const createBtn = formWrapper.querySelector('#createIdiomaBtn') as HTMLButtonElement;
+
   const message = formWrapper.querySelector('#createIdiomaMessage') as HTMLDivElement;
 
   newIdiomaBtn.addEventListener('click', () => {
@@ -914,6 +968,7 @@ function initCreateIdiomaUI() {
       return;
     }
 
+    // Actualitzar el select principal i seleccionar el nou idioma
     populateIdiomaSelect(idioma.id);
 
     message.innerHTML = `
@@ -931,7 +986,13 @@ function initCreateIdiomaUI() {
   });
 }
 
-function populateEditorialSelect(selectedValue: string | null) {
+/**
+ * ============================================================
+ * SELECT EDITORIAL
+ * ============================================================
+ */
+
+function populateEditorialSelect(selectedValue: string | null): void {
   const select = document.getElementById('editorial_id') as HTMLSelectElement | null;
 
   if (!select) return;
@@ -939,8 +1000,10 @@ function populateEditorialSelect(selectedValue: string | null) {
   select.innerHTML = '';
 
   const empty = document.createElement('option');
+
   empty.value = '';
   empty.textContent = '-- Selecciona editorial --';
+
   select.appendChild(empty);
 
   for (const editorial of editorialsList) {
@@ -957,12 +1020,22 @@ function populateEditorialSelect(selectedValue: string | null) {
   }
 }
 
-function initCreateEditorialUI() {
+/**
+ * ============================================================
+ * CREAR EDITORIAL UI
+ * ============================================================
+ */
+
+function initCreateEditorialUI(): void {
   const container = document.getElementById('inputEditorial');
 
   if (!container) return;
 
-  container.innerHTML = '';
+  /*
+   * IMPORTANTE:
+   * No hacemos container.innerHTML = '' porque aquí ya existe
+   * el select principal #editorial_id.
+   */
 
   const newEditorialBtn = document.createElement('button');
 
@@ -1027,7 +1100,6 @@ function initCreateEditorialUI() {
 
   container.appendChild(formWrapper);
 
-  // Evitar que Enter dins d'aquest mini-formulari faci submit del formulari gran
   formWrapper.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -1035,17 +1107,21 @@ function initCreateEditorialUI() {
   });
 
   const nomInput = formWrapper.querySelector('#newEditorialNom') as HTMLInputElement;
+
   const paisSelect = formWrapper.querySelector('#newEditorialPaisId') as HTMLSelectElement;
+
   const webInput = formWrapper.querySelector('#newEditorialWeb') as HTMLInputElement;
+
   const createBtn = formWrapper.querySelector('#createEditorialBtn') as HTMLButtonElement;
+
   const message = formWrapper.querySelector('#createEditorialMessage') as HTMLDivElement;
 
-  // Reutilitza la llista de paisos ja carregada
+  // Carregar països al select del mini-formulari
   for (const pais of paisosList) {
     const option = document.createElement('option');
 
     option.value = String(pais.id);
-    option.textContent = pais.pais_ca;
+    option.textContent = pais.pais;
 
     paisSelect.appendChild(option);
   }
@@ -1097,6 +1173,7 @@ function initCreateEditorialUI() {
       return;
     }
 
+    // Actualitzar el select principal i seleccionar la nova editorial
     populateEditorialSelect(editorial.id);
 
     message.innerHTML = `
@@ -1116,7 +1193,13 @@ function initCreateEditorialUI() {
   });
 }
 
-function createAuthorSelect(selectedValue: string | null = null) {
+/**
+ * ============================================================
+ * SELECT AUTORS
+ * ============================================================
+ */
+
+function createAuthorSelect(selectedValue: string | null = null): void {
   const wrapper = document.createElement('div');
 
   wrapper.className = 'd-flex gap-2 mb-2';
@@ -1162,7 +1245,13 @@ function createAuthorSelect(selectedValue: string | null = null) {
   container?.appendChild(wrapper);
 }
 
-function createGrupSelect(selectedValue: string | null = null) {
+/**
+ * ============================================================
+ * SELECT GRUPS
+ * ============================================================
+ */
+
+function createGrupSelect(selectedValue: string | null = null): void {
   const wrapper = document.createElement('div');
 
   wrapper.className = 'd-flex gap-2 mb-2';
@@ -1208,7 +1297,13 @@ function createGrupSelect(selectedValue: string | null = null) {
   container?.appendChild(wrapper);
 }
 
-function createEtiquetaSelect(selectedValue: string | null = null) {
+/**
+ * ============================================================
+ * SELECT ETIQUETES
+ * ============================================================
+ */
+
+function createEtiquetaSelect(selectedValue: string | null = null): void {
   const wrapper = document.createElement('div');
 
   wrapper.className = 'd-flex gap-2 mb-2';
@@ -1254,7 +1349,13 @@ function createEtiquetaSelect(selectedValue: string | null = null) {
   container?.appendChild(wrapper);
 }
 
-function initAuthorUI() {
+/**
+ * ============================================================
+ * UI AUTORS
+ * ============================================================
+ */
+
+function initAuthorUI(): void {
   const btn = document.getElementById('addAutorBtn');
 
   btn?.addEventListener('click', () => {
@@ -1262,7 +1363,13 @@ function initAuthorUI() {
   });
 }
 
-function initGrupUI() {
+/**
+ * ============================================================
+ * UI GRUPS
+ * ============================================================
+ */
+
+function initGrupUI(): void {
   const btn = document.getElementById('addGrupBtn');
 
   btn?.addEventListener('click', () => {
@@ -1272,7 +1379,13 @@ function initGrupUI() {
   initTestCreateGrupUI();
 }
 
-function initEtiquetaUI() {
+/**
+ * ============================================================
+ * UI ETIQUETES
+ * ============================================================
+ */
+
+function initEtiquetaUI(): void {
   const btn = document.getElementById('addEtiquetaBtn');
 
   btn?.addEventListener('click', () => {
@@ -1282,7 +1395,13 @@ function initEtiquetaUI() {
   initTestCreateEtiquetaUI();
 }
 
-export async function formLlibre(isUpdate: boolean, id?: string) {
+/**
+ * ============================================================
+ * FORMULARI LLIBRE
+ * ============================================================
+ */
+
+export async function formLlibre(isUpdate: boolean, id?: string): Promise<void> {
   const form = document.getElementById('formLlibre');
 
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
@@ -1295,6 +1414,12 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
 
   let data: Partial<Llibre> = {};
 
+  /**
+   * ==========================================================
+   * ACTUALITZAR LLIBRE
+   * ==========================================================
+   */
+
   if (id && isUpdate) {
     try {
       data = await api.get<Llibre>(`biblioteca/get/llibreId`, {
@@ -1302,7 +1427,6 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
       });
     } catch (error) {
       console.error(error);
-
       return;
     }
 
@@ -1355,9 +1479,11 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
     renderFormInputs(data);
 
     populateIdiomaSelect(data.idioma_id ? String(data.idioma_id) : null);
+
     initCreateIdiomaUI();
 
     populateEditorialSelect(data.editorial_id ? String(data.editorial_id) : null);
+
     initCreateEditorialUI();
 
     if (data?.autors?.length) {
@@ -1394,6 +1520,12 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
     form.addEventListener('submit', function (event) {
       transmissioDadesDB(event, 'POST', 'formLlibre', `${API_BASE}/biblioteca/put/llibre`);
     });
+
+    /**
+     * ==========================================================
+     * CREAR LLIBRE
+     * ==========================================================
+     */
   } else {
     divTitol.innerHTML = `<h2>Creació de nou Llibre</h2>`;
 
@@ -1471,6 +1603,8 @@ export async function formLlibre(isUpdate: boolean, id?: string) {
   }
 
   await auxiliarSelect(data.img_id ?? 0, 'imatgesLlibres', 'img_id', 'alt');
+
   await auxiliarSelect(data.estat_id ?? 0, 'estatLlibre', 'estat_id', 'estat');
+
   await auxiliarSelect(data.tipus_id ?? 0, 'tipusLlibre', 'tipus_id', 'nomTipus');
 }

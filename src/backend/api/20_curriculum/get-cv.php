@@ -35,7 +35,7 @@ if ($slug === "perfilCV") {
 
     $id = $_GET['id'] ?? null;
     $sql = <<<SQL
-            SELECT c.id, c.email, c.nom_complet, c.tel, c.web, c.adreca, ci.ciutat_ca, i.nameImg, c.disponibilitat, c.visibilitat, c.created_at, c.updated_at, co.pais_ca, c.img_perfil, c.localitzacio_ciutat
+            SELECT c.id, c.email, c.nom_complet, c.tel, c.web, c.adreca, ci.ciutat, i.nameImg, c.disponibilitat, c.visibilitat, c.created_at, c.updated_at, co.pais, c.img_perfil, c.localitzacio_ciutat
             FROM %s AS c
             LEFT JOIN %s AS i ON c.img_perfil = i.id
             LEFT JOIN %s AS ci ON c.localitzacio_ciutat = ci.id
@@ -270,7 +270,7 @@ if ($slug === "perfilCV") {
     $id   = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
     $sql = <<<SQL
-              SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat, co.pais_ca AS pais_cat
+              SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat, co.pais
               FROM %s AS e
               LEFT JOIN %s AS i ON e.logo_empresa = i.id
               LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id
@@ -310,7 +310,7 @@ if ($slug === "perfilCV") {
 } else if ($slug === "experiencies") {
 
     $sql = <<<SQL
-              SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat, co.pais_ca AS pais_cat
+              SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat, co.pais
               FROM %s AS e
               LEFT JOIN %s AS i ON e.logo_empresa = i.id
               LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id
@@ -352,7 +352,7 @@ if ($slug === "perfilCV") {
         // 1. Datos principales
 
         $sql = <<<SQL
-             SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat, co.pais_ca AS pais_cat
+             SELECT e.id, e.empresa, e.empresa_url, e.empresa_localitzacio, e.data_inici, e.data_fi, e.is_current, e.logo_empresa, e.posicio, e.visible, e.created_at, e.updated_at, i.nameImg, c.ciutat, co.pais
                     FROM %s e
                     LEFT JOIN %s AS i ON e.logo_empresa = i.id
                     LEFT JOIN %s AS c ON e.empresa_localitzacio = c.id
@@ -443,7 +443,7 @@ if ($slug === "perfilCV") {
     $id = $_GET['id'] ?? null;
 
     $sql = <<<SQL
-                SELECT e.id, e.institucio, e.institucio_url, e.institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.ciutat_ca, co.pais_ca
+                SELECT e.id, e.institucio, e.institucio_url, e.institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.ciutat, co.pais
                 FROM %s AS e
                 LEFT JOIN %s AS i ON e.logo_id = i.id
                 LEFT JOIN %s AS c ON e.institucio_localitzacio = c.id
@@ -481,7 +481,7 @@ if ($slug === "perfilCV") {
 } else if ($slug === "llistatEducacio") {
 
     $sql = <<<SQL
-            SELECT e.id, e.institucio, e.institucio_url, e.institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.ciutat_ca, co.pais_ca
+            SELECT e.id, e.institucio, e.institucio_url, e.institucio_localitzacio, e.data_inici, e.data_fi, e.logo_id, e.posicio, e.visible, i.nameImg, c.ciutat, co.pais
             FROM %s AS e
             LEFT JOIN %s AS i ON e.logo_id = i.id
             LEFT JOIN %s AS c ON e.institucio_localitzacio = c.id
@@ -572,8 +572,8 @@ if ($slug === "perfilCV") {
                         e.posicio,
                         e.visible,
                         i.nameImg,
-                        c.ciutat_ca,
-                        co.pais_ca
+                        c.ciutat,
+                        co.pais
             FROM %s AS e
             LEFT JOIN %s AS i ON e.logo_id = i.id
             LEFT JOIN %s AS c ON e.institucio_localitzacio = c.id

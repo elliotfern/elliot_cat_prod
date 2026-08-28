@@ -9,7 +9,7 @@ export interface PersonaApi {
   nom: string;
   cognoms: string | null;
   slug: string;
-  pais_ca: string | null;
+  pais: string | null;
 
   any_naixement: number | null;
   any_defuncio: number | null;
@@ -114,7 +114,7 @@ export function mapPersona(api: PersonaApi): PersonaView {
     ciutatNaixement: api.ciutatNaixement ?? null,
     ciutatDefuncio: api.ciutatDefuncio ?? null,
 
-    paisAutor: api.pais_ca ?? '',
+    paisAutor: api.pais ?? '',
     sexe_id: api.sexe_id ?? null,
 
     grupsText: '',
