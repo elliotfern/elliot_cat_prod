@@ -55,7 +55,8 @@ class Response
         'contacte_id',
         'producte_id',
         'pressupost_id',
-        'factura_id'
+        'factura_id',
+        'projecte_id'
     ];
 
     public static function success(

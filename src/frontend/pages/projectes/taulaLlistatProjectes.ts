@@ -3,49 +3,89 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { ProjecteDetalls } from '../../types/Projecte';
 
-function labelStatus(status: number): string {
-  switch (status) {
-    case 0:
-      return 'Arxivat';
-    case 1:
-      return 'Actiu';
-    case 2:
-      return 'En pausa';
-    case 3:
-      return 'Finalitzat';
-    default:
-      return String(status);
-  }
-}
-
-function escapeHtml(s: string): string {
-  return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
-}
-
 export async function taulaLlistatProjectes() {
   const isAdmin = await getIsAdmin();
 
   const columns: TaulaDinamica<ProjecteDetalls>[] = [
     {
       header: 'Projecte',
-      field: 'name',
+      field: 'projecte',
       render: (_: unknown, row: ProjecteDetalls) => {
-        const name = row.name?.trim() ?? '';
-        const nomComplet = `${name}`.trim();
+        const projecte = row.projecte?.trim() ?? '';
+        const nomComplet = `<a id="${row.id}" title="Fitxa projecte" href="/gestio/projectes/fitxa-projecte/${row.id}">${projecte}</a>`;
 
         return nomComplet || '-';
       },
     },
     {
       header: 'Categoria',
-      field: 'nomCategoria',
+      field: 'categoria',
+      render: (_: unknown, row: ProjecteDetalls) => {
+        switch (row.categoria) {
+          case 'professional':
+            return '<span class="badge bg-primary">Professional</span>';
+
+          case 'personal':
+            return '<span class="badge bg-success">Personal</span>';
+
+          default:
+            return '';
+        }
+      },
     },
+
+    {
+      header: 'Estat',
+      field: 'estat',
+      render: (_: unknown, row: ProjecteDetalls) => {
+        switch (row.estat) {
+          case 'pendent':
+            return '<span class="badge bg-secondary">Pendent</span>';
+
+          case 'en_curs':
+            return '<span class="badge bg-primary">En curs</span>';
+
+          case 'finalitzat':
+            return '<span class="badge bg-success">Finalitzat</span>';
+
+          case 'arxivat':
+            return '<span class="badge bg-dark">Arxivat</span>';
+
+          default:
+            return '';
+        }
+      },
+    },
+
+    {
+      header: 'Prioritat',
+      field: 'prioritat',
+      render: (_: unknown, row: ProjecteDetalls) => {
+        switch (row.prioritat) {
+          case 'baixa':
+            return '<span class="badge bg-secondary">Baixa</span>';
+
+          case 'normal':
+            return '<span class="badge bg-primary">Normal</span>';
+
+          case 'alta':
+            return '<span class="badge bg-warning text-dark">Alta</span>';
+
+          case 'urgent':
+            return '<span class="badge bg-danger">Urgent</span>';
+
+          default:
+            return '';
+        }
+      },
+    },
+
     {
       header: 'Dates',
-      field: 'start_date',
+      field: 'data_inici',
       render: (_: unknown, row: ProjecteDetalls) => {
-        const startDate = row.start_date?.trim() ?? '';
-        const endDate = row.end_date?.trim() ?? '';
+        const startDate = row.data_inici?.trim() ?? '';
+        const endDate = row.data_fi?.trim() ?? '';
         const data = `${startDate} - ${endDate}`.trim();
 
         return data || '-';
@@ -54,12 +94,13 @@ export async function taulaLlistatProjectes() {
     {
       header: 'Client',
       field: 'client_id',
-    },
-    {
-      header: 'Estat',
-      field: 'status',
       render: (_: unknown, row: ProjecteDetalls) => {
-        return labelStatus(Number(row.status));
+        const nom = row.nom?.trim() ?? '';
+        const cognoms = row.cognoms?.trim() ?? '';
+        const empresa = row.empresa?.trim() ?? '';
+        const data = `<a id="${row.client_id}" title="Fitxa client" href="/gestio/comptabilitat/fitxa-client/${row.client_id}">${nom} ${cognoms} (${empresa})</a>`;
+
+        return data || '-';
       },
     },
   ];
@@ -79,8 +120,8 @@ export async function taulaLlistatProjectes() {
     url: `projectes/get/llistatProjectes`,
     containerId: 'taulaLlistatProjectes',
     columns,
-    filterKeys: ['name'],
-    filterByFields: ['status'],
+    filterKeys: ['projecte'],
+    filterByFields: ['estat'],
     filterLabels: {
       status: 'Estat:',
     },

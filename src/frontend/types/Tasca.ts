@@ -1,25 +1,19 @@
 export interface Tasca {
   [key: string]: unknown;
 
-  // DB
-  id: number;
-  project_id: number | null;
-
+  id: string;
+  projecte_id: string;
   title: string;
   subject: string | null;
   notes: string | null;
-
-  status: number; // tinyint unsigned (default 1)
-  priority: number; // tinyint unsigned (default 3)
-
-  planned_date: string | null; // YYYY-MM-DD
-  is_next: number; // tinyint(1) default 0
-
+  estat: 'pendent' | 'en_curs' | 'finalitzat' | 'arxivat';
+  prioritat: 'baixa' | 'normal' | 'alta' | 'urgent';
+  planned_date: string | null;
+  is_next: number;
   blocked_reason: string | null;
-  estimated_hours: number | null; // decimal(6,2)
-
-  // Meta (puede venir en GET)
+  estimated_hours: string | null;
   created_at?: string;
   updated_at?: string;
   done_at?: string | null;
+  client_id: string;
 }

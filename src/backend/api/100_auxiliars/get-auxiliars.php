@@ -1664,54 +1664,89 @@ if ($slug === 'directors') {
         );
     }
 
-    // Llistat Factures clients
+    // Llistat Projectes categories
     // ruta GET => "/api/cinema/get/auxiliars/projectes_categories"
 } else if ($slug === "projectes_categories") {
 
-    $sql = <<<SQL
-            SELECT c.id, c.name
-            FROM %s AS c
-            ORDER BY c.id DESC
-            SQL;
+    $result = [
+        [
+            'id' => 'professional',
+            'categoria' => 'Professional',
+        ],
+        [
+            'id' => 'personal',
+            'categoria' => 'Personal',
+        ],
+    ];
 
-    $query = sprintf(
-        $sql,
-        qi(Tables::PROJECTES_CATEGORIES, $pdo),
-
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: $result,
+        httpCode: 200
     );
 
-    try {
+    // Llistat Estats projectes
+    // ruta GET => "/api/cinema/get/auxiliars/projectes_estats"
+} else if ($slug === "projectes_estats") {
 
-        $result = $db->getData($query);
+    $result = [
+        [
+            'id' => 'pendent',
+            'estat' => 'Pendent',
+        ],
+        [
+            'id' => 'en_curs',
+            'estat' => 'En curs',
+        ],
+        [
+            'id' => 'finalitzat',
+            'estat' => 'Finalitzat',
+        ],
+        [
+            'id' => 'arxivat',
+            'estat' => 'Arxivat',
+        ],
+    ];
 
-        if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
-            );
-            return;
-        }
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: $result,
+        httpCode: 200
+    );
+    // Llistat Prioritats projectes
+    // ruta GET => "/api/cinema/get/auxiliars/projectes_prioritats"
+} else if ($slug === "projectes_prioritats") {
 
-        Response::success(
-            message: MissatgesAPI::success('get'),
-            data: $result,
-            httpCode: 200
-        );
-    } catch (PDOException $e) {
-        Response::error(
-            MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
-            500
-        );
-    }
+    $result = [
+        [
+            'id' => 'baixa',
+            'prioritat' => 'Baixa',
+        ],
+        [
+            'id' => 'normal',
+            'prioritat' => 'Normal',
+        ],
+        [
+            'id' => 'alta',
+            'prioritat' => 'Alta',
+        ],
+        [
+            'id' => 'urgent',
+            'prioritat' => 'Urgent',
+        ],
+    ];
 
+    Response::success(
+        message: MissatgesAPI::success('get'),
+        data: $result,
+        httpCode: 200
+    );
     // Llistat Projectes
     // ruta GET => "/api/auxiliars/projectes"
 } else if ($slug === "projectes") {
 
     $sql = <<<SQL
-            SELECT c.id, c.name
+            SELECT c.id, c.projecte
             FROM %s AS c
             ORDER BY c.id DESC
             SQL;

@@ -1,24 +1,32 @@
+export type ProjecteEstat = 'pendent' | 'en_curs' | 'finalitzat' | 'arxivat';
+
+export type ProjecteCategoria = 'professional' | 'personal';
+
+export type ProjectePrioritat = 'baixa' | 'normal' | 'alta' | 'urgent';
+
 export type ProjecteDetalls = {
-  id: number;
-  name: string;
-  description: string | null;
-  status: number;
-  category_id: number | null;
-  category_name?: string | null;
-  start_date: string;
-  end_date: string;
-  priority: number;
-  client_id: number | null;
-  client_name?: string | null;
+  id: string;
+  projecte: string;
+  descripcio: string | null;
+  data_inici: string;
+  data_fi: string;
   pressupost_id: number | null;
   factura_id: number | null;
   created_at?: string;
   updated_at?: string;
-  nomCategoria: string;
+
+  estat: ProjecteEstat;
+  categoria: ProjecteCategoria;
+  prioritat: ProjectePrioritat;
+
+  client_id: number | null;
+  nom?: string | null;
+  cognoms?: string | null;
+  empresa?: string | null;
 };
 
 export type TascaItem = {
-  id: number;
+  id: string;
   project_id: number | null;
   title: string;
   subject: string | null;
@@ -32,13 +40,14 @@ export type TascaItem = {
   created_at?: string;
   updated_at?: string;
   done_at?: string | null;
+  estat: string;
+  prioritat: string;
 };
 
 export type TasquesResponse = {
   project: { id: number };
   kpis: {
-    total: number;
-    done: number;
+    done_at: number;
     blocked: number;
     in_progress: number;
     backlog: number;

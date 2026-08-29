@@ -26,51 +26,43 @@
     <input type="hidden" name="id" id="id">
 
     <div class="mb-3">
-        <label class="form-label" for="name">Nom</label>
-        <input class="form-control" type="text" name="name" id="name" maxlength="160" required>
+        <label class="form-label" for="projecte">Nom</label>
+        <input class="form-control" type="text" name="projecte" id="projecte" maxlength="160" required>
     </div>
 
     <div class="mb-3">
-        <label class="form-label" for="description">Descripció</label>
-        <textarea class="form-control" name="description" id="description" rows="6"></textarea>
+        <label class="form-label" for=" ">Descripció</label>
+        <textarea class="form-control" name="descripcio" id="descripcio" rows="6"></textarea>
     </div>
 
     <div class="row g-3">
-        <div class="col-12 col-md-4">
-            <label class="form-label" for="status">Estat</label>
-            <select class="form-select" name="status" id="status">
-                <option value="1">Actiu</option>
-                <option value="2">En pausa</option>
-                <option value="3">Finalitzat</option>
-                <option value="0">Arxivat</option>
+
+        <div class="col-4 col-md-4">
+            <label for="estat" class="form-label">Estat</label>
+            <select class="form-select" id="estat" name="estat">
             </select>
         </div>
 
-        <div class="col-12 col-md-4">
-            <label class="form-label" for="priority">Prioritat</label>
-            <select class="form-select" name="priority" id="priority">
-                <option value="1">Baixa</option>
-                <option value="2">Mitja</option>
-                <option value="3">Alta</option>
-                <option value="4">Molt alta</option>
+        <div class="col-4 col-md-4">
+            <label for="prioritat" class="form-label">Prioritat</label>
+            <select class="form-select" id="prioritat" name="prioritat">
             </select>
         </div>
 
-        <div class="col-12 col-md-4">
-            <label class="form-label" for="category_id">Categoria</label>
-            <select class="form-select" name="category_id" id="category_id">
-                <option value="">—</option>
+        <div class="col-4 col-md-4">
+            <label for="categoria" class="form-label">Categoria</label>
+            <select class="form-select" id="categoria" name="categoria">>
             </select>
         </div>
 
         <div class="col-12 col-md-6">
-            <label class="form-label" for="start_date">Data inici</label>
-            <input class="form-control" type="date" name="start_date" id="start_date">
+            <label class="form-label" for="data_inici">Data inici</label>
+            <input class="form-control" type="date" name="data_inici" id="data_inici">
         </div>
 
         <div class="col-12 col-md-6">
-            <label class="form-label" for="end_date">Data fi</label>
-            <input class="form-control" type="date" name="end_date" id="end_date">
+            <label class="form-label" for="data_fi">Data fi</label>
+            <input class="form-control" type="date" name="data_fi" id="data_fi">
         </div>
 
         <div class="col-12 col-md-4">

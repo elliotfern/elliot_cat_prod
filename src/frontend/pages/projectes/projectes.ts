@@ -4,6 +4,7 @@ import { formProjecte } from './formProjecte';
 import { formTask } from './formTasca';
 import { initProjectesHome } from './homeProjectes';
 import { taulaLlistatProjectes } from './taulaLlistatProjectes';
+import { taulaLlistatTasques } from './taulaLlistatTasques';
 
 export function projectes() {
   const pageType = getPageType(window.location.href);
@@ -16,7 +17,7 @@ export function projectes() {
   const action = String(actionRaw).split('?')[0].replace(/\/+$/, '');
 
   const idRaw = pageType[iProjectes + 2];
-  const id = Number.parseInt(String(idRaw), 10);
+  const id = String(idRaw);
 
   // /.../projectes
   if (!action) {
@@ -50,7 +51,7 @@ export function projectes() {
       break;
 
     case 'llistat-tasques':
-      taulaLlistatProjectes();
+      taulaLlistatTasques();
       break;
 
     default:

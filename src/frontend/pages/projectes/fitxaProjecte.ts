@@ -1,195 +1,431 @@
 import { api } from '../../core/api/client';
-import { ProjecteDetalls, TasquesResponse } from '../../types/Projecte';
+import { ProjecteDetalls } from '../../types/Projecte';
+import { Tasca } from '../../types/Tasca';
 import { API_URLS } from '../../utils/apiUrls';
 import { formatData } from '../../utils/formataData';
 
-// --- Helpers UI ---
-function setText(id: string, value: string) {
+// ------------------------------------------------
+// Helpers UI
+// ------------------------------------------------
+
+function setText(id: string, value: string): void {
   const el = document.getElementById(id);
+
   if (!el) return;
+
   el.textContent = value;
 }
 
-function labelStatus(status: number): string {
-  switch (status) {
-    case 1:
-      return 'Backlog';
-    case 2:
-      return 'En curs';
-    case 3:
-      return 'Bloquejada';
-    case 4:
-      return 'Feta';
+function escapeHtml(value: string): string {
+  return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+}
+
+// ------------------------------------------------
+// Badges
+// ------------------------------------------------
+
+function badgeEstat(estat: string): string {
+  switch (estat) {
+    case 'pendent':
+      return '<span class="badge bg-secondary">Pendent</span>';
+
+    case 'en_curs':
+      return '<span class="badge bg-primary">En curs</span>';
+
+    case 'finalitzat':
+      return '<span class="badge bg-success">Finalitzat</span>';
+
+    case 'arxivat':
+      return '<span class="badge bg-dark">Arxivat</span>';
+
     default:
-      return String(status);
+      return escapeHtml(estat);
   }
 }
 
-function labelPriority(p: number): string {
-  switch (p) {
-    case 1:
-      return '1 - Baixa';
-    case 2:
-      return '2 - Mitja';
-    case 3:
-      return '3 - Alta';
-    case 4:
-      return '4 - Urgent';
+function badgePrioritat(prioritat: string): string {
+  switch (prioritat) {
+    case 'baixa':
+      return '<span class="badge bg-secondary">Baixa</span>';
+
+    case 'normal':
+      return '<span class="badge bg-primary">Normal</span>';
+
+    case 'alta':
+      return '<span class="badge bg-warning text-dark">Alta</span>';
+
+    case 'urgent':
+      return '<span class="badge bg-danger">Urgent</span>';
+
     default:
-      return String(p);
+      return escapeHtml(prioritat);
   }
 }
 
-function escapeHtml(s: string): string {
-  return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+function badgeCategoria(categoria: string): string {
+  switch (categoria) {
+    case 'professional':
+      return '<span class="badge bg-primary">Professional</span>';
+
+    case 'personal':
+      return '<span class="badge bg-success">Personal</span>';
+
+    default:
+      return escapeHtml(categoria);
+  }
 }
 
-export async function initProjecteDetalls(id: number): Promise<void> {
-  const meta = document.getElementById('projecteDetallsMeta') as HTMLDivElement | null;
-  if (!meta) {
+// ------------------------------------------------
+// Projecte
+// ------------------------------------------------
+
+export async function initProjecteDetalls(id: string): Promise<void> {
+  // ------------------------------------------------
+  // Validar ID
+  // ------------------------------------------------
+
+  if (!id || !id.trim()) {
+    console.error('ID de projecte invàlid');
     return;
   }
 
-  if (!Number.isFinite(id) || id <= 0) {
-    return;
-  }
-
+  // ------------------------------------------------
   // Containers
+  // ------------------------------------------------
+
   const header = document.getElementById('projecteDetallsHeader');
   const fitxa = document.getElementById('projecteDetallsFitxa');
   const kpisBox = document.getElementById('projecteDetallsKpis');
   const tasquesBox = document.getElementById('projecteDetallsTasques');
 
   if (!header || !fitxa || !kpisBox || !tasquesBox) {
+    console.error("No s'han trobat els contenidors del detall del projecte");
+
     return;
   }
 
-  // --- 1) GET detalls projecte ---
-  let data: ProjecteDetalls;
+  // ------------------------------------------------
+  // 1) GET projecte
+  // ------------------------------------------------
+
+  let projecte: ProjecteDetalls;
 
   try {
-    data = await api.get<ProjecteDetalls>(API_URLS.GET.PROJECTE_DETALLS, {
+    projecte = await api.get<ProjecteDetalls>(API_URLS.GET.PROJECTE_DETALLS, {
       id,
     });
   } catch (error) {
     console.error(error);
-    fitxa.innerHTML = `<div class="text-muted">No s'han pogut carregar els detalls del projecte.</div>`;
-    return;
-  }
 
-  const p = data;
+    header.innerHTML = '';
 
-  // Pintar Header (básico)
-  header.innerHTML = `
-    <div class="d-flex align-items-start justify-content-between">
-      <div>
-        <h3 class="mb-1">${escapeHtml(p.name ?? '—')}</h3>
-        <div class="text-muted small">
-          #${p.id}
-          ${p.category_name ? ` · ${escapeHtml(String(p.category_name))}` : ''}
-        </div>
+    fitxa.innerHTML = `
+      <div class="alert alert-danger">
+        No s'han pogut carregar els detalls del projecte.
       </div>
-      <div class="text-muted small">
-        Estat: <strong>${escapeHtml(labelStatus(p.status))}</strong>
-        · Prioritat: <strong>${escapeHtml(labelPriority(p.priority))}</strong>
-      </div>
-    </div>
-  `;
+    `;
 
-  // Pintar Fitxa (básico)
-  fitxa.innerHTML = `
-    <div class="row g-3">
-      <div class="col-12 col-md-6">
-        <div class="small text-muted">Data inici</div>
-        <div>${escapeHtml(formatData(p.start_date))}</div>
-      </div>
-      <div class="col-12 col-md-6">
-        <div class="small text-muted">Data fi</div>
-        <div>${escapeHtml(formatData(p.end_date))}</div>
-      </div>
-
-      <div class="col-12">
-        <div class="small text-muted">Descripció</div>
-        <div>${p.description ? escapeHtml(p.description) : '—'}</div>
-      </div>
-    </div>
-  `;
-
-  // Subtítulo fijo (si quieres)
-  setText('subtitolProjecte', `Detalls del projecte · #${p.id}`);
-
-  // --- 2) GET tasques + KPIs ---
-  let data2: TasquesResponse;
-
-  try {
-    data2 = await api.get<TasquesResponse>(API_URLS.GET.PROJECTE_TASQUES, {
-      id,
-    });
-  } catch (error) {
-    console.error(error);
-    kpisBox.innerHTML = `<div class="text-muted">No s'han pogut carregar les tasques.</div>`;
+    kpisBox.innerHTML = '';
     tasquesBox.innerHTML = '';
+
     return;
   }
 
-  const { kpis, items } = data2;
+  // ------------------------------------------------
+  // Header
+  // ------------------------------------------------
 
-  // KPIs (simple)
+  header.innerHTML = `
+    <div>
+      <h3 class="mb-1">
+        ${escapeHtml(projecte.projecte ?? '—')}
+      </h3>
+
+      <div class="text-muted small">
+        #${escapeHtml(projecte.id)}
+      </div>
+    </div>
+  `;
+
+  // ------------------------------------------------
+  // Fitxa
+  // ------------------------------------------------
+
+  fitxa.innerHTML = `
+    <div class="card">
+
+      <div class="card-body">
+
+        <div class="d-flex justify-content-end mb-4">
+
+          <a
+            href="/gestio/projectes/modifica-projecte/${encodeURIComponent(projecte.id)}"
+            class="btn btn-warning"
+          >
+            Modifica projecte
+          </a>
+
+        </div>
+
+        <div class="row g-4">
+
+          <!-- Estat -->
+          <div class="col-12 col-md-6">
+
+            <div class="small text-muted mb-1">
+              Estat
+            </div>
+
+            <div>
+              ${badgeEstat(projecte.estat)}
+            </div>
+
+          </div>
+
+          <!-- Prioritat -->
+          <div class="col-12 col-md-6">
+
+            <div class="small text-muted mb-1">
+              Prioritat
+            </div>
+
+            <div>
+              ${badgePrioritat(projecte.prioritat)}
+            </div>
+
+          </div>
+
+          <!-- Categoria -->
+          <div class="col-12 col-md-6">
+
+            <div class="small text-muted mb-1">
+              Categoria
+            </div>
+
+            <div>
+              ${badgeCategoria(projecte.categoria)}
+            </div>
+
+          </div>
+
+          <!-- Client -->
+          <div class="col-12 col-md-6">
+
+            <div class="small text-muted mb-1">
+              Client
+            </div>
+
+            <div>
+              ${projecte.nom ? escapeHtml(`${projecte.nom} ${projecte.cognoms ?? ''}`.trim()) + (projecte.empresa ? ` (${escapeHtml(projecte.empresa)})` : '') : '—'}
+            </div>
+
+          </div>
+
+          <!-- Data inici -->
+          <div class="col-12 col-md-6">
+
+            <div class="small text-muted mb-1">
+              Data inici
+            </div>
+
+            <div>
+              ${projecte.data_inici ? escapeHtml(formatData(projecte.data_inici)) : '—'}
+            </div>
+
+          </div>
+
+          <!-- Data fi -->
+          <div class="col-12 col-md-6">
+
+            <div class="small text-muted mb-1">
+              Data fi
+            </div>
+
+            <div>
+              ${projecte.data_fi ? escapeHtml(formatData(projecte.data_fi)) : '—'}
+            </div>
+
+          </div>
+
+          <!-- Descripció -->
+          <div class="col-12">
+
+            <div class="small text-muted mb-1">
+              Descripció
+            </div>
+
+            <div>
+              ${projecte.descripcio ? escapeHtml(projecte.descripcio) : '—'}
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  // ------------------------------------------------
+  // Subtítol
+  // ------------------------------------------------
+
+  setText('subtitolProjecte', `Detalls del projecte · #${projecte.id}`);
+
+  // ------------------------------------------------
+  // 2) GET tasques del projecte
+  // ------------------------------------------------
+
+  let tasques: Tasca[];
+
+  try {
+    tasques = await api.get<Tasca[]>(API_URLS.GET.PROJECTE_TASQUES, {
+      id,
+    });
+  } catch (error) {
+    console.error(error);
+
+    kpisBox.innerHTML = '';
+
+    tasquesBox.innerHTML = `
+      <div class="alert alert-danger">
+        No s'han pogut carregar les tasques del projecte.
+      </div>
+    `;
+
+    return;
+  }
+
+  // ------------------------------------------------
+  // KPIs simples
+  // ------------------------------------------------
+
+  const total = tasques.length;
+
+  const finalitzades = tasques.filter((t) => t.estat === 'finalitzat').length;
+
+  const enCurs = tasques.filter((t) => t.estat === 'en_curs').length;
+
+  const pendents = tasques.filter((t) => t.estat === 'pendent').length;
+
+  const next = tasques.filter((t) => Number(t.is_next) === 1).length;
+
   kpisBox.innerHTML = `
     <div class="d-flex flex-wrap gap-3">
-      <div><strong>${kpis.total}</strong> total</div>
-      <div><strong>${kpis.done}</strong> fetes</div>
-      <div><strong>${kpis.blocked}</strong> bloquejades</div>
-      <div><strong>${kpis.in_progress}</strong> en curs</div>
-      <div><strong>${kpis.backlog}</strong> backlog</div>
-      <div><strong>${kpis.next}</strong> next</div>
+
+      <div class="border rounded px-3 py-2">
+        <strong>${total}</strong>
+        <span class="text-muted">tasques</span>
+      </div>
+
+      <div class="border rounded px-3 py-2">
+        <strong>${finalitzades}</strong>
+        <span class="text-muted">finalitzades</span>
+      </div>
+
+      <div class="border rounded px-3 py-2">
+        <strong>${enCurs}</strong>
+        <span class="text-muted">en curs</span>
+      </div>
+
+      <div class="border rounded px-3 py-2">
+        <strong>${pendents}</strong>
+        <span class="text-muted">pendents</span>
+      </div>
+
+      <div class="border rounded px-3 py-2">
+        <strong>${next}</strong>
+        <span class="text-muted">next</span>
+      </div>
+
     </div>
   `;
 
-  // --- 3) Tabla de tareas (render muy básico) ---
-  // Si ya tienes tu renderDynamicTable que acepta URL, lo ideal es que el endpoint devuelva items “directo”.
-  // Como aquí ya tenemos items, lo más simple es pintar HTML.
-  // (Luego lo refinamos con tu tabla dinámica si quieres.)
+  // ------------------------------------------------
+  // 3) Tasques
+  // ------------------------------------------------
 
   tasquesBox.innerHTML = `
     <div class="table-responsive">
-      <table class="table table-striped">
+
+      <table class="table table-striped align-middle">
+
         <thead class="table-primary">
+
           <tr>
             <th>Títol</th>
             <th>Estat</th>
             <th>Prioritat</th>
             <th>Data</th>
             <th>Next</th>
-            <th style="width:160px"></th>
+            <th></th>
           </tr>
+
         </thead>
+
         <tbody>
+
           ${
-            items.length
-              ? items
+            tasques.length > 0
+              ? tasques
                   .map(
                     (t) => `
-                <tr>
-                  <td>${escapeHtml(t.title ?? '')}</td>
-                  <td>${escapeHtml(labelStatus(Number(t.status)))}</td>
-                  <td>${escapeHtml(labelPriority(Number(t.priority)))}</td>
-                  <td>${escapeHtml(formatData(t.planned_date))}</td>
-                  <td>${Number(t.is_next) === 1 ? '✅' : ''}</td>
-                  <td class="text-end">
-                    <a class="btn btn-sm btn-outline-secondary"
-                       href="/gestio/projectes/modifica-tasca/${t.id}">
-                      Edita
-                    </a>
-                  </td>
-                </tr>
-              `
+                      <tr>
+
+                        <td>
+                          ${escapeHtml(t.title ?? '')}
+                        </td>
+
+                        <td>
+                          ${badgeEstat(t.estat)}
+                        </td>
+
+                        <td>
+                          ${badgePrioritat(t.prioritat)}
+                        </td>
+
+                        <td>
+                          ${t.planned_date ? escapeHtml(formatData(t.planned_date)) : '—'}
+                        </td>
+
+                        <td>
+                          ${Number(t.is_next) === 1 ? '✅' : ''}
+                        </td>
+
+                        <td class="text-end">
+
+                          <a
+                            class="btn btn-sm btn-outline-secondary"
+                            href="/gestio/projectes/modifica-tasca/${encodeURIComponent(t.id)}"
+                          >
+                            Edita
+                          </a>
+
+                        </td>
+
+                      </tr>
+                    `
                   )
                   .join('')
-              : `<tr><td colspan="6" class="text-muted">No hi ha tasques.</td></tr>`
+              : `
+                <tr>
+
+                  <td
+                    colspan="6"
+                    class="text-muted"
+                  >
+                    No hi ha tasques.
+                  </td>
+
+                </tr>
+              `
           }
+
         </tbody>
+
       </table>
+
     </div>
   `;
 }

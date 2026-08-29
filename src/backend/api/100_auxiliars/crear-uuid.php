@@ -5,23 +5,25 @@ use Ramsey\Uuid\Uuid as Ramsey;
 use App\Utils\Uuid;
 
 // ─────────────────────────────────────────────
-// CONFIGURACIÓ: ajusta aquests valors
+// CONFIGURACIÓ
 // ─────────────────────────────────────────────
-$taula = 'db_comptabilitat_facturacio_clients';       // Nom de la taula a actualitzar
-$columnaId = 'id2';          // Nom de la columna PK (BINARY(16))
-$columnaFiltre = 'id';      // Columna que fem servir per identificar la fila (ex: alguna PK antiga o rowid)
+$taula = 'db_projectes_tasques';
+$columnaId = 'id2';              // BINARY(16), nou UUID
+$columnaFiltre = 'id';      // Identificador actual/antic de la fila
 // ─────────────────────────────────────────────
 
-$db = new Database(); // O com instanciïs la teva connexió
+$db = new Database();
 $pdo = $db->getPdo();
 
 try {
     $pdo->beginTransaction();
 
-    // 1. Seleccionar files que necessiten un nou UUID
-    //    (ajusta el WHERE segons el teu cas: id IS NULL, id = '', etc.)
-    $stmtSelect = $pdo->prepare("SELECT `$columnaFiltre` FROM `$taula`");
+    // 1. Seleccionar les files
+    $stmtSelect = $pdo->prepare(
+        "SELECT `$columnaFiltre` FROM `$taula`"
+    );
     $stmtSelect->execute();
+
     $files = $stmtSelect->fetchAll(PDO::FETCH_ASSOC);
 
     if (empty($files)) {
@@ -30,19 +32,36 @@ try {
         exit(0);
     }
 
-    // 2. Preparar la sentència d'UPDATE
+    // 2. Preparar UPDATE
     $stmtUpdate = $pdo->prepare(
-        "UPDATE `$taula` SET `$columnaId` = :nouId WHERE `$columnaFiltre` = :filtre"
+        "UPDATE `$taula`
+         SET `$columnaId` = :nouId
+         WHERE `$columnaFiltre` = :filtre"
     );
 
     $comptador = 0;
 
     foreach ($files as $fila) {
-        $nouUuid = Ramsey::uuid7();
-        $nouUuidBinari = Uuid::toBinary($nouUuid->toString());
 
-        $stmtUpdate->bindValue(':nouId', $nouUuidBinari, PDO::PARAM_LOB);
-        $stmtUpdate->bindValue(':filtre', $fila[$columnaFiltre]);
+        // Generar un UUID v7 nou per aquesta fila
+        $nouUuid = Ramsey::uuid7();
+
+        // Convertir UUID textual a BINARY(16)
+        $nouUuidBinari = Uuid::toBinary(
+            $nouUuid->toString()
+        );
+
+        $stmtUpdate->bindValue(
+            ':nouId',
+            $nouUuidBinari,
+            PDO::PARAM_LOB
+        );
+
+        $stmtUpdate->bindValue(
+            ':filtre',
+            $fila[$columnaFiltre]
+        );
+
         $stmtUpdate->execute();
 
         $comptador++;
@@ -52,7 +71,11 @@ try {
 
     echo "Actualitzades $comptador files amb nou UUID v7.\n";
 } catch (Exception $e) {
-    $pdo->rollBack();
+
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
     echo "Error: " . $e->getMessage() . "\n";
     exit(1);
 }

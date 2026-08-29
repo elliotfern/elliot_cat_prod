@@ -30,8 +30,8 @@
 
         <!-- Projecte -->
         <div class="col-12 col-lg-6">
-            <label for="project_id" class="form-label">Projecte</label>
-            <select id="project_id" name="project_id" class="form-select">
+            <label for="projecte_id" class="form-label">Projecte</label>
+            <select id="projecte_id" name="projecte_id" class="form-select">
                 <option value="">— Sense projecte —</option>
             </select>
         </div>
@@ -51,23 +51,15 @@
 
         <!-- Status -->
         <div class="col-12 col-lg-3">
-            <label for="status" class="form-label">Estat</label>
-            <select id="status" name="status" class="form-select" required>
-                <option value="1">Backlog</option>
-                <option value="2">En curs</option>
-                <option value="3">Bloquejada</option>
-                <option value="4">Feta</option>
+            <label for="estat" class="form-label">Estat</label>
+            <select id="estat" name="estat" class="form-select" required>
             </select>
         </div>
 
         <!-- Prioritat -->
         <div class="col-12 col-lg-3">
-            <label for="priority" class="form-label">Prioritat</label>
-            <select id="priority" name="priority" class="form-select" required>
-                <option value="1">1 - Baixa</option>
-                <option value="2">2 - Mitja</option>
-                <option value="3">3 - Alta</option>
-                <option value="4">4 - Urgent</option>
+            <label for="prioritat" class="form-label">Prioritat</label>
+            <select id="prioritat" name="prioritat" class="form-select" required>
             </select>
         </div>
 

@@ -5,7 +5,7 @@ import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../utils/renderInputsForm';
 
-export async function formProjecte(isUpdate: boolean, id?: number) {
+export async function formProjecte(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formProjecte') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnProjecte') as HTMLButtonElement | null;
@@ -31,7 +31,10 @@ export async function formProjecte(isUpdate: boolean, id?: number) {
     btnSubmit.textContent = 'Inserir dades';
   }
 
-  await auxiliarSelect(data.category_id ?? '', 'projectes_categories', 'category_id', 'name');
+  await auxiliarSelect(data.categoria ?? '', 'projectes_categories', 'categoria', 'categoria');
+  await auxiliarSelect(data.estat ?? '', 'projectes_estats', 'estat', 'estat');
+  await auxiliarSelect(data.prioritat ?? '', 'projectes_prioritats', 'prioritat', 'prioritat');
+
   await auxiliarSelect(data.client_id ?? '', 'clients', 'client_id', 'client');
   await auxiliarSelect(data.pressupost_id ?? '', 'budgets', 'pressupost_id', 'concepte');
   await auxiliarSelect(data.factura_id ?? '', 'facturesClients', 'factura_id', 'facConcepte');
