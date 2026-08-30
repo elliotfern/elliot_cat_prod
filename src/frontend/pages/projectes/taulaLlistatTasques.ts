@@ -2,6 +2,7 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Tasca } from '../../types/Tasca';
+import { formatData } from '../../utils/formataData';
 
 export async function taulaLlistatTasques() {
   const isAdmin = await getIsAdmin();
@@ -138,8 +139,7 @@ export async function taulaLlistatTasques() {
       header: 'Data',
       field: 'planned_date',
       render: (_: unknown, row: Tasca) => {
-        const data = row.planned_date?.trim() ?? '';
-
+        const data = row.planned_date?.trim() ? formatData(row.planned_date) : '';
         return data || '-';
       },
     },

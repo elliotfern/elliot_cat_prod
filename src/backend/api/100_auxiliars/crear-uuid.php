@@ -7,7 +7,7 @@ use App\Utils\Uuid;
 // ─────────────────────────────────────────────
 // CONFIGURACIÓ
 // ─────────────────────────────────────────────
-$taula = 'db_projectes_tasques';
+$taula = 'db_projectes';
 $columnaId = 'id2';              // BINARY(16), nou UUID
 $columnaFiltre = 'id';      // Identificador actual/antic de la fila
 // ─────────────────────────────────────────────

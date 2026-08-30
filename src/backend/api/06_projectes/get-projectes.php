@@ -44,6 +44,7 @@ if ($slug === 'home') {
     // TODAY
     // ------------------------------------------------
 
+    // TASQUES
     $sqlToday = <<<SQL
         SELECT
             t.id,
@@ -72,7 +73,7 @@ if ($slug === 'home') {
     SQL;
 
     // ------------------------------------------------
-    // BLOCKED
+    // TASQUES EN CURS
     // ------------------------------------------------
 
     $sqlBlocked = <<<SQL
@@ -107,7 +108,7 @@ if ($slug === 'home') {
 
     $sqlActive = <<<SQL
         SELECT
-            p.id AS project_id,
+            p.id AS projecte_id,
             p.projecte AS project_name,
             p.prioritat AS project_priority,
             p.categoria AS category_name,

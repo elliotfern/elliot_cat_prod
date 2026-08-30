@@ -2,6 +2,7 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { ProjecteDetalls } from '../../types/Projecte';
+import { formatData } from '../../utils/formataData';
 
 export async function taulaLlistatProjectes() {
   const isAdmin = await getIsAdmin();
@@ -84,11 +85,15 @@ export async function taulaLlistatProjectes() {
       header: 'Dates',
       field: 'data_inici',
       render: (_: unknown, row: ProjecteDetalls) => {
-        const startDate = row.data_inici?.trim() ?? '';
-        const endDate = row.data_fi?.trim() ?? '';
-        const data = `${startDate} - ${endDate}`.trim();
+        const startDate = row.data_inici?.trim() ? formatData(row.data_inici) : '';
 
-        return data || '-';
+        const endDate = row.data_fi?.trim() ? formatData(row.data_fi) : '';
+
+        if (!startDate && !endDate) {
+          return '-';
+        }
+
+        return `${startDate} - ${endDate}`;
       },
     },
     {
