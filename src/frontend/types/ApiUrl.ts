@@ -43,6 +43,7 @@ export type ApiUrls = {
     PROVEIDOR_ID: string;
     DESPESA_ID: string;
     IMATGE_ID: (id: string) => string;
+    PAISOS: string;
   };
   POST: {
     PERFIL_CV: string;
@@ -107,5 +108,7 @@ export type ApiUrls = {
     IMATGE: string;
     GALERIA_IMATGES: string;
   };
-  DELETE: {};
+  DELETE: {
+    PAIS: string;
+  };
 };

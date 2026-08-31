@@ -1,8 +1,8 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { Imatge } from '../../types/Imatge';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
-import { renderFormInputs } from '../../utils/renderInputsForm';
+import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 
 export async function formImatge(isUpdate: boolean, id?: string) {
   const form = document.getElementById('uploadImgForm');

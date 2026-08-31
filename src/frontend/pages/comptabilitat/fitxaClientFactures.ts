@@ -2,7 +2,7 @@ import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { FacturaClient } from '../../types/Client';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-import { Button } from '../../ui/button';
+import { Button } from '../../Presentation/Components/Button/Button';
 import { API_URLS } from '../../utils/apiUrls';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';
 import { formatEuro } from '../../utils/locales/formatEuro';

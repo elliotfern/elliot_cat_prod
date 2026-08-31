@@ -600,7 +600,7 @@ $routes = [
     // PAISOS
     '/api/paisos/post' => [
         'view' => '../src/backend/api/24_paisos/post-paisos.php',
-        'needs_session' => false,
+        'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true
@@ -608,7 +608,15 @@ $routes = [
 
     '/api/paisos/put' => [
         'view' => '../src/backend/api/24_paisos/put-paisos.php',
-        'needs_session' => false,
+        'needs_session' => true,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
+    '/api/paisos/delete' => [
+        'view' => '../src/backend/api/24_paisos/delete-paisos.php',
+        'needs_session' => true,
         'header_footer' => false,
         'header_menu_footer' => false,
         'apiSenseHTML' => true

@@ -1,6 +1,8 @@
+import { formDataToObject } from '../Presentation/Utils/formDataToObject';
 import { Missatges } from './locales/missatges';
-import { missatgesBackend } from './missatgesBackend';
-import { resetForm } from './resetForm';
+import { missatgesBackend } from '../Presentation/Utils/missatgesBackend';
+import { resetForm } from '../Presentation/Utils/resetForm';
+import { markInvalidFields } from '../Presentation/Utils/formErrors';
 
 type SuccessBehavior = 'none' | 'hide' | 'disable';
 
@@ -27,112 +29,6 @@ function getElements(form: HTMLFormElement) {
   }
 
   return { okMessageDiv, okTextDiv, errMessageDiv, errTextDiv };
-}
-
-function setChoicesError(select: HTMLSelectElement, message: string) {
-  const wrapper = select.closest('.choices');
-  if (!wrapper) return;
-
-  // limpiar error anterior
-  const old = wrapper.parentElement?.querySelector('.choices-error');
-  if (old) old.remove();
-
-  // marcar visualmente
-  wrapper.classList.add('is-invalid');
-
-  // crear mensaje inline
-  const errorDiv = document.createElement('div');
-  errorDiv.className = 'choices-error text-danger small mt-1';
-  errorDiv.innerHTML = message;
-
-  // insertar debajo del componente
-  wrapper.parentElement?.appendChild(errorDiv);
-}
-
-function clearChoicesErrors(form: HTMLFormElement) {
-  form.querySelectorAll('.choices.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
-
-  form.querySelectorAll('.choices-error').forEach((el) => el.remove());
-}
-
-function markInvalidFields(form: HTMLFormElement, errors: any) {
-  // reset visual state
-  form.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
-  form.querySelectorAll('.invalid-feedback').forEach((el) => (el.innerHTML = ''));
-  clearChoicesErrors(form);
-
-  if (!errors || typeof errors !== 'object') return;
-
-  for (const [field, errorRaw] of Object.entries(errors)) {
-    const error = errorRaw as FieldError;
-
-    const el = form.querySelector(`[name="${field}"]`);
-    if (!el) continue;
-
-    const label = error.label ?? field;
-
-    const messages = normalizeFieldErrors(error);
-
-    const htmlMessages = messages.filter(Boolean).join('<br>');
-
-    if (!htmlMessages) continue;
-
-    if (el.tagName !== 'SELECT') {
-      el.classList.add('is-invalid');
-
-      const errorBox = document.getElementById(`error-${field}`);
-
-      if (errorBox) {
-        errorBox.innerHTML = `
-        <div class="fw-semibold">${label}</div>
-        <div>${htmlMessages}</div>
-      `;
-      }
-
-      continue;
-    }
-
-    setChoicesError(
-      el as HTMLSelectElement,
-      `
-      <div class="fw-semibold">${label}</div>
-      <div>${htmlMessages}</div>
-    `
-    );
-  }
-}
-
-function normalizeFieldErrors(error: any): string[] {
-  if (!error) return [];
-
-  if (Array.isArray(error.messages)) return error.messages;
-
-  if (typeof error.messages === 'string') return [error.messages];
-
-  return [];
-}
-
-/**
- * Normaliza FormData -> object
- */
-function formDataToObject(form: HTMLFormElement): Record<string, unknown> {
-  const formData = new FormData(form);
-  const data: Record<string, unknown> = {};
-
-  for (const [key, value] of formData.entries()) {
-    const isArray = key.endsWith('[]');
-    const cleanKey = isArray ? key.replace('[]', '') : key;
-
-    if (isArray) {
-      const arr = (data[cleanKey] as unknown[] | undefined) ?? [];
-      arr.push(value);
-      data[cleanKey] = arr;
-    } else {
-      data[cleanKey] = value;
-    }
-  }
-
-  return data;
 }
 
 /**

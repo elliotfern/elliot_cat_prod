@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/bootstrap": "^5.2.11",
     "@types/eslint": "^9.6.1",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^26.1.2",
@@ -36,6 +37,7 @@
   },
   "homepage": "https://github.com/elliotfern/elliotfern-intranet#readme",
   "dependencies": {
+    "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",
     "choices.js": "^11.2.3",
     "hls.js": "^1.7.0",

@@ -1,4 +1,14 @@
-export function missatgesBackend({ tipus, missatge, contenidor, text, altreContenidor }: { tipus: 'success' | 'error'; missatge: string; contenidor: HTMLElement; text: HTMLElement; altreContenidor?: HTMLElement }): void {
+type MissatgeTipus = 'success' | 'error';
+
+interface MissatgeOptions {
+  tipus: MissatgeTipus;
+  missatge: string;
+  contenidor: HTMLElement;
+  text: HTMLElement;
+  altreContenidor?: HTMLElement;
+}
+
+export function missatgesBackend({ tipus, missatge, contenidor, text, altreContenidor }: MissatgeOptions): void {
   // Ocultar el otro mensaje
   if (altreContenidor) {
     altreContenidor.classList.add('d-none');
@@ -8,13 +18,16 @@ export function missatgesBackend({ tipus, missatge, contenidor, text, altreConte
   const heading = tipus === 'success' ? 'Transmissió de dades correcta!' : 'Error en les dades!';
 
   text.innerHTML = `
-    <h4 class="alert-heading"><strong>${heading}</strong></h4>
+    <h4 class="alert-heading">
+      <strong>${heading}</strong>
+    </h4>
     <div class="mt-2">${missatge}</div>
   `;
 
   // Mostrar el mensaje actual
   contenidor.classList.remove('d-none');
   contenidor.classList.remove('alert-success', 'alert-danger');
+
   contenidor.classList.add(tipus === 'success' ? 'alert-success' : 'alert-danger');
 
   contenidor.scrollIntoView({

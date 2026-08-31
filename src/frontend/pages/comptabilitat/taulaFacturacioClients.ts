@@ -4,7 +4,7 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Factura } from '../../types/Factura';
 import { API_URLS } from '../../utils/apiUrls';
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { formatEuro } from '../../utils/locales/formatEuro';
 
 // Generador PDF por idioma

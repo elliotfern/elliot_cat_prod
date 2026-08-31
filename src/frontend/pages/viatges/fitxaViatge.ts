@@ -1,7 +1,7 @@
 import { renderFitxaInformacio } from '../../components/renderFitxaInformacio/renderFitxaInformacio';
 import { getPageType } from '../../utils/urlPath';
 import { formatDataCatala } from '../../utils/formataData';
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { Viatge } from '../../types/Viatge';
 
 export async function fitxaViatge() {

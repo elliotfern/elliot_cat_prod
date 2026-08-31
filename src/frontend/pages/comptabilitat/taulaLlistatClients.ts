@@ -3,7 +3,7 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Client } from '../../types/Client';
 import { API_URLS } from '../../utils/apiUrls';
-import { Button } from '../../ui/button';
+import { Button } from '../../Presentation/Components/Button/Button';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';
 import { mostrar } from '../../utils/renderText';
 

@@ -1,9 +1,9 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { Link } from '../../types/Link';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
-import { renderFormInputs } from '../../utils/renderInputsForm';
+import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 import { API_BASE } from '../../utils/urls';
 
 type SubTema = {

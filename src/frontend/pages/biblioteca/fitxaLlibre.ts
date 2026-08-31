@@ -1,4 +1,4 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { renderFitxa } from '../../utils/renderFitxa';
 import { mapLlibreToFitxa } from '../../components/mappers/llibre';
 import { Llibre } from '../../types/Llibre';

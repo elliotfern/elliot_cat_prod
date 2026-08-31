@@ -1,6 +1,6 @@
 // src/frontend/services/auth/isAdmin.ts
 
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 
 export type MeResponse =
   | {

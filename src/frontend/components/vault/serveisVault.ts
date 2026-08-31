@@ -3,7 +3,7 @@ import { formatData } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { Vault, TwoFACodeResponse } from '../../types/Vault';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 
 export async function serveisVaultApi() {
   const isAdmin = await getIsAdmin(); // Comprobar si es admin

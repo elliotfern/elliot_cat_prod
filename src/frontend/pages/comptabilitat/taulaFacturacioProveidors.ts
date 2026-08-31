@@ -3,7 +3,7 @@ import { formatData } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { API_URLS } from '../../utils/apiUrls';
-import { Button } from '../../ui/button';
+import { Button } from '../../Presentation/Components/Button/Button';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';
 import { formatEuro } from '../../utils/locales/formatEuro';
 

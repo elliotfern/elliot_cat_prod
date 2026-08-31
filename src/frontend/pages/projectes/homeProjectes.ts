@@ -1,4 +1,4 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { formatData } from '../../utils/formataData';
 
 // ------------------------------------------------

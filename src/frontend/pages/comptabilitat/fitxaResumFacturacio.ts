@@ -1,4 +1,4 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { renderCapcalera, SelectorComptabilitat, onCanviEmissor, onCanviExercici, actualizarExercicis, actualizarCapcalera } from './ResumFacturacio/capcalera';
 import { getEmissor, getEmissorsComptabilitat, getExercicisDisponibles } from './ResumFacturacio/emissors';
 import { EvolucioMensualResponse, renderEvolucioMensual } from './ResumFacturacio/evolucioMensual';

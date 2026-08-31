@@ -1,7 +1,7 @@
 // src/utils/auxiliarSelect.ts
 import Choices from 'choices.js';
 import 'choices.js/public/assets/styles/choices.min.css';
-import { api } from '../core/api/client';
+import { api } from '../Infrastructure/Api/Client/ApiClient';
 
 type Item = { id: number | string; [key: string]: unknown };
 

@@ -1,5 +1,5 @@
 import { mapPersona, mapPersonaToFitxa } from '../../components/mappers/persona';
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { Persona } from '../../types/Persona';
 import { PersonaView } from '../../types/PersonaView';
 import { renderFitxa } from '../../utils/renderFitxa';

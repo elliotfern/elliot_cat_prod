@@ -1,3 +1,5 @@
+import { formPais } from '../../Presentation/Pais/FormPais';
+import { taulaLlistatPaisos } from '../../Presentation/Pais/TaulaLlistatPaisos';
 import { getPageType } from '../../utils/urlPath';
 import { formSubTema } from '../adreces/formSubTema';
 import { formTema } from '../adreces/formTema';
@@ -9,12 +11,10 @@ import { formCiutat } from './formCiutat';
 import { formGaleriaImatges } from './formGaleriaImatges';
 import { formGrupPersones } from './formGrupPersones';
 import { formImatge } from './formImatge';
-import { formPais } from './formPais';
 import { taulaLlistatGrupsPersones } from './llistatGrup';
 import { taulaLlistatCiutats } from './taulaLlistatCiutats';
 import { taulaLlistatGaleriaImatges } from './taulaLlistatGaleriaImatges';
 import { taulaLlistatImatges } from './taulaLlistatImatges';
-import { taulaLlistatPaisos } from './taulaLlistatPaisos';
 
 const url = window.location.href;
 const pageType = getPageType(url);

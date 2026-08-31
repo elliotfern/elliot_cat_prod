@@ -3,7 +3,7 @@ import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { mostrar } from '../../utils/renderText';
-import { Button } from '../../ui/button';
+import { Button } from '../../Presentation/Components/Button/Button';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';
 import { API_URLS } from '../../utils/apiUrls';
 

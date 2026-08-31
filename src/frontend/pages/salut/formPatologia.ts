@@ -1,7 +1,7 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
-import { renderFormInputs } from '../../utils/renderInputsForm';
+import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 import { API_BASE } from '../../utils/urls';
 
 type Medicament = {

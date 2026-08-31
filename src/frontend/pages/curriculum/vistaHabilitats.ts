@@ -1,5 +1,5 @@
 // src/pages/curriculum/vistaHabilitats.ts
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { HabilitatItem } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
 import { DOMAIN_IMG } from '../../utils/urls';

@@ -1,8 +1,8 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { Pressupost } from '../../types/Pressupost';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
-import { renderFormInputs } from '../../utils/renderInputsForm';
+import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 
 export async function formPressupost(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formPressupost') as HTMLFormElement | null;

@@ -1,4 +1,4 @@
-import { API_BASE } from '../../utils/urls';
+import { API_BASE } from '../../../utils/urls';
 import { ApiError, ApiResponse } from './types';
 import { buildQueryParams } from './utils';
 

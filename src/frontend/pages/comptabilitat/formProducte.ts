@@ -1,8 +1,8 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { Producte } from '../../types/Producte';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
-import { renderFormInputs } from '../../utils/renderInputsForm';
+import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 
 export async function formProducte(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formProducte') as HTMLFormElement | null;

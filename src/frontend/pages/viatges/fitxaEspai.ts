@@ -3,7 +3,7 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css'; // Importar el CSS de Leaflet
 import { Espai } from '../../types/Espai';
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 
 export async function fitxaEspai(espai: string) {
   const isAdmin = await getIsAdmin();

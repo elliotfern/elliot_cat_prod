@@ -1,6 +1,6 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { Client } from '../../types/Client';
-import { Button } from '../../ui/button';
+import { Button } from '../../Presentation/Components/Button/Button';
 import { API_URLS } from '../../utils/apiUrls';
 import { formatDataCatala } from '../../utils/formataData';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';

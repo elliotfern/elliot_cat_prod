@@ -1,4 +1,4 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { RenderTableOptions } from '../../types/TaulaDinamica';
 
 function renderCellContent(content: string | HTMLElement | unknown): string {

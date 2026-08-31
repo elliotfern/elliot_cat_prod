@@ -1,5 +1,5 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { registerDeleteCallback, initDeleteHandlers } from '../../components/renderTaula/handleDelete';
+import { registerDeleteCallback, initDeleteHandlers } from '../../Presentation/Components/Table/handleDelete';
 import { formatData } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';

@@ -1,6 +1,6 @@
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
-import { renderFormInputs } from '../../utils/renderInputsForm';
+import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 import { API_BASE } from '../../utils/urls';
 
 export async function formFacultatiu(isUpdate: boolean, id?: string) {

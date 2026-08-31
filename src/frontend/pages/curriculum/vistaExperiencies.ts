@@ -1,4 +1,4 @@
-import { api } from '../../core/api/client';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { ExperienciaItem } from '../../types/ExperienciaItem';
 import { API_URLS } from '../../utils/apiUrls';
 
