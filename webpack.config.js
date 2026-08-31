@@ -39,7 +39,20 @@ module.exports = {
       {
         test: /\.ts$/,
         exclude: /node_modules/,
-        use: 'ts-loader',
+        use: {
+          loader: 'swc-loader',
+          options: {
+            jsc: {
+              parser: {
+                syntax: 'typescript',
+              },
+              target: 'es2021',
+            },
+            module: {
+              type: 'es6',
+            },
+          },
+        },
       },
       {
         test: /\.css$/,

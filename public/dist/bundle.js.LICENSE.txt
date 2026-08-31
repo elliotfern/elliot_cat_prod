@@ -25,4 +25,4 @@
 
 /*! @license DOMPurify 3.4.2 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.4.2/LICENSE */
 
-/*! choices.js v11.2.3 | © 2026 Josh Johnson | https://github.com/Choices-js/Choices#readme */
+/*! choices.js v11.2.4 | © 2026 Josh Johnson | https://github.com/Choices-js/Choices#readme */
