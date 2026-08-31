@@ -1,3 +1,5 @@
+import { formCiutat } from '../../Presentation/Ciutat/FormCiutat';
+import { taulaLlistatCiutats } from '../../Presentation/Ciutat/TaulaLlistatCiutats';
 import { formPais } from '../../Presentation/Pais/FormPais';
 import { taulaLlistatPaisos } from '../../Presentation/Pais/TaulaLlistatPaisos';
 import { getPageType } from '../../utils/urlPath';
@@ -7,12 +9,12 @@ import { taulaLlistatSubTemes } from '../adreces/taulaLlistatSubTemes';
 import { taulaLlistatTemes } from '../adreces/taulaLlistatTemes';
 import { fitxaGaleriaImatge } from './fitxaGaleriaImatges';
 import { fitxaImatge } from './fitxaImatge';
-import { formCiutat } from './formCiutat';
+
 import { formGaleriaImatges } from './formGaleriaImatges';
 import { formGrupPersones } from './formGrupPersones';
 import { formImatge } from './formImatge';
 import { taulaLlistatGrupsPersones } from './llistatGrup';
-import { taulaLlistatCiutats } from './taulaLlistatCiutats';
+
 import { taulaLlistatGaleriaImatges } from './taulaLlistatGaleriaImatges';
 import { taulaLlistatImatges } from './taulaLlistatImatges';
 

@@ -530,6 +530,14 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    '/api/ciutats/delete' => [
+        'view' => '../src/backend/api/100_auxiliars/ciutats/delete-ciutats.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     // 21 Agenda esdeveniments
     '/api/agenda/get/{slug}' => [
         'view' => '../src/backend/api/21_agenda/get-agenda.php',
