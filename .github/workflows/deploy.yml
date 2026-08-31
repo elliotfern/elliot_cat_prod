@@ -145,8 +145,11 @@ jobs:
           REMOTE="epgylzqu@87.98.230.129"
           REMOTE_DIR="/home/epgylzqu/elliot.cat/"
 
-          rsync -az --delete \
-          --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
+
+          time rsync -az --delete \
+            --stats \
+            --human-readable \
+            --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
           --exclude ".git/" \
           --exclude ".github/" \
           --exclude "node_modules/" \
