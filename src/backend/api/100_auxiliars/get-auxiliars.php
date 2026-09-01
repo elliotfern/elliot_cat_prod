@@ -1207,18 +1207,21 @@ if ($slug === 'directors') {
 } else if ($slug === "llistatContactes") {
 
     $sql = <<<SQL
-        SELECT
-            c.id,
-            CONCAT(
-            c.nom,
-            ' ',
-            c.cognoms,
-            ' (',
-            c.empresa,
-            ')') AS contacte
-        FROM %s AS c
-        ORDER BY contacte ASC
-    SQL;
+                SELECT
+                c.id,
+                CONCAT_WS(
+                    ' ',
+                    NULLIF(c.nom, ''),
+                    NULLIF(c.cognoms, ''),
+                    CASE
+                        WHEN NULLIF(c.empresa, '') IS NOT NULL
+                        THEN CONCAT('(', c.empresa, ')')
+                        ELSE NULL
+                    END
+                ) AS contacte
+            FROM %s AS c
+            ORDER BY contacte ASC
+            SQL;
 
     $query = sprintf(
         $sql,
