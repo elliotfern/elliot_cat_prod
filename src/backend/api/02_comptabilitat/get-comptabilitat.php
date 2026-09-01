@@ -620,24 +620,12 @@ if ($slug === 'clients') {
             c.empresa
 
         FROM %s AS ic
-
-        LEFT JOIN %s AS vt
-            ON ic.tipus_iva = vt.id
-
-        LEFT JOIN %s AS ist
-            ON ist.id = ic.estat
-
-        LEFT JOIN %s AS pt
-            ON ic.metode_pagament = pt.id
-
-        LEFT JOIN %s AS cl
-            ON ic.client_id = cl.id
-
-        LEFT JOIN %s AS c
-            ON cl.contacte_id = c.id
-
+        LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
+        LEFT JOIN %s AS ist ON ist.id = ic.estat
+        LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
+        LEFT JOIN %s AS cl ON ic.client_id = cl.contacte_id
+        LEFT JOIN %s AS c ON cl.contacte_id = c.id
         WHERE ic.emissor_id = :emissor_id
-
         ORDER BY ic.id DESC
     SQL;
 
@@ -760,13 +748,11 @@ if ($slug === 'clients') {
 
             FROM %s AS ic
             LEFT JOIN %s AS vt ON ic.tipus_iva = vt.id
-
             LEFT JOIN %s AS ist ON ic.estat = ist.id
-
             LEFT JOIN %s AS pt ON ic.metode_pagament = pt.id
 
             -- CLIENT
-            LEFT JOIN %s AS c ON ic.client_id = c.id
+            LEFT JOIN %s AS c ON ic.client_id = c.contacte_id
 
             -- CONTACTE
             LEFT JOIN %s AS co ON c.contacte_id = co.id
