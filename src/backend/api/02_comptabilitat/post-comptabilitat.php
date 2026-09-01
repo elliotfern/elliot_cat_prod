@@ -121,7 +121,7 @@ if ($slug === 'clients') {
             ) VALUES (
                 :id,
                 :contacte_id,
-                :estat_id,
+                :estat_id
             )
         ");
 
