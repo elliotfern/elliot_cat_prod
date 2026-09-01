@@ -1202,6 +1202,55 @@ if ($slug === 'directors') {
         );
     }
 
+    // Llistat contactes
+    // ruta GET => "/api/cinema/get/auxiliars/llistatContactes"
+} else if ($slug === "llistatContactes") {
+
+    $sql = <<<SQL
+        SELECT
+            c.id,
+            CONCAT(
+            c.nom,
+            ' ',
+            c.cognoms,
+            ' (',
+            c.empresa,
+            ')') AS contacte
+        FROM %s AS c
+        ORDER BY contacte ASC
+    SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_CONTACTES, $pdo)
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // Llistat tipus IVA
     // ruta GET => "/api/cinema/get/auxiliars/tipusIVA"
 } else if ($slug === "tipusIVA") {

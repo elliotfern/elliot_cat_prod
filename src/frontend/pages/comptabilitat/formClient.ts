@@ -44,7 +44,7 @@ export async function formClient(isUpdate: boolean, id?: string) {
   }
 
   // --- Selects auxiliares (preselección segura) ---
-  await auxiliarSelect(data.contacte_id ?? 0, 'clients', 'contacte_id', 'client');
+  await auxiliarSelect(data.contacte_id ?? 0, 'llistatContactes', 'contacte_id', 'contacte');
 
   await auxiliarSelect(data.estat_id ?? null, 'estatsClients', 'estat_id', 'estat');
 }
