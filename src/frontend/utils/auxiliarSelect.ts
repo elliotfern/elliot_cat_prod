@@ -1,5 +1,5 @@
 // src/utils/auxiliarSelect.ts
-import Choices from 'choices.js';
+import Choices, { Options } from 'choices.js';
 import 'choices.js/public/assets/styles/choices.min.css';
 import { api } from '../Infrastructure/Api/Client/ApiClient';
 
@@ -19,7 +19,7 @@ const isEmptySel = (v: unknown): boolean => v === null || v === undefined || v =
  * @param fallbackValue valor a usar si selected es vacío
  * @param config   opciones extra para Choices
  */
-export async function auxiliarSelect(selected: number | string | Array<number | string> | null | undefined, apiUrl: string, elementId: string, valorText: string, fallbackValue?: number | string, config?: any): Promise<Choices | void> {
+export async function auxiliarSelect(selected: number | string | Array<number | string> | null | undefined, apiUrl: string, elementId: string, valorText: string, fallbackValue?: number | string, config?: Options): Promise<Choices | void> {
   try {
     const data = await api.get<Item[]>(`auxiliars/get/${apiUrl}`);
 

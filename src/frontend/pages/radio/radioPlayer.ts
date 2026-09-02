@@ -33,7 +33,7 @@ export interface RadioPlayerConfig {
   /** URL de la API que da información del programa en emisión. Omite junto con parsePrograma si la emisora no tiene una fuente fiable de esta info. */
   programaApiUrl?: string;
   /** Convierte la respuesta cruda (ya parseada de JSON) de esa API en un ProgramaInfo homogéneo. */
-  parsePrograma?: (raw: any) => ProgramaInfo;
+  parsePrograma?: (raw: unknown) => ProgramaInfo;
 
   /** Logo de la emisora. */
   logoUrl: string;

@@ -1,5 +1,14 @@
-interface Window {
-  dayjs: typeof import('dayjs');
+interface TrixBlockAttribute {
+  tagName: string;
+  terminal: boolean;
+  breakOnReturn: boolean;
+  group: boolean;
 }
 
-declare const Trix: any;
+interface TrixConfig {
+  blockAttributes: Record<string, TrixBlockAttribute>;
+}
+
+declare const Trix: {
+  config: TrixConfig;
+};

@@ -17,6 +17,11 @@ type Patologia = {
   medicaments: MedicamentItem[];
 };
 
+type ReceptaResponse = {
+  success: boolean;
+  message?: string;
+};
+
 function showToast(message: string, variant: 'success' | 'danger') {
   let container = document.getElementById('toastContainer');
 
@@ -55,10 +60,10 @@ async function demanarRecepta(id: string, button: HTMLButtonElement) {
       body: JSON.stringify({ id }),
     });
 
-    const result = await response.json();
+    const result: ReceptaResponse = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result?.message || 'Error enviant la recepta');
+      throw new Error(result.message || 'Error enviant la recepta');
     }
 
     button.textContent = 'Recepta demanada ✓';
@@ -78,7 +83,7 @@ async function demanarRecepta(id: string, button: HTMLButtonElement) {
 
 // Es penja a window perquè renderDynamicTable pinta HTML com a string (innerHTML),
 // així que el onclick inline necessita una funció accessible globalment.
-(window as any).__demanarRecepta = (id: string, button: HTMLButtonElement) => {
+window.__demanarRecepta = (id: string, button: HTMLButtonElement) => {
   demanarRecepta(id, button);
 };
 
@@ -129,22 +134,22 @@ export async function taulaLlistatPatologies() {
     },
     {
       header: 'Medicaments',
-      field: 'medicaments' as any,
+      field: 'medicaments',
       render: (_: unknown, row: Patologia) => renderMedicamentsCell(row),
     },
     {
       header: 'Dosis',
-      field: 'medicaments' as any,
+      field: 'medicaments',
       render: (_: unknown, row: Patologia) => renderDosisCell(row),
     },
     {
       header: 'Recepta',
-      field: 'medicaments' as any,
+      field: 'medicaments',
       render: (_: unknown, row: Patologia) => renderReceptaCell(row),
     },
     {
       header: 'Accions',
-      field: 'medicaments' as any,
+      field: 'medicaments',
       render: (_: unknown, row: Patologia) => renderAccionsCell(row),
     },
 

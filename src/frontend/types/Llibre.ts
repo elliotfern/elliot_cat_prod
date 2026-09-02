@@ -39,5 +39,5 @@ type AutorData = {
   id: string;
   nom: string | null;
   cognoms: string | null;
-  slug: string | null;
+  slug: string;
 };

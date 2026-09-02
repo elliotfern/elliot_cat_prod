@@ -1,10 +1,15 @@
 import { state } from '../../../types/Esdeveniment';
 import { loadEventos } from './llistatEsdeveniments';
 
-export function renderSubetapas(container: HTMLElement, subetapas: any[]) {
+interface Subetapa {
+  id: string;
+  nomSubEtapa: string;
+}
+
+export function renderSubetapas(container: HTMLElement, subetapas: Subetapa[]): void {
   container.innerHTML = '';
 
-  if (!subetapas || subetapas.length === 0) {
+  if (subetapas.length === 0) {
     container.innerHTML = `<p>No hi ha subetapes disponibles</p>`;
     return;
   }
@@ -24,11 +29,12 @@ export function renderSubetapas(container: HTMLElement, subetapas: any[]) {
     btn.onclick = () => {
       state.subetapa = sub.id;
 
-      // UI activo
-      wrapper.querySelectorAll('button').forEach((b) => b.classList.remove('active'));
+      wrapper.querySelectorAll('button').forEach((b) => {
+        b.classList.remove('active');
+      });
+
       btn.classList.add('active');
 
-      // 👇 aquí filtras
       loadEventos();
     };
 

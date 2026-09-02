@@ -24,15 +24,26 @@ export function showSuccess(form: HTMLFormElement, message: string): void {
   });
 }
 
-export function showError(form: HTMLFormElement, error: any, defaultMessage: string): void {
+interface ApiError {
+  message?: string;
+  errors?: unknown;
+}
+
+function isApiError(err: unknown): err is ApiError {
+  return typeof err === 'object' && err !== null;
+}
+
+export function showError(form: HTMLFormElement, error: unknown, defaultMessage: string): void {
   const errMessageDiv = document.getElementById('errMessage');
   const errTextDiv = document.getElementById('errText');
   const okMessageDiv = document.getElementById('okMessage');
 
+  const apiError = isApiError(error) ? error : undefined;
+
   if (errMessageDiv && errTextDiv) {
     missatgesBackend({
       tipus: 'error',
-      missatge: error?.message || defaultMessage,
+      missatge: apiError?.message || defaultMessage,
       contenidor: errMessageDiv,
       text: errTextDiv,
       altreContenidor: okMessageDiv ?? undefined,
@@ -40,5 +51,5 @@ export function showError(form: HTMLFormElement, error: any, defaultMessage: str
   }
 
   // Marcar errores de los campos
-  markInvalidFields(form, error?.errors);
+  markInvalidFields(form, apiError?.errors);
 }

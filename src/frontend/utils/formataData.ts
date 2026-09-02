@@ -31,10 +31,10 @@ export function formatDataCatala(inputDate: string): string {
   const mesesCatalan = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
 
   // Convertir la fecha
-  let fecha = new Date(inputDate);
-  let day = ('0' + fecha.getDate()).slice(-2); // Obtener el día y asegurar que tenga 2 dígitos
-  let month = mesesCatalan[fecha.getMonth()]; // Obtener el nombre del mes en catalán
-  let year = fecha.getFullYear(); // Obtener el año
+  const fecha = new Date(inputDate);
+  const day = ('0' + fecha.getDate()).slice(-2); // Obtener el día y asegurar que tenga 2 dígitos
+  const month = mesesCatalan[fecha.getMonth()]; // Obtener el nombre del mes en catalán
+  const year = fecha.getFullYear(); // Obtener el año
 
   return `${day} ${month} ${year}`;
 }

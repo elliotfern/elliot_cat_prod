@@ -81,10 +81,8 @@ export async function vistaExperiencia(): Promise<void> {
   if (!root) return;
   root.innerHTML = spinner();
 
-  let data: ExperienciaItem[] = [];
-
   try {
-    data = await api.get<ExperienciaItem[]>(API_URLS.GET.EXPERIENCIES);
+    const data = await api.get<ExperienciaItem[]>(API_URLS.GET.EXPERIENCIES);
 
     root.innerHTML = renderTable(data);
   } catch (error) {

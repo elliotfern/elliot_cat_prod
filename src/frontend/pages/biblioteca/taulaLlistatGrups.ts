@@ -3,7 +3,7 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Llibre } from '../../types/Llibre';
 import { DOMAIN_WEB } from '../../utils/urls';
-import { buildFrontUrl, getLangPrefix } from '../../utils/locales/getLangPrefix';
+import { buildFrontUrl } from '../../utils/locales/getLangPrefix';
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -11,7 +11,6 @@ function escapeHtml(s: string): string {
 
 export async function taulaLlistatGrups() {
   const isAdmin = await getIsAdmin();
-  const basePrefix = isAdmin ? 'gestio' : getLangPrefix();
 
   const columns: TaulaDinamica<Llibre>[] = [
     {

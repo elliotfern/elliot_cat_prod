@@ -4,7 +4,7 @@ import { getIsAdmin } from '../../services/auth/isAdmin';
 import { Persona } from '../../types/Persona';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { getLangPrefix } from '../../utils/locales/getLangPrefix';
-import { API_BASE, DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
+import { DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
 
 export async function taulaLlistatAutors() {
   const isAdmin = await getIsAdmin(); // Comprovar si és admin

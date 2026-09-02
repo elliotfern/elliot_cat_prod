@@ -7,12 +7,12 @@ import { buildFrontUrl, getLangPrefix } from '../../utils/locales/getLangPrefix'
 
 function renderAutorsCell(row: Llibre, basePrefix: string): string {
   const base = `${DOMAIN_WEB}/${basePrefix}/base-dades-persones/fitxa-persona/`;
-  const autors = Array.isArray((row as any).autors) ? (row as any).autors : [];
+  const autors = Array.isArray(row.autors) ? row.autors : [];
   if (autors.length === 0) return '';
 
   return autors
-    .filter((a: any) => a && typeof a.slug === 'string' && a.slug.length > 0)
-    .map((a: any) => {
+    .filter((a) => a && typeof a.slug === 'string' && a.slug.length > 0)
+    .map((a) => {
       const fullName = [a.nom, a.cognoms].filter(Boolean).join(' ').trim();
       const label = fullName || a.slug;
       const href = `${base}${encodeURIComponent(a.slug)}`;
@@ -56,7 +56,7 @@ export async function taulaLlistatLlibres() {
       field: 'nomGenCat',
       render: (_: unknown, row: Llibre) => {
         const nomGenCat = row.nomGenCat ?? '';
-        const sub = (row as any).sub_tema ?? (row as any).sub_genere_cat ?? '';
+        const sub = row.sub_tema ?? row.sub_genere_cat ?? '';
         // Si ya tienes sub_tema (nuevo endpoint) mejor
         const text = sub ? `${nomGenCat} (${sub})` : `${nomGenCat}`;
         return text;
@@ -65,7 +65,7 @@ export async function taulaLlistatLlibres() {
 
     {
       header: 'Col·lecció',
-      field: 'grups' as any,
+      field: 'grups',
       render: (_: unknown, row: Llibre) => renderGrupsCell(row, basePrefix),
     },
 

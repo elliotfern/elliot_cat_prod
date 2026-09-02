@@ -61,6 +61,7 @@ export async function loginApi(event: Event) {
       window.location.href = redirect;
     }, 800);
   } catch (error) {
+    console.error('Error de connexió amb el servidor:', error);
     showError('Error de connexió amb el servidor');
   }
 }

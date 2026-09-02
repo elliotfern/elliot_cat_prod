@@ -46,7 +46,7 @@ export function resetForm(formId: string) {
 
   // 3) Trix editors: vaciar hidden + el editor visual
   form.querySelectorAll<HTMLInputElement>('input[type="hidden"][id]').forEach((hidden) => {
-    const editor = form.querySelector(`trix-editor[input="${hidden.id}"]`) as any;
+    const editor = form.querySelector(`trix-editor[input="${hidden.id}"]`) as HTMLTrixEditorElement | null;
     if (editor?.editor) {
       editor.editor.loadHTML('');
     }

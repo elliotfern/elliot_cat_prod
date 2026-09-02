@@ -22,7 +22,7 @@ const localeLabel = (loc: string) => LOCALES.find((l) => l.id === loc)?.label ??
 // URL del botón de edición
 const editUrl = (locale: string) => `${window.location.origin}/gestio/curriculum/modifica-perfil-i18n/1/${locale}`;
 
-function layoutHTML(perfilId: number) {
+function layoutHTML() {
   const tabs = LOCALES.map(
     (l, i) =>
       `<button class="nav-link ${i === 0 ? 'active' : ''}" data-locale="${l.id}" type="button" role="tab" aria-selected="${i === 0}">
@@ -45,7 +45,7 @@ export async function vistaPerfilCVi18n(id = 1): Promise<void> {
   if (!root) return;
 
   // Dibuja UI base
-  root.innerHTML = layoutHTML(id);
+  root.innerHTML = layoutHTML();
 
   const content = root.querySelector('#localeContent') as HTMLElement;
   const tabBar = root.querySelector('.nav-tabs') as HTMLElement;

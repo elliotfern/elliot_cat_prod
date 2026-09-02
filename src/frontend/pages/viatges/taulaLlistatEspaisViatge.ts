@@ -1,6 +1,5 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { formatData } from '../../utils/formataData';
-import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Espai } from '../../types/Espai';
@@ -36,7 +35,7 @@ export async function taulaLlistatEspaisViatges(slug: string) {
 
   renderDynamicTable({
     url: `viatges/get/llistatEspaisViatge?viatge=${slug}`,
-    containerId: 'taulaLlistatEspaisViatge',
+    containerId: 'atge',
     columns,
     filterKeys: ['nom', 'ciutat'],
     filterByField: 'ciutat',

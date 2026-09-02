@@ -40,7 +40,13 @@ function renderCellContent(content: string | HTMLElement | unknown): string {
 function getNestedValue(obj: unknown, path?: string): unknown {
   if (!path) return obj;
 
-  return path.split('.').reduce((acc: any, key) => acc?.[key], obj);
+  return path.split('.').reduce((acc: unknown, key) => {
+    if (typeof acc !== 'object' || acc === null) {
+      return undefined;
+    }
+
+    return key in acc ? (acc as Record<string, unknown>)[key] : undefined;
+  }, obj);
 }
 
 export function taulaDinamica<T extends object>(options: TaulaRenderOptions<T>): void {
@@ -71,7 +77,7 @@ export function taulaDinamica<T extends object>(options: TaulaRenderOptions<T>):
   let currentPage = 1;
   let filteredData = [...data];
 
-  let activeButtonFilters: Record<string, string> = {};
+  const activeButtonFilters: Record<string, string> = {};
 
   let sortField: string | null = null;
   let sortDirection: 'asc' | 'desc' | null = null;
@@ -139,7 +145,7 @@ export function taulaDinamica<T extends object>(options: TaulaRenderOptions<T>):
     }
 
     return s
-      .split(splitter as any)
+      .split(splitter)
       .map((x) => (filterSplitTrim ? x.trim() : x))
       .filter(Boolean);
   }

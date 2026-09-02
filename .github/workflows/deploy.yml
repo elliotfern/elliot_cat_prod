@@ -115,6 +115,9 @@ jobs:
       - name: TypeScript type check
         run: npx tsc --noEmit
 
+      - name: Lint (npm)
+        run: npm run lint
+
       - name: Build frontend assets
         env:
           CI: true

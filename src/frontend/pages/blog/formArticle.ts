@@ -26,7 +26,7 @@ function fillFormFromData(form: HTMLFormElement, data: Record<string, unknown>) 
   for (const [key, val] of Object.entries(data)) {
     const el = document.getElementById(key) as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
     if (!el) continue;
-    if ('value' in el && (el as any).value === '') el.value = String(val ?? '');
+    if (el.value === '') el.value = String(val ?? '');
   }
 }
 
@@ -100,8 +100,6 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
     fillFormFromData(form, data as Record<string, unknown>);
 
     // 5) Dates (datetime-local)
-    const postDateEl = document.getElementById('post_date') as HTMLInputElement | null;
-    const postModEl = document.getElementById('post_modified') as HTMLInputElement | null;
 
     // 6) Trix
     setTrixHTML('post_content', String(data.post_content ?? ''));

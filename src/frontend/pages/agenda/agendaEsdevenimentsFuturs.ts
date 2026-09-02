@@ -138,8 +138,8 @@ export async function carregarAgendaFutura(usuariId: number): Promise<void> {
       return;
     }
 
-    const json: ApiResponse<AgendaEsdeveniment[]> | any = await res.json();
-    const events: AgendaEsdeveniment[] = json.data ?? json ?? [];
+    const json: ApiResponse<AgendaEsdeveniment[]> = await res.json();
+    const events: AgendaEsdeveniment[] = json.data ?? [];
 
     if (!events.length) {
       container.innerHTML = '<p>No tens esdeveniments futurs programats.</p>';

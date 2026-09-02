@@ -3,15 +3,6 @@ import { PerfilCV } from '../../types/Curriculum';
 import { API_URLS } from '../../utils/apiUrls';
 import { DOMAIN_IMG, DOMAIN_WEB } from '../../utils/urls';
 
-// Mapa opcional per mostrar disponibilitat (ajusta si tens catàleg propi)
-const DISPON: Record<number, string> = {
-  1: 'Immediata',
-  2: 'Amb preavís',
-  3: 'Freelance',
-  4: 'Mitja jornada',
-  5: 'Jornada completa',
-};
-
 const qsId = (): number => {
   const v = new URLSearchParams(window.location.search).get('id');
   const n = v ? Number(v) : NaN;
@@ -41,8 +32,6 @@ function resolveImg(nameImg?: string | null): string | null {
 
 function renderCard(d: PerfilCV): string {
   const imgUrl = resolveImg(d.nameImg);
-  const dispoTxt = d.disponibilitat && DISPON[d.disponibilitat] ? DISPON[d.disponibilitat] : '—';
-  const visTxt = d.visibilitat === 1 || d.visibilitat === true ? 'Sí' : 'No';
   const urlEdit = editUrl(d.id);
 
   return `

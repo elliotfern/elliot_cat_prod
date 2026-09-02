@@ -1,21 +1,25 @@
-export function setWithExpiry(key: string, value: any, ttlSeconds: number) {
-  const now = new Date();
-  const item = {
+interface StoredItem {
+  value: unknown;
+  expiry: number;
+}
+
+export function setWithExpiry(key: string, value: unknown, ttlSeconds: number): void {
+  const item: StoredItem = {
     value,
-    expiry: now.getTime() + ttlSeconds * 1000, // ttl en milisegundos
+    expiry: Date.now() + ttlSeconds * 1000,
   };
+
   localStorage.setItem(key, JSON.stringify(item));
 }
 
-// Leer valor con expiración
-export function getWithExpiry(key: string): any | null {
+export function getWithExpiry(key: string): unknown | null {
   const itemStr = localStorage.getItem(key);
+
   if (!itemStr) return null;
 
-  const item = JSON.parse(itemStr);
-  const now = new Date();
+  const item = JSON.parse(itemStr) as StoredItem;
 
-  if (now.getTime() > item.expiry) {
+  if (Date.now() > item.expiry) {
     localStorage.removeItem(key);
     return null;
   }

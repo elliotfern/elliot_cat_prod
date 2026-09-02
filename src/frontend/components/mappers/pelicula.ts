@@ -1,28 +1,11 @@
+import { Pelicula } from '../../types/Pelicula';
 import { formatData } from '../../utils/formataData';
-
-interface PeliculaApi {
-  id: string;
-  pelicula: string;
-  pelicula_ca: string | null;
-  slug: string;
-  any: string | number | null;
-  descripcio: string | null;
-  nameImg: string | null;
-  pais: string | null;
-  idioma: string | null;
-  genere: string | null;
-  dateCreated?: string | undefined;
-  dateModified?: string | undefined;
-  nom: string | null;
-  cognoms: string | null;
-  slugDirector: string | null;
-}
 
 function safeDate(date?: string | null): string {
   return date ? formatData(date) : '';
 }
 
-export function mapPeliculaToFitxa(api: PeliculaApi) {
+export function mapPeliculaToFitxa(api: Pelicula) {
   return {
     title: api.pelicula,
 

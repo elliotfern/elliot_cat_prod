@@ -1,27 +1,10 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
+import { Proveidor } from '../../types/Proveidor';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { formatDataCatala } from '../../utils/formataData';
 import { formatEuro } from '../../utils/locales/formatEuro';
 import { DOMAIN_WEB } from '../../utils/urls';
-
-export interface Proveidor {
-  id: string;
-  client_id: string;
-  concepte?: string;
-  import?: string;
-  data: string;
-  nom?: string;
-  cognoms?: string;
-  empresa?: string;
-  estat?: string;
-  producte?: string;
-  any?: string;
-  num: string;
-
-  created_at?: string;
-  updated_at?: string;
-}
 
 export async function taulaPressupostos() {
   const isAdmin = await getIsAdmin();

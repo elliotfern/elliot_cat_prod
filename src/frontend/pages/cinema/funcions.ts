@@ -1,5 +1,4 @@
 import { getPageType } from '../../utils/urlPath';
-import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { taulaLlistatPelicules } from './taulaLlistatPelicules';
 import { fitxaPelicula } from './fitxaPelicula';
 import { fitxaSerie } from './fitxaSerie';

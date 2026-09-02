@@ -13,12 +13,7 @@ type ApiResponse = {
   [key: string]: unknown;
 };
 
-type FieldError = {
-  label?: string;
-  messages?: string[] | string;
-};
-
-function getElements(form: HTMLFormElement) {
+function getElements() {
   const okMessageDiv = document.getElementById('okMessage');
   const okTextDiv = document.getElementById('okText');
   const errMessageDiv = document.getElementById('errMessage');
@@ -101,7 +96,7 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
     return;
   }
 
-  const ui = getElements(form);
+  const ui = getElements();
 
   try {
     const hasFile = form.querySelector('input[type="file"]') !== null;
@@ -160,8 +155,8 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
     }
 
     return response;
-  } catch (error: any) {
-    const errors = error?.errors;
+  } catch (error) {
+    const errors = error instanceof Error ? undefined : (error as { errors?: unknown })?.errors;
 
     let errorDetails = '';
 
@@ -169,7 +164,7 @@ export async function transmissioDadesDB(event: Event, method: string, formId: s
       errorDetails = Object.values(errors).flat().join('<br>');
     }
 
-    const fullMessage = error?.message || Missatges.error.xarxa;
+    const fullMessage = error instanceof Error ? error.message : Missatges.error.xarxa;
 
     missatgesBackend({
       tipus: 'error',

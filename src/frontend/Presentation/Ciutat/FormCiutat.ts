@@ -85,7 +85,7 @@ export async function formCiutat(isUpdate: boolean, id?: string): Promise<void> 
         await updateCiutat.execute(id, data);
 
         showSuccess(form, 'Dades modificades correctament.');
-      } catch (error: any) {
+      } catch (error) {
         showError(form, error, 'Error modificant les dades.');
       }
     });
@@ -116,7 +116,7 @@ export async function formCiutat(isUpdate: boolean, id?: string): Promise<void> 
       resetForm('formCiutat');
 
       auxiliarSelectData(null, paisos, 'pais_id', 'pais');
-    } catch (error: any) {
+    } catch (error) {
       showError(form, error, 'Error creant la ciutat.');
     }
   });

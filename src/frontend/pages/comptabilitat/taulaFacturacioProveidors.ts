@@ -6,6 +6,7 @@ import { API_URLS } from '../../utils/apiUrls';
 import { Button } from '../../Presentation/Components/Button/Button';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';
 import { formatEuro } from '../../utils/locales/formatEuro';
+import { FacturaProveidor } from '../../types/FacturaProveidor';
 
 export const RECEPTORS: Record<string, string> = {
   '019e3ebaf71370c2860a40a79fb5ad7b': 'Hispano Atlantic Consulting Ltd (juliol 2017 - octubre 2022)',
@@ -28,25 +29,25 @@ export function renderTitolReceptor(receptorId: string) {
 export async function taulaDespeses(receptorId: string, tipus_despesa: string) {
   const isAdmin = await getIsAdmin();
 
-  const columns: TaulaDinamica<any>[] = [
-    { header: 'Data', field: 'data', render: (_: unknown, row: any) => formatData(row.data) },
+  const columns: TaulaDinamica<FacturaProveidor>[] = [
+    { header: 'Data', field: 'data', render: (_: unknown, row: FacturaProveidor) => formatData(row.data) },
     { header: 'Concepte', field: 'concepte' },
     {
       header: 'Proveïdor',
       field: 'proveidorNom',
-      render: (_: unknown, row: any) => `
+      render: (_: unknown, row: FacturaProveidor) => `
         <a href="/gestio/comptabilitat/fitxa-proveidor/${row.proveidor_id}">
           ${row.proveidorNom}
         </a>`,
     },
     { header: 'Categoria', field: 'nomCategoria' },
-    { header: 'Base', field: 'base_imposable', render: (_: unknown, row: any) => `${formatEuro(row.base_imposable)}` },
-    { header: 'IVA', field: 'import_iva', render: (_: unknown, row: any) => `${formatEuro(row.import_iva)}` },
-    { header: 'Total', field: 'total', render: (_: unknown, row: any) => `<strong>${formatEuro(row.total)}</strong>` },
+    { header: 'Base', field: 'base_imposable', render: (_: unknown, row: FacturaProveidor) => `${formatEuro(row.base_imposable)}` },
+    { header: 'IVA', field: 'import_iva', render: (_: unknown, row: FacturaProveidor) => `${formatEuro(row.import_iva)}` },
+    { header: 'Total', field: 'total', render: (_: unknown, row: FacturaProveidor) => `<strong>${formatEuro(row.total)}</strong>` },
     {
       header: 'Pagat',
       field: 'pagat',
-      render: (_: unknown, row: any) =>
+      render: (_: unknown, row: FacturaProveidor) =>
         `<button class="btn btn-sm ${row.pagat ? 'btn-secondary' : 'btn-primary'}">
           ${row.pagat ? 'Pagat' : 'Pendent'}
         </button>`,

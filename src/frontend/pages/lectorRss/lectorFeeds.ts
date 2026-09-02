@@ -76,7 +76,7 @@ export function lectorFeeds(url: string, targetElement: string): void {
         return response.text();
       }
     })
-    .then((data: any) => {
+    .then((data: unknown) => {
       if (typeof data === 'string') {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(data, 'application/xml');

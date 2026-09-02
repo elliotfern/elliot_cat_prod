@@ -69,7 +69,9 @@ function formatDateCa(dateStr: string): string {
 }
 
 function normalizeStatus(status?: string | null): string {
-  return String(status ?? '').trim().toLowerCase();
+  return String(status ?? '')
+    .trim()
+    .toLowerCase();
 }
 
 function renderStatusBadge(status?: string | null): string {
@@ -107,10 +109,24 @@ function buildPublicUrl(slug: string, langId: number): string {
   return `/${code}/historia/article/${safe}`;
 }
 
-function parseApiPayload(json: any): ApiPayload {
-  const data = json?.data ?? json;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
 
-  if (data && Array.isArray(data.items) && data.pagination) return data as ApiPayload;
+function getApiData(json: unknown): unknown {
+  if (isRecord(json) && 'data' in json) {
+    return json.data;
+  }
+
+  return json;
+}
+
+function parseApiPayload(json: unknown): ApiPayload {
+  const data = isRecord(json) && 'data' in json ? json.data : json;
+
+  if (isRecord(data) && Array.isArray(data.items) && isRecord(data.pagination)) {
+    return data as unknown as ApiPayload;
+  }
 
   if (Array.isArray(data)) {
     return {
@@ -128,7 +144,14 @@ function parseApiPayload(json: any): ApiPayload {
 
   return {
     items: [],
-    pagination: { page: 1, limit: 20, total: 0, pages: 1, has_prev: false, has_next: false },
+    pagination: {
+      page: 1,
+      limit: 20,
+      total: 0,
+      pages: 1,
+      has_prev: false,
+      has_next: false,
+    },
   };
 }
 
@@ -136,29 +159,27 @@ async function fetchFacets(): Promise<HistoriaObertaFacets> {
   const url = `https://${window.location.host}/api/blog/get/filtresHistoriaOberta`;
   const r = await fetch(url, { credentials: 'include' });
   const json = await r.json();
-  const data = (json?.data ?? json) as Partial<HistoriaObertaFacets>;
+  const data = getApiData(json) as Partial<HistoriaObertaFacets>;
 
   const courses = Array.isArray(data.courses)
     ? data.courses
-        .filter((c) => c && Number.isFinite(Number((c as any).id)) && typeof (c as any).label === 'string')
+        .filter((c) => c && Number.isFinite(Number(c.id)) && typeof c.label === 'string')
         .map((c) => ({
-          id: Number((c as any).id),
-          ordre: Number((c as any).ordre ?? 0),
-          label: String((c as any).label).trim(),
+          id: Number(c.id),
+          ordre: Number(c.ordre ?? 0),
+          label: String(c.label).trim(),
         }))
         .filter((c) => c.id > 0 && c.label !== '')
     : [];
 
   const langs = Array.isArray(data.langs)
     ? data.langs
-        .filter((l) => l && Number.isFinite(Number((l as any).id)) && typeof (l as any).label === 'string')
-        .map((l) => ({ id: Number((l as any).id), label: String((l as any).label).trim() }))
+        .filter((l) => l && Number.isFinite(Number(l.id)) && typeof l.label === 'string')
+        .map((l) => ({ id: Number(l.id), label: String(l.label).trim() }))
         .filter((l) => l.id > 0 && l.label !== '')
     : [];
 
-  const statuses = Array.isArray(data.statuses)
-    ? data.statuses.map((s) => String(s).trim()).filter((s) => s !== '')
-    : [];
+  const statuses = Array.isArray(data.statuses) ? data.statuses.map((s) => String(s).trim()).filter((s) => s !== '') : [];
 
   return {
     courses,
@@ -277,28 +298,17 @@ export async function renderHistoriaObertaListPaged(): Promise<void> {
   const langsMap = new Map<number, string>(facets.langs.map((l) => [l.id, l.label]));
 
   // COURSES
-  const courses = facets.courses
-    .slice()
-    .sort((a, b) => (Number(a.ordre ?? 0) - Number(b.ordre ?? 0)) || (a.id - b.id));
+  const courses = facets.courses.slice().sort((a, b) => Number(a.ordre ?? 0) - Number(b.ordre ?? 0) || a.id - b.id);
 
-  cursSelect.innerHTML = [
-    `<option value="0">Tots</option>`,
-    ...courses.map((c) => `<option value="${c.id}">${escapeHtml(c.label)}</option>`),
-  ].join('');
+  cursSelect.innerHTML = [`<option value="0">Tots</option>`, ...courses.map((c) => `<option value="${c.id}">${escapeHtml(c.label)}</option>`)].join('');
 
   // LANGS
   const langs = facets.langs.slice().sort((a, b) => a.label.localeCompare(b.label, 'ca'));
-  langSelect.innerHTML = [
-    `<option value="0">Tots</option>`,
-    ...langs.map((l) => `<option value="${l.id}">${escapeHtml(l.label)}</option>`),
-  ].join('');
+  langSelect.innerHTML = [`<option value="0">Tots</option>`, ...langs.map((l) => `<option value="${l.id}">${escapeHtml(l.label)}</option>`)].join('');
 
   // STATUSES
   const statuses = facets.statuses.slice().sort((a, b) => a.localeCompare(b, 'ca'));
-  statusSelect.innerHTML = [
-    `<option value="">Tots</option>`,
-    ...statuses.map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`),
-  ].join('');
+  statusSelect.innerHTML = [`<option value="">Tots</option>`, ...statuses.map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`)].join('');
 
   function renderList(items: HistoriaObertaRow[]): void {
     if (!items.length) {

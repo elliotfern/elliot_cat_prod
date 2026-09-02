@@ -1,5 +1,4 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { mostrar } from '../../utils/renderText';
@@ -19,9 +18,6 @@ interface Emissor {
   created_at: string;
   updated_at: string;
 }
-
-const url = window.location.href;
-const pageType = getPageType(url);
 
 export async function taulaLlistatEmissors() {
   const isAdmin = await getIsAdmin();

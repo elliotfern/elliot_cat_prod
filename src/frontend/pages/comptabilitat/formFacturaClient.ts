@@ -138,7 +138,7 @@ export async function formFacturaClient(isUpdate: boolean, id?: string) {
  * PREPROCESAR FORMULARIO
  * ============================================================
  */
-function preProcessFacturaFormData(rawData: Record<string, any>): Record<string, any> {
+function preProcessFacturaFormData(rawData: Record<string, unknown>): Record<string, unknown> {
   /*
    * ID factura
    */

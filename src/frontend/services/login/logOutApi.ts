@@ -1,8 +1,12 @@
 import { api } from '../../Infrastructure/Api/Client/ApiClient';
 
+type LogoutResponse = {
+  message: string;
+};
+
 export async function logout() {
   try {
-    const data = await api.get<any>('auth/get/?logOut');
+    const data = await api.get<LogoutResponse>('auth/get/?logOut');
 
     if (data.message === 'OK') {
       localStorage.clear();

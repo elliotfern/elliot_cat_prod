@@ -1,5 +1,3 @@
-import { formatData } from './formataData';
-
 type FitxaFieldType = 'text' | 'html' | 'link';
 
 interface FitxaField {

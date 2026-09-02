@@ -65,7 +65,7 @@ export async function formPais(isUpdate: boolean, id?: string): Promise<void> {
         await updatePais.execute(id, data);
 
         showSuccess(form, 'Dades modificades correctament.');
-      } catch (error: any) {
+      } catch (error) {
         showError(form, error, 'Error modificant les dades.');
       }
     });
@@ -92,7 +92,7 @@ export async function formPais(isUpdate: boolean, id?: string): Promise<void> {
       showSuccess(form, 'País creat correctament.');
 
       resetForm('formPais');
-    } catch (error: any) {
+    } catch (error) {
       showError(form, error, 'Error creant el país.');
     }
   });

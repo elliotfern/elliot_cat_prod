@@ -7,7 +7,7 @@ import { Viatge } from '../../types/Viatge';
 export async function fitxaViatge() {
   const url = window.location.href;
   const pageType = getPageType(url);
-  let viatge = pageType[3];
+  const viatge = pageType[3];
 
   let result: Viatge;
   try {

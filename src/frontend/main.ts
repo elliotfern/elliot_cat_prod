@@ -29,24 +29,7 @@ import { salut } from './pages/salut/salut';
 import { radio } from './pages/radio/radio';
 import { galeriaImatgesPublica } from './pages/auxiliars/fitxaGaleriaImatgesPublica';
 import { obtenerTemperaturaTrento } from './pages/auxiliars/meteoTrento';
-
-function whenElementExists(id: string, cb: () => void, timeoutMs = 4000): void {
-  if (document.getElementById(id)) {
-    cb();
-    return;
-  }
-
-  const obs = new MutationObserver(() => {
-    if (document.getElementById(id)) {
-      obs.disconnect();
-      cb();
-    }
-  });
-
-  obs.observe(document.documentElement, { childList: true, subtree: true });
-
-  window.setTimeout(() => obs.disconnect(), timeoutMs);
-}
+import { historiaOberta } from './pages/historiaOberta/historiaOberta';
 
 document.addEventListener('trix-before-initialize', function () {
   // H2
@@ -75,7 +58,7 @@ document.addEventListener('trix-before-initialize', function () {
 });
 
 document.addEventListener('trix-initialize', function (event) {
-  const editorElement = event.target as any;
+  const editorElement = event.target as HTMLTrixEditorElement;
   const toolbar = editorElement.toolbarElement;
   if (!toolbar) return;
 
@@ -144,7 +127,7 @@ async function main() {
   } else if (pageType[1] === 'lector-rss' || pageType[0] === 'lector-rss') {
     lectorRss();
   } else if (pageType[1] === 'historia' || pageType[0] === 'historia') {
-    //historiaOberta();
+    historiaOberta();
   } else if (pageType[1] === 'biblioteca' || pageType[0] === 'biblioteca') {
     biblioteca();
   } else if (pageType[1] === 'adreces' || pageType[0] === 'adreces') {

@@ -21,8 +21,7 @@ const pageType = getPageType(url);
 
 export function curriculum() {
   const id = parseInt(pageType[3], 10);
-  const idLocale = parseInt(pageType[4], 10);
-   const idLocaleUuuid = pageType[4];
+  const idLocaleUuuid = pageType[4];
 
   if (pageType[2] === 'nou-perfil') {
     formPerfil(false);
@@ -50,8 +49,6 @@ export function curriculum() {
     vistaHabilitats();
   } else if (pageType[2] === 'nova-experiencia') {
     formExperiencies(false);
-  } else if (pageType[2] === 'modifica-experiencia') {
-    formExperiencies(true, id);
   } else if (pageType[2] === 'modifica-experiencia') {
     formExperiencies(true, id);
   } else if (pageType[2] === 'perfil-experiencies') {

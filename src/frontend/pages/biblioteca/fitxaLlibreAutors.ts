@@ -1,8 +1,15 @@
 type ApiResponse<T> = {
   status: 'success' | 'error';
   message: string;
-  errors: any;
+  errors: unknown;
   data: T;
+};
+
+type DeleteResponse = {
+  response: {
+    success: boolean;
+  };
+  message?: string;
 };
 
 type Autor = {
@@ -27,6 +34,10 @@ type LlibreAutorsPayload = {
   autors: Autor[];
 };
 
+type ContainerWithDeleteBound = HTMLElement & {
+  __deleteBound?: boolean;
+};
+
 function escapeHtml(s: unknown): string {
   return String(s ?? '')
     .replace(/&/g, '&amp;')
@@ -49,21 +60,6 @@ function showErr(message: string) {
   err.style.display = 'block';
   err.innerHTML = `<h4 class="alert-heading"><strong>${escapeHtml(message)}</strong></h4>`;
   err.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function showOk(message: string) {
-  const ok = document.getElementById('missatgeOk');
-  const err = document.getElementById('missatgeErr');
-
-  if (err) {
-    err.style.display = 'none';
-    err.innerHTML = '';
-  }
-
-  if (!ok) return;
-  ok.style.display = 'block';
-  ok.innerHTML = `<h4 class="alert-heading"><strong>${escapeHtml(message)}</strong></h4>`;
-  ok.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function hideAlerts() {
@@ -138,8 +134,10 @@ function renderTable(llibreSlug: string, autors: Autor[]) {
 function bindDeleteHandlers(container: HTMLElement) {
   // Evitar duplicar listeners si re-renderizas
   // (marcamos con una bandera)
-  const anyContainer = container as any;
+  const anyContainer = container as ContainerWithDeleteBound;
+
   if (anyContainer.__deleteBound) return;
+
   anyContainer.__deleteBound = true;
 
   container.addEventListener('click', async (ev) => {
@@ -196,7 +194,7 @@ async function eliminarAutorPerRelacio(btn: HTMLButtonElement, relId: number, ll
       headers: { Accept: 'application/json' },
     });
 
-    const json = (await res.json().catch(() => null)) as any;
+    const json = (await res.json().catch(() => null)) as DeleteResponse | null;
 
     if (!json) {
       showErr('Resposta invàlida del servidor');
@@ -236,7 +234,7 @@ async function eliminarAutorPerAutorUuid(btn: HTMLButtonElement, autorUuid: stri
       headers: { Accept: 'application/json' },
     });
 
-    const json = (await res.json().catch(() => null)) as any;
+    const json = (await res.json().catch(() => null)) as DeleteResponse | null;
 
     if (!json) {
       showErr('Resposta invàlida del servidor');

@@ -1,5 +1,6 @@
 import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { mapPeliculaToFitxa } from '../../components/mappers/pelicula';
+import { Pelicula } from '../../types/Pelicula';
 import { renderFitxa } from '../../utils/renderFitxa';
 
 export async function fitxaPelicula(baseUrl: string, peliSlug: string) {

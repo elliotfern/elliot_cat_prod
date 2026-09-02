@@ -12,35 +12,35 @@ export async function formProjecte(isUpdate: boolean, id?: string) {
 
   if (!divTitol || !btnSubmit || !form) return;
 
-  let data: Partial<ProjecteDetalls> = {};
-
   if (id && isUpdate) {
-    try {
-      data = await api.get<ProjecteDetalls>(API_URLS.GET.PROJECTE_ID, { id });
-    } catch (error) {
-      console.error(error);
-      return;
-    }
+    const data = await api.get<ProjecteDetalls>(API_URLS.GET.PROJECTE_ID, { id });
 
     divTitol.innerHTML = `<h2>Modificació del projecte</h2>`;
     btnSubmit.textContent = 'Modificar dades';
 
     renderFormInputs(data);
+    await auxiliarSelect(data.categoria ?? '', 'projectes_categories', 'categoria', 'categoria');
+    await auxiliarSelect(data.estat ?? '', 'projectes_estats', 'estat', 'estat');
+    await auxiliarSelect(data.prioritat ?? '', 'projectes_prioritats', 'prioritat', 'prioritat');
+
+    await auxiliarSelect(data.client_id ?? '', 'clients', 'client_id', 'client');
+    await auxiliarSelect(data.pressupost_id ?? '', 'budgets', 'pressupost_id', 'concepte');
+    await auxiliarSelect(data.factura_id ?? '', 'facturesClients', 'factura_id', 'facConcepte');
   } else {
     divTitol.innerHTML = `<h2>Creació de nou projecte</h2>`;
     btnSubmit.textContent = 'Inserir dades';
   }
 
-  await auxiliarSelect(data.categoria ?? '', 'projectes_categories', 'categoria', 'categoria');
-  await auxiliarSelect(data.estat ?? '', 'projectes_estats', 'estat', 'estat');
-  await auxiliarSelect(data.prioritat ?? '', 'projectes_prioritats', 'prioritat', 'prioritat');
+  await auxiliarSelect('', 'projectes_categories', 'categoria', 'categoria');
+  await auxiliarSelect('', 'projectes_estats', 'estat', 'estat');
+  await auxiliarSelect('', 'projectes_prioritats', 'prioritat', 'prioritat');
 
-  await auxiliarSelect(data.client_id ?? '', 'clients', 'client_id', 'client');
-  await auxiliarSelect(data.pressupost_id ?? '', 'budgets', 'pressupost_id', 'concepte');
-  await auxiliarSelect(data.factura_id ?? '', 'facturesClients', 'factura_id', 'facConcepte');
+  await auxiliarSelect('', 'clients', 'client_id', 'client');
+  await auxiliarSelect('', 'budgets', 'pressupost_id', 'concepte');
+  await auxiliarSelect('', 'facturesClients', 'factura_id', 'facConcepte');
 
   // Eliminar cualquier listener anterior
-  const oldHandler = (form as any).__projecteSubmitHandler;
+  const oldHandler = form.__projecteSubmitHandler;
 
   if (oldHandler) {
     form.removeEventListener('submit', oldHandler);
@@ -58,5 +58,5 @@ export async function formProjecte(isUpdate: boolean, id?: string) {
   form.addEventListener('submit', submitHandler);
 
   // Guardar referencia para poder eliminarlo la próxima vez
-  (form as any).__projecteSubmitHandler = submitHandler;
+  form.__projecteSubmitHandler = submitHandler;
 }

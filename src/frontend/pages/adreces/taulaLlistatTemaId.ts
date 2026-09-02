@@ -1,12 +1,9 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { DOMAIN_WEB } from '../../utils/urls';
 import { SubTema } from '../../types/SubTema';
 
 export async function taulaLlistatTemaId(id: string) {
-  const isAdmin = await getIsAdmin();
-
   const columns: TaulaDinamica<SubTema>[] = [
     {
       header: 'Subtema',

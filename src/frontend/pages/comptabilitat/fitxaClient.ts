@@ -37,7 +37,7 @@ function renderClient(response: Client) {
   renderClientPressupostos(client.id);
   renderClientFactures(client.id);
 
-  const v = (x: any) => (x === null || x === '' ? '—' : x);
+  const v = (x: unknown) => (x === null || x === '' ? '—' : x);
 
   container.innerHTML = `
     <div class="card shadow-sm">

@@ -1,4 +1,3 @@
-import { getIsAdmin } from '../../services/auth/isAdmin';
 import { isLang } from '../../utils/locales/getLangPrefix';
 import { DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
 
@@ -12,8 +11,6 @@ function capitalizeWords(str: string) {
 }
 
 export async function barraNavegacio() {
-  const isAdmin = await getIsAdmin();
-
   const url = new URL(window.location.href);
   let parts = url.pathname.split('/').filter(Boolean);
 

@@ -9,20 +9,12 @@ export async function formTema(isUpdate: boolean, id?: string) {
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnTema') as HTMLButtonElement;
 
-  let data: Partial<Tema> = {};
-
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    try {
-      data = await api.get<Tema>(API_URLS.GET.TEMA_ID, {
-        id,
-      });
-    } catch (error) {
-      console.error(error);
-
-      return;
-    }
+    const data = await api.get<Tema>(API_URLS.GET.TEMA_ID, {
+      id,
+    });
 
     divTitol.innerHTML = `<h2>Modificació tema</h2>`;
 

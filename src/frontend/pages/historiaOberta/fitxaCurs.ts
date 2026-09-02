@@ -125,8 +125,8 @@ function renderTableLocal<T extends Record<string, unknown>>(opts: { containerId
               .map((row) => {
                 const tds = opts.columns
                   .map((col) => {
-                    const value = (row as any)[col.field as any];
-                    const html = col.render ? col.render(value, row as any) : escapeHtml(value);
+                    const value = row[col.field];
+                    const html = col.render ? col.render(value, row) : escapeHtml(value);
                     return `<td class="py-2">${html}</td>`;
                   })
                   .join('');

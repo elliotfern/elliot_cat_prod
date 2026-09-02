@@ -1,5 +1,4 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { formatData } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Espai } from '../../types/Espai';

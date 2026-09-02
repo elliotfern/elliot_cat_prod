@@ -14,13 +14,18 @@ function renderCellContent(content: string | HTMLElement | unknown): string {
 /**
  * Acceso seguro a propiedades anidadas: "data.factures"
  */
-function getNestedValue(obj: any, path?: string): unknown {
+function getNestedValue(obj: unknown, path?: string): unknown {
   if (!path) return obj;
 
-  return path.split('.').reduce((acc, key) => acc?.[key], obj);
+  return path.split('.').reduce<unknown>((acc, key) => {
+    if (acc && typeof acc === 'object') {
+      return (acc as Record<string, unknown>)[key];
+    }
+    return undefined;
+  }, obj);
 }
 
-export async function renderDynamicTable<T extends Record<string, any>>(options: RenderTableOptions<T>): Promise<void> {
+export async function renderDynamicTable<T extends object>(options: RenderTableOptions<T>): Promise<void> {
   const { url, columns, containerId, rowsPerPage = 15, filterKeys = [], filterByField, filterByFields = [], filterLabels, filterSplitBy, filterSplitTrim = true, dataKey } = options;
 
   const filterFields = filterByFields.length > 0 ? filterByFields : filterByField ? [filterByField] : [];
@@ -156,10 +161,10 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
     });
   }
 
-  let raw: any;
+  let raw: unknown;
 
   try {
-    raw = await api.get<any>(url);
+    raw = await api.get<unknown>(url);
   } catch (error) {
     console.error(error);
 
@@ -181,12 +186,11 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
     // caso antiguo: API devuelve array directo
     data = raw;
   } else if (raw && typeof raw === 'object') {
-    if (dataKey && Array.isArray(raw[dataKey])) {
-      // caso nuevo: { factures: [] }
-      data = raw[dataKey];
-    } else if (Array.isArray(raw.data)) {
-      // fallback antiguo wrapper
-      data = raw.data;
+    const rawObj = raw as Record<string, unknown>;
+    if (dataKey && Array.isArray(rawObj[dataKey])) {
+      data = rawObj[dataKey] as T[];
+    } else if (Array.isArray(rawObj.data)) {
+      data = rawObj.data as T[];
     }
   }
 
@@ -205,8 +209,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
 
   let currentPage = 1;
   let filteredData = [...data];
-  let activeButtonFilter: string | null = null;
-  let activeButtonFilters: Record<string, string> = {};
+  const activeButtonFilters: Record<string, string> = {};
 
   let sortField: string | null = null;
   let sortDirection: 'asc' | 'desc' | null = null;
@@ -267,7 +270,7 @@ export async function renderDynamicTable<T extends Record<string, any>>(options:
     if (!splitter) return [s];
 
     return s
-      .split(splitter as any)
+      .split(splitter as string | RegExp)
       .map((x) => (filterSplitTrim ? x.trim() : x))
       .filter(Boolean);
   }

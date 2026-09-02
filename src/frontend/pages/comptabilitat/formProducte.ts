@@ -11,19 +11,11 @@ export async function formProducte(isUpdate: boolean, id?: string) {
 
   if (!form || !divTitol || !btnSubmit) return;
 
-  let data: Partial<Producte> = {};
-
   // Si es actualización, cargamos los datos
   if (isUpdate && id) {
-    try {
-      data = await api.get<Producte>(`comptabilitat/get/producteId`, {
-        id,
-      });
-    } catch (error) {
-      console.error(error);
-
-      return;
-    }
+    const data = await api.get<Producte>(`comptabilitat/get/producteId`, {
+      id,
+    });
 
     divTitol.innerHTML = `<h2>Modificació Producte</h2>`;
     btnSubmit.textContent = 'Modificar Producte';

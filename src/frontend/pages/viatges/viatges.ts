@@ -1,5 +1,4 @@
 import { getPageType } from '../../utils/urlPath';
-import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { taulaLlistatViatges } from './taulaLlistatViatges';
 import { taulaLlistatEspaisViatges } from './taulaLlistatEspaisViatge';
 import { fitxaEspai } from './fitxaEspai';

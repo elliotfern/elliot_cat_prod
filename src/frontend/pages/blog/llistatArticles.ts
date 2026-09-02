@@ -80,6 +80,10 @@ function escapeHtml(input: unknown): string {
     .replaceAll("'", '&#039;');
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 function formatDateCa(dateStr: string): string {
   const iso = String(dateStr).trim().replace(' ', 'T');
   const d = new Date(iso);
@@ -90,14 +94,12 @@ function formatDateCa(dateStr: string): string {
   return d.toLocaleDateString('ca-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-function parseApiPayload(json: any): ApiPayload {
+function parseApiPayload(json: unknown): ApiPayload {
   // Suporta:
   // - { status, data: { items, pagination } }
   // - { data: { items, pagination } }
   // - { items, pagination }
-  const data = json?.data ?? json;
-
-  if (data && Array.isArray(data.items) && data.pagination) return data as ApiPayload;
+  const data = isRecord(json) && 'data' in json ? json.data : json;
 
   // fallback (si tornessis a retornar array)
   if (Array.isArray(data)) {
@@ -149,23 +151,51 @@ async function fetchFacets(): Promise<BlogFacets> {
   const r = await fetch(url, { credentials: 'include' });
   const json = await r.json();
 
-  const data = (json?.data ?? json) as Partial<BlogFacets>;
+  const data = isRecord(json) && 'data' in json ? json.data : json;
 
-  const years = Array.isArray(data.years) ? data.years.map((y) => Number(y)).filter((y) => Number.isFinite(y)) : [];
+  const years = isRecord(data) && Array.isArray(data.years) ? data.years.map((y) => Number(y)).filter((y) => Number.isFinite(y)) : [];
 
-  const categories = Array.isArray(data.categories)
-    ? data.categories
-        .filter((c) => c && typeof (c as any).hex === 'string' && typeof (c as any).label === 'string')
-        .map((c) => ({ hex: (c as any).hex.trim(), label: (c as any).label.trim() }))
-        .filter((c) => c.hex !== '' && c.label !== '')
-    : [];
+  const categories =
+    isRecord(data) && Array.isArray(data.categories)
+      ? data.categories
+          .filter(isRecord)
+          .map((c) => {
+            if (typeof c.hex !== 'string' || typeof c.label !== 'string') {
+              return null;
+            }
 
-  const langs = Array.isArray((data as any).langs)
-    ? (data as any).langs
-        .filter((x: any) => x && Number.isFinite(Number(x.id)) && typeof x.label === 'string')
-        .map((x: any) => ({ id: Number(x.id), label: String(x.label).trim() }))
-        .filter((x: any) => x.id > 0 && x.label !== '')
-    : [];
+            const hex = c.hex.trim();
+            const label = c.label.trim();
+
+            if (hex === '' || label === '') {
+              return null;
+            }
+
+            return { hex, label };
+          })
+          .filter((c): c is { hex: string; label: string } => c !== null)
+      : [];
+
+  const langs =
+    isRecord(data) && Array.isArray(data.langs)
+      ? data.langs
+          .filter(isRecord)
+          .map((x) => {
+            if (!Number.isFinite(Number(x.id)) || typeof x.label !== 'string') {
+              return null;
+            }
+
+            const id = Number(x.id);
+            const label = x.label.trim();
+
+            if (id <= 0 || label === '') {
+              return null;
+            }
+
+            return { id, label };
+          })
+          .filter((x): x is { id: number; label: string } => x !== null)
+      : [];
 
   return { years, categories, langs };
 }

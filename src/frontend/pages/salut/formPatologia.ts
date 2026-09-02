@@ -1,19 +1,11 @@
 import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
-import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 import { API_BASE } from '../../utils/urls';
 
 type Medicament = {
   id: string;
   medicament: string;
-};
-
-type Patologia = {
-  id: string;
-  patologia: string;
-  genere: string;
-  medicaments?: { id: string; medicaments: string }[];
 };
 
 let medicamentsList: Medicament[] = [];
@@ -85,21 +77,13 @@ export async function formPatologia(isUpdate: boolean, id?: string) {
 
   await loadMedicaments();
 
-  let data: Partial<Patologia> = {};
-
   if (id && isUpdate) {
-    try {
-      const response = await fetch(`${API_BASE}/salut/get/patologiaID?id=${id}`);
-      const responseData = await response.json();
+    const response = await fetch(`${API_BASE}/salut/get/patologiaID?id=${id}`);
+    const responseData = await response.json();
 
-      if (!responseData || !responseData.data) return;
+    if (!responseData || !responseData.data) return;
 
-      data = responseData.data;
-    } catch (error) {
-      console.error(error);
-
-      return;
-    }
+    const data = responseData.data;
 
     divTitol.innerHTML = `<h2>Modificació dades patologia</h2>`;
 

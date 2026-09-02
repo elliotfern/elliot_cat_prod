@@ -61,10 +61,11 @@ export function initDeleteHandlers(): void {
           rowElement.remove();
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error al eliminar:', error);
 
-      showFlashMessage(error?.message || 'Error en eliminar el registre.', 'danger');
+      const message = error instanceof Error ? error.message : 'Error en eliminar el registre.';
+      showFlashMessage(message, 'danger');
     }
   });
 }

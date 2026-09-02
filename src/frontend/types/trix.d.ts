@@ -3,8 +3,13 @@
 declare global {
   interface HTMLTrixEditorElement extends HTMLElement {
     editor: TrixEditor;
+    toolbarElement: HTMLElement;
   }
 
+  interface Window {
+    dayjs: typeof import('dayjs');
+    __demanarRecepta: (id: string, button: HTMLButtonElement) => void;
+  }
   interface TrixEditor {
     loadHTML(html: string): void;
     insertString(text: string): void;

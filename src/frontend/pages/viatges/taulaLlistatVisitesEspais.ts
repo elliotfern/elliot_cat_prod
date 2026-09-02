@@ -3,14 +3,14 @@ import { formatDataCatala } from '../../utils/formataData';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { getPageType } from '../../utils/urlPath';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-import { Viatge, VisitaEspai } from '../../types/Viatge';
+import { VisitaEspai } from '../../types/Viatge';
 
 const url = window.location.href;
 const pageType = getPageType(url);
 
 export async function taulaLlistatVisitesEspais() {
   const isAdmin = await getIsAdmin();
-  let slug: string = '';
+  let slug: string;
   let gestioUrl: string = '';
 
   if (isAdmin) {

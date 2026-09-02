@@ -9,20 +9,12 @@ export async function formImatge(isUpdate: boolean, id?: string) {
   const divTitol = document.getElementById('titolForm') as HTMLDivElement;
   const btnSubmit = document.getElementById('btnForm') as HTMLButtonElement;
 
-  let data: Partial<Imatge> = {};
-
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    try {
-      data = await api.get<Imatge>(`auxiliars/imatges/get/imatgeId`, {
-        id,
-      });
-    } catch (error) {
-      console.error(error);
-
-      return;
-    }
+    const data = await api.get<Imatge>(`auxiliars/imatges/get/imatgeId`, {
+      id,
+    });
 
     divTitol.innerHTML = `<h2>Modificació dades Imatge</h2>`;
 

@@ -9,20 +9,12 @@ export async function formGrupPersones(isUpdate: boolean, id?: string) {
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnGrupPersones') as HTMLButtonElement | null;
 
-  let data: Partial<GrupPersones> = {};
-
   if (!divTitol || !btnSubmit || !form) return;
 
   if (id && isUpdate) {
-    try {
-      data = await api.get<GrupPersones>(API_URLS.GET.PERSONES_GRUPS_ID, {
-        id,
-      });
-    } catch (error) {
-      console.error(error);
-
-      return;
-    }
+    const data = await api.get<GrupPersones>(API_URLS.GET.PERSONES_GRUPS_ID, {
+      id,
+    });
 
     divTitol.innerHTML = `<h2>Modificació de Grup de persones</h2>`;
     renderFormInputs(data);

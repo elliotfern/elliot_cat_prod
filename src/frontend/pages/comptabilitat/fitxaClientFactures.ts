@@ -7,6 +7,12 @@ import { API_URLS } from '../../utils/apiUrls';
 import { INTRANET_URLS } from '../../utils/IntranetUrls';
 import { formatEuro } from '../../utils/locales/formatEuro';
 
+type FacturesClientRaw = {
+  totals?: {
+    total_facturat?: number | string | null;
+  };
+};
+
 // Generador PDF por idioma
 async function generatePDF(invoiceId: string, lang: 'ca', fileName?: string, btn?: HTMLButtonElement | null) {
   const prevLabel = btn?.textContent;
@@ -137,8 +143,9 @@ export async function renderClientFactures(clientId: string) {
     dataKey: 'factures',
     rowsPerPage: 9999,
 
-    renderHeader: ({ raw }: any) => {
-      const total = raw?.totals?.total_facturat ?? 0;
+    renderHeader: ({ raw }) => {
+      const data = raw as FacturesClientRaw;
+      const total = data.totals?.total_facturat ?? 0;
 
       return `
       <div class="d-flex justify-content-between align-items-center mb-3">

@@ -9,7 +9,7 @@ export async function blog() {
 
   // ✅ Óptimo: calculamos 1 sola vez
   const isAdmin = await getIsAdmin();
-  let slug = '';
+  let slug: string;
   if (isAdmin) {
     slug = pageType[3];
   } else {

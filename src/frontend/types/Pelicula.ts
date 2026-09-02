@@ -1,4 +1,4 @@
-interface Pelicula {
+export interface Pelicula {
   slug: string;
   pelicula: string;
   id: string;
@@ -13,4 +13,6 @@ interface Pelicula {
   nameImg: string;
   idioma: string;
   slugDirector: string;
+  dateCreated?: string | undefined;
+  dateModified?: string | undefined;
 }

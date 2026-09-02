@@ -1,8 +1,6 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { getPageType } from '../../utils/urlPath';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
-import { SubTema } from '../../types/SubTema';
 import { Link } from '../../types/Link';
 import { formatData } from '../../utils/formataData';
 import { DOMAIN_WEB } from '../../utils/urls';

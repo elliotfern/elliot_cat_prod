@@ -36,7 +36,7 @@ export function decorateLinksInHtml(html: string): string {
     const href = rawHref.trim();
     if (!href) continue;
 
-    let url: URL | null = null;
+    let url: URL | null;
     try {
       url = new URL(href, window.location.origin);
     } catch {
