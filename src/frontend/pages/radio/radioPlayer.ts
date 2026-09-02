@@ -6,6 +6,25 @@
 
 import Hls from 'hls.js';
 
+export interface RadioPlayerConfig<T = unknown> {
+  streamUrl: string;
+  useHls?: boolean;
+
+  programaApiUrl?: string;
+  parsePrograma?: (raw: T) => ProgramaInfo;
+
+  logoUrl: string;
+  logoAlt: string;
+  logoClass?: string;
+
+  ids?: RadioPlayerIds;
+
+  initControls?: (audio: HTMLAudioElement) => void;
+
+  intervaloRefresco?: number;
+  intervaloError?: number;
+}
+
 export interface ProgramaInfo {
   titulo: string;
   descripcion: string;
@@ -21,41 +40,6 @@ export interface RadioPlayerIds {
   descripcion?: string;
   horarios?: string;
   btnActualizar?: string;
-}
-
-export interface RadioPlayerConfig {
-  /** URL del stream de audio en directo. */
-  streamUrl: string;
-  /** true si el stream es HLS y hace falta hls.js para reproducirlo.
-   *  false (por defecto) si el <audio><source> del HTML ya apunta al stream. */
-  useHls?: boolean;
-
-  /** URL de la API que da información del programa en emisión. Omite junto con parsePrograma si la emisora no tiene una fuente fiable de esta info. */
-  programaApiUrl?: string;
-  /** Convierte la respuesta cruda (ya parseada de JSON) de esa API en un ProgramaInfo homogéneo. */
-  parsePrograma?: (raw: unknown) => ProgramaInfo;
-
-  /** Logo de la emisora. */
-  logoUrl: string;
-  logoAlt: string;
-  /** Clase CSS del <img> del logo (por defecto 'logo-radio'). */
-  logoClass?: string;
-
-  /** IDs de los elementos del HTML (con valores por defecto habituales). */
-  ids?: RadioPlayerIds;
-
-  /**
-   * Conecta los controles de reproducción/volumen. Por defecto busca los
-   * botones ▶️⏸️🔇🔊🔉 dentro de `.controls-radio` (patrón de Rai Radio 3).
-   * Pásalo si tu emisora usa otros ids/botones (p. ej. Catalunya Música,
-   * que solo tiene volumen con ids propios).
-   */
-  initControls?: (audio: HTMLAudioElement) => void;
-
-  /** Refresco periódico de seguridad, en ms (por defecto 15 min). */
-  intervaloRefresco?: number;
-  /** Reintento tras un error al pedir el programa, en ms (por defecto 10 min). */
-  intervaloError?: number;
 }
 
 const DEFAULT_IDS: Required<RadioPlayerIds> = {
@@ -138,7 +122,7 @@ function initControlesPorDefecto(audio: HTMLAudioElement): void {
   });
 }
 
-export function initRadioPlayer(config: RadioPlayerConfig): void {
+export function initRadioPlayer<T = unknown>(config: RadioPlayerConfig<T>): void {
   const ids = { ...DEFAULT_IDS, ...config.ids };
   const intervaloRefresco = config.intervaloRefresco ?? 15 * 60 * 1000;
   const intervaloError = config.intervaloError ?? 10 * 60 * 1000;

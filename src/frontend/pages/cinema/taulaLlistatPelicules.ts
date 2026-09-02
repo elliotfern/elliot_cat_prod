@@ -1,5 +1,6 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { getIsAdmin } from '../../services/auth/isAdmin';
+import { Pelicula } from '../../types/Pelicula';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 
 export async function taulaLlistatPelicules() {
