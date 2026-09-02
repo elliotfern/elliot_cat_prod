@@ -9,7 +9,8 @@
     "lint:fix": "eslint . --fix",
     "dev": "npm run lint && NODE_ENV=development webpack --mode development",
     "build": "npm run lint && NODE_ENV=production webpack --mode production",
-    "test": "vendor/bin/phpunit --testdox --colors=always"
+    "test": "vendor/bin/phpunit --testdox --colors=always",
+    "prepare": "husky"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +27,7 @@
     "dotenv": "^17.4.2",
     "eslint": "^10.9.1",
     "globals": "^17.12.0",
+    "husky": "^9.1.7",
     "style-loader": "^4.0.0",
     "swc-loader": "^0.2.7",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
@@ -55,5 +57,10 @@
   },
   "allowScripts": {
     "@swc/core@1.16.1": true
+  },
+  "lint-staged": {
+    "*.js": "eslint --fix",
+    "*.ts": "eslint --fix",
+    "*.css": "prettier --write"
   }
 }
