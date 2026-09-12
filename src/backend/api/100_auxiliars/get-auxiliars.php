@@ -1926,9 +1926,9 @@ if ($slug === 'directors') {
 
 
     $sql = <<<SQL
-            SELECT c.id, c.nameCa AS nomCurs
+            SELECT c.id, c.curs AS nomCurs
             FROM %s AS c
-            ORDER BY c.nameCa ASC
+            ORDER BY c.curs ASC
             SQL;
 
     $query = sprintf(
@@ -2103,6 +2103,50 @@ if ($slug === 'directors') {
                 SELECT id, post_title
                 FROM %s
                 WHERE lang = 4
+                AND post_type = 'historia_oberta'
+                ORDER BY post_date DESC;
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::BLOG, $pdo)
+
+    );
+
+    try {
+
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat complet articles historia fr
+    // ruta GET => "/api/auxiliars/get/blogArticlesFr"
+} else if ($slug === 'blogArticlesFr') {
+
+    $sql = <<<SQL
+                SELECT id, post_title
+                FROM %s
+                WHERE lang = 7
                 AND post_type = 'historia_oberta'
                 ORDER BY post_date DESC;
             SQL;

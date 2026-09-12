@@ -24,12 +24,6 @@ if ($requestUri === '') {
     $requestUri = '/';
 }
 
-// Redirección raíz → homepage
-if ($requestUri === '/') {
-    header('Location: /inici', true, 302);
-    exit();
-}
-
 // Inicializar una variable para los parámetros de la ruta
 $routeParams = [];
 

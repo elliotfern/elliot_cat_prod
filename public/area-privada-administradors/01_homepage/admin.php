@@ -7,7 +7,6 @@ use App\Utils\Url;
 
 <div id="barraNavegacioContenidor"></div>
 
-
 <?php if ($viewModel->isAdmin) : ?>
 
     <div id="temperaturaTrento" class="alert alert-warning" style="margin-top:20px;margin-bottom:25px">-</div>

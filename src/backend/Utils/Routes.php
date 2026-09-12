@@ -63,4 +63,14 @@ class Routes
     {
         return new ProjecteRoutes();
     }
+
+    public static function historia(): HistoriaRoutes
+    {
+        return new HistoriaRoutes();
+    }
+
+    public static function blog(): BlogRoutes
+    {
+        return new BlogRoutes();
+    }
 }

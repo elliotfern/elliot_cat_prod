@@ -5,7 +5,7 @@ import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 
-export async function formCursArticle(isUpdate: boolean, id?: number) {
+export async function formCursArticle(isUpdate: boolean, id?: string) {
   const form = document.getElementById('formCursArticle') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolForm') as HTMLDivElement | null;
   const btnSubmit = document.getElementById('btnCursArticle') as HTMLButtonElement | null;

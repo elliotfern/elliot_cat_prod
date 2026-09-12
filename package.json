@@ -56,11 +56,10 @@
     "trix": "^2.1.19"
   },
   "allowScripts": {
-    "@swc/core@1.16.1": true
+    "@swc/core@1.16.2": true
   },
   "lint-staged": {
-    "*.js": "eslint --fix",
-    "*.ts": "eslint --fix",
-    "*.css": "prettier --write"
+    "src/**/*.ts": "eslint --fix",
+    "src/**/*.css": "prettier --write"
   }
 }

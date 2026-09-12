@@ -6,12 +6,12 @@ import { formatData } from '../../utils/formataData';
 import { DOMAIN_WEB } from '../../utils/urls';
 
 type CursHistoriaApi = {
-  id: number;
+  id: string;
   ordre: number;
-  nombreCurso: string;
-  resumen: string;
+  curs: string;
+  resum: string;
   img: string;
-  paramName: string;
+  slug: string;
   lastModified: string;
 };
 
@@ -22,18 +22,17 @@ export async function taulaLlistatCursosHistoria(): Promise<void> {
       field: 'ordre',
       render: (value: unknown) => {
         const v = value === null || value === undefined || value === '' ? '—' : String(value);
-        return `<span class="text-muted">${escapeHtml(v)}</span>`;
+        return `${escapeHtml(v)}`;
       },
     },
     {
       header: 'Curs',
-      field: 'nombreCurso',
+      field: 'curs',
       render: (_: unknown, row: CursHistoriaApi) => {
-        // Link directo a la gestión de artículos del curso (ajusta la ruta si la decides distinta)
         return `
           <a href="${DOMAIN_WEB}/gestio/historia/fitxa-curs/${row.id}"}
           </a>
-          ${row.nombreCurso ? `<div class="text-muted" style="font-size:12px">${escapeHtml(row.nombreCurso)}</div>` : ''}
+          ${row.curs ? `${escapeHtml(row.curs)}` : ''}
         `;
       },
     },
@@ -50,8 +49,10 @@ export async function taulaLlistatCursosHistoria(): Promise<void> {
       field: 'id',
       render: (_: unknown, row: CursHistoriaApi) => {
         return `
+
+
           <a href="${DOMAIN_WEB}/gestio/historia/modifica-curs/${row.id}">
-            <button type="button" class="button btn-petit">Modifica curs</button>
+            <button type="button" class="btn btn-warning btn-sm">Modifica curs</button>
           </a>
         `;
       },
@@ -59,10 +60,10 @@ export async function taulaLlistatCursosHistoria(): Promise<void> {
   ];
 
   renderDynamicTable({
-    url: `https://${window.location.host}/api/historia/get/llistatCursos?langCurso=ca`,
+    url: `historia/get/llistatCursos`,
     containerId: 'cursList',
     columns,
-    filterKeys: ['nombreCurso'],
+    filterKeys: ['curs'],
   });
 }
 

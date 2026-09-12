@@ -172,7 +172,12 @@ $routes = [
     APP_GESTIO . $url['historia'] . '/llistat-cursos' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'llistat-cursos.php'),
 
     APP_GESTIO . $url['historia'] . '/fitxa-curs/{id}' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'fitxa-curs.php'),
+    APP_GESTIO . $url['historia'] . '/nou-curs' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'form-curs.php'),
+    APP_GESTIO . $url['historia'] . '/modifica-curs/{id}' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'form-curs.php'),
 
+
+
+    APP_GESTIO . $url['historia'] . '/llistat-slots-cursos-articles' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'llistat-cursos-articles.php'),
     APP_GESTIO . $url['historia'] . '/modifica-curs-article/{id}' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'form-curs-article.php'),
     APP_GESTIO . $url['historia'] . '/nou-curs-article' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'form-curs-article.php'),
 

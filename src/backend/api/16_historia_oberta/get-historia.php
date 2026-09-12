@@ -5,13 +5,14 @@ use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Utils\Uuid;
 
 $slug = $routeParams[0] ?? '';
 $db = new Database();
 $pdo = $db->getPdo();
 
 header("Content-Type: application/json; charset=utf-8");
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     header('HTTP/1.1 405 Method Not Allowed');
@@ -31,7 +32,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY c.carrecInici";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -62,7 +63,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY e.esdeDataIAny ASC";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -124,7 +125,7 @@ if ($slug === 'carrecsPersona') {
     ) ASC";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Vincular parámetros si es necesario
     if ($etapaFiltro) {
@@ -188,7 +189,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY s.anyInici";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -216,7 +217,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY s.anyInici ASC";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -266,7 +267,7 @@ if ($slug === 'carrecsPersona') {
     WHERE e.slug =:slug";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':slug', $esdeveniment, PDO::PARAM_STR);
 
@@ -348,7 +349,7 @@ if ($slug === 'carrecsPersona') {
     WHERE e.id = :id";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $idBinary, PDO::PARAM_LOB);
 
@@ -402,7 +403,7 @@ if ($slug === 'carrecsPersona') {
     WHERE i.typeImg = 4";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -435,7 +436,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY ep.cognoms ASC";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -466,7 +467,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY org.nomOrg ASC";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -494,7 +495,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY e.esdeNom ASC";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -520,7 +521,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY p.cognoms";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -548,7 +549,7 @@ if ($slug === 'carrecsPersona') {
     WHERE e.id = :id";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -575,7 +576,7 @@ if ($slug === 'carrecsPersona') {
     FROM db_historia_organitzacions AS o";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -602,7 +603,7 @@ if ($slug === 'carrecsPersona') {
     WHERE o.id = :id";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -632,7 +633,7 @@ if ($slug === 'carrecsPersona') {
     WHERE c.id = :id";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_STR);
 
@@ -662,7 +663,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY o.dataFunda";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -697,7 +698,7 @@ if ($slug === 'carrecsPersona') {
     WHERE o.slug = :slug";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':slug', $slug, PDO::PARAM_STR);
 
@@ -728,7 +729,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY e.esdeDataIAny ASC";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -759,7 +760,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY c.carrecInici";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
@@ -788,7 +789,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY i.nom DESC";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -815,7 +816,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY i.ideologia";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -841,7 +842,7 @@ if ($slug === 'carrecsPersona') {
     ORDER BY t.nomTipus";
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -861,60 +862,10 @@ if ($slug === 'carrecsPersona') {
     // Llistat cursos
     // ruta GET => "/api/historia/get/llistatCursos"
 } else if ($slug === 'llistatCursos') {
-    global $conn;
-    $lang = $_GET['langCurso'];
 
-    if ($lang === "ca") {
-        $sql = "SELECT id,
-        ordre,
-        nameCa AS nombreCurso,
-        resumenCa AS resumen,
-        img,
-        paramNameCa AS paramName,
-        lastModified
+    $sql = "SELECT id, ordre, curs, resum, img_id, slug, lastModified
         FROM db_historia_oberta_cursos 
         ORDER BY ordre ASC";
-    } else if ($lang === "en") {
-        $sql = "SELECT id,
-        ordre,
-        nameEn AS nombreCurso,
-        resumenEn AS resumen,
-        img,
-        paramNameEn AS paramName,
-        lastModified
-        FROM db_historia_oberta_cursos 
-        ORDER BY ordre ASC";
-    } else if ($lang === "es") {
-        $sql = "SELECT id,
-        ordre,
-        nameEs AS nombreCurso,
-        resumenEs AS resumen,
-        img,
-        paramNameEs AS paramName,
-        lastModified
-        FROM db_historia_oberta_cursos 
-        ORDER BY ordre ASC";
-    } else if ($lang === "fr") {
-        $sql = "SELECT id,
-        ordre,
-        nameFr AS nombreCurso,
-        resumenFr AS resumen,
-        img,
-        paramNameFr AS paramName,
-        lastModified
-        FROM db_historia_oberta_cursos 
-        ORDER BY ordre ASC";
-    } else if ($lang === "it") {
-        $sql = "SELECT id,
-        ordre,
-        nameIt AS nombreCurso,
-        resumenIt AS resumen,
-        img,
-        paramNameIt AS paramName,
-        lastModified
-        FROM db_historia_oberta_cursos 
-        ORDER BY ordre ASC";
-    }
 
     try {
         $result = $db->getData($sql);
@@ -931,7 +882,7 @@ if ($slug === 'carrecsPersona') {
         Response::success(
             MissatgesAPI::success('get'),
             $result,
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(
@@ -941,80 +892,147 @@ if ($slug === 'carrecsPersona') {
         );
     }
 } else if ($slug === 'cursHistoria') {
-    // Aquí puedes obtener los valores de los parámetros
-    $paramName = $_GET['paramName'];
-    $lang = $_GET['langCurso'];
 
-    if ($lang === "ca") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameCa AS courseName, c.descripCa AS courseDescription, c.id AS cursId
+    $paramName = $_GET['paramName'] ?? null;
+
+    if (!$paramName) {
+        Response::error(
+            MissatgesAPI::error('paramRequired'),
+            [],
+            400
+        );
+        return;
+    }
+
+    $query = "SELECT
+            p.ID,
+            p.post_title,
+            p.post_date,
+            p.slug,
+            c.curs,
+            c.descripcio,
+            c.id AS cursId
         FROM db_historia_oberta_cursos AS c
-        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
+        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs_id
         LEFT JOIN db_blog AS p ON p.ID = l.ca
-        WHERE c.paramNameCa = :param
+        WHERE c.slug = :param
         ORDER BY l.ordre ASC";
-    } else if ($lang === "en") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameEn AS courseName, c.descripEn AS courseDescription, c.id AS cursId
-        FROM db_historia_oberta_cursos AS c
-        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
-        LEFT JOIN db_blog AS p ON p.ID = l.en
-        WHERE c.paramNameEn = :param
-        ORDER BY l.ordre ASC;";
-    } else if ($lang === "fr") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameFr AS courseName, c.descripFr AS courseDescription, c.id AS cursId
-        FROM db_historia_oberta_cursos AS c
-        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
-        LEFT JOIN db_blog AS p ON p.ID = l.fr
-        WHERE c.paramNameFr = :param
-        ORDER BY l.ordre ASC;";
-    } else if ($lang === "es") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameEs AS courseName, c.descripEs AS courseDescription, c.id AS cursId
-        FROM db_historia_oberta_cursos AS c
-        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
-        LEFT JOIN db_blog AS p ON p.ID = l.es
-        WHERE c.paramNameEs = :param
-        ORDER BY l.ordre ASC;";
-    } else if ($lang === "it") {
-        $query = "SELECT p.ID, p.post_title, p.post_date, p.slug, c.nameIt AS courseName, c.descripIt AS courseDescription, c.id AS cursId
-        FROM db_historia_oberta_cursos AS c
-        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs
-        LEFT JOIN db_blog AS p ON p.ID = l.it
-        WHERE c.paramNameIt = :param
-        ORDER BY l.ordre ASC;";
+
+    try {
+        $params = [
+            ':param' => $paramName,
+        ];
+
+        $rows = $db->getData($query, $params, false);
+
+        if (empty($rows)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        $course = [
+            'id' => $rows[0]['cursId'],
+            'curs' => $rows[0]['curs'],
+            'descripcio' => $rows[0]['descripcio'],
+        ];
+
+        $articles = [];
+
+        foreach ($rows as $row) {
+            if ($row['ID'] === null) {
+                continue;
+            }
+
+            $articles[] = [
+                'id' => $row['ID'],
+                'post_title' => $row['post_title'],
+                'post_date' => $row['post_date'],
+                'slug' => $row['slug'],
+            ];
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            [
+                'curs' => $course,
+                'articles' => $articles,
+            ],
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 
-    global $conn;
+    // Article per slug
+    // URL: /api/historia/get/articleSlug?articleSlug=revolut&scope=blog|historia
+} else if ($slug === 'articleSlug') {
 
-    // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $articleSlug = (string)($_GET['articleSlug'] ?? '');
+    $articleSlug = trim($articleSlug);
 
-    // Vincular los parámetros
-    $stmt->bindParam(':param', $paramName);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+    // Validació bàsica de slug
+    if ($articleSlug === '' || !preg_match('~^[a-z0-9][a-z0-9\-]*[a-z0-9]$|^[a-z0-9]$~', $articleSlug)) {
+        Response::error('Paràmetre articleSlug invàlid', [], 400);
+        return;
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $query = "SELECT
+            b.id,
+            b.post_type,
+            b.post_title,
+            b.post_excerpt,
+            b.lang,
+            b.post_content,
+            b.post_status,
+            b.slug,
+            b.categoria,
+            b.post_date,
+            b.post_modified,
+            t.tema
+        FROM " . qi(Tables::BLOG, $pdo) . " AS b
+        LEFT JOIN " . qi(Tables::DB_TEMES, $pdo) . " AS t ON b.categoria = t.id
+        WHERE b.slug = :slug
+        LIMIT 1";
 
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
+    try {
+        $params = [':slug' => $articleSlug];
+        $rows = $db->getData($query, $params, true);
 
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
+        if (empty($rows)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $rows,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // Llistat arxiu articles
 } else if ($slug === 'arxiuArticles') {
 
     // Aquí puedes obtener los valores de los parámetros
     $lang = $_GET['lang'];
-
-    global $conn;
 
     if ($lang === "ca") {
         $query = "SELECT p.ID, p.post_title, p.post_name, c.nameCa AS cursName, c.paramNameCa AS cursParam
@@ -1054,7 +1072,7 @@ if ($slug === 'carrecsPersona') {
     }
 
     // Preparar la consulta
-    $stmt = $conn->prepare($query);
+    $stmt = $pdo->prepare($query);
 
     // Ejecutar la consulta
     $stmt->execute();
@@ -1074,23 +1092,18 @@ if ($slug === 'carrecsPersona') {
     // Devolver los datos en formato JSON
     echo json_encode($data);
 
-
-
     /**
      * GET : Slots/articles d'un curs (amb títols per idioma)
      * URL: /api/historia-oberta/get/cursArticles?cursId=3
      */
 } else if ($slug === 'cursArticles') {
 
-    $cursId = isset($_GET['cursId']) ? (int)$_GET['cursId'] : 0;
-    if ($cursId <= 0) {
-        Response::error(MissatgesAPI::error('invalid_param'), ['cursId'], 400);
-        return;
-    }
+    $cursId = $_GET['cursId'];
+
 
     // 1) Curs info (opcional, però útil)
     $sqlCurs = sprintf(
-        "SELECT id, ordre, nameCa, nameEs, nameEn, nameIt, nameFr, img, lastModified
+        "SELECT id, ordre, curs, img_id, lastModified
          FROM %s
          WHERE id = :id
          LIMIT 1",
@@ -1101,7 +1114,7 @@ if ($slug === 'carrecsPersona') {
     $sql = sprintf(
         "SELECT
             a.id AS slotId,
-            a.curs,
+            a.curs_id,
             a.ordre,
 
             a.ca AS ca_id,
@@ -1136,7 +1149,7 @@ if ($slug === 'carrecsPersona') {
         LEFT JOIN %s AS bfr ON bfr.id = a.fr
         LEFT JOIN %s AS bit ON bit.id = a.it
 
-        WHERE a.curs = :cursId
+        WHERE a.curs_id = :cursId
         ORDER BY a.ordre ASC, a.id ASC",
         qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo),
         qi(Tables::BLOG, $pdo),
@@ -1147,14 +1160,14 @@ if ($slug === 'carrecsPersona') {
     );
 
     try {
-        $curs = $db->getData($sqlCurs, [':id' => $cursId], true);
+        $curs = $db->getData($sqlCurs, [':id' => Uuid::toBinary($cursId)], true);
 
         if (empty($curs)) {
             Response::error(MissatgesAPI::error('not_found'), ['curs not found'], 404);
             return;
         }
 
-        $items = $db->getData($sql, [':cursId' => $cursId], false) ?? [];
+        $items = $db->getData($sql, [':cursId' => Uuid::toBinary($cursId)], false) ?? [];
 
         // normalitza una mica per frontend
         $normalized = array_map(function ($r) {
@@ -1162,17 +1175,16 @@ if ($slug === 'carrecsPersona') {
                 $id = $r[$prefix . '_id'] ?? null;
                 if ($id === null) return null;
                 return [
-                    'id' => (int)$id,
+                    'id' => (string)$id,
                     'title' => (string)($r[$prefix . '_title'] ?? ''),
                     'slug' => (string)($r[$prefix . '_slug'] ?? ''),
                     'status' => (string)($r[$prefix . '_status'] ?? ''),
-                    'editUrl' => "/gestio/blog/modifica-article/" . (int)$id
                 ];
             };
 
             return [
-                'slotId' => (int)$r['slotId'],
-                'curs' => (int)$r['curs'],
+                'slotId' => $r['slotId'],
+                'curs_id' => $r['curs_id'],
                 'ordre' => (int)$r['ordre'],
                 'ca' => $mk('ca'),
                 'es' => $mk('es'),
@@ -1188,7 +1200,7 @@ if ($slug === 'carrecsPersona') {
                 'curs' => $curs,
                 'items' => $normalized
             ],
-            200
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
@@ -1202,13 +1214,7 @@ if ($slug === 'carrecsPersona') {
      */
 } else if ($slug === 'cursArticleId') {
 
-    header('Content-Type: application/json; charset=utf-8');
-
-    $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-    if ($id <= 0) {
-        Response::error(MissatgesAPI::error('invalid_param'), ['id'], 400);
-        return;
-    }
+    $id = $_GET['id'];
 
     $sql = sprintf(
         "SELECT
@@ -1218,11 +1224,11 @@ if ($slug === 'carrecsPersona') {
             a.en,
             a.fr,
             a.it,
-            a.curs,
+            a.curs_id,
             a.ordre,
-            c.nameCa AS cursNameCa
+            c.curs
          FROM %s AS a
-         LEFT JOIN %s AS c ON c.id = a.curs
+         LEFT JOIN %s AS c ON c.id = a.curs_id
          WHERE a.id = :id
          LIMIT 1",
         qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo),
@@ -1230,7 +1236,7 @@ if ($slug === 'carrecsPersona') {
     );
 
     try {
-        $row = $db->getData($sql, [':id' => $id], true);
+        $row = $db->getData($sql, [':id' => Uuid::toBinary($id)], true);
 
         if (empty($row)) {
             Response::error(MissatgesAPI::error('not_found'), ['slot not found'], 404);
@@ -1240,7 +1246,142 @@ if ($slug === 'carrecsPersona') {
         Response::success(
             MissatgesAPI::success('get'),
             $row,
-            200
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
+} else if ($slug === 'llistatHistoriaObertaSlots') {
+
+    try {
+
+        $sql = "SELECT
+                hoa.id AS slot_id,
+                hoa.curs_id,
+                hoa.ordre,
+
+                ca.id AS ca_id,
+                ca.post_title AS ca_title,
+                ca.slug AS ca_slug,
+                ca.post_status AS ca_status,
+
+                es.id AS es_id,
+                es.post_title AS es_title,
+                es.slug AS es_slug,
+                es.post_status AS es_status,
+
+                en.id AS en_id,
+                en.post_title AS en_title,
+                en.slug AS en_slug,
+                en.post_status AS en_status,
+
+                fr.id AS fr_id,
+                fr.post_title AS fr_title,
+                fr.slug AS fr_slug,
+                fr.post_status AS fr_status,
+
+                it.id AS it_id,
+                it.post_title AS it_title,
+                it.slug AS it_slug,
+                it.post_status AS it_status
+
+            FROM " . qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo) . " AS hoa
+
+            LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS ca
+                ON ca.id = hoa.ca
+
+            LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS es
+                ON es.id = hoa.es
+
+            LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS en
+                ON en.id = hoa.en
+
+            LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS fr
+                ON fr.id = hoa.fr
+
+            LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS it
+                ON it.id = hoa.it
+
+            ORDER BY hoa.ordre ASC, hoa.id ASC
+        ";
+
+        $rows = $db->getData($sql, [], false) ?? [];
+
+        $data = array_map(
+            static function (array $row): array {
+
+                $article = static function (
+                    ?string $id,
+                    ?string $title,
+                    ?string $slug,
+                    ?string $status
+                ): ?array {
+                    if ($id === null) {
+                        return null;
+                    }
+
+                    return [
+                        'id' => (int) $id,
+                        'title' => $title ?? '',
+                        'slug' => $slug ?? '',
+                        'status' => $status ?? '',
+                    ];
+                };
+
+                return [
+                    'slotId' => (string) $row['slot_id'],
+                    'curs_id' => $row['curs_id'],
+                    'ordre' => (int) $row['ordre'],
+
+                    'ca' => $article(
+                        $row['ca_id'],
+                        $row['ca_title'],
+                        $row['ca_slug'],
+                        $row['ca_status']
+                    ),
+
+                    'es' => $article(
+                        $row['es_id'],
+                        $row['es_title'],
+                        $row['es_slug'],
+                        $row['es_status']
+                    ),
+
+                    'en' => $article(
+                        $row['en_id'],
+                        $row['en_title'],
+                        $row['en_slug'],
+                        $row['en_status']
+                    ),
+
+                    'fr' => $article(
+                        $row['fr_id'],
+                        $row['fr_title'],
+                        $row['fr_slug'],
+                        $row['fr_status']
+                    ),
+
+                    'it' => $article(
+                        $row['it_id'],
+                        $row['it_title'],
+                        $row['it_slug'],
+                        $row['it_status']
+                    ),
+                ];
+            },
+            $rows
+        );
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $data,
+            httpCode: 200
         );
     } catch (PDOException $e) {
         Response::error(

@@ -21,8 +21,6 @@ $routes = [
 
     // HOMEPAGE (alias coherente)
     '/'        => route_public('./web-publica/index.php'),
-    '/home'    => route_public('./web-publica/index.php'),
-    '/inici'   => route_public('./web-publica/index.php'),
 
     // Login / registro
     '/entrada'     => route_public('./web-publica/autenticacio-usuaris/login.php'),

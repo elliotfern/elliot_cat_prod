@@ -30,6 +30,7 @@ import { radio } from './pages/radio/radio';
 import { galeriaImatgesPublica } from './pages/auxiliars/fitxaGaleriaImatgesPublica';
 import { obtenerTemperaturaTrento } from './pages/auxiliars/meteoTrento';
 import { historiaOberta } from './pages/historiaOberta/historiaOberta';
+import { getCoursesList } from './pages/historiaOberta/cursosWebPublica';
 
 document.addEventListener('trix-before-initialize', function () {
   // H2
@@ -153,5 +154,7 @@ async function main() {
     if (temperaturaTrento) {
       temperaturaTrento.innerHTML = await obtenerTemperaturaTrento();
     }
+  } else if (pageType.length === 0) {
+    getCoursesList();
   }
 }

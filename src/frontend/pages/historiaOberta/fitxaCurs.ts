@@ -1,5 +1,4 @@
-// src/frontend/pages/gestio/historia/fitxaCursArticles.ts
-
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { DOMAIN_WEB } from '../../utils/urls';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 
@@ -13,7 +12,7 @@ type BlogRef = {
 
 type SlotItem = {
   slotId: number;
-  curs: number;
+  cursId: number;
   ordre: number;
   ca: BlogRef | null;
   es: BlogRef | null;
@@ -23,96 +22,125 @@ type SlotItem = {
 };
 
 type CursInfo = {
-  id: number;
-  nameCa?: string;
-  nombreCurso?: string;
+  id: string;
+  curs: string;
+  slug: string;
 };
 
-type ApiResponse = {
-  status: string;
-  message: string;
-  errors: unknown[];
-  data: {
-    curs: CursInfo;
-    items: SlotItem[];
-  };
+type CursArticlesResponse = {
+  curs: CursInfo;
+  items: SlotItem[];
 };
 
 export async function taulaArticlesCurs(cursId: string): Promise<void> {
   const infoCurs = document.getElementById('infoCurs');
   const container = document.getElementById('llistatArticles');
-  if (!infoCurs || !container) return;
 
-  container.innerHTML = `<div class="alert alert-info">Carregant articles...</div>`;
-
-  const url = `https://${window.location.host}/api/historia/get/cursArticles?cursId=${encodeURIComponent(cursId)}`;
-
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) {
-    container.innerHTML = `<div class="alert alert-danger">Error carregant el curs.</div>`;
+  if (!infoCurs || !container) {
     return;
   }
 
-  const json = (await res.json()) as ApiResponse;
-  const curs = json.data?.curs;
-  const items = json.data?.items ?? [];
-
-  // Nombre del curso
-  const nom = (curs?.nameCa || curs?.nombreCurso || `Curs ID ${cursId}`) as string;
-
-  // InfoCurs con un poco de Bootstrap 5
-  infoCurs.innerHTML = `
-    <div class="card shadow-sm mb-3">
-      <div class="card-body py-3">
-        <h2 class="h5 mb-0">${escapeHtml(nom)}</h2>
-      </div>
+  container.innerHTML = `
+    <div class="alert alert-info">
+      Carregant articles...
     </div>
   `;
 
-  const columns: TaulaDinamica<SlotItem>[] = [
-    {
-      header: 'Ordre',
-      field: 'ordre',
-      render: (value: unknown) => {
-        const v = value === null || value === undefined || value === '' ? '—' : String(value);
-        return `<span class="fw-semibold">${escapeHtml(v)}</span>`;
-      },
-    },
-    { header: 'CAT', field: 'ca', render: (_: unknown, row: SlotItem) => renderLangCell(row.ca) },
-    { header: 'ES', field: 'es', render: (_: unknown, row: SlotItem) => renderLangCell(row.es) },
-    { header: 'EN', field: 'en', render: (_: unknown, row: SlotItem) => renderLangCell(row.en) },
-    { header: 'FR', field: 'fr', render: (_: unknown, row: SlotItem) => renderLangCell(row.fr) },
-    { header: 'IT', field: 'it', render: (_: unknown, row: SlotItem) => renderLangCell(row.it) },
-    {
-      header: 'Modifica',
-      field: 'slotId',
-      render: (_: unknown, row: SlotItem) => {
-        const href = `${DOMAIN_WEB}/gestio/historia/modifica-curs-article/${row.slotId}`;
-        return `
-          <a href="${href}" class="btn btn-sm btn-primary">
-            Modifica slot
-          </a>
-        `;
-      },
-    },
-  ];
+  try {
+    const data = await api.get<CursArticlesResponse>('historia/get/cursArticles', {
+      cursId,
+    });
 
-  renderTableLocal({
-    containerId: 'llistatArticles',
-    columns,
-    rows: items.slice().sort((a, b) => a.ordre - b.ordre),
-  });
+    const curs = data.curs;
+    const items = data.items ?? [];
+
+    const nom = curs.curs;
+
+    infoCurs.innerHTML = `
+      <div class="card shadow-sm mb-3">
+        <div class="card-body py-3">
+          <h2 class="h5 mb-0">${escapeHtml(nom)}</h2>
+        </div>
+      </div>
+    `;
+
+    const columns: TaulaDinamica<SlotItem>[] = [
+      {
+        header: 'Ordre',
+        field: 'ordre',
+        render: (value: unknown) => {
+          const v = value === null || value === undefined || value === '' ? '—' : String(value);
+
+          return `<span class="fw-semibold">${escapeHtml(v)}</span>`;
+        },
+      },
+      {
+        header: 'CAT',
+        field: 'ca',
+        render: (_: unknown, row: SlotItem) => renderLangCell(row.ca),
+      },
+      {
+        header: 'ES',
+        field: 'es',
+        render: (_: unknown, row: SlotItem) => renderLangCell(row.es),
+      },
+      {
+        header: 'EN',
+        field: 'en',
+        render: (_: unknown, row: SlotItem) => renderLangCell(row.en),
+      },
+      {
+        header: 'FR',
+        field: 'fr',
+        render: (_: unknown, row: SlotItem) => renderLangCell(row.fr),
+      },
+      {
+        header: 'IT',
+        field: 'it',
+        render: (_: unknown, row: SlotItem) => renderLangCell(row.it),
+      },
+      {
+        header: 'Modifica',
+        field: 'slotId',
+        render: (_: unknown, row: SlotItem) => {
+          const href = `${DOMAIN_WEB}/gestio/historia/modifica-curs-article/${row.slotId}`;
+
+          return `
+            <a href="${href}" class="btn btn-sm btn-primary">
+              Modifica slot
+            </a>
+          `;
+        },
+      },
+    ];
+
+    renderTableLocal({
+      containerId: 'llistatArticles',
+      columns,
+      rows: items.slice().sort((a, b) => a.ordre - b.ordre),
+    });
+  } catch (error: unknown) {
+    console.error('Error carregant el curs:', error);
+
+    container.innerHTML = `
+      <div class="alert alert-danger">
+        Error carregant el curs.
+      </div>
+    `;
+  }
 }
 
-// Render local (datos pre-cargados)
-function renderTableLocal<T extends Record<string, unknown>>(opts: { containerId: string; columns: TaulaDinamica<T>[]; rows: T[] }) {
+function renderTableLocal<T extends Record<string, unknown>>(opts: { containerId: string; columns: TaulaDinamica<T>[]; rows: T[] }): void {
   const container = document.getElementById(opts.containerId);
-  if (!container) return;
+
+  if (!container) {
+    return;
+  }
 
   const thead = `
     <thead class="table-light">
       <tr>
-        ${opts.columns.map((c) => `<th scope="col" class="text-uppercase small">${escapeHtml(c.header)}</th>`).join('')}
+        ${opts.columns.map((column) => `<th scope="col" class="text-uppercase small">${escapeHtml(column.header)}</th>`).join('')}
       </tr>
     </thead>
   `;
@@ -124,16 +152,25 @@ function renderTableLocal<T extends Record<string, unknown>>(opts: { containerId
           ? opts.rows
               .map((row) => {
                 const tds = opts.columns
-                  .map((col) => {
-                    const value = row[col.field];
-                    const html = col.render ? col.render(value, row) : escapeHtml(value);
+                  .map((column) => {
+                    const value = row[column.field];
+
+                    const html = column.render ? column.render(value, row) : escapeHtml(value);
+
                     return `<td class="py-2">${html}</td>`;
                   })
                   .join('');
+
                 return `<tr>${tds}</tr>`;
               })
               .join('')
-          : `<tr><td colspan="${opts.columns.length}" class="text-muted p-3">Sense articles.</td></tr>`
+          : `
+            <tr>
+              <td colspan="${opts.columns.length}" class="text-muted p-3">
+                Sense articles.
+              </td>
+            </tr>
+          `
       }
     </tbody>
   `;
@@ -157,10 +194,8 @@ function renderLangCell(ref: BlogRef | null): string {
     return `<span class="text-muted">—</span>`;
   }
 
-  // editor artículo db_blog
   const editHref = `${DOMAIN_WEB}/gestio/blog/modifica-article/${ref.id}`;
 
-  // pequeño badge de status si quieres verlo
   const status = ref.status ? `<span class="badge text-bg-light ms-2">${escapeHtml(ref.status)}</span>` : '';
 
   return `
@@ -171,8 +206,14 @@ function renderLangCell(ref: BlogRef | null): string {
         </div>
         ${status}
       </div>
+
       <div>
-        <a href="${editHref}" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener">
+        <a
+          href="${editHref}"
+          class="btn btn-sm btn-outline-secondary"
+          target="_blank"
+          rel="noopener"
+        >
           Modifica article
         </a>
       </div>

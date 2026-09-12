@@ -14,3 +14,4 @@ enum UserRole: string
         return $this === self::ADMIN;
     }
 }
+
