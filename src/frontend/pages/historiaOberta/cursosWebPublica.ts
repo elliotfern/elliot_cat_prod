@@ -6,6 +6,8 @@ interface Curs {
   descripcio?: string;
   resum?: string;
   slug: string;
+  extension: string;
+  nameImg: string;
 }
 
 export async function getCoursesList(): Promise<void> {
@@ -39,7 +41,7 @@ function displayCourses(courses: Curs[]): void {
       <div class="card h-100">
         <a href="${courseLink}">
           <img
-            src="${course.img}"
+            src="https://media.elliot.cat/img/historia-curs/${course.nameImg}${course.extension}"
             class="card-img-top img-fluid"
             alt="${course.curs ?? ''}"
           >

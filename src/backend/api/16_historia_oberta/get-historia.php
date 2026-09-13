@@ -863,9 +863,10 @@ if ($slug === 'carrecsPersona') {
     // ruta GET => "/api/historia/get/llistatCursos"
 } else if ($slug === 'llistatCursos') {
 
-    $sql = "SELECT id, ordre, curs, resum, img_id, slug, lastModified
-        FROM db_historia_oberta_cursos 
-        ORDER BY ordre ASC";
+    $sql = "SELECT c.id, c.ordre, c.curs, c.resum, c.img_id, c.slug, c.lastModified, i.nameImg, i.extension
+        FROM db_historia_oberta_cursos AS c
+        LEFT JOIN db_img AS i ON c.img_id = i.id
+        ORDER BY c.ordre ASC";
 
     try {
         $result = $db->getData($sql);
