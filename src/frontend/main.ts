@@ -127,7 +127,7 @@ async function main() {
     // Part accessible tant a usuaris com a visitants
   } else if (pageType[1] === 'lector-rss' || pageType[0] === 'lector-rss') {
     lectorRss();
-  } else if (pageType[1] === 'historia' || pageType[0] === 'historia') {
+  } else if (pageType[1] === 'historia') {
     historiaOberta();
   } else if (pageType[1] === 'biblioteca' || pageType[0] === 'biblioteca') {
     biblioteca();
@@ -154,7 +154,7 @@ async function main() {
     if (temperaturaTrento) {
       temperaturaTrento.innerHTML = await obtenerTemperaturaTrento();
     }
-  } else if (pageType.length === 0) {
+  } else if (pageType.length === 0 || pageType[0] === 'historia') {
     getCoursesList();
   }
 }
