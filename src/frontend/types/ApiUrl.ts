@@ -45,6 +45,7 @@ export type ApiUrls = {
     DESPESA_ID: string;
     IMATGE_ID: (id: string) => string;
     PAISOS: string;
+    CURS_ID: (id: string) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -77,6 +78,7 @@ export type ApiUrls = {
     DESPESA: string;
     IMATGE: string;
     GALERIA_IMATGES: string;
+    CURS_HISTORIA: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -108,6 +110,7 @@ export type ApiUrls = {
     DESPESA: string;
     IMATGE: string;
     GALERIA_IMATGES: string;
+    CURS_HISTORIA: string;
   };
   DELETE: {
     PAIS: string;

@@ -1257,6 +1257,45 @@ if ($slug === 'carrecsPersona') {
     }
 
     return;
+
+    /**
+     * GET : CursId
+     * URL: /api/historia/get/cursId?id=12
+     */
+} else if ($slug === 'cursId') {
+
+    $id = $_GET['id'];
+
+    $sql = sprintf(
+        "SELECT c.id, c.curs, c.resum, c.descripcio, c.slug, c.img_id, c.ordre, c.lastModified
+         FROM %s AS c
+         WHERE c.id = :id
+         LIMIT 1",
+        qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo)
+    );
+
+    try {
+        $row = $db->getData($sql, [':id' => Uuid::toBinary($id)], true);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), ['slot not found'], 404);
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $row,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
 } else if ($slug === 'llistatHistoriaObertaSlots') {
 
     try {

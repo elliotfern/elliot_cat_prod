@@ -99,7 +99,7 @@ try {
     Response::success(
         MissatgesAPI::success('import'),
         ['imported' => count($events)],
-        200
+        httpCode:200
     );
     exit;
 } catch (\Throwable $e) {

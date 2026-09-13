@@ -17,12 +17,12 @@ $pdo = $db->getPdo();
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
@@ -52,8 +52,8 @@ if ($slug === 'esdeveniment') {
     // Ahora puedes acceder a los datos como un array asociativo
     $hasError = false; // Inicializamos la variable $hasError como false
 
-    $esdeNom       = !empty($data['esdeNom']) ? data_input($data['esdeNom']) : ($hasError = true);
-    $slug          = !empty($data['slug']) ? data_input($data['slug']) : ($hasError = true);
+    $esdeNom       = !empty($data['esdeNom']) ? $data['esdeNom'] : ($hasError = true);
+    $slug          = !empty($data['slug']) ? $data['slug'] : ($hasError = true);
     $esdeDataIDia  = isset($data['esdeDataIDia']) ? (int) $data['esdeDataIDia'] : null;
     $esdeDataIMes  = isset($data['esdeDataIMes']) ? (int) $data['esdeDataIMes'] : null;
     $esdeDataIAny  = isset($data['esdeDataIAny']) ? (int) $data['esdeDataIAny'] : ($hasError = true);
@@ -62,10 +62,10 @@ if ($slug === 'esdeveniment') {
     $esdeDataFAny  = isset($data['esdeDataFAny']) ? (int) $data['esdeDataFAny'] : null;
     $esSubEtapa    = isset($data['esSubEtapa']) ? (int) $data['esSubEtapa'] : null;
     $esdeCiutat = !empty($data['esdeCiutat'])
-        ? uuid::toBinary(data_input($data['esdeCiutat']))
+        ? uuid::toBinary($data['esdeCiutat'])
         : null;
 
-    $img           = !empty($data['img']) ? data_input($data['img']) : '';
+    $img           = !empty($data['img']) ? $data['img'] : '';
 
     $id = !empty($data['id']) ? uuid::toBinary($data['id']) : ($hasError = true);
     $timestamp = date('Y-m-d');
@@ -145,9 +145,9 @@ if ($slug === 'esdeveniment') {
     // Ahora puedes acceder a los datos como un array asociativo
     $hasError = false; // Inicializamos la variable $hasError como false
 
-    $idEsdev     = !empty($data['idEsdev']) ? data_input($data['idEsdev']) : ($hasError = true);
-    $idPersona   = !empty($data['idPersona']) ? data_input($data['idPersona']) : ($hasError = true);
-    $id          = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
+    $idEsdev     = !empty($data['idEsdev']) ? $data['idEsdev'] : ($hasError = true);
+    $idPersona   = !empty($data['idPersona']) ? $data['idPersona'] : ($hasError = true);
+    $id          = !empty($data['id']) ? $data['id'] : ($hasError = true);
 
     if (!$hasError) {
 
@@ -202,9 +202,9 @@ if ($slug === 'esdeveniment') {
     // Ahora puedes acceder a los datos como un array asociativo
     $hasError = false; // Inicializamos la variable $hasError como false
 
-    $idEsde  = !empty($data['idEsde']) ? data_input($data['idEsde']) : ($hasError = true);
-    $idOrg   = !empty($data['idOrg']) ? data_input($data['idOrg']) : ($hasError = true);
-    $id      = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
+    $idEsde  = !empty($data['idEsde']) ? $data['idEsde'] : ($hasError = true);
+    $idOrg   = !empty($data['idOrg']) ? $data['idOrg'] : ($hasError = true);
+    $id      = !empty($data['id']) ? $data['id'] : ($hasError = true);
 
     if (!$hasError) {
         global $conn;
@@ -258,15 +258,15 @@ if ($slug === 'esdeveniment') {
     // Ahora puedes acceder a los datos como un array asociativo
     $hasError = false; // Inicializamos la variable $hasError como false
 
-    $idPersona = !empty($data['idPersona']) ? data_input($data['idPersona']) : ($hasError = true);
-    $carrecNom = !empty($data['carrecNom']) ? data_input($data['carrecNom']) : ($hasError = true);
-    $carrecNomCast = !empty($data['carrecNomCast']) ? data_input($data['carrecNomCast']) : ($hasError = false);
-    $carrecNomEng = !empty($data['carrecNomEng']) ? data_input($data['carrecNomEng']) : ($hasError = false);
-    $carrecNomIt = !empty($data['carrecNomIt']) ? data_input($data['carrecNomIt']) : ($hasError = false);
-    $carrecInici = !empty($data['carrecInici']) ? data_input($data['carrecInici']) : ($hasError = true);
-    $carrecFi = !empty($data['carrecFi']) ? data_input($data['carrecFi']) : ($hasError = false);
-    $idOrg = !empty($data['idOrg']) ? data_input($data['idOrg']) : ($hasError = true);
-    $id = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
+    $idPersona = !empty($data['idPersona']) ? $data['idPersona'] : ($hasError = true);
+    $carrecNom = !empty($data['carrecNom']) ? $data['carrecNom'] : ($hasError = true);
+    $carrecNomCast = !empty($data['carrecNomCast']) ? $data['carrecNomCast'] : ($hasError = false);
+    $carrecNomEng = !empty($data['carrecNomEng']) ? $data['carrecNomEng'] : ($hasError = false);
+    $carrecNomIt = !empty($data['carrecNomIt']) ? $data['carrecNomIt'] : ($hasError = false);
+    $carrecInici = !empty($data['carrecInici']) ? $data['carrecInici'] : ($hasError = true);
+    $carrecFi = !empty($data['carrecFi']) ? $data['carrecFi'] : ($hasError = false);
+    $idOrg = !empty($data['idOrg']) ? $data['idOrg'] : ($hasError = true);
+    $id = !empty($data['id']) ? $data['id'] : ($hasError = true);
 
     if (!$hasError) {
         global $conn;
@@ -332,21 +332,21 @@ if ($slug === 'esdeveniment') {
     // Ahora puedes acceder a los datos como un array asociativo
     $hasError = false; // Inicializamos la variable $hasError como false
 
-    $nomOrg = !empty($data['nomOrg']) ? data_input($data['nomOrg']) : ($hasError = true);
-    $nomOrgCast = !empty($data['nomOrgCast']) ? data_input($data['nomOrgCast']) : ($hasError = false);
-    $nomOrgEng = !empty($data['nomOrgEng']) ? data_input($data['nomOrgEng']) : ($hasError = false);
-    $nomOrgIt = !empty($data['nomOrgIt']) ? data_input($data['nomOrgIt']) : ($hasError = false);
-    $slug = !empty($data['slug']) ? data_input($data['slug']) : ($hasError = true);
-    $orgSig = !empty($data['orgSig']) ? data_input($data['orgSig']) : ($hasError = false);
-    $dataFunda = !empty($data['dataFunda']) ? data_input($data['dataFunda']) : ($hasError = true);
-    $dataDiss = !empty($data['dataDiss']) ? data_input($data['dataDiss']) : ($hasError = false);
-    $orgPais = !empty($data['orgPais']) ? data_input($data['orgPais']) : ($hasError = true);
-    $orgCiutat = !empty($data['orgCiutat']) ? data_input($data['orgCiutat']) : ($hasError = true);
-    $orgSubEtapa = !empty($data['orgSubEtapa']) ? data_input($data['orgSubEtapa']) : ($hasError = true);
-    $orgTipus = !empty($data['orgTipus']) ? data_input($data['orgTipus']) : ($hasError = true);
-    $orgIdeologia = !empty($data['orgIdeologia']) ? data_input($data['orgIdeologia']) : ($hasError = false);
-    $img = !empty($data['img']) ? data_input($data['img']) : ($hasError = true);
-    $id = !empty($data['id']) ? data_input($data['id']) : ($hasError = true);
+    $nomOrg = !empty($data['nomOrg']) ? $data['nomOrg'] : ($hasError = true);
+    $nomOrgCast = !empty($data['nomOrgCast']) ? $data['nomOrgCast'] : ($hasError = false);
+    $nomOrgEng = !empty($data['nomOrgEng']) ? $data['nomOrgEng'] : ($hasError = false);
+    $nomOrgIt = !empty($data['nomOrgIt']) ? $data['nomOrgIt'] : ($hasError = false);
+    $slug = !empty($data['slug']) ? $data['slug'] : ($hasError = true);
+    $orgSig = !empty($data['orgSig']) ? $data['orgSig'] : ($hasError = false);
+    $dataFunda = !empty($data['dataFunda']) ? $data['dataFunda'] : ($hasError = true);
+    $dataDiss = !empty($data['dataDiss']) ? $data['dataDiss'] : ($hasError = false);
+    $orgPais = !empty($data['orgPais']) ? $data['orgPais'] : ($hasError = true);
+    $orgCiutat = !empty($data['orgCiutat']) ? $data['orgCiutat'] : ($hasError = true);
+    $orgSubEtapa = !empty($data['orgSubEtapa']) ? $data['orgSubEtapa'] : ($hasError = true);
+    $orgTipus = !empty($data['orgTipus']) ? $data['orgTipus'] : ($hasError = true);
+    $orgIdeologia = !empty($data['orgIdeologia']) ? $data['orgIdeologia'] : ($hasError = false);
+    $img = !empty($data['img']) ? $data['img'] : ($hasError = true);
+    $id = !empty($data['id']) ? $data['id'] : ($hasError = true);
 
     $timestamp = date('Y-m-d');
     $dateModified = $timestamp;
@@ -565,13 +565,125 @@ if ($slug === 'esdeveniment') {
             return;
         }
 
-        Response::success(MissatgesAPI::success('update'), ['id' => $id], 200);
+        Response::success(MissatgesAPI::success('update'), ['id' => $id], httpCode: 200);
     } catch (PDOException $e) {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
     return;
     // si no hi ha cap endpoint valid, mostrar error:
+
+} else if ($slug === 'cursHistoria') {
+    try {
+
+        $input = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (!is_array($input)) {
+            Response::error(
+                'Dades de la petició invàlides.',
+                [],
+                400
+            );
+            return;
+        }
+
+        $id = trim((string) ($input['id'] ?? ''));
+        $curs = trim((string) ($input['curs'] ?? ''));
+        $resum = trim((string) ($input['resum'] ?? ''));
+        $descripcio = isset($input['descripcio'])
+            ? trim((string) $input['descripcio'])
+            : null;
+        $slugCurs = trim((string) ($input['slug'] ?? ''));
+        $imgId = trim((string) ($input['img_id'] ?? ''));
+        $ordre = $input['ordre'] ?? null;
+
+        $errors = [];
+
+        if ($id === '') {
+            $errors[] = 'L\'id del curs és obligatori.';
+        }
+
+        if ($curs === '') {
+            $errors[] = 'El curs és obligatori.';
+        }
+
+        if ($resum === '') {
+            $errors[] = 'El resum és obligatori.';
+        }
+
+        if ($slugCurs === '') {
+            $errors[] = 'El slug és obligatori.';
+        }
+
+        if ($imgId === '') {
+            $errors[] = 'La imatge és obligatòria.';
+        }
+
+        if ($ordre !== null && $ordre !== '') {
+            if (filter_var($ordre, FILTER_VALIDATE_INT) === false) {
+                $errors[] = 'L\'ordre ha de ser un número enter.';
+            } else {
+                $ordre = (int) $ordre;
+            }
+        } else {
+            $ordre = null;
+        }
+
+        if ($errors !== []) {
+            Response::error(
+                'Hi ha errors en les dades del curs.',
+                $errors,
+                400
+            );
+            return;
+        }
+
+        $sql = "
+            UPDATE " . qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo) . "
+            SET
+                curs = :curs,
+                resum = :resum,
+                descripcio = :descripcio,
+                slug = :slug,
+                img_id = :img_id,
+                ordre = :ordre,
+                lastModified = CURRENT_TIMESTAMP
+            WHERE id = :id
+        ";
+
+        $db->execute(
+            $sql,
+            [
+                ':id' => Uuid::toBinary($id),
+                ':curs' => $curs,
+                ':resum' => $resum,
+                ':descripcio' => $descripcio,
+                ':slug' => $slugCurs,
+                ':img_id' => Uuid::toBinary($imgId),
+                ':ordre' => $ordre,
+            ]
+        );
+
+        Response::success(
+            MissatgesAPI::success('update'),
+            [
+                'id' => $id,
+            ],
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
 } else {
     // response output - data error
     $response['status'] = 'error';

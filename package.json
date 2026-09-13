@@ -7,8 +7,8 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "dev": "npm run lint && NODE_ENV=development webpack --mode development",
-    "build": "npm run lint && NODE_ENV=production webpack --mode production",
+    "dev": "npm run lint && npx tsc --noEmit && NODE_ENV=development webpack --mode development",
+    "build": "npm run lint && npx tsc --noEmit && NODE_ENV=production webpack --mode production",
     "test": "vendor/bin/phpunit --testdox --colors=always",
     "prepare": "husky"
   },

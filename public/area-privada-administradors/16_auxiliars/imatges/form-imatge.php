@@ -46,6 +46,7 @@
         <option value="2">Biblioteca llibres: llibre</option>
         <option value="3">Història: imatge</option>
         <option value="4">Història: esdeveniment</option>
+        <option value="5">Història: curs</option>
         <option value="6">Història: organització</option>
         <option value="12">Història: mapa</option>
         <option value="15">Història: infografia</option>

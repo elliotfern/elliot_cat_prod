@@ -158,6 +158,7 @@ if ($slug === 'imatges') {
         2 => 'biblioteca-llibre',
         3 => 'historia-imatge',
         4 => 'historia-esdeveniment',
+        5 => 'historia-curs',
         6 => 'historia-organitzacio',
         7 => 'cinema-serie',
         8 => 'cinema-pelicula',

@@ -210,6 +210,48 @@ if ($slug === 'directors') {
         );
     }
 
+    // Llistat imatges cursos historia
+    // ruta GET => "/api/cinema/get/auxiliars/imgCursosHistoria"
+} else if ($slug === 'imgCursosHistoria') {
+    $sql = <<<SQL
+            SELECT i.id, i.alt
+            FROM %s AS i
+            WHERE i.typeImg = :img
+            ORDER BY i.alt ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_IMATGES, $pdo),
+    );
+
+    try {
+        $img = 5;
+        $params = [':img' => $img];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // Llistat idiomes
     // ruta GET => "/api/cinema/get/auxiliars/?type=llengues"
 } else if ($slug === "llengues") {

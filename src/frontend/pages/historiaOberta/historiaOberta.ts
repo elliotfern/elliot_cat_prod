@@ -8,6 +8,7 @@ import { initCronologia } from './cronologia/llistatEsdeveniments';
 import { getCursHistoria } from './fitxaCursWebPublica';
 import { renderArticle } from './fitxaArticleWebPublica';
 import { renderCursosArticlesList } from './llistatCursosArticles';
+import { formCursHistoria } from './formCurs';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -129,5 +130,14 @@ export function historiaOberta() {
     const slug = pageType[2];
 
     renderArticle(slug);
+  }
+
+  if (pageType[2] === 'nou-curs') {
+    formCursHistoria(false);
+  }
+
+  if (pageType[2] === 'modifica-curs') {
+    const slug = pageType[3];
+    formCursHistoria(true, slug);
   }
 }
