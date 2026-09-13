@@ -41,7 +41,7 @@ function displayCourses(courses: Curs[]): void {
       <div class="card h-100">
         <a href="${courseLink}">
           <img
-            src="https://media.elliot.cat/img/historia-curs/${course.nameImg}${course.extension}"
+            src="https://media.elliot.cat/img/historia-curs/${course.nameImg}.${course.extension}"
             class="card-img-top img-fluid"
             alt="${course.curs ?? ''}"
           >
