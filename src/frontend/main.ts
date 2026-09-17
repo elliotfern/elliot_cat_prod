@@ -154,7 +154,7 @@ async function main() {
     if (temperaturaTrento) {
       temperaturaTrento.innerHTML = await obtenerTemperaturaTrento();
     }
-  } else if (pageType.length === 0 || pageType[0] === 'historia') {
+  } else if (pageType.length === 0) {
     getCoursesList();
   }
 }
