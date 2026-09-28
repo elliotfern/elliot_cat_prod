@@ -279,6 +279,15 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
+    // LECTOR RSS
+    '/api/rss/get/{slug}' => [
+        'view' => '../src/backend/api/14_lector_rss/get-rss.php',
+        'needs_session' => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true
+    ],
+
     // SITEMAP
     '/api/sitemap/get' => [
         'view' => '../src/backend/api/15_sitemap/get-sitemap.php',

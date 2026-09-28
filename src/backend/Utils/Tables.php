@@ -27,7 +27,6 @@ class Tables
 
     public const IMG = 'db_img';
 
-
     public const CINEMA_SERIES_TV = 'db_cinema_seriestv';
     public const CINEMA_ACTORS_SERIES = 'db_cinema_seriestv_actors';
     public const CINEMA_GENERES = 'db_cinema_generes';
@@ -130,6 +129,9 @@ class Tables
     public const DB_SALUT_FACULTATIUS = 'db_salut_facultatius';
     public const DB_SALUT_PATOLOGIES_MEDICAMENTS = 'db_salut_patologia_medicaments';
     public const DB_SALUT_RECEPTES = 'db_salut_receptes_sollicituds';
+
+    // LECTOR FEEDS
+    public const DB_RSS_FEEDS = 'db_rss_feeds';
 
     // Agrega aquí todas las tablas que necesites usar
 

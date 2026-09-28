@@ -1,31 +1,8 @@
-<main>
-    <div class="container">
-        <h1>Lectura de Feeds RSS</h1>
+<div id="barraNavegacioContenidor"></div>
+<h1>Lectura de Feeds RSS</h1>
 
-        <!-- Botones de categorías -->
-        <div id="botones" class="requadre">
-            <button id="btnBlogs" class="btn-gran btn-primari">Blogs</button>
-            <button id="btnMedios" class="btn-gran btn-primari">Mitjans de comunicació</button>
-        </div>
+<div id="lectorRSS"></div>
 
-        <!-- Botones de feeds agrupados por categoría -->
-        <div id="grupoBlogs" class="hidden requadre">
-            <button id="btnFeed1" class="btn-gran btn-secondari">Jaime Gómez-Obregon</button>
-            <button id="btnFeed7" class="btn-gran btn-secondari">The Cheis</button>
-
-        </div>
-
-        <div id="grupoMedios" class="hidden requadre">
-            <button id="btnFeed2" class="btn-gran btn-secondari">Vilaweb</button>
-            <button id="btnFeed3" class="btn-gran btn-secondari">El Pais</button>
-            <button id="btnFeed4" class="btn-gran btn-secondari">La Vanguardia</button>
-            <button id="btnFeed5" class="btn-gran btn-secondari">BBC World</button>
-            <button id="btnFeed6" class="btn-gran btn-secondari">Ara</button>
-        </div>
-
-        <div id="feed"></div>
-    </div>
-</main>
 
 <style>
     .requadre {
@@ -55,5 +32,14 @@
         /* Mantiene la relación de aspecto original de la imagen */
         object-fit: contain;
         /* Ajusta la imagen para que se ajuste dentro del contenedor sin recortar */
+    }
+
+    .requadre button {
+        margin: 0 6px 6px 0;
+    }
+
+    .requadre button.actiu {
+        font-weight: bold;
+        text-decoration: underline;
     }
 </style>
