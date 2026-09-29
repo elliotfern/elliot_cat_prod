@@ -135,23 +135,12 @@ if ($slug === "esdevenimentId") {
 
     /**
      * GET : Llistat d’esdeveniments per rang de dates
-     * URL: agenda/get/esdevenimentsRang?usuari_id=1&from=2025-01-01&to=2025-01-31
+     * URL: agenda/get/esdevenimentsRang?from=2025-01-01&to=2025-01-31
      */
 } else if ($slug === "esdevenimentsRang") {
 
-    $usuariId = (int)($_GET['usuari_id'] ?? 0);
     $from     = $_GET['from'] ?? null;
     $to       = $_GET['to'] ?? null;
-
-
-    if ($usuariId <= 0 || !$from || !$to) {
-        Response::error(
-            MissatgesAPI::error('validacio'),
-            ['Paràmetres requerits: usuari_id, from, to'],
-            400
-        );
-        return;
-    }
 
     if (
         !preg_match('/^\d{4}-\d{2}-\d{2}$/', $from) ||

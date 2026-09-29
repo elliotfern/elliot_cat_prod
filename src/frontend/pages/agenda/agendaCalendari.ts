@@ -98,7 +98,6 @@ async function loadMonthData(usuariId: number, year: number, month: number): Pro
   const { from, to } = getMonthRange(year, month);
 
   const response = await api.get<AgendaEsdeveniment[]>('agenda/get/esdevenimentsRang', {
-    usuari_id: usuariId,
     from,
     to,
   });

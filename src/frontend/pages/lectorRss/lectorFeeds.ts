@@ -5,15 +5,6 @@ interface FeedItem {
   description: string;
 }
 
-function esUrlSegura(url: string): boolean {
-  try {
-    const u = new URL(url, window.location.origin);
-    return u.protocol === 'http:' || u.protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
-
 function renderizarItems(container: HTMLElement, items: FeedItem[]): void {
   const ul = document.createElement('ul');
 
@@ -22,7 +13,7 @@ function renderizarItems(container: HTMLElement, items: FeedItem[]): void {
 
     const a = document.createElement('a');
     a.textContent = item.title;
-    a.href = esUrlSegura(item.link) ? item.link : '#';
+    a.href = /^https?:\/\//i.test(item.link) ? item.link : '#';
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
 
