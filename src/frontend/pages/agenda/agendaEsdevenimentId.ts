@@ -8,7 +8,7 @@ export type EstatEsdeveniment = 'pendent' | 'confirmat' | 'cancel·lat' | 'cance
 export interface AgendaEsdeveniment {
   id: string;
   ciutat_id: string;
-  ciutat_final: string;
+  ciutat_nom: string;
   titol: string;
   descripcio?: string | null;
   tipus: TipusEsdeveniment;
@@ -149,7 +149,7 @@ function renderEsdeveniment(ev: AgendaEsdeveniment): void {
          <div class="agenda-detall-label">Lloc</div>
          <div class="agenda-detall-value">${ev.lloc}</div>
          <div class="agenda-detall-label">Ciutat</div>
-         <div class="agenda-detall-value">${ev.ciutat_final}</div>
+         <div class="agenda-detall-value">${ev.ciutat_nom}</div>
        </div>`
     : '';
 
