@@ -17,8 +17,8 @@ final class GetAgendaRangeUseCase
 
     public function execute(string $from, string $to): array
     {
-        $fromDate = new \DateTimeImmutable($from);
-        $toDate   = new \DateTimeImmutable($to);
+        $fromDate = (new \DateTimeImmutable($from))->setTime(0, 0, 0);
+        $toDate   = (new \DateTimeImmutable($to))->setTime(0, 0, 0)->modify('+1 day');
 
         $events = $this->agendaRepository->findByDateRange($fromDate, $toDate);
 

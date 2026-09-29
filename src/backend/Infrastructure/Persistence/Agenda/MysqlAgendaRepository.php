@@ -73,9 +73,9 @@ final class MysqlAgendaRepository implements AgendaRepositoryInterface
         c.ciutat AS ciutat_nom
     FROM db_agenda_esdeveniments AS e
     LEFT JOIN db_geo_ciutats c ON e.ciutat_id = c.id
-    WHERE data_inici <= :to
-    AND (data_fi IS NULL OR data_fi >= :from)
-    ORDER BY data_inici ASC";
+    WHERE e.data_inici < :to
+      AND COALESCE(e.data_fi, e.data_inici) >= :from
+    ORDER BY e.data_inici ASC";
 
         $stmt = $this->pdo->prepare($sql);
 
