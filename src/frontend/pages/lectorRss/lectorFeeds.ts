@@ -5,44 +5,41 @@ interface FeedItem {
   description: string;
 }
 
-export const feeds = [
-  {
-    url: 'https://jaime.gomezobregon.com/feed',
-    buttonId: 'btnFeed1',
-    categoria: 'blogs',
-  },
-  {
-    url: 'https://www.vilaweb.cat/feed/',
-    buttonId: 'btnFeed2',
-    categoria: 'medios',
-  },
-  {
-    url: 'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada',
-    buttonId: 'btnFeed3',
-    categoria: 'medios',
-  },
-  {
-    url: 'https://www.lavanguardia.com/rss/home.xml',
-    buttonId: 'btnFeed4',
-    categoria: 'medios',
-  },
-  {
-    url: 'https://feeds.bbci.co.uk/news/world/rss.xml',
-    buttonId: 'btnFeed5',
-    categoria: 'medios',
-  },
-  {
-    url: 'https://ara.cat/rss',
-    buttonId: 'btnFeed6',
-    categoria: 'medios',
-  },
+function esUrlSegura(url: string): boolean {
+  try {
+    const u = new URL(url, window.location.origin);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
 
-  {
-    url: 'https://thecheis.com/feed/',
-    buttonId: 'btnFeed7',
-    categoria: 'blogs',
-  },
-];
+function renderizarItems(container: HTMLElement, items: FeedItem[]): void {
+  const ul = document.createElement('ul');
+
+  items.forEach((item) => {
+    const li = document.createElement('li');
+
+    const a = document.createElement('a');
+    a.textContent = item.title;
+    a.href = esUrlSegura(item.link) ? item.link : '#';
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+
+    const pFecha = document.createElement('p');
+    const strong = document.createElement('strong');
+    strong.textContent = item.date;
+    pFecha.appendChild(strong);
+
+    const pDesc = document.createElement('p');
+    pDesc.textContent = item.description;
+
+    li.append(a, pFecha, pDesc);
+    ul.appendChild(li);
+  });
+
+  container.replaceChildren(ul);
+}
 
 function procesarXML(xml: Document): FeedItem[] {
   const items = Array.from(xml.querySelectorAll('item'));
@@ -69,6 +66,8 @@ export function lectorFeeds(url: string, targetElement: string): void {
 
   fetch(`/api/lector-rss/get/?url=${encodeURIComponent(url)}`)
     .then((response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
       const contentType = response.headers.get('Content-Type');
       if (contentType && contentType.includes('application/json')) {
         return response.json();
@@ -77,27 +76,22 @@ export function lectorFeeds(url: string, targetElement: string): void {
       }
     })
     .then((data: unknown) => {
+      let items: FeedItem[];
+
       if (typeof data === 'string') {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(data, 'application/xml');
-        data = procesarXML(xmlDoc); // Asegúrate de que procesarXML devuelva FeedItem[]
+        if (xmlDoc.querySelector('parsererror')) {
+          throw new Error('XML inválido');
+        }
+        items = procesarXML(xmlDoc);
+      } else {
+        if (!Array.isArray(data)) throw new Error('Respuesta inesperada');
+        items = data as FeedItem[];
       }
-
-      let html = '<ul>';
-      (data as FeedItem[]).forEach((item) => {
-        html += `
-          <li>
-              <a href="${item.link}" target="_blank">${item.title}</a>
-              <p><strong>${item.date}</strong></p>
-              <p>${item.description}</p>
-          </li>`;
-      });
-      html += '</ul>';
 
       const container = document.getElementById(targetElement);
-      if (container) {
-        container.innerHTML = html;
-      }
+      if (container) renderizarItems(container, items);
     })
     .catch((error) => {
       console.error(`Error al obtener el feed: ${url}`, error);
