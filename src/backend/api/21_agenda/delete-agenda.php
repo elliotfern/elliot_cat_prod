@@ -4,6 +4,7 @@ use App\Application\Agenda\UseCase\DeleteAgendaEventUseCase;
 use App\Config\DatabaseConnection;
 use App\Infrastructure\EntryPoint\Http\Agenda\DeleteAgendaEventController;
 use App\Infrastructure\Persistence\Agenda\MysqlAgendaRepository;
+use App\Infrastructure\Security\Auth\AuthFactory;
 use App\Utils\MissatgesAPI;
 use App\Utils\Response;
 
@@ -30,6 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
  * URL: https://elliot.cat/api/agenda/delete/esdevenimentId?id=1
  */
 if ($slug === "esdeveniment") {
+
+    AuthFactory::admin()->handle();
 
     $id = $_GET['id'] ?? '';
 
