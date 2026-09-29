@@ -22,6 +22,23 @@ export interface AgendaEsdeveniment {
   actualitzat_el: string;
 }
 
+async function eliminarEsdeveniment(id: string, btn: HTMLButtonElement): Promise<void> {
+  if (!window.confirm('Segur que vols eliminar aquest esdeveniment? Aquesta acció no es pot desfer.')) {
+    return;
+  }
+
+  btn.disabled = true;
+
+  try {
+    await api.delete('agenda/delete/esdeveniment', { id });
+    window.location.href = '/gestio/agenda/calendari-esdeveniments';
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false;
+    window.alert("No s'ha pogut eliminar l'esdeveniment. Torna-ho a provar.");
+  }
+}
+
 const MONTHS_CA = ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
 
 const WEEKDAYS_CA = ['Diumenge', 'Dilluns', 'Dimarts', 'Dimecres', 'Dijous', 'Divendres', 'Dissabte'];
@@ -210,6 +227,11 @@ export async function carregarEsdevenimentDetall(id: string): Promise<void> {
     }
 
     renderEsdeveniment(ev);
+
+    const btnEliminar = document.getElementById('btn-eliminar-esdeveniment') as HTMLButtonElement | null;
+    if (btnEliminar) {
+      btnEliminar.onclick = () => void eliminarEsdeveniment(ev.id, btnEliminar);
+    }
   } catch (err) {
     console.error(err);
 

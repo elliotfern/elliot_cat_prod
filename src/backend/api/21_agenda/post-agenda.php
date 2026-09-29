@@ -18,12 +18,12 @@ $pdo = DatabaseConnection::getConnection();
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'http://localhost']);
+    corsAllow(['https://elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'http://localhost']);
+corsAllow(['https://elliot.cat', 'https://elliot.local']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Response::error(MissatgesAPI::error('method_not_allowed'), [], 405);

@@ -38,6 +38,11 @@
                 <div id="agenda-esdeveniment-main" class="agenda-esdeveniment-main">
                     <p>Carregant esdeveniment...</p>
                 </div>
+
+                <button type="button" id="btn-eliminar-esdeveniment" class="btn btn-danger" style="margin-top:15px">
+                    Eliminar esdeveniment
+                </button>
+
             </section>
 
 
