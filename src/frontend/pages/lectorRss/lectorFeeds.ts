@@ -6,9 +6,12 @@ interface FeedItem {
 }
 
 function htmlATexto(html: string): string {
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const doc = new DOMParser().parseFromString(`<root>${html}</root>`, 'text/xml');
+  if (doc.querySelector('parsererror')) {
+    return html.replace(/\s+/g, ' ').trim();
+  }
   doc.querySelectorAll('a.more-link').forEach((el) => el.remove());
-  return (doc.body.textContent ?? '').replace(/\s+/g, ' ').trim();
+  return (doc.documentElement?.textContent ?? '').replace(/\s+/g, ' ').trim();
 }
 
 function safeHttpUrl(raw: string): string | null {
