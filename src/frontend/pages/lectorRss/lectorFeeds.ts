@@ -11,6 +11,18 @@ function htmlATexto(html: string): string {
   return (doc.body.textContent ?? '').replace(/\s+/g, ' ').trim();
 }
 
+function safeHttpUrl(raw: string): string | null {
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.toString();
+    }
+  } catch {
+    // URL inválida
+  }
+  return null;
+}
+
 function renderizarItems(container: HTMLElement, items: FeedItem[]): void {
   const ul = document.createElement('ul');
 
@@ -21,11 +33,8 @@ function renderizarItems(container: HTMLElement, items: FeedItem[]): void {
     a.textContent = item.title;
 
     const href = item.link;
-    if (href.startsWith('https://') || href.startsWith('http://')) {
-      a.href = href;
-    } else {
-      a.href = '#';
-    }
+    const safeHref = safeHttpUrl(href);
+    a.href = safeHref ?? '#';
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
 
