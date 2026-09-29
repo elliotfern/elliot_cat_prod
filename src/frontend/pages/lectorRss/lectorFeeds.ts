@@ -5,6 +5,12 @@ interface FeedItem {
   description: string;
 }
 
+function htmlATexto(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll('a.more-link').forEach((el) => el.remove());
+  return (doc.body.textContent ?? '').replace(/\s+/g, ' ').trim();
+}
+
 function renderizarItems(container: HTMLElement, items: FeedItem[]): void {
   const ul = document.createElement('ul');
 
@@ -13,7 +19,13 @@ function renderizarItems(container: HTMLElement, items: FeedItem[]): void {
 
     const a = document.createElement('a');
     a.textContent = item.title;
-    a.href = /^https?:\/\//i.test(item.link) ? item.link : '#';
+
+    const href = item.link;
+    if (href.startsWith('https://') || href.startsWith('http://')) {
+      a.href = href;
+    } else {
+      a.href = '#';
+    }
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
 
@@ -23,7 +35,7 @@ function renderizarItems(container: HTMLElement, items: FeedItem[]): void {
     pFecha.appendChild(strong);
 
     const pDesc = document.createElement('p');
-    pDesc.textContent = item.description;
+    pDesc.textContent = htmlATexto(item.description);
 
     li.append(a, pFecha, pDesc);
     ul.appendChild(li);
