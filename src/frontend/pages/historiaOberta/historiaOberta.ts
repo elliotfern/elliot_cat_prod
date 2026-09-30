@@ -5,21 +5,13 @@ import { taulaLlistatCursosHistoria } from './llistatCursos';
 import { taulaArticlesCurs } from './fitxaCurs';
 import { formCursArticle } from './formCursArticle';
 import { initCronologia } from './cronologia/llistatEsdeveniments';
-import { getCursHistoria } from './fitxaCursWebPublica';
-import { renderArticle } from './fitxaArticleWebPublica';
 import { renderCursosArticlesList } from './llistatCursosArticles';
 import { formCursHistoria } from './formCurs';
-import { getCoursesList } from './cursosWebPublica';
 
 const url = window.location.href;
 const pageType = getPageType(url);
 
 export function historiaOberta() {
-  if (pageType.length === 1) {
-    getCoursesList();
-    return;
-  }
-
   if (pageType[2] === 'llistat-articles') {
     renderHistoriaObertaList();
   }
@@ -127,15 +119,6 @@ export function historiaOberta() {
         transmissioDadesDB(event, 'POST', 'formOrganitzacio', '/api/historia/post/?organitzacio');
       });
     }
-  } else if (pageType[1] === 'curs') {
-    const curs = pageType[2];
-    getCursHistoria(curs);
-  }
-
-  if (pageType[1] === 'article') {
-    const slug = pageType[2];
-
-    renderArticle(slug);
   }
 
   if (pageType[2] === 'nou-curs') {
