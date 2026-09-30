@@ -33,7 +33,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="/sobre-autor" data-route="/sobre-autor">Sobre l'autor</a>
+                        <a class="nav-link" href="/autor" data-route="/autor">Sobre l'autor</a>
                     </li>
 
                     <li class="nav-item">
