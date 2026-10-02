@@ -12,6 +12,8 @@ import { initUserAreaButton } from './components/header/userAreaButton';
 import { getCoursesList } from './pages/historiaOberta/cursosWebPublica';
 import { intranet_admin } from './pages/intranet_admin/intranet_admin';
 import { historiaWebPublica } from './pages/historiaOberta/historiaWebPublica';
+import { renderBlogListPaged } from './pages/blog/llistatArticles';
+import { renderBlogArticleView } from './pages/blog/article';
 
 document.addEventListener('trix-before-initialize', function () {
   // H2
@@ -99,5 +101,16 @@ async function main() {
 
   if (pageType[0] === 'historia') {
     historiaWebPublica();
+  }
+
+  if (pageType[0] === 'blog') {
+    if (pageType.length === 1) {
+      renderBlogListPaged();
+    }
+
+    if (pageType.length === 2) {
+      const slug = pageType[1];
+      renderBlogArticleView(slug, 'blog');
+    }
   }
 }

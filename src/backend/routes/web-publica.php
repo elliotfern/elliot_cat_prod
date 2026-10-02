@@ -34,6 +34,10 @@ $routes = [
     // GALERIA IMATGES
     '/imatges/galeria/{slug}' => route_public('./web-publica/galeria-imatges.php'),
 
+    // BLOG
+    '/blog' => route_public('./web-publica/blog.php'),
+    '/blog/{slug}' => route_public('./web-publica/article-blog.php'),
+
     // TEMES LEGALS FOOTER
     '/autor' => route_public('./web-publica/autor.php'),
     '/politica-privacitat' => route_public('./web-publica/politica-privacitat.php'),

@@ -509,7 +509,7 @@ if ($slug === 'llistatArticles') {
 
         // ✅ Normalizar categoria (UUID con guiones)
         $hex = (string)($row['categoria_hex'] ?? '');
-        $row['categoria'] = $hex !== '' ? hexToUuidText($hex) : null;
+        $row['categoria'] = $hex !== '' ? ($hex) : null;
 
         // ✅ Reemplazar shortcodes de imágenes del blog
         if (isset($row['post_content']) && is_string($row['post_content']) && $row['post_content'] !== '') {

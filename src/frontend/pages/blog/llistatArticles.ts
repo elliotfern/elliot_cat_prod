@@ -1,17 +1,4 @@
-// src/frontend/pages/blog/llistatArticlesPaged.ts
-// Llistat d'articles del blog amb:
-// - paginació clàssica (Prev / Next)
-// - filtres server-side: any (year) i categoria (cat=hex o cat=0 per "Sense categoria")
-// - filtre server-side: idioma (lang=id)
-// - ordre (asc/desc)
-// - URL diferent segons admin:
-//    admin  -> /gestio/blog/article/<slug>
-//    públic -> /blog/article/<slug>
-//
-// Container esperat: <div id="articleList"></div>
-
 import { getIsAdmin } from '../../services/auth/isAdmin';
-import { langIdToCode } from '../../utils/locales/getLangPrefix';
 
 function isPublicStatus(status?: string | null): boolean {
   const s = String(status ?? '')
@@ -96,12 +83,14 @@ function formatDateCa(dateStr: string): string {
 
 function parseApiPayload(json: unknown): ApiPayload {
   // Suporta:
-  // - { status, data: { items, pagination } }
+  // - { success, data: { items, pagination } }
   // - { data: { items, pagination } }
   // - { items, pagination }
+  // - array de articles
+
   const data = isRecord(json) && 'data' in json ? json.data : json;
 
-  // fallback (si tornessis a retornar array)
+  // Fallback si l'API retornés directament un array
   if (Array.isArray(data)) {
     return {
       items: data as BlogArticle[],
@@ -116,9 +105,43 @@ function parseApiPayload(json: unknown): ApiPayload {
     };
   }
 
+  if (!isRecord(data)) {
+    return {
+      items: [],
+      pagination: {
+        page: 1,
+        limit: 10,
+        total: 0,
+        pages: 1,
+        has_prev: false,
+        has_next: false,
+      },
+    };
+  }
+
+  const items = Array.isArray(data.items) ? (data.items as BlogArticle[]) : [];
+
+  const pagination = isRecord(data.pagination)
+    ? {
+        page: Number(data.pagination.page) || 1,
+        limit: Number(data.pagination.limit) || 10,
+        total: Number(data.pagination.total) || 0,
+        pages: Number(data.pagination.pages) || 1,
+        has_prev: Boolean(data.pagination.has_prev),
+        has_next: Boolean(data.pagination.has_next),
+      }
+    : {
+        page: 1,
+        limit: 10,
+        total: items.length,
+        pages: 1,
+        has_prev: false,
+        has_next: false,
+      };
+
   return {
-    items: [],
-    pagination: { page: 1, limit: 10, total: 0, pages: 1, has_prev: false, has_next: false },
+    items,
+    pagination,
   };
 }
 
@@ -208,7 +231,7 @@ export async function renderBlogListPaged(): Promise<void> {
   const isAdmin = await getIsAdmin();
 
   // ✅ URL según rol
-  function buildArticleUrl(slug: string, langId?: number | null): string {
+  function buildArticleUrl(slug: string): string {
     const safe = encodeURIComponent(slug);
 
     if (isAdmin) {
@@ -216,8 +239,7 @@ export async function renderBlogListPaged(): Promise<void> {
       return `/gestio/blog/article/${safe}`;
     }
 
-    const code = langIdToCode(langId);
-    return `/${code}/blog/article/${safe}`;
+    return `/blog/${safe}`;
   }
 
   const state = {
@@ -330,7 +352,7 @@ export async function renderBlogListPaged(): Promise<void> {
 
     const rowsHtml = items
       .map((row) => {
-        const href = buildArticleUrl(row.slug, row.lang);
+        const href = buildArticleUrl(row.slug);
         const title = escapeHtml(row.post_title || '(Sense títol)');
         const cat = escapeHtml((row.tema ?? 'Sense categoria') || 'Sense categoria');
         const dateLabel = escapeHtml(formatDateCa(row.post_date));
