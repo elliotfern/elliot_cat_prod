@@ -3,7 +3,6 @@ import { BlogArticle } from '../../types/BlogArticle';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
-import { LANG_ID_TO_CODE } from '../../utils/locales/getLangPrefix';
 import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 import { setTrixHTML } from '../../utils/setTrix';
 import { DOMAIN_WEB } from '../../utils/urls';
@@ -30,7 +29,7 @@ function fillFormFromData(form: HTMLFormElement, data: Record<string, unknown>) 
   }
 }
 
-export async function formBlogArticle(isUpdate: boolean, id?: number) {
+export async function formBlogArticle(isUpdate: boolean, id?: string) {
   const form = document.getElementById('modificaBlog') as HTMLFormElement | null;
   const divTitol = document.getElementById('titolBlog') as HTMLHeadingElement | null;
   const btnSubmit = document.getElementById('btnSave') as HTMLButtonElement | null;
@@ -46,10 +45,10 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
   async function fillSelects(current: Partial<BlogArticle>) {
     await Promise.all([
       // Categoria (binary16): normalment aquí tindràs una taula de categories/temes amb uuid + nom
-      auxiliarSelect(current.categoria ?? '', 'temes', 'categoria', 'tema'),
+      auxiliarSelect(current.categoria_id ?? '', 'temes', 'categoria_id', 'tema'),
 
       // Idiomes (int): taula d'idiomes amb id + nom
-      auxiliarSelect(current.lang ?? 1, 'llengues', 'lang', 'idioma'),
+      auxiliarSelect(current.idioma_id ?? 1, 'llengues', 'idioma_id', 'idioma'),
 
       // Estat (varchar): si ho tens en taula, sinó també es pot omplir amb constants al TS (però tu has dit dinàmic)
       auxiliarSelect(current.post_status ?? 'publicat', 'estatsPublicacio', 'post_status', 'post_status'),
@@ -74,10 +73,8 @@ export async function formBlogArticle(isUpdate: boolean, id?: number) {
     // 3) Títol UI
 
     // 3) Títol UI amb link públic (amb idioma)
-    const langId = Number(data.lang ?? 1);
-    const langCode = LANG_ID_TO_CODE[langId] ?? 'ca';
 
-    const publicUrl = `${DOMAIN_WEB}/${langCode}/blog/article/${encodeURIComponent(String(data.slug ?? ''))}`;
+    const publicUrl = `${DOMAIN_WEB}/blog/article/${encodeURIComponent(String(data.slug ?? ''))}`;
 
     divTitol.innerHTML = `
         Modifica article:

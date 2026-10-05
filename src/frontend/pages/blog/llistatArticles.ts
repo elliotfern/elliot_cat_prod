@@ -25,19 +25,19 @@ function renderStatusBadge(status?: string | null): string {
   return `<span class="badge text-bg-secondary">${escapeHtml(s)}</span>`;
 }
 
-function buildEditUrl(id: number): string {
-  return `/gestio/blog/modifica-article/${encodeURIComponent(String(id))}`;
+function buildEditUrl(id: string): string {
+  return `/gestio/blog/modifica-article/${encodeURIComponent(id)}`;
 }
 
 type BlogArticle = {
-  id: number;
+  id: string;
   post_title: string;
   slug: string;
   post_date: string;
   tema?: string | null;
-  categoria_hex?: string | null; // ve del backend: HEX(b.categoria)
-  lang?: number | null; // idioma ID
-  post_status?: string | null; // 'publish' | 'draft' ...
+  categoria_id?: string | null;
+  idioma_id?: string | null;
+  post_status?: string | null;
 };
 
 type ApiPayload = {
@@ -54,8 +54,8 @@ type ApiPayload = {
 
 type BlogFacets = {
   years: number[];
-  categories: Array<{ hex: string; label: string }>;
-  langs: Array<{ id: number; label: string }>;
+  categories: Array<{ id: string; label: string }>;
+  langs: Array<{ id: string; label: string }>;
 };
 
 function escapeHtml(input: unknown): string {
@@ -145,27 +145,33 @@ function parseApiPayload(json: unknown): ApiPayload {
   };
 }
 
-async function fetchPage(params: {
-  page: number;
-  limit: number;
-  order: 'asc' | 'desc';
-  year?: number;
-  cat?: string; // '' | '0' | hex
-  lang?: number; // 0/undefined = tots
-}): Promise<ApiPayload> {
+async function fetchPage(params: { page: number; limit: number; order: 'asc' | 'desc'; year?: number; cat?: string; lang?: string }): Promise<ApiPayload> {
   const usp = new URLSearchParams();
+
   usp.set('page', String(params.page));
   usp.set('limit', String(params.limit));
   usp.set('order', params.order);
 
-  if (params.year && params.year > 0) usp.set('year', String(params.year));
-  if (params.cat && params.cat !== '') usp.set('cat', params.cat);
-  if (params.lang && params.lang > 0) usp.set('lang', String(params.lang));
+  if (params.year && params.year > 0) {
+    usp.set('year', String(params.year));
+  }
+
+  if (params.cat && params.cat !== '') {
+    usp.set('cat', params.cat);
+  }
+
+  if (params.lang && params.lang !== '') {
+    usp.set('idioma_id', params.lang);
+  }
 
   const url = `https://${window.location.host}/api/blog/get/llistatArticles?${usp.toString()}`;
 
-  const r = await fetch(url, { credentials: 'include' });
-  const json = await r.json();
+  const r = await fetch(url, {
+    credentials: 'include',
+  });
+
+  const json: unknown = await r.json();
+
   return parseApiPayload(json);
 }
 
@@ -183,20 +189,20 @@ async function fetchFacets(): Promise<BlogFacets> {
       ? data.categories
           .filter(isRecord)
           .map((c) => {
-            if (typeof c.hex !== 'string' || typeof c.label !== 'string') {
+            if (typeof c.id !== 'string' || typeof c.label !== 'string') {
               return null;
             }
 
-            const hex = c.hex.trim();
+            const id = c.id.trim();
             const label = c.label.trim();
 
-            if (hex === '' || label === '') {
+            if (id === '' || label === '') {
               return null;
             }
 
-            return { hex, label };
+            return { id, label };
           })
-          .filter((c): c is { hex: string; label: string } => c !== null)
+          .filter((c): c is { id: string; label: string } => c !== null)
       : [];
 
   const langs =
@@ -204,20 +210,20 @@ async function fetchFacets(): Promise<BlogFacets> {
       ? data.langs
           .filter(isRecord)
           .map((x) => {
-            if (!Number.isFinite(Number(x.id)) || typeof x.label !== 'string') {
+            if (typeof x.id !== 'string' || typeof x.label !== 'string') {
               return null;
             }
 
-            const id = Number(x.id);
+            const id = x.id.trim();
             const label = x.label.trim();
 
-            if (id <= 0 || label === '') {
+            if (id === '' || label === '') {
               return null;
             }
 
             return { id, label };
           })
-          .filter((x): x is { id: number; label: string } => x !== null)
+          .filter((x): x is { id: string; label: string } => x !== null)
       : [];
 
   return { years, categories, langs };
@@ -247,7 +253,7 @@ export async function renderBlogListPaged(): Promise<void> {
     limit: 10,
     year: 0, // 0 = tots
     cat: '', // '' = totes, '0' = sense categoria, hex = categoria
-    lang: 0, // 0 = tots, >0 = idioma id
+    lang: '', // 0 = tots, >0 = idioma id
     order: 'desc' as 'asc' | 'desc',
   };
 
@@ -274,7 +280,7 @@ export async function renderBlogListPaged(): Promise<void> {
             <div class="col-12 col-lg-3">
               <label class="form-label mb-1" for="blogLangSelect">Idioma</label>
               <select id="blogLangSelect" class="form-select">
-                <option value="0">Tots</option>
+                  <option value="">Tots</option>
               </select>
             </div>
 
@@ -331,15 +337,15 @@ export async function renderBlogListPaged(): Promise<void> {
 
     yearSelect.innerHTML = [`<option value="0">Tots</option>`, ...years.map((y) => `<option value="${y}">${y}</option>`)].join('');
 
-    // CATEGORIES (HEX)
+    // CATEGORIES (UUID)
     const categories = facets.categories.slice().sort((a, b) => a.label.localeCompare(b.label, 'ca'));
 
-    catSelect.innerHTML = [`<option value="">Totes</option>`, `<option value="0">Sense categoria</option>`, ...categories.map((c) => `<option value="${escapeHtml(c.hex)}">${escapeHtml(c.label)}</option>`)].join('');
+    catSelect.innerHTML = [`<option value="">Totes</option>`, `<option value="0">Sense categoria</option>`, ...categories.map((c) => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.label)}</option>`)].join('');
 
     // LANGS (ID)
     const langs = facets.langs.slice().sort((a, b) => a.label.localeCompare(b.label, 'ca'));
 
-    langSelect.innerHTML = [`<option value="0">Tots</option>`, ...langs.map((l) => `<option value="${l.id}">${escapeHtml(l.label)}</option>`)].join('');
+    langSelect.innerHTML = [`<option value="">Tots</option>`, ...langs.map((l) => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.label)}</option>`)].join('');
 
     facetsLoaded = true;
   }
@@ -410,7 +416,7 @@ export async function renderBlogListPaged(): Promise<void> {
       order: state.order,
       year: state.year > 0 ? state.year : undefined,
       cat: state.cat !== '' ? state.cat : undefined,
-      lang: state.lang > 0 ? state.lang : undefined,
+      lang: state.lang !== '' ? state.lang : undefined,
     });
 
     let items = data.items ?? [];
@@ -456,7 +462,7 @@ export async function renderBlogListPaged(): Promise<void> {
   });
 
   langSelect.addEventListener('change', () => {
-    state.lang = parseInt(langSelect.value, 10) || 0; // 0 | id
+    state.lang = langSelect.value;
     state.page = 1;
     load();
   });
@@ -471,12 +477,12 @@ export async function renderBlogListPaged(): Promise<void> {
     state.page = 1;
     state.year = 0;
     state.cat = '';
-    state.lang = 0;
+    state.lang = '';
     state.order = 'desc';
 
     yearSelect.value = '0';
     catSelect.value = '';
-    langSelect.value = '0';
+    langSelect.value = '';
     orderSelect.value = 'desc';
 
     load();

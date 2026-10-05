@@ -5,13 +5,15 @@ declare(strict_types=1);
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
-use App\Config\Audit;
 use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
+use App\Infrastructure\Error\HttpErrorResponder;
+use App\Utils\Uuid;
+use Ramsey\Uuid\Uuid as RamseyUuid;
 
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: POST");
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('HTTP/1.1 405 Method Not Allowed');
@@ -24,13 +26,6 @@ if (!$conn) {
     Response::error(MissatgesAPI::error('errorBD'), ['No se pudo establecer conexión a la base de datos.'], 500);
 }
 
-if (!isAuthenticatedAdmin()) {
-    http_response_code(403);
-    echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-    exit;
-}
-
-$userUuid = getAuthenticatedUserUuid(); // auditoría (si aplica)
 
 // 📨 Entrada JSON
 $inputData = file_get_contents('php://input');
@@ -38,26 +33,33 @@ $data = json_decode($inputData, true) ?: [];
 
 $errors = [];
 
+/**
+ * =========================
+ * CREATE ID (UUID v7)
+ * =========================
+ */
+$id = RamseyUuid::uuid7()->toString();
+$idBin = Uuid::toBinary($id);
+
+
 // 📥 Campos (post_date y post_modified se ignoran: backend los gestiona)
 $post_type    = isset($data['post_type']) ? trim((string)$data['post_type']) : 'post';
 $post_title   = isset($data['post_title']) ? trim((string)$data['post_title']) : '';
 $post_content = isset($data['post_content']) ? (string)$data['post_content'] : '';
 $post_excerpt = array_key_exists('post_excerpt', $data) ? trim((string)($data['post_excerpt'] ?? '')) : null;
 
-$lang         = isset($data['lang']) ? (int)$data['lang'] : null;
+$idioma_id         = $data['idioma_id'];
 $post_status  = isset($data['post_status']) ? trim((string)$data['post_status']) : 'publish';
 $slug         = isset($data['slug']) ? trim((string)$data['slug']) : '';
 
-$categoriaTxt = isset($data['categoria']) ? trim((string)$data['categoria']) : '';
+$categoria_id = isset($data['categoria_id']) ? trim((string)$data['categoria_id']) : '';
 
 // 🔎 Validaciones
 if ($post_title === '') $errors[] = ValidacioErrors::requerit('post_title');
 if ($post_content === '') $errors[] = ValidacioErrors::requerit('post_content');
 
-if ($lang === null) {
-    $errors[] = ValidacioErrors::requerit('lang');
-} elseif ($lang < 0) {
-    $errors[] = ValidacioErrors::format('lang', 'int_positiu');
+if ($idioma_id === null) {
+    $errors[] = ValidacioErrors::requerit('idioma_id');
 }
 
 if ($slug === '') {
@@ -70,10 +72,10 @@ if ($slug === '') {
     if (mb_strlen($slug) > 200) $errors[] = ValidacioErrors::massaLlarg('slug', 200);
 }
 
-if ($categoriaTxt === '') {
+if ($categoria_id === '') {
     $errors[] = ValidacioErrors::requerit('categoria');
-} elseif (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $categoriaTxt)) {
-    $errors[] = ValidacioErrors::format('categoria', 'uuid');
+} elseif (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $categoria_id)) {
+    $errors[] = ValidacioErrors::format('categoria',);
 }
 
 if ($post_type !== '' && mb_strlen($post_type) > 20) $errors[] = ValidacioErrors::massaLlarg('post_type', 20);
@@ -94,13 +96,15 @@ try {
 
     $sql = "
     INSERT INTO db_blog (
-      post_type, post_title, post_content, post_excerpt, lang, post_status, slug, categoria, post_date, post_modified
+      id, post_type, post_title, post_content, post_excerpt, idioma_id, post_status, slug, categoria_id, post_date, post_modified
     ) VALUES (
-      :post_type, :post_title, :post_content, :post_excerpt, :lang, :post_status, :slug,  uuid_text_to_bin(:categoria), NOW(), NOW()
+      :id, :post_type, :post_title, :post_content, :post_excerpt, :idioma_id, :post_status, :slug,  :categoria_id, NOW(), NOW()
     )
   ";
 
     $stmt = $conn->prepare($sql);
+
+    $stmt->bindValue(':id', $idBin, PDO::PARAM_LOB);
     $stmt->bindValue(':post_type', $post_type, PDO::PARAM_STR);
     $stmt->bindValue(':post_title', $post_title, PDO::PARAM_STR);
     $stmt->bindValue(':post_content', $post_content, PDO::PARAM_STR);
@@ -109,37 +113,22 @@ try {
     $excerptVal = ($post_excerpt !== null && $post_excerpt !== '') ? $post_excerpt : null;
     $stmt->bindValue(':post_excerpt', $excerptVal, $excerptVal === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 
-    $stmt->bindValue(':lang', $lang, PDO::PARAM_INT);
+    $stmt->bindValue(':idioma_id', uuid::toBinary($idioma_id), PDO::PARAM_LOB);
     $stmt->bindValue(':post_status', $post_status, PDO::PARAM_STR);
     $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
-    $stmt->bindValue(':categoria', $categoriaTxt, PDO::PARAM_STR);
+    $stmt->bindValue(':categoria_id', Uuid::toBinary($categoria_id), PDO::PARAM_LOB);
 
     $stmt->execute();
-
-    $newId = (int)$conn->lastInsertId();
-
-    // 📝 Audit
-    Audit::registrarCanvi(
-        $conn,
-        $userUuid,
-        'INSERT',
-        "Creació article blog (id=$newId, slug=$slug)",
-        Tables::BLOG,
-        (string)$newId
-    );
 
     Response::success(
         MissatgesAPI::success('create'),
         [
-            'id' => $newId,
+            'id' => $id,
             'slug' => $slug,
         ],
-        201
+        httpCode: 201
     );
 } catch (PDOException $e) {
-    if ((int)($e->errorInfo[1] ?? 0) === 1062) {
-        Response::error(MissatgesAPI::error('duplicat'), ['Registre duplicat'], 409);
-    }
-    error_log('[blog:post:article] ' . $e->getMessage());
+
     Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
 }

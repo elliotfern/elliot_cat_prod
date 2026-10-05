@@ -6,6 +6,7 @@ use App\Config\Database;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
+use App\Utils\Uuid;
 
 $slug = $routeParams[0] ?? null;
 $db  = new Database();
@@ -153,66 +154,120 @@ if ($slug === 'llistatArticles') {
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $order = isset($_GET['order']) ? strtolower((string)$_GET['order']) : 'desc';
 
-    $year  = isset($_GET['year']) ? (int)$_GET['year'] : 0;
-    $cat   = isset($_GET['cat']) ? trim((string)$_GET['cat']) : ''; // puede venir vacío
+    $year = isset($_GET['year']) ? (int)$_GET['year'] : 0;
+    $cat  = isset($_GET['cat']) ? trim((string)$_GET['cat']) : '';
 
-    $lang = isset($_GET['lang']) ? (int)$_GET['lang'] : 0;
+    $idiomaId = isset($_GET['idioma_id'])
+        ? trim((string)$_GET['idioma_id'])
+        : '';
 
-    // Idiomes permesos (IDs)
-    $allowedLangIds = [1, 2, 3, 4, 7];
-    if ($lang !== 0 && !in_array($lang, $allowedLangIds, true)) {
-        $lang = 0;
+
+    // =========================================================
+    // VALIDACIÓ PARÀMETRES
+    // =========================================================
+
+    if ($page < 1) {
+        $page = 1;
     }
 
-    if ($page < 1) $page = 1;
-    if ($limit < 1) $limit = 10;
-    if ($limit > 50) $limit = 50;
-    if (!in_array($order, ['asc', 'desc'], true)) $order = 'desc';
+    if ($limit < 1) {
+        $limit = 10;
+    }
+
+    if ($limit > 50) {
+        $limit = 50;
+    }
+
+    if (!in_array($order, ['asc', 'desc'], true)) {
+        $order = 'desc';
+    }
 
     $offset = ($page - 1) * $limit;
 
-    // WHERE dinámico
+
+    // =========================================================
+    // WHERE DINÀMIC
+    // =========================================================
+
     $where = [];
     $params = [];
 
-    // Excluir historia_oberta del listado del blog
+    // Excloure historia_oberta
     $where[] = "b.post_type <> :excluded_post_type";
     $params[':excluded_post_type'] = $excludedPostType;
 
 
-    // (Opcional) filtra por año usando el campo post_date (YYYY-...)
+    // =========================================================
+    // FILTRE ANY
+    // =========================================================
+
     if ($year >= 1970 && $year <= 2100) {
+
         $where[] = "YEAR(b.post_date) = :year";
         $params[':year'] = $year;
     }
 
-    // (Opcional) filtra por categoría
-    // - si cat="0" => sin categoría
-    // - si cat es HEX(32) => convertimos a BINARY(16)
+
+    // =========================================================
+    // FILTRE CATEGORIA
+    // =========================================================
+
+    // cat="0" => sense categoria
+    // cat=UUID => categoria concreta
     if ($cat !== '') {
+
         if ($cat === '0') {
-            $where[] = "b.categoria IS NULL";
+
+            $where[] = "b.categoria_id IS NULL";
         } else {
-            // ✅ validación básica: HEX de 32 chars
-            if (!preg_match('/^[0-9a-fA-F]{32}$/', $cat)) {
-                Response::error('Paràmetre cat invàlid', [], 400);
+
+            if (!Uuid::isValid($cat)) {
+                Response::error(
+                    'Paràmetre cat invàlid',
+                    [],
+                    400
+                );
                 return;
             }
-            $where[] = "b.categoria = UNHEX(:cat)";
-            $params[':cat'] = strtolower($cat);
+
+            $where[] = "b.categoria_id = :cat";
+            $params[':cat'] = Uuid::toBinary($cat);
         }
     }
 
-    // (Opcional) filtra por idioma (ID)
-    if ($lang > 0) {
-        $where[] = "b.lang = :lang";
-        $params[':lang'] = $lang;
+
+    // =========================================================
+    // FILTRE IDIOMA
+    // =========================================================
+
+    if ($idiomaId !== '') {
+
+        if (!Uuid::isValid($idiomaId)) {
+
+            Response::error(
+                'Paràmetre idioma_id invàlid',
+                [],
+                400
+            );
+            return;
+        }
+
+        $where[] = "b.idioma_id = :idioma_id";
+        $params[':idioma_id'] = Uuid::toBinary($idiomaId);
     }
 
-    $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+    $whereSql = $where
+        ? 'WHERE ' . implode(' AND ', $where)
+        : '';
+
 
     try {
-        // COUNT total
+
+        // =========================================================
+        // COUNT TOTAL
+        // =========================================================
+
         $sqlCount = sprintf(
             "SELECT COUNT(*) AS total
              FROM %s AS b
@@ -222,28 +277,36 @@ if ($slug === 'llistatArticles') {
         );
 
         $stmtCount = $pdo->prepare($sqlCount);
-        foreach ($params as $k => $v) {
-            $stmtCount->bindValue($k, $v);
+
+        foreach ($params as $key => $value) {
+            $stmtCount->bindValue($key, $value);
         }
+
         $stmtCount->execute();
+
         $total = (int)$stmtCount->fetchColumn();
 
-        // DATA paginada
+
+        // =========================================================
+        // DATA PAGINADA
+        // =========================================================
+
         $sql = sprintf(
             "SELECT
                 b.id,
                 b.post_type,
                 b.post_title,
                 b.post_excerpt,
-                b.lang,
+                b.idioma_id,
                 b.post_status,
                 b.slug,
-                HEX(b.categoria) AS categoria_hex,
+                b.categoria_id,
                 b.post_date,
                 b.post_modified,
                 t.tema
              FROM %s AS b
-             LEFT JOIN %s AS t ON b.categoria = t.id
+             LEFT JOIN %s AS t
+                ON b.categoria_id = t.id
              %s
              ORDER BY b.post_date %s
              LIMIT :limit OFFSET :offset",
@@ -254,21 +317,82 @@ if ($slug === 'llistatArticles') {
         );
 
         $stmt = $pdo->prepare($sql);
-        foreach ($params as $k => $v) {
-            $stmt->bindValue($k, $v);
+
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
         }
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+        $stmt->bindValue(
+            ':limit',
+            $limit,
+            PDO::PARAM_INT
+        );
+
+        $stmt->bindValue(
+            ':offset',
+            $offset,
+            PDO::PARAM_INT
+        );
+
         $stmt->execute();
 
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rowsRaw = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $pages = (int)ceil(($total > 0 ? $total : 1) / $limit);
+
+        // =========================================================
+        // CONVERTIR BINARY(16) → UUID
+        // =========================================================
+
+        $rows = [];
+
+        foreach ($rowsRaw as $row) {
+
+            if (
+                isset($row['id']) &&
+                is_string($row['id']) &&
+                strlen($row['id']) === 16
+            ) {
+                $row['id'] = Uuid::toString($row['id']);
+            }
+
+            if (
+                isset($row['idioma_id']) &&
+                is_string($row['idioma_id']) &&
+                strlen($row['idioma_id']) === 16
+            ) {
+                $row['idioma_id'] = Uuid::toString($row['idioma_id']);
+            }
+
+            if (
+                isset($row['categoria_id']) &&
+                is_string($row['categoria_id']) &&
+                strlen($row['categoria_id']) === 16
+            ) {
+                $row['categoria_id'] = Uuid::toString($row['categoria_id']);
+            }
+
+            $rows[] = $row;
+        }
+
+
+        // =========================================================
+        // PAGINACIÓ
+        // =========================================================
+
+        $pages = (int)ceil(
+            ($total > 0 ? $total : 1) / $limit
+        );
+
+
+        // =========================================================
+        // RESPONSE
+        // =========================================================
 
         Response::success(
             MissatgesAPI::success('get'),
             [
                 'items' => $rows,
+
                 'pagination' => [
                     'page' => $page,
                     'limit' => $limit,
@@ -277,16 +401,20 @@ if ($slug === 'llistatArticles') {
                     'has_prev' => $page > 1,
                     'has_next' => $page < $pages,
                 ],
+
                 'filters' => [
                     'year' => $year ?: null,
-                    'cat'  => $cat !== '' ? $cat : null,
+                    'cat' => $cat !== '' ? $cat : null,
                     'order' => $order,
-                    'lang' => $lang > 0 ? $lang : null,
+                    'idioma_id' => $idiomaId !== ''
+                        ? $idiomaId
+                        : null,
                 ],
             ],
             httpCode: 200
         );
     } catch (PDOException $e) {
+
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
@@ -300,12 +428,13 @@ if ($slug === 'llistatArticles') {
 
     $excludedPostType = 'historia_oberta';
 
-    // ✅ Admin? (si no, solo publicados)
-    $statusWhere = " AND b.post_status IN ('publish','published','publicat')";
+    // Solo artículos publicados
+    $statusWhere = " AND b.post_status IN ('publish', 'published', 'publicat')";
 
-    // 1) Anyos disponibles (de post_date)
+    // 1) Años disponibles (post_date)
     $sqlYears = sprintf(
-        "SELECT DISTINCT YEAR(b.post_date) AS y
+        "SELECT DISTINCT
+            YEAR(b.post_date) AS y
          FROM %s AS b
          WHERE b.post_date IS NOT NULL
            AND b.post_type <> :excluded_post_type
@@ -315,14 +444,14 @@ if ($slug === 'llistatArticles') {
         $statusWhere
     );
 
-    // 2) Categories disponibles (HEX id + label)
+    // 2) Categorías disponibles
     $sqlCats = sprintf(
         "SELECT DISTINCT
-            HEX(t.id) AS hex,
+            t.id AS id,
             t.tema AS label
          FROM %s AS b
-         INNER JOIN %s AS t ON b.categoria = t.id
-         WHERE b.categoria IS NOT NULL
+         INNER JOIN %s AS t ON b.categoria_id = t.id
+         WHERE b.categoria_id IS NOT NULL
            AND b.post_date IS NOT NULL
            AND b.post_type <> :excluded_post_type
            %s
@@ -332,14 +461,22 @@ if ($slug === 'llistatArticles') {
         $statusWhere
     );
 
-    // 3) Idiomes disponibles (només els permesos i que apareixen al blog)
-    $allowedLangIds = [1, 2, 3, 4, 7];
+    // 3) Idiomas disponibles
+    // Se filtran por el código/valor del idioma, no por el UUID.
+    $allowedLangs = [
+        'Català',
+        'Castellà',
+        'Anglès',
+        'Francès',
+        'Italià',
+    ];
 
-    // ✅ Placeholders nombrados (no mezclar ? y :named)
     $langPlaceholders = [];
-    foreach ($allowedLangIds as $i => $_) {
-        $langPlaceholders[] = ':lang' . $i;
+
+    foreach ($allowedLangs as $i => $_) {
+        $langPlaceholders[] = ':idioma' . $i;
     }
+
     $inLang = implode(',', $langPlaceholders);
 
     $sqlLangs = sprintf(
@@ -347,8 +484,8 @@ if ($slug === 'llistatArticles') {
             l.id AS id,
             l.idioma AS label
          FROM %s AS b
-         INNER JOIN %s AS l ON b.lang = l.id
-         WHERE b.lang IN ($inLang)
+         INNER JOIN %s AS l ON b.idioma_id = l.id
+         WHERE l.idioma IN ($inLang)
            AND b.post_date IS NOT NULL
            AND b.post_type <> :excluded_post_type
            %s
@@ -359,62 +496,113 @@ if ($slug === 'llistatArticles') {
     );
 
     try {
+
+        // =========================================================
         // YEARS
+        // =========================================================
+
         $stmtY = $pdo->prepare($sqlYears);
         $stmtY->bindValue(':excluded_post_type', $excludedPostType);
         $stmtY->execute();
+
         $yearsRaw = $stmtY->fetchAll(PDO::FETCH_ASSOC);
 
         $years = [];
+
         foreach ($yearsRaw as $r) {
             $y = (int)($r['y'] ?? 0);
-            if ($y > 0) $years[] = $y;
+
+            if ($y > 0) {
+                $years[] = $y;
+            }
         }
+
         $years = array_values(array_unique($years));
         rsort($years);
 
+
+        // =========================================================
         // CATEGORIES
+        // =========================================================
+
         $stmtC = $pdo->prepare($sqlCats);
         $stmtC->bindValue(':excluded_post_type', $excludedPostType);
         $stmtC->execute();
+
         $catsRaw = $stmtC->fetchAll(PDO::FETCH_ASSOC);
 
         $categories = [];
+
         foreach ($catsRaw as $r) {
-            $hex = trim((string)($r['hex'] ?? ''));
+
+            $idBinary = $r['id'] ?? null;
             $label = trim((string)($r['label'] ?? ''));
 
-            if ($hex === '' || $label === '') continue;
+            if (!is_string($idBinary) || strlen($idBinary) !== 16 || $label === '') {
+                continue;
+            }
 
             $categories[] = [
-                'hex' => $hex,
+                'id' => Uuid::toString($idBinary),
                 'label' => $label,
             ];
         }
-        usort($categories, fn($a, $b) => strcmp($a['label'], $b['label']));
 
+        usort(
+            $categories,
+            fn($a, $b) => strcmp($a['label'], $b['label'])
+        );
+
+
+        // =========================================================
         // LANGS
+        // =========================================================
+
         $stmtL = $pdo->prepare($sqlLangs);
-        foreach ($allowedLangIds as $i => $langId) {
-            $stmtL->bindValue(':lang' . $i, $langId, PDO::PARAM_INT);
+
+        foreach ($allowedLangs as $i => $lang) {
+            $stmtL->bindValue(
+                ':idioma' . $i,
+                $lang,
+                PDO::PARAM_STR
+            );
         }
-        $stmtL->bindValue(':excluded_post_type', $excludedPostType);
+
+        $stmtL->bindValue(
+            ':excluded_post_type',
+            $excludedPostType
+        );
+
         $stmtL->execute();
+
         $langsRaw = $stmtL->fetchAll(PDO::FETCH_ASSOC);
 
         $langs = [];
+
         foreach ($langsRaw as $r) {
-            $id = (int)($r['id'] ?? 0);
+
+            $idBinary = $r['id'] ?? null;
             $label = trim((string)($r['label'] ?? ''));
 
-            if ($id <= 0 || $label === '') continue;
+            if (!is_string($idBinary) || strlen($idBinary) !== 16 || $label === '') {
+                continue;
+            }
 
             $langs[] = [
-                'id' => $id,
+                'id' => Uuid::toString($idBinary),
                 'label' => $label,
             ];
         }
-        usort($langs, fn($a, $b) => strcmp($a['label'], $b['label']));
+
+        usort(
+            $langs,
+            fn($a, $b) => strcmp($a['label'], $b['label'])
+        );
+
+
+        // =========================================================
+        // RESPONSE
+        // =========================================================
 
         Response::success(
             MissatgesAPI::success('get'),
@@ -426,6 +614,7 @@ if ($slug === 'llistatArticles') {
             httpCode: 200
         );
     } catch (PDOException $e) {
+
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
@@ -474,16 +663,16 @@ if ($slug === 'llistatArticles') {
             b.post_type,
             b.post_title,
             b.post_excerpt,
-            b.lang,
+            b.idioma_id,
             b.post_content,
             b.post_status,
             b.slug,
-            HEX(b.categoria) AS categoria_hex,
+            b.categoria_id,
             b.post_date,
             b.post_modified,
             t.tema
         FROM " . qi(Tables::BLOG, $pdo) . " AS b
-        LEFT JOIN " . qi(Tables::DB_TEMES, $pdo) . " AS t ON b.categoria = t.id
+        LEFT JOIN " . qi(Tables::DB_TEMES, $pdo) . " AS t ON b.categoria_id = t.id
         WHERE b.slug = :slug
         $whereExtra
         LIMIT 1
@@ -508,8 +697,8 @@ if ($slug === 'llistatArticles') {
         }
 
         // ✅ Normalizar categoria (UUID con guiones)
-        $hex = (string)($row['categoria_hex'] ?? '');
-        $row['categoria'] = $hex !== '' ? ($hex) : null;
+        $hex = (string)($row['categoria_id'] ?? '');
+        $row['categoria_id'] = $hex !== '' ? ($hex) : null;
 
         // ✅ Reemplazar shortcodes de imágenes del blog
         if (isset($row['post_content']) && is_string($row['post_content']) && $row['post_content'] !== '') {
@@ -532,13 +721,7 @@ if ($slug === 'llistatArticles') {
     // URL: /api/blog/get/articleId?id=333  
 } else if ($slug === 'articleId') {
 
-    $idRaw = $_GET['id'] ?? null;
-    $id = is_string($idRaw) ? (int)$idRaw : (int)$idRaw;
-
-    if ($id <= 0) {
-        Response::error('ID invàlid', ['id' => $idRaw], 400);
-        exit;
-    }
+    $id = $_GET['id'] ?? null;
 
     try {
         // Nota: devolvemos categoria como HEX para que el frontend no trate binary(16) directamente
@@ -549,10 +732,10 @@ if ($slug === 'llistatArticles') {
                 b.post_title,
                 b.post_content,
                 b.post_excerpt,
-                b.lang,
+                b.idioma_id,
                 b.post_status,
                 b.slug,
-                HEX(b.categoria) AS categoria,
+                b.categoria_id,
                 b.post_date,
                 b.post_modified
             FROM db_blog b
@@ -560,7 +743,7 @@ if ($slug === 'llistatArticles') {
             LIMIT 1
         ";
 
-        $params = [':id' => $id];
+        $params = [':id' => Uuid::toBinary($id)];
         $result = $db->getData($query, $params, true);
 
         if (empty($result)) {
@@ -573,7 +756,7 @@ if ($slug === 'llistatArticles') {
         }
 
         // ✅ Normalizar categoria para que coincida con el endpoint de categorías (UUID con guiones)
-        $hex = (string)($result['categoria'] ?? '');
+        $hex = (string)($result['categoria_id'] ?? '');
 
 
         Response::success(
@@ -590,14 +773,14 @@ if ($slug === 'llistatArticles') {
     }
 
     // Llistat Historia Oberta (INTRANET ONLY)
-    // URL: /api/blog/get/llistatHistoriaOberta?page=1&limit=10&order=asc|desc&curs=0|id&lang=0|id&status=publish|draft|...
+    // URL: /api/blog/get/llistatHistoriaOberta?page=1&limit=10&order=asc|desc&curs=0|id&idioma_id=0|id&status=publish|draft|...
 } else if ($slug === 'llistatHistoriaOberta') {
 
     $sql = "SELECT
                 b.id AS blog_id,
                 c.ordre AS curs_ordre,
                 c.curs,
-                b.lang,
+                b.idioma_id,
                 b.post_status,
                 b.slug,
                 b.post_title,

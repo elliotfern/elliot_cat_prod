@@ -34,10 +34,10 @@
             </select>
         </div>
 
-        <!-- lang (int(1)) -->
+        <!-- lang  -->
         <div class="col-12 col-lg-3">
-            <label class="form-label" for="lang">Idioma</label>
-            <select class="form-select" id="lang" name="lang">
+            <label class="form-label" for="idioma_id">Idioma</label>
+            <select class="form-select" id="idioma_id" name="idioma_id">
                 <!-- TS omple opcions -->
             </select>
         </div>
@@ -45,7 +45,7 @@
         <!-- categoria (binary(16)) -->
         <div class="col-12 col-lg-3">
             <label class="form-label" for="categoria">Categoria</label>
-            <select class="form-select" id="categoria" name="categoria">
+            <select class="form-select" id="categoria_id" name="categoria_id">
                 <!-- TS omple opcions -->
             </select>
         </div>

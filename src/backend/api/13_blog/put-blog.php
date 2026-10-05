@@ -8,10 +8,12 @@ use App\Utils\Tables;
 use App\Config\Audit;
 use App\Utils\ValidacioErrors;
 use App\Config\DatabaseConnection;
+use App\Utils\Uuid;
 
 header("Content-Type: application/json");
+
 header("Access-Control-Allow-Methods: PUT, POST");
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 // Aceptamos PUT o POST fallback (por si algún fetch/hosting no manda PUT bien)
 $method = $_SERVER['REQUEST_METHOD'] ?? '';
@@ -26,14 +28,6 @@ if (!$conn) {
     Response::error(MissatgesAPI::error('errorBD'), ['No se pudo establecer conexión a la base de datos.'], 500);
 }
 
-if (!isAuthenticatedAdmin()) {
-    http_response_code(403);
-    echo json_encode(['error' => 'No autoritzat (admin requerit)']);
-    exit;
-}
-
-$userUuid = getAuthenticatedUserUuid(); // auditoría
-
 // 📨 Entrada JSON
 $inputData = file_get_contents('php://input');
 $data = json_decode($inputData, true) ?: [];
@@ -41,44 +35,44 @@ $data = json_decode($inputData, true) ?: [];
 $errors = [];
 
 // 📥 Campos (post_date y post_modified se ignoran)
-$id          = isset($data['id']) ? (int)$data['id'] : 0;
+$id          = $data['id'];
 
 $post_type    = isset($data['post_type']) ? trim((string)$data['post_type']) : 'post';
 $post_title   = isset($data['post_title']) ? trim((string)$data['post_title']) : '';
 $post_content = isset($data['post_content']) ? (string)$data['post_content'] : '';
 $post_excerpt = array_key_exists('post_excerpt', $data) ? trim((string)($data['post_excerpt'] ?? '')) : null;
 
-$lang         = isset($data['lang']) ? (int)$data['lang'] : null;
+$idioma_id         = $data['idioma_id'];
 $post_status  = isset($data['post_status']) ? trim((string)$data['post_status']) : 'publish';
 $slug         = isset($data['slug']) ? trim((string)$data['slug']) : '';
 
-$categoriaTxt = isset($data['categoria']) ? trim((string)$data['categoria']) : '';
+$categoria_id = isset($data['categoria_id']) ? trim((string)$data['categoria_id']) : '';
 
 // 🔎 Validaciones
-if ($id <= 0) $errors[] = ValidacioErrors::requerit('id');
+if (!is_string($id) || !Uuid::isValid($id)) {
+    $errors[] = ValidacioErrors::format('id');
+}
 
 if ($post_title === '') $errors[] = ValidacioErrors::requerit('post_title');
 if ($post_content === '') $errors[] = ValidacioErrors::requerit('post_content');
 
-if ($lang === null) {
-    $errors[] = ValidacioErrors::requerit('lang');
-} elseif ($lang < 0) {
-    $errors[] = ValidacioErrors::format('lang', 'int_positiu');
+if ($idioma_id === null) {
+    $errors[] = ValidacioErrors::requerit('idioma_id');
 }
 
 if ($slug === '') {
     $errors[] = ValidacioErrors::requerit('slug');
 } else {
     if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
-        $errors[] = ValidacioErrors::format('slug', 'slug');
+        $errors[] = ValidacioErrors::format('slug');
     }
     if (mb_strlen($slug) > 200) $errors[] = ValidacioErrors::massaLlarg('slug', 200);
 }
 
-if ($categoriaTxt === '') {
-    $errors[] = ValidacioErrors::requerit('categoria');
-} elseif (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $categoriaTxt)) {
-    $errors[] = ValidacioErrors::format('categoria', 'uuid');
+if ($categoria_id === '') {
+    $errors[] = ValidacioErrors::requerit('categoria_id');
+} elseif (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $categoria_id)) {
+    $errors[] = ValidacioErrors::format('categoria_id');
 }
 
 if ($post_type !== '' && mb_strlen($post_type) > 20) $errors[] = ValidacioErrors::massaLlarg('post_type', 20);
@@ -92,7 +86,7 @@ try {
     // ✅ evitar colisión de slug con otro artículo
     $checkSlug = $conn->prepare("SELECT 1 FROM db_blog WHERE slug = :slug AND id <> :id LIMIT 1");
     $checkSlug->bindValue(':slug', $slug, PDO::PARAM_STR);
-    $checkSlug->bindValue(':id', $id, PDO::PARAM_INT);
+    $checkSlug->bindValue(':id', Uuid::toBinary($id), PDO::PARAM_LOB);
     $checkSlug->execute();
     if ($checkSlug->fetchColumn()) {
         Response::error(MissatgesAPI::error('duplicat'), [ValidacioErrors::duplicat('slug')], 409);
@@ -105,17 +99,17 @@ try {
       post_title = :post_title,
       post_content = :post_content,
       post_excerpt = :post_excerpt,
-      lang = :lang,
+      idioma_id = :idioma_id,
       post_status = :post_status,
       slug = :slug,
-      categoria = uuid_text_to_bin(:categoria),
+      categoria_id = :categoria_id,
       post_modified = NOW()
     WHERE id = :id
     LIMIT 1
   ";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->bindValue(':id', Uuid::toBinary($id), PDO::PARAM_LOB);
     $stmt->bindValue(':post_type', $post_type, PDO::PARAM_STR);
     $stmt->bindValue(':post_title', $post_title, PDO::PARAM_STR);
     $stmt->bindValue(':post_content', $post_content, PDO::PARAM_STR);
@@ -123,22 +117,13 @@ try {
     $excerptVal = ($post_excerpt !== null && $post_excerpt !== '') ? $post_excerpt : null;
     $stmt->bindValue(':post_excerpt', $excerptVal, $excerptVal === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
 
-    $stmt->bindValue(':lang', $lang, PDO::PARAM_INT);
+    $stmt->bindValue(':idioma_id', Uuid::toBinary($idioma_id), PDO::PARAM_LOB);
     $stmt->bindValue(':post_status', $post_status, PDO::PARAM_STR);
     $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
-    $stmt->bindValue(':categoria', $categoriaTxt, PDO::PARAM_STR);
+    $stmt->bindValue(':categoria_id', Uuid::toBinary($categoria_id), PDO::PARAM_LOB);
 
     $stmt->execute();
 
-    // 📝 Audit
-    Audit::registrarCanvi(
-        $conn,
-        $userUuid,
-        'UPDATE',
-        "Modificació article blog (id=$id, slug=$slug)",
-        Tables::BLOG,
-        (string)$id
-    );
 
     Response::success(
         MissatgesAPI::success('update'),
@@ -146,7 +131,7 @@ try {
             'id' => $id,
             'slug' => $slug,
         ],
-        200
+        httpCode: 200
     );
 } catch (PDOException $e) {
     if ((int)($e->errorInfo[1] ?? 0) === 1062) {

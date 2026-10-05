@@ -24,7 +24,6 @@ export async function blog() {
   const action = String(actionRaw).split('?')[0].replace(/\/+$/, '');
 
   const idRaw = pageType[iBlog + 2];
-  const id = Number.parseInt(String(idRaw), 10);
 
   // /.../blog
   if (!action) {
@@ -38,7 +37,7 @@ export async function blog() {
       break;
 
     case 'modifica-article':
-      void formBlogArticle(true, id);
+      void formBlogArticle(true, idRaw);
       break;
 
     case 'nou-article':

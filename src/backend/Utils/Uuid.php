@@ -25,4 +25,10 @@ final class Uuid
     {
         return RamseyUuid::fromBytes($binary)->toString();
     }
+
+
+    public static function isValid(string $uuid): bool
+    {
+        return RamseyUuid::isValid($uuid);
+    }
 }

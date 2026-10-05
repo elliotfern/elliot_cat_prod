@@ -7,7 +7,7 @@ use App\Utils\Uuid;
 // ─────────────────────────────────────────────
 // CONFIGURACIÓ
 // ─────────────────────────────────────────────
-$taula = 'db_historia_oberta_articles';
+$taula = 'db_blog';
 $columnaId = 'id2';              // BINARY(16), nou UUID
 $columnaFiltre = 'id';      // Identificador actual/antic de la fila
 // ─────────────────────────────────────────────
