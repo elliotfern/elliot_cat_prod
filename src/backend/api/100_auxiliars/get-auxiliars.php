@@ -2010,17 +2010,18 @@ if ($slug === 'directors') {
 } else if ($slug === 'blogArticlesCa') {
 
     $sql = <<<SQL
-                SELECT id, post_title
-                FROM %s
-                WHERE lang = 1
-                AND post_type = 'historia_oberta'
-                ORDER BY post_date DESC;
+                SELECT b.id, b.post_title
+                FROM %s AS b
+                LEFT JOIN %s AS i ON b.idioma_id = i.id
+                WHERE i.codi = 'ca'
+                AND b.post_type = 'historia_oberta'
+                ORDER BY b.post_date DESC;
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::BLOG, $pdo)
-
+        qi(Tables::BLOG, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo)
     );
 
     try {
@@ -2028,10 +2029,10 @@ if ($slug === 'directors') {
         $result = $db->getData($query);
 
         if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
+            Response::success(
+                message: MissatgesAPI::success('get'),
+                data: $result,
+                httpCode: 200
             );
             return;
         }
@@ -2054,17 +2055,18 @@ if ($slug === 'directors') {
 } else if ($slug === 'blogArticlesEs') {
 
     $sql = <<<SQL
-                SELECT id, post_title
-                FROM %s
-                WHERE lang = 3
-                AND post_type = 'historia_oberta'
-                ORDER BY post_date DESC;
+                SELECT b.id, b.post_title
+                FROM %s AS b
+                LEFT JOIN %s AS i ON b.idioma_id = i.id
+                WHERE i.codi = 'es'
+                AND b.post_type = 'historia_oberta'
+                ORDER BY b.post_date DESC;
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::BLOG, $pdo)
-
+        qi(Tables::BLOG, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo)
     );
 
     try {
@@ -2072,10 +2074,10 @@ if ($slug === 'directors') {
         $result = $db->getData($query);
 
         if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
+            Response::success(
+                message: MissatgesAPI::success('get'),
+                data: $result,
+                httpCode: 200
             );
             return;
         }
@@ -2098,17 +2100,18 @@ if ($slug === 'directors') {
 } else if ($slug === 'blogArticlesEn') {
 
     $sql = <<<SQL
-                SELECT id, post_title
-                FROM %s
-                WHERE lang = 2
-                AND post_type = 'historia_oberta'
-                ORDER BY post_date DESC;
+                SELECT b.id, b.post_title
+                FROM %s AS b
+                LEFT JOIN %s AS i ON b.idioma_id = i.id
+                WHERE i.codi = 'en'
+                AND b.post_type = 'historia_oberta'
+                ORDER BY b.post_date DESC;
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::BLOG, $pdo)
-
+        qi(Tables::BLOG, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo)
     );
 
     try {
@@ -2116,10 +2119,10 @@ if ($slug === 'directors') {
         $result = $db->getData($query);
 
         if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
+            Response::success(
+                message: MissatgesAPI::success('get'),
+                data: $result,
+                httpCode: 200
             );
             return;
         }
@@ -2142,17 +2145,18 @@ if ($slug === 'directors') {
 } else if ($slug === 'blogArticlesIt') {
 
     $sql = <<<SQL
-                SELECT id, post_title
-                FROM %s
-                WHERE lang = 4
-                AND post_type = 'historia_oberta'
-                ORDER BY post_date DESC;
+                SELECT b.id, b.post_title
+                FROM %s AS b
+                LEFT JOIN %s AS i ON b.idioma_id = i.id
+                WHERE i.codi = 'it'
+                AND b.post_type = 'historia_oberta'
+                ORDER BY b.post_date DESC;
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::BLOG, $pdo)
-
+        qi(Tables::BLOG, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo)
     );
 
     try {
@@ -2160,10 +2164,10 @@ if ($slug === 'directors') {
         $result = $db->getData($query);
 
         if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
+            Response::success(
+                message: MissatgesAPI::success('get'),
+                data: $result,
+                httpCode: 200
             );
             return;
         }
@@ -2186,17 +2190,18 @@ if ($slug === 'directors') {
 } else if ($slug === 'blogArticlesFr') {
 
     $sql = <<<SQL
-                SELECT id, post_title
-                FROM %s
-                WHERE lang = 7
-                AND post_type = 'historia_oberta'
-                ORDER BY post_date DESC;
+                SELECT b.id, b.post_title
+                FROM %s AS b
+                LEFT JOIN %s AS i ON b.idioma_id = i.id
+                WHERE i.codi = 'fr'
+                AND b.post_type = 'historia_oberta'
+                ORDER BY b.post_date DESC;
             SQL;
 
     $query = sprintf(
         $sql,
-        qi(Tables::BLOG, $pdo)
-
+        qi(Tables::BLOG, $pdo),
+        qi(Tables::DB_IDIOMES, $pdo)
     );
 
     try {
@@ -2204,10 +2209,10 @@ if ($slug === 'directors') {
         $result = $db->getData($query);
 
         if (empty($result)) {
-            Response::error(
-                MissatgesAPI::error('not_found'),
-                [],
-                404
+            Response::success(
+                message: MissatgesAPI::success('get'),
+                data: $result,
+                httpCode: 200
             );
             return;
         }

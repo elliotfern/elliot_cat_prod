@@ -777,7 +777,7 @@ if ($slug === 'llistatArticles') {
 } else if ($slug === 'llistatHistoriaOberta') {
 
     $sql = "SELECT
-                b.id AS blog_id,
+                b.id,
                 c.ordre AS curs_ordre,
                 c.curs,
                 b.idioma_id,
@@ -786,17 +786,17 @@ if ($slug === 'llistatArticles') {
                 b.post_title,
                 b.post_date,
                 b.post_modified,
-                 hoa.id AS group_id,
+                 hoa.id AS grup_id,
                 hoa.curs_id,
                 hoa.ordre AS article_ordre
             FROM " . qi(Tables::BLOG, $pdo) . " AS b
             LEFT JOIN " . qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo) . " AS hoa
                 ON (
-                    b.id = hoa.ca
-                    OR b.id = hoa.es
-                    OR b.id = hoa.en
-                    OR b.id = hoa.fr
-                    OR b.id = hoa.it
+                    b.id = hoa.article_ca_id
+                    OR b.id = hoa.article_es_id
+                    OR b.id = hoa.article_en_id
+                    OR b.id = hoa.article_fr_id
+                    OR b.id = hoa.article_it_id
                 )
             LEFT JOIN " . qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo) . " AS c ON c.id = hoa.curs_id
             WHERE b.post_type = 'historia_oberta'

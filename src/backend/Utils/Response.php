@@ -58,7 +58,12 @@ class Response
         'factura_id',
         'projecte_id',
         'curs_id',
-        'slotId'
+        'slotId',
+        'article_ca_id',
+        'article_es_id',
+        'article_en_id',
+        'article_fr_id',
+        'article_it_id',
     ];
 
     public static function success(

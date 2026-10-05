@@ -19,7 +19,7 @@
 
         <div class="col-md-3">
             <label for="curs" class="form-label">Curs:</label>
-            <select class="form-select" name="curs" id="curs">
+            <select class="form-select" name="curs_id" id="curs_id">
                 <!-- Options via TypeScript -->
             </select>
         </div>
@@ -31,35 +31,35 @@
 
         <div class="col-md-3">
             <label for="ca" class="form-label">Article (CAT):</label>
-            <select class="form-select" name="ca" id="ca">
+            <select class="form-select" name="article_ca_id" id="article_ca_id">
                 <!-- Options via TypeScript -->
             </select>
         </div>
 
         <div class="col-md-3">
             <label for="es" class="form-label">Article (ES):</label>
-            <select class="form-select" name="es" id="es">
+            <select class="form-select" name="article_es_id" id="article_es_id">
                 <!-- Options via TypeScript -->
             </select>
         </div>
 
         <div class="col-md-3">
             <label for="en" class="form-label">Article (EN):</label>
-            <select class="form-select" name="en" id="en">
+            <select class="form-select" name="article_en_id" id="article_en_id">
                 <!-- Options via TypeScript -->
             </select>
         </div>
 
         <div class="col-md-3">
             <label for="fr" class="form-label">Article (FR):</label>
-            <select class="form-select" name="fr" id="fr">
+            <select class="form-select" name="article_fr_id" id="article_fr_id">
                 <!-- Options via TypeScript -->
             </select>
         </div>
 
         <div class="col-md-3">
             <label for="it" class="form-label">Article (IT):</label>
-            <select class="form-select" name="it" id="it">
+            <select class="form-select" name="article_it_id" id="article_it_id">
                 <!-- Options via TypeScript -->
             </select>
         </div>

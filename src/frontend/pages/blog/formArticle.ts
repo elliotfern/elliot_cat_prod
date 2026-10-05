@@ -74,7 +74,7 @@ export async function formBlogArticle(isUpdate: boolean, id?: string) {
 
     // 3) Títol UI amb link públic (amb idioma)
 
-    const publicUrl = `${DOMAIN_WEB}/blog/article/${encodeURIComponent(String(data.slug ?? ''))}`;
+    const publicUrl = `${DOMAIN_WEB}/blog/${encodeURIComponent(String(data.slug ?? ''))}`;
 
     divTitol.innerHTML = `
         Modifica article:

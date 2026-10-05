@@ -990,16 +990,16 @@ if ($slug === 'carrecsPersona') {
             b.post_type,
             b.post_title,
             b.post_excerpt,
-            b.lang,
+            b.idioma_id,
             b.post_content,
             b.post_status,
             b.slug,
-            b.categoria,
+            b.categoria_id,
             b.post_date,
             b.post_modified,
             t.tema
         FROM " . qi(Tables::BLOG, $pdo) . " AS b
-        LEFT JOIN " . qi(Tables::DB_TEMES, $pdo) . " AS t ON b.categoria = t.id
+        LEFT JOIN " . qi(Tables::DB_TEMES, $pdo) . " AS t ON b.categoria_id = t.id
         WHERE b.slug = :slug
         LIMIT 1";
 
@@ -1118,37 +1118,37 @@ if ($slug === 'carrecsPersona') {
             a.curs_id,
             a.ordre,
 
-            a.ca AS ca_id,
+            a.article_ca_id AS ca_id,
             bca.post_title AS ca_title,
             bca.slug AS ca_slug,
             bca.post_status AS ca_status,
 
-            a.es AS es_id,
+            a.article_es_id AS es_id,
             bes.post_title AS es_title,
             bes.slug AS es_slug,
             bes.post_status AS es_status,
 
-            a.en AS en_id,
+            a.article_en_id AS en_id,
             ben.post_title AS en_title,
             ben.slug AS en_slug,
             ben.post_status AS en_status,
 
-            a.fr AS fr_id,
+            a.article_fr_id AS fr_id,
             bfr.post_title AS fr_title,
             bfr.slug AS fr_slug,
             bfr.post_status AS fr_status,
 
-            a.it AS it_id,
+            a.article_it_id AS it_id,
             bit.post_title AS it_title,
             bit.slug AS it_slug,
             bit.post_status AS it_status
 
         FROM %s AS a
-        LEFT JOIN %s AS bca ON bca.id = a.ca
-        LEFT JOIN %s AS bes ON bes.id = a.es
-        LEFT JOIN %s AS ben ON ben.id = a.en
-        LEFT JOIN %s AS bfr ON bfr.id = a.fr
-        LEFT JOIN %s AS bit ON bit.id = a.it
+        LEFT JOIN %s AS bca ON bca.id = a.article_ca_id
+        LEFT JOIN %s AS bes ON bes.id = a.article_es_id
+        LEFT JOIN %s AS ben ON ben.id = a.article_en_id
+        LEFT JOIN %s AS bfr ON bfr.id = a.article_fr_id
+        LEFT JOIN %s AS bit ON bit.id = a.article_it_id
 
         WHERE a.curs_id = :cursId
         ORDER BY a.ordre ASC, a.id ASC",
@@ -1220,11 +1220,11 @@ if ($slug === 'carrecsPersona') {
     $sql = sprintf(
         "SELECT
             a.id,
-            a.ca,
-            a.es,
-            a.en,
-            a.fr,
-            a.it,
+            a.article_ca_id,
+            a.article_es_id,
+            a.article_en_id,
+            a.article_fr_id,
+            a.article_it_id,
             a.curs_id,
             a.ordre,
             c.curs
@@ -1334,19 +1334,19 @@ if ($slug === 'carrecsPersona') {
             FROM " . qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo) . " AS hoa
 
             LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS ca
-                ON ca.id = hoa.ca
+                ON ca.id = hoa. article_ca_id
 
             LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS es
-                ON es.id = hoa.es
+                ON es.id = hoa. article_es_id
 
             LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS en
-                ON en.id = hoa.en
+                ON en.id = hoa. article_en_id
 
             LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS fr
-                ON fr.id = hoa.fr
+                ON fr.id = hoa. article_fr_id
 
             LEFT JOIN " . qi(Tables::BLOG, $pdo) . " AS it
-                ON it.id = hoa.it
+                ON it.id = hoa. article_it_id
 
             ORDER BY hoa.ordre ASC, hoa.id ASC
         ";

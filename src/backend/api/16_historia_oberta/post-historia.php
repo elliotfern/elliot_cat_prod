@@ -16,12 +16,12 @@ $pdo = $db->getPdo();
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliotl.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 // Check if the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -403,144 +403,327 @@ if ($slug === 'esdeveniment') {
     /**
      * POST : Crear slot curs-article (db_historia_oberta_articles)
      * URL: /api/historia/post/createCursArticle
-     * BODY:
-     * {
-     *   "curs": 3,
-     *   "ordre": 1,
-     *   "ca": 123,
-     *   "es": null,
-     *   "en": null,
-     *   "fr": null,
-     *   "it": null
-     * }
      */
 } else if ($slug === 'createCursArticle') {
-
     $raw = file_get_contents('php://input');
     $data = json_decode($raw ?: '', true);
 
     if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
+        Response::error(
+            MissatgesAPI::error('bad_request'),
+            ['json' => 'invalid'],
+            400
+        );
         return;
     }
 
-    // Helpers
     $errors = [];
 
-    $optIntOrNull = static function ($v): ?int {
-        if ($v === null) return null;
-        if ($v === '') return null;
-        if (!is_numeric($v)) return null;
-        return (int)$v;
-    };
+    // =========================================================
+    // DATOS
+    // =========================================================
 
-    $requireInt = static function (array $data, string $key, array &$errors): ?int {
-        if (!array_key_exists($key, $data)) {
-            $errors[$key] = 'required';
-            return null;
-        }
-        if (!is_numeric($data[$key])) {
-            $errors[$key] = 'must_be_int';
-            return null;
-        }
-        $n = (int)$data[$key];
-        if ($n <= 0) {
-            $errors[$key] = 'must_be_gt_0';
-            return null;
-        }
-        return $n;
-    };
+    $cursId = isset($data['curs_id'])
+        ? trim((string)$data['curs_id'])
+        : '';
 
-    $curs  = $requireInt($data, 'curs', $errors);
-    $ordre = $requireInt($data, 'ordre', $errors);
+    $ordre = $data['ordre'] ?? null;
 
-    $ca = $optIntOrNull($data['ca'] ?? null);
-    $es = $optIntOrNull($data['es'] ?? null);
-    $en = $optIntOrNull($data['en'] ?? null);
-    $fr = $optIntOrNull($data['fr'] ?? null);
-    $it = $optIntOrNull($data['it'] ?? null);
+    $articleCaId = isset($data['article_ca_id'])
+        ? trim((string)$data['article_ca_id'])
+        : '';
 
-    // Validaciones básicas de nullables: si viene no-null debe ser >0
-    foreach (['ca' => $ca, 'es' => $es, 'en' => $en, 'fr' => $fr, 'it' => $it] as $k => $v) {
-        if ($v !== null && $v <= 0) $errors[$k] = 'must_be_gt_0_or_null';
+    $articleEsId = isset($data['article_es_id'])
+        ? trim((string)$data['article_es_id'])
+        : '';
+
+    $articleEnId = isset($data['article_en_id'])
+        ? trim((string)$data['article_en_id'])
+        : '';
+
+    $articleItId = isset($data['article_it_id'])
+        ? trim((string)$data['article_it_id'])
+        : '';
+
+    $articleFrId = isset($data['article_fr_id'])
+        ? trim((string)$data['article_fr_id'])
+        : '';
+
+
+    // =========================================================
+    // VALIDACIÓ CURS
+    // =========================================================
+
+    if (!Uuid::isValid($cursId)) {
+        $errors['curs_id'] = 'must_be_uuid';
     }
 
+
+    // =========================================================
+    // VALIDACIÓ ORDRE
+    // =========================================================
+
+    if ($ordre === null || $ordre === '' || !is_numeric($ordre)) {
+
+        $errors['ordre'] = 'must_be_int';
+    } else {
+
+        $ordre = (int)$ordre;
+
+        if ($ordre <= 0) {
+            $errors['ordre'] = 'must_be_gt_0';
+        }
+    }
+
+
+    // =========================================================
+    // VALIDACIÓ ARTICLES
+    // =========================================================
+
+    $articleIds = [
+        'article_ca_id' => $articleCaId,
+        'article_es_id' => $articleEsId,
+        'article_en_id' => $articleEnId,
+        'article_it_id' => $articleItId,
+        'article_fr_id' => $articleFrId,
+    ];
+
+    foreach ($articleIds as $key => $articleId) {
+
+        // El català és obligatori
+        if ($key === 'article_ca_id' && $articleId === '') {
+            $errors[$key] = 'required';
+            continue;
+        }
+
+        // La resta poden ser NULL
+        if ($articleId === '') {
+            $articleIds[$key] = null;
+            continue;
+        }
+
+        if (!Uuid::isValid($articleId)) {
+            $errors[$key] = 'must_be_uuid_or_null';
+        }
+    }
+
+
+    // =========================================================
+    // ERROR VALIDACIÓ
+    // =========================================================
+
     if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
+        Response::error(
+            MissatgesAPI::error('invalid_data'),
+            $errors,
+            400
+        );
         return;
     }
 
+
+    // =========================================================
+    // VALORS NORMALITZATS
+    // =========================================================
+
+    $articleCaId = $articleIds['article_ca_id'];
+    $articleEsId = $articleIds['article_es_id'];
+    $articleEnId = $articleIds['article_en_id'];
+    $articleItId = $articleIds['article_it_id'];
+    $articleFrId = $articleIds['article_fr_id'];
+
+
     try {
-        // (Opcional recomendado) Validar que el curs existe
+
+        // =====================================================
+        // EXISTEIX EL CURS?
+        // =====================================================
+
         $sqlCurs = sprintf(
-            "SELECT id FROM %s WHERE id = :id LIMIT 1",
+            "SELECT id
+             FROM %s
+             WHERE id = :id
+             LIMIT 1",
             qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo)
         );
-        $exists = $db->getData($sqlCurs, [':id' => $curs], true);
-        if (empty($exists)) {
-            Response::error(MissatgesAPI::error('invalid_data'), ['curs' => 'not_found'], 400);
+
+        $existsCurs = $db->getData(
+            $sqlCurs,
+            [
+                ':id' => Uuid::toBinary($cursId),
+            ],
+            true
+        );
+
+        if (empty($existsCurs)) {
+
+            Response::error(
+                MissatgesAPI::error('invalid_data'),
+                ['curs_id' => 'not_found'],
+                400
+            );
+
             return;
         }
 
-        // (Opcional recomendado) Validar artículos en db_blog (lang + post_type)
-        $validateBlog = static function (\PDO $pdo, Database $db, int $blogId, int $expectedLang): bool {
-            $q = sprintf(
-                "SELECT id FROM %s WHERE id = :id AND lang = :lang AND post_type = 'historia_oberta' LIMIT 1",
-                qi(Tables::BLOG, $pdo)
-            );
-            $r = $db->getData($q, [':id' => $blogId, ':lang' => $expectedLang], true);
-            return !empty($r);
-        };
 
-        // lang mapping: ca=1 en=2 es=3 it=4 fr=7
-        $langMap = ['ca' => 1, 'en' => 2, 'es' => 3, 'it' => 4, 'fr' => 7];
+        // =====================================================
+        // GENERAR ID
+        // =====================================================
 
-        foreach (['ca' => $ca, 'es' => $es, 'en' => $en, 'fr' => $fr, 'it' => $it] as $k => $v) {
-            if ($v !== null) {
-                $expected = $langMap[$k];
-                if (!$validateBlog($pdo, $db, $v, $expected)) {
-                    Response::error(MissatgesAPI::error('invalid_data'), [$k => 'blog_not_found_or_lang_mismatch'], 400);
-                    return;
-                }
+        $id = Uuid::generate();
+
+
+        // =====================================================
+        // INSERT
+        // =====================================================
+
+        $sql = sprintf(
+            "INSERT INTO %s (
+                id,
+                article_ca_id,
+                article_es_id,
+                article_en_id,
+                article_it_id,
+                article_fr_id,
+                curs_id,
+                ordre
+            ) VALUES (
+                :id,
+                :article_ca_id,
+                :article_es_id,
+                :article_en_id,
+                :article_it_id,
+                :article_fr_id,
+                :curs_id,
+                :ordre
+            )",
+            qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo)
+        );
+
+        $stmt = $pdo->prepare($sql);
+
+
+        // =====================================================
+        // BIND UUID NULLABLES
+        // =====================================================
+
+        $bindNullableUuid = static function (
+            PDOStatement $stmt,
+            string $parameter,
+            ?string $uuid
+        ): void {
+
+            if ($uuid === null) {
+
+                $stmt->bindValue(
+                    $parameter,
+                    null,
+                    PDO::PARAM_NULL
+                );
+            } else {
+
+                $stmt->bindValue(
+                    $parameter,
+                    Uuid::toBinary($uuid),
+                    PDO::PARAM_LOB
+                );
             }
-        }
-
-        // Insert
-        $sql = <<<SQL
-            INSERT INTO %s (ca, es, fr, en, it, curs, ordre)
-            VALUES (:ca, :es, :fr, :en, :it, :curs, :ordre)
-        SQL;
-
-        $q = sprintf($sql, qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo));
-        $stmt = $pdo->prepare($q);
-
-        $bindNullableInt = static function (\PDOStatement $st, string $param, ?int $val): void {
-            if ($val === null) $st->bindValue($param, null, PDO::PARAM_NULL);
-            else $st->bindValue($param, $val, PDO::PARAM_INT);
         };
 
-        $bindNullableInt($stmt, ':ca', $ca);
-        $bindNullableInt($stmt, ':es', $es);
-        $bindNullableInt($stmt, ':fr', $fr);
-        $bindNullableInt($stmt, ':en', $en);
-        $bindNullableInt($stmt, ':it', $it);
 
-        $stmt->bindValue(':curs', $curs, PDO::PARAM_INT);
-        $stmt->bindValue(':ordre', $ordre, PDO::PARAM_INT);
+        $bindNullableUuid(
+            $stmt,
+            ':article_ca_id',
+            $articleCaId
+        );
+
+        $bindNullableUuid(
+            $stmt,
+            ':article_es_id',
+            $articleEsId
+        );
+
+        $bindNullableUuid(
+            $stmt,
+            ':article_en_id',
+            $articleEnId
+        );
+
+        $bindNullableUuid(
+            $stmt,
+            ':article_it_id',
+            $articleItId
+        );
+
+        $bindNullableUuid(
+            $stmt,
+            ':article_fr_id',
+            $articleFrId
+        );
+
+
+        // curs_id
+        $stmt->bindValue(
+            ':curs_id',
+            Uuid::toBinary($cursId),
+            PDO::PARAM_LOB
+        );
+
+
+        // ordre
+        $stmt->bindValue(
+            ':ordre',
+            $ordre,
+            PDO::PARAM_INT
+        );
+
+
+        // id
+        $stmt->bindValue(
+            ':id',
+            Uuid::toBinary($id),
+            PDO::PARAM_LOB
+        );
+
+
+        // =====================================================
+        // EXECUTE
+        // =====================================================
 
         if (!$stmt->execute()) {
-            Response::error(MissatgesAPI::error('errorBD'), [
-                'sqlState' => $stmt->errorCode(),
-                'info' => $stmt->errorInfo(),
-            ], 500);
+
+            Response::error(
+                MissatgesAPI::error('errorBD'),
+                [
+                    'sqlState' => $stmt->errorCode(),
+                    'info' => $stmt->errorInfo(),
+                ],
+                500
+            );
+
             return;
         }
 
-        $newId = (int)$pdo->lastInsertId();
 
-        Response::success(MissatgesAPI::success('create'), ['id' => $newId], httpCode: 201);
+        // =====================================================
+        // RESPONSE
+        // =====================================================
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            [
+                'id' => $id,
+            ],
+            httpCode: 201
+        );
     } catch (PDOException $e) {
-        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 
     return;

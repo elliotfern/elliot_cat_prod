@@ -4,13 +4,13 @@ import { DOMAIN_WEB } from '../../utils/urls';
 import { langIdToCode } from '../../utils/locales/getLangPrefix';
 
 interface HistoriaObertaRow {
-  blog_id: number;
-  group_id: number;
+  id: string;
+  grup_id: number;
   curs_id: number;
   curs_ordre: number;
   article_ordre: number;
   course_name: string;
-  lang: number;
+  idioma_id: string;
   post_status?: string | null;
   slug: string;
   post_title: string;
@@ -45,7 +45,7 @@ export async function renderHistoriaObertaList(): Promise<void> {
       },
       {
         header: 'Idioma',
-        field: 'lang',
+        field: 'idioma_id',
         render: (value: unknown) => `<span class="badge text-bg-light border">${escapeHtml(langIdToCode(Number(value)))}</span>`,
       },
       {
@@ -65,10 +65,10 @@ export async function renderHistoriaObertaList(): Promise<void> {
       },
       {
         header: 'Accions',
-        field: 'blog_id',
+        field: 'id',
         render: (_value: unknown, row: HistoriaObertaRow) => {
-          const publicUrl = buildPublicUrl(row.slug, row.lang);
-          const editUrl = buildEditUrl(row.blog_id);
+          const publicUrl = buildPublicUrl(row.slug);
+          const editUrl = buildEditUrl(row.id);
 
           return `
             <div class="d-flex gap-2 flex-wrap">
@@ -110,14 +110,12 @@ export async function renderHistoriaObertaList(): Promise<void> {
   }
 }
 
-function buildEditUrl(blogId: number): string {
+function buildEditUrl(blogId: string): string {
   return `${DOMAIN_WEB}/gestio/blog/modifica-article/${encodeURIComponent(String(blogId))}`;
 }
 
-function buildPublicUrl(slug: string, langId: number): string {
-  const code = langIdToCode(langId);
-
-  return `/${code}/historia/article/${encodeURIComponent(slug)}`;
+function buildPublicUrl(slug: string): string {
+  return `/historia/article/${encodeURIComponent(slug)}`;
 }
 
 function renderStatus(status?: string | null): string {

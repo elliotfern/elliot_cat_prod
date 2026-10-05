@@ -17,9 +17,9 @@ export async function formCursArticle(isUpdate: boolean, id?: string) {
 
   // Si vienes con ?cursId=... (crear desde una fitxa)
   const qs = new URLSearchParams(window.location.search);
-  const cursIdFromQuery = Number(qs.get('cursId') ?? 0);
-  if (!isNaN(cursIdFromQuery) && cursIdFromQuery > 0) {
-    data.curs = cursIdFromQuery;
+  const cursIdFromQuery = String(qs.get('cursId') ?? 0);
+  if (cursIdFromQuery) {
+    data.curs_id = cursIdFromQuery;
   }
 
   if (id && isUpdate) {
@@ -58,10 +58,10 @@ export async function formCursArticle(isUpdate: boolean, id?: string) {
   // ---------------------------------------------
   // Selects
   // ---------------------------------------------
-  await auxiliarSelect(data.curs ?? 0, 'historiaCursos', 'curs', 'nomCurs');
-  await auxiliarSelect(data.ca ?? 0, 'blogArticlesCa', 'ca', 'post_title');
-  await auxiliarSelect(data.es ?? 0, 'blogArticlesEs', 'es', 'post_title');
-  await auxiliarSelect(data.en ?? 0, 'blogArticlesEn', 'en', 'post_title');
-  await auxiliarSelect(data.fr ?? 0, 'blogArticlesFr', 'fr', 'post_title');
-  await auxiliarSelect(data.it ?? 0, 'blogArticlesIt', 'it', 'post_title');
+  await auxiliarSelect(data.curs_id ?? 0, 'historiaCursos', 'curs_id', 'nomCurs');
+  await auxiliarSelect(data.article_ca_id ?? 0, 'blogArticlesCa', 'article_ca_id', 'post_title');
+  await auxiliarSelect(data.article_es_id ?? 0, 'blogArticlesEs', 'article_es_id', 'post_title');
+  await auxiliarSelect(data.article_en_id ?? 0, 'blogArticlesEn', 'article_en_id', 'post_title');
+  await auxiliarSelect(data.article_fr_id ?? 0, 'blogArticlesFr', 'article_fr_id', 'post_title');
+  await auxiliarSelect(data.article_it_id ?? 0, 'blogArticlesIt', 'article_it_id', 'post_title');
 }
