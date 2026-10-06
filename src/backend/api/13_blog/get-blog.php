@@ -7,6 +7,7 @@ use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Utils\Uuid;
+use Ramsey\Uuid\Uuid as RamseyUuid;
 
 $slug = $routeParams[0] ?? null;
 $db  = new Database();
@@ -25,117 +26,117 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit();
 }
 
-/**
- * Parse attrs tipo: id=22 alt="hola" class="rounded" caption="..."
- */
 function parseShortcodeAttrs(string $attrStr): array
 {
     $attrs = [];
+    $attrStr = html_entity_decode($attrStr, ENT_QUOTES, 'UTF-8');
+
     if (preg_match_all('~(\w+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s]+))~u', $attrStr, $m, PREG_SET_ORDER)) {
         foreach ($m as $x) {
             $k = strtolower($x[1]);
-            $v = $x[2] !== '' ? $x[2] : ($x[3] !== '' ? $x[3] : $x[4]);
-            $attrs[$k] = $v;
+            $attrs[$k] = $x[2] !== '' ? $x[2] : (($x[3] ?? '') !== '' ? $x[3] : ($x[4] ?? ''));
         }
     }
+
     return $attrs;
 }
 
-/**
- * Reemplaza [img id=22 ...] por <figure><img ...></figure>
- * - Permite imágenes de cualquier type
- * - Una sola query para todas las ids
- */
 function renderBlogImgShortcodes(string $html, PDO $pdo): string
 {
     // Tipos permitidos en artículos públicos
-    $allowedTypeIds = [1, 2, 3, 4, 6, 7, 8, 11, 12, 13, 15, 16, 17];
+    $allowedTypeIds = [1, 2, 3, 4, 6, 7, 8, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23];
 
-    // Buscar shortcodes [img ...]
     if (!preg_match_all('~\[img\s+([^\]]+)\]~i', $html, $matches, PREG_SET_ORDER)) {
         return $html;
     }
 
     $items = [];
-    $ids = [];
+    $ids = []; // uuid string => true
 
     foreach ($matches as $m) {
-        $raw = $m[0];
-        $attrStr = $m[1];
+        $attrs = parseShortcodeAttrs($m[1]);
+        $uuid = strtolower(trim((string)($attrs['id'] ?? '')));
 
-        $attrs = parseShortcodeAttrs($attrStr);
-        $id = isset($attrs['id']) ? (int)$attrs['id'] : 0;
-
-        if ($id > 0) {
-            $items[] = ['raw' => $raw, 'id' => $id, 'attrs' => $attrs];
-            $ids[$id] = true;
+        if ($uuid !== '' && RamseyUuid::isValid($uuid)) {
+            $items[] = ['raw' => $m[0], 'id' => $uuid, 'attrs' => $attrs];
+            $ids[$uuid] = true;
+        } else {
+            $html = str_replace(
+                $m[0],
+                '<div class="alert alert-warning my-3">Imatge amb id invàlid</div>',
+                $html
+            );
         }
     }
 
-    if (!$ids) return $html;
+    if (!$ids) {
+        return $html;
+    }
 
     $idList = array_keys($ids);
     $in = implode(',', array_fill(0, count($idList), '?'));
 
-    // Query única
     $sql = "
-        SELECT i.id, i.nameImg, i.alt, i.typeImg, t.name AS dir
+        SELECT i.id, i.nameImg, i.extension, i.alt, i.typeImg, t.name AS dir
         FROM db_img i
         JOIN db_img_type t ON t.id = i.typeImg
         WHERE i.id IN ($in)
     ";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($idList);
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($idList as $k => $uuid) {
+        $stmt->bindValue($k + 1, RamseyUuid::fromString($uuid)->getBytes(), PDO::PARAM_LOB);
+    }
+    $stmt->execute();
 
     $byId = [];
-    foreach ($rows as $r) {
-        $byId[(int)$r['id']] = $r;
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $byId[RamseyUuid::fromBytes($r['id'])->toString()] = $r;
     }
 
     foreach ($items as $it) {
-        $id = $it['id'];
+        $uuid  = $it['id'];
         $attrs = $it['attrs'];
 
-        if (!isset($byId[$id])) {
-            $replacement = '<div class="alert alert-warning my-3">Imatge no trobada (id=' . $id . ')</div>';
+        if (!isset($byId[$uuid])) {
+            $replacement = '<div class="alert alert-warning my-3">Imatge no trobada (id='
+                . htmlspecialchars($uuid, ENT_QUOTES, 'UTF-8') . ')</div>';
             $html = str_replace($it['raw'], $replacement, $html);
             continue;
         }
 
-        $img = $byId[$id];
+        $img = $byId[$uuid];
 
-        // 🔐 Validación de tipo permitido
         if (!in_array((int)$img['typeImg'], $allowedTypeIds, true)) {
-            $replacement = '<div class="alert alert-warning my-3">Tipus d\'imatge no permès (id=' . $id . ')</div>';
+            $replacement = '<div class="alert alert-warning my-3">Tipus d\'imatge no permès (id='
+                . htmlspecialchars($uuid, ENT_QUOTES, 'UTF-8') . ')</div>';
             $html = str_replace($it['raw'], $replacement, $html);
             continue;
         }
 
-        $dir = (string)$img['dir']; // nombre del directorio
-        $fileBase = (string)$img['nameImg'];
+        $ext = ltrim(trim((string)$img['extension']), '.');
+        if ($ext === '') {
+            $ext = 'jpg';
+        }
 
-        $src = 'https://media.elliot.cat/img/' .
-            rawurlencode($dir) . '/' .
-            rawurlencode($fileBase) . '.jpg';
+        $src = 'https://media.elliot.cat/img/'
+            . rawurlencode((string)$img['dir']) . '/'
+            . rawurlencode((string)$img['nameImg']) . '.'
+            . rawurlencode($ext);
 
-        // ALT prioridad: shortcode > BD > vacío
         $alt = $attrs['alt'] ?? ($img['alt'] ?? '');
         $altSafe = htmlspecialchars((string)$alt, ENT_QUOTES, 'UTF-8');
 
-        // Clase extra opcional
         $classExtra = trim((string)($attrs['class'] ?? ''));
-        $class = trim('img-fluid rounded ' . $classExtra);
-        $classSafe = htmlspecialchars($class, ENT_QUOTES, 'UTF-8');
+        $classSafe = htmlspecialchars(trim('img-fluid rounded ' . $classExtra), ENT_QUOTES, 'UTF-8');
 
-        // Caption opcional
         $caption = (string)($attrs['caption'] ?? '');
         $captionSafe = htmlspecialchars($caption, ENT_QUOTES, 'UTF-8');
 
         $figure =
             '<figure class="my-4 text-center">' .
-            '<img loading="lazy" decoding="async" class="' . $classSafe . '" src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" alt="' . $altSafe . '">' .
+            '<img loading="lazy" decoding="async" class="' . $classSafe . '" src="'
+            . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" alt="' . $altSafe . '">' .
             ($caption !== '' ? '<figcaption class="small text-muted mt-2">' . $captionSafe . '</figcaption>' : '') .
             '</figure>';
 
@@ -144,6 +145,7 @@ function renderBlogImgShortcodes(string $html, PDO $pdo): string
 
     return $html;
 }
+
 // Llistat complet del blog
 // URL: /api/blog/get/llistatArticles?page=1&limit=10&order=asc|desc
 if ($slug === 'llistatArticles') {
