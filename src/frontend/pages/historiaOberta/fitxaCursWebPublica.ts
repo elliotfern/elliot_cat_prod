@@ -11,12 +11,25 @@ interface ArticleHistoria {
   post_title: string;
   post_date: string;
   slug: string;
+  ordre: number;
 }
+
+type CodiIdioma = 'ca' | 'es' | 'en' | 'fr' | 'it';
+
+type ArticlesPerIdioma = Record<CodiIdioma, ArticleHistoria[]>;
 
 interface CursHistoriaResponse {
   curs: CursHistoria;
-  articles: ArticleHistoria[];
+  articles: ArticlesPerIdioma;
 }
+
+const IDIOMES: ReadonlyArray<{ codi: CodiIdioma; nom: string }> = [
+  { codi: 'ca', nom: 'Català' },
+  { codi: 'es', nom: 'Español' },
+  { codi: 'en', nom: 'English' },
+  { codi: 'fr', nom: 'Français' },
+  { codi: 'it', nom: 'Italiano' },
+];
 
 export async function getCursHistoria(nameCourse: string): Promise<void> {
   try {
@@ -28,6 +41,48 @@ export async function getCursHistoria(nameCourse: string): Promise<void> {
   }
 }
 
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function renderArticles(articles: ArticleHistoria[]): string {
+  if (articles.length === 0) {
+    return `<p class="text-muted small mb-0">—</p>`;
+  }
+
+  const items = [...articles]
+    .sort((a, b) => a.ordre - b.ordre)
+    .map((article) => {
+      const postLink = `/historia/article/${encodeURIComponent(article.slug)}`;
+
+      return `
+        <li class="list-group-item">
+          <span class="text-muted me-2">${article.ordre}.</span>
+          <a href="${postLink}" class="text-decoration-none">${escapeHtml(article.post_title)}</a>
+        </li>
+      `;
+    })
+    .join('');
+
+  return `<ol class="list-group list-group-flush">${items}</ol>`;
+}
+
+function renderIdioma(codi: CodiIdioma, nom: string, articles: ArticleHistoria[]): string {
+  return `
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">${nom}</span>
+          <span class="badge text-bg-secondary">${articles.length}</span>
+        </div>
+        ${articles.length > 0 ? renderArticles(articles) : `<div class="card-body"><p class="text-muted small mb-0">Cap article en aquest idioma.</p></div>`}
+      </div>
+    </div>
+  `;
+}
+
 function mostrarCurs(result: CursHistoriaResponse): void {
   const cursContainer = document.getElementById('curs');
 
@@ -35,31 +90,15 @@ function mostrarCurs(result: CursHistoriaResponse): void {
     return;
   }
 
-  cursContainer.innerHTML = '';
+  const { curs, articles } = result;
 
-  const curs = result.curs;
+  const totalArticles = IDIOMES.reduce((total, { codi }) => total + (articles[codi]?.length ?? 0), 0);
 
-  const articles = result.articles
-    .map((article) => {
-      const postLink = `/historia/article/${encodeURIComponent(article.slug)}`;
-
-      return `
-        <li class="mb-2">
-          <a href="${postLink}" class="text-decoration-none">
-            ${article.post_title}
-          </a>
-        </li>
-      `;
-    })
-    .join('');
+  const idiomesHtml = IDIOMES.map(({ codi, nom }) => renderIdioma(codi, nom, articles[codi] ?? [])).join('');
 
   const articlesContent =
-    result.articles.length > 0
-      ? `
-        <ol>
-          ${articles}
-        </ol>
-      `
+    totalArticles > 0
+      ? `<div class="row g-4">${idiomesHtml}</div>`
       : `
         <div class="alert alert-info">
           No hi ha cap article disponible per aquest curs.
@@ -68,7 +107,7 @@ function mostrarCurs(result: CursHistoriaResponse): void {
 
   cursContainer.innerHTML = `
     <div class="text-center mb-4">
-      <h1>${curs.curs}</h1>
+      <h1>${escapeHtml(curs.curs)}</h1>
 
       ${curs.descripcio ? `<p class="small">${curs.descripcio}</p>` : ''}
     </div>

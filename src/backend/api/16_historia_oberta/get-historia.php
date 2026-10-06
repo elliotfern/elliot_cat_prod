@@ -905,26 +905,84 @@ if ($slug === 'carrecsPersona') {
         return;
     }
 
-    $query = "SELECT
-            p.ID,
-            p.post_title,
-            p.post_date,
-            p.slug,
-            c.curs,
-            c.descripcio,
-            c.id AS cursId
-        FROM db_historia_oberta_cursos AS c
-        LEFT JOIN db_historia_oberta_articles AS l ON c.id = l.curs_id
-        LEFT JOIN db_blog AS p ON p.ID = l.ca
-        WHERE c.slug = :param
-        ORDER BY l.ordre ASC";
-
     try {
-        $params = [
-            ':param' => $paramName,
-        ];
 
-        $rows = $db->getData($query, $params, false);
+        // =====================================================
+        // CURS + ARTICLES
+        // =====================================================
+
+        $query = sprintf(
+            "SELECT
+                c.id AS curs_id,
+                c.curs,
+                c.descripcio,
+
+                ca.id AS ca_id,
+                ca.post_title AS ca_post_title,
+                ca.post_date AS ca_post_date,
+                ca.slug AS ca_slug,
+
+                es.id AS es_id,
+                es.post_title AS es_post_title,
+                es.post_date AS es_post_date,
+                es.slug AS es_slug,
+
+                en.id AS en_id,
+                en.post_title AS en_post_title,
+                en.post_date AS en_post_date,
+                en.slug AS en_slug,
+
+                fr.id AS fr_id,
+                fr.post_title AS fr_post_title,
+                fr.post_date AS fr_post_date,
+                fr.slug AS fr_slug,
+
+                it.id AS it_id,
+                it.post_title AS it_post_title,
+                it.post_date AS it_post_date,
+                it.slug AS it_slug,
+
+                hoa.ordre
+
+             FROM %s AS c
+
+             LEFT JOIN %s AS hoa
+                ON hoa.curs_id = c.id
+
+             LEFT JOIN %s AS ca
+                ON ca.id = hoa.article_ca_id
+
+             LEFT JOIN %s AS es
+                ON es.id = hoa.article_es_id
+
+             LEFT JOIN %s AS en
+                ON en.id = hoa.article_en_id
+
+             LEFT JOIN %s AS fr
+                ON fr.id = hoa.article_fr_id
+
+             LEFT JOIN %s AS it
+                ON it.id = hoa.article_it_id
+
+             WHERE c.slug = :param
+
+             ORDER BY hoa.ordre ASC",
+            qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo),
+            qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo),
+            qi(Tables::BLOG, $pdo),
+            qi(Tables::BLOG, $pdo),
+            qi(Tables::BLOG, $pdo),
+            qi(Tables::BLOG, $pdo),
+            qi(Tables::BLOG, $pdo)
+        );
+
+        $rows = $db->getData(
+            $query,
+            [
+                ':param' => $paramName,
+            ],
+            false
+        );
 
         if (empty($rows)) {
             Response::error(
@@ -935,26 +993,107 @@ if ($slug === 'carrecsPersona') {
             return;
         }
 
+
+        // =====================================================
+        // CURS
+        // =====================================================
+
         $course = [
-            'id' => $rows[0]['cursId'],
+            'id' => Uuid::toString($rows[0]['curs_id']),
             'curs' => $rows[0]['curs'],
             'descripcio' => $rows[0]['descripcio'],
         ];
 
-        $articles = [];
+
+        // =====================================================
+        // ARTICLES PER IDIOMA
+        // =====================================================
+
+        $articles = [
+            'ca' => [],
+            'es' => [],
+            'en' => [],
+            'fr' => [],
+            'it' => [],
+        ];
+
+
+        // =====================================================
+        // PROCESSAR ARTICLES
+        // =====================================================
 
         foreach ($rows as $row) {
-            if ($row['ID'] === null) {
-                continue;
+
+            if (
+                is_string($row['ca_id']) &&
+                strlen($row['ca_id']) === 16
+            ) {
+                $articles['ca'][] = [
+                    'id' => Uuid::toString($row['ca_id']),
+                    'post_title' => $row['ca_post_title'],
+                    'post_date' => $row['ca_post_date'],
+                    'slug' => $row['ca_slug'],
+                    'ordre' => $row['ordre'],
+                ];
             }
 
-            $articles[] = [
-                'id' => $row['ID'],
-                'post_title' => $row['post_title'],
-                'post_date' => $row['post_date'],
-                'slug' => $row['slug'],
-            ];
+            if (
+                is_string($row['es_id']) &&
+                strlen($row['es_id']) === 16
+            ) {
+                $articles['es'][] = [
+                    'id' => Uuid::toString($row['es_id']),
+                    'post_title' => $row['es_post_title'],
+                    'post_date' => $row['es_post_date'],
+                    'slug' => $row['es_slug'],
+                    'ordre' => $row['ordre'],
+                ];
+            }
+
+            if (
+                is_string($row['en_id']) &&
+                strlen($row['en_id']) === 16
+            ) {
+                $articles['en'][] = [
+                    'id' => Uuid::toString($row['en_id']),
+                    'post_title' => $row['en_post_title'],
+                    'post_date' => $row['en_post_date'],
+                    'slug' => $row['en_slug'],
+                    'ordre' => $row['ordre'],
+                ];
+            }
+
+            if (
+                is_string($row['fr_id']) &&
+                strlen($row['fr_id']) === 16
+            ) {
+                $articles['fr'][] = [
+                    'id' => Uuid::toString($row['fr_id']),
+                    'post_title' => $row['fr_post_title'],
+                    'post_date' => $row['fr_post_date'],
+                    'slug' => $row['fr_slug'],
+                    'ordre' => $row['ordre'],
+                ];
+            }
+
+            if (
+                is_string($row['it_id']) &&
+                strlen($row['it_id']) === 16
+            ) {
+                $articles['it'][] = [
+                    'id' => Uuid::toString($row['it_id']),
+                    'post_title' => $row['it_post_title'],
+                    'post_date' => $row['it_post_date'],
+                    'slug' => $row['it_slug'],
+                    'ordre' => $row['ordre'],
+                ];
+            }
         }
+
+
+        // =====================================================
+        // RESPONSE
+        // =====================================================
 
         Response::success(
             MissatgesAPI::success('get'),
@@ -965,12 +1104,15 @@ if ($slug === 'carrecsPersona') {
             httpCode: 200
         );
     } catch (PDOException $e) {
+
         Response::error(
             MissatgesAPI::error('errorBD'),
             [$e->getMessage()],
             500
         );
     }
+
+    return;
 
     // Article per slug
     // URL: /api/historia/get/articleSlug?articleSlug=revolut&scope=blog|historia
