@@ -772,7 +772,7 @@ if ($slug === 'llistatArticles') {
         );
     }
 
-    // Llistat Historia Oberta (INTRANET ONLY)
+    // Llistat Historia Oberta (INTRANET)
     // URL: /api/blog/get/llistatHistoriaOberta?page=1&limit=10&order=asc|desc&curs=0|id&idioma_id=0|id&status=publish|draft|...
 } else if ($slug === 'llistatHistoriaOberta') {
 
