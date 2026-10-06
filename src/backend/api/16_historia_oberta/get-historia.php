@@ -6,6 +6,7 @@ use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Utils\Uuid;
+use Ramsey\Uuid\Uuid as RamseyUuid;
 
 $slug = $routeParams[0] ?? '';
 $db = new Database();
@@ -19,6 +20,129 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     echo json_encode(['error' => 'Method not allowed']);
     exit();
 }
+
+
+function parseShortcodeAttrs2(string $attrStr): array
+{
+    $attrs = [];
+    $attrStr = html_entity_decode($attrStr, ENT_QUOTES, 'UTF-8');
+
+    if (preg_match_all('~(\w+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s]+))~u', $attrStr, $m, PREG_SET_ORDER)) {
+        foreach ($m as $x) {
+            $k = strtolower($x[1]);
+            $attrs[$k] = $x[2] !== '' ? $x[2] : (($x[3] ?? '') !== '' ? $x[3] : ($x[4] ?? ''));
+        }
+    }
+
+    return $attrs;
+}
+
+function renderBlogImgShortcodes2(string $html, PDO $pdo): string
+{
+
+    // Tipos permitidos en artículos públicos
+    $allowedTypeIds = [1, 2, 3, 4, 6, 7, 8, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+
+    if (!preg_match_all('~\[img\s+([^\]]+)\]~i', $html, $matches, PREG_SET_ORDER)) {
+        return $html;
+    }
+
+    $items = [];
+    $ids = []; // uuid string => true
+
+    foreach ($matches as $m) {
+        $attrs = parseShortcodeAttrs2($m[1]);
+        $uuid = strtolower(trim((string)($attrs['id'] ?? '')));
+
+        if ($uuid !== '' && RamseyUuid::isValid($uuid)) {
+            $items[] = ['raw' => $m[0], 'id' => $uuid, 'attrs' => $attrs];
+            $ids[$uuid] = true;
+        } else {
+            $html = str_replace(
+                $m[0],
+                '<div class="alert alert-warning my-3">Imatge amb id invàlid</div>',
+                $html
+            );
+        }
+    }
+
+    if (!$ids) {
+        return $html;
+    }
+
+    $idList = array_keys($ids);
+    $in = implode(',', array_fill(0, count($idList), '?'));
+
+    $sql = "
+        SELECT i.id, i.nameImg, i.extension, i.alt, i.typeImg, t.name AS dir
+        FROM db_img i
+        JOIN db_img_type t ON t.id = i.typeImg
+        WHERE i.id IN ($in)
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    foreach ($idList as $k => $uuid) {
+        $stmt->bindValue($k + 1, RamseyUuid::fromString($uuid)->getBytes(), PDO::PARAM_LOB);
+    }
+    $stmt->execute();
+
+    $byId = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $byId[RamseyUuid::fromBytes($r['id'])->toString()] = $r;
+    }
+
+    foreach ($items as $it) {
+        $uuid  = $it['id'];
+        $attrs = $it['attrs'];
+
+        if (!isset($byId[$uuid])) {
+            $replacement = '<div class="alert alert-warning my-3">Imatge no trobada (id='
+                . htmlspecialchars($uuid, ENT_QUOTES, 'UTF-8') . ')</div>';
+            $html = str_replace($it['raw'], $replacement, $html);
+            continue;
+        }
+
+        $img = $byId[$uuid];
+
+        if (!in_array((int)$img['typeImg'], $allowedTypeIds, true)) {
+            $replacement = '<div class="alert alert-warning my-3">Tipus d\'imatge no permès (id='
+                . htmlspecialchars($uuid, ENT_QUOTES, 'UTF-8') . ')</div>';
+            $html = str_replace($it['raw'], $replacement, $html);
+            continue;
+        }
+
+        $ext = ltrim(trim((string)$img['extension']), '.');
+        if ($ext === '') {
+            $ext = 'jpg';
+        }
+
+        $src = 'https://media.elliot.cat/img/'
+            . rawurlencode((string)$img['dir']) . '/'
+            . rawurlencode((string)$img['nameImg']) . '.'
+            . rawurlencode($ext);
+
+        $alt = $attrs['alt'] ?? ($img['alt'] ?? '');
+        $altSafe = htmlspecialchars((string)$alt, ENT_QUOTES, 'UTF-8');
+
+        $classExtra = trim((string)($attrs['class'] ?? ''));
+        $classSafe = htmlspecialchars(trim('img-fluid rounded ' . $classExtra), ENT_QUOTES, 'UTF-8');
+
+        $caption = (string)($attrs['caption'] ?? '');
+        $captionSafe = htmlspecialchars($caption, ENT_QUOTES, 'UTF-8');
+
+        $figure =
+            '<figure class="my-4 text-center">' .
+            '<img loading="lazy" decoding="async" class="' . $classSafe . '" src="'
+            . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '" alt="' . $altSafe . '">' .
+            ($caption !== '' ? '<figcaption class="small text-muted mt-2">' . $captionSafe . '</figcaption>' : '') .
+            '</figure>';
+
+        $html = str_replace($it['raw'], $figure, $html);
+    }
+
+    return $html;
+}
+
 
 // 2. Llistat de càrrecs d'una persona
 // ruta GET => "/api/historia/get/carrecsPersona?id=234"
@@ -1147,9 +1271,9 @@ if ($slug === 'carrecsPersona') {
 
     try {
         $params = [':slug' => $articleSlug];
-        $rows = $db->getData($query, $params, true);
+        $row = $db->getData($query, $params, true);
 
-        if (empty($rows)) {
+        if (empty($row)) {
             Response::error(
                 MissatgesAPI::error('not_found'),
                 [],
@@ -1158,15 +1282,20 @@ if ($slug === 'carrecsPersona') {
             return;
         }
 
+        // ✅ Reemplazar shortcodes de imágenes
+        if (isset($row['post_content']) && is_string($row['post_content']) && $row['post_content'] !== '') {
+            $row['post_content'] = renderBlogImgShortcodes2($row['post_content'], $pdo);
+        }
+
         Response::success(
             message: MissatgesAPI::success('get'),
-            data: $rows,
+            data: $row,
             httpCode: 200
         );
-    } catch (PDOException $e) {
+    } catch (Throwable $e) {
         Response::error(
             MissatgesAPI::error('errorBD'),
-            [$e->getMessage()],
+            [$e->getMessage() . ' @ ' . basename($e->getFile()) . ':' . $e->getLine()],
             500
         );
     }
