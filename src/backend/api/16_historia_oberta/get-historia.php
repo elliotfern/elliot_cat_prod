@@ -1479,6 +1479,155 @@ if ($slug === 'carrecsPersona') {
     }
 
     return;
+} else if ($slug === 'cursArticle') {
+
+    $articleSlug = trim((string)($_GET['articleSlug'] ?? ''));
+
+    if ($articleSlug === '' || !preg_match('~^[a-z0-9][a-z0-9\-]*[a-z0-9]$|^[a-z0-9]$~', $articleSlug)) {
+        Response::error('Paràmetre articleSlug invàlid', [], 400);
+        return;
+    }
+
+    try {
+        $blog    = qi(Tables::BLOG, $pdo);
+        $enllac  = qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo);
+        $cursos  = qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo);
+
+        // b  = article actual (per slug)
+        // h  = fila d'enllaç on apareix b (en qualsevol columna d'idioma)
+        // h2 = totes les files del mateix curs
+        // a  = article de h2 en el MATEIX idioma que b
+        $query = "SELECT
+                c.id   AS curs_id,
+                c.curs,
+                c.slug AS curs_slug,
+                a.id   AS article_id,
+                a.post_title,
+                a.slug AS article_slug,
+                a.post_date,
+                h2.ordre
+            FROM {$blog} AS b
+            INNER JOIN {$enllac} AS h
+                ON b.id IN (h.article_ca_id, h.article_es_id, h.article_en_id, h.article_fr_id, h.article_it_id)
+            INNER JOIN {$cursos} AS c
+                ON c.id = h.curs_id
+            INNER JOIN {$enllac} AS h2
+                ON h2.curs_id = h.curs_id
+            INNER JOIN {$blog} AS a
+                ON a.id = CASE
+                    WHEN b.id = h.article_ca_id THEN h2.article_ca_id
+                    WHEN b.id = h.article_es_id THEN h2.article_es_id
+                    WHEN b.id = h.article_en_id THEN h2.article_en_id
+                    WHEN b.id = h.article_fr_id THEN h2.article_fr_id
+                    WHEN b.id = h.article_it_id THEN h2.article_it_id
+                END
+            WHERE b.slug = :slug
+            ORDER BY h2.ordre ASC";
+
+        $rows = $db->getData($query, [':slug' => $articleSlug], false);
+
+        // Article sense curs: resposta OK però buida (el frontend no pinta la targeta)
+        if (empty($rows)) {
+            Response::success(
+                MissatgesAPI::success('get'),
+                ['curs' => null, 'articles' => []],
+                httpCode: 200
+            );
+            return;
+        }
+
+        $articles = [];
+        foreach ($rows as $row) {
+            $articles[] = [
+                'id'         => Uuid::toString($row['article_id']),
+                'post_title' => $row['post_title'],
+                'post_date'  => $row['post_date'],
+                'slug'       => $row['article_slug'],
+                'ordre'      => (int)$row['ordre'],
+            ];
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            [
+                'curs' => [
+                    'id'   => Uuid::toString($rows[0]['curs_id']),
+                    'curs' => $rows[0]['curs'],
+                    'slug' => $rows[0]['curs_slug'],
+                ],
+                'articles' => $articles,
+            ],
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
+} else if ($slug === 'idiomesArticle') {
+
+    $articleSlug = trim((string)($_GET['articleSlug'] ?? ''));
+
+    if ($articleSlug === '' || !preg_match('~^[a-z0-9][a-z0-9\-]*[a-z0-9]$|^[a-z0-9]$~', $articleSlug)) {
+        Response::error('Paràmetre articleSlug invàlid', [], 400);
+        return;
+    }
+
+    try {
+        $blog   = qi(Tables::BLOG, $pdo);
+        $enllac = qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo);
+
+        $query = "SELECT
+                ca.slug AS ca_slug, ca.post_title AS ca_title,
+                es.slug AS es_slug, es.post_title AS es_title,
+                en.slug AS en_slug, en.post_title AS en_title,
+                fr.slug AS fr_slug, fr.post_title AS fr_title,
+                it.slug AS it_slug, it.post_title AS it_title
+            FROM {$blog} AS b
+            INNER JOIN {$enllac} AS h
+                ON b.id IN (h.article_ca_id, h.article_es_id, h.article_en_id, h.article_fr_id, h.article_it_id)
+            LEFT JOIN {$blog} AS ca ON ca.id = h.article_ca_id
+            LEFT JOIN {$blog} AS es ON es.id = h.article_es_id
+            LEFT JOIN {$blog} AS en ON en.id = h.article_en_id
+            LEFT JOIN {$blog} AS fr ON fr.id = h.article_fr_id
+            LEFT JOIN {$blog} AS it ON it.id = h.article_it_id
+            WHERE b.slug = :slug
+            LIMIT 1";
+
+        $row = $db->getData($query, [':slug' => $articleSlug], true);
+
+        $idiomes = [];
+
+        if ($row) {
+            foreach (['ca', 'es', 'en', 'fr', 'it'] as $codi) {
+                if (!empty($row[$codi . '_slug'])) {
+                    $idiomes[] = [
+                        'codi'       => $codi,
+                        'slug'       => $row[$codi . '_slug'],
+                        'post_title' => $row[$codi . '_title'],
+                    ];
+                }
+            }
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            ['idiomes' => $idiomes],
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
 
     /**
      * GET : Slot (db_historia_oberta_articles) per ID
