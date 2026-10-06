@@ -1303,66 +1303,7 @@ if ($slug === 'carrecsPersona') {
     // Llistat arxiu articles
 } else if ($slug === 'arxiuArticles') {
 
-    // Aquí puedes obtener los valores de los parámetros
-    $lang = $_GET['lang'];
 
-    if ($lang === "ca") {
-        $query = "SELECT p.ID, p.post_title, p.post_name, c.nameCa AS cursName, c.paramNameCa AS cursParam
-            FROM epgylzqu_historia_web.posts_lang AS l
-            INNER JOIN epgylzqu_historia_web.xfr_posts AS p ON l.ca = p.ID
-            INNER JOIN epgylzqu_elliotfern_intranet.db_openhistory_courses AS c ON l.curs = c.id
-            GROUP BY p.id
-            ORDER BY l.curs ASC, l.ordre ASC;";
-    } else if ($lang === "en") {
-        $query = "SELECT p.ID, p.post_title, p.post_name, c.nameEn AS cursName, c.paramNameEn AS cursParam
-            FROM epgylzqu_historia_web.posts_lang AS l
-            INNER JOIN epgylzqu_historia_web.xfr_posts AS p ON l.en = p.ID
-            INNER JOIN epgylzqu_elliotfern_intranet.db_openhistory_courses AS c ON l.curs = c.id
-            GROUP BY p.id
-            ORDER BY l.curs ASC, l.ordre ASC;";
-    } else if ($lang === "fr") {
-        $query = "SELECT p.ID, p.post_title, p.post_name, c.nameFr AS cursName, c.paramNameFr AS cursParam
-            FROM epgylzqu_historia_web.posts_lang AS l
-            INNER JOIN epgylzqu_historia_web.xfr_posts AS p ON l.fr = p.ID
-            INNER JOIN epgylzqu_elliotfern_intranet.db_openhistory_courses AS c ON l.curs = c.id
-            GROUP BY p.id
-            ORDER BY l.curs ASC, l.ordre ASC;";
-    } else if ($lang === "es") {
-        $query = "SELECT p.ID, p.post_title, p.post_name, c.nameEs AS cursName, c.paramNameEs AS cursParam
-            FROM epgylzqu_historia_web.posts_lang AS l
-            INNER JOIN epgylzqu_historia_web.xfr_posts AS p ON l.es = p.ID
-            INNER JOIN epgylzqu_elliotfern_intranet.db_openhistory_courses AS c ON l.curs = c.id
-            GROUP BY p.id
-            ORDER BY l.curs ASC, l.ordre ASC;";
-    } else if ($lang === "it") {
-        $query = "SELECT p.ID, p.post_title, p.post_name, c.nameIt AS cursName, c.paramNameIt AS cursParam
-            FROM epgylzqu_historia_web.posts_lang AS l
-            INNER JOIN epgylzqu_historia_web.xfr_posts AS p ON l.it = p.ID
-            INNER JOIN epgylzqu_elliotfern_intranet.db_openhistory_courses AS c ON l.curs = c.id
-            GROUP BY p.id
-            ORDER BY l.curs ASC, l.ordre ASC;";
-    }
-
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
-    }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Establecer el encabezado de respuesta a JSON
-    header('Content-Type: application/json');
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
 
     /**
      * GET : Slots/articles d'un curs (amb títols per idioma)
