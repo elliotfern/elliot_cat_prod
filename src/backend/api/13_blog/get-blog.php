@@ -788,7 +788,8 @@ if ($slug === 'llistatArticles') {
                 b.post_modified,
                  hoa.id AS grup_id,
                 hoa.curs_id,
-                hoa.ordre AS article_ordre
+                hoa.ordre AS article_ordre,
+                i.idioma
             FROM " . qi(Tables::BLOG, $pdo) . " AS b
             LEFT JOIN " . qi(Tables::DB_HISTORIA_OBERTA_ARTICLES, $pdo) . " AS hoa
                 ON (
@@ -799,6 +800,7 @@ if ($slug === 'llistatArticles') {
                     OR b.id = hoa.article_it_id
                 )
             LEFT JOIN " . qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo) . " AS c ON c.id = hoa.curs_id
+            LEFT JOIN " . qi(Tables::DB_IDIOMES, $pdo) . " AS i ON b.idioma_id = i.id
             WHERE b.post_type = 'historia_oberta'
             ORDER BY b.post_date DESC";
 

@@ -1,7 +1,6 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { DOMAIN_WEB } from '../../utils/urls';
-import { langIdToCode } from '../../utils/locales/getLangPrefix';
 
 interface HistoriaObertaRow {
   id: string;
@@ -16,6 +15,7 @@ interface HistoriaObertaRow {
   post_title: string;
   post_date: string;
   post_modified?: string | null;
+  idioma: string;
 }
 
 export async function renderHistoriaObertaList(): Promise<void> {
@@ -45,8 +45,8 @@ export async function renderHistoriaObertaList(): Promise<void> {
       },
       {
         header: 'Idioma',
-        field: 'idioma_id',
-        render: (value: unknown) => `<span class="badge text-bg-light border">${escapeHtml(langIdToCode(Number(value)))}</span>`,
+        field: 'idioma',
+        render: (value: unknown) => `<span class="badge text-bg-light border">${escapeHtml(value ?? '-')}</span>`,
       },
       {
         header: 'Estat',
