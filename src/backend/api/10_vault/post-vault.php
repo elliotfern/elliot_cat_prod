@@ -9,6 +9,9 @@ use Ramsey\Uuid\Uuid as Ramsey;
 $db = new Database();
 $pdo = $db->getPdo();
 
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+
 header("Content-Type: application/json");
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
@@ -37,8 +40,8 @@ function generateEncryptedPassword($password, $token)
     ];
 }
 
-// a) Inserir link
-if (isset($_GET['clau'])) {
+// a) Inserir link 
+if ($slug === 'clau') {
 
     // Helpers
     function requireField(array $data, string $key, array &$errors)
@@ -75,7 +78,7 @@ if (isset($_GET['clau'])) {
 
     $servei = requireField($data, 'servei', $errors);
     $usuari = requireField($data, 'usuari', $errors);
-    $tipus = requireField($data, 'tipus', $errors);
+    $tipus_id = $data['tipus_id'];
 
     $web = optionalField($data, 'web');
     $notes = optionalField($data, 'notes');
@@ -83,8 +86,8 @@ if (isset($_GET['clau'])) {
     $clau2f = optionalField($data, 'clau2f');
 
     // Validar format UUID de tipus abans de convertir-lo a binari
-    if ($tipus !== null && !preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $tipus)) {
-        $errors['tipus'] = 'format_invalid';
+    if ($tipus_id !== null && !preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $tipus_id)) {
+        $errors['tipus_id'] = 'format_invalid';
     }
 
     if (!empty($errors)) {
@@ -110,7 +113,7 @@ if (isset($_GET['clau'])) {
     $idBinari = Uuid::toBinary($novaId->toString());
 
     // Convertir tipus (UUID string) a binari per tipus_id
-    $tipusIdBinari = Uuid::toBinary($tipus);
+    $tipusIdBinari = Uuid::toBinary($tipus_id);
 
     // Asignar valores adicionales
     $timestamp = date('Y-m-d');

@@ -8,6 +8,9 @@ use App\Utils\Uuid;
 $db = new Database();
 $pdo = $db->getPdo();
 
+/** @var array $routeParams */
+$slug = $routeParams[0] ?? null;
+
 header("Content-Type: application/json");
 
 corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
@@ -37,7 +40,7 @@ function generateEncryptedPassword($password, $token)
 }
 
 // a) Inserir link
-if (isset($_GET['clau'])) {
+if ($slug === 'clau') {
 
     // Helpers
     function requireField(array $data, string $key, array &$errors)
@@ -75,7 +78,7 @@ if (isset($_GET['clau'])) {
     $id = requireField($data, 'id', $errors);
     $servei = requireField($data, 'servei', $errors);
     $usuari = requireField($data, 'usuari', $errors);
-    $tipus = requireField($data, 'tipus_id', $errors);
+    $tipus = $data['tipus_id'];
 
     $web = optionalField($data, 'web');
     $notes = optionalField($data, 'notes');

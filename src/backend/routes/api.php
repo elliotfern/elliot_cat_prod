@@ -55,7 +55,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/vault/post' => [
+    '/api/vault/post/{slug}' => [
         'view' => '../src/backend/api/10_vault/post-vault.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -63,7 +63,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/vault/put' => [
+    '/api/vault/put/{slug}' => [
         'view' => '../src/backend/api/10_vault/put-vault.php',
         'needs_session' => false,
         'header_footer' => false,

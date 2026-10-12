@@ -37,14 +37,14 @@ export async function formVault(isUpdate: boolean, idUuid?: string) {
     }
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'PUT', 'formVault', `${API_BASE}/vault/put/?clau`, true);
+      transmissioDadesDB(event, 'PUT', 'formVault', `${API_BASE}/vault/put/clau`, true);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nova clau privada</h2>`;
     btnSubmit.textContent = 'Inserir dades';
 
     form.addEventListener('submit', function (event) {
-      transmissioDadesDB(event, 'POST', 'formVault', `${API_BASE}/vault/post/?clau`, true);
+      transmissioDadesDB(event, 'POST', 'formVault', `${API_BASE}/vault/post/clau`, true);
     });
   }
 
