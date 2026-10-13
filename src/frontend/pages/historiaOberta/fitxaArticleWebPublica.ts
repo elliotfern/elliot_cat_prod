@@ -289,7 +289,7 @@ function setupImageLightbox(container: HTMLElement): void {
     img.style.maxWidth = '100%';
     img.style.width = 'auto';
     img.style.height = 'auto';
-    img.style.maxHeight = '320px';
+    img.style.maxHeight = 'min(80vh, 900px)';
     img.style.objectFit = 'contain';
     img.style.cursor = 'zoom-in';
     img.style.display = 'block';
