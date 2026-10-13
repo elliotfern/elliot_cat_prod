@@ -307,16 +307,104 @@ function setupImageLightbox(container: HTMLElement): void {
       overlay.setAttribute('aria-modal', 'true');
       overlay.setAttribute('aria-label', 'Imagen ampliada');
 
+      // El visor puede desplazarse en ambas direcciones.
+      Object.assign(overlay.style, {
+        position: 'fixed',
+        inset: '0',
+        zIndex: '9999',
+        overflow: 'auto',
+        background: 'rgba(0, 0, 0, 0.95)',
+        padding: '5vh 0',
+        boxSizing: 'border-box',
+      });
+
       const closeButton = document.createElement('button');
       closeButton.type = 'button';
       closeButton.className = 'blog-lightbox-close';
       closeButton.setAttribute('aria-label', 'Cerrar imagen');
       closeButton.textContent = '×';
 
+      Object.assign(closeButton.style, {
+        position: 'fixed',
+        top: '12px',
+        right: '20px',
+        zIndex: '2',
+        color: '#fff',
+        background: 'rgba(0, 0, 0, 0.6)',
+        border: '1px solid rgba(255,255,255,0.5)',
+        borderRadius: '50%',
+        width: '44px',
+        height: '44px',
+        fontSize: '30px',
+        lineHeight: '1',
+        cursor: 'pointer',
+      });
+
       const enlargedImage = document.createElement('img');
       enlargedImage.src = img.currentSrc || img.src;
       enlargedImage.alt = img.alt;
       enlargedImage.className = 'blog-lightbox-image';
+
+      Object.assign(enlargedImage.style, {
+        display: 'block',
+        maxWidth: 'none',
+        maxHeight: 'none',
+        width: 'auto',
+        height: 'auto',
+        objectFit: 'contain',
+        cursor: 'zoom-in',
+        transform: 'none',
+        borderRadius: '0.25rem',
+      });
+
+      let zoom = 1;
+      let fitScale = 1;
+
+      const updateZoom = (): void => {
+        const width = Math.round(enlargedImage.naturalWidth * fitScale * zoom);
+        const height = Math.round(enlargedImage.naturalHeight * fitScale * zoom);
+
+        enlargedImage.style.width = `${width}px`;
+        enlargedImage.style.height = `${height}px`;
+        enlargedImage.style.cursor = zoom > 1 ? 'zoom-out' : 'zoom-in';
+
+        // El contenedor conserva las dimensiones ampliadas
+        // para permitir desplazarse por toda la imagen.
+        enlargedImage.parentElement?.style.setProperty('width', `${width}px`);
+        enlargedImage.parentElement?.style.setProperty('height', `${height}px`);
+      };
+
+      const imageContainer = document.createElement('div');
+      Object.assign(imageContainer.style, {
+        width: 'fit-content',
+        height: 'fit-content',
+        margin: '0 auto',
+      });
+
+      const initializeImage = (): void => {
+        if (!enlargedImage.naturalWidth || !enlargedImage.naturalHeight) {
+          return;
+        }
+
+        fitScale = Math.min(1, (window.innerWidth * 0.9) / enlargedImage.naturalWidth, (window.innerHeight * 0.9) / enlargedImage.naturalHeight);
+
+        zoom = 1;
+        updateZoom();
+      };
+
+      const toggleZoom = (): void => {
+        // Alterna entre ajustar a pantalla y ampliar al doble.
+        zoom = zoom === 1 ? 2 : 1;
+        updateZoom();
+      };
+
+      const onWheel = (event: WheelEvent): void => {
+        event.preventDefault();
+
+        zoom = Math.max(1, Math.min(4, zoom + (event.deltaY < 0 ? 0.25 : -0.25)));
+
+        updateZoom();
+      };
 
       const close = (): void => {
         overlay.remove();
@@ -330,6 +418,15 @@ function setupImageLightbox(container: HTMLElement): void {
         }
       };
 
+      enlargedImage.addEventListener('load', initializeImage);
+      enlargedImage.addEventListener('click', toggleZoom);
+      enlargedImage.addEventListener('wheel', onWheel, { passive: false });
+
+      // Por si el navegador ya tiene la imagen en caché.
+      if (enlargedImage.complete) {
+        initializeImage();
+      }
+
       closeButton.addEventListener('click', close);
 
       overlay.addEventListener('click', (event: MouseEvent) => {
@@ -338,10 +435,11 @@ function setupImageLightbox(container: HTMLElement): void {
         }
       });
 
-      overlay.append(closeButton, enlargedImage);
+      imageContainer.append(enlargedImage);
+      overlay.append(closeButton, imageContainer);
       document.body.append(overlay);
-      closeButton.focus();
 
+      closeButton.focus();
       document.addEventListener('keydown', onKeyDown);
     };
 
