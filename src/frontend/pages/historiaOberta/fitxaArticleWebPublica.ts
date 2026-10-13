@@ -209,6 +209,8 @@ export async function renderArticle(slug: string): Promise<void> {
 
     if (contentElement) {
       contentElement.innerHTML = contentHtml || '<div class="text-muted">Sense contingut.</div>';
+
+      setupImageLightbox(container);
     }
 
     void renderIdiomesArticle(slug);
@@ -278,4 +280,78 @@ async function renderIdiomesArticle(currentSlug: string): Promise<void> {
   } catch (error: unknown) {
     console.error("Error carregant els idiomes de l'article:", error);
   }
+}
+
+function setupImageLightbox(container: HTMLElement): void {
+  const images = container.querySelectorAll<HTMLImageElement>('.blog-content img');
+
+  images.forEach((img) => {
+    img.style.maxWidth = '100%';
+    img.style.width = 'auto';
+    img.style.height = 'auto';
+    img.style.maxHeight = '320px';
+    img.style.objectFit = 'contain';
+    img.style.cursor = 'zoom-in';
+    img.style.display = 'block';
+    img.style.margin = '1rem auto';
+    img.style.borderRadius = '0.375rem';
+
+    img.tabIndex = 0;
+    img.setAttribute('role', 'button');
+    img.setAttribute('aria-label', 'Ampliar imagen');
+
+    const openLightbox = (): void => {
+      const overlay = document.createElement('div');
+      overlay.className = 'blog-lightbox';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'Imagen ampliada');
+
+      const closeButton = document.createElement('button');
+      closeButton.type = 'button';
+      closeButton.className = 'blog-lightbox-close';
+      closeButton.setAttribute('aria-label', 'Cerrar imagen');
+      closeButton.textContent = '×';
+
+      const enlargedImage = document.createElement('img');
+      enlargedImage.src = img.currentSrc || img.src;
+      enlargedImage.alt = img.alt;
+      enlargedImage.className = 'blog-lightbox-image';
+
+      const close = (): void => {
+        overlay.remove();
+        img.focus();
+        document.removeEventListener('keydown', onKeyDown);
+      };
+
+      const onKeyDown = (event: KeyboardEvent): void => {
+        if (event.key === 'Escape') {
+          close();
+        }
+      };
+
+      closeButton.addEventListener('click', close);
+
+      overlay.addEventListener('click', (event: MouseEvent) => {
+        if (event.target === overlay) {
+          close();
+        }
+      });
+
+      overlay.append(closeButton, enlargedImage);
+      document.body.append(overlay);
+      closeButton.focus();
+
+      document.addEventListener('keydown', onKeyDown);
+    };
+
+    img.addEventListener('click', openLightbox);
+
+    img.addEventListener('keydown', (event: KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openLightbox();
+      }
+    });
+  });
 }
