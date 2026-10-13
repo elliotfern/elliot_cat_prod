@@ -370,15 +370,22 @@ function setupImageLightbox(container: HTMLElement): void {
 
         // El contenedor conserva las dimensiones ampliadas
         // para permitir desplazarse por toda la imagen.
-        enlargedImage.parentElement?.style.setProperty('width', `${width}px`);
-        enlargedImage.parentElement?.style.setProperty('height', `${height}px`);
+        imageContainer.style.width = `${Math.max(width, overlay.clientWidth)}px`;
+        imageContainer.style.height = `${Math.max(height, overlay.clientHeight)}px`;
       };
 
       const imageContainer = document.createElement('div');
+
       Object.assign(imageContainer.style, {
-        width: 'fit-content',
-        height: 'fit-content',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        width: 'max-content',
+        minWidth: '100%',
+        height: 'max-content',
+        minHeight: '90vh',
         margin: '0 auto',
+        boxSizing: 'border-box',
       });
 
       const initializeImage = (): void => {
