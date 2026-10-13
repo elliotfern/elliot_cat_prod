@@ -307,12 +307,16 @@ function setupImageLightbox(container: HTMLElement): void {
       overlay.setAttribute('aria-modal', 'true');
       overlay.setAttribute('aria-label', 'Imagen ampliada');
 
+      const previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
       // El visor puede desplazarse en ambas direcciones.
       Object.assign(overlay.style, {
         position: 'fixed',
         inset: '0',
         zIndex: '9999',
         overflow: 'auto',
+        overscrollBehavior: 'contain',
         background: 'rgba(0, 0, 0, 0.95)',
         padding: '5vh 0',
         boxSizing: 'border-box',
@@ -368,10 +372,10 @@ function setupImageLightbox(container: HTMLElement): void {
         enlargedImage.style.height = `${height}px`;
         enlargedImage.style.cursor = zoom > 1 ? 'zoom-out' : 'zoom-in';
 
-        // El contenedor conserva las dimensiones ampliadas
-        // para permitir desplazarse por toda la imagen.
         imageContainer.style.width = `${Math.max(width, overlay.clientWidth)}px`;
         imageContainer.style.height = `${Math.max(height, overlay.clientHeight)}px`;
+
+        imageContainer.style.justifyContent = width < overlay.clientWidth ? 'center' : 'flex-start';
       };
 
       const imageContainer = document.createElement('div');
@@ -380,11 +384,8 @@ function setupImageLightbox(container: HTMLElement): void {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        width: 'max-content',
-        minWidth: '100%',
-        height: 'max-content',
-        minHeight: '90vh',
-        margin: '0 auto',
+        width: '100%',
+        minHeight: '100%',
         boxSizing: 'border-box',
       });
 
@@ -405,15 +406,8 @@ function setupImageLightbox(container: HTMLElement): void {
         updateZoom();
       };
 
-      const onWheel = (event: WheelEvent): void => {
-        event.preventDefault();
-
-        zoom = Math.max(1, Math.min(4, zoom + (event.deltaY < 0 ? 0.25 : -0.25)));
-
-        updateZoom();
-      };
-
       const close = (): void => {
+        document.body.style.overflow = previousBodyOverflow;
         overlay.remove();
         img.focus();
         document.removeEventListener('keydown', onKeyDown);
@@ -427,7 +421,6 @@ function setupImageLightbox(container: HTMLElement): void {
 
       enlargedImage.addEventListener('load', initializeImage);
       enlargedImage.addEventListener('click', toggleZoom);
-      enlargedImage.addEventListener('wheel', onWheel, { passive: false });
 
       // Por si el navegador ya tiene la imagen en caché.
       if (enlargedImage.complete) {
