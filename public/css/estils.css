@@ -75,3 +75,9 @@
     max-height: 240px !important;
   }
 }
+
+.blog-content .image-download-link {
+  font-size: 0.875rem;
+  text-decoration: underline;
+  cursor: pointer;
+}

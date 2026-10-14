@@ -210,6 +210,7 @@ export async function renderArticle(slug: string): Promise<void> {
     if (contentElement) {
       contentElement.innerHTML = contentHtml || '<div class="text-muted">Sense contingut.</div>';
 
+      addImageDownloadLinks(container);
       setupImageLightbox(container);
     }
 
@@ -370,6 +371,7 @@ function setupImageLightbox(container: HTMLElement): void {
 
         enlargedImage.style.width = `${width}px`;
         enlargedImage.style.height = `${height}px`;
+        enlargedImage.style.flex = '0 0 auto';
         enlargedImage.style.cursor = zoom > 1 ? 'zoom-out' : 'zoom-in';
 
         imageContainer.style.width = `${Math.max(width, overlay.clientWidth)}px`;
@@ -384,8 +386,10 @@ function setupImageLightbox(container: HTMLElement): void {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        width: '100%',
-        minHeight: '100%',
+        width: 'max-content',
+        minWidth: '100%',
+        minHeight: '90vh',
+        margin: '0 auto',
         boxSizing: 'border-box',
       });
 
@@ -451,5 +455,30 @@ function setupImageLightbox(container: HTMLElement): void {
         openLightbox();
       }
     });
+  });
+}
+
+function addImageDownloadLinks(container: HTMLElement): void {
+  const images = container.querySelectorAll<HTMLImageElement>('.blog-content img');
+
+  images.forEach((img) => {
+    const imageUrl = img.currentSrc || img.src;
+
+    if (!imageUrl || !img.parentElement) return;
+
+    const parent = img.closest('figure') ?? img.parentElement;
+
+    if (parent.querySelector('.image-download-link')) return;
+
+    const downloadUrl = new URL(imageUrl);
+    downloadUrl.searchParams.set('download', '1');
+
+    const link = document.createElement('a');
+    link.href = downloadUrl.toString();
+    link.textContent = 'Descarrega la imatge';
+    link.className = 'image-download-link d-block text-center mt-2 mb-3';
+    link.setAttribute('aria-label', 'Descarrega la imatge');
+
+    parent.insertAdjacentElement('afterend', link);
   });
 }
