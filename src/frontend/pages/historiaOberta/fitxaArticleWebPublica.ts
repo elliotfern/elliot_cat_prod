@@ -287,15 +287,17 @@ function setupImageLightbox(container: HTMLElement): void {
   const images = container.querySelectorAll<HTMLImageElement>('.blog-content img');
 
   images.forEach((img) => {
-    img.style.maxWidth = '100%';
-    img.style.width = 'auto';
-    img.style.height = 'auto';
-    img.style.maxHeight = 'min(80vh, 900px)';
-    img.style.objectFit = 'contain';
-    img.style.cursor = 'zoom-in';
-    img.style.display = 'block';
-    img.style.margin = '1rem auto';
-    img.style.borderRadius = '0.375rem';
+    Object.assign(img.style, {
+      maxWidth: '100%',
+      width: 'auto',
+      height: 'auto',
+      maxHeight: 'min(80vh, 900px)',
+      objectFit: 'contain',
+      cursor: 'zoom-in',
+      display: 'block',
+      margin: '1rem auto',
+      borderRadius: '0.375rem',
+    });
 
     img.tabIndex = 0;
     img.setAttribute('role', 'button');
@@ -303,6 +305,7 @@ function setupImageLightbox(container: HTMLElement): void {
 
     const openLightbox = (): void => {
       const overlay = document.createElement('div');
+
       overlay.className = 'blog-lightbox';
       overlay.setAttribute('role', 'dialog');
       overlay.setAttribute('aria-modal', 'true');
@@ -311,7 +314,6 @@ function setupImageLightbox(container: HTMLElement): void {
       const previousBodyOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
 
-      // El visor puede desplazarse en ambas direcciones.
       Object.assign(overlay.style, {
         position: 'fixed',
         inset: '0',
@@ -319,11 +321,13 @@ function setupImageLightbox(container: HTMLElement): void {
         overflow: 'auto',
         overscrollBehavior: 'contain',
         background: 'rgba(0, 0, 0, 0.95)',
-        padding: '5vh 0',
+        padding: '0',
+        margin: '0',
         boxSizing: 'border-box',
       });
 
       const closeButton = document.createElement('button');
+
       closeButton.type = 'button';
       closeButton.className = 'blog-lightbox-close';
       closeButton.setAttribute('aria-label', 'Cerrar imagen');
@@ -346,6 +350,7 @@ function setupImageLightbox(container: HTMLElement): void {
       });
 
       const enlargedImage = document.createElement('img');
+
       enlargedImage.src = img.currentSrc || img.src;
       enlargedImage.alt = img.alt;
       enlargedImage.className = 'blog-lightbox-image';
@@ -358,27 +363,11 @@ function setupImageLightbox(container: HTMLElement): void {
         height: 'auto',
         objectFit: 'contain',
         cursor: 'zoom-in',
-        transform: 'none',
         borderRadius: '0.25rem',
+        margin: '0',
+        padding: '0',
+        flex: '0 0 auto',
       });
-
-      let zoom = 1;
-      let fitScale = 1;
-
-      const updateZoom = (): void => {
-        const width = Math.round(enlargedImage.naturalWidth * fitScale * zoom);
-        const height = Math.round(enlargedImage.naturalHeight * fitScale * zoom);
-
-        enlargedImage.style.width = `${width}px`;
-        enlargedImage.style.height = `${height}px`;
-        enlargedImage.style.flex = '0 0 auto';
-        enlargedImage.style.cursor = zoom > 1 ? 'zoom-out' : 'zoom-in';
-
-        imageContainer.style.width = `${Math.max(width, overlay.clientWidth)}px`;
-        imageContainer.style.height = `${Math.max(height, overlay.clientHeight)}px`;
-
-        imageContainer.style.justifyContent = width < overlay.clientWidth ? 'center' : 'flex-start';
-      };
 
       const imageContainer = document.createElement('div');
 
@@ -386,18 +375,49 @@ function setupImageLightbox(container: HTMLElement): void {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        width: 'max-content',
+        width: '100%',
         minWidth: '100%',
-        minHeight: '90vh',
-        margin: '0 auto',
+        minHeight: '100%',
         boxSizing: 'border-box',
+        margin: '0',
+        padding: '0',
       });
+
+      let zoom = 1;
+      let fitScale = 1;
+
+      const updateZoom = (): void => {
+        const width = Math.round(enlargedImage.naturalWidth * fitScale * zoom);
+
+        const height = Math.round(enlargedImage.naturalHeight * fitScale * zoom);
+
+        enlargedImage.style.width = `${width}px`;
+        enlargedImage.style.height = `${height}px`;
+        enlargedImage.style.cursor = zoom > 1 ? 'zoom-out' : 'zoom-in';
+
+        // El contenedor debe ser tan grande como la imagen
+        // o como mínimo ocupar toda la ventana.
+        imageContainer.style.width = `${Math.max(width, overlay.clientWidth)}px`;
+
+        imageContainer.style.height = `${Math.max(height, overlay.clientHeight)}px`;
+
+        imageContainer.style.minWidth = '0';
+        imageContainer.style.minHeight = '0';
+
+        imageContainer.style.justifyContent = width < overlay.clientWidth ? 'center' : 'flex-start';
+
+        // Al cambiar el zoom, empezar siempre desde arriba
+        // y desde la izquierda.
+        overlay.scrollTop = 0;
+        overlay.scrollLeft = 0;
+      };
 
       const initializeImage = (): void => {
         if (!enlargedImage.naturalWidth || !enlargedImage.naturalHeight) {
           return;
         }
 
+        // Ajustar inicialmente la imagen al espacio disponible.
         fitScale = Math.min(1, (window.innerWidth * 0.9) / enlargedImage.naturalWidth, (window.innerHeight * 0.9) / enlargedImage.naturalHeight);
 
         zoom = 1;
@@ -405,7 +425,6 @@ function setupImageLightbox(container: HTMLElement): void {
       };
 
       const toggleZoom = (): void => {
-        // Alterna entre ajustar a pantalla y ampliar al doble.
         zoom = zoom === 1 ? 2 : 1;
         updateZoom();
       };
@@ -426,7 +445,7 @@ function setupImageLightbox(container: HTMLElement): void {
       enlargedImage.addEventListener('load', initializeImage);
       enlargedImage.addEventListener('click', toggleZoom);
 
-      // Por si el navegador ya tiene la imagen en caché.
+      // Por si la imagen ya está en caché.
       if (enlargedImage.complete) {
         initializeImage();
       }

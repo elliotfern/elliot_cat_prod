@@ -27,6 +27,12 @@
   margin-top: 10px;
 }
 
+.blog-content .image-download-link {
+  font-size: 0.875rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .blog-content img {
   max-width: 100%;
   height: auto;
@@ -36,41 +42,45 @@
 .blog-lightbox {
   position: fixed;
   inset: 0;
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  background: rgb(0 0 0 / 85%);
+  z-index: 9999;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background: rgb(0 0 0 / 95%);
 }
 
 .blog-lightbox-image {
   display: block;
-  max-width: 95vw;
-  max-height: 90vh;
+  max-width: none;
+  max-height: none;
   width: auto;
   height: auto;
   object-fit: contain;
-  cursor: default;
+  cursor: zoom-in;
+  margin: 0;
+  padding: 0;
+  flex: 0 0 auto;
 }
 
 .blog-lightbox-close {
-  position: absolute;
-  top: 1rem;
-  right: 1.5rem;
-  border: 0;
-  background: transparent;
+  position: fixed;
+  top: 12px;
+  right: 20px;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgb(255 255 255 / 50%);
+  border-radius: 50%;
+  background: rgb(0 0 0 / 60%);
   color: #fff;
-  font-size: 2.5rem;
+  font-size: 30px;
   line-height: 1;
   cursor: pointer;
 }
 
 @media (max-width: 576px) {
-  .blog-lightbox {
-    padding: 1rem;
-  }
-
   .blog-content img {
     max-height: 240px !important;
   }
