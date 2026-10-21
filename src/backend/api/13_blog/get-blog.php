@@ -825,6 +825,107 @@ if ($slug === 'llistatArticles') {
     }
 
     return;
+
+    // Llistat d'articles d'Història Oberta per al sitemap
+    // URL: /api/blog/get/llistatHistoriaSitemap
+} else if ($slug === 'llistatHistoriaSitemap') {
+
+    $sql = "SELECT
+            b.slug,
+            b.post_modified AS lastmod
+        FROM " . qi(Tables::BLOG, $pdo) . " AS b
+        WHERE b.post_type = 'historia_oberta'
+          AND b.post_status IN ('publish', 'published', 'publicat')
+          AND b.slug IS NOT NULL
+          AND TRIM(b.slug) <> ''
+        ORDER BY b.post_modified DESC, b.slug ASC";
+
+    try {
+        $rows = $db->getData($sql, [], false) ?? [];
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $rows,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
+
+
+    // Llistat de cursos d'Història Oberta per al sitemap
+    // URL: /api/blog/get/llistatCursosSitemap
+} else if ($slug === 'llistatCursosSitemap') {
+
+    $sql = "SELECT
+            c.slug,
+            c.lastModified AS lastmod
+        FROM " . qi(Tables::DB_HISTORIA_OBERTA_CURSOS, $pdo) . " AS c
+        WHERE c.slug IS NOT NULL
+          AND TRIM(c.slug) <> ''
+        ORDER BY c.ordre ASC, c.slug ASC";
+
+    try {
+        $rows = $db->getData($sql, [], false) ?? [];
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $rows,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
+
+
+    // Llistat d'articles del blog per al sitemap
+    // URL: /api/blog/get/llistatArticlesSitemap
+} else if ($slug === 'llistatArticlesSitemap') {
+
+    $sql = "SELECT
+            b.slug,
+            b.post_modified AS lastmod
+        FROM " . qi(Tables::BLOG, $pdo) . " AS b
+        WHERE b.post_type <> :excluded_post_type
+          AND b.post_status IN ('publish', 'published', 'publicat')
+          AND b.slug IS NOT NULL
+          AND TRIM(b.slug) <> ''
+        ORDER BY b.post_modified DESC, b.slug ASC
+    ";
+
+    try {
+        $rows = $db->getData(
+            $sql,
+            [':excluded_post_type' => 'historia_oberta'],
+            false
+        ) ?? [];
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $rows,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
 } else {
     // No se proporcionó un token
     header('HTTP/1.1 403 Forbidden');

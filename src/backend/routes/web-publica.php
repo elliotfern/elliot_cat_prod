@@ -17,6 +17,24 @@ function route_public(string $viewPath, array $overrides = []): array
     );
 }
 
+
+function route_interna(string $viewPath, array $overrides = []): array
+{
+    $defaultPublicConfig = [
+        'needs_session' => false,
+        'needs_admin'   => false,
+        'header_footer' => false,
+        'header_menu_footer' => false,
+        'apiSenseHTML' => true,
+    ];
+
+    return array_merge(
+        $defaultPublicConfig,
+        $overrides,
+        ['view' => $viewPath]
+    );
+}
+
 $routes = [
 
     // HOMEPAGE (alias coherente)
@@ -43,6 +61,8 @@ $routes = [
     '/politica-privacitat' => route_public('./web-publica/politica-privacitat.php'),
     '/compromis-qualitat' => route_public('./web-publica/compromis-qualitat.php'),
     '/contacte' => route_public('./web-publica/contacte.php'),
+
+    '/sitemap.xml' => route_interna('./web-publica/sitemap.php'),
 
 ];
 
