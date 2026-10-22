@@ -2,6 +2,7 @@
 
 
 use App\Config\Database;
+use App\Infrastructure\Security\Auth\AuthContext;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
@@ -1263,6 +1264,7 @@ if ($slug === 'carrecsPersona') {
             b.categoria_id,
             b.post_date,
             b.post_modified,
+            b.visibilitat,
             t.tema
         FROM " . qi(Tables::BLOG, $pdo) . " AS b
         LEFT JOIN " . qi(Tables::DB_TEMES, $pdo) . " AS t ON b.categoria_id = t.id
@@ -1283,12 +1285,33 @@ if ($slug === 'carrecsPersona') {
         }
 
         // ✅ Reemplazar shortcodes de imágenes
-        if (isset($row['post_content']) && is_string($row['post_content']) && $row['post_content'] !== '') {
-            $row['post_content'] = renderBlogImgShortcodes2($row['post_content'], $pdo);
+        $user = AuthContext::user();
+        $isAuthenticated = !empty($user['id']);
+
+        $requiresAuthentication = (
+            ($row['visibilitat'] ?? 'public') === 'registered'
+        );
+
+        $needsLogin = $requiresAuthentication && !$isAuthenticated;
+
+        if ($requiresAuthentication && !$isAuthenticated) {
+            unset($row['post_content']);
+        } elseif (
+            isset($row['post_content'])
+            && is_string($row['post_content'])
+            && $row['post_content'] !== ''
+        ) {
+            $row['post_content'] = renderBlogImgShortcodes2(
+                $row['post_content'],
+                $pdo
+            );
         }
 
         Response::success(
             message: MissatgesAPI::success('get'),
+            meta: [
+                'requires_authentication' => $needsLogin,
+            ],
             data: $row,
             httpCode: 200
         );

@@ -23,25 +23,32 @@ final class MysqlUsuariRepository implements UsuariRepository
     {
         $sql = "
             INSERT INTO db_usuaris (
-                id, email, password, nom, cognom, role,
-                isActive, usuari_img_id, dateCreated, lastLoginAt,
-                updatedAt, deletedAt
+                id,
+                email,
+                password,
+                nom,
+                cognom,
+                role,
+                isActive,
+                usuari_img_id,
+                dateCreated,
+                lastLoginAt,
+                updatedAt,
+                deletedAt
             ) VALUES (
-                :id, :email, :password, :nom, :cognom, :role,
-                :isActive, :usuari_img_id, :dateCreated, :lastLoginAt,
-                :updatedAt, :deletedAt
+                :id,
+                :email,
+                :password,
+                :nom,
+                :cognom,
+                :role,
+                :isActive,
+                :usuari_img_id,
+                :dateCreated,
+                :lastLoginAt,
+                :updatedAt,
+                :deletedAt
             )
-            ON DUPLICATE KEY UPDATE
-                email = VALUES(email),
-                password = VALUES(password),
-                nom = VALUES(nom),
-                cognom = VALUES(cognom),
-                role = VALUES(role),
-                isActive = VALUES(isActive),
-                usuari_img_id = VALUES(usuari_img_id),
-                lastLoginAt = VALUES(lastLoginAt),
-                updatedAt = VALUES(updatedAt),
-                deletedAt = VALUES(deletedAt)
         ";
 
         $stmt = $this->pdo->prepare($sql);
@@ -49,7 +56,7 @@ final class MysqlUsuariRepository implements UsuariRepository
         $stmt->execute([
             'id' => $usuari->id()->value(),
             'email' => $usuari->email()->value(),
-            'password' => $usuari->password(),
+            'password' => $usuari->password()->hash(),
             'nom' => $usuari->nom(),
             'cognom' => $usuari->cognom(),
             'role' => $usuari->role()->value,
@@ -65,11 +72,14 @@ final class MysqlUsuariRepository implements UsuariRepository
     public function findById(UserId $id): ?Usuari
     {
         $stmt = $this->pdo->prepare("
-            SELECT * FROM db_usuaris WHERE id = :id AND deletedAt IS NULL
+            SELECT *
+            FROM db_usuaris
+            WHERE id = :id
+              AND deletedAt IS NULL
         ");
 
         $stmt->execute([
-            'id' => $id->value()
+            'id' => $id->value(),
         ]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -80,11 +90,14 @@ final class MysqlUsuariRepository implements UsuariRepository
     public function findByEmail(Email $email): ?Usuari
     {
         $stmt = $this->pdo->prepare("
-            SELECT * FROM db_usuaris WHERE email = :email AND deletedAt IS NULL
+            SELECT *
+            FROM db_usuaris
+            WHERE email = :email
+              AND deletedAt IS NULL
         ");
 
         $stmt->execute([
-            'email' => $email->value()
+            'email' => $email->value(),
         ]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -102,7 +115,7 @@ final class MysqlUsuariRepository implements UsuariRepository
 
         $stmt->execute([
             'id' => $id->value(),
-            'deletedAt' => (new \DateTimeImmutable())->format('Y-m-d H:i:s')
+            'deletedAt' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
         ]);
     }
 
@@ -116,17 +129,17 @@ final class MysqlUsuariRepository implements UsuariRepository
             cognom: $row['cognom'],
             role: UserRole::from($row['role']),
             isActive: (bool) $row['isActive'],
-            usuariImgId: $row['usuari_img_id']
+            usuariImgId: $row['usuari_img_id'] !== null
                 ? new UsuariImgId($row['usuari_img_id'])
                 : null,
             dateCreated: new \DateTimeImmutable($row['dateCreated']),
-            lastLoginAt: $row['lastLoginAt']
+            lastLoginAt: $row['lastLoginAt'] !== null
                 ? new \DateTimeImmutable($row['lastLoginAt'])
                 : null,
-            updatedAt: $row['updatedAt']
+            updatedAt: $row['updatedAt'] !== null
                 ? new \DateTimeImmutable($row['updatedAt'])
                 : null,
-            deletedAt: $row['deletedAt']
+            deletedAt: $row['deletedAt'] !== null
                 ? new \DateTimeImmutable($row['deletedAt'])
                 : null,
         );

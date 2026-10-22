@@ -1,67 +1,49 @@
-export async function loginApi(event: Event) {
+import { authenticateUser } from './loginService';
+
+export async function loginApi(event: Event): Promise<void> {
   event.preventDefault();
 
-  const emailInput = document.getElementById('email') as HTMLInputElement;
-  const passwordInput = document.getElementById('password') as HTMLInputElement;
-
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
   const okBox = document.getElementById('okMessage');
   const errBox = document.getElementById('errMessage');
 
-  if (!emailInput || !passwordInput || !okBox || !errBox) return;
+  if (!(emailInput instanceof HTMLInputElement) || !(passwordInput instanceof HTMLInputElement) || !okBox || !errBox) {
+    return;
+  }
 
   const email = emailInput.value;
   const password = passwordInput.value;
 
-  const showError = (msg: string) => {
+  const showError = (message: string): void => {
     errBox.className = 'alert alert-danger';
     errBox.classList.remove('d-none');
+    errBox.textContent = message;
 
     okBox.classList.add('d-none');
-
-    errBox.innerHTML = msg;
   };
 
-  const showSuccess = (msg: string) => {
+  const showSuccess = (message: string): void => {
     okBox.className = 'alert alert-success';
     okBox.classList.remove('d-none');
+    okBox.textContent = message;
 
     errBox.classList.add('d-none');
-
-    okBox.innerHTML = msg;
   };
 
   try {
-    const response = await fetch('/api/usuaris/post/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await authenticateUser(email, password);
 
-    const data = await response.json();
+    showSuccess(response.message || 'Accés permès');
 
-    // ❌ ERROR
-    if (!response.ok || data.success !== true) {
-      const msg = data.message || "Error d'autenticació";
+    window.setTimeout(() => {
+      const redirect = response.data.user.role === 'admin' ? '/gestio/admin' : '/usuaris';
 
-      const extra = Array.isArray(data.errors) && data.errors.length ? `<br><small>${data.errors.join('<br>')}</small>` : '';
-
-      showError(msg + extra);
-      return;
-    }
-
-    // ✅ SUCCESS
-    showSuccess(data.message || 'Accés permès');
-
-    setTimeout(() => {
-      const role = data.data.user.role;
-      const redirect = role === 'admin' ? '/gestio/admin' : '/usuaris';
       window.location.href = redirect;
     }, 800);
-  } catch (error) {
-    console.error('Error de connexió amb el servidor:', error);
-    showError('Error de connexió amb el servidor');
+  } catch (error: unknown) {
+    console.error('Error durant l’autenticació:', error);
+
+    showError(error instanceof Error ? error.message : 'Error de connexió amb el servidor');
   }
 }

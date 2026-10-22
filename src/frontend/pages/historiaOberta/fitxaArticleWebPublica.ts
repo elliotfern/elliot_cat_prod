@@ -1,4 +1,6 @@
 import { api } from '../../Infrastructure/Api/Client/ApiClient';
+import { ApiResponse } from '../../Infrastructure/Api/Client/types';
+import { authenticateUser } from '../../services/login/loginService';
 import { decorateLinksInHtml } from '../../utils/linksExterns';
 
 interface BlogArticleDetail {
@@ -71,8 +73,8 @@ function formatDateCa(dateStr: string): string {
   });
 }
 
-async function fetchArticleBySlug(slug: string): Promise<BlogArticleDetail> {
-  return api.get<BlogArticleDetail>('historia/get/articleSlug', {
+async function fetchArticleBySlug(slug: string): Promise<ApiResponse<BlogArticleDetail>> {
+  return api.getResponse<BlogArticleDetail>('historia/get/articleSlug', {
     articleSlug: slug,
   });
 }
@@ -148,7 +150,6 @@ export async function renderArticle(slug: string): Promise<void> {
         Slug invàlid.
       </div>
     `;
-
     return;
   }
 
@@ -164,22 +165,96 @@ export async function renderArticle(slug: string): Promise<void> {
   `;
 
   try {
-    const article = await fetchArticleBySlug(slug);
+    const response = await fetchArticleBySlug(slug);
+    const article = response.data;
+    const requiresAuthentication = response.meta.requires_authentication === true;
 
     const title = escapeHtml(article.post_title || '(Sense títol)');
     const excerpt = (article.post_excerpt ?? '').trim();
     const contentHtml = decorateLinksInHtml(article.post_content ?? '').trim();
-
     const category = escapeHtml((article.tema ?? 'Sense categoria') || 'Sense categoria');
-
     const dateLabel = escapeHtml(formatDateCa(article.post_date));
+
+    const restrictedContentHtml = `
+  <div class="mx-auto mt-4" style="max-width: 600px;">
+    <div class="alert alert-info p-4 p-md-5" role="alert">
+      <div class="text-center mb-4">
+        <h2 class="h5 mb-2">Contingut restringit</h2>
+
+        <p class="mb-2">
+          Per llegir l'article complet, inicia sessió amb el teu compte.
+        </p>
+
+        <p class="mb-0">
+          Si encara no tens compte,
+          <a href="https://elliot.local/nou-usuari" class="alert-link">
+            registra't aquí
+          </a>.
+        </p>
+      </div>
+
+      <hr class="my-4">
+
+      <form id="articleLoginForm" class="mx-auto" style="max-width: 420px;">
+        <div class="mb-3">
+          <label for="articleLoginEmail" class="form-label">
+            Correu electrònic
+          </label>
+          <input
+            type="email"
+            class="form-control"
+            id="articleLoginEmail"
+            name="email"
+            autocomplete="username"
+            required
+          >
+        </div>
+
+        <div class="mb-3">
+          <label for="articleLoginPassword" class="form-label">
+            Contrasenya
+          </label>
+          <input
+            type="password"
+            class="form-control"
+            id="articleLoginPassword"
+            name="password"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <div
+          id="articleLoginError"
+          class="alert alert-danger d-none"
+          role="alert"
+          aria-live="polite"
+        ></div>
+
+        <div class="text-center">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            id="articleLoginSubmit"
+          >
+            Iniciar sessió
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+`;
+
+    const articleContentHtml = `
+      <hr class="my-4"/>
+      <div class="blog-content" id="blogContent"></div>
+    `;
 
     container.innerHTML = `
       <div id="idiomesArticle" class="mb-3"></div>
 
       <article class="card">
         <div class="card-body">
-
           <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
             <span class="badge text-bg-light border">
               ${category}
@@ -190,28 +265,63 @@ export async function renderArticle(slug: string): Promise<void> {
             </span>
           </div>
 
-          <h1 class="h3 mb-3">
-            ${title}
-          </h1>
+          <h1 class="h3 mb-3">${title}</h1>
 
           ${excerpt ? `<p class="lead">${escapeHtml(excerpt)}</p>` : ''}
 
-          <hr class="my-4"/>
-
-          <div class="blog-content" id="blogContent"></div>
+          ${requiresAuthentication ? restrictedContentHtml : articleContentHtml}
         </div>
       </article>
 
       <div id="cursArticles" class="mt-4"></div>
     `;
 
-    const contentElement = container.querySelector<HTMLDivElement>('#blogContent');
+    if (requiresAuthentication) {
+      const loginForm = container.querySelector<HTMLFormElement>('#articleLoginForm');
 
-    if (contentElement) {
-      contentElement.innerHTML = contentHtml || '<div class="text-muted">Sense contingut.</div>';
+      const emailInput = container.querySelector<HTMLInputElement>('#articleLoginEmail');
 
-      addImageDownloadLinks(container);
-      setupImageLightbox(container);
+      const passwordInput = container.querySelector<HTMLInputElement>('#articleLoginPassword');
+
+      const errorBox = container.querySelector<HTMLDivElement>('#articleLoginError');
+
+      const submitButton = container.querySelector<HTMLButtonElement>('#articleLoginSubmit');
+
+      loginForm?.addEventListener('submit', async (event: SubmitEvent) => {
+        event.preventDefault();
+
+        if (!emailInput || !passwordInput || !errorBox || !submitButton) {
+          return;
+        }
+
+        errorBox.textContent = '';
+        errorBox.classList.add('d-none');
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'Iniciant sessió…';
+
+        try {
+          await authenticateUser(emailInput.value, passwordInput.value);
+
+          await renderArticle(slug);
+        } catch (error: unknown) {
+          errorBox.textContent = error instanceof Error ? error.message : 'No s’ha pogut iniciar sessió. Torna-ho a provar.';
+
+          errorBox.classList.remove('d-none');
+
+          submitButton.disabled = false;
+          submitButton.textContent = 'Iniciar sessió';
+        }
+      });
+    } else {
+      const contentElement = container.querySelector<HTMLDivElement>('#blogContent');
+
+      if (contentElement) {
+        contentElement.innerHTML = contentHtml || '<div class="text-muted">Sense contingut.</div>';
+
+        addImageDownloadLinks(container);
+        setupImageLightbox(container);
+      }
     }
 
     void renderIdiomesArticle(slug);

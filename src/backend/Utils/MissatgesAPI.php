@@ -9,6 +9,7 @@ class MissatgesAPI
         $messages = [
             'get' => "Obtenció de dades correctament.",
             'create' => "Registre creat correctament.",
+            'createUser' => "El Registre del nou usuari s'ha creat correctament. Ara pots fer login amb les teves dades d'usuari.",
             'update' => "Registre actualitzat correctament.",
             'delete' => "Registre eliminat amb èxit.",
             'default' => "Operació realitzada correctament.",
@@ -28,8 +29,9 @@ class MissatgesAPI
             'errorBD' => "S'ha produït un error a la base de dades.",
             'errorEndPoint' => "Aquesta operació no és vàlida.",
             'duplicat' => "Ja existeix un valor a la base de dades amb el mateix nom.",
+            'privacitat' => "Cal acceptar la política de privacitat.",
+            'email_duplicat' => 'Aquest correu electrònic ja està registrat.',
         ];
         return $messages[$key] ?? $messages['default'];
     }
 }
- 

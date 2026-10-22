@@ -12,6 +12,15 @@ export const api = {
       queryParams
     ),
 
+  getResponse: async <T>(endpoint: string, queryParams?: Record<string, unknown>): Promise<ApiResponse<T>> =>
+    requestResponse<T>(
+      endpoint,
+      {
+        method: 'GET',
+      },
+      queryParams
+    ),
+
   post: async <T>(endpoint: string, body?: unknown, queryParams?: Record<string, unknown>): Promise<T> =>
     request<T>(
       endpoint,
@@ -73,4 +82,37 @@ async function request<T>(endpoint: string, options: RequestInit = {}, queryPara
   }
 
   return json.data;
+}
+
+async function requestResponse<T>(endpoint: string, options: RequestInit = {}, queryParams?: Record<string, unknown>): Promise<ApiResponse<T>> {
+  const query = buildQueryParams(queryParams);
+
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE}/${endpoint}${query}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      },
+      credentials: 'include',
+      ...options,
+    });
+  } catch {
+    throw new ApiError('Error de connexió amb el servidor');
+  }
+
+  let json: ApiResponse<T>;
+
+  try {
+    json = (await response.json()) as ApiResponse<T>;
+  } catch {
+    throw new ApiError('Resposta JSON invàlida');
+  }
+
+  if (!response.ok || !json.success) {
+    throw new ApiError(json.message || 'Error API', json.errors || [], response.status, json);
+  }
+
+  return json;
 }

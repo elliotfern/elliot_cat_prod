@@ -42,7 +42,7 @@ $routes = [
 
     // Login / registro
     '/entrada'     => route_public('./web-publica/autenticacio-usuaris/login.php'),
-    '/nou-usuari'  => route_public('./web-publica/autenticacio-usuaris/registre-usuari.php'),
+    '/nou-usuari'  => route_public('./web-publica/autenticacio-usuaris/registre.php'),
 
     // HISTORIA OBERTA
     '/historia' => route_public('./web-publica/historia.php'),

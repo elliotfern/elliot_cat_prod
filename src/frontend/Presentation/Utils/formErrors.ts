@@ -130,3 +130,25 @@ export function markInvalidFields(form: HTMLFormElement, errors: unknown): void 
     }
   }
 }
+
+/**
+ * Limpia el error visual de un campo cuando el usuario lo modifica.
+ */
+export function clearFieldError(form: HTMLFormElement, field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement): void {
+  field.classList.remove('is-invalid');
+
+  const errorBox = document.getElementById(`error-${field.name}`);
+
+  if (errorBox) {
+    errorBox.innerHTML = '';
+  }
+
+  // Si ya no quedan campos inválidos, ocultar el mensaje general.
+  if (!form.querySelector('.is-invalid')) {
+    const errMessage = document.getElementById('errMessage');
+
+    if (errMessage) {
+      errMessage.classList.add('d-none');
+    }
+  }
+}

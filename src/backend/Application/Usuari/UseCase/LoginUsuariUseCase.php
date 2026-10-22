@@ -38,7 +38,10 @@ final class LoginUsuariUseCase
         }
 
         // 3. verificar password
-        if (!$usuari->password()->verify($password)) {
+        if (!$this->passwordHasher->verify(
+            $password,
+            $usuari->password()->hash()
+        )) {
             throw new \RuntimeException('Invalid credentials');
         }
 

@@ -1,9 +1,11 @@
 <?php
 
 use App\Application\Security\NativePasswordHasher;
+use App\Application\Usuari\UseCase\CreateUsuariUseCase;
 use App\Application\Usuari\UseCase\LoginUsuariUseCase;
 use App\Config\Database;
 use App\Config\DatabaseConnection;
+use App\Infrastructure\EntryPoint\Http\Usuari\CreateUsuariController;
 use App\Infrastructure\EntryPoint\Http\Usuari\LoginUsuariController;
 use App\Infrastructure\Persistence\Usuari\MysqlUsuariRepository;
 use App\Infrastructure\Security\Jwt\JwtService;
@@ -21,7 +23,7 @@ $pdo = DatabaseConnection::getConnection();
 header('Content-Type: application/json; charset=utf-8');
 
 
-// Verificar si se recibieron datos
+// ENDPOINT DE LOGIN
 if ($slug  === 'login') {
     header('Content-Type: application/json; charset=utf-8');
 
@@ -75,6 +77,77 @@ if ($slug  === 'login') {
             httpCode: 401
         );
     }
+
+    // ENDPOINT DE REGISTRE USUARI
+} else if ($slug  === 'registre') {
+
+    header('Content-Type: application/json; charset=utf-8');
+
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    if (!is_array($input)) {
+        Response::error(
+            message: 'Invalid JSON input',
+            httpCode: 400
+        );
+        exit;
+    }
+
+    $email = $input['email'] ?? null;
+    $password = $input['password'] ?? null;
+    $nom = $input['nom'] ?? null;
+    $cognom = $input['cognom'] ?? null;
+    $acceptaPrivacitat = $input['acceptaPrivacitat'] ?? null;
+
+    if (
+        !is_string($email) || trim($email) === '' ||
+        !is_string($password) || $password === '' ||
+        !is_string($nom) || trim($nom) === '' ||
+        !is_string($cognom) || trim($cognom) === ''
+    ) {
+        Response::error(
+            message: 'All fields are required',
+            httpCode: 400
+        );
+        exit;
+    }
+
+    if (!filter_var(trim($email), FILTER_VALIDATE_EMAIL)) {
+        Response::error(
+            message: 'Invalid email format',
+            httpCode: 400
+        );
+        exit;
+    }
+
+    try {
+        $repository = new MysqlUsuariRepository($pdo);
+        $passwordHasher = new NativePasswordHasher();
+
+        $useCase = new CreateUsuariUseCase(
+            $repository,
+            $passwordHasher
+        );
+
+        $controller = new CreateUsuariController($useCase);
+
+        $controller->execute(
+            email: $email,
+            password: $password,
+            nom: $nom,
+            cognom: $cognom,
+            acceptaPrivacitat: $acceptaPrivacitat
+        );
+    } catch (\Throwable $e) {
+        error_log($e->getMessage());
+
+        Response::error(
+            message: 'Unable to create account',
+            httpCode: 500
+        );
+    }
+
+    exit;
 } else {
 
     // Si no hay resultados, devolver un mensaje de error

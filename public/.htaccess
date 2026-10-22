@@ -13,9 +13,7 @@ RewriteRule ^img/ - [L]
 RewriteRule \.(js|css|png|jpg|jpeg|gif|svg|ico|txt)$ - [L]
 
 # API
-
 RewriteRule ^api/ index.php [QSA,L]
 
 # Todo lo demás al front controller
-
 RewriteRule ^ index.php [QSA,L] </IfModule>

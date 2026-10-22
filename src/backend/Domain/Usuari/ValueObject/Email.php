@@ -6,9 +6,11 @@ namespace App\Domain\Usuari\ValueObject;
 
 final class Email
 {
-    public function __construct(private string $value)
-    {
-        $this->assertValid($value);
+    public function __construct(
+        private string $value
+    ) {
+        $this->value = trim($this->value);
+        $this->assertValid($this->value);
     }
 
     public static function fromString(string $email): self

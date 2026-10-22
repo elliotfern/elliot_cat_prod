@@ -7,13 +7,13 @@ import { loginPage } from './pages/login/funcions';
 import { barraNavegacio } from './components/barraNavegacio/barraNavegacio';
 import { mostrarBotonsNomesAdmin } from './components/mostrarBotons/mostrarBoton';
 import { logout } from './services/login/logOutApi';
-import { transmissioDadesDB } from './utils/actualitzarDades';
 import { initUserAreaButton } from './components/header/userAreaButton';
 import { getCoursesList } from './pages/historiaOberta/cursosWebPublica';
 import { intranet_admin } from './pages/intranet_admin/intranet_admin';
 import { historiaWebPublica } from './pages/historiaOberta/historiaWebPublica';
 import { renderBlogListPaged } from './pages/blog/llistatArticles';
 import { renderBlogArticleView } from './pages/blog/article';
+import { formRegistreUsuari } from './pages/login/registreUsuari';
 
 document.addEventListener('trix-before-initialize', function () {
   // H2
@@ -89,14 +89,10 @@ async function main() {
 
   if (pageType[0] === 'entrada') {
     loginPage();
-  } else if (pageType[0] === 'nou-usuari') {
-    const autor = document.getElementById('formUsuari');
-    if (autor) {
-      // Lanzar actualizador de datos
-      autor.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'formUsuari', '/api/auth/post/usuari');
-      });
-    }
+  }
+
+  if (pageType[0] === 'nou-usuari') {
+    formRegistreUsuari();
   }
 
   if (pageType[0] === 'historia') {

@@ -15,7 +15,7 @@ export function missatgesBackend({ tipus, missatge, contenidor, text, altreConte
     altreContenidor.classList.remove('alert-success', 'alert-danger');
   }
 
-  const heading = tipus === 'success' ? 'Transmissió de dades correcta!' : 'Error en les dades!';
+  const heading = tipus === 'success' ? "L'operació s'ha realitzat correctament!" : "No s'ha pogut completar l'operació.";
 
   text.innerHTML = `
     <h4 class="alert-heading">
