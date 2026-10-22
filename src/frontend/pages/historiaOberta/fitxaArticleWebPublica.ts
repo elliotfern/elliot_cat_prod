@@ -2,6 +2,7 @@ import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { ApiResponse } from '../../Infrastructure/Api/Client/types';
 import { authenticateUser } from '../../services/login/loginService';
 import { decorateLinksInHtml } from '../../utils/linksExterns';
+import { DOMAIN_WEB } from '../../utils/urls';
 
 interface BlogArticleDetail {
   id: string;
@@ -187,7 +188,7 @@ export async function renderArticle(slug: string): Promise<void> {
 
         <p class="mb-0">
           Si encara no tens compte,
-          <a href="https://elliot.local/nou-usuari" class="alert-link">
+          <a href="${DOMAIN_WEB}/nou-usuari" class="alert-link">
             registra't aquí
           </a>.
         </p>
