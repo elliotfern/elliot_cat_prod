@@ -21,7 +21,9 @@ final class UsuariTest extends TestCase
         return new Usuari(
             id: UserId::fromString('12345678-1234-1234-1234-123456789abc'),
             email: new Email('test@test.com'),
-            password: Password::fromPlain('secret'),
+            password: Password::fromHash(
+                password_hash('secret', PASSWORD_BCRYPT)
+            ),
             nom: 'Test',
             cognom: 'User',
             role: UserRole::from($role),
