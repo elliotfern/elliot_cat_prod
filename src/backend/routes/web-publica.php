@@ -49,6 +49,11 @@ $routes = [
     '/historia/curs/{slug}' => route_public('./web-publica/curs.php'),
     '/historia/article/{slug}' => route_public('./web-publica/article.php'),
 
+    '/historia/banc-dades/{slug}' => route_public('./web-publica/curs.php'),
+    '/historia/cronologia/{slug}' => route_public('./web-publica/curs.php'),
+    '/historia/mapa/{slug}' => route_public('./web-publica/curs.php'),
+    '/historia/recurs-digital/{slug}' => route_public('./web-publica/curs.php'),
+
     // GALERIA IMATGES
     '/imatges/galeria/{slug}' => route_public('./web-publica/galeria-imatges.php'),
 
