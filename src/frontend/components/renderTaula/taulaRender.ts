@@ -1,6 +1,8 @@
 import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { RenderTableOptions } from '../../types/TaulaDinamica';
 
+const buttonFilterStates = new Map<string, Record<string, string>>();
+
 function renderCellContent(content: string | HTMLElement | unknown): string {
   if (content == null) return '';
 
@@ -36,6 +38,10 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
     console.error(`Contenedor #${containerId} no encontrado`);
     return;
   }
+
+  const activeButtonFilters = buttonFilterStates.get(containerId) ?? {};
+
+  buttonFilterStates.set(containerId, activeButtonFilters);
 
   function renderFilters() {
     if (filterFields.length === 0) return;
@@ -80,7 +86,14 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
       const allValues = data.flatMap((row) => getFilterParts(getNestedValue(row, field)));
 
-      const uniqueValues = [...new Set(allValues)].sort((a, b) =>
+      const values = new Set(allValues);
+      const selectedValue = activeButtonFilters[field];
+
+      if (selectedValue !== undefined) {
+        values.add(selectedValue);
+      }
+
+      const uniqueValues = [...values].sort((a, b) =>
         a.localeCompare(b, 'ca', {
           sensitivity: 'base',
         })
@@ -194,12 +207,12 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
     }
   }
 
-  if (!Array.isArray(data) || data.length === 0) {
+  if (!Array.isArray(data) || (data.length === 0 && Object.keys(activeButtonFilters).length === 0)) {
     container.innerHTML = `
-      <div class="alert alert-info">
-        No hi ha dades disponibles.
-      </div>
-    `;
+    <div class="alert alert-info">
+      No hi ha dades disponibles.
+    </div>
+  `;
     return;
   }
 
@@ -209,7 +222,6 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
   let currentPage = 1;
   let filteredData = [...data];
-  const activeButtonFilters: Record<string, string> = {};
 
   let sortField: string | null = null;
   let sortDirection: 'asc' | 'desc' | null = null;
