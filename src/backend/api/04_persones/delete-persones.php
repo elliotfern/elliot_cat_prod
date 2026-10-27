@@ -1,11 +1,14 @@
 <?php
 
+use App\Config\Database;
 use App\Utils\Uuid;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 
-global $conn;
+$db = new Database();
+$pdo = $db->getPdo();
+
 /** @var array $routeParams */
 $slug = $routeParams[0] ?? null;
 
@@ -13,25 +16,16 @@ $slug = $routeParams[0] ?? null;
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
     Response::error(MissatgesAPI::error('method_not_allowed'), [], 405);
     exit;
-}
-
-function isUuid($s)
-{
-    return is_string($s)
-        && preg_match(
-            '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i',
-            $s
-        );
 }
 
 // -------------------------
@@ -42,7 +36,7 @@ if ($slug === 'persona') {
 
     $id = $_GET['id'] ?? null;
 
-    if (!$id || !isUuid($id)) {
+    if (!$id || !Uuid::isValid($id)) {
         Response::error(
             MissatgesAPI::error('invalid_data'),
             ['id' => 'invalid_uuid'],
@@ -52,8 +46,7 @@ if ($slug === 'persona') {
     }
 
     try {
-
-        $conn->beginTransaction();
+        $pdo->beginTransaction();
 
         // Verificar existencia
         $sqlCheck = "
@@ -63,13 +56,12 @@ if ($slug === 'persona') {
             LIMIT 1
         ";
 
-        $stmtCheck = $conn->prepare($sqlCheck);
-        $stmtCheck->bindValue(':id', uuid::toBinary($id), PDO::PARAM_LOB);
+        $stmtCheck = $pdo->prepare($sqlCheck);
+        $stmtCheck->bindValue(':id', Uuid::toBinary($id), PDO::PARAM_LOB);
         $stmtCheck->execute();
 
         if (!$stmtCheck->fetchColumn()) {
-
-            $conn->rollBack();
+            $pdo->rollBack();
 
             Response::error(
                 MissatgesAPI::error('not_found'),
@@ -79,18 +71,17 @@ if ($slug === 'persona') {
             exit;
         }
 
-        // Eliminar relaciones grupos
+        // Eliminar relaciones con grupos
         $sqlRel = "
             DELETE FROM " . Tables::PERSONES_GRUPS_RELACIONS . "
             WHERE persona_id = :id
         ";
 
-        $stmtRel = $conn->prepare($sqlRel);
-        $stmtRel->bindValue(':id', uuid::toBinary($id), PDO::PARAM_LOB);
+        $stmtRel = $pdo->prepare($sqlRel);
+        $stmtRel->bindValue(':id', Uuid::toBinary($id), PDO::PARAM_LOB);
 
         if (!$stmtRel->execute()) {
-
-            $conn->rollBack();
+            $pdo->rollBack();
 
             Response::error(
                 MissatgesAPI::error('db_error'),
@@ -110,12 +101,11 @@ if ($slug === 'persona') {
             LIMIT 1
         ";
 
-        $stmtDelete = $conn->prepare($sqlDelete);
-        $stmtDelete->bindValue(':id', uuid::toBinary($id), PDO::PARAM_LOB);
+        $stmtDelete = $pdo->prepare($sqlDelete);
+        $stmtDelete->bindValue(':id', Uuid::toBinary($id), PDO::PARAM_LOB);
 
         if (!$stmtDelete->execute()) {
-
-            $conn->rollBack();
+            $pdo->rollBack();
 
             Response::error(
                 MissatgesAPI::error('db_error'),
@@ -128,21 +118,18 @@ if ($slug === 'persona') {
             exit;
         }
 
-        $conn->commit();
+        $pdo->commit();
 
         Response::success(
             MissatgesAPI::success('delete'),
-            [
-                'id' => $id
-            ],
-            200
+            ['id' => $id],
+            httpCode: 200
         );
 
         exit;
     } catch (\Throwable $e) {
-
-        if ($conn->inTransaction()) {
-            $conn->rollBack();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
         }
 
         Response::error(

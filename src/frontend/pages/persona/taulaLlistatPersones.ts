@@ -1,8 +1,9 @@
 import { renderDynamicTable } from '../../components/renderTaula/taulaRender';
-import { registerDeleteCallback, initDeleteHandlers } from '../../Presentation/Components/Table/handleDelete';
+import { registerDeleteCallback, initDeleteHandlers, registerDeleteHandler } from '../../Presentation/Components/Table/handleDelete';
 import { getIsAdmin } from '../../services/auth/isAdmin';
 import { TaulaDinamica } from '../../types/TaulaDinamica';
 import { Persona } from '../../types/Persona';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
 
 export async function taulaLlistatPersones() {
   const isAdmin = await getIsAdmin();
@@ -56,15 +57,16 @@ export async function taulaLlistatPersones() {
       header: '',
       field: 'id',
       render: (_: unknown, row: Persona) => `
-         <button 
-           type="button"
-           class="delete-button btn btn-danger btn-sm"
-           data-id="${row.id}" 
-           data-url="persones/delete/persona?id=${row.id}"
-           data-reload-callback="${reloadKey}"
-         >
-           Elimina
-         </button>`,
+        <button
+          type="button"
+          class="delete-button btn btn-danger btn-sm"
+          data-id="${row.id}"
+          data-delete-handler="persona"
+          data-reload-callback="${reloadKey}"
+        >
+          Elimina
+        </button>
+      `,
     });
   }
 
@@ -80,6 +82,10 @@ export async function taulaLlistatPersones() {
 
   // Registra el callback con una clave única
   registerDeleteCallback(reloadKey, () => taulaLlistatPersones());
+
+  registerDeleteHandler('persona', async (id: string): Promise<void> => {
+    await api.delete('persones/delete/persona', { id });
+  });
 
   // Inicia el listener una sola vez
   initDeleteHandlers();
