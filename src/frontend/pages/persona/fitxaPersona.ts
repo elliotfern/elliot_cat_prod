@@ -1,5 +1,6 @@
 import { mapPersona, mapPersonaToFitxa } from '../../components/mappers/persona';
 import { api } from '../../Infrastructure/Api/Client/ApiClient';
+import { getIsAdmin } from '../../services/auth/isAdmin';
 import { Persona } from '../../types/Persona';
 import { PersonaView } from '../../types/PersonaView';
 import { renderFitxa } from '../../utils/renderFitxa';
@@ -71,7 +72,27 @@ export async function runFitxaBlocks(options: RunFitxaBlocksOptions) {
 // -------------------------
 // MAIN
 // -------------------------
+
+function renderTitolBancDades(): void {
+  const container = document.getElementById('titolPagina');
+
+  if (!container) return;
+
+  let titol = document.getElementById('titolBancDades');
+
+  if (!titol) {
+    titol = document.createElement('h1');
+    titol.id = 'titolBancDades';
+    titol.className = 'mb-4';
+    titol.textContent = 'Banc de dades: dones i homes que han fet història';
+
+    container.prepend(titol);
+  }
+}
+
 export async function fitxaPersona(url: string, slug: string) {
+  renderTitolBancDades();
+
   try {
     // 1. API
     const personaApi = await api.get<Persona>(url, {
@@ -84,23 +105,29 @@ export async function fitxaPersona(url: string, slug: string) {
     // 3. FITXA UI
     const fitxa = mapPersonaToFitxa(persona);
 
-    renderFitxa({
-      containerId: 'fitxaPersona',
+    const isAdmin = await getIsAdmin();
 
+    const fitxaOptions = {
+      containerId: 'fitxaPersona',
       title: fitxa.title,
       image: fitxa.image,
       fields: fitxa.fields,
       description: fitxa.description,
       dateCreated: fitxa.dateCreated,
       dateModified: fitxa.dateModified,
+      ...(isAdmin
+        ? {
+            editButton: {
+              basePath: 'base-dades-persones',
+              action: 'modifica-persona',
+              id: persona.slug,
+              label: 'Modifica persona',
+            },
+          }
+        : {}),
+    };
 
-      editButton: {
-        basePath: 'base-dades-persones',
-        action: 'modifica-persona',
-        id: persona.slug,
-        label: 'Modifica persona',
-      },
-    });
+    renderFitxa(fitxaOptions);
 
     // 4. BLOQUES EXTRA
     await runFitxaBlocks({

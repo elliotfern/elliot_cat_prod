@@ -44,12 +44,14 @@ $routes = [
     '/entrada'     => route_public('./web-publica/autenticacio-usuaris/login.php'),
     '/nou-usuari'  => route_public('./web-publica/autenticacio-usuaris/registre.php'),
 
-    // HISTORIA OBERTA
+    // HISTORIA OBERTA 
     '/historia' => route_public('./web-publica/historia.php'),
     '/historia/curs/{slug}' => route_public('./web-publica/curs.php'),
     '/historia/article/{slug}' => route_public('./web-publica/article.php'),
 
-    '/historia/banc-dades/{slug}' => route_public('./web-publica/curs.php'),
+    '/historia/banc-dades' => route_public('./web-publica/banc-dades.php'),
+    '/historia/banc-dades/{slug}' => route_public('./web-publica/banc-dades.php'),
+    '/historia/banc-dades/{slug}/{slug}' => route_public('./web-publica/banc-dades.php'),
     '/historia/cronologia/{slug}' => route_public('./web-publica/curs.php'),
     '/historia/mapa/{slug}' => route_public('./web-publica/curs.php'),
     '/historia/recurs-digital/{slug}' => route_public('./web-publica/curs.php'),

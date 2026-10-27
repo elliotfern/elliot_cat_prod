@@ -1,8 +1,8 @@
 <div id="barraNavegacioContenidor"></div>
 
-<h1>Base de dades Persones</h1>
+<div id="fitxaPersona">
 
-<div id="fitxaPersona"> </div>
+</div>
 
 <hr>
 

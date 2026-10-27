@@ -16,12 +16,12 @@ header('Content-Type: application/json; charset=utf-8');
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+    corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
     http_response_code(204);
     exit;
 }
 
-corsAllow(['https://elliot.cat', 'https://dev.elliot.cat']);
+corsAllow(['https://elliot.cat', 'https://dev.elliot.cat', 'https://elliot.local']);
 // Check if the request method is GET
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -105,6 +105,158 @@ if ($slug === 'llistatPersones') {
         );
         exit;
     }
+
+
+
+    // Llistat de persones filtrat per un o diversos grups.
+    // GET => /api/persones/get/llistatPersonesPerGrup?grup_id=UUID
+    // GET => /api/persones/get/llistatPersonesPerGrup?grup_id=UUID,UUID
+
+} else if ($slug === 'llistatPersonesPerGrup') {
+
+    $tableA   = qi(Tables::PERSONES, $pdo);
+    $tableC   = qi(Tables::GEO_PAISOS, $pdo);
+    $tableI   = qi(Tables::IMG, $pdo);
+    $tableRel = qi(Tables::PERSONES_GRUPS_RELACIONS, $pdo);
+    $tableG   = qi(Tables::PERSONES_GRUPS, $pdo);
+
+    // Obtenir els grups seleccionats.
+    $grupIdParam = $_GET['grup_id'] ?? null;
+
+    if (!is_string($grupIdParam) || trim($grupIdParam) === '') {
+        Response::error(
+            MissatgesAPI::error('invalid_request'),
+            [],
+            400
+        );
+        exit;
+    }
+
+    $grupIds = array_map(
+        static function (string $id): string {
+            $id = strtolower(trim($id));
+
+            // Accepta UUID amb guions o sense.
+            if (preg_match('/^[0-9a-f]{32}$/', $id) === 1) {
+                $id = substr($id, 0, 8) . '-'
+                    . substr($id, 8, 4) . '-'
+                    . substr($id, 12, 4) . '-'
+                    . substr($id, 16, 4) . '-'
+                    . substr($id, 20, 12);
+            }
+
+            return $id;
+        },
+        explode(',', $grupIdParam)
+    );
+
+    $grupIds = array_values(array_unique($grupIds));
+
+    // Eliminar identificadors duplicats.
+    $grupIds = array_values(array_unique($grupIds));
+
+    // Validar i convertir els UUID a BINARY(16).
+    $parametresGrup = [];
+    $valorsGrup = [];
+
+
+    foreach ($grupIds as $index => $grupId) {
+
+        if (!Uuid::isValid($grupId)) {
+            Response::error(
+                MissatgesAPI::error('invalid_request'),
+                [],
+                400
+            );
+            exit;
+        }
+
+        $parametre = ':grup_id_' . $index;
+
+        $parametresGrup[] = $parametre;
+        $valorsGrup[$parametre] = Uuid::toBinary($grupId);
+    }
+
+    $grupsSQL = implode(', ', $parametresGrup);
+
+    $sql = <<<SQL
+        SELECT
+            a.id,
+            a.nom,
+            a.cognoms,
+            a.slug,
+            a.dia_naixement,
+            a.mes_naixement,
+            a.any_naixement,
+            a.dia_defuncio,
+            a.mes_defuncio,
+            a.any_defuncio,
+            c.pais,
+            i.nameImg,
+            COALESCE(
+                JSON_ARRAYAGG(g.grup_ca),
+                JSON_ARRAY()
+            ) AS grup
+        FROM {$tableA} AS a
+        LEFT JOIN {$tableC} AS c
+            ON a.pais_autor_id = c.id
+        LEFT JOIN {$tableI} AS i
+            ON a.img_id = i.id
+        LEFT JOIN {$tableRel} AS rel
+            ON a.id = rel.persona_id
+        LEFT JOIN {$tableG} AS g
+            ON rel.grup_id = g.id
+        WHERE a.id IN (
+            SELECT rel_filtre.persona_id
+            FROM {$tableRel} AS rel_filtre
+            WHERE rel_filtre.grup_id IN ({$grupsSQL})
+        )
+        GROUP BY a.id
+        ORDER BY a.cognoms
+        SQL;
+
+    try {
+        $result = $db->getData($sql, $valorsGrup);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            exit;
+        }
+
+        foreach ($result as &$row) {
+
+            // Decodificar els grups retornats com a JSON.
+            if (is_string($row['grup'])) {
+                $decoded = json_decode($row['grup'], true);
+                $row['grup'] = is_array($decoded) ? $decoded : [];
+            }
+
+            // Normalitzar els camps d'any.
+            $row['any_naixement'] = $row['any_naixement'] ?? null;
+            $row['any_defuncio']  = $row['any_defuncio'] ?? null;
+        }
+
+        unset($row);
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (\Throwable $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+        exit;
+    }
+
+
 
     // ruta GET => "/api/persones/get/persona?slug=josep-fontana"
 } else if ($slug === 'persona') {

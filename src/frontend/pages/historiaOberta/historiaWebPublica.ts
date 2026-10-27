@@ -2,6 +2,7 @@ import { getPageType } from '../../utils/urlPath';
 import { getCursHistoria } from './fitxaCursWebPublica';
 import { renderArticle } from './fitxaArticleWebPublica';
 import { getCoursesList } from './cursosWebPublica';
+import { bancDadesWebPublica } from './bancDades/intro';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -15,6 +16,11 @@ export function historiaWebPublica() {
   if (pageType[1] === 'article') {
     const slug = pageType[2];
     renderArticle(slug);
+  }
+
+  if (pageType[1] === 'banc-dades') {
+    bancDadesWebPublica();
+    return;
   }
 
   if (pageType[0] === 'historia') {
