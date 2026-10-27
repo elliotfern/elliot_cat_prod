@@ -2,6 +2,7 @@ import { api } from '../../Infrastructure/Api/Client/ApiClient';
 import { RenderTableOptions } from '../../types/TaulaDinamica';
 
 const buttonFilterStates = new Map<string, Record<string, string>>();
+const tablePageStates = new Map<string, number>();
 
 function renderCellContent(content: string | HTMLElement | unknown): string {
   if (content == null) return '';
@@ -220,7 +221,7 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   // STATE
   // =========================
 
-  let currentPage = 1;
+  let currentPage = tablePageStates.get(containerId) ?? 1;
   let filteredData = [...data];
 
   let sortField: string | null = null;
@@ -318,7 +319,7 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   // FILTER LOGIC
   // =========================
 
-  function applyFilters() {
+  function applyFilters(resetPage = true) {
     const search = normalizeText(searchInput.value);
 
     filteredData = data
@@ -349,7 +350,22 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
     applySort();
 
-    currentPage = 1;
+    // Només reiniciar la paginació quan canvien els filtres o la cerca.
+    if (resetPage) {
+      currentPage = 1;
+    }
+
+    // Evitar quedar en una pàgina que ja no existeix.
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+
+    if (totalPages === 0) {
+      currentPage = 1;
+    } else if (currentPage > totalPages) {
+      currentPage = totalPages;
+    }
+
+    tablePageStates.set(containerId, currentPage);
+
     renderTable();
   }
 
@@ -438,7 +454,10 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
 
       a.onclick = (e) => {
         e.preventDefault();
+
         currentPage = i;
+        tablePageStates.set(containerId, currentPage);
+
         renderTable();
       };
 
@@ -453,7 +472,7 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
   // INIT
   // =========================
 
-  searchInput.addEventListener('input', applyFilters);
+  searchInput.addEventListener('input', () => applyFilters());
 
   container.innerHTML = '';
 
@@ -484,5 +503,5 @@ export async function renderDynamicTable<T extends object>(options: RenderTableO
     container.appendChild(paginationNav);
   }
 
-  applyFilters();
+  applyFilters(false);
 }
