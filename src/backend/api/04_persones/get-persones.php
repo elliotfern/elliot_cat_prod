@@ -212,7 +212,7 @@ if ($slug === 'llistatPersones') {
             WHERE rel_filtre.grup_id IN ({$grupsSQL})
         )
         GROUP BY a.id
-        ORDER BY a.cognoms
+        ORDER BY a.any_naixement IS NULL, a.any_naixement ASC
         SQL;
 
     try {
