@@ -1,246 +1,177 @@
-<?php
-// Obtener la URL completa
-$url2 = $_SERVER['REQUEST_URI'];
-$parsedUrl = parse_url($url2);
-$path = $parsedUrl['path'];
-$segments = explode("/", trim($path, "/"));
+<div id="barraNavegacioContenidor"></div>
 
-if ($segments[2] === "modifica-esdeveniment") {
-    $modificaBtn = 1;
-    $slug = $routeParams[0];
-} else {
-    $modificaBtn = 2;
-}
+<h1>Base de dades: Història Oberta</h1>
 
-if ($modificaBtn === 1) {
-?>
-    <script type="module">
-        formUpdateLlibre("<?php echo $slug; ?>");
-    </script>
-<?php
-} else {
-?>
-    <script type="module">
-        // Llenar selects con opciones
-        selectOmplirDades("/api/auxiliars/get/ciutats", "", "esdeCiutat", "ciutat");
-        selectOmplirDades("/api/historia/get/llistatSubEtapes", "", "esSubEtapa", "nomSubEtapa");
-        selectOmplirDades("/api/auxiliars/get/calendariDies", "", "esdeDataIDia", "dia");
-        selectOmplirDades("/api/auxiliars/get/calendariDies", "", "esdeDataFDia", "dia");
-        selectOmplirDades("/api/auxiliars/get/calendariMesos", "", "esdeDataIMes", "mes");
-        selectOmplirDades("/api/auxiliars/get/calendariMesos", "", "esdeDataFMes", "mes");
-        selectOmplirDades("/api/historia/get/llistatImatgesEsdeveniments", "", "img", "alt");
-    </script>
-<?php
-}
-?>
+<div class="form">
 
-<div class="barraNavegacioContenidor"></div>
+    <div id="titolForm"></div>
 
-<div class="container-fluid form">
-    <?php
-    if ($modificaBtn === 1) {
-    ?>
-        <h2>Modificar un esdeveniment històric</h2>
-        <h4 id="bookUpdateTitle"></h4>
-    <?php
-    } else {
-    ?>
-        <h2>Creació d'un nou esdeveniment històric </h2>
-    <?php
-    }
-    ?>
-
-    <div class="alert alert-success d-none" id="okMessage" role="alert">
-        <div id="okText">
-        </div>
+    <div class="alert alert-success d-none" id="okMessage">
+        <div id="okText"></div>
     </div>
 
-    <div class="alert alert-danger d-none" id="errMessage" role="alert">
-        <div id="errText"> </div>
+    <div class="alert alert-danger d-none" id="errMessage">
+        <div id="errText"></div>
     </div>
 
     <form method="POST" action="" id="formEsdeveniment" class="row g-3">
-        <?php $timestamp = date('Y-m-d'); ?>
-        <?php
-        if ($modificaBtn === 1) {
-        ?>
-            <input type="hidden" id="id" name="id" value="">
-        <?php
-        }
-        ?>
 
-        <div class="col-md-4">
-            <label>Esdeveniment (català):</label>
+        <!-- Identificador -->
+        <input type="hidden" id="id" name="id" value="">
+
+        <!-- Dades generals -->
+        <div class="col-12">
+            <h4>Dades de l'esdeveniment</h4>
+        </div>
+
+        <div class="col-md-6">
+            <label for="esdeNom" class="form-label">Esdeveniment:</label>
             <input class="form-control" type="text" name="esdeNom" id="esdeNom" value="">
         </div>
 
-
-        <div class="col-md-4">
-            <label>Slug:</label>
+        <div class="col-md-6">
+            <label for="slug" class="form-label">Slug:</label>
             <input class="form-control" type="text" name="slug" id="slug" value="">
         </div>
 
-        <div class="col-md-4">
+        <!-- Data d'inici -->
+        <div class="col-12">
+            <h4>Data d'inici</h4>
         </div>
 
         <div class="col-md-4">
-            <label>Dia inici:</label>
-            <select class="form-select" name="esdeDataIDia" id="esdeDataIDia" value="">
+            <label for="esdeDataIDia" class="form-label">Dia:</label>
+            <select class="form-select" name="esdeDataIDia" id="esdeDataIDia">
             </select>
         </div>
 
         <div class="col-md-4">
-            <label>Mes inici:</label>
-            <select class="form-select" name="esdeDataIMes" id="esdeDataIMes" value="">
+            <label for="esdeDataIMes" class="form-label">Mes:</label>
+            <select class="form-select" name="esdeDataIMes" id="esdeDataIMes">
             </select>
         </div>
 
         <div class="col-md-4">
-            <label>Any inici:</label>
-            <input class="form-control" type="text" name="esdeDataIAny" id="esdeDataIAny" value="">
+            <label for="esdeDataIAny" class="form-label">Any:</label>
+            <input class="form-control" type="number" name="esdeDataIAny" id="esdeDataIAny">
+        </div>
+
+        <!-- Data de finalització -->
+        <div class="col-12">
+            <h4>Data de finalització</h4>
+        </div>
+
+        <div class="col-md-4">
+            <label for="esdeDataFDia" class="form-label">Dia:</label>
+            <select class="form-select" name="esdeDataFDia" id="esdeDataFDia">
             </select>
         </div>
 
         <div class="col-md-4">
-            <label>Dia fi:</label>
-            <select class="form-select" name="esdeDataFDia" id="esdeDataFDia" value="">
+            <label for="esdeDataFMes" class="form-label">Mes:</label>
+            <select class="form-select" name="esdeDataFMes" id="esdeDataFMes">
             </select>
         </div>
 
         <div class="col-md-4">
-            <label>Mes fi:</label>
-            <select class="form-select" name="esdeDataFMes" id="esdeDataFMes" value="">
+            <label for="esdeDataFAny" class="form-label">Any:</label>
+            <input class="form-control" type="number" name="esdeDataFAny" id="esdeDataFAny">
+        </div>
+
+        <!-- Ubicació i classificació -->
+        <div class="col-12">
+            <h4>Classificació i ubicació</h4>
+        </div>
+
+        <div class="col-md-4">
+            <label for="sub_etapa_id" class="form-label">Subetapa històrica:</label>
+            <select class="form-select" name="sub_etapa_id" id="sub_etapa_id">
             </select>
         </div>
 
         <div class="col-md-4">
-            <label>Any fi:</label>
-            <input class="form-control" type="text" name="esdeDataFAny" id="esdeDataFAny" value="">
+            <label for="ciutat_id" class="form-label">Ciutat:</label>
+            <select class="form-select" name="ciutat_id" id="ciutat_id">
             </select>
         </div>
 
         <div class="col-md-4">
-            <label>Sub-etapa històrica:</label>
-            <select class="form-select" name="esSubEtapa" id="esSubEtapa" value="">
+            <label for="imatge_id" class="form-label">Imatge:</label>
+            <select class="form-select" name="imatge_id" id="imatge_id">
             </select>
         </div>
 
-        <div class="col-md-4">
-            <label>Ciutat:</label>
-            <select class="form-select" name="esdeCiutat" id="esdeCiutat" value="">
-            </select>
+        <!-- Ubicació i classificació -->
+        <div class="col-12">
+            <h4>Descripció esdeveniment</h4>
         </div>
 
-        <div class="col-md-4">
-            <label>Imatge:</label>
-            <select class="form-select" name="img" id="img" value="">
-            </select>
+        <!-- TRIX -->
+        <div class="col-12">
+            <label class="form-label fw-medium">Descripció</label>
+            <input id="descripcio" name="descripcio" type="hidden">
+            <trix-editor input="descripcio" class="form-control"></trix-editor>
         </div>
 
-        <div class="container" style="margin-top:25px">
-            <div class="row">
-                <div class="col-6 text-left">
-                    <a href="#" onclick="window.history.back()" class="btn btn-secondary">Tornar enrere</a>
-                </div>
-                <div class="col-6 text-right derecha">
-                    <?php
-                    if ($modificaBtn === 1) {
-                    ?>
-                        <button type="submit" class="btn btn-primary">Modifica esdeveniment</button>
-                    <?php
-                    } else {
-                    ?>
-                        <button type="submit" class="btn btn-primary">Crea nou esdeveniment</button>
-                    <?php
-                    }
-                    ?>
 
-                </div>
+        <!-- Persones vinculades -->
+        <div class="col-12">
+            <hr>
+            <h4>Persones vinculades a l'esdeveniment:</h4>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Persones:</label>
+
+            <div id="personesContainer"></div>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-secondary mt-2"
+                id="addPersonaBtn">
+                + Afegir persona
+            </button>
+        </div>
+
+        <!-- Organitzacions vinculades -->
+        <div class="col-12">
+            <hr>
+            <h4>Organitzacions vinculades a l'esdeveniment:</h4>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Organitzacions:</label>
+
+            <div id="organitzacionsContainer"></div>
+
+            <button
+                type="button"
+                class="btn btn-sm btn-secondary mt-2"
+                id="addOrganitzacioBtn">
+                + Afegir organització
+            </button>
+        </div>
+
+        <hr>
+
+        <!-- Botons del formulari -->
+        <div class="col-12 mt-4">
+            <div class="d-flex justify-content-between flex-wrap gap-2">
+                <a
+                    href="#"
+                    onclick="window.history.back()"
+                    class="btn btn-secondary">
+                    Tornar enrere
+                </a>
+
+
+                <button type="submit" id="btnEsde" class="btn btn-primary">
+                    Modifica
+                </button>
+
             </div>
         </div>
+
     </form>
 
 </div>
-
-<script>
-    function formUpdateLlibre(slug) {
-        let urlAjax = "/api/historia/get/esdevenimentId?id=" + slug;
-
-        fetch(urlAjax)
-            .then(response => response.json())
-            .then(data => {
-
-                document.getElementById('bookUpdateTitle').innerHTML =
-                    "Esdeveniment: " + data.esdeNom;
-
-                document.getElementById('esdeNom').value = data.esdeNom;
-                document.getElementById('slug').value = data.slug;
-                document.getElementById("id").value = data.id;
-
-                document.getElementById("esdeDataIAny").value =
-                    data.esdeDataIAny === 0 ? '' : data.esdeDataIAny;
-
-                document.getElementById("esdeDataFAny").value =
-                    data.esdeDataFAny === 0 ? '' : data.esdeDataFAny;
-
-                // selects corregidos
-                selectOmplirDades("/api/auxiliars/get/ciutats", data.esdeCiutat, "esdeCiutat", "ciutat");
-                selectOmplirDades("/api/historia/get/llistatSubEtapes", data.esSubEtapa, "esSubEtapa", "nomSubEtapa");
-                selectOmplirDades("/api/auxiliars/get/calendariDies", data.esdeDataIDia, "esdeDataIDia", "dia");
-                selectOmplirDades("/api/auxiliars/get/calendariDies", data.esdeDataFDia, "esdeDataFDia", "dia");
-                selectOmplirDades("/api/auxiliars/get/calendariMesos", data.esdeDataIMes, "esdeDataIMes", "mes");
-                selectOmplirDades("/api/auxiliars/get/calendariMesos", data.esdeDataFMes, "esdeDataFMes", "mes");
-                selectOmplirDades("/api/historia/get/llistatImatgesEsdeveniments", data.img, "img", "alt");
-
-            })
-            .catch(error => console.error("Error:", error));
-    }
-
-    async function selectOmplirDades(url, selectedValue, selectId, textField) {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error('Error en la sol·licitud AJAX');
-            }
-
-            const json = await response.json();
-            const data = json.data || [];
-
-            const selectElement = document.getElementById(selectId);
-            if (!selectElement) return;
-
-            selectElement.innerHTML = '';
-
-            // opción por defecto
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.text = 'Selecciona una opció:';
-            defaultOption.selected = !selectedValue;
-            selectElement.appendChild(defaultOption);
-
-            data.forEach((item) => {
-                const option = document.createElement('option');
-
-                option.value = item.id;
-
-                // fallback seguro por si cambia el campo
-                option.text =
-                    item[textField] ??
-                    item.nom ??
-                    item.dia ??
-                    item.mes ??
-                    item.alt ??
-                    '';
-
-                if (String(item.id) === String(selectedValue)) {
-                    option.selected = true;
-                }
-
-                selectElement.appendChild(option);
-            });
-
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-</script>

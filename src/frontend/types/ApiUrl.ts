@@ -46,6 +46,8 @@ export type ApiUrls = {
     IMATGE_ID: (id: string) => string;
     PAISOS: string;
     CURS_ID: (id: string) => string;
+    ORGANITZACIO_ID: (id: string) => string;
+    ESDEVENIMENT_ID: (id: string) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -79,6 +81,8 @@ export type ApiUrls = {
     IMATGE: string;
     GALERIA_IMATGES: string;
     CURS_HISTORIA: string;
+    ORGANITZACIO_HISTORIA: string;
+    ESDEVENIMENT_HISTORIA: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -111,6 +115,8 @@ export type ApiUrls = {
     IMATGE: string;
     GALERIA_IMATGES: string;
     CURS_HISTORIA: string;
+    ORGANITZACIO_HISTORIA: string;
+    ESDEVENIMENT_HISTORIA: string;
   };
   DELETE: {
     PAIS: string;

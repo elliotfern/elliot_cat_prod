@@ -187,59 +187,65 @@ if ($slug === 'carrecsPersona') {
     WHERE ep.idPersona = :id
     ORDER BY e.esdeDataIAny ASC";
 
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
-
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
-    }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
 
     // 2. Llistat d'esdeveniments
     // ruta GET => "/api/historia/get/llistatEsdeveniments"
 } else if ($slug === 'llistatEsdeveniments') {
-    // Obtener los parámetros de filtro
-    $etapaFiltro = isset($_GET['etapa']) ? $_GET['etapa'] : '';
-    $subetapaFiltro = isset($_GET['subetapa']) ? $_GET['subetapa'] : '';
+    $etapaFiltro = $_GET['etapa'] ?? '';
+    $subetapaFiltro = $_GET['subetapa'] ?? '';
 
-    $query = "SELECT LOWER(CONCAT_WS('-',
-        SUBSTR(HEX(e.id), 1, 8),
-        SUBSTR(HEX(e.id), 9, 4),
-        SUBSTR(HEX(e.id), 13, 4),
-        SUBSTR(HEX(e.id), 17, 4),
-        SUBSTR(HEX(e.id), 21)
-        )) AS id,
-     e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, s.nomSubEtapa, p.etapaNom, 
-      c.ciutat, co.pais
+    $query = "SELECT
+        e.id,
+        e.esdeNom,
+        e.slug,
+        e.esdeDataIDia,
+        e.esdeDataIMes,
+        e.esdeDataIAny,
+        e.esdeDataFDia,
+        e.esdeDataFMes,
+        e.esdeDataFAny,
+        s.nomSubEtapa,
+        p.etapaNom,
+        c.ciutat,
+        co.pais
     FROM db_historia_esdeveniments AS e
-    LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id
-    LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id
+    LEFT JOIN db_historia_sub_periode AS s ON e.sub_etapa_id = s.id
+    LEFT JOIN db_historia_periode_historic AS p ON s.etapa_id = p.id
     LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
     LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id
     WHERE 1=1 ";
 
-    if (!empty($etapaFiltro)) {
+    $params = [];
+
+    if ($etapaFiltro !== '') {
+        if (!is_string($etapaFiltro) || !Uuid::isValid($etapaFiltro)) {
+            Response::error(
+                MissatgesAPI::error('parametres'),
+                [],
+                400
+            );
+            return;
+        }
+
         $query .= " AND p.id = :etapa";
+        $params[':etapa'] = Uuid::toBinary($etapaFiltro);
     }
 
-    if (!empty($subetapaFiltro)) {
+    if ($subetapaFiltro !== '') {
+        if (!is_string($subetapaFiltro) || !Uuid::isValid($subetapaFiltro)) {
+            Response::error(
+                MissatgesAPI::error('parametres'),
+                [],
+                400
+            );
+            return;
+        }
+
         $query .= " AND s.id = :subetapa";
+        $params[':subetapa'] = Uuid::toBinary($subetapaFiltro);
     }
 
-    // Eliminar la parte LIMIT y OFFSET
-    $query .= " ORDER BY 
+    $query .= " ORDER BY
     STR_TO_DATE(
         CONCAT(
             e.esdeDataIAny, '-',
@@ -249,89 +255,118 @@ if ($slug === 'carrecsPersona') {
         '%Y-%m-%d'
     ) ASC";
 
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
+    try {
+        $result = $db->getData($query, $params, false);
 
-    // Vincular parámetros si es necesario
-    if ($etapaFiltro) {
-        $stmt->bindParam(':etapa', $etapaFiltro, PDO::PARAM_INT);
-    }
-    if ($subetapaFiltro) {
-        $stmt->bindParam(':subetapa', $subetapaFiltro, PDO::PARAM_INT);
-    }
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-    array_walk_recursive($data, function (&$v) {
-        if (!is_string($v)) return;
+    // 2. Llistat d'esdeveniments
+    // ruta GET => "/api/historia/get/llistatEsdevenimentsTaula"
+} else if ($slug === 'llistatEsdevenimentsTaula') {
 
-        // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
-        $v = str_replace("\0", '', $v);
+    $query = "SELECT
+        e.id,
+        e.esdeNom,
+        e.slug,
+        e.esdeDataIDia,
+        e.esdeDataIMes,
+        e.esdeDataIAny,
+        e.esdeDataFDia,
+        e.esdeDataFMes,
+        e.esdeDataFAny,
+        s.nomSubEtapa,
+        p.etapaNom,
+        c.ciutat,
+        co.pais
+    FROM db_historia_esdeveniments AS e
+    LEFT JOIN db_historia_sub_periode AS s ON e.sub_etapa_id = s.id
+    LEFT JOIN db_historia_periode_historic AS p ON s.etapa_id = p.id
+    LEFT JOIN db_geo_ciutats AS c ON e.ciutat_id = c.id
+    LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id
+    ORDER BY e.esdeNom ASC";
 
-        // Intentar normalizar a UTF-8 válido
-        // 1) Si ya es UTF-8 válido, lo deja igual
-        if (!mb_check_encoding($v, 'UTF-8')) {
-            // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
-            $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
-            if ($v2 !== false) {
-                $v = $v2;
-            } else {
-                // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
-                $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                if ($v3 !== false) $v = $v3;
-            }
-        } else {
-            // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
-            $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            if ($v2 !== false) $v = $v2;
-        }
-    });
 
-    // Devolver los datos y el total de eventos
-    echo json_encode([
-        'data' => $data,
-    ]);
+    try {
+        $result = $db->getData($query, [], false);
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+
 
     // 2. Llistat de subetapes
     // ruta GET => "/api/historia/get/subEtapesEtapa?id=1"
 } else if ($slug === 'subEtapesEtapa') {
-    $id = $_GET['id'];
+    $id = filter_input(INPUT_GET, 'id');
 
-    $query = "SELECT s.id, s.nomSubEtapa
-    FROM db_historia_sub_periode AS s
-    WHERE s.idEtapa = :id
-    ORDER BY s.anyInici";
+    $sql = "SELECT
+            s.id,
+            s.nomSubEtapa
+        FROM db_historia_sub_periode AS s
+        WHERE s.etapa_id = :id
+        ORDER BY s.anyInici ASC";
 
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
+    try {
+        $result = $db->getData($sql, [':id' => Uuid::toBinary($id)], false);
 
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // 5. Llistat etapes històriques
+    // ruta GET => "/api/historia/get/llistatEtapes"
+} else if ($slug === 'llistatEtapes') {
 
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
+    $sql = "SELECT s.id, s.etapaNom, s.etapaAnyInici, s.etapaAnyFi 	
+    FROM db_historia_periode_historic AS s
+    ORDER BY s.etapaAnyInici ASC";
+
+    try {
+        $result = $db->getData($sql, [], false);
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // 5. Llistat subetapes
     // ruta GET => "/api/historia/get/llistatSubEtapes"
@@ -363,191 +398,235 @@ if ($slug === 'carrecsPersona') {
         "data" => $data
     ]);
 
-    // 4. Esdeveniment
-    // ruta GET => "/api/historia/get/esdeveniment?slug=revolucio-vellut"
-} else if ($slug === 'esdeveniment') {
-    $esdeveniment = $_GET['slug'];
 
-    $query = "SELECT LOWER(CONCAT_WS('-',
-        SUBSTR(HEX(e.id), 1, 8),
-        SUBSTR(HEX(e.id), 9, 4),
-        SUBSTR(HEX(e.id), 13, 4),
-        SUBSTR(HEX(e.id), 17, 4),
-        SUBSTR(HEX(e.id), 21)
-        )) AS id,
-        e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, e.esSubEtapa,
-            LOWER(CONCAT_WS('-',
-        SUBSTR(HEX(e.esdeCiutat), 1, 8),
-        SUBSTR(HEX(e.esdeCiutat), 9, 4),
-        SUBSTR(HEX(e.esdeCiutat), 13, 4),
-        SUBSTR(HEX(e.esdeCiutat), 17, 4),
-        SUBSTR(HEX(e.esdeCiutat), 21)
-        )) AS esdeCiutat, e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais, e.img, i.nameImg, i.alt
-    FROM db_historia_esdeveniments AS e
-    LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id 
-    LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id 
-    LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
-    LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id 
-    LEFT JOIN db_img AS i ON e.img = i.id 
-    WHERE e.slug =:slug";
+    // 2. Esdeveniment slug
+    // ruta GET => "/api/historia/get/esdevenimentSlug"
+} else if ($slug === 'esdevenimentSlug') {
 
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
+    $slugEsdeveniment = $_GET['slug'] ?? null;
 
-    $stmt->bindParam(':slug', $esdeveniment, PDO::PARAM_STR);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$data) {
-        echo json_encode(['error' => 'No rows found']);
+    if (!is_string($slugEsdeveniment) || $slugEsdeveniment === '') {
+        Response::error(
+            MissatgesAPI::error('parametres'),
+            ['El slug de l\'esdeveniment és obligatori.'],
+            400
+        );
         exit;
     }
 
-    // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-    array_walk_recursive($data, function (&$v) {
-        if (!is_string($v)) return;
+    try {
+        // 1. Obtenir les dades de l'esdeveniment
+        $sql = "SELECT
+                e.id,
+                e.esdeNom,
+                e.slug,
+                e.esdeDataIDia,
+                e.esdeDataIMes,
+                e.esdeDataIAny,
+                e.esdeDataFDia,
+                e.esdeDataFMes,
+                e.esdeDataFAny,
+                e.ciutat_id,
+                e.descripcio,
+                e.sub_etapa_id,
+                e.imatge_id,
+                e.dateCreated,
+                e.dateModified,
+                i.nameImg,
+                i.alt,
+                s.nomSubEtapa,
+                p.etapaNom,
+                c.ciutat,
+                co.pais
+            FROM db_historia_esdeveniments AS e
+            LEFT JOIN db_historia_sub_periode AS s
+                ON e.sub_etapa_id = s.id
+            LEFT JOIN db_historia_periode_historic AS p
+                ON s.etapa_id = p.id
+            LEFT JOIN db_geo_ciutats AS c
+                ON e.ciutat_id = c.id
+            LEFT JOIN db_geo_paisos AS co
+                ON c.pais_id = co.id
+            LEFT JOIN db_img AS i
+                ON e.imatge_id = i.id
+            WHERE e.slug = :slug
+            LIMIT 1";
 
-        // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
-        $v = str_replace("\0", '', $v);
+        $result = $db->getData(
+            $sql,
+            [':slug' => $slugEsdeveniment],
+            true
+        );
 
-        // Intentar normalizar a UTF-8 válido
-        // 1) Si ya es UTF-8 válido, lo deja igual
-        if (!mb_check_encoding($v, 'UTF-8')) {
-            // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
-            $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
-            if ($v2 !== false) {
-                $v = $v2;
-            } else {
-                // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
-                $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                if ($v3 !== false) $v = $v3;
-            }
-        } else {
-            // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
-            $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            if ($v2 !== false) $v = $v2;
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('noTrobat'),
+                ['No s\'ha trobat l\'esdeveniment.'],
+                404
+            );
+            exit;
         }
-    });
 
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
+        // 2. Obtenir les persones relacionades
+        $sqlPersones = "SELECT
+                a.id,
+                a.nom,
+                a.cognoms,
+                a.slug
+            FROM db_historia_esdeveniment_persones AS ep
+            INNER JOIN db_persones AS a
+                ON a.id = ep.persona_id
+            WHERE ep.esdeveniment_id = :id";
+
+        $persones = $db->getData(
+            $sqlPersones,
+            [':id' => $result['id']]
+        );
+
+        // 3. Obtenir les organitzacions relacionades
+        $sqlOrganitzacions = "SELECT
+                o.id,
+                o.organitzacio,
+                o.sigla,
+                o.slug
+            FROM db_historia_esdeveniment_organitzacio AS eo
+            INNER JOIN db_historia_organitzacions AS o
+                ON o.id = eo.organitzacio_id
+            WHERE eo.esdeveniment_id = :id";
+
+        $organitzacions = $db->getData(
+            $sqlOrganitzacions,
+            [':id' => $result['id']]
+        );
+
+        // 4. Incorporar les relacions a l'esdeveniment
+        $result['persones'] = $persones ?: [];
+        $result['organitzacions'] = $organitzacions ?: [];
+
+        // 5. Retornar les dades
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (Throwable $e) {
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            ['Error en consultar l\'esdeveniment.'],
+            500
+        );
+    }
+
 
     // 4. Esdeveniment - pagina modifica
     // ruta GET => "/api/historia/get/esdevenimentId?id=ewr23232412"
 } else if ($slug === 'esdevenimentId') {
 
-    function uuidToBytes($uuid)
-    {
-        return hex2bin(str_replace('-', '', $uuid));
-    }
+    $id = $_GET['id'] ?? null;
 
-    $id = $_GET['id'];
-
-    $idBinary = uuidToBytes($id);
-
-    $query = "SELECT LOWER(CONCAT_WS('-',
-        SUBSTR(HEX(e.id), 1, 8),
-        SUBSTR(HEX(e.id), 9, 4),
-        SUBSTR(HEX(e.id), 13, 4),
-        SUBSTR(HEX(e.id), 17, 4),
-        SUBSTR(HEX(e.id), 21)
-        )) AS id, 
-    e.esdeNom, e.slug, e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny, e.esdeDataFDia, e.esdeDataFMes, e.esdeDataFAny, e.esSubEtapa, 
-    LOWER(CONCAT_WS('-',
-        SUBSTR(HEX(e.esdeCiutat), 1, 8),
-        SUBSTR(HEX(e.esdeCiutat), 9, 4),
-        SUBSTR(HEX(e.esdeCiutat), 13, 4),
-        SUBSTR(HEX(e.esdeCiutat), 17, 4),
-        SUBSTR(HEX(e.esdeCiutat), 21)
-        )) AS esdeCiutat,
-        e.dateCreated, e.dateModified, s.nomSubEtapa, p.etapaNom, c.ciutat, co.pais, e.img, i.nameImg, i.alt
-    FROM db_historia_esdeveniments AS e
-    LEFT JOIN db_historia_sub_periode AS s ON e.esSubEtapa = s.id 
-    LEFT JOIN db_historia_periode_historic AS p ON s.idEtapa = p.id 
-    LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
-    LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id 
-    LEFT JOIN db_img AS i ON e.img = i.id 
-    WHERE e.id = :id";
-
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
-
-    $stmt->bindParam(':id', $idBinary, PDO::PARAM_LOB);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
+    if (!is_string($id) || $id === '') {
+        Response::error(
+            MissatgesAPI::error('parametres'),
+            ['L\'identificador de l\'esdeveniment és obligatori.'],
+            400
+        );
         exit;
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+    try {
+        // 1. Obtenir les dades de l'esdeveniment
+        $sql = "SELECT
+                e.id,
+                e.esdeNom,
+                e.slug,
+                e.esdeDataIDia,
+                e.esdeDataIMes,
+                e.esdeDataIAny,
+                e.esdeDataFDia,
+                e.esdeDataFMes,
+                e.esdeDataFAny,
+                e.sub_etapa_id,
+                e.ciutat_id,
+                e.descripcio,
+                e.dateCreated,
+                e.dateModified,
+                s.nomSubEtapa,
+                p.etapaNom,
+                c.ciutat,
+                co.pais,
+                e.imatge_id,
+                i.nameImg,
+                i.alt
+            FROM db_historia_esdeveniments AS e
+            LEFT JOIN db_historia_sub_periode AS s ON e.sub_etapa_id = s.id
+            LEFT JOIN db_historia_periode_historic AS p ON s.etapa_id = p.id
+            LEFT JOIN db_geo_ciutats AS c ON e.ciutat_id = c.id
+            LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id
+            LEFT JOIN db_img AS i ON e.imatge_id = i.id
+            WHERE e.id = :id";
 
-    // Sanititzar strings perquè json_encode no peti per UTF-8 malformat
-    array_walk_recursive($data, function (&$v) {
-        if (!is_string($v)) return;
+        $result = $db->getData($sql, [':id' => Uuid::toBinary($id)], true);
 
-        // Quitar NULs (muy típicos si hubo UTF-32 / bytes raros)
-        $v = str_replace("\0", '', $v);
-
-        // Intentar normalizar a UTF-8 válido
-        // 1) Si ya es UTF-8 válido, lo deja igual
-        if (!mb_check_encoding($v, 'UTF-8')) {
-            // 2) Intenta desde ISO-8859-1 (latin1) -> UTF-8 (común en legacy)
-            $v2 = @iconv('ISO-8859-1', 'UTF-8//IGNORE', $v);
-            if ($v2 !== false) {
-                $v = $v2;
-            } else {
-                // 3) Último recurso: limpia bytes inválidos asumiendo UTF-8
-                $v3 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-                if ($v3 !== false) $v = $v3;
-            }
-        } else {
-            // Aun siendo UTF-8 válido, limpia bytes raros si los hubiera
-            $v2 = @iconv('UTF-8', 'UTF-8//IGNORE', $v);
-            if ($v2 !== false) $v = $v2;
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('noTrobat'),
+                ['No s\'ha trobat l\'esdeveniment.'],
+                404
+            );
+            exit;
         }
-    });
 
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
+        // 2. Obtenir les persones relacionades
+        $sqlPersones = "SELECT
+                a.id,
+                a.nom,
+                a.cognoms,
+                a.slug
+            FROM db_historia_esdeveniment_persones AS ep
+            INNER JOIN db_persones AS a ON a.id = ep.persona_id
+            WHERE ep.esdeveniment_id = :id";
 
-    // 5. Imatges esdeveniment
-    // ruta GET => "/api/historia/get/llistatImatgesEsdeveniments"
-} else if ($slug === 'llistatImatgesEsdeveniments') {
+        $persones = $db->getData(
+            $sqlPersones,
+            [':id' => Uuid::toBinary($id)]
+        );
 
-    $query = "SELECT i.id, i.alt
-    FROM db_img AS i
-    WHERE i.typeImg = 4";
+        // 3. Obtenir les organitzacions relacionades
+        $sqlOrganitzacions = "SELECT
+                o.id,
+                o.organitzacio,
+                o.sigla,
+                o.slug
+            FROM db_historia_esdeveniment_organitzacio AS eo
+            INNER JOIN db_historia_organitzacions AS o ON o.id = eo.organitzacio_id
+            WHERE eo.esdeveniment_id = :id";
 
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
+        $organitzacions = $db->getData(
+            $sqlOrganitzacions,
+            [':id' => Uuid::toBinary($id)]
+        );
 
-    // Ejecutar la consulta
-    $stmt->execute();
+        // 4. Incorporar les relacions a l'esdeveniment
+        $result['persones'] = $persones ?: [];
+        $result['organitzacions'] = $organitzacions ?: [];
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+        // 5. Retornar les dades
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (Throwable $e) {
+        var_dump('[esdevenimentId] ' . $e->getMessage());
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            ['Error en consultar l\'esdeveniment.'],
+            500
+        );
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode([
-        "status" => "success",
-        "message" => "OK",
-        "data" => $data
-    ]);
 
     // 3. Llistat de persones vinculades a un esdeveniment
     // ruta GET => "/api/historia/get/personesEsdeveniments?id=234"
@@ -637,32 +716,6 @@ if ($slug === 'carrecsPersona') {
     // Devolver los datos en formato JSON
     echo json_encode($data);
 
-    // 4. Llistat persones
-    // ruta GET => "/api/historia/get/llistatPersones"
-} else if ($slug === 'llistatPersones') {
-
-    $query = "SELECT p.id, CONCAT(p.nom, ' ', p.cognoms) AS nom
-    FROM db_persones AS p
-    ORDER BY p.cognoms";
-
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
-    }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-
 
     // 3. Llistat d'esdeveniments vinculats a una persona
     // ruta GET => "/api/historia/get/formEsdevenimentsPersona?id=234"
@@ -692,34 +745,6 @@ if ($slug === 'carrecsPersona') {
 
     // Devolver los datos en formato JSON
     echo json_encode($data);
-
-    // 3. Llistat organitzacions
-    // ruta GET => "/api/historia/get/llistatOrganitzacions"
-} else if ($slug === 'llistatOrganitzacions') {
-
-    $query = "SELECT o.id, o.nomOrg
-    FROM db_historia_organitzacions AS o";
-
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
-    }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-
-    // 3. Relació esdeveniment-organitzacions
-    // ruta GET => "/api/historia/get/formEsdevenimentOrganitzacions?id=22"
 } else if ($slug === 'formEsdevenimentOrganitzacions') {
     $id = $_GET['id'];
 
@@ -778,69 +803,158 @@ if ($slug === 'carrecsPersona') {
     echo json_encode($data);
 
     // 3. Llistat organitzacions
-    // ruta GET => "/api/historia/get/paginaOrganitzacions"
-} else if ($slug === 'paginaOrganitzacions') {
+    // ruta GET => "/api/historia/get/llistatOrganitzacions"
+} else if ($slug === 'llistatOrganitzacions') {
 
-    $query = "SELECT o.id, o.nomOrg, o.slug, o.orgSig, o.dataFunda, o.dataDiss, c.pais, i.nameImg, o.dateCreated, o.dateModified
+    $sql = "SELECT o.id, o.organitzacio, o.sigla, o.any_fundacio, o.any_dissolucio, o.slug, o.sub_etapa_id, o.tipus, o.dateCreated, o.dateModified, c.pais, s.nomSubEtapa
     FROM db_historia_organitzacions AS o
-    LEFT JOIN db_countries AS c ON o.orgPais = c.id
-    LEFT JOIN db_img AS i ON o.img = i.id
-    ORDER BY o.dataFunda";
+    LEFT JOIN db_geo_paisos AS c ON o.pais_id = c.id
+    LEFT JOIN db_historia_sub_periode AS s ON o.sub_etapa_id = s.id
+    ORDER BY
+            (o.any_fundacio = 0) ASC,
+            o.any_fundacio ASC,
+            o.organitzacio ASC";
 
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
+    try {
+        $result = $db->getData($sql, [], false);
 
-    // Ejecutar la consulta
-    $stmt->execute();
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
 
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
 
     // 3. Pagina detalls organització
-    // ruta GET => "/api/historia/get/fitxaOrganitzacio?slug=primera-internacional"
-} else if ($slug === 'fitxaOrganitzacio') {
-    $slug = $_GET['slug'];
+    // ruta GET => "/api/historia/get/organitzacioId?id=4t345345werwr"
+} else if ($slug === 'organitzacioId') {
 
-    $query = "SELECT o.id, o.nomOrg, o.slug, o.orgSig, o.dataFunda, o.dataDiss, ci.ciutat, c.pais, i.nameImg, o.dateCreated, o.dateModified,
-    sp.nomSubEtapa, ph.etapaNom, ot.nomTipus, ip.ideologia, i.alt, o.nomOrgCast, o.nomOrgEng, o.nomOrgIt, o.orgPais, o.orgCiutat, o.orgSubEtapa, o.orgTipus, o.orgIdeologia, o.img
+    $id = $_GET['id'];
+
+    $sql = "SELECT    
+    o.id,
+    o.organitzacio,
+    o.slug,
+    o.sigla,
+    o.any_fundacio,
+    o.any_dissolucio,
+    o.pais_id,
+    o.ciutat_id,
+    o.sub_etapa_id,
+    o.tipus,
+    o.ideologia_id,
+    o.imatge_id,
+    o.dateCreated,
+    o.dateModified 
     FROM db_historia_organitzacions AS o
-    LEFT JOIN db_countries AS c ON o.orgPais = c.id
-    LEFT JOIN db_cities AS ci ON o.orgCiutat = ci.id
-    LEFT JOIN db_historia_sub_periode AS sp ON o.orgSubEtapa = sp.id
-    LEFT JOIN db_historia_periode_historic AS ph ON sp.idEtapa = ph.id
-    LEFT JOIN db_historia_organitzacions_tipus AS ot ON o.orgTipus = ot.id
-    LEFT JOIN aux_historia_ideologies_politiques AS ip ON o.orgIdeologia = ip.id
-    LEFT JOIN db_img AS i ON o.img = i.id
-    WHERE o.slug = :slug";
+    WHERE o.id = :id
+    LIMIT 1";
 
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
+    try {
+        $params = [':id' => Uuid::toBinary($id)];
+        $result = $db->getData($sql, $params, true);
 
-    $stmt->bindParam(':slug', $slug, PDO::PARAM_STR);
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
 
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
     }
 
-    // Recopilar los resultados
-    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+    // 3. Pagina detalls organització slug
+    // ruta GET => "/api/historia/get/organitzacioSlug?slug=partit-comunista"
+} else if ($slug === 'organitzacioSlug') {
 
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
+    $slug = $_GET['slug'];
+
+    $sql = "SELECT    
+    o.id,
+    o.organitzacio,
+    o.slug,
+    o.sigla,
+    o.any_fundacio,
+    o.any_dissolucio,
+    o.pais_id,
+    o.ciutat_id,
+    o.sub_etapa_id,
+    o.tipus,
+    o.ideologia_id,
+    o.imatge_id,
+    o.dateCreated,
+    o.dateModified,
+
+    h.nomSubEtapa,
+    hp.etapaNom,
+    i.ideologia,
+    p.pais,
+    c.ciutat,
+    img.alt,
+    img.nameImg
+    FROM db_historia_organitzacions AS o
+    LEFT JOIN db_historia_sub_periode AS h ON o.sub_etapa_id = h.id
+    LEFT JOIN db_historia_periode_historic AS hp ON h.etapa_id = hp.id
+    LEFT JOIN aux_historia_ideologies_politiques AS i ON o.ideologia_id = i.id
+    LEFT JOIN db_geo_ciutats AS c ON o.ciutat_id = c.id
+    LEFT JOIN db_geo_paisos AS p ON o.pais_id = p.id
+    LEFT JOIN db_img AS img ON o.imatge_id = img.id
+    WHERE o.slug = :slug
+    LIMIT 1";
+
+    try {
+        $params = ['slug' => $slug];
+        $result = $db->getData($sql, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
 
     // 3. Pagina Esdeveniments/organitzacio
     // ruta GET => "/api/historia/get/esdevenimentsOrganitzacio?id=22"
@@ -939,32 +1053,6 @@ if ($slug === 'carrecsPersona') {
     $query = "SELECT i.id, i.ideologia
     FROM aux_historia_ideologies_politiques AS i
     ORDER BY i.ideologia";
-
-    // Preparar la consulta
-    $stmt = $pdo->prepare($query);
-
-    // Ejecutar la consulta
-    $stmt->execute();
-
-    // Verificar si se encontraron resultados
-    if ($stmt->rowCount() === 0) {
-        echo json_encode(['error' => 'No rows found']);
-        exit;
-    }
-
-    // Recopilar los resultados
-    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Devolver los datos en formato JSON
-    echo json_encode($data);
-
-    // 5. Tipus organitzacio
-    // ruta GET => "/api/historia/get/llistatTipusOrganitzacio"
-} else if ($slug === 'llistatTipusOrganitzacio') {
-
-    $query = "SELECT t.id, t.nomTipus
-    FROM db_historia_organitzacions_tipus AS t
-    ORDER BY t.nomTipus";
 
     // Preparar la consulta
     $stmt = $pdo->prepare($query);

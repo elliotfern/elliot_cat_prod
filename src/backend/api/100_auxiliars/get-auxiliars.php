@@ -170,6 +170,131 @@ if ($slug === 'directors') {
         );
     }
 
+
+    // Llistat imatges organitzacions històriques
+    // ruta GET => "/api/cinema/get/auxiliars/imgOrg"
+} else if ($slug === 'imgOrg') {
+    $sql = <<<SQL
+            SELECT i.id, i.alt
+            FROM %s AS i
+            WHERE i.typeImg = :img
+            ORDER BY i.alt ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_IMATGES, $pdo),
+    );
+
+    try {
+        $img = 6;
+        $params = [':img' => $img];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // Llistat imatges esdeveniments històriques
+    // ruta GET => "/api/cinema/get/auxiliars/imgEsde"
+} else if ($slug === 'imgEsde') {
+    $sql = <<<SQL
+            SELECT i.id, i.alt
+            FROM %s AS i
+            WHERE i.typeImg = :img
+            ORDER BY i.alt ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_IMATGES, $pdo),
+    );
+
+    try {
+        $img = 4;
+        $params = [':img' => $img];
+        $result = $db->getData($query, $params);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+
+    // Llistat sub-etapes històriques
+    // ruta GET => "/api/cinema/get/auxiliars/subEtapesHistoriques"
+} else if ($slug === 'subEtapesHistoriques') {
+    $sql = <<<SQL
+            SELECT i.id, i.nomSubEtapa
+            FROM %s AS i
+            ORDER BY i.nomSubEtapa ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_SUB_ETAPES, $pdo),
+    );
+
+    try {
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // Llistat generes pelicules
     // ruta GET => "/api/cinema/get/auxiliars/?type=generesPelis"
 } elseif ($slug === 'generesPelis') {
@@ -1609,7 +1734,6 @@ if ($slug === 'directors') {
     );
 
     try {
-
         $result = $db->getData($query);
 
         if (empty($result)) {
@@ -1634,6 +1758,46 @@ if ($slug === 'directors') {
         );
     }
 
+    // GET : llistat ideologies
+    // URL: https://elliot.cat/api/auxiliars/get/ideologies
+} else if ($slug === "ideologies") {
+
+    $sql = <<<SQL
+            SELECT i.id, i.ideologia
+            FROM %s AS i
+            ORDER BY i.ideologia ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::AUX_IDEOLOGIES, $pdo),
+
+    );
+
+    try {
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
     // GET : llistat tipus agenda
     // URL: https://elliot.cat/api/auxiliars/get/subtemes
 } else if ($slug === "tipusAgenda") {

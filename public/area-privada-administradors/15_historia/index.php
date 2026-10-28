@@ -33,6 +33,7 @@ use App\Utils\Url;
         <ul>
             <li><a href="<?php echo Url::intranet('persones'); ?>/llistat-persones">Llistat de persones</a></li>
             <li><a href="<?php echo Url::intranet('historia'); ?>/llistat-organitzacions">Llistat d'organitzacions</a></li>
+            <li><a href="<?php echo Url::intranet('historia'); ?>/cronologia-esdeveniments">Cronologia històrica d'esdeveniments</a></li>
             <li><a href="<?php echo Url::intranet('historia'); ?>/llistat-esdeveniments">Llistat d'esdeveniments</a></li>
         </ul>
     </div>

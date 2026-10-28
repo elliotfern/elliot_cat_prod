@@ -64,6 +64,9 @@ class Response
         'article_en_id',
         'article_fr_id',
         'article_it_id',
+        'sub_etapa_id',
+        'ideologia_id',
+
     ];
 
     public static function success(

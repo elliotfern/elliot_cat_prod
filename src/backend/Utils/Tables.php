@@ -102,6 +102,9 @@ class Tables
     // Història
     public const DB_HISTORIA_OBERTA_ARTICLES = 'db_historia_oberta_articles';
     public const DB_HISTORIA_OBERTA_CURSOS = 'db_historia_oberta_cursos';
+    public const AUX_IDEOLOGIES = 'aux_historia_ideologies_politiques';
+    public const DB_SUB_ETAPES = 'db_historia_sub_periode';
+    public const DB_HISTORIA_ORGANITZACIONS = 'db_historia_organitzacions';
 
     // Persones
     public const DB_PERSONES = 'db_persones';

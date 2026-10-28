@@ -7,6 +7,12 @@ import { formCursArticle } from './formCursArticle';
 import { initCronologia } from './cronologia/llistatEsdeveniments';
 import { renderCursosArticlesList } from './llistatCursosArticles';
 import { formCursHistoria } from './formCurs';
+import { taulaLlistatOrganitzacions } from './llistatOrganitzacions';
+import { formOrganitzacioHistoria } from './formOrganitzacio';
+import { fitxaOrganitzacio } from './fitxaOrganitzacio';
+import { taulaLlistatEsdeveniments } from './llistatEsdeveniments';
+import { formEsdevenimentHistoria } from './formEsdeveniment';
+import { fitxaEsdeveniment } from './fitxaEsdeveniment';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -38,56 +44,32 @@ export function historiaOberta() {
     void formCursArticle(false);
   }
 
-  if (pageType[2] === 'llistat-esdeveniments') {
+  if (pageType[2] === 'cronologia-esdeveniments') {
     void initCronologia();
+  }
+
+  if (pageType[2] === 'llistat-esdeveniments') {
+    taulaLlistatEsdeveniments();
   }
 
   if (pageType[3] === 'modifica-article') {
     //'/api/historia/get/?carrecsPersona=', data.id, ['Càrrec', 'Organització', 'Anys', 'Accions'], function (fila, columna) {
     // /api/historia/get/?esdevenimentsPersona=', data.id, ['Esdeveniment', 'Any', 'Accions'], function (fila, columna) {
-  } else if (pageType[2] === 'nou-esdeveniment') {
-    const form = document.getElementById('formEsdeveniment');
-    if (form) {
-      // Lanzar actualizador de datos
-      form.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'formEsdeveniment', '/api/historia/post/esdeveniment');
-      });
-    }
+  }
+
+  if (pageType[2] === 'nou-esdeveniment') {
+    formEsdevenimentHistoria(false);
   } else if (pageType[2] === 'modifica-esdeveniment') {
-    const form = document.getElementById('formEsdeveniment');
-    if (form) {
-      // Lanzar actualizador de datos
-      form.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'PUT', 'formEsdeveniment', '/api/historia/put/esdeveniment');
-      });
-    }
-  } else if (pageType[2] === 'modifica-esdeveniment-persona') {
-    const form = document.getElementById('formEsdeveniment');
+    const esde = pageType[3];
+    formEsdevenimentHistoria(true, esde);
+  }
 
-    if (form) {
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
+  if (pageType[2] === 'fitxa-esdeveniment') {
+    const esde = pageType[3];
+    fitxaEsdeveniment('historia/get/esdevenimentSlug', esde);
+  }
 
-        const submitter = event.submitter; // El botón que activó el envío
-        const metodo = submitter?.dataset?.method || 'POST'; // Valor por defecto: POST
-
-        transmissioDadesDB(event, metodo, 'formEsdeveniment', `/api/historia/${metodo.toLowerCase()}/?esdevenimentPersona`);
-      });
-    }
-  } else if (pageType[2] === 'modifica-esdeveniment-organitzacio') {
-    const form = document.getElementById('formEsdeveniment');
-
-    if (form) {
-      form.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        const submitter = event.submitter; // El botón que activó el envío
-        const metodo = submitter?.dataset?.method || 'POST'; // Valor por defecto: POST
-
-        transmissioDadesDB(event, metodo, 'formEsdeveniment', `/api/historia/${metodo.toLowerCase()}/?esdevenimentOrganitzacio`);
-      });
-    }
-  } else if (pageType[2] === 'nou-persona-carrec') {
+  if (pageType[2] === 'nou-persona-carrec') {
     const form = document.getElementById('formPersonaCarrec');
     if (form) {
       // Lanzar actualizador de datos
@@ -103,26 +85,22 @@ export function historiaOberta() {
         transmissioDadesDB(event, 'PUT', 'formPersonaCarrec', '/api/historia/put/?personaCarrec');
       });
     }
+  } else if (pageType[2] === 'llistat-organitzacions') {
+    taulaLlistatOrganitzacions();
   } else if (pageType[2] === 'modifica-organitzacio') {
-    const form = document.getElementById('formOrganitzacio');
-    if (form) {
-      // Lanzar actualizador de datos
-      form.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'PUT', 'formOrganitzacio', '/api/historia/put/?organitzacio');
-      });
-    }
+    const org = pageType[3];
+    formOrganitzacioHistoria(true, org);
   } else if (pageType[2] === 'nova-organitzacio') {
-    const form = document.getElementById('formOrganitzacio');
-    if (form) {
-      // Lanzar actualizador de datos
-      form.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'formOrganitzacio', '/api/historia/post/?organitzacio');
-      });
-    }
+    formOrganitzacioHistoria(false);
   }
 
   if (pageType[2] === 'nou-curs') {
     formCursHistoria(false);
+  }
+
+  if (pageType[2] === 'fitxa-organitzacio') {
+    const slug = pageType[3];
+    fitxaOrganitzacio('historia/get/organitzacioSlug', slug);
   }
 
   if (pageType[2] === 'modifica-curs') {

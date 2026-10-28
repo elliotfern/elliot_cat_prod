@@ -29,9 +29,9 @@ class HistoriaRoutes
         return $this->base() . '/nou-curs-article';
     }
 
-    public function novaPatologia(): string
+    public function novaOrganitzacio(): string
     {
-        return $this->base() . '/nova-patologia';
+        return $this->base() . '/nova-organitzacio';
     }
 
     // -------------------------

@@ -48,10 +48,7 @@ export async function taulaLlistatCursosHistoria(): Promise<void> {
       header: 'Accions',
       field: 'id',
       render: (_: unknown, row: CursHistoriaApi) => {
-        return `
-
-
-          <a href="${DOMAIN_WEB}/gestio/historia/modifica-curs/${row.id}">
+        return `<a href="${DOMAIN_WEB}/gestio/historia/modifica-curs/${row.id}">
             <button type="button" class="btn btn-warning btn-sm">Modifica curs</button>
           </a>
         `;

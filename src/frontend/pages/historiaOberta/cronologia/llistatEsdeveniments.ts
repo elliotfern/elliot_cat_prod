@@ -46,7 +46,7 @@ export async function loadSubetapas() {
     return;
   }
 
-  renderSubetapas(container, data);
+  renderSubetapas(container, data.data);
 }
 
 export function initCronologia() {

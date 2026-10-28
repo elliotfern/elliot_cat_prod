@@ -7,6 +7,8 @@ use App\Utils\Response;
 use App\Utils\MissatgesAPI;
 use App\Utils\Tables;
 use App\Utils\Uuid;
+use App\Utils\ValidacioErrors;
+use Ramsey\Uuid\Uuid as RamseyUuid;
 
 $slug = $routeParams[0] ?? null;
 
@@ -35,207 +37,384 @@ if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
 // a) Modificar esdeveniment
 if ($slug === 'esdeveniment') {
 
-    // Obtener el cuerpo de la solicitud PUT
-    $input_data = file_get_contents("php://input");
+    // Llegir JSON
+    $inputData = file_get_contents('php://input');
+    $data = json_decode($inputData, true);
 
-    // Decodificar los datos JSON
-    $data = json_decode($input_data, true);
-
-    // Verificar si se recibieron datos
-    if ($data === null) {
-        // Error al decodificar JSON
-        header('HTTP/1.1 400 Bad Request');
-        echo json_encode(['error' => 'Error decoding JSON data']);
-        exit();
+    if (!is_array($data)) {
+        Response::error(
+            MissatgesAPI::error('bad_request'),
+            ['json' => 'invalid'],
+            400
+        );
+        exit;
     }
 
-    // Ahora puedes acceder a los datos como un array asociativo
-    $hasError = false; // Inicializamos la variable $hasError como false
+    // ==============================
+    // VALIDACIÓ
+    // ==============================
+    $errors = [];
 
-    $esdeNom       = !empty($data['esdeNom']) ? $data['esdeNom'] : ($hasError = true);
-    $slug          = !empty($data['slug']) ? $data['slug'] : ($hasError = true);
-    $esdeDataIDia  = isset($data['esdeDataIDia']) ? (int) $data['esdeDataIDia'] : null;
-    $esdeDataIMes  = isset($data['esdeDataIMes']) ? (int) $data['esdeDataIMes'] : null;
-    $esdeDataIAny  = isset($data['esdeDataIAny']) ? (int) $data['esdeDataIAny'] : ($hasError = true);
-    $esdeDataFDia  = isset($data['esdeDataFDia']) ? (int) $data['esdeDataFDia'] : null;
-    $esdeDataFMes  = isset($data['esdeDataFMes']) ? (int) $data['esdeDataFMes'] : null;
-    $esdeDataFAny  = isset($data['esdeDataFAny']) ? (int) $data['esdeDataFAny'] : null;
-    $esSubEtapa    = isset($data['esSubEtapa']) ? (int) $data['esSubEtapa'] : null;
-    $esdeCiutat = !empty($data['esdeCiutat'])
-        ? uuid::toBinary($data['esdeCiutat'])
+    $id = trim((string) ($data['id'] ?? ''));
+    $nom = trim((string) ($data['esdeNom'] ?? ''));
+    $slug = trim((string) ($data['slug'] ?? ''));
+
+    $dataInicialDia = $data['esdeDataIDia'] ?? null;
+    $dataInicialMes = $data['esdeDataIMes'] ?? null;
+    $dataInicialAny = $data['esdeDataIAny'] ?? null;
+
+    $dataFinalDia = $data['esdeDataFDia'] ?? null;
+    $dataFinalMes = $data['esdeDataFMes'] ?? null;
+    $dataFinalAny = $data['esdeDataFAny'] ?? null;
+
+    $subEtapaId = trim((string) ($data['sub_etapa_id'] ?? ''));
+    $ciutatId = trim((string) ($data['ciutat_id'] ?? ''));
+    $imatgeId = trim((string) ($data['imatge_id'] ?? ''));
+    $descripcio = trim((string) ($data['descripcio'] ?? ''));
+
+    $persones = $data['persones'] ?? null;
+    $organitzacions = $data['organitzacions'] ?? null;
+
+    $uuidRegex = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
+
+    // Identificador obligatori
+    if ($id === '' || !preg_match($uuidRegex, $id)) {
+        $errors[] = ValidacioErrors::format('id');
+    }
+
+    // Camps obligatoris
+    foreach (
+        [
+            'esdeNom' => $nom,
+            'slug' => $slug,
+        ] as $camp => $valor
+    ) {
+        if ($valor === '') {
+            $errors[] = ValidacioErrors::requerit($camp);
+        }
+    }
+
+    // Camps UUID opcionals
+    foreach (
+        [
+            'sub_etapa_id' => $subEtapaId,
+            'ciutat_id' => $ciutatId,
+            'imatge_id' => $imatgeId,
+        ] as $camp => $valor
+    ) {
+        if ($valor !== '' && !preg_match($uuidRegex, $valor)) {
+            $errors[] = ValidacioErrors::format($camp);
+        }
+    }
+
+    // Validar dates
+    $dates = [
+        'esdeDataIDia' => [$dataInicialDia, 31],
+        'esdeDataIMes' => [$dataInicialMes, 12],
+        'esdeDataIAny' => [$dataInicialAny, 2155],
+        'esdeDataFDia' => [$dataFinalDia, 31],
+        'esdeDataFMes' => [$dataFinalMes, 12],
+        'esdeDataFAny' => [$dataFinalAny, 2155],
+    ];
+
+    foreach ($dates as $camp => [$valor, $maxim]) {
+        if (
+            $valor === null
+            || $valor === ''
+            || filter_var($valor, FILTER_VALIDATE_INT) === false
+            || (int) $valor < 0
+            || (int) $valor > $maxim
+        ) {
+            $errors[] = ValidacioErrors::format($camp);
+        }
+    }
+
+    // En una modificació exigim els dos arrays.
+    // Un array buit significa que no hi ha relacions d'aquell tipus.
+    if (!is_array($persones)) {
+        $errors[] = ValidacioErrors::format('persones');
+    }
+
+    if (!is_array($organitzacions)) {
+        $errors[] = ValidacioErrors::format('organitzacions');
+    }
+
+    // Validar UUID de les relacions i eliminar duplicats
+    $validarRelacions = static function (
+        array $ids,
+        string $camp
+    ) use (&$errors, $uuidRegex): array {
+        $resultat = [];
+
+        foreach ($ids as $relacioId) {
+            if ($relacioId === '') {
+                continue;
+            }
+
+            if (
+                !is_string($relacioId)
+                || !preg_match($uuidRegex, $relacioId)
+            ) {
+                $errors[] = ValidacioErrors::format($camp);
+                continue;
+            }
+
+            $resultat[strtolower($relacioId)] = $relacioId;
+        }
+
+        return array_values($resultat);
+    };
+
+    $personesIds = is_array($persones)
+        ? $validarRelacions($persones, 'persones')
+        : [];
+
+    $organitzacionsIds = is_array($organitzacions)
+        ? $validarRelacions($organitzacions, 'organitzacions')
+        : [];
+
+    if ($errors !== []) {
+        Response::error(
+            MissatgesAPI::error('validation_error'),
+            $errors,
+            400
+        );
+        exit;
+    }
+
+    // ==============================
+    // CONVERSIÓ UUID I DATES
+    // ==============================
+    $idBytes = Uuid::toBinary($id);
+
+    $subEtapaBytes = $subEtapaId !== ''
+        ? Uuid::toBinary($subEtapaId)
         : null;
 
-    $img           = !empty($data['img']) ? $data['img'] : '';
+    $ciutatBytes = $ciutatId !== ''
+        ? Uuid::toBinary($ciutatId)
+        : null;
 
-    $id = !empty($data['id']) ? uuid::toBinary($data['id']) : ($hasError = true);
-    $timestamp = date('Y-m-d');
-    $dateModified = $timestamp;
+    $imatgeBytes = $imatgeId !== ''
+        ? Uuid::toBinary($imatgeId)
+        : null;
 
-    if (!$hasError) {
-        global $conn;
+    $dateModified = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
 
-        $sql = "UPDATE db_historia_esdeveniments 
-        SET esdeNom = :esdeNom, 
-            slug = :slug, 
-            esdeDataIDia = :esdeDataIDia, 
-            esdeDataIMes = :esdeDataIMes, 
-            esdeDataIAny = :esdeDataIAny, 
-            esdeDataFDia = :esdeDataFDia, 
-            esdeDataFMes = :esdeDataFMes, 
-            esdeDataFAny = :esdeDataFAny, 
-            esSubEtapa = :esSubEtapa,
-            img = :img,
-            esdeCiutat = :esdeCiutat,
-            dateModified = :dateModified
-        WHERE id = :id";
+    try {
+        // ==============================
+        // COMPROVAR EXISTÈNCIA
+        // ==============================
+        $sqlExisteix = "
+        SELECT id
+        FROM db_historia_esdeveniments
+        WHERE id = :id
+        LIMIT 1
+    ";
 
-        $stmt = $conn->prepare($sql);
+        $stmtExisteix = $pdo->prepare($sqlExisteix);
+        $stmtExisteix->bindValue(':id', $idBytes, PDO::PARAM_LOB);
+        $stmtExisteix->execute();
 
-        $stmt->bindParam(":esdeNom", $esdeNom, PDO::PARAM_STR);
-        $stmt->bindParam(":slug", $slug, PDO::PARAM_STR);
-        $stmt->bindParam(":esdeDataIDia", $esdeDataIDia, PDO::PARAM_INT);
-        $stmt->bindParam(":esdeDataIMes", $esdeDataIMes, PDO::PARAM_INT);
-        $stmt->bindParam(":esdeDataIAny", $esdeDataIAny, PDO::PARAM_INT);
-        $stmt->bindParam(":esdeDataFDia", $esdeDataFDia, PDO::PARAM_INT);
-        $stmt->bindParam(":esdeDataFMes", $esdeDataFMes, PDO::PARAM_INT);
-        $stmt->bindParam(":esdeDataFAny", $esdeDataFAny, PDO::PARAM_INT);
-        $stmt->bindParam(":esSubEtapa", $esSubEtapa, PDO::PARAM_INT);
-        $stmt->bindParam(":esdeCiutat", $esdeCiutat, PDO::PARAM_LOB);
-        $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-        $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
-        $stmt->bindParam(":id", $id, PDO::PARAM_LOB);
-
-        if ($stmt->execute()) {
-            // response output
-            $response['status'] = 'success';
-            header("Content-Type: application/json");
-            echo json_encode($response);
-        } else {
-            // response output - data error
-            $response['status'] = 'error';
-            header("Content-Type: application/json");
-            echo json_encode($response);
+        if ($stmtExisteix->fetchColumn() === false) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                ['id' => $id],
+                404
+            );
+            exit;
         }
-    } else {
-        // response output - data error
-        $response['status'] = 'error';
 
-        header("Content-Type: application/json");
-        echo json_encode($response);
-    }
+        // ==============================
+        // INICIAR TRANSACCIÓ
+        // ==============================
+        $pdo->beginTransaction();
 
+        // ==============================
+        // ACTUALITZAR ESDEVENIMENT
+        // ==============================
+        $sql = "
+        UPDATE db_historia_esdeveniments
+        SET
+            esdeNom = :esdeNom,
+            slug = :slug,
+            esdeDataIDia = :esdeDataIDia,
+            esdeDataIMes = :esdeDataIMes,
+            esdeDataIAny = :esdeDataIAny,
+            esdeDataFDia = :esdeDataFDia,
+            esdeDataFMes = :esdeDataFMes,
+            esdeDataFAny = :esdeDataFAny,
+            sub_etapa_id = :sub_etapa_id,
+            ciutat_id = :ciutat_id,
+            imatge_id = :imatge_id,
+            dateModified = :dateModified,
+            descripcio = :descripcio
+        WHERE id = :id
+    ";
 
-    // b) Inserir esdeveniment/persona
-} else if (isset($_GET['esdevenimentPersona'])) {
+        $stmt = $pdo->prepare($sql);
 
-    // Obtener el cuerpo de la solicitud PUT
-    $input_data = file_get_contents("php://input");
+        $stmt->bindValue(':id', $idBytes, PDO::PARAM_LOB);
+        $stmt->bindValue(':esdeNom', $nom, PDO::PARAM_STR);
+        $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
 
-    // Decodificar los datos JSON
-    $data = json_decode($input_data, true);
+        $stmt->bindValue(':esdeDataIDia', (int) $dataInicialDia, PDO::PARAM_INT);
+        $stmt->bindValue(':esdeDataIMes', (int) $dataInicialMes, PDO::PARAM_INT);
+        $stmt->bindValue(':esdeDataIAny', (int) $dataInicialAny, PDO::PARAM_INT);
 
-    // Verificar si se recibieron datos
-    if ($data === null) {
-        // Error al decodificar JSON
-        header('HTTP/1.1 400 Bad Request');
-        echo json_encode(['error' => 'Error decoding JSON data']);
-        exit();
-    }
+        $stmt->bindValue(':esdeDataFDia', (int) $dataFinalDia, PDO::PARAM_INT);
+        $stmt->bindValue(':esdeDataFMes', (int) $dataFinalMes, PDO::PARAM_INT);
+        $stmt->bindValue(':esdeDataFAny', (int) $dataFinalAny, PDO::PARAM_INT);
 
-    // Ahora puedes acceder a los datos como un array asociativo
-    $hasError = false; // Inicializamos la variable $hasError como false
+        $stmt->bindValue(':descripcio', $descripcio, PDO::PARAM_STR);
 
-    $idEsdev     = !empty($data['idEsdev']) ? $data['idEsdev'] : ($hasError = true);
-    $idPersona   = !empty($data['idPersona']) ? $data['idPersona'] : ($hasError = true);
-    $id          = !empty($data['id']) ? $data['id'] : ($hasError = true);
+        $stmt->bindValue(
+            ':sub_etapa_id',
+            $subEtapaBytes,
+            $subEtapaBytes === null ? PDO::PARAM_NULL : PDO::PARAM_LOB
+        );
 
-    if (!$hasError) {
+        $stmt->bindValue(
+            ':ciutat_id',
+            $ciutatBytes,
+            $ciutatBytes === null ? PDO::PARAM_NULL : PDO::PARAM_LOB
+        );
 
-        global $conn;
-        $sql = "UPDATE db_historia_esdeveniment_persones 
-        SET  idEsdev = :idEsdev, 
-            idPersona = :idPersona
-        WHERE id = :id";
+        $stmt->bindValue(
+            ':imatge_id',
+            $imatgeBytes,
+            $imatgeBytes === null ? PDO::PARAM_NULL : PDO::PARAM_LOB
+        );
 
-        $stmt = $conn->prepare($sql);
+        $stmt->bindValue(':dateModified', $dateModified, PDO::PARAM_STR);
+        $stmt->execute();
 
-        $stmt->bindParam(":idEsdev", $idEsdev, PDO::PARAM_INT);
-        $stmt->bindParam(":idPersona", $idPersona, PDO::PARAM_INT);
-        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+        // ==============================
+        // ACTUALITZAR RELACIONS: PERSONES
+        // ==============================
+        $sqlEliminarPersones = "
+        DELETE FROM db_historia_esdeveniment_persones
+        WHERE esdeveniment_id = :id
+    ";
 
-        if ($stmt->execute()) {
-            // response output
-            $response['status'] = 'success';
-            header("Content-Type: application/json");
-            echo json_encode($response);
-        } else {
-            // response output - data error
-            $response['status'] = 'error';
-            header("Content-Type: application/json");
-            echo json_encode($response);
+        $stmtEliminarPersones = $pdo->prepare($sqlEliminarPersones);
+        $stmtEliminarPersones->bindValue(':id', $idBytes, PDO::PARAM_LOB);
+        $stmtEliminarPersones->execute();
+
+        if ($personesIds !== []) {
+            $sqlInsertarPersona = "
+            INSERT INTO db_historia_esdeveniment_persones (
+                id,
+                esdeveniment_id,
+                persona_id
+            ) VALUES (
+                :id,
+                :esdeveniment_id,
+                :persona_id
+            )
+        ";
+
+            $stmtInsertarPersona = $pdo->prepare($sqlInsertarPersona);
+
+            foreach ($personesIds as $personaId) {
+                $relacioId = RamseyUuid::uuid7()->getBytes();
+
+                $stmtInsertarPersona->bindValue(':id', $relacioId, PDO::PARAM_LOB);
+                $stmtInsertarPersona->bindValue(
+                    ':esdeveniment_id',
+                    $idBytes,
+                    PDO::PARAM_LOB
+                );
+                $stmtInsertarPersona->bindValue(
+                    ':persona_id',
+                    Uuid::toBinary($personaId),
+                    PDO::PARAM_LOB
+                );
+
+                $stmtInsertarPersona->execute();
+            }
         }
-    } else {
-        // response output - data error
-        $response['status'] = 'error';
 
-        header("Content-Type: application/json");
-        echo json_encode($response);
-    }
+        // ==============================
+        // ACTUALITZAR RELACIONS: ORGANITZACIONS
+        // ==============================
+        $sqlEliminarOrganitzacions = "
+        DELETE FROM db_historia_esdeveniment_organitzacio
+        WHERE esdeveniment_id = :id
+    ";
 
-    // b) modificar esdeveniment/organitzacio
-} else if (isset($_GET['esdevenimentOrganitzacio'])) {
+        $stmtEliminarOrganitzacions = $pdo->prepare($sqlEliminarOrganitzacions);
+        $stmtEliminarOrganitzacions->bindValue(':id', $idBytes, PDO::PARAM_LOB);
+        $stmtEliminarOrganitzacions->execute();
 
-    // Obtener el cuerpo de la solicitud PUT
-    $input_data = file_get_contents("php://input");
+        if ($organitzacionsIds !== []) {
+            $sqlInsertarOrganitzacio = "
+            INSERT INTO db_historia_esdeveniment_organitzacio (
+                id,
+                esdeveniment_id,
+                organitzacio_id
+            ) VALUES (
+                :id,
+                :esdeveniment_id,
+                :organitzacio_id
+            )
+        ";
 
-    // Decodificar los datos JSON
-    $data = json_decode($input_data, true);
+            $stmtInsertarOrganitzacio = $pdo->prepare($sqlInsertarOrganitzacio);
 
-    // Verificar si se recibieron datos
-    if ($data === null) {
-        // Error al decodificar JSON
-        header('HTTP/1.1 400 Bad Request');
-        echo json_encode(['error' => 'Error decoding JSON data']);
-        exit();
-    }
+            foreach ($organitzacionsIds as $organitzacioId) {
+                $relacioId = RamseyUuid::uuid7()->getBytes();
 
-    // Ahora puedes acceder a los datos como un array asociativo
-    $hasError = false; // Inicializamos la variable $hasError como false
+                $stmtInsertarOrganitzacio->bindValue(
+                    ':id',
+                    $relacioId,
+                    PDO::PARAM_LOB
+                );
+                $stmtInsertarOrganitzacio->bindValue(
+                    ':esdeveniment_id',
+                    $idBytes,
+                    PDO::PARAM_LOB
+                );
+                $stmtInsertarOrganitzacio->bindValue(
+                    ':organitzacio_id',
+                    Uuid::toBinary($organitzacioId),
+                    PDO::PARAM_LOB
+                );
 
-    $idEsde  = !empty($data['idEsde']) ? $data['idEsde'] : ($hasError = true);
-    $idOrg   = !empty($data['idOrg']) ? $data['idOrg'] : ($hasError = true);
-    $id      = !empty($data['id']) ? $data['id'] : ($hasError = true);
-
-    if (!$hasError) {
-        global $conn;
-        $sql = "UPDATE db_historia_esdeveniment_organitzacio 
-        SET idEsde = :idEsde, 
-            idOrg = :idOrg
-        WHERE id = :id";
-
-        $stmt = $conn->prepare($sql);
-
-        $stmt->bindParam(":idEsde", $idEsde, PDO::PARAM_INT);
-        $stmt->bindParam(":idOrg", $idOrg, PDO::PARAM_INT);
-        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-        if ($stmt->execute()) {
-            // response output
-            $response['status'] = 'success';
-            header("Content-Type: application/json");
-            echo json_encode($response);
-        } else {
-            // response output - data error
-            $response['status'] = 'error';
-            header("Content-Type: application/json");
-            echo json_encode($response);
+                $stmtInsertarOrganitzacio->execute();
+            }
         }
-    } else {
-        // response output - data error
-        $response['status'] = 'error';
 
-        header("Content-Type: application/json");
-        echo json_encode($response);
+        // ==============================
+        // CONFIRMAR TRANSACCIÓ
+        // ==============================
+        $pdo->commit();
+
+        Response::success(
+            MissatgesAPI::success('update'),
+            [
+                'id' => Uuid::toString($idBytes),
+                'esdeNom' => $nom,
+                'slug' => $slug,
+                'persones' => $personesIds,
+                'organitzacions' => $organitzacionsIds,
+                'dateModified' => $dateModified,
+            ]
+        );
+        exit;
+    } catch (\Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        error_log('[PUT esdeveniment] ' . $e->getMessage());
+
+        Response::error(
+            MissatgesAPI::error('internal_error'),
+            [],
+            500
+        );
+        exit;
     }
 
     // b) modificar persona / carrec
@@ -312,102 +491,225 @@ if ($slug === 'esdeveniment') {
         echo json_encode($response);
     }
 
-    // b) Inserir organitzacio
-} else if (isset($_GET['organitzacio'])) {
 
-    // Obtener el cuerpo de la solicitud PUT
+
+    // ==============================
+    // PUT ORGANITZACIO
+    // ==============================
+} else if ($slug === 'organitzacio') {
+
+    // Llegir JSON
     $input_data = file_get_contents("php://input");
-
-    // Decodificar los datos JSON
     $data = json_decode($input_data, true);
 
-    // Verificar si se recibieron datos
-    if ($data === null) {
-        // Error al decodificar JSON
-        header('HTTP/1.1 400 Bad Request');
-        echo json_encode(['error' => 'Error decoding JSON data']);
-        exit();
+    if (!is_array($data)) {
+        Response::error(
+            MissatgesAPI::error('bad_request'),
+            ['json' => 'invalid'],
+            400
+        );
+        exit;
     }
 
-    // Ahora puedes acceder a los datos como un array asociativo
-    $hasError = false; // Inicializamos la variable $hasError como false
+    // ==============================
+    // VALIDACIÓ
+    // ==============================
+    $errors = [];
 
-    $nomOrg = !empty($data['nomOrg']) ? $data['nomOrg'] : ($hasError = true);
-    $nomOrgCast = !empty($data['nomOrgCast']) ? $data['nomOrgCast'] : ($hasError = false);
-    $nomOrgEng = !empty($data['nomOrgEng']) ? $data['nomOrgEng'] : ($hasError = false);
-    $nomOrgIt = !empty($data['nomOrgIt']) ? $data['nomOrgIt'] : ($hasError = false);
-    $slug = !empty($data['slug']) ? $data['slug'] : ($hasError = true);
-    $orgSig = !empty($data['orgSig']) ? $data['orgSig'] : ($hasError = false);
-    $dataFunda = !empty($data['dataFunda']) ? $data['dataFunda'] : ($hasError = true);
-    $dataDiss = !empty($data['dataDiss']) ? $data['dataDiss'] : ($hasError = false);
-    $orgPais = !empty($data['orgPais']) ? $data['orgPais'] : ($hasError = true);
-    $orgCiutat = !empty($data['orgCiutat']) ? $data['orgCiutat'] : ($hasError = true);
-    $orgSubEtapa = !empty($data['orgSubEtapa']) ? $data['orgSubEtapa'] : ($hasError = true);
-    $orgTipus = !empty($data['orgTipus']) ? $data['orgTipus'] : ($hasError = true);
-    $orgIdeologia = !empty($data['orgIdeologia']) ? $data['orgIdeologia'] : ($hasError = false);
-    $img = !empty($data['img']) ? $data['img'] : ($hasError = true);
-    $id = !empty($data['id']) ? $data['id'] : ($hasError = true);
+    $id            = trim((string) ($data['id'] ?? ''));
+    $organitzacio  = trim((string) ($data['organitzacio'] ?? ''));
+    $slugOrg       = trim((string) ($data['slug'] ?? ''));
+    $sigla         = trim((string) ($data['sigla'] ?? ''));
+    $anyFundacio   = $data['any_fundacio'] ?? null;
+    $anyDissolucio = $data['any_dissolucio'] ?? null;
+    $paisId        = trim((string) ($data['pais_id'] ?? ''));
+    $ciutatId      = trim((string) ($data['ciutat_id'] ?? ''));
+    $subEtapaId    = trim((string) ($data['sub_etapa_id'] ?? ''));
+    $tipus         = trim((string) ($data['tipus'] ?? ''));
+    $ideologiaId   = trim((string) ($data['ideologia_id'] ?? ''));
+    $imatgeId      = trim((string) ($data['imatge_id'] ?? ''));
+    $dateCreated   = trim((string) ($data['dateCreated'] ?? ''));
+    $dateModified  = trim((string) ($data['dateModified'] ?? ''));
 
-    $timestamp = date('Y-m-d');
-    $dateModified = $timestamp;
+    $uuidRegex = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
 
-    if (!$hasError) {
-        global $conn;
-        $sql = "UPDATE db_historia_organitzacions
-        SET nomOrg = :nomOrg,
-            nomOrgCast = :nomOrgCast,
-            nomOrgEng = :nomOrgEng,
-            nomOrgIt = :nomOrgIt,
-            slug = :slug,
-            orgSig = :orgSig,
-            dataFunda = :dataFunda,
-            dataDiss = :dataDiss,
-            orgPais = :orgPais,
-            orgCiutat = :orgCiutat,
-            orgSubEtapa = :orgSubEtapa,
-            orgTipus = :orgTipus,
-            orgIdeologia = :orgIdeologia,
-            img = :img,
-            dateModified = :dateModified
-            WHERE id = :id";
+    // ID de l'organització
+    if ($id === '') {
+        $errors[] = ValidacioErrors::requerit('id');
+    } elseif (!preg_match($uuidRegex, $id)) {
+        $errors[] = ValidacioErrors::format('id');
+    }
 
-        $stmt = $conn->prepare($sql);
-
-        $stmt->bindParam(":nomOrg", $nomOrg, PDO::PARAM_STR);
-        $stmt->bindParam(":nomOrgCast", $nomOrgCast, PDO::PARAM_STR);
-        $stmt->bindParam(":nomOrgEng", $nomOrgEng, PDO::PARAM_STR);
-        $stmt->bindParam(":nomOrgIt", $nomOrgIt, PDO::PARAM_STR);
-        $stmt->bindParam(":slug", $slug, PDO::PARAM_STR);
-        $stmt->bindParam(":orgSig", $orgSig, PDO::PARAM_STR);
-        $stmt->bindParam(":dataFunda", $dataFunda, PDO::PARAM_STR);
-        $stmt->bindParam(":dataDiss", $dataDiss, PDO::PARAM_STR);
-        $stmt->bindParam(":orgPais", $orgPais, PDO::PARAM_INT);
-        $stmt->bindParam(":orgCiutat", $orgCiutat, PDO::PARAM_INT);
-        $stmt->bindParam(":orgSubEtapa", $orgSubEtapa, PDO::PARAM_INT);
-        $stmt->bindParam(":orgTipus", $orgTipus, PDO::PARAM_INT);
-        $stmt->bindParam(":orgIdeologia", $orgIdeologia, PDO::PARAM_INT);
-        $stmt->bindParam(":img", $img, PDO::PARAM_INT);
-        $stmt->bindParam(":dateModified", $dateModified, PDO::PARAM_STR);
-        $stmt->bindParam(":id", $id, PDO::PARAM_STR);
-
-        if ($stmt->execute()) {
-            // response output
-            $response['status'] = 'success';
-            header("Content-Type: application/json");
-            echo json_encode($response);
-        } else {
-            // response output - data error
-            $response['status'] = 'error';
-            header("Content-Type: application/json");
-            echo json_encode($response);
+    // Camps de text obligatoris
+    foreach (
+        [
+            'organitzacio' => $organitzacio,
+            'slug' => $slugOrg,
+            'sigla' => $sigla,
+            'tipus' => $tipus,
+        ] as $camp => $valor
+    ) {
+        if ($valor === '') {
+            $errors[] = ValidacioErrors::requerit($camp);
         }
-    } else {
-        // response output - data error
-        $response['status'] = 'error';
-
-        header("Content-Type: application/json");
-        echo json_encode($response);
     }
+
+    // Camps UUID opcionals: una cadena buida representa NULL
+    foreach (
+        [
+            'pais_id' => $paisId,
+            'ciutat_id' => $ciutatId,
+            'sub_etapa_id' => $subEtapaId,
+            'ideologia_id' => $ideologiaId,
+            'imatge_id' => $imatgeId,
+        ] as $camp => $valor
+    ) {
+        if ($valor !== '' && !preg_match($uuidRegex, $valor)) {
+            $errors[] = ValidacioErrors::format($camp);
+        }
+    }
+
+    // Anys
+    foreach (
+        [
+            'any_fundacio' => $anyFundacio,
+            'any_dissolucio' => $anyDissolucio,
+        ] as $camp => $valor
+    ) {
+        if ($valor === null || $valor === '') {
+            $errors[] = ValidacioErrors::requerit($camp);
+        } elseif (
+            filter_var($valor, FILTER_VALIDATE_INT) === false
+            || (int) $valor < 0
+            || (int) $valor > 2155
+        ) {
+            $errors[] = ValidacioErrors::format($camp);
+        }
+    }
+
+    if ($errors !== []) {
+        Response::error(
+            MissatgesAPI::error('validation_error'),
+            $errors,
+            400
+        );
+        exit;
+    }
+
+    // ==============================
+    // CONVERSIÓ UUID
+    // ==============================
+    try {
+        $idBytes = Uuid::toBinary($id);
+        $paisBytes = Uuid::toBinary($paisId);
+        $ciutatBytes = Uuid::toBinary($ciutatId);
+        $subEtapaBytes = Uuid::toBinary($subEtapaId);
+        $ideologiaBytes = Uuid::toBinary($ideologiaId);
+        $imatgeBytes = Uuid::toBinary($imatgeId);
+
+        // Dates
+        $dateModified = new \DateTimeImmutable();
+        $dateModifiedFormatted = $dateModified->format('Y-m-d H:i:s');
+
+
+        // ==============================
+        // UPDATE
+        // ==============================
+        $sql = "UPDATE " . Tables::DB_HISTORIA_ORGANITZACIONS . "
+                SET
+                    organitzacio = :organitzacio,
+                    slug = :slug,
+                    sigla = :sigla,
+                    any_fundacio = :any_fundacio,
+                    any_dissolucio = :any_dissolucio,
+                    pais_id = :pais_id,
+                    ciutat_id = :ciutat_id,
+                    sub_etapa_id = :sub_etapa_id,
+                    tipus = :tipus,
+                    ideologia_id = :ideologia_id,
+                    imatge_id = :imatge_id,
+                    dateModified = :dateModified
+                WHERE id = :id";
+
+        $stmt = $pdo->prepare($sql);
+
+        // UUID binaris
+        $stmt->bindValue(':id', $idBytes, PDO::PARAM_LOB);
+        $stmt->bindValue(':pais_id', $paisBytes, PDO::PARAM_LOB);
+        $stmt->bindValue(':ciutat_id', $ciutatBytes, PDO::PARAM_LOB);
+        $stmt->bindValue(':sub_etapa_id', $subEtapaBytes, PDO::PARAM_LOB);
+        $stmt->bindValue(':ideologia_id', $ideologiaBytes, PDO::PARAM_LOB);
+        $stmt->bindValue(':imatge_id', $imatgeBytes, PDO::PARAM_LOB);
+
+        // Text
+        $stmt->bindValue(':organitzacio', $organitzacio, PDO::PARAM_STR);
+        $stmt->bindValue(':slug', $slugOrg, PDO::PARAM_STR);
+        $stmt->bindValue(':sigla', $sigla, PDO::PARAM_STR);
+        $stmt->bindValue(':tipus', $tipus, PDO::PARAM_STR);
+
+        // Anys
+        $stmt->bindValue(
+            ':any_fundacio',
+            (int) $anyFundacio,
+            PDO::PARAM_INT
+        );
+        $stmt->bindValue(
+            ':any_dissolucio',
+            (int) $anyDissolucio,
+            PDO::PARAM_INT
+        );
+
+        // Dates
+        $stmt->bindValue(':dateModified', $dateModifiedFormatted, PDO::PARAM_STR);
+
+        $stmt->execute();
+
+        // ==============================
+        // COMPROVAR EXISTÈNCIA
+        // ==============================
+        if ($stmt->rowCount() === 0) {
+            $sqlCheck = "SELECT 1
+                         FROM " . Tables::DB_HISTORIA_ORGANITZACIONS . "
+                         WHERE id = :id
+                         LIMIT 1";
+
+            $stmtCheck = $pdo->prepare($sqlCheck);
+            $stmtCheck->bindValue(':id', $idBytes, PDO::PARAM_LOB);
+            $stmtCheck->execute();
+
+            if (!$stmtCheck->fetchColumn()) {
+                Response::error(
+                    MissatgesAPI::error('not_found'),
+                    ['id' => $id],
+                    404
+                );
+                exit;
+            }
+        }
+
+        // ==============================
+        // RESPOSTA OK
+        // ==============================
+        Response::success(
+            MissatgesAPI::success('update'),
+            [
+                'id' => $id,
+                'organitzacio' => $organitzacio,
+                'slug' => $slugOrg,
+            ]
+        );
+        exit;
+    } catch (\Throwable $e) {
+        Response::error(
+            MissatgesAPI::error('internal_error'),
+            [
+                'message' => $e->getMessage(),
+            ],
+            500
+        );
+        exit;
+    }
+
 
     /**
      * PUT : Actualitzar slot curs-article (db_historia_oberta_articles)

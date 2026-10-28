@@ -182,6 +182,7 @@ $routes = [
     APP_GESTIO . $url['historia'] . '/nou-curs-article' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'form-curs-article.php'),
 
     APP_GESTIO . $url['historia'] . '/llistat-organitzacions' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'llistat-organitzacions.php'),
+    APP_GESTIO . $url['historia'] . '/cronologia-esdeveniments' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'cronologia-esdeveniments.php'),
     APP_GESTIO . $url['historia'] . '/llistat-esdeveniments' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'llistat-esdeveniments.php'),
     APP_GESTIO . $url['historia'] . '/fitxa-persona/{slug}' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'fitxa-persona.php'),
     APP_GESTIO . $url['historia'] . '/fitxa-politic/{slug}' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'fitxa-politic.php'),

@@ -1,16 +1,13 @@
 import { state } from '../../../types/Esdeveniment';
 import { loadEventos, loadSubetapas } from './llistatEsdeveniments';
+import { getEtapas } from './api';
 
-const etapas = [
-  { id: 1, nombre: 'Prehistòria' },
-  { id: 2, nombre: 'Edat Antiga' },
-  { id: 3, nombre: 'Edat Mitjana' },
-  { id: 4, nombre: 'Edat Moderna' },
-  { id: 5, nombre: 'Edat Contemporània' },
-  { id: 6, nombre: 'Món Actual' },
-];
+interface Etapa {
+  id: string;
+  etapaNom: string;
+}
 
-export function renderFiltros(container: HTMLElement) {
+export async function renderFiltros(container: HTMLElement): Promise<void> {
   const wrapper = document.createElement('div');
 
   wrapper.innerHTML = `
@@ -19,42 +16,71 @@ export function renderFiltros(container: HTMLElement) {
     <div id="subetapas-container" class="mb-3"></div>
   `;
 
-  const etapasDiv = wrapper.querySelector('#etapas')!;
-
-  const buttons: HTMLButtonElement[] = []; // 👈 importante
-
-  etapas.forEach((e) => {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-outline-primary';
-    btn.textContent = e.nombre;
-
-    btn.onclick = () => {
-      state.etapa = e.id;
-      state.subetapa = null;
-
-      // reset visual etapas
-      buttons.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      loadSubetapas();
-      loadEventos();
-    };
-
-    buttons.push(btn);
-    etapasDiv.appendChild(btn);
-  });
-
   container.appendChild(wrapper);
+
+  const etapasDiv = wrapper.querySelector<HTMLDivElement>('#etapas');
+
+  if (!etapasDiv) return;
+
+  etapasDiv.innerHTML = '<p>Carregant etapes...</p>';
+
+  try {
+    const response = await getEtapas();
+    const etapas: Etapa[] = response.data ?? [];
+
+    etapasDiv.innerHTML = '';
+
+    if (etapas.length === 0) {
+      etapasDiv.innerHTML = '<div class="alert alert-info">No hi ha cap etapa històrica.</div>';
+      return;
+    }
+
+    etapas.forEach((etapa) => {
+      const btn = document.createElement('button');
+
+      btn.type = 'button';
+      btn.className = 'btn btn-outline-primary';
+      btn.textContent = etapa.etapaNom;
+      btn.dataset.etapaId = etapa.id;
+
+      btn.addEventListener('click', async () => {
+        state.etapa = etapa.id;
+        state.subetapa = null;
+
+        setActiveEtapaUI();
+
+        await loadSubetapas();
+        await loadEventos();
+      });
+
+      etapasDiv.appendChild(btn);
+    });
+
+    // Selecciona la primera etapa si encara no n'hi ha cap de seleccionada.
+    if (!state.etapa || !etapas.some((etapa) => etapa.id === state.etapa)) {
+      state.etapa = etapas[0].id;
+    }
+
+    setActiveEtapaUI();
+
+    await loadSubetapas();
+    await loadEventos();
+  } catch (error: unknown) {
+    console.error('Error en renderFiltros:', error);
+
+    etapasDiv.innerHTML = `
+    <div class="alert alert-danger">
+      Error carregant les etapes històriques.
+      Consulta la consola per veure el detall.
+    </div>
+  `;
+  }
 }
 
-export function setActiveEtapaUI() {
-  document.querySelectorAll('#etapas button').forEach((btn, index) => {
-    const etapaId = index + 1;
+export function setActiveEtapaUI(): void {
+  const buttons = document.querySelectorAll<HTMLButtonElement>('#etapas button');
 
-    if (etapaId === state.etapa) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
+  buttons.forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.etapaId === state.etapa);
   });
 }
