@@ -63,6 +63,11 @@ if ($slug === 'esdeveniment') {
     $dataFinalMes = $data['esdeDataFMes'] ?? null;
     $dataFinalAny = $data['esdeDataFAny'] ?? null;
 
+    // Les cadenes buides equivalen a NULL.
+    $dataFinalDia = $dataFinalDia === '' ? null : $dataFinalDia;
+    $dataFinalMes = $dataFinalMes === '' ? null : $dataFinalMes;
+    $dataFinalAny = $dataFinalAny === '' ? null : $dataFinalAny;
+
     $subEtapaId = trim((string) ($data['sub_etapa_id'] ?? ''));
     $ciutatId = trim((string) ($data['ciutat_id'] ?? ''));
     $imatgeId = trim((string) ($data['imatge_id'] ?? ''));
@@ -99,17 +104,14 @@ if ($slug === 'esdeveniment') {
         }
     }
 
-    // Validar dates
-    $dates = [
+    // Validar dates inicials: obligatòries.
+    $datesInicials = [
         'esdeDataIDia' => [$dataInicialDia, 31],
         'esdeDataIMes' => [$dataInicialMes, 12],
         'esdeDataIAny' => [$dataInicialAny, 2155],
-        'esdeDataFDia' => [$dataFinalDia, 31],
-        'esdeDataFMes' => [$dataFinalMes, 12],
-        'esdeDataFAny' => [$dataFinalAny, 2155],
     ];
 
-    foreach ($dates as $camp => [$valor, $maxim]) {
+    foreach ($datesInicials as $camp => [$valor, $maxim]) {
         if (
             $valor === null
             || $valor === ''
@@ -118,6 +120,31 @@ if ($slug === 'esdeveniment') {
             || (int) $valor > $maxim
         ) {
             $errors[] = ValidacioErrors::format($camp);
+        }
+    }
+
+    // Validar dates finals: opcionals, però han d'anar juntes.
+    $datesFinals = [
+        'esdeDataFDia' => [$dataFinalDia, 31],
+        'esdeDataFMes' => [$dataFinalMes, 12],
+        'esdeDataFAny' => [$dataFinalAny, 2155],
+    ];
+
+    $totsElsCampsFinalsBuits =
+        $dataFinalDia === null
+        && $dataFinalMes === null
+        && $dataFinalAny === null;
+
+    if (!$totsElsCampsFinalsBuits) {
+        foreach ($datesFinals as $camp => [$valor, $maxim]) {
+            if (
+                $valor === null
+                || filter_var($valor, FILTER_VALIDATE_INT) === false
+                || (int) $valor < 0
+                || (int) $valor > $maxim
+            ) {
+                $errors[] = ValidacioErrors::format($camp);
+            }
         }
     }
 
@@ -251,9 +278,23 @@ if ($slug === 'esdeveniment') {
         $stmt->bindValue(':esdeDataIMes', (int) $dataInicialMes, PDO::PARAM_INT);
         $stmt->bindValue(':esdeDataIAny', (int) $dataInicialAny, PDO::PARAM_INT);
 
-        $stmt->bindValue(':esdeDataFDia', (int) $dataFinalDia, PDO::PARAM_INT);
-        $stmt->bindValue(':esdeDataFMes', (int) $dataFinalMes, PDO::PARAM_INT);
-        $stmt->bindValue(':esdeDataFAny', (int) $dataFinalAny, PDO::PARAM_INT);
+        $stmt->bindValue(
+            ':esdeDataFDia',
+            $dataFinalDia,
+            $dataFinalDia === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+        );
+
+        $stmt->bindValue(
+            ':esdeDataFMes',
+            $dataFinalMes,
+            $dataFinalMes === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+        );
+
+        $stmt->bindValue(
+            ':esdeDataFAny',
+            $dataFinalAny,
+            $dataFinalAny === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+        );
 
         $stmt->bindValue(':descripcio', $descripcio, PDO::PARAM_STR);
 

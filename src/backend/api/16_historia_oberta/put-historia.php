@@ -67,13 +67,21 @@ if ($slug === 'esdeveniment') {
     $dataFinalMes = $data['esdeDataFMes'] ?? null;
     $dataFinalAny = $data['esdeDataFAny'] ?? null;
 
+    // Les cadenes buides equivalen a NULL.
+    $dataFinalDia = $dataFinalDia === '' ? null : $dataFinalDia;
+    $dataFinalMes = $dataFinalMes === '' ? null : $dataFinalMes;
+    $dataFinalAny = $dataFinalAny === '' ? null : $dataFinalAny;
+
     $subEtapaId = trim((string) ($data['sub_etapa_id'] ?? ''));
     $ciutatId = trim((string) ($data['ciutat_id'] ?? ''));
     $imatgeId = trim((string) ($data['imatge_id'] ?? ''));
     $descripcio = trim((string) ($data['descripcio'] ?? ''));
 
-    $persones = $data['persones'] ?? null;
-    $organitzacions = $data['organitzacions'] ?? null;
+    $personesEnviades = array_key_exists('persones', $data);
+    $organitzacionsEnviades = array_key_exists('organitzacions', $data);
+
+    $persones = $personesEnviades ? $data['persones'] : [];
+    $organitzacions = $organitzacionsEnviades ? $data['organitzacions'] : [];
 
     $uuidRegex = '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i';
 
@@ -107,17 +115,14 @@ if ($slug === 'esdeveniment') {
         }
     }
 
-    // Validar dates
-    $dates = [
+    // Validar dates inicials: obligatòries.
+    $datesInicials = [
         'esdeDataIDia' => [$dataInicialDia, 31],
         'esdeDataIMes' => [$dataInicialMes, 12],
         'esdeDataIAny' => [$dataInicialAny, 2155],
-        'esdeDataFDia' => [$dataFinalDia, 31],
-        'esdeDataFMes' => [$dataFinalMes, 12],
-        'esdeDataFAny' => [$dataFinalAny, 2155],
     ];
 
-    foreach ($dates as $camp => [$valor, $maxim]) {
+    foreach ($datesInicials as $camp => [$valor, $maxim]) {
         if (
             $valor === null
             || $valor === ''
@@ -126,6 +131,31 @@ if ($slug === 'esdeveniment') {
             || (int) $valor > $maxim
         ) {
             $errors[] = ValidacioErrors::format($camp);
+        }
+    }
+
+    // Validar dates finals: opcionals, però han d'anar juntes.
+    $datesFinals = [
+        'esdeDataFDia' => [$dataFinalDia, 31],
+        'esdeDataFMes' => [$dataFinalMes, 12],
+        'esdeDataFAny' => [$dataFinalAny, 2155],
+    ];
+
+    $totsElsCampsFinalsBuits =
+        $dataFinalDia === null
+        && $dataFinalMes === null
+        && $dataFinalAny === null;
+
+    if (!$totsElsCampsFinalsBuits) {
+        foreach ($datesFinals as $camp => [$valor, $maxim]) {
+            if (
+                $valor === null
+                || filter_var($valor, FILTER_VALIDATE_INT) === false
+                || (int) $valor < 0
+                || (int) $valor > $maxim
+            ) {
+                $errors[] = ValidacioErrors::format($camp);
+            }
         }
     }
 
@@ -262,9 +292,23 @@ if ($slug === 'esdeveniment') {
         $stmt->bindValue(':esdeDataIMes', (int) $dataInicialMes, PDO::PARAM_INT);
         $stmt->bindValue(':esdeDataIAny', (int) $dataInicialAny, PDO::PARAM_INT);
 
-        $stmt->bindValue(':esdeDataFDia', (int) $dataFinalDia, PDO::PARAM_INT);
-        $stmt->bindValue(':esdeDataFMes', (int) $dataFinalMes, PDO::PARAM_INT);
-        $stmt->bindValue(':esdeDataFAny', (int) $dataFinalAny, PDO::PARAM_INT);
+        $stmt->bindValue(
+            ':esdeDataFDia',
+            $dataFinalDia,
+            $dataFinalDia === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+        );
+
+        $stmt->bindValue(
+            ':esdeDataFMes',
+            $dataFinalMes,
+            $dataFinalMes === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+        );
+
+        $stmt->bindValue(
+            ':esdeDataFAny',
+            $dataFinalAny,
+            $dataFinalAny === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+        );
 
         $stmt->bindValue(':descripcio', $descripcio, PDO::PARAM_STR);
 
@@ -292,17 +336,18 @@ if ($slug === 'esdeveniment') {
         // ==============================
         // ACTUALITZAR RELACIONS: PERSONES
         // ==============================
-        $sqlEliminarPersones = "
+        if ($personesEnviades) {
+            $sqlEliminarPersones = "
         DELETE FROM db_historia_esdeveniment_persones
         WHERE esdeveniment_id = :id
     ";
 
-        $stmtEliminarPersones = $pdo->prepare($sqlEliminarPersones);
-        $stmtEliminarPersones->bindValue(':id', $idBytes, PDO::PARAM_LOB);
-        $stmtEliminarPersones->execute();
+            $stmtEliminarPersones = $pdo->prepare($sqlEliminarPersones);
+            $stmtEliminarPersones->bindValue(':id', $idBytes, PDO::PARAM_LOB);
+            $stmtEliminarPersones->execute();
 
-        if ($personesIds !== []) {
-            $sqlInsertarPersona = "
+            if ($personesIds !== []) {
+                $sqlInsertarPersona = "
             INSERT INTO db_historia_esdeveniment_persones (
                 id,
                 esdeveniment_id,
@@ -312,43 +357,46 @@ if ($slug === 'esdeveniment') {
                 :esdeveniment_id,
                 :persona_id
             )
-        ";
+            ";
 
-            $stmtInsertarPersona = $pdo->prepare($sqlInsertarPersona);
 
-            foreach ($personesIds as $personaId) {
-                $relacioId = RamseyUuid::uuid7()->getBytes();
+                $stmtInsertarPersona = $pdo->prepare($sqlInsertarPersona);
 
-                $stmtInsertarPersona->bindValue(':id', $relacioId, PDO::PARAM_LOB);
-                $stmtInsertarPersona->bindValue(
-                    ':esdeveniment_id',
-                    $idBytes,
-                    PDO::PARAM_LOB
-                );
-                $stmtInsertarPersona->bindValue(
-                    ':persona_id',
-                    Uuid::toBinary($personaId),
-                    PDO::PARAM_LOB
-                );
+                foreach ($personesIds as $personaId) {
+                    $relacioId = RamseyUuid::uuid7()->getBytes();
 
-                $stmtInsertarPersona->execute();
+                    $stmtInsertarPersona->bindValue(':id', $relacioId, PDO::PARAM_LOB);
+                    $stmtInsertarPersona->bindValue(
+                        ':esdeveniment_id',
+                        $idBytes,
+                        PDO::PARAM_LOB
+                    );
+                    $stmtInsertarPersona->bindValue(
+                        ':persona_id',
+                        Uuid::toBinary($personaId),
+                        PDO::PARAM_LOB
+                    );
+
+                    $stmtInsertarPersona->execute();
+                }
             }
         }
 
         // ==============================
         // ACTUALITZAR RELACIONS: ORGANITZACIONS
         // ==============================
-        $sqlEliminarOrganitzacions = "
+        if ($organitzacionsEnviades) {
+            $sqlEliminarOrganitzacions = "
         DELETE FROM db_historia_esdeveniment_organitzacio
         WHERE esdeveniment_id = :id
     ";
 
-        $stmtEliminarOrganitzacions = $pdo->prepare($sqlEliminarOrganitzacions);
-        $stmtEliminarOrganitzacions->bindValue(':id', $idBytes, PDO::PARAM_LOB);
-        $stmtEliminarOrganitzacions->execute();
+            $stmtEliminarOrganitzacions = $pdo->prepare($sqlEliminarOrganitzacions);
+            $stmtEliminarOrganitzacions->bindValue(':id', $idBytes, PDO::PARAM_LOB);
+            $stmtEliminarOrganitzacions->execute();
 
-        if ($organitzacionsIds !== []) {
-            $sqlInsertarOrganitzacio = "
+            if ($organitzacionsIds !== []) {
+                $sqlInsertarOrganitzacio = "
             INSERT INTO db_historia_esdeveniment_organitzacio (
                 id,
                 esdeveniment_id,
@@ -358,30 +406,31 @@ if ($slug === 'esdeveniment') {
                 :esdeveniment_id,
                 :organitzacio_id
             )
-        ";
+            ";
 
-            $stmtInsertarOrganitzacio = $pdo->prepare($sqlInsertarOrganitzacio);
+                $stmtInsertarOrganitzacio = $pdo->prepare($sqlInsertarOrganitzacio);
 
-            foreach ($organitzacionsIds as $organitzacioId) {
-                $relacioId = RamseyUuid::uuid7()->getBytes();
+                foreach ($organitzacionsIds as $organitzacioId) {
+                    $relacioId = RamseyUuid::uuid7()->getBytes();
 
-                $stmtInsertarOrganitzacio->bindValue(
-                    ':id',
-                    $relacioId,
-                    PDO::PARAM_LOB
-                );
-                $stmtInsertarOrganitzacio->bindValue(
-                    ':esdeveniment_id',
-                    $idBytes,
-                    PDO::PARAM_LOB
-                );
-                $stmtInsertarOrganitzacio->bindValue(
-                    ':organitzacio_id',
-                    Uuid::toBinary($organitzacioId),
-                    PDO::PARAM_LOB
-                );
+                    $stmtInsertarOrganitzacio->bindValue(
+                        ':id',
+                        $relacioId,
+                        PDO::PARAM_LOB
+                    );
+                    $stmtInsertarOrganitzacio->bindValue(
+                        ':esdeveniment_id',
+                        $idBytes,
+                        PDO::PARAM_LOB
+                    );
+                    $stmtInsertarOrganitzacio->bindValue(
+                        ':organitzacio_id',
+                        Uuid::toBinary($organitzacioId),
+                        PDO::PARAM_LOB
+                    );
 
-                $stmtInsertarOrganitzacio->execute();
+                    $stmtInsertarOrganitzacio->execute();
+                }
             }
         }
 
@@ -396,8 +445,8 @@ if ($slug === 'esdeveniment') {
                 'id' => Uuid::toString($idBytes),
                 'esdeNom' => $nom,
                 'slug' => $slug,
-                'persones' => $personesIds,
-                'organitzacions' => $organitzacionsIds,
+                ...($personesEnviades ? ['persones' => $personesIds] : []),
+                ...($organitzacionsEnviades ? ['organitzacions' => $organitzacionsIds] : []),
                 'dateModified' => $dateModified,
             ]
         );
