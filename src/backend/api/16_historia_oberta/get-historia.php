@@ -211,7 +211,7 @@ if ($slug === 'carrecsPersona') {
     FROM db_historia_esdeveniments AS e
     LEFT JOIN db_historia_sub_periode AS s ON e.sub_etapa_id = s.id
     LEFT JOIN db_historia_periode_historic AS p ON s.etapa_id = p.id
-    LEFT JOIN db_geo_ciutats AS c ON e.esdeCiutat = c.id
+    LEFT JOIN db_geo_ciutats AS c ON e.ciutat_id = c.id
     LEFT JOIN db_geo_paisos AS co ON c.pais_id = co.id
     WHERE 1=1 ";
 

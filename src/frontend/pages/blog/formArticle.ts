@@ -79,17 +79,7 @@ export async function formBlogArticle(isUpdate: boolean, id?: string) {
     divTitol.innerHTML = `
         Modifica article:
         <a href="${publicUrl}"
-          target="_blank"success	false
-
-message	"S'ha produït un error a la base de dades."
-
-errors	
-
-0	"Call to undefined function renderBlogImgShortcodes() @ get-historia.php:1163"
-
-meta	[]
-
-data	null
+          target="_blank"success
           rel="noopener noreferrer"
           class="text-decoration-none">
           ${String(data.post_title ?? '')}

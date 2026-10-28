@@ -4,6 +4,7 @@ import { API_URLS } from '../../utils/apiUrls';
 import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 import Choices from 'choices.js';
+import { setTrixHTML } from '../../utils/setTrix';
 
 interface PersonaEsdeveniment {
   id: string;
@@ -292,6 +293,9 @@ export async function formEsdevenimentHistoria(isUpdate: boolean, id?: string): 
       delete formData.organitzacions;
 
       renderFormInputs(formData);
+
+      // Trix
+      setTrixHTML('descripcio', String(data.descripcio ?? ''));
 
       btnSubmit.textContent = 'Modificar dades';
     } else {
