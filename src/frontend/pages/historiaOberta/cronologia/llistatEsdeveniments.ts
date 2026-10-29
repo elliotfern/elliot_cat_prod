@@ -1,14 +1,16 @@
+import { getIsAdmin } from '../../../services/auth/isAdmin';
 import { state } from '../../../types/Esdeveniment';
 import { getEventos, getSubetapas } from './api';
 import { renderFiltros, setActiveEtapaUI } from './filtres';
 import { renderPaginacion } from './paginacio';
 import { renderSubetapas } from './renderSubEtapes';
-import { pintarTabla, renderTabla } from './taula';
+import { renderTabla } from './taula';
 
 const root = document.getElementById('cronologia')!;
 
-export async function loadEventos() {
+export async function loadEventos(): Promise<void> {
   const container = document.getElementById('table-container')!;
+
   container.innerHTML = 'Carregant...';
 
   const data = await getEventos(state.etapa, state.subetapa || undefined);
@@ -25,15 +27,17 @@ export async function loadEventos() {
   state.eventos = data.data;
   state.paginaActual = 1;
 
-  container.innerHTML = ''; // limpia
+  container.innerHTML = '';
 
-  renderTabla(container);
-  pintarTabla();
-  renderPaginacion(container); // 👈 luego lo añadimos
+  const esAdmin = await getIsAdmin();
+  renderTabla(container, esAdmin);
+
+  renderPaginacion(container);
+
   setActiveEtapaUI();
 }
 
-export async function loadSubetapas() {
+export async function loadSubetapas(): Promise<void> {
   const container = document.getElementById('subetapas-container');
   if (!container) return;
 
@@ -49,7 +53,7 @@ export async function loadSubetapas() {
   renderSubetapas(container, data.data);
 }
 
-export function initCronologia() {
+export function initCronologia(): void {
   renderFiltros(root);
 
   const tableContainer = document.createElement('div');

@@ -1,8 +1,10 @@
 import { state } from '../../../types/Esdeveniment';
 
+let esAdminActual = false;
+
 const mesos = ['', 'gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'];
 
-export function formatDataCatalana(dia?: number, mes?: number, any?: number) {
+export function formatDataCatalana(dia?: number, mes?: number, any?: number): string {
   if (!any) return '';
 
   const d = dia && dia !== 0 ? dia : '';
@@ -14,55 +16,110 @@ export function formatDataCatalana(dia?: number, mes?: number, any?: number) {
   return `${any}`;
 }
 
-export function renderTabla(container: HTMLElement) {
-  const table = document.createElement('table');
-  table.className = 'table table-striped';
+export function renderTabla(container: HTMLElement, esAdmin: boolean): void {
+  esAdminActual = esAdmin;
 
-  table.innerHTML = `
-    <thead class="table-primary">
-      <tr>
-        <th>Esdeveniment</th>
-        <th>Ciutat</th>
-        <th>Data</th>
-        <th>Etapa</th>
-        <th>Època</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  `;
+  const row = document.createElement('div');
+  row.id = 'esdeveniments-cards';
+  row.className = 'row g-3';
 
-  container.appendChild(table);
+  container.appendChild(row);
+
+  pintarTabla();
 }
 
-export function pintarTabla() {
-  const tbody = document.querySelector('tbody')!;
-  const start = (state.paginaActual - 1) * state.eventosPorPagina;
-  const data = state.eventos.slice(start, start + state.eventosPorPagina);
+export function pintarTabla(): void {
+  const container = document.getElementById('esdeveniments-cards');
+  if (!container) return;
 
-  tbody.innerHTML = data
-    .map(
-      (e) => `
-    <tr>
-    <td>
-        <a href="/gestio/historia/fitxa-esdeveniment/${e.slug}">
-           <strong>${e.esdeNom}</strong>
-        </a>
-      </td>
-      <td>${e.ciutat}</td>
-      <td>
-        ${formatDataCatalana(e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny)}
-      </td>
-      <td>${e.etapaNom}</td>
-      <td>${e.nomSubEtapa}</td>
-      <td>
-        <a href="/gestio/historia/modifica-esdeveniment/${e.id}" 
-           class="btn btn-sm btn-primary">
-           Modifica
-        </a>
-      </td>
-    </tr>
-  `
-    )
+  const inici = (state.paginaActual - 1) * state.eventosPorPagina;
+  const esdeveniments = state.eventos.slice(inici, inici + state.eventosPorPagina);
+
+  container.innerHTML = esdeveniments
+    .map((e) => {
+      const titol = escaparHTML(e.esdeNom);
+      const slug = encodeURIComponent(e.slug);
+      const subetapa = e.nomSubEtapa ? escaparHTML(e.nomSubEtapa) : '';
+      const data = formatDataCatalana(e.esdeDataIDia, e.esdeDataIMes, e.esdeDataIAny);
+      const imatge = e.nameImg ? `https://media.elliot.cat/img/historia-esdeveniment/${encodeURIComponent(e.nameImg)}.jpg` : '';
+      const alt = escaparHTML(e.alt ?? e.esdeNom);
+      const urlFitxa = `/gestio/historia/fitxa-esdeveniment/${slug}`;
+
+      return `
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+          <article class="card h-100 shadow-sm">
+            ${
+              imatge
+                ? `
+                  <a href="${urlFitxa}">
+                    <img
+                      src="${imatge}"
+                      class="card-img-top"
+                      alt="${alt}"
+                      loading="lazy"
+                      style="height: 240px; object-fit: cover; object-position: top;"
+                    >
+                  </a>
+                `
+                : ''
+            }
+
+            <div class="card-body d-flex flex-column">
+              <h2 class="card-title h5">
+                ${titol}
+              </h2>
+
+              ${data ? `<p class="card-text small mb-2">${escaparHTML(data)}</p>` : ''}
+
+              ${
+                subetapa
+                  ? `
+                    <div class="mb-3">
+                      <span class="badge text-bg-secondary me-1 mb-1">
+                        ${subetapa}
+                      </span>
+                    </div>
+                  `
+                  : ''
+              }
+
+              <a
+                href="${urlFitxa}"
+                class="btn btn-outline-primary mt-auto"
+              >
+                Veure esdeveniment
+              </a>
+
+              ${
+                esAdminActual
+                  ? `
+                    <a
+                      href="/gestio/historia/modifica-esdeveniment/${encodeURIComponent(e.id)}"
+                      class="btn btn-warning mt-2"
+                    >
+                      Modifica
+                    </a>
+                  `
+                  : ''
+              }
+            </div>
+          </article>
+        </div>
+      `;
+    })
     .join('');
+}
+
+function escaparHTML(valor: string): string {
+  return valor.replace(/[&<>"']/g, (caracter) => {
+    const entitats: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+
+    return entitats[caracter] ?? caracter;
+  });
 }
