@@ -43,14 +43,13 @@ export async function loadSubetapas(): Promise<void> {
 
   container.innerHTML = 'Carregant...';
 
-  const data = await getSubetapas(state.etapa);
-
-  if (data.error) {
+  try {
+    const response = await getSubetapas(state.etapa);
+    renderSubetapas(container, response.data);
+  } catch (error: unknown) {
+    console.error('Error carregant subetapes:', error);
     container.innerHTML = '<p>Error carregant subetapes</p>';
-    return;
   }
-
-  renderSubetapas(container, data.data);
 }
 
 export function initCronologia(): void {

@@ -1,10 +1,6 @@
 import { state } from '../../../types/Esdeveniment';
+import { Subetapa } from '../../../types/SubEtapaHistorica';
 import { loadEventos } from './llistatEsdeveniments';
-
-interface Subetapa {
-  id: string;
-  nomSubEtapa: string;
-}
 
 export function renderSubetapas(container: HTMLElement, subetapas: Subetapa[]): void {
   container.innerHTML = '';
