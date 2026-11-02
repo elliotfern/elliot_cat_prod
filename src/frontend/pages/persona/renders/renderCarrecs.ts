@@ -15,7 +15,7 @@ export function renderCarrecs(persona: PersonaView): HTMLElement | null {
         <thead class="table-dark">
           <tr>
             <th>Càrrec</th>
-            <th>Organització</th>
+            <th>Organització/Institució</th>
             <th>Període</th>
              <th class="text-end">Accions</th>
           </tr>
