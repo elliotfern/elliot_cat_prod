@@ -51,7 +51,7 @@ export async function runFitxaBlocks(options: RunFitxaBlocksOptions) {
   container.innerHTML = '';
 
   // Càrrecs
-  const carrecs = renderCarrecs(options.persona);
+  const carrecs = await renderCarrecs(options.persona);
 
   if (carrecs) {
     container.appendChild(carrecs);
