@@ -370,7 +370,8 @@ if ($slug === 'llistatPersones') {
                 'fi' => $r['carrecFi'],
                 'organitzacio_id' => !empty($r['organitzacio_id'])
                     ? Uuid::toString($r['organitzacio_id'])
-                    : null
+                    : null,
+                'organitzacio' => $r['organitzacio'],
             ];
         }
 
