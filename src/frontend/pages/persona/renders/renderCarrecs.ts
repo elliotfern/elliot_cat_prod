@@ -1,9 +1,12 @@
+import { getIsAdmin } from '../../../services/auth/isAdmin';
 import { PersonaView } from '../../../types/PersonaView';
 
-export function renderCarrecs(persona: PersonaView): HTMLElement | null {
+export async function renderCarrecs(persona: PersonaView): Promise<HTMLElement | null> {
   if (!Array.isArray(persona.carrecs) || persona.carrecs.length === 0) {
     return null;
   }
+
+  const isAdmin = await getIsAdmin();
 
   const wrapper = document.createElement('div');
 
@@ -17,7 +20,7 @@ export function renderCarrecs(persona: PersonaView): HTMLElement | null {
             <th>Càrrec</th>
             <th>Organització/Institució</th>
             <th>Període</th>
-             <th class="text-end">Accions</th>
+            ${isAdmin ? '<th class="text-end">Accions</th>' : ''}
           </tr>
         </thead>
         <tbody></tbody>
@@ -51,18 +54,22 @@ export function renderCarrecs(persona: PersonaView): HTMLElement | null {
       tdPeriode.textContent = `Fins a ${fi}`;
     }
 
-    // Accions
-    const tdAccions = document.createElement('td');
-    tdAccions.className = 'text-end';
+    tr.append(tdNom, tdOrganitzacio, tdPeriode);
 
-    const editLink = document.createElement('a');
-    editLink.href = `/gestio/historia/modifica-carrec/${encodeURIComponent(carrec.id)}`;
-    editLink.className = 'btn btn-sm btn-outline-warning';
-    editLink.textContent = 'Modifica';
+    // Accions: només administradors
+    if (isAdmin) {
+      const tdAccions = document.createElement('td');
+      tdAccions.className = 'text-end';
 
-    tdAccions.appendChild(editLink);
+      const editLink = document.createElement('a');
+      editLink.href = `/gestio/historia/modifica-carrec/${encodeURIComponent(carrec.id)}`;
+      editLink.className = 'btn btn-sm btn-outline-warning';
+      editLink.textContent = 'Modifica';
 
-    tr.append(tdNom, tdOrganitzacio, tdPeriode, tdAccions);
+      tdAccions.appendChild(editLink);
+      tr.appendChild(tdAccions);
+    }
+
     tbody.appendChild(tr);
   }
 
