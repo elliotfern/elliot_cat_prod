@@ -66,6 +66,8 @@ class Response
         'article_it_id',
         'sub_etapa_id',
         'ideologia_id',
+        'persona_id',
+        'organitzacio_id',
 
     ];
 

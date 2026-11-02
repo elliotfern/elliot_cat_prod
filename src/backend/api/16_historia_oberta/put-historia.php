@@ -466,81 +466,6 @@ if ($slug === 'esdeveniment') {
         exit;
     }
 
-    // b) modificar persona / carrec
-} else if (isset($_GET['personaCarrec'])) {
-
-    // Obtener el cuerpo de la solicitud PUT
-    $input_data = file_get_contents("php://input");
-
-    // Decodificar los datos JSON
-    $data = json_decode($input_data, true);
-
-    // Verificar si se recibieron datos
-    if ($data === null) {
-        // Error al decodificar JSON
-        header('HTTP/1.1 400 Bad Request');
-        echo json_encode(['error' => 'Error decoding JSON data']);
-        exit();
-    }
-
-    // Ahora puedes acceder a los datos como un array asociativo
-    $hasError = false; // Inicializamos la variable $hasError como false
-
-    $idPersona = !empty($data['idPersona']) ? $data['idPersona'] : ($hasError = true);
-    $carrecNom = !empty($data['carrecNom']) ? $data['carrecNom'] : ($hasError = true);
-    $carrecNomCast = !empty($data['carrecNomCast']) ? $data['carrecNomCast'] : ($hasError = false);
-    $carrecNomEng = !empty($data['carrecNomEng']) ? $data['carrecNomEng'] : ($hasError = false);
-    $carrecNomIt = !empty($data['carrecNomIt']) ? $data['carrecNomIt'] : ($hasError = false);
-    $carrecInici = !empty($data['carrecInici']) ? $data['carrecInici'] : ($hasError = true);
-    $carrecFi = !empty($data['carrecFi']) ? $data['carrecFi'] : ($hasError = false);
-    $idOrg = !empty($data['idOrg']) ? $data['idOrg'] : ($hasError = true);
-    $id = !empty($data['id']) ? $data['id'] : ($hasError = true);
-
-    if (!$hasError) {
-        global $conn;
-        $sql = "UPDATE aux_persones_carrecs
-        SET idOrg = :idOrg,
-            idPersona = :idPersona,
-            carrecNom = :carrecNom,
-            carrecNomCast = :carrecNomCast,
-            carrecNomEng = :carrecNomEng,
-            carrecNomIt = :carrecNomIt,
-            carrecInici = :carrecInici,
-            carrecFi = :carrecFi
-             WHERE id = :id";
-
-        $stmt = $conn->prepare($sql);
-
-        $stmt->bindParam(":idPersona", $idPersona, PDO::PARAM_INT);
-        $stmt->bindParam(":carrecNom", $carrecNom, PDO::PARAM_STR);
-        $stmt->bindParam(":carrecNomCast", $carrecNomCast, PDO::PARAM_STR);
-        $stmt->bindParam(":carrecNomEng", $carrecNomEng, PDO::PARAM_STR);
-        $stmt->bindParam(":carrecNomIt", $carrecNomIt, PDO::PARAM_STR);
-        $stmt->bindParam(":carrecInici", $carrecInici, PDO::PARAM_STR);
-        $stmt->bindParam(":carrecFi", $carrecFi, PDO::PARAM_STR);
-        $stmt->bindParam(":idOrg", $idOrg, PDO::PARAM_INT);
-        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
-
-        if ($stmt->execute()) {
-            // response output
-            $response['status'] = 'success';
-            header("Content-Type: application/json");
-            echo json_encode($response);
-        } else {
-            // response output - data error
-            $response['status'] = 'error';
-            header("Content-Type: application/json");
-            echo json_encode($response);
-        }
-    } else {
-        // response output - data error
-        $response['status'] = 'error';
-
-        header("Content-Type: application/json");
-        echo json_encode($response);
-    }
-
-
 
     // ==============================
     // PUT ORGANITZACIO
@@ -1195,6 +1120,188 @@ if ($slug === 'esdeveniment') {
                 'id' => $id,
             ],
             httpCode: 200
+        );
+    } catch (PDOException $e) {
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
+
+    // ==============================
+    // PUT CARREC
+    // ==============================
+} else if ($slug === 'carrec') {
+
+    try {
+
+        $input = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (!is_array($input)) {
+            Response::error(
+                'Dades de la petició invàlides.',
+                [],
+                400
+            );
+            return;
+        }
+
+        // ==============================
+        // DADES
+        // ==============================
+
+        $id = is_string($input['id'] ?? null)
+            ? trim($input['id'])
+            : '';
+
+        $personaId = is_string($input['persona_id'] ?? null)
+            ? trim($input['persona_id'])
+            : '';
+
+        $carrecNom = is_string($input['carrecNom'] ?? null)
+            ? trim($input['carrecNom'])
+            : '';
+
+        $carrecInici = $input['carrecInici'] ?? null;
+        $carrecFi = $input['carrecFi'] ?? null;
+
+        $organitzacioId = is_string($input['organitzacio_id'] ?? null)
+            ? trim($input['organitzacio_id'])
+            : '';
+
+        $errors = [];
+
+        // ==============================
+        // VALIDACIONS
+        // ==============================
+
+        if ($id === '' || !Uuid::isValid($id)) {
+            $errors[] = 'L\'identificador del càrrec és invàlid.';
+        }
+
+        if ($personaId === '' || !Uuid::isValid($personaId)) {
+            $errors[] = 'La persona és obligatòria o té un identificador invàlid.';
+        }
+
+        if ($carrecNom === '') {
+            $errors[] = 'El càrrec és obligatori.';
+        } elseif (mb_strlen($carrecNom) > 155) {
+            $errors[] = 'El càrrec no pot superar els 155 caràcters.';
+        }
+
+        // Any d'inici
+        if ($carrecInici !== null && $carrecInici !== '') {
+
+            if (filter_var($carrecInici, FILTER_VALIDATE_INT) === false) {
+                $errors[] = 'L\'any d\'inici ha de ser un número enter.';
+            } else {
+                $carrecInici = (int) $carrecInici;
+            }
+        } else {
+            $carrecInici = null;
+        }
+
+        // Any de fi
+        if ($carrecFi !== null && $carrecFi !== '') {
+
+            if (filter_var($carrecFi, FILTER_VALIDATE_INT) === false) {
+                $errors[] = 'L\'any de fi ha de ser un número enter.';
+            } else {
+                $carrecFi = (int) $carrecFi;
+            }
+        } else {
+            $carrecFi = null;
+        }
+
+        // Organització
+        if (
+            $organitzacioId !== ''
+            && !Uuid::isValid($organitzacioId)
+        ) {
+            $errors[] = 'L\'organització té un identificador invàlid.';
+        }
+
+        if ($errors !== []) {
+            Response::error(
+                'Hi ha errors en les dades del càrrec.',
+                $errors,
+                400
+            );
+            return;
+        }
+
+        // ==============================
+        // COMPROVAR EXISTÈNCIA
+        // ==============================
+
+        $idBin = Uuid::toBinary($id);
+
+        $sqlCheck = "
+            SELECT 1
+            FROM " . qi(Tables::PERSONES_CARRECS, $pdo) . "
+            WHERE id = :id
+            LIMIT 1
+        ";
+
+        $stmt = $pdo->prepare($sqlCheck);
+        $stmt->execute([
+            ':id' => $idBin,
+        ]);
+
+        if ($stmt->fetchColumn() === false) {
+            Response::error(
+                'El càrrec no existeix.',
+                [],
+                404
+            );
+            return;
+        }
+
+        // ==============================
+        // UPDATE
+        // ==============================
+
+        $sql = "
+            UPDATE " . qi(Tables::PERSONES_CARRECS, $pdo) . "
+            SET
+                persona_id = :persona_id,
+                carrecNom = :carrecNom,
+                carrecInici = :carrecInici,
+                carrecFi = :carrecFi,
+                organitzacio_id = :organitzacio_id
+            WHERE id = :id
+        ";
+
+        $db->execute(
+            $sql,
+            [
+                ':id' => $idBin,
+                ':persona_id' => Uuid::toBinary($personaId),
+                ':carrecNom' => $carrecNom,
+                ':carrecInici' => $carrecInici,
+                ':carrecFi' => $carrecFi,
+                ':organitzacio_id' => $organitzacioId !== ''
+                    ? Uuid::toBinary($organitzacioId)
+                    : null,
+            ]
+        );
+
+        // ==============================
+        // RESPOSTA
+        // ==============================
+
+        Response::success(
+            MissatgesAPI::success('update'),
+            [
+                'id' => $id,
+            ]
         );
     } catch (PDOException $e) {
 

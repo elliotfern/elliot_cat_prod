@@ -34,6 +34,11 @@ class HistoriaRoutes
         return $this->base() . '/nova-organitzacio';
     }
 
+    public function nouCarrec(): string
+    {
+        return $this->base() . '/nou-carrec';
+    }
+
     // -------------------------
     // PAGINES
     // -------------------------

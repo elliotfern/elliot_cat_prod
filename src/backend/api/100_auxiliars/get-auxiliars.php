@@ -85,6 +85,46 @@ if ($slug === 'directors') {
         );
     }
 
+    // Llistat organitzacions històriques
+    // ruta GET => "/api/cinema/get/auxiliars/organitzacions"
+} else if ($slug === 'organitzacions') {
+    $sql = <<<SQL
+            SELECT i.id, i.organitzacio
+            FROM %s AS i
+            ORDER BY i.organitzacio ASC
+            SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_HISTORIA_ORGANITZACIONS, $pdo),
+    );
+
+    try {
+        $result = $db->getData($query);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+
     // Llistat imatges pelicules
     // ruta GET => "/api/cinema/get/auxiliars/imgPelis"
 } else if ($slug === 'imgPelis') {
@@ -1197,6 +1237,31 @@ if ($slug === 'directors') {
         Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
     }
 
+    // GET : llistat persones
+    // URL: https://elliot.cat/api/auxiliars/get/persones
+} else if ($slug === "persones") {
+
+    $db = new Database();
+    $query = "SELECT id, CONCAT_WS(' ', nom, cognoms) AS nom_complet
+            FROM db_persones
+            ORDER BY cognoms ASC";
+
+    try {
+        $row = $db->getData($query);
+
+        if (empty($row)) {
+            Response::error(MissatgesAPI::error('not_found'), [], 404);
+            return;
+        }
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $row,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(MissatgesAPI::error('errorBD'), [$e->getMessage()], 500);
+    }
     // GET : llistat sexes
     // URL: https://elliot.cat/api/auxiliars/get/sexes
 } else if ($slug === "sexes") {

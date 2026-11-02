@@ -35,6 +35,7 @@ use App\Utils\Url;
             <li><a href="<?php echo Url::intranet('historia'); ?>/llistat-organitzacions">Llistat d'organitzacions</a></li>
             <li><a href="<?php echo Url::intranet('historia'); ?>/cronologia-esdeveniments">Cronologia històrica d'esdeveniments</a></li>
             <li><a href="<?php echo Url::intranet('historia'); ?>/llistat-esdeveniments">Llistat d'esdeveniments</a></li>
+            <li><a href="<?php echo Url::intranet('historia'); ?>/llistat-carrecs">Llistat de càrrecs / responsabilitats</a></li>
         </ul>
     </div>
 

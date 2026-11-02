@@ -1,5 +1,4 @@
 import { getPageType } from '../../utils/urlPath';
-import { transmissioDadesDB } from '../../utils/actualitzarDades';
 import { renderHistoriaObertaList } from './llistatHistoriaObertaPaged';
 import { taulaLlistatCursosHistoria } from './llistatCursos';
 import { taulaArticlesCurs } from './fitxaCurs';
@@ -13,6 +12,8 @@ import { fitxaOrganitzacio } from './fitxaOrganitzacio';
 import { taulaLlistatEsdeveniments } from './llistatEsdeveniments';
 import { formEsdevenimentHistoria } from './formEsdeveniment';
 import { fitxaEsdeveniment } from './fitxaEsdeveniment';
+import { taulaLlistatCarrecs } from './llistatCarrecs';
+import { formCarrec } from './formCarrec';
 
 const url = window.location.href;
 const pageType = getPageType(url);
@@ -52,11 +53,6 @@ export function historiaOberta() {
     taulaLlistatEsdeveniments();
   }
 
-  if (pageType[3] === 'modifica-article') {
-    //'/api/historia/get/?carrecsPersona=', data.id, ['Càrrec', 'Organització', 'Anys', 'Accions'], function (fila, columna) {
-    // /api/historia/get/?esdevenimentsPersona=', data.id, ['Esdeveniment', 'Any', 'Accions'], function (fila, columna) {
-  }
-
   if (pageType[2] === 'nou-esdeveniment') {
     formEsdevenimentHistoria(false);
   } else if (pageType[2] === 'modifica-esdeveniment') {
@@ -69,23 +65,16 @@ export function historiaOberta() {
     fitxaEsdeveniment('historia/get/esdevenimentSlug', esde);
   }
 
-  if (pageType[2] === 'nou-persona-carrec') {
-    const form = document.getElementById('formPersonaCarrec');
-    if (form) {
-      // Lanzar actualizador de datos
-      form.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'POST', 'formPersonaCarrec', '/api/historia/post/?personaCarrec');
-      });
-    }
-  } else if (pageType[2] === 'modifica-persona-carrec') {
-    const form = document.getElementById('formPersonaCarrec');
-    if (form) {
-      // Lanzar actualizador de datos
-      form.addEventListener('submit', function (event) {
-        transmissioDadesDB(event, 'PUT', 'formPersonaCarrec', '/api/historia/put/?personaCarrec');
-      });
-    }
-  } else if (pageType[2] === 'llistat-organitzacions') {
+  if (pageType[2] === 'llistat-carrecs') {
+    taulaLlistatCarrecs();
+  } else if (pageType[2] === 'nou-carrec') {
+    formCarrec(false);
+  } else if (pageType[2] === 'modifica-carrec') {
+    const id = pageType[3];
+    formCarrec(true, id);
+  }
+
+  if (pageType[2] === 'llistat-organitzacions') {
     taulaLlistatOrganitzacions();
   } else if (pageType[2] === 'modifica-organitzacio') {
     const org = pageType[3];

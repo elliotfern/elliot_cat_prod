@@ -48,6 +48,7 @@ export type ApiUrls = {
     CURS_ID: (id: string) => string;
     ORGANITZACIO_ID: (id: string) => string;
     ESDEVENIMENT_ID: (id: string) => string;
+    CARREC_ID: (id: string) => string;
   };
   POST: {
     PERFIL_CV: string;
@@ -83,6 +84,7 @@ export type ApiUrls = {
     CURS_HISTORIA: string;
     ORGANITZACIO_HISTORIA: string;
     ESDEVENIMENT_HISTORIA: string;
+    CARREC_HISTORIA: string;
   };
   PUT: {
     PERFIL_CV: string;
@@ -117,6 +119,7 @@ export type ApiUrls = {
     CURS_HISTORIA: string;
     ORGANITZACIO_HISTORIA: string;
     ESDEVENIMENT_HISTORIA: string;
+    CARREC_HISTORIA: string;
   };
   DELETE: {
     PAIS: string;

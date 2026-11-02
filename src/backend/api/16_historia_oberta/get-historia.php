@@ -894,6 +894,78 @@ if ($slug === 'carrecsPersona') {
         );
     }
 
+    // 3. Pagina detalls Carrec
+    // ruta GET => "/api/historia/get/carrecId?id=4t345345werwr"
+} else if ($slug === 'carrecId') {
+
+    $id = $_GET['id'];
+
+    $sql = "SELECT c.id, c.persona_id, c.carrecNom, c.carrecInici, c.carrecFi, c.organitzacio_id
+    FROM db_persones_carrecs AS c
+    WHERE c.id = :id
+    LIMIT 1";
+
+    try {
+        $params = [':id' => Uuid::toBinary($id)];
+        $result = $db->getData($sql, $params, true);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    // 3. Llistat de càrrecs / responsabilitats
+    // ruta GET => "/api/historia/get/llistatCarrecs"
+} else if ($slug === 'llistatCarrecs') {
+
+    $sql = "SELECT c.organitzacio, p.id, p.carrecNom AS nom, p.persona_id, p.carrecInici AS inici, p.carrecFi AS fi, p.organitzacio_id, pe.nom AS nomPersona, pe.cognoms, pe.slug AS slugPersona, c.slug AS slugOrganitzacio
+    FROM db_persones_carrecs AS p
+     LEFT JOIN db_persones AS pe ON p.persona_id = pe.id
+    LEFT JOIN db_historia_organitzacions AS c ON p.organitzacio_id = c.id
+    ORDER BY p.carrecNom";
+
+    try {
+        $result = $db->getData($sql, [], false);
+
+        if (empty($result)) {
+            Response::error(
+                MissatgesAPI::error('not_found'),
+                [],
+                404
+            );
+            return;
+        }
+
+        Response::success(
+            MissatgesAPI::success('get'),
+            $result,
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // 3. Pagina detalls organització slug
     // ruta GET => "/api/historia/get/organitzacioSlug?slug=partit-comunista"
 } else if ($slug === 'organitzacioSlug') {

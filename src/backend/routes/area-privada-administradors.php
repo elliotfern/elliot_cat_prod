@@ -197,6 +197,10 @@ $routes = [
     APP_GESTIO . $url['historia'] . '/modifica-organitzacio/{slug}' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'form-organitzacio.php'),
     APP_GESTIO . $url['historia'] . '/nova-organitzacio' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'form-organitzacio.php'),
 
+    APP_GESTIO . $url['historia'] . '/nou-carrec' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'form-carrec.php'),
+    APP_GESTIO . $url['historia'] . '/modifica-carrec/{slug}' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'form-carrec.php'),
+    APP_GESTIO . $url['historia'] . '/llistat-carrecs' => route(APP_INTRANET_DIR . APP_HISTORIA_DIR . 'llistat-carrecs.php'),
+
     // 16. Auxiliars
     APP_GESTIO . $url['auxiliars'] => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'index.php'),
     APP_GESTIO . $url['auxiliars'] . '/llistat-imatges' => route(APP_INTRANET_DIR . APP_AUXILIARS_DIR . 'imatges/llistat-imatges.php'),

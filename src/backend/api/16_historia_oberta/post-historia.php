@@ -450,10 +450,6 @@ if ($slug === 'esdeveniment') {
         exit;
     }
 
-    // b) Inserir persona / carrec
-} else if (isset($_GET['personaCarrec'])) {
-
-
     // ==============================
     // POST ORGANITZACIO
     // ==============================
@@ -1105,6 +1101,158 @@ if ($slug === 'esdeveniment') {
 
     return;
     // si no hi ha cap endpoint valid, mostrar error:
+
+    // ==============================
+    // POST CARREC
+    // ==============================
+} else if ($slug === 'carrec') {
+
+    try {
+
+        $input = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (!is_array($input)) {
+            Response::error(
+                'Dades de la petició invàlides.',
+                [],
+                400
+            );
+            return;
+        }
+
+        // ==============================
+        // DADES
+        // ==============================
+
+        $personaId = trim((string) ($input['persona_id'] ?? ''));
+        $carrecNom = trim((string) ($input['carrecNom'] ?? ''));
+
+        $carrecInici = $input['carrecInici'] ?? null;
+        $carrecFi = $input['carrecFi'] ?? null;
+
+        $organitzacioId = trim(
+            (string) ($input['organitzacio_id'] ?? '')
+        );
+
+        $errors = [];
+
+        // ==============================
+        // VALIDACIONS
+        // ==============================
+
+        if ($personaId === '' || !Uuid::isValid($personaId)) {
+            $errors[] = 'La persona és obligatòria o té un identificador invàlid.';
+        }
+
+        if ($carrecNom === '') {
+            $errors[] = 'El càrrec és obligatori.';
+        } elseif (mb_strlen($carrecNom) > 155) {
+            $errors[] = 'El càrrec no pot superar els 155 caràcters.';
+        }
+
+        // Any d'inici
+        if ($carrecInici !== null && $carrecInici !== '') {
+
+            if (filter_var($carrecInici, FILTER_VALIDATE_INT) === false) {
+                $errors[] = 'L\'any d\'inici ha de ser un número enter.';
+            } else {
+                $carrecInici = (int) $carrecInici;
+            }
+        } else {
+            $carrecInici = null;
+        }
+
+        // Any de fi
+        if ($carrecFi !== null && $carrecFi !== '') {
+
+            if (filter_var($carrecFi, FILTER_VALIDATE_INT) === false) {
+                $errors[] = 'L\'any de fi ha de ser un número enter.';
+            } else {
+                $carrecFi = (int) $carrecFi;
+            }
+        } else {
+            $carrecFi = null;
+        }
+
+        // Organització
+        if ($organitzacioId !== '' && !Uuid::isValid($organitzacioId)) {
+            $errors[] = 'L\'organització té un identificador invàlid.';
+        }
+
+        if ($errors !== []) {
+            Response::error(
+                'Hi ha errors en les dades del càrrec.',
+                $errors,
+                400
+            );
+            return;
+        }
+
+        // ==============================
+        // INSERT
+        // ==============================
+
+        $id = Uuid::generate();
+
+        $sql = "
+            INSERT INTO " . qi(Tables::PERSONES_CARRECS, $pdo) . "
+            (
+                id,
+                persona_id,
+                carrecNom,
+                carrecInici,
+                carrecFi,
+                organitzacio_id
+            )
+            VALUES
+            (
+                :id,
+                :persona_id,
+                :carrecNom,
+                :carrecInici,
+                :carrecFi,
+                :organitzacio_id
+            )
+        ";
+
+        $db->execute(
+            $sql,
+            [
+                ':id' => Uuid::toBinary($id),
+                ':persona_id' => Uuid::toBinary($personaId),
+                ':carrecNom' => $carrecNom,
+                ':carrecInici' => $carrecInici,
+                ':carrecFi' => $carrecFi,
+                ':organitzacio_id' => $organitzacioId !== ''
+                    ? Uuid::toBinary($organitzacioId)
+                    : null,
+            ]
+        );
+
+        // ==============================
+        // RESPOSTA
+        // ==============================
+
+        Response::success(
+            MissatgesAPI::success('create'),
+            [
+                'id' => $id,
+            ],
+            httpCode: 201
+        );
+    } catch (PDOException $e) {
+
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
+    return;
 } else {
     // response output - data error
     $response['status'] = 'error';
