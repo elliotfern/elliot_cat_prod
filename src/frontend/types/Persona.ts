@@ -1,3 +1,5 @@
+import { Carrec } from './Carrec';
+
 export interface Persona {
   slug: string;
   nom: string;
@@ -40,6 +42,7 @@ export interface Persona {
   grups: GrupDTO[];
   grup_ids?: string[];
   grup: string[];
+  carrecs?: Carrec[];
 }
 
 export type GrupDTO = { id: string; nom: string };

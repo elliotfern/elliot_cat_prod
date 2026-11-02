@@ -7,7 +7,7 @@ use App\Utils\Uuid;
 // ─────────────────────────────────────────────
 // CONFIGURACIÓ
 // ─────────────────────────────────────────────
-$taula = 'db_historia_sub_periode';
+$taula = 'db_persones_carrecs';
 $columnaId = 'id2';              // BINARY(16), nou UUID
 $columnaFiltre = 'id';      // Identificador actual/antic de la fila
 // ─────────────────────────────────────────────

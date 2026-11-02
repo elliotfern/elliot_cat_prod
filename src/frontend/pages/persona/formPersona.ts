@@ -5,6 +5,8 @@ import { auxiliarSelect } from '../../utils/auxiliarSelect';
 import { renderFormInputs } from '../../Presentation/Utils/renderInputsForm';
 import { setTrixHTML } from '../../utils/setTrix';
 import { API_BASE } from '../../utils/urls';
+import { Carrec } from '../../types/Carrec';
+import Choices from 'choices.js';
 
 type Pais = {
   id: string;
@@ -15,6 +17,23 @@ type Ciutat = {
   id: string;
   ciutat: string;
 };
+
+type Organitzacio = {
+  id: string;
+  organitzacio: string;
+  sigla: string;
+};
+
+let organitzacionsList: Organitzacio[] = [];
+
+async function loadOrganitzacions(): Promise<void> {
+  try {
+    organitzacionsList = await api.get<Organitzacio[]>('historia/get/llistatOrganitzacions');
+  } catch (error) {
+    console.error('loadOrganitzacions failed:', error);
+    organitzacionsList = [];
+  }
+}
 
 let paisosList: Pais[] = [];
 
@@ -222,6 +241,228 @@ async function loadPaisos() {
 
     paisosList = [];
   }
+}
+
+function createCarrecBlock(carrec?: Carrec): void {
+  const container = document.getElementById('carrecsList');
+
+  if (!container) return;
+
+  const index = container.children.length;
+
+  const wrapper = document.createElement('div');
+
+  wrapper.className = 'border rounded p-3 mb-3';
+
+  // ID del càrrec (només existeix quan editem un càrrec)
+  if (carrec?.id) {
+    const idInput = document.createElement('input');
+
+    idInput.type = 'hidden';
+    idInput.name = `carrecs[${index}][id]`;
+    idInput.value = carrec.id;
+
+    wrapper.appendChild(idInput);
+  }
+
+  // Títol i botó d'eliminació
+  const header = document.createElement('div');
+
+  header.className = 'd-flex justify-content-between align-items-center mb-3';
+
+  const title = document.createElement('strong');
+
+  title.textContent = `Càrrec ${index + 1}`;
+
+  const removeBtn = document.createElement('button');
+
+  removeBtn.type = 'button';
+  removeBtn.className = 'btn btn-sm btn-danger';
+  removeBtn.textContent = '✕';
+  removeBtn.setAttribute('aria-label', 'Eliminar càrrec');
+
+  header.appendChild(title);
+  header.appendChild(removeBtn);
+
+  wrapper.appendChild(header);
+
+  // Nom del càrrec
+  const nomGroup = document.createElement('div');
+
+  nomGroup.className = 'mb-3';
+
+  const nomLabel = document.createElement('label');
+
+  nomLabel.className = 'form-label';
+  nomLabel.textContent = 'Nom del càrrec';
+
+  const nomInput = document.createElement('input');
+
+  nomInput.type = 'text';
+  nomInput.className = 'form-control';
+  nomInput.name = `carrecs[${index}][carrecNom]`;
+  nomInput.required = true;
+  nomInput.maxLength = 155;
+  nomInput.value = carrec?.nom ?? '';
+
+  nomGroup.appendChild(nomLabel);
+  nomGroup.appendChild(nomInput);
+
+  wrapper.appendChild(nomGroup);
+
+  // Anys d'inici i finalització
+  const yearsRow = document.createElement('div');
+
+  yearsRow.className = 'row g-3 mb-3';
+
+  const iniciGroup = document.createElement('div');
+
+  iniciGroup.className = 'col-md-6';
+
+  const iniciLabel = document.createElement('label');
+
+  iniciLabel.className = 'form-label';
+  iniciLabel.textContent = 'Any d’inici';
+
+  const iniciInput = document.createElement('input');
+
+  iniciInput.type = 'number';
+  iniciInput.className = 'form-control';
+  iniciInput.name = `carrecs[${index}][carrecInici]`;
+  iniciInput.min = '1';
+  iniciInput.max = '9999';
+  iniciInput.step = '1';
+  iniciInput.value = carrec?.inici != null ? String(carrec.inici) : '';
+
+  iniciGroup.appendChild(iniciLabel);
+  iniciGroup.appendChild(iniciInput);
+
+  const fiGroup = document.createElement('div');
+
+  fiGroup.className = 'col-md-6';
+
+  const fiLabel = document.createElement('label');
+
+  fiLabel.className = 'form-label';
+  fiLabel.textContent = 'Any de finalització';
+
+  const fiInput = document.createElement('input');
+
+  fiInput.type = 'number';
+  fiInput.className = 'form-control';
+  fiInput.name = `carrecs[${index}][carrecFi]`;
+  fiInput.min = '1';
+  fiInput.max = '9999';
+  fiInput.step = '1';
+  fiInput.value = carrec?.fi != null ? String(carrec.fi) : '';
+
+  fiGroup.appendChild(fiLabel);
+  fiGroup.appendChild(fiInput);
+
+  yearsRow.appendChild(iniciGroup);
+  yearsRow.appendChild(fiGroup);
+
+  wrapper.appendChild(yearsRow);
+
+  // Organització
+  const organitzacioGroup = document.createElement('div');
+
+  organitzacioGroup.className = 'mb-2';
+
+  const organitzacioLabel = document.createElement('label');
+
+  organitzacioLabel.className = 'form-label';
+  organitzacioLabel.textContent = 'Organització';
+
+  const organitzacioSelect = document.createElement('select');
+
+  organitzacioSelect.className = 'form-select';
+  organitzacioSelect.name = `carrecs[${index}][organitzacio_id]`;
+
+  const emptyOption = document.createElement('option');
+
+  emptyOption.value = '';
+  emptyOption.textContent = '-- Sense organització --';
+
+  organitzacioSelect.appendChild(emptyOption);
+
+  for (const organitzacio of organitzacionsList) {
+    const option = document.createElement('option');
+
+    option.value = organitzacio.id;
+    option.textContent = organitzacio.sigla ? `${organitzacio.organitzacio} (${organitzacio.sigla})` : organitzacio.organitzacio;
+
+    organitzacioSelect.appendChild(option);
+  }
+
+  organitzacioGroup.appendChild(organitzacioLabel);
+  organitzacioGroup.appendChild(organitzacioSelect);
+
+  wrapper.appendChild(organitzacioGroup);
+
+  container.appendChild(wrapper);
+
+  // Inicialitzar Choices.js
+  const choices = new Choices(organitzacioSelect, {
+    searchEnabled: true,
+    allowHTML: false,
+    shouldSort: false,
+    placeholder: true,
+    placeholderValue: 'Selecciona una organització:',
+    itemSelectText: '',
+    noResultsText: 'Sense resultats',
+  });
+
+  // Preseleccionar organització existent
+  if (carrec?.organitzacio_id) {
+    const organitzacioExisteix = organitzacionsList.some((organitzacio) => organitzacio.id === carrec.organitzacio_id);
+
+    if (organitzacioExisteix) {
+      choices.setChoiceByValue(carrec.organitzacio_id);
+    } else {
+      console.warn('No s’ha trobat l’organització del càrrec:', carrec.organitzacio_id);
+    }
+  }
+
+  // Ajustar amplada de Choices.js
+  const choicesContainer = wrapper.querySelector<HTMLElement>('.choices');
+
+  if (choicesContainer) {
+    choicesContainer.style.flex = '1';
+    choicesContainer.style.minWidth = '0';
+  }
+
+  removeBtn.addEventListener('click', () => {
+    choices.destroy();
+    wrapper.remove();
+
+    actualizarIndicesCarrecs(container);
+  });
+}
+
+function initCarrecsUI(): void {
+  const container = document.getElementById('inputCarrecs');
+
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const addBtn = document.createElement('button');
+
+  addBtn.type = 'button';
+  addBtn.className = 'btn btn-sm btn-secondary mb-3';
+  addBtn.textContent = '+ Afegir càrrec';
+
+  const carrecsList = document.createElement('div');
+
+  carrecsList.id = 'carrecsList';
+
+  addBtn.addEventListener('click', () => {
+    createCarrecBlock();
+  });
+
+  container.appendChild(addBtn);
+  container.appendChild(carrecsList);
 }
 
 async function createPais(nomPais: string): Promise<Pais | null> {
@@ -444,4 +685,31 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
   initCreateCiutatUI();
   await auxiliarSelect(data.ciutat_naixement_id ?? 0, 'ciutats', 'ciutat_naixement_id', 'ciutat');
   await auxiliarSelect(data.ciutat_defuncio_id ?? 0, 'ciutats', 'ciutat_defuncio_id', 'ciutat');
+
+  await loadOrganitzacions();
+
+  initCarrecsUI();
+
+  // Cargar cargos existentes al modificar una persona
+  if (Array.isArray(data.carrecs)) {
+    for (const carrec of data.carrecs) {
+      createCarrecBlock(carrec);
+    }
+  }
+}
+
+function actualizarIndicesCarrecs(container: HTMLElement): void {
+  Array.from(container.children).forEach((child, index) => {
+    const inputs = child.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select');
+
+    inputs.forEach((input) => {
+      input.name = input.name.replace(/carrecs\[\d+\]/, `carrecs[${index}]`);
+    });
+
+    const heading = child.querySelector('strong');
+
+    if (heading) {
+      heading.textContent = `Càrrec ${index + 1}`;
+    }
+  });
 }

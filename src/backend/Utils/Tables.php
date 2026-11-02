@@ -7,6 +7,7 @@ class Tables
     public const PERSONES = 'db_persones';
     public const PERSONES_GRUPS_RELACIONS = 'db_persones_grups_relacions';
     public const PERSONES_GRUPS = 'db_persones_grups';
+    public const PERSONES_CARRECS = 'db_persones_carrecs';
 
     public const LLIBRES = 'db_llibres';
     public const LLIBRES_AUTORS = 'db_llibres_autors';

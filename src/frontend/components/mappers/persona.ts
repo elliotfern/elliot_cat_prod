@@ -1,5 +1,6 @@
 import { formatData } from '../../utils/formataData';
 import { PersonaView } from '../../types/PersonaView';
+import { Carrec } from '../../types/Carrec';
 
 // -------------------------
 // API TYPE
@@ -32,6 +33,7 @@ export interface PersonaApi {
   created_at?: string | null;
   updated_at?: string | null;
   grups: { id: string; nom: string }[];
+  carrecs?: Carrec[];
 }
 
 // -------------------------
@@ -119,6 +121,7 @@ export function mapPersona(api: PersonaApi): PersonaView {
 
     grupsText: '',
     grups: Array.isArray(api.grups) ? api.grups.map((g) => g.nom) : [],
+    carrecs: Array.isArray(api.carrecs) ? api.carrecs : [],
   };
 }
 

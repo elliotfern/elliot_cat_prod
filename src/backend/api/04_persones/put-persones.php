@@ -96,6 +96,153 @@ function insertPersonGroups(PDO $pdo, string $personaIdBin, array $grupIds): voi
     }
 }
 
+function syncPersonCharges(PDO $pdo, string $personaIdBin, array $carrecs): void
+{
+    // Obtener los cargos actuales de la persona.
+    $sql = "
+        SELECT id
+        FROM " . Tables::PERSONES_CARRECS . "
+        WHERE persona_id = :persona_id
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':persona_id', $personaIdBin, PDO::PARAM_LOB);
+    $stmt->execute();
+
+    $existingIds = [];
+
+    while ($idBin = $stmt->fetchColumn()) {
+        $existingIds[bin2hex($idBin)] = $idBin;
+    }
+
+    $retainedIds = [];
+
+    $sqlUpdate = "
+        UPDATE " . Tables::PERSONES_CARRECS . "
+        SET
+            carrecNom = :nom,
+            carrecInici = :inici,
+            carrecFi = :fi,
+            organitzacio_id = :organitzacio_id
+        WHERE id = :id
+          AND persona_id = :persona_id
+    ";
+
+    $stmtUpdate = $pdo->prepare($sqlUpdate);
+
+    $sqlInsert = "
+        INSERT INTO " . Tables::PERSONES_CARRECS . " (
+            id,
+            persona_id,
+            carrecNom,
+            carrecInici,
+            carrecFi,
+            organitzacio_id
+        ) VALUES (
+            :id,
+            :persona_id,
+            :nom,
+            :inici,
+            :fi,
+            :organitzacio_id
+        )
+    ";
+
+    $stmtInsert = $pdo->prepare($sqlInsert);
+
+    foreach ($carrecs as $carrec) {
+
+        $organitzacioBin = $carrec['organitzacio_id'] !== null
+            ? Uuid::toBinary($carrec['organitzacio_id'])
+            : null;
+
+        if ($carrec['id'] !== null) {
+
+            $idBin = Uuid::toBinary($carrec['id']);
+            $idKey = bin2hex($idBin);
+
+            // El cargo debe pertenecer a esta persona.
+            if (!isset($existingIds[$idKey])) {
+                throw new \InvalidArgumentException('invalid_carrec_id');
+            }
+
+            $retainedIds[$idKey] = true;
+
+            $stmtUpdate->bindValue(':nom', $carrec['nom'], PDO::PARAM_STR);
+            $stmtUpdate->bindValue(
+                ':inici',
+                $carrec['inici'],
+                $carrec['inici'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+            );
+            $stmtUpdate->bindValue(
+                ':fi',
+                $carrec['fi'],
+                $carrec['fi'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+            );
+            $stmtUpdate->bindValue(
+                ':organitzacio_id',
+                $organitzacioBin,
+                $organitzacioBin === null ? PDO::PARAM_NULL : PDO::PARAM_LOB
+            );
+            $stmtUpdate->bindValue(':id', $idBin, PDO::PARAM_LOB);
+            $stmtUpdate->bindValue(':persona_id', $personaIdBin, PDO::PARAM_LOB);
+
+            if (!$stmtUpdate->execute()) {
+                throw new \RuntimeException('db_error update persona carrec');
+            }
+        } else {
+
+            $newIdBin = ramsey::uuid7()->getBytes();
+
+            $stmtInsert->bindValue(':id', $newIdBin, PDO::PARAM_LOB);
+            $stmtInsert->bindValue(':persona_id', $personaIdBin, PDO::PARAM_LOB);
+            $stmtInsert->bindValue(':nom', $carrec['nom'], PDO::PARAM_STR);
+            $stmtInsert->bindValue(
+                ':inici',
+                $carrec['inici'],
+                $carrec['inici'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+            );
+            $stmtInsert->bindValue(
+                ':fi',
+                $carrec['fi'],
+                $carrec['fi'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+            );
+            $stmtInsert->bindValue(
+                ':organitzacio_id',
+                $organitzacioBin,
+                $organitzacioBin === null ? PDO::PARAM_NULL : PDO::PARAM_LOB
+            );
+
+            if (!$stmtInsert->execute()) {
+                throw new \RuntimeException('db_error insert persona carrec');
+            }
+        }
+    }
+
+    // Eliminar los cargos que ya no aparecen en el formulario.
+    $sqlDelete = "
+        DELETE FROM " . Tables::PERSONES_CARRECS . "
+        WHERE id = :id
+          AND persona_id = :persona_id
+    ";
+
+    $stmtDelete = $pdo->prepare($sqlDelete);
+
+    foreach ($existingIds as $idKey => $idBin) {
+
+        if (isset($retainedIds[$idKey])) {
+            continue;
+        }
+
+        $stmtDelete->bindValue(':id', $idBin, PDO::PARAM_LOB);
+        $stmtDelete->bindValue(':persona_id', $personaIdBin, PDO::PARAM_LOB);
+
+        if (!$stmtDelete->execute()) {
+            throw new \RuntimeException('db_error delete persona carrec');
+        }
+    }
+}
+
 
 // -------------------------
 // PUT PERSONA
@@ -220,6 +367,105 @@ if (isset($_GET['persona'])) {
 
             if (!isUuid($gid)) {
                 $errors["grup_ids.$i"] = 'invalid_uuid';
+            }
+        }
+    }
+
+    // -------------------------
+    // CARRECS
+    // -------------------------
+
+    $hasCarrecs = array_key_exists('carrecs', $data);
+    $carrecs = [];
+
+    if ($hasCarrecs) {
+
+        if (!is_array($data['carrecs'])) {
+
+            $errors['carrecs'] = 'invalid_array';
+        } else {
+
+            foreach ($data['carrecs'] as $i => $item) {
+
+                if (!is_array($item)) {
+                    $errors["carrecs.$i"] = 'invalid_format';
+                    continue;
+                }
+
+                $carrecId = $item['id'] ?? null;
+                $nomCarrec = $item['carrecNom'] ?? '';
+                $iniciRaw = $item['carrecInici'] ?? null;
+                $fiRaw = $item['carrecFi'] ?? null;
+                $organitzacioId = $item['organitzacio_id'] ?? null;
+
+                // Normalizar valores vacíos.
+                $carrecId = ($carrecId === '') ? null : $carrecId;
+                $nomCarrec = is_string($nomCarrec) ? trim($nomCarrec) : null;
+                $iniciRaw = ($iniciRaw === '') ? null : $iniciRaw;
+                $fiRaw = ($fiRaw === '') ? null : $fiRaw;
+                $organitzacioId = ($organitzacioId === '') ? null : $organitzacioId;
+
+                // Validar ID del cargo existente.
+                if ($carrecId !== null && !isUuid($carrecId)) {
+                    $errors["carrecs.$i.id"] = 'invalid_uuid';
+                }
+
+                // Ignorar bloques nuevos completamente vacíos.
+                if (
+                    $carrecId === null &&
+                    ($nomCarrec === null || $nomCarrec === '') &&
+                    $iniciRaw === null &&
+                    $fiRaw === null &&
+                    $organitzacioId === null
+                ) {
+                    continue;
+                }
+
+                // Nombre del cargo.
+                if ($nomCarrec === null || $nomCarrec === '') {
+                    $errors["carrecs.$i.carrecNom"] = 'required';
+                } elseif (mb_strlen($nomCarrec) > 155) {
+                    $errors["carrecs.$i.carrecNom"] = 'max_length';
+                }
+
+                // Año de inicio.
+                $inici = null;
+
+                if ($iniciRaw !== null) {
+                    $validated = filter_var($iniciRaw, FILTER_VALIDATE_INT);
+
+                    if ($validated === false) {
+                        $errors["carrecs.$i.carrecInici"] = 'invalid_int';
+                    } else {
+                        $inici = $validated;
+                    }
+                }
+
+                // Año de finalización.
+                $fi = null;
+
+                if ($fiRaw !== null) {
+                    $validated = filter_var($fiRaw, FILTER_VALIDATE_INT);
+
+                    if ($validated === false) {
+                        $errors["carrecs.$i.carrecFi"] = 'invalid_int';
+                    } else {
+                        $fi = $validated;
+                    }
+                }
+
+                // Organización.
+                if ($organitzacioId !== null && !isUuid($organitzacioId)) {
+                    $errors["carrecs.$i.organitzacio_id"] = 'invalid_uuid';
+                }
+
+                $carrecs[] = [
+                    'id' => $carrecId,
+                    'nom' => $nomCarrec ?? '',
+                    'inici' => $inici,
+                    'fi' => $fi,
+                    'organitzacio_id' => $organitzacioId,
+                ];
             }
         }
     }
@@ -372,12 +618,29 @@ if (isset($_GET['persona'])) {
             }
         }
 
+        // cargos replace / synchronize
+        if ($hasCarrecs) {
+            syncPersonCharges($pdo, $personaIdBin, $carrecs);
+        }
+
         $pdo->commit();
 
         Response::success(
             MissatgesAPI::success('update'),
             ['id' => $id],
             httpCode: 200
+        );
+        exit;
+    } catch (\InvalidArgumentException $e) {
+
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+
+        Response::error(
+            MissatgesAPI::error('invalid_data'),
+            ['carrecs' => 'invalid_carrec_id'],
+            400
         );
         exit;
     } catch (\Throwable $e) {
@@ -392,110 +655,6 @@ if (isset($_GET['persona'])) {
                 'line' => $e->getLine(),
             ],
             500
-        );
-        exit;
-    }
-
-    // -------------------------
-    // PUT update persona/autor
-    // ruta: ?grupPersona
-    // -------------------------
-} else if (isset($_GET['grupPersona'])) {
-
-    $input = file_get_contents("php://input");
-    $data = json_decode($input, true);
-
-    if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
-        exit;
-    }
-
-    // ✅ id viene dentro del body
-    $id = isset($data['id']) ? trim((string)$data['id']) : '';
-
-    if ($id === '' || !isUuid($id)) {
-        Response::error(MissatgesAPI::error('invalid_data'), ['id' => 'invalid_uuid'], 400);
-        exit;
-    }
-
-    $errors = [];
-
-    // Requeridos (NOT NULL)
-    $grup_ca = $data['grup_ca'];
-
-    // Normaliza
-    $grup_ca = is_string($grup_ca) ? trim($grup_ca) : $grup_ca;
-
-    if ($grup_ca === '') $errors['grup_ca'] = 'required';
-
-    // (Opcional) límite FE (maxlength=150)
-    $maxLen = 150;
-    if (is_string($grup_ca) && mb_strlen($grup_ca) > $maxLen) $errors['grup_ca'] = 'too_long';
-
-    if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
-        exit;
-    }
-
-    try {
-        $pdo->beginTransaction();
-
-        // 1) comprobar que existe
-        $qChk = "SELECT 1 FROM " . Tables::PERSONES_GRUPS . " WHERE id = :id LIMIT 1";
-        $stChk = $pdo->prepare($qChk);
-        $stChk->bindValue(':id', uuid::toBinary($id), PDO::PARAM_STR);
-        $stChk->execute();
-
-        if (!$stChk->fetchColumn()) {
-            $pdo->rollBack();
-            Response::error(MissatgesAPI::error('not_found'), ['grupPersona' => 'not_found'], 404);
-            exit;
-        }
-
-        // 2) update
-        $sql = "
-            UPDATE " . Tables::PERSONES_GRUPS . "
-            SET
-                grup_ca = :grup_ca
-            WHERE id = :id
-            LIMIT 1
-        ";
-
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->bindValue(':id', uuid::toBinary($id), PDO::PARAM_STR);
-        $stmt->bindValue(':grup_ca', $grup_ca, PDO::PARAM_STR);
-
-        if (!$stmt->execute()) {
-            $pdo->rollBack();
-            Response::error(MissatgesAPI::error('db_error'), [
-                'sqlState' => $stmt->errorCode(),
-                'info' => $stmt->errorInfo(),
-            ], 500);
-            exit;
-        }
-
-        $pdo->commit();
-
-        Response::success(
-            MissatgesAPI::success('update'),
-            [
-                'id' => $id,
-            ],
-            httpCode: 200
-        );
-        exit;
-    } catch (\Throwable $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-
-        Response::error(
-            MissatgesAPI::error('internal_error'),
-            [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ],
-            httpCode: 500
         );
         exit;
     }

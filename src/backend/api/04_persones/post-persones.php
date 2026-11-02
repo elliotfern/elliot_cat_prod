@@ -100,6 +100,69 @@ function insertPersonGroups(PDO $pdo, string $personaIdBin, array $grupIds): voi
     }
 }
 
+/**
+ * Inserta relaciones persona->càrrec
+ *
+ * @param PDO $pdo
+ * @param string $personaIdBin UUID de la persona en BINARY(16)
+ * @param array $carrecs Cargos normalizados
+ */
+function insertPersonCharges(PDO $pdo, string $personaIdBin, array $carrecs): void
+{
+    if (empty($carrecs)) return;
+
+    $sql = "
+        INSERT INTO " . Tables::PERSONES_CARRECS . " (
+            id,
+            persona_id,
+            carrecNom,
+            carrecInici,
+            carrecFi,
+            organitzacio_id
+        ) VALUES (
+            :id,
+            :persona_id,
+            :carrecNom,
+            :carrecInici,
+            :carrecFi,
+            :organitzacio_id
+        )
+    ";
+
+    $stmt = $pdo->prepare($sql);
+
+    foreach ($carrecs as $carrec) {
+        $carrecUuidBin = ramsey::uuid7()->getBytes();
+
+        $stmt->bindValue(':id', $carrecUuidBin, PDO::PARAM_LOB);
+        $stmt->bindValue(':persona_id', $personaIdBin, PDO::PARAM_LOB);
+
+        $stmt->bindValue(':carrecNom', $carrec['nom'], PDO::PARAM_STR);
+
+        if ($carrec['inici'] === null) {
+            $stmt->bindValue(':carrecInici', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':carrecInici', $carrec['inici'], PDO::PARAM_INT);
+        }
+
+        if ($carrec['fi'] === null) {
+            $stmt->bindValue(':carrecFi', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':carrecFi', $carrec['fi'], PDO::PARAM_INT);
+        }
+
+        if ($carrec['organitzacio_id'] === null) {
+            $stmt->bindValue(':organitzacio_id', null, PDO::PARAM_NULL);
+        } else {
+            $organitzacioBin = Uuid::toBinary($carrec['organitzacio_id']);
+            $stmt->bindValue(':organitzacio_id', $organitzacioBin, PDO::PARAM_LOB);
+        }
+
+        if (!$stmt->execute()) {
+            throw new \RuntimeException('db_error insert persona carrec');
+        }
+    }
+}
 
 // -------------------------
 // POST crear persona/autor
@@ -210,6 +273,92 @@ if (isset($_GET['persona'])) {
         if (!isUuid($gid)) $errors["grup_ids.$i"] = 'invalid_uuid';
     }
 
+    // -------------------------
+    // Càrrecs de la persona
+    // -------------------------
+
+    $carrecs = [];
+
+    if (isset($data['carrecs'])) {
+
+        if (!is_array($data['carrecs'])) {
+            $errors['carrecs'] = 'invalid_format';
+        } else {
+
+            foreach ($data['carrecs'] as $i => $item) {
+
+                if (!is_array($item)) {
+                    $errors["carrecs.$i"] = 'invalid_format';
+                    continue;
+                }
+
+                $nomCarrec = trim((string)($item['carrecNom'] ?? ''));
+
+                $iniciRaw = $item['carrecInici'] ?? null;
+                $fiRaw = $item['carrecFi'] ?? null;
+                $organitzacioId = optionalField($item, 'organitzacio_id');
+
+                // Ignorar filas completamente vacías
+                if (
+                    $nomCarrec === '' &&
+                    ($iniciRaw === null || $iniciRaw === '') &&
+                    ($fiRaw === null || $fiRaw === '') &&
+                    $organitzacioId === null
+                ) {
+                    continue;
+                }
+
+                // Nombre obligatorio
+                if ($nomCarrec === '') {
+                    $errors["carrecs.$i.carrecNom"] = 'required';
+                } elseif (mb_strlen($nomCarrec) > 155) {
+                    $errors["carrecs.$i.carrecNom"] = 'max_length';
+                }
+
+                // Año de inicio
+                $inici = null;
+
+                if ($iniciRaw !== null && $iniciRaw !== '') {
+                    $validated = filter_var($iniciRaw, FILTER_VALIDATE_INT);
+
+                    if ($validated === false) {
+                        $errors["carrecs.$i.carrecInici"] = 'invalid_int';
+                    } else {
+                        $inici = $validated;
+                    }
+                }
+
+                // Año de finalización
+                $fi = null;
+
+                if ($fiRaw !== null && $fiRaw !== '') {
+                    $validated = filter_var($fiRaw, FILTER_VALIDATE_INT);
+
+                    if ($validated === false) {
+                        $errors["carrecs.$i.carrecFi"] = 'invalid_int';
+                    } else {
+                        $fi = $validated;
+                    }
+                }
+
+                // Organización opcional
+                if (
+                    $organitzacioId !== null &&
+                    !isUuid($organitzacioId)
+                ) {
+                    $errors["carrecs.$i.organitzacio_id"] = 'invalid_uuid';
+                }
+
+                $carrecs[] = [
+                    'nom' => $nomCarrec,
+                    'inici' => $inici,
+                    'fi' => $fi,
+                    'organitzacio_id' => $organitzacioId,
+                ];
+            }
+        }
+    }
+
     if (!empty($errors)) {
         Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
         exit;
@@ -318,6 +467,11 @@ if (isset($_GET['persona'])) {
             insertPersonGroups($pdo, $uuid_bin, $grup_ids);
         }
 
+        // Insert càrrecs de la persona
+        if (!empty($carrecs)) {
+            insertPersonCharges($pdo, $uuid_bin, $carrecs);
+        }
+
         $pdo->commit();
 
         Response::success(
@@ -325,104 +479,6 @@ if (isset($_GET['persona'])) {
             [
                 'id' => $uuid->toString(),
                 'slug' => $slug,
-            ],
-            httpCode: 201
-        );
-        exit;
-    } catch (\Throwable $e) {
-        if ($pdo->inTransaction()) $pdo->rollBack();
-
-        Response::error(
-            MissatgesAPI::error('internal_error'),
-            [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ],
-            500
-        );
-        exit;
-    }
-} else if (isset($_GET['grupPersona'])) {
-    $input = file_get_contents("php://input");
-    $data = json_decode($input, true);
-
-    if (!is_array($data)) {
-        Response::error(MissatgesAPI::error('bad_request'), ['json' => 'invalid'], 400);
-        exit;
-    }
-
-    $errors = [];
-
-    // Requeridos (NOT NULL en la tabla)
-    $grup_ca = requireField($data, 'grup_ca', $errors);
-
-    // Normaliza (trim) y valida vacío
-    $grup_ca = is_string($grup_ca) ? trim($grup_ca) : $grup_ca;
-
-    if ($grup_ca === '') $errors['grup_ca'] = 'required';
-
-    // (Opcional) límite lógico FE (tu input tiene maxlength=150)
-    // Aquí solo lo aplico si quieres evitar strings enormes en TEXT:
-    $maxLen = 150;
-    if (is_string($grup_ca) && mb_strlen($grup_ca) > $maxLen) $errors['grup_ca'] = 'too_long';
-
-    if (!empty($errors)) {
-        Response::error(MissatgesAPI::error('invalid_data'), $errors, 400);
-        exit;
-    }
-
-    // UUIDv7
-    $uuid = ramsey::uuid7();
-    $uuidBytes  = $uuid->getBytes();   // BINARY(16)
-    $uuidString = $uuid->toString();   // devolver al FE
-
-    try {
-        $pdo->beginTransaction();
-
-        // (Opcional) evitar duplicados exactos por nombre CA (si te interesa)
-        // Si NO quieres esta regla, borra este bloque.
-        $qChk = "SELECT 1 FROM db_persones_grups WHERE grup_ca = :grup_ca LIMIT 1";
-        $stChk = $pdo->prepare($qChk);
-        $stChk->bindValue(':grup_ca', $grup_ca, PDO::PARAM_STR);
-        $stChk->execute();
-        if ($stChk->fetchColumn()) {
-            $pdo->rollBack();
-            Response::error(MissatgesAPI::error('invalid_data'), ['grup_ca' => 'already_exists'], 409);
-            exit;
-        }
-
-        // Insert
-        $sql = "
-            INSERT INTO db_persones_grups (
-                id,
-                grup_ca
-            ) VALUES (
-                :id,
-                :grup_ca
-            )
-        ";
-
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->bindValue(':id', $uuidBytes, PDO::PARAM_LOB);
-        $stmt->bindValue(':grup_ca', $grup_ca, PDO::PARAM_STR);
-
-        if (!$stmt->execute()) {
-            $pdo->rollBack();
-            Response::error(MissatgesAPI::error('db_error'), [
-                'sqlState' => $stmt->errorCode(),
-                'info' => $stmt->errorInfo(),
-            ], 500);
-            exit;
-        }
-
-        $pdo->commit();
-
-        Response::success(
-            MissatgesAPI::success('create'),
-            [
-                'id' => $uuidString,
             ],
             httpCode: 201
         );

@@ -6,6 +6,7 @@ import { PersonaView } from '../../types/PersonaView';
 import { renderFitxa } from '../../utils/renderFitxa';
 
 import { renderActor } from './renders/renderActor';
+import { renderCarrecs } from './renders/renderCarrecs';
 import { renderHistoriador } from './renders/renderHistoriador';
 
 // -------------------------
@@ -49,6 +50,14 @@ export async function runFitxaBlocks(options: RunFitxaBlocksOptions) {
 
   container.innerHTML = '';
 
+  // Càrrecs
+  const carrecs = renderCarrecs(options.persona);
+
+  if (carrecs) {
+    container.appendChild(carrecs);
+  }
+
+  // Blocs específics segons professions
   for (const block of fitxaBlocks) {
     if (!block.professions.some((p) => options.persona.grups.includes(p))) {
       continue;
@@ -58,14 +67,7 @@ export async function runFitxaBlocks(options: RunFitxaBlocksOptions) {
 
     if (!result) continue;
 
-    const el =
-      typeof result === 'string'
-        ? Object.assign(document.createElement('div'), {
-            innerHTML: result,
-          })
-        : result;
-
-    container.appendChild(el);
+    container.appendChild(result);
   }
 }
 

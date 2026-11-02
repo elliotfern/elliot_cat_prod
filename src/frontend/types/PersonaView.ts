@@ -1,3 +1,5 @@
+import { Carrec } from './Carrec';
+
 export interface PersonaView {
   id: string;
   slug: string;
@@ -30,4 +32,5 @@ export interface PersonaView {
   sexe_id: string;
   grupsText: string;
   grups: string[];
+  carrecs: Carrec[];
 }

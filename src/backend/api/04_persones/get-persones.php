@@ -257,7 +257,6 @@ if ($slug === 'llistatPersones') {
     }
 
 
-
     // ruta GET => "/api/persones/get/persona?slug=josep-fontana"
 } else if ($slug === 'persona') {
 
@@ -343,6 +342,39 @@ if ($slug === 'llistatPersones') {
 
         // limpiar campos sueltos
         unset($base['grup_id'], $base['grup_nom']);
+
+        // 🔵 Obtener cargos de la persona
+        $queryCarrecs = "SELECT
+        c.id,
+        c.carrecNom,
+        c.carrecInici,
+        c.carrecFi,
+        c.organitzacio_id,
+        o.organitzacio
+            FROM " . Tables::PERSONES_CARRECS . " AS c
+            LEFT JOIN " . Tables::DB_HISTORIA_ORGANITZACIONS . " AS o ON c.organitzacio_id = o.id
+            WHERE c.persona_id = :persona_id
+            ORDER BY c.carrecInici ASC";
+
+        $rowsCarrecs = $db->getData($queryCarrecs, [
+            ':persona_id' => $base['id']
+        ]);
+
+        $carrecs = [];
+
+        foreach ($rowsCarrecs as $r) {
+            $carrecs[] = [
+                'id' => Uuid::toString($r['id']),
+                'nom' => $r['carrecNom'],
+                'inici' => $r['carrecInici'],
+                'fi' => $r['carrecFi'],
+                'organitzacio_id' => !empty($r['organitzacio_id'])
+                    ? Uuid::toString($r['organitzacio_id'])
+                    : null
+            ];
+        }
+
+        $base['carrecs'] = $carrecs;
 
         Response::success(
             message: MissatgesAPI::success('get'),

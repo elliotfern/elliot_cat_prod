@@ -138,6 +138,9 @@
       <trix-editor input="descripcio" class="form-control"></trix-editor>
     </div>
 
+    <hr>
+    <div id="inputCarrecs"> </div>
+
     <!-- BOTONES -->
     <div class="col-12">
       <div class="d-flex justify-content-between mt-3">
