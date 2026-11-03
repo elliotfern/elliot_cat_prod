@@ -9,6 +9,7 @@ export async function renderCarrecs(persona: PersonaView): Promise<HTMLElement |
   const isAdmin = await getIsAdmin();
 
   const wrapper = document.createElement('div');
+  wrapper.className = 'mb-4';
 
   wrapper.innerHTML = `
     <h4 class="mb-3">Càrrecs i responsabilitats</h4>

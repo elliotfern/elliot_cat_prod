@@ -7,6 +7,7 @@ import { renderFitxa } from '../../utils/renderFitxa';
 
 import { renderActor } from './renders/renderActor';
 import { renderCarrecs } from './renders/renderCarrecs';
+import { renderEsdeveniments } from './renders/renderEsdeveniments';
 import { renderHistoriador } from './renders/renderHistoriador';
 
 // -------------------------
@@ -57,15 +58,38 @@ export async function runFitxaBlocks(options: RunFitxaBlocksOptions) {
     container.appendChild(carrecs);
   }
 
+  // Esdeveniments històrics
+  const esdeveniments = await renderEsdeveniments(options.persona);
+
+  if (esdeveniments) {
+    container.appendChild(esdeveniments);
+  }
+
   // Blocs específics segons professions
   for (const block of fitxaBlocks) {
-    if (!block.professions.some((p) => options.persona.grups.includes(p))) {
+    const grupsCoincidents = options.persona.grups.filter((grup) => block.professions.includes(grup));
+
+    if (grupsCoincidents.length === 0) {
       continue;
     }
 
     const result = await block.render(options.persona);
 
     if (!result) continue;
+
+    // Badge amb els grups reals de la persona
+    const badges = document.createElement('div');
+    badges.className = 'mb-3';
+
+    for (const grup of grupsCoincidents) {
+      const badge = document.createElement('span');
+      badge.className = 'badge bg-secondary me-1';
+      badge.textContent = grup;
+
+      badges.appendChild(badge);
+    }
+
+    result.prepend(badges);
 
     container.appendChild(result);
   }

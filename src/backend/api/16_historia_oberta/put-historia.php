@@ -456,7 +456,7 @@ if ($slug === 'esdeveniment') {
             $pdo->rollBack();
         }
 
-        error_log('[PUT esdeveniment] ' . $e->getMessage());
+        var_dump('[PUT esdeveniment] ' . $e->getMessage());
 
         Response::error(
             MissatgesAPI::error('internal_error'),

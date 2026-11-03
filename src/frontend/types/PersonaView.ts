@@ -1,4 +1,5 @@
 import { Carrec } from './Carrec';
+import { Esdeveniment } from './Esdeveniment';
 
 export interface PersonaView {
   id: string;
@@ -33,4 +34,5 @@ export interface PersonaView {
   grupsText: string;
   grups: string[];
   carrecs: Carrec[];
+  esdeveniments: Esdeveniment[];
 }

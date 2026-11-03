@@ -1,4 +1,5 @@
 import { Carrec } from './Carrec';
+import { Esdeveniment } from './Esdeveniment';
 
 export interface Persona {
   slug: string;
@@ -43,6 +44,7 @@ export interface Persona {
   grup_ids?: string[];
   grup: string[];
   carrecs?: Carrec[];
+  esdeveniments?: Esdeveniment[];
 }
 
 export type GrupDTO = { id: string; nom: string };

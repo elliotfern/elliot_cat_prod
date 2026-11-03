@@ -17,16 +17,26 @@ export interface Esdeveniment {
 
   descripcio: string;
 
-  ciutat_id: string;
-  sub_etapa_id: string;
-  imatge_id: string;
-
   dateCreated: string;
   dateModified: string;
   nameImg: string | null;
   alt: string | null;
   persones: EsdevenimentPersona[];
   organitzacions: EsdevenimentOrganitzacio[];
+
+  nom: string;
+  imatge_id: string | null;
+
+  data_inici_dia: number | null;
+  data_inici_mes: number | null;
+  data_inici_any: number | null;
+
+  data_final_dia: number | null;
+  data_final_mes: number | null;
+  data_final_any: number | null;
+
+  sub_etapa_id: string | null;
+  ciutat_id: string | null;
 }
 
 export interface EsdevenimentPersona {

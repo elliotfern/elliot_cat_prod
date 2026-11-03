@@ -377,6 +377,53 @@ if ($slug === 'llistatPersones') {
 
         $base['carrecs'] = $carrecs;
 
+        // 🔵 Obtener acontecimientos históricos relacionados con la persona
+        $queryEsdeveniments = "SELECT
+                e.id,
+                e.esdeNom,
+                e.slug,
+                e.esdeDataIDia,
+                e.esdeDataIMes,
+                e.esdeDataIAny,
+                e.esdeDataFDia,
+                e.esdeDataFMes,
+                e.esdeDataFAny,
+                e.sub_etapa_id,
+                e.ciutat_id
+            FROM " . Tables::DB_HISTORIA_ESDEVENIMENTS_PERSONES . " AS ep
+            INNER JOIN " . Tables::DB_HISTORIA_ESDEVENIMENTS . " AS e
+                ON ep.esdeveniment_id = e.id
+            WHERE ep.persona_id = :persona_id
+            ORDER BY e.esdeDataIAny ASC";
+
+        $rowsEsdeveniments = $db->getData($queryEsdeveniments, [
+            ':persona_id' => $base['id']
+        ]);
+
+        $esdeveniments = [];
+
+        foreach ($rowsEsdeveniments as $r) {
+            $esdeveniments[] = [
+                'id' => Uuid::toString($r['id']),
+                'nom' => $r['esdeNom'],
+                'slug' => $r['slug'],
+                'data_inici_dia' => $r['esdeDataIDia'],
+                'data_inici_mes' => $r['esdeDataIMes'],
+                'data_inici_any' => $r['esdeDataIAny'],
+                'data_final_dia' => $r['esdeDataFDia'],
+                'data_final_mes' => $r['esdeDataFMes'],
+                'data_final_any' => $r['esdeDataFAny'],
+                'sub_etapa_id' => !empty($r['sub_etapa_id'])
+                    ? Uuid::toString($r['sub_etapa_id'])
+                    : null,
+                'ciutat_id' => !empty($r['ciutat_id'])
+                    ? Uuid::toString($r['ciutat_id'])
+                    : null,
+            ];
+        }
+
+        $base['esdeveniments'] = $esdeveniments;
+
         Response::success(
             message: MissatgesAPI::success('get'),
             data: $base,
