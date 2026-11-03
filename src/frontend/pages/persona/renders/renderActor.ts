@@ -1,4 +1,5 @@
 import { api } from '../../../Infrastructure/Api/Client/ApiClient';
+import { getIsAdmin } from '../../../services/auth/isAdmin';
 import { PersonaView } from '../../../types/PersonaView';
 
 type ActorPelicula = {
@@ -16,7 +17,7 @@ type ActorSerie = {
   anyFi?: number | null;
 };
 
-export async function renderActor(persona: PersonaView) {
+export async function renderActor(persona: PersonaView): Promise<HTMLElement | null> {
   let pelicules: ActorPelicula[] = [];
   let series: ActorSerie[] = [];
 
@@ -31,14 +32,14 @@ export async function renderActor(persona: PersonaView) {
       }),
     ]);
 
-    // Películas
+    // Pel·lícules
     if (peliculesRes.status === 'fulfilled') {
       pelicules = peliculesRes.value;
     } else {
       console.error('Error carregant pel·lícules', peliculesRes.reason);
     }
 
-    // Series
+    // Sèries
     if (seriesRes.status === 'fulfilled') {
       series = seriesRes.value;
     } else {
@@ -49,139 +50,149 @@ export async function renderActor(persona: PersonaView) {
     return null;
   }
 
-  // ==========================
-  // SI NO HAY NADA → NULL
-  // ==========================
-
   if (!pelicules.length && !series.length) {
     return null;
   }
 
+  const isAdmin = await getIsAdmin();
   const wrapper = document.createElement('div');
 
-  let html = '';
-
   // ==========================
-  // TABLA PELÍCULAS
+  // TAULA PEL·LÍCULES
   // ==========================
 
   if (pelicules.length) {
-    html += `
+    const section = document.createElement('div');
+
+    section.innerHTML = `
       <h4 class="mb-3 mt-4">🎬 Pel·lícules</h4>
 
       <div class="table-responsive mb-5">
         <table class="table table-sm table-striped table-hover align-middle">
-
           <thead class="table-dark">
             <tr>
               <th>Títol</th>
               <th>Rol</th>
               <th>Any</th>
-              <th class="text-end">Accions</th>
+              ${isAdmin ? '<th class="text-end">Accions</th>' : ''}
             </tr>
           </thead>
-
-          <tbody>
-
-            ${pelicules
-              .map(
-                (p) => `
-              
-              <tr>
-
-                <td>
-                  <a href="/gestio/cinema/fitxa-pelicula/${p.slug}">
-                    ${p.titol}
-                  </a>
-                </td>
-
-                <td>${p.rol ?? ''}</td>
-
-                <td>${p.anyInici ?? ''}</td>
-
-                <td class="text-end">
-                  <a
-                    href="/gestio/cinema/modifica-pelicula/${p.slug}"
-                    class="btn btn-sm btn-outline-warning"
-                  >
-                    Modifica
-                  </a>
-                </td>
-
-              </tr>
-
-            `
-              )
-              .join('')}
-
-          </tbody>
-
+          <tbody></tbody>
         </table>
       </div>
     `;
+
+    const tbody = section.querySelector('tbody');
+
+    if (tbody) {
+      for (const pelicula of pelicules) {
+        const tr = document.createElement('tr');
+
+        const tdTitol = document.createElement('td');
+        const linkPelicula = document.createElement('a');
+
+        linkPelicula.href = isAdmin ? `/gestio/cinema/fitxa-pelicula/${encodeURIComponent(pelicula.slug)}` : `/banc-dades/cinema/fitxa-pelicula/${encodeURIComponent(pelicula.slug)}`;
+
+        linkPelicula.textContent = pelicula.titol;
+        tdTitol.appendChild(linkPelicula);
+
+        const tdRol = document.createElement('td');
+        tdRol.textContent = pelicula.rol ?? '';
+
+        const tdAny = document.createElement('td');
+        tdAny.textContent = pelicula.anyInici != null ? String(pelicula.anyInici) : '';
+
+        tr.append(tdTitol, tdRol, tdAny);
+
+        if (isAdmin) {
+          const tdAccions = document.createElement('td');
+          tdAccions.className = 'text-end';
+
+          const editLink = document.createElement('a');
+          editLink.href = `/gestio/cinema/modifica-pelicula/${encodeURIComponent(pelicula.slug)}`;
+          editLink.className = 'btn btn-sm btn-outline-warning';
+          editLink.textContent = 'Modifica';
+
+          tdAccions.appendChild(editLink);
+          tr.appendChild(tdAccions);
+        }
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    wrapper.appendChild(section);
   }
 
   // ==========================
-  // TABLA SERIES TV
+  // TAULA SÈRIES TV
   // ==========================
 
   if (series.length) {
-    html += `
+    const section = document.createElement('div');
+
+    section.innerHTML = `
       <h4 class="mb-3">📺 Sèries TV</h4>
 
       <div class="table-responsive">
         <table class="table table-sm table-striped table-hover align-middle">
-
           <thead class="table-dark">
             <tr>
               <th>Títol</th>
               <th>Rol</th>
               <th>Anys</th>
-              <th class="text-end">Accions</th>
+              ${isAdmin ? '<th class="text-end">Accions</th>' : ''}
             </tr>
           </thead>
-
-          <tbody>
-
-            ${series
-              .map((s) => {
-                const anys = s.anyFi ? `${s.anyInici} - ${s.anyFi}` : s.anyInici;
-
-                return `
-                  <tr>
-
-                    <td>
-                      <a href="/gestio/cinema/fitxa-serie/${s.slug}">
-                        ${s.titol}
-                      </a>
-                    </td>
-
-                    <td>${s.role ?? ''}</td>
-
-                    <td>${anys ?? ''}</td>
-
-                    <td class="text-end">
-                      <a
-                        href="/gestio/cinema/modifica-serie/${s.slug}"
-                        class="btn btn-sm btn-outline-warning"
-                      >
-                        Modifica
-                      </a>
-                    </td>
-
-                  </tr>
-                `;
-              })
-              .join('')}
-
-          </tbody>
-
+          <tbody></tbody>
         </table>
       </div>
     `;
-  }
 
-  wrapper.innerHTML = html;
+    const tbody = section.querySelector('tbody');
+
+    if (tbody) {
+      for (const serie of series) {
+        const tr = document.createElement('tr');
+
+        const tdTitol = document.createElement('td');
+        const linkSerie = document.createElement('a');
+
+        linkSerie.href = isAdmin ? `/gestio/cinema/fitxa-serie/${encodeURIComponent(serie.slug)}` : `/banc-dades/cinema/fitxa-serie/${encodeURIComponent(serie.slug)}`;
+
+        linkSerie.textContent = serie.titol;
+        tdTitol.appendChild(linkSerie);
+
+        const tdRol = document.createElement('td');
+        tdRol.textContent = serie.role ?? '';
+
+        const tdAnys = document.createElement('td');
+
+        const anys = serie.anyFi != null ? `${serie.anyInici ?? ''} - ${serie.anyFi}` : serie.anyInici != null ? String(serie.anyInici) : '';
+
+        tdAnys.textContent = anys;
+
+        tr.append(tdTitol, tdRol, tdAnys);
+
+        if (isAdmin) {
+          const tdAccions = document.createElement('td');
+          tdAccions.className = 'text-end';
+
+          const editLink = document.createElement('a');
+          editLink.href = `/gestio/cinema/modifica-serie/${encodeURIComponent(serie.slug)}`;
+          editLink.className = 'btn btn-sm btn-outline-warning';
+          editLink.textContent = 'Modifica';
+
+          tdAccions.appendChild(editLink);
+          tr.appendChild(tdAccions);
+        }
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    wrapper.appendChild(section);
+  }
 
   return wrapper;
 }
