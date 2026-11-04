@@ -1,5 +1,5 @@
-import { api } from '../../../Infrastructure/Api/Client/ApiClient';
-import { DOMAIN_WEB } from '../../../utils/urls';
+import { api } from '../../Infrastructure/Api/Client/ApiClient';
+import { DOMAIN_WEB } from '../../utils/urls';
 
 interface Persona {
   id: string;
@@ -97,7 +97,7 @@ export async function donesHomes(): Promise<void> {
 
           const imatge = persona.nameImg
             ? `
-              <a href="${DOMAIN_WEB}/historia/banc-dades/dones-homes/${encodeURIComponent(persona.slug)}">
+              <a href="${DOMAIN_WEB}/banc-dades/dones-homes/${encodeURIComponent(persona.slug)}">
                 <img
                     src="https://media.elliot.cat/img/persona/${encodeURIComponent(persona.nameImg)}.jpg"
                     class="card-img-top"
@@ -123,7 +123,7 @@ export async function donesHomes(): Promise<void> {
                 .join('')
             : '';
 
-          const url = `${DOMAIN_WEB}/historia/banc-dades/dones-homes/${encodeURIComponent(persona.slug)}`;
+          const url = `${DOMAIN_WEB}/banc-dades/dones-homes/${encodeURIComponent(persona.slug)}`;
 
           return `
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3">

@@ -57,7 +57,7 @@ export async function renderEsdeveniments(persona: PersonaView): Promise<HTMLEle
 
     const linkEsdeveniment = document.createElement('a');
 
-    linkEsdeveniment.href = isAdmin ? `/gestio/historia/fitxa-esdeveniment/${encodeURIComponent(esdeveniment.slug)}` : `/historia/banc-dades/esdeveniments/${encodeURIComponent(esdeveniment.slug)}`;
+    linkEsdeveniment.href = isAdmin ? `/gestio/historia/fitxa-esdeveniment/${encodeURIComponent(esdeveniment.slug)}` : `/banc-dades/esdeveniments/${encodeURIComponent(esdeveniment.slug)}`;
 
     linkEsdeveniment.textContent = esdeveniment.nom;
 

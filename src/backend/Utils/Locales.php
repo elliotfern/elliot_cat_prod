@@ -15,4 +15,11 @@ class Locales
     {
         return self::ID_TO_UUID[$locale] ?? null;
     }
+
+    public static function toId(string $uuid): ?int
+    {
+        $id = array_search($uuid, self::ID_TO_UUID, true);
+
+        return $id !== false ? $id : null;
+    }
 }

@@ -1,14 +1,10 @@
-import { getPageType } from '../../../utils/urlPath';
-import { fitxaPersona } from '../../persona/fitxaPersona';
+import { fitxaPersona } from '../persona/fitxaPersona';
 import { donesHomes } from './donesHomes';
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
-export function bancDadesWebPublica(): void {
-  switch (pageType[2]) {
+export function bancDadesWebPublica(pageType: string[]): void {
+  switch (pageType[1]) {
     case 'dones-homes': {
-      const persona = pageType[3];
+      const persona = pageType[2];
 
       if (persona) {
         fitxaPersona('persones/get/persona', persona);

@@ -32,7 +32,7 @@ const configuracioTipus: Record<TipusRecurs, ConfiguracioTipus> = {
   banc_dades: {
     titolSeccio: 'Bancs de dades',
     etiqueta: 'Banc de dades',
-    prefixUrl: '/historia/banc-dades',
+    prefixUrl: '/banc-dades',
     color: '#237a57',
     boto: 'Accedir al recurs',
   },

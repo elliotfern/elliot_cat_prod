@@ -1,19 +1,14 @@
 import 'trix/dist/trix.css';
 import 'trix';
 import './assets/css/style.css';
-
 import { getPageType } from './utils/urlPath';
-import { loginPage } from './pages/login/funcions';
 import { barraNavegacio } from './components/barraNavegacio/barraNavegacio';
 import { mostrarBotonsNomesAdmin } from './components/mostrarBotons/mostrarBoton';
 import { logout } from './services/login/logOutApi';
 import { initUserAreaButton } from './components/header/userAreaButton';
-import { getCoursesList } from './pages/historiaOberta/cursosWebPublica';
-import { intranet_admin } from './pages/intranet_admin/intranet_admin';
-import { historiaWebPublica } from './pages/historiaOberta/historiaWebPublica';
-import { renderBlogListPaged } from './pages/blog/llistatArticles';
-import { renderBlogArticleView } from './pages/blog/article';
-import { formRegistreUsuari } from './pages/login/registreUsuari';
+import { webUsuaris } from './inicialitzacio/webUsuaris';
+import { webAdmin } from './inicialitzacio/webAdmin';
+import { webPublica } from './inicialitzacio/webPublica';
 
 document.addEventListener('trix-before-initialize', function () {
   // H2
@@ -65,11 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
   main();
 });
 
-async function main() {
-  const url = window.location.href;
-  const pageType = getPageType(url);
-  console.log(pageType);
+function main(): void {
+  const pageType = getPageType(window.location.href);
 
+  // Web publica
   void initUserAreaButton();
   barraNavegacio();
   mostrarBotonsNomesAdmin();
@@ -79,34 +73,15 @@ async function main() {
     logoutButton.addEventListener('click', logout);
   }
 
-  if (pageType.length === 0) {
-    getCoursesList();
-  }
-
   if (pageType[0] === 'gestio') {
-    intranet_admin();
+    webAdmin(pageType);
+    return;
   }
 
-  if (pageType[0] === 'entrada') {
-    loginPage();
+  if (pageType[0] === 'usuaris') {
+    webUsuaris(pageType);
+    return;
   }
 
-  if (pageType[0] === 'nou-usuari') {
-    formRegistreUsuari();
-  }
-
-  if (pageType[0] === 'historia') {
-    historiaWebPublica();
-  }
-
-  if (pageType[0] === 'blog') {
-    if (pageType.length === 1) {
-      renderBlogListPaged();
-    }
-
-    if (pageType.length === 2) {
-      const slug = pageType[1];
-      renderBlogArticleView(slug, 'blog');
-    }
-  }
+  webPublica(pageType);
 }

@@ -1,30 +1,25 @@
-import { getPageType } from '../../utils/urlPath';
-import { adreces } from '../adreces/adreces';
-import { agenda } from '../agenda/agenda';
-import { areaPrivadaUsuaris } from '../areaPrivadaUsuaris/funcions';
-import { auxiliars } from '../auxiliars/auxiliars';
-import { galeriaImatgesPublica } from '../auxiliars/fitxaGaleriaImatgesPublica';
-import { obtenerTemperaturaTrento } from '../auxiliars/meteoTrento';
-import { biblioteca } from '../biblioteca/biblioteca';
-import { blog } from '../blog/blog';
-import { cinema } from '../cinema/funcions';
-import { comptabilitat } from '../comptabilitat/comptabilitat';
-import { contactes } from '../contactes/contactes';
-import { curriculum } from '../curriculum/curriculum';
-import { usuaris } from '../gestioUsuaris/usuaris';
-import { historiaOberta } from '../historiaOberta/historiaOberta';
-import { lectorRss } from '../lectorRss/lectorRss';
-import { persona } from '../persona/persona';
-import { projectes } from '../projectes/projectes';
-import { radio } from '../radio/radio';
-import { salut } from '../salut/salut';
-import { vault } from '../vault/funcions';
-import { viatges } from '../viatges/viatges';
+import { adreces } from '../pages/adreces/adreces';
+import { agenda } from '../pages/agenda/agenda';
+import { auxiliars } from '../pages/auxiliars/auxiliars';
+import { galeriaImatgesPublica } from '../pages/auxiliars/fitxaGaleriaImatgesPublica';
+import { obtenerTemperaturaTrento } from '../pages/auxiliars/meteoTrento';
+import { biblioteca } from '../pages/biblioteca/biblioteca';
+import { blog } from '../pages/blog/blog';
+import { cinema } from '../pages/cinema/funcions';
+import { comptabilitat } from '../pages/comptabilitat/comptabilitat';
+import { contactes } from '../pages/contactes/contactes';
+import { curriculum } from '../pages/curriculum/curriculum';
+import { usuaris } from '../pages/gestioUsuaris/usuaris';
+import { historiaOberta } from '../pages/historiaOberta/historiaOberta';
+import { lectorRss } from '../pages/lectorRss/lectorRss';
+import { persona } from '../pages/persona/persona';
+import { projectes } from '../pages/projectes/projectes';
+import { radio } from '../pages/radio/radio';
+import { salut } from '../pages/salut/salut';
+import { vault } from '../pages/vault/funcions';
+import { viatges } from '../pages/viatges/viatges';
 
-const url = window.location.href;
-const pageType = getPageType(url);
-
-export async function intranet_admin() {
+export async function webAdmin(pageType: string[]) {
   if (pageType[1] === 'claus-privades') {
     vault();
   } else if (pageType[1] === 'comptabilitat') {
@@ -61,7 +56,7 @@ export async function intranet_admin() {
   } else if (pageType[1] === 'gestio-usuaris') {
     usuaris();
   } else if (pageType[1] === 'usuaris') {
-    areaPrivadaUsuaris();
+    usuaris();
   } else if (pageType[1] === 'blog') {
     blog();
   } else if (pageType[1] === 'imatges') {

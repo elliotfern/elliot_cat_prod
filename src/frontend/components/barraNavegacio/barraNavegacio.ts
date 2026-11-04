@@ -1,8 +1,7 @@
-import { isLang } from '../../utils/locales/getLangPrefix';
 import { DOMAIN_WEB, INTRANET_WEB } from '../../utils/urls';
 
-// Capitalizar
-function capitalizeWords(str: string) {
+// Capitalitzar paraules
+function capitalizeWords(str: string): string {
   return str
     .replace(/-/g, ' ')
     .split(' ')
@@ -10,35 +9,29 @@ function capitalizeWords(str: string) {
     .join(' ');
 }
 
-export async function barraNavegacio() {
+export async function barraNavegacio(): Promise<void> {
   const url = new URL(window.location.href);
   let parts = url.pathname.split('/').filter(Boolean);
 
   const inGestio = parts[0] === 'gestio';
 
-  // 🔧 Normalizar partes (quitamos prefijos estructurales)
+  // Eliminar prefix estructural de gestió
   if (inGestio) {
-    parts = parts.slice(1); // quitar "gestio"
+    parts = parts.slice(1);
   }
 
-  let langPrefix = '';
+  // Filtrar parts que no han d'aparèixer al breadcrumb
+  const filteredParts = parts.filter((part, index) => {
+    if (part.includes('fitxa')) return false;
 
-  if (!inGestio && parts.length && isLang(parts[0])) {
-    langPrefix = `/${parts[0]}`;
-    parts = parts.slice(1); // quitar idioma
-  }
+    if (!inGestio && part === 'article' && parts[index - 1] === 'blog') {
+      return false;
+    }
 
-  // Base URL limpia
-  const baseUrl = inGestio ? INTRANET_WEB : DOMAIN_WEB;
-
-  // Filtrado de partes
-  const filteredParts = parts.filter((p, index) => {
-    if (p.includes('fitxa')) return false;
-    if (!inGestio && p === 'article' && parts[index - 1] === 'blog') return false;
     return true;
   });
 
-  // Construcción breadcrumb
+  // Construcció breadcrumb
   const nav = document.createElement('nav');
   nav.className = 'breadcrumb mb-3 p-2 rounded bg-light border';
   nav.setAttribute('aria-label', 'breadcrumb');
@@ -46,7 +39,7 @@ export async function barraNavegacio() {
   const ol = document.createElement('ol');
   ol.className = 'breadcrumb mb-0';
 
-  // 🏠 Home
+  // Inici
   const homeLi = document.createElement('li');
   homeLi.className = 'breadcrumb-item';
 
@@ -56,14 +49,14 @@ export async function barraNavegacio() {
     homeLink.href = INTRANET_WEB;
     homeLink.textContent = 'Intranet';
   } else {
-    homeLink.href = `${DOMAIN_WEB}${langPrefix}/homepage`;
+    homeLink.href = DOMAIN_WEB;
     homeLink.textContent = 'Inici';
   }
 
   homeLi.appendChild(homeLink);
   ol.appendChild(homeLi);
 
-  // 🔗 Breadcrumb dinámico
+  // Breadcrumb dinàmic
   filteredParts.forEach((part, index) => {
     const li = document.createElement('li');
     const label = capitalizeWords(part);
@@ -80,9 +73,9 @@ export async function barraNavegacio() {
 
       const accumPath = filteredParts.slice(0, index + 1).join('/');
 
-      const fullPath = inGestio ? `/gestio/${accumPath}` : `${langPrefix}/${accumPath}`;
+      const fullPath = inGestio ? `/gestio/${accumPath}` : `/${accumPath}`;
 
-      link.href = new URL(fullPath, baseUrl).toString();
+      link.href = new URL(fullPath, inGestio ? INTRANET_WEB : DOMAIN_WEB).toString();
       link.textContent = label;
 
       li.appendChild(link);
@@ -95,6 +88,7 @@ export async function barraNavegacio() {
 
   // Render
   const container = document.getElementById('barraNavegacioContenidor');
+
   if (container) {
     container.innerHTML = '';
     container.appendChild(nav);
