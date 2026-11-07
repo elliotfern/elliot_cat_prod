@@ -121,6 +121,7 @@ jobs:
       - name: Build frontend assets
         env:
           CI: true
+          API_WEB: https://api.elliot.cat/api
           API_BASE: https://elliot.cat/api
           DOMAIN_WEB: https://elliot.cat
           DOMAIN_IMG: https://media.elliot.cat
