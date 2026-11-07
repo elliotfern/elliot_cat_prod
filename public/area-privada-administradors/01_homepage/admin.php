@@ -49,7 +49,19 @@ use App\Utils\Url;
             <li><a href="<?php echo Url::intranet('agenda'); ?>">21. Agenda</a></li>
             <li><a href="<?php echo Url::intranet('taulell-pendents'); ?>">22. Taulell temes pendents</a></li>
             <li><a href="<?php echo Url::intranet('salut'); ?>">25. Salut</a></li>
-            <li><a href="<?php echo Url::intranet('dades'); ?>">26. Organització dades</a></li>
+        </ul>
+
+        <h4>Documentació tècnica equip de treball:</h4>
+
+        <h5>Sistemes i equips:</h5>
+        <ul>
+            <li><a href="<?php echo Url::intranet('documentacio-tecnica'); ?>/equip/dades-basiques">0. Dades bàsiques: Fedora 45 — ASUS N551JK</a></li>
+            <li><a href="<?php echo Url::intranet('documentacio-tecnica'); ?>/equip/inventari-sistema">1. Inventari del sistema i configuració de Fedora 45</a></li>
+        </ul>
+
+
+        <ul>
+            <li><a href="<?php echo Url::intranet('documentacio-tecnica'); ?>/documents-disc-dur">Organització directores i documents disc dur</a></li>
         </ul>
     </div>
 

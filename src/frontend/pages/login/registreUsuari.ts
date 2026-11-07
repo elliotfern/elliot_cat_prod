@@ -1,6 +1,6 @@
 import { renderLoginForm } from '../../services/login/renderLoginForm';
 import { transmissioDadesDB } from '../../utils/actualitzarDades';
-import { API_BASE } from '../../utils/urls';
+import { API_WEB } from '../../utils/urls';
 
 export function formRegistreUsuari(): void {
   const form = document.getElementById('formUsuari');
@@ -89,6 +89,6 @@ export function formRegistreUsuari(): void {
       return;
     }
 
-    void transmissioDadesDB(event, 'POST', 'formUsuari', `${API_BASE}/usuaris/post/registre`, false);
+    void transmissioDadesDB(event, 'POST', 'formUsuari', `${API_WEB}/usuaris/post/registre`, false);
   });
 }

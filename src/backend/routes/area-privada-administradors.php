@@ -327,8 +327,18 @@ $routes = [
     APP_GESTIO . $url['salut'] . "/nova-patologia" => route(APP_INTRANET_DIR . APP_SALUT . 'form-patologia.php'),
     APP_GESTIO . $url['salut'] . "/modifica-patologia/{id}" => route(APP_INTRANET_DIR . APP_SALUT . 'form-patologia.php'),
 
-    // DIRECTORI DADES
-    APP_GESTIO . $url['dades'] => route(APP_INTRANET_DIR . APP_DADES . 'index.php'),
+    // DOCUMENTACIO TECNICA EQUIP
+    APP_GESTIO . $url['documentacio_tecnica'] => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . 'index.php'),
+
+    // 1. Sistema i fedora
+    APP_GESTIO . $url['documentacio_tecnica'] . "/equip/dades-basiques" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . 'equip/dades-basiques.php'),
+    APP_GESTIO . $url['documentacio_tecnica'] . "/equip/inventari-sistema" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . 'equip/inventari-sistema.php'),
+
+    // 2. Directoris i dades
+    APP_GESTIO . $url['documentacio_tecnica'] . "/documents-disc-dur" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . 'documents_disc_disc.php'),
+
+
+
 
 ];
 

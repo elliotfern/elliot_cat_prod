@@ -36,7 +36,7 @@ class AppRoutes
         'agenda'        => '/agenda',
         'taulell-pendents' => '/taulell-pendents',
         'salut'         => '/salut',
-        'dades'         => '/dades',
+        'documentacio-tecnica'         => '/documentacio-tecnica',
 
         // 🔹 Casos específicos
         'taulell_legalitzacio' => '/taulell-pendents/legalitzacio-titol',

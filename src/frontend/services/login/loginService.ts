@@ -1,4 +1,5 @@
 import type { ApiResponse } from '../../Infrastructure/Api/Client/types';
+import { API_WEB } from '../../utils/urls';
 
 export type UserRole = 'admin' | 'user';
 
@@ -17,7 +18,7 @@ export interface LoginData {
 export type LoginApiResponse = ApiResponse<LoginData>;
 
 export async function authenticateUser(email: string, password: string): Promise<LoginApiResponse> {
-  const response = await fetch('/api/usuaris/post/login', {
+  const response = await fetch(`${API_WEB}/usuaris/post/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
