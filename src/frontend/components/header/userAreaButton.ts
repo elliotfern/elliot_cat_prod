@@ -1,4 +1,4 @@
-import { api } from '../../Infrastructure/Api/Client/ApiClient';
+import { apiSymfony } from '../../Infrastructure/Api/Client/ApiClient';
 
 type MeResponse = {
   authenticated: boolean;
@@ -34,7 +34,7 @@ function escapeHtml(s: string): string {
 async function fetchMe(): Promise<MeResponse | null> {
   let data: MeResponse;
   try {
-    data = await api.get<MeResponse>(ME_ENDPOINT);
+    data = await apiSymfony.get<MeResponse>(ME_ENDPOINT);
     return data as MeResponse;
   } catch (error) {
     console.error(error);

@@ -1,6 +1,6 @@
 // src/frontend/services/auth/isAdmin.ts
 
-import { api } from '../../Infrastructure/Api/Client/ApiClient';
+import { apiSymfony } from '../../Infrastructure/Api/Client/ApiClient';
 
 export type MeResponse =
   | {
@@ -53,7 +53,7 @@ function clearMeCache(): void {
 
 export async function fetchMe(): Promise<MeResponse> {
   try {
-    return await api.get<MeResponse>('usuaris/get/me');
+    return await apiSymfony.get<MeResponse>('usuaris/get/me');
   } catch (error) {
     console.error(error);
 
