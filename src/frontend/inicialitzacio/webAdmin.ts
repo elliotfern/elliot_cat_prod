@@ -10,7 +10,7 @@ import { comptabilitat } from '../pages/comptabilitat/comptabilitat';
 import { contactes } from '../pages/contactes/contactes';
 import { curriculum } from '../pages/curriculum/curriculum';
 import { usuaris } from '../pages/gestioUsuaris/usuaris';
-import { inicialitzarGestorCorreu } from '../pages/gestorCorreu/correu';
+import { inicialitzarGestorCorreu } from '../pages/correu/correu';
 import { historiaOberta } from '../pages/historiaOberta/historiaOberta';
 import { lectorRss } from '../pages/lectorRss/lectorRss';
 import { persona } from '../pages/persona/persona';
