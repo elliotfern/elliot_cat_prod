@@ -28,6 +28,7 @@ use App\Utils\Url;
             <li><a href="<?php echo Url::intranet('projectes'); ?>">6. Gestor de projectes</a></li>
             <li><a href="<?php echo Url::intranet('programacio'); ?>">5. Recursos programació web</a></li>
             <li><a href="<?php echo Url::intranet('vault'); ?>">10. Claus d'accés</a></li>
+            <li><a href="<?php echo Url::intranet('correu'); ?>">27. Gestor correu web</a></li>
         </ul>
 
         <h4>Personal:</h4>

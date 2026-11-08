@@ -14,6 +14,8 @@ function createApi(baseUrl: string) {
 
     put: async <T>(endpoint: string, body?: unknown, queryParams?: QueryParams): Promise<T> => request<T>(baseUrl, endpoint, { method: 'PUT', body: JSON.stringify(body) }, queryParams),
 
+    patch: async <T>(endpoint: string, body?: unknown, queryParams?: QueryParams): Promise<T> => request<T>(baseUrl, endpoint, { method: 'PATCH', body: JSON.stringify(body) }, queryParams),
+
     delete: async <T>(endpoint: string, queryParams?: QueryParams): Promise<T> => request<T>(baseUrl, endpoint, { method: 'DELETE' }, queryParams),
   };
 }

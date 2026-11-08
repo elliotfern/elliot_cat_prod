@@ -37,6 +37,7 @@ class AppRoutes
         'taulell-pendents' => '/taulell-pendents',
         'salut'         => '/salut',
         'documentacio-tecnica'         => '/documentacio-tecnica',
+        'correu'        => '/gestor-correu',
 
         // 🔹 Casos específicos
         'taulell_legalitzacio' => '/taulell-pendents/legalitzacio-titol',

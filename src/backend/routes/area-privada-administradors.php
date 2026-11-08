@@ -337,7 +337,8 @@ $routes = [
     // 2. Directoris i dades
     APP_GESTIO . $url['documentacio_tecnica'] . "/documents-disc-dur" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . 'documents_disc_disc.php'),
 
-
+    // GESTOR CORREU ELECTRÒNIC
+    APP_GESTIO . $url['gestor_correu'] => route(APP_INTRANET_DIR . APP_GESTOR_CORREU . 'index.php'),
 
 
 ];

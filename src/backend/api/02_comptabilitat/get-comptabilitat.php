@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 // ruta => "api/comptabilitat/get/clients"
 if ($slug === 'clients') {
 
-    AuthFactory::admin()->handle();
+    //AuthFactory::admin()->handle();
 
     $sql = <<<SQL
             SELECT

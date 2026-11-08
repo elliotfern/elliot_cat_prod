@@ -10,6 +10,7 @@ import { comptabilitat } from '../pages/comptabilitat/comptabilitat';
 import { contactes } from '../pages/contactes/contactes';
 import { curriculum } from '../pages/curriculum/curriculum';
 import { usuaris } from '../pages/gestioUsuaris/usuaris';
+import { inicialitzarGestorCorreu } from '../pages/gestorCorreu/correu';
 import { historiaOberta } from '../pages/historiaOberta/historiaOberta';
 import { lectorRss } from '../pages/lectorRss/lectorRss';
 import { persona } from '../pages/persona/persona';
@@ -62,6 +63,8 @@ export async function webAdmin(pageType: string[]) {
   } else if (pageType[1] === 'imatges') {
     const id = pageType[2];
     galeriaImatgesPublica(id);
+  } else if (pageType[1] === 'gestor-correu') {
+    inicialitzarGestorCorreu();
   } else if (pageType[0] === 'gestio' || pageType[1] === 'admin') {
     const temperaturaTrento = document.getElementById('temperaturaTrento');
 

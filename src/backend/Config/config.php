@@ -34,6 +34,8 @@ define('APP_AGENDA_DIR', '21_agenda/');
 define('APP_TAULELL_DIR', '22_taulell_pendents/');
 define('APP_SALUT', '25_salut/');
 define('APP_DOCUMENTACIO_TECNICA', '26_documentacio_tecnica/');
+define('APP_GESTOR_CORREU', '27_gestor_correu/');
+
 // definicio de url
 $url = [
     'comptabilitat' => '/comptabilitat',
@@ -59,5 +61,6 @@ $url = [
     'agenda' => '/agenda',
     'taulell_pendents' => '/taulell-pendents',
     'salut'           => '/salut',
-    'documentacio_tecnica'           => '/documentacio-tecnica',
+    'documentacio_tecnica'   => '/documentacio-tecnica',
+    'gestor_correu'   => '/gestor-correu',
 ];
