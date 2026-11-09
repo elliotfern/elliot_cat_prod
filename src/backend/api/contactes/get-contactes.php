@@ -90,6 +90,62 @@ if ($slug === "llistatContactes") {
         );
     }
 
+    // GET : cerca de contactes per autocompletar destinataris
+    // URL: https://elliot.cat/api/contactes/get/cercaContactes?q=juan
+} else if ($slug === "cercaContactes") {
+
+    $terme = $_GET['q'] ?? '';
+
+    $sql = <<<SQL
+    SELECT
+        c.id,
+        c.tipus_persona,
+        c.nom,
+        c.cognoms,
+        c.empresa,
+        c.email
+    FROM %s AS c
+    WHERE
+        c.nom LIKE ?
+        OR c.cognoms LIKE ?
+        OR c.empresa LIKE ?
+        OR c.email LIKE ?
+    ORDER BY
+        c.cognoms ASC,
+        c.nom ASC
+    LIMIT 10
+SQL;
+
+    $query = sprintf(
+        $sql,
+        qi(Tables::DB_CONTACTES, $pdo)
+    );
+
+    $parametreCerca = '%' . $terme . '%';
+
+    $params = [
+        $parametreCerca,
+        $parametreCerca,
+        $parametreCerca,
+        $parametreCerca,
+    ];
+
+    try {
+        $result = $db->getData($query, $params, false);
+
+        Response::success(
+            message: MissatgesAPI::success('get'),
+            data: $result ?: [],
+            httpCode: 200
+        );
+    } catch (PDOException $e) {
+        Response::error(
+            MissatgesAPI::error('errorBD'),
+            [$e->getMessage()],
+            500
+        );
+    }
+
     // RUTA GET - contacteId
 } else if ($slug === 'contacteId') {
     $id = $_GET['id'];

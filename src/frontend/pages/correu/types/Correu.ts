@@ -60,3 +60,12 @@ export interface MissatgePerEnviar {
   contingut_text: string | null;
   contingut_html: string | null;
 }
+
+export interface Contacte {
+  id: string;
+  tipus_persona: string;
+  nom: string | null;
+  cognoms: string | null;
+  empresa: string | null;
+  email: string | null;
+}

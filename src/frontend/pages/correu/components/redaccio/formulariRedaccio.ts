@@ -1,50 +1,17 @@
-import type { ContacteCorreu, MissatgePerEnviar } from '../../types/Correu';
+import type { MissatgePerEnviar } from '../../types/Correu';
 
 import { crearElement } from '../../utils/dom';
 import { crearEditorRedaccio } from './editorRedaccio';
-
-interface CampCorreu {
-  contenidor: HTMLElement;
-  input: HTMLInputElement;
-}
-
-function crearCampCorreu(id: string, etiqueta: string, obligatori = false, classes = 'col-12 col-md-6'): CampCorreu {
-  const contenidor = crearElement('div', classes);
-
-  const label = crearElement('label', 'form-label', etiqueta);
-  label.htmlFor = id;
-
-  const input = crearElement('input', 'form-control');
-  input.type = 'email';
-  input.id = id;
-  input.multiple = true;
-  input.required = obligatori;
-  input.placeholder = 'correu@exemple.com';
-
-  contenidor.append(label, input);
-
-  return { contenidor, input };
-}
-
-function obtenirDestinataris(valor: string): ContacteCorreu[] {
-  return valor
-    .split(',')
-    .map((email) => email.trim())
-    .filter((email) => email.length > 0)
-    .map((email) => ({
-      nom: '',
-      email,
-    }));
-}
+import { crearCampDestinataris } from './campDestinataris';
 
 export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => Promise<void>): HTMLFormElement {
   const formulari = crearElement('form', 'd-flex flex-column gap-3');
 
-  const destinataris = crearCampCorreu('redaccio-destinataris', 'Per a', true, 'col-12');
+  const destinataris = crearCampDestinataris('redaccio-destinataris', 'Per a', true, 'col-12');
 
-  const copia = crearCampCorreu('redaccio-copia', 'CC');
+  const copia = crearCampDestinataris('redaccio-copia', 'CC');
 
-  const copiaOculta = crearCampCorreu('redaccio-copia-oculta', 'CCO');
+  const copiaOculta = crearCampDestinataris('redaccio-copia-oculta', 'CCO');
 
   const assumpteContenidor = crearElement('div', 'mb-0');
 
@@ -71,12 +38,17 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
   accions.appendChild(botoEnviar);
 
   const filaDestinataris = crearElement('div', 'row g-3');
+
   filaDestinataris.append(destinataris.contenidor, copia.contenidor, copiaOculta.contenidor);
 
   formulari.append(filaDestinataris, assumpteContenidor, editor.contenidor, estat, accions);
 
   formulari.addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    destinataris.validar();
+    copia.validar();
+    copiaOculta.validar();
 
     if (!formulari.reportValidity()) {
       return;
@@ -94,9 +66,9 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
     }
 
     const missatge: MissatgePerEnviar = {
-      destinataris: obtenirDestinataris(destinataris.input.value),
-      copia: obtenirDestinataris(copia.input.value),
-      copia_oculta: obtenirDestinataris(copiaOculta.input.value),
+      destinataris: destinataris.obtenirDestinataris(),
+      copia: copia.obtenirDestinataris(),
+      copia_oculta: copiaOculta.obtenirDestinataris(),
       assumpte: assumpte.value.trim(),
       contingut_text: null,
       contingut_html: contingutHtml,
@@ -110,6 +82,11 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
       await enviar(missatge);
 
       formulari.reset();
+
+      destinataris.netejar();
+      copia.netejar();
+      copiaOculta.netejar();
+
       editor.netejar();
 
       estat.className = 'small text-success';

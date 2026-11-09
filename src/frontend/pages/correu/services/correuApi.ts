@@ -1,6 +1,6 @@
-import { apiSymfony } from '../../../Infrastructure/Api/Client/ApiClient';
-import { ENDPOINT_CARPETES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES } from '../constants/endpoints';
-import type { CarpetaCorreu, MissatgeDetall, MissatgeLlista, MissatgePerEnviar, RespostaCarpetes } from '../types/Correu';
+import { api, apiSymfony } from '../../../Infrastructure/Api/Client/ApiClient';
+import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES } from '../constants/endpoints';
+import type { CarpetaCorreu, Contacte, MissatgeDetall, MissatgeLlista, MissatgePerEnviar, RespostaCarpetes } from '../types/Correu';
 
 interface RespostaMissatges {
   missatges: MissatgeLlista[];
@@ -37,4 +37,14 @@ export async function marcarMissatgeLlegit(carpeta: string, missatge: MissatgeLl
 
 export async function enviarMissatge(missatge: MissatgePerEnviar): Promise<void> {
   await apiSymfony.post(ENDPOINT_ENVIAR, missatge);
+}
+
+export async function cercarContactes(terme: string): Promise<Contacte[]> {
+  const cerca = terme.trim();
+
+  if (cerca.length < 2) {
+    return [];
+  }
+
+  return api.get<Contacte[]>(ENDPOINT_CERCAR_CONTACTES, { q: cerca });
 }
