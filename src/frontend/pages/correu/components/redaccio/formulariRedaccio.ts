@@ -1,18 +1,8 @@
-import type { ContacteCorreu, MissatgePerEnviar } from '../../types/Correu';
-
+import type { MissatgePerEnviar } from '../../types/Correu';
+import type { OpcionsRedaccio } from '../../types/Redaccio';
 import { crearElement } from '../../utils/dom';
 import { crearEditorRedaccio } from './editorRedaccio';
 import { crearCampDestinataris } from './campDestinataris';
-
-export interface OpcionsRedaccio {
-  destinataris?: ContacteCorreu[];
-  copia?: ContacteCorreu[];
-  assumpte?: string;
-  inReplyTo?: string | null;
-  referencies?: string[];
-  contingutCitatText?: string | null;
-  contingutCitatHtml?: string | null;
-}
 
 export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => Promise<void>, opcions: OpcionsRedaccio = {}): HTMLFormElement {
   const formulari = crearElement('form', 'd-flex flex-column gap-3');
