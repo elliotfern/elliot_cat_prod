@@ -1,9 +1,17 @@
 import DOMPurify from 'dompurify';
+
 import { crearElement } from '../../utils/dom';
 import { formatarData } from '../../utils/formatData';
-import { MissatgeDetall } from '../../types/Correu';
 
-export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDetall): void {
+import type { MissatgeDetall } from '../../types/Correu';
+
+export interface AccionsLectura {
+  respondre: (missatge: MissatgeDetall) => void;
+  respondreTots: (missatge: MissatgeDetall) => void;
+  reenviar: (missatge: MissatgeDetall) => void;
+}
+
+export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDetall, accions?: AccionsLectura): void {
   contenidor.replaceChildren();
 
   const capcalera = crearElement('div', 'border-bottom pb-3 mb-3');
@@ -38,5 +46,39 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
     cos.textContent = 'Aquest missatge no té contingut disponible.';
   }
 
-  contenidor.append(capcalera, cos);
+  contenidor.appendChild(capcalera);
+
+  if (accions) {
+    const barraAccions = crearElement('div', 'd-flex flex-wrap gap-2 mb-3');
+
+    const botoRespondre = crearElement('button', 'btn btn-outline-primary btn-sm', 'Respondre');
+
+    botoRespondre.type = 'button';
+
+    botoRespondre.addEventListener('click', () => {
+      accions.respondre(missatge);
+    });
+
+    const botoRespondreTots = crearElement('button', 'btn btn-outline-primary btn-sm', 'Respondre a tots');
+
+    botoRespondreTots.type = 'button';
+
+    botoRespondreTots.addEventListener('click', () => {
+      accions.respondreTots(missatge);
+    });
+
+    const botoReenviar = crearElement('button', 'btn btn-outline-secondary btn-sm', 'Reenviar');
+
+    botoReenviar.type = 'button';
+
+    botoReenviar.addEventListener('click', () => {
+      accions.reenviar(missatge);
+    });
+
+    barraAccions.append(botoRespondre, botoRespondreTots, botoReenviar);
+
+    contenidor.appendChild(barraAccions);
+  }
+
+  contenidor.appendChild(cos);
 }

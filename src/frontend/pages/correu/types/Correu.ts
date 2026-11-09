@@ -59,6 +59,14 @@ export interface MissatgePerEnviar {
   assumpte: string;
   contingut_text: string | null;
   contingut_html: string | null;
+
+  // Metadatos de conversación
+  in_reply_to?: string | null;
+  referencies?: string[];
+
+  // Contenido original citado o reenviado
+  contingut_citat_text?: string | null;
+  contingut_citat_html?: string | null;
 }
 
 export interface Contacte {

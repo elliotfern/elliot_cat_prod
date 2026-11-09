@@ -9,6 +9,21 @@ interface CampDestinataris {
   validar: () => boolean;
 }
 
+interface CampDestinataris {
+  contenidor: HTMLElement;
+  obtenirDestinataris: () => ContacteCorreu[];
+  netejar: () => void;
+  validar: () => boolean;
+}
+
+interface CampDestinataris {
+  contenidor: HTMLElement;
+  obtenirDestinataris: () => ContacteCorreu[];
+  establirDestinataris: (destinataris: ContacteCorreu[]) => void;
+  netejar: () => void;
+  validar: () => boolean;
+}
+
 const TEMPS_ESPERA_CERCA = 300;
 
 function obtenirNom(contacte: Contacte): string {
@@ -309,6 +324,38 @@ export function crearCampDestinataris(id: string, etiqueta: string, obligatori =
     contenidor,
 
     obtenirDestinataris: () => destinataris.map((destinatari) => ({ ...destinatari })),
+
+    establirDestinataris: (nousDestinataris) => {
+      destinataris.length = 0;
+
+      for (const destinatari of nousDestinataris) {
+        const email = destinatari.email.trim();
+
+        if (!email || !esEmailValid(email)) {
+          continue;
+        }
+
+        const duplicat = destinataris.some((existent) => existent.email.toLowerCase() === email.toLowerCase());
+
+        if (duplicat) {
+          continue;
+        }
+
+        destinataris.push({
+          nom: destinatari.nom,
+          email,
+        });
+      }
+
+      input.value = '';
+      estat.textContent = '';
+      resultats = [];
+      indexActiu = -1;
+
+      mostrarSuggeriments(false);
+      renderitzarDestinataris();
+      actualitzarValidacio();
+    },
 
     netejar: () => {
       destinataris.length = 0;

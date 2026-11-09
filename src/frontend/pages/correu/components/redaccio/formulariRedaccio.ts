@@ -1,10 +1,20 @@
-import type { MissatgePerEnviar } from '../../types/Correu';
+import type { ContacteCorreu, MissatgePerEnviar } from '../../types/Correu';
 
 import { crearElement } from '../../utils/dom';
 import { crearEditorRedaccio } from './editorRedaccio';
 import { crearCampDestinataris } from './campDestinataris';
 
-export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => Promise<void>): HTMLFormElement {
+export interface OpcionsRedaccio {
+  destinataris?: ContacteCorreu[];
+  copia?: ContacteCorreu[];
+  assumpte?: string;
+  inReplyTo?: string | null;
+  referencies?: string[];
+  contingutCitatText?: string | null;
+  contingutCitatHtml?: string | null;
+}
+
+export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => Promise<void>, opcions: OpcionsRedaccio = {}): HTMLFormElement {
   const formulari = crearElement('form', 'd-flex flex-column gap-3');
 
   const destinataris = crearCampDestinataris('redaccio-destinataris', 'Per a', true, 'col-12');
@@ -13,15 +23,25 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
 
   const copiaOculta = crearCampDestinataris('redaccio-copia-oculta', 'CCO');
 
+  if (opcions.destinataris) {
+    destinataris.establirDestinataris(opcions.destinataris);
+  }
+
+  if (opcions.copia) {
+    copia.establirDestinataris(opcions.copia);
+  }
+
   const assumpteContenidor = crearElement('div', 'mb-0');
 
   const assumpteLabel = crearElement('label', 'form-label', 'Assumpte');
+
   assumpteLabel.htmlFor = 'redaccio-assumpte';
 
   const assumpte = crearElement('input', 'form-control');
   assumpte.type = 'text';
   assumpte.id = 'redaccio-assumpte';
   assumpte.placeholder = 'Assumpte del missatge';
+  assumpte.value = opcions.assumpte ?? '';
 
   assumpteContenidor.append(assumpteLabel, assumpte);
 
@@ -32,9 +52,11 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
   estat.setAttribute('aria-live', 'polite');
 
   const botoEnviar = crearElement('button', 'btn btn-primary', 'Enviar');
+
   botoEnviar.type = 'submit';
 
   const accions = crearElement('div', 'd-flex justify-content-end');
+
   accions.appendChild(botoEnviar);
 
   const filaDestinataris = crearElement('div', 'row g-3');
@@ -42,6 +64,8 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
   filaDestinataris.append(destinataris.contenidor, copia.contenidor, copiaOculta.contenidor);
 
   formulari.append(filaDestinataris, assumpteContenidor, editor.contenidor, estat, accions);
+
+  const teContingutCitat = Boolean(opcions.contingutCitatText?.trim() || opcions.contingutCitatHtml?.trim());
 
   formulari.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -59,7 +83,9 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
     const comprovacioContingut = document.createElement('div');
     comprovacioContingut.innerHTML = contingutHtml;
 
-    if (!comprovacioContingut.textContent?.trim()) {
+    const teContingutNou = Boolean(comprovacioContingut.textContent?.trim());
+
+    if (!teContingutNou && !teContingutCitat) {
       estat.className = 'small text-danger';
       estat.textContent = 'Escriu el contingut del missatge.';
       return;
@@ -72,6 +98,10 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
       assumpte: assumpte.value.trim(),
       contingut_text: null,
       contingut_html: contingutHtml,
+      in_reply_to: opcions.inReplyTo ?? null,
+      referencies: opcions.referencies ?? [],
+      contingut_citat_text: opcions.contingutCitatText ?? null,
+      contingut_citat_html: opcions.contingutCitatHtml ?? null,
     };
 
     botoEnviar.disabled = true;
@@ -93,6 +123,7 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
       estat.textContent = 'Missatge enviat correctament.';
     } catch (error: unknown) {
       estat.className = 'small text-danger';
+
       estat.textContent = error instanceof Error ? error.message : "No s'ha pogut enviar el missatge.";
     } finally {
       botoEnviar.disabled = false;
