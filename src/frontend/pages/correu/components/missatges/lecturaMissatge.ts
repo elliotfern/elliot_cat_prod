@@ -6,9 +6,11 @@ import { formatarData } from '../../utils/formatData';
 import type { MissatgeDetall } from '../../types/Correu';
 
 export interface AccionsLectura {
-  respondre: (missatge: MissatgeDetall) => void;
-  respondreTots: (missatge: MissatgeDetall) => void;
-  reenviar: (missatge: MissatgeDetall) => void;
+  respondre?: (missatge: MissatgeDetall) => void;
+  respondreTots?: (missatge: MissatgeDetall) => void;
+  reenviar?: (missatge: MissatgeDetall) => void;
+  editarEsborrany?: (missatge: MissatgeDetall) => void;
+  eliminarEsborrany?: (missatge: MissatgeDetall) => void;
 }
 
 export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDetall, accions?: AccionsLectura): void {
@@ -51,33 +53,69 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
   if (accions) {
     const barraAccions = crearElement('div', 'd-flex flex-wrap gap-2 mb-3');
 
-    const botoRespondre = crearElement('button', 'btn btn-outline-primary btn-sm', 'Respondre');
+    if (accions.editarEsborrany) {
+      const botoEditar = crearElement('button', 'btn btn-outline-primary btn-sm', 'Editar borrador');
 
-    botoRespondre.type = 'button';
+      botoEditar.type = 'button';
 
-    botoRespondre.addEventListener('click', () => {
-      accions.respondre(missatge);
-    });
+      botoEditar.addEventListener('click', () => {
+        accions.editarEsborrany?.(missatge);
+      });
 
-    const botoRespondreTots = crearElement('button', 'btn btn-outline-primary btn-sm', 'Respondre a tots');
+      barraAccions.appendChild(botoEditar);
+    }
 
-    botoRespondreTots.type = 'button';
+    if (accions.eliminarEsborrany) {
+      const botoEliminar = crearElement('button', 'btn btn-outline-danger btn-sm', 'Eliminar borrador');
 
-    botoRespondreTots.addEventListener('click', () => {
-      accions.respondreTots(missatge);
-    });
+      botoEliminar.type = 'button';
 
-    const botoReenviar = crearElement('button', 'btn btn-outline-secondary btn-sm', 'Reenviar');
+      botoEliminar.addEventListener('click', () => {
+        accions.eliminarEsborrany?.(missatge);
+      });
 
-    botoReenviar.type = 'button';
+      barraAccions.appendChild(botoEliminar);
+    }
 
-    botoReenviar.addEventListener('click', () => {
-      accions.reenviar(missatge);
-    });
+    if (accions.respondre) {
+      const botoRespondre = crearElement('button', 'btn btn-outline-primary btn-sm', 'Respondre');
 
-    barraAccions.append(botoRespondre, botoRespondreTots, botoReenviar);
+      botoRespondre.type = 'button';
 
-    contenidor.appendChild(barraAccions);
+      botoRespondre.addEventListener('click', () => {
+        accions.respondre?.(missatge);
+      });
+
+      barraAccions.appendChild(botoRespondre);
+    }
+
+    if (accions.respondreTots) {
+      const botoRespondreTots = crearElement('button', 'btn btn-outline-primary btn-sm', 'Respondre a tots');
+
+      botoRespondreTots.type = 'button';
+
+      botoRespondreTots.addEventListener('click', () => {
+        accions.respondreTots?.(missatge);
+      });
+
+      barraAccions.appendChild(botoRespondreTots);
+    }
+
+    if (accions.reenviar) {
+      const botoReenviar = crearElement('button', 'btn btn-outline-secondary btn-sm', 'Reenviar');
+
+      botoReenviar.type = 'button';
+
+      botoReenviar.addEventListener('click', () => {
+        accions.reenviar?.(missatge);
+      });
+
+      barraAccions.appendChild(botoReenviar);
+    }
+
+    if (barraAccions.childElementCount > 0) {
+      contenidor.appendChild(barraAccions);
+    }
   }
 
   contenidor.appendChild(cos);

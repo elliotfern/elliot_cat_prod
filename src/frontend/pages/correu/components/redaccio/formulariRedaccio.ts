@@ -8,7 +8,17 @@ import { crearCampDestinataris } from './campDestinataris';
 
 export type AccioGuardarEsborrany = (esborrany: EsborranyPerGuardar) => Promise<IdentificadorMissatgeCorreu>;
 
-export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => Promise<void>, opcions: OpcionsRedaccio = {}, guardarEsborrany?: AccioGuardarEsborrany): HTMLFormElement {
+export type AccioEnviarEsborrany = (id: IdentificadorMissatgeCorreu) => Promise<void>;
+
+function escaparHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function convertirTextAHtml(text: string): string {
+  return text.split(/\r?\n/).map(escaparHtml).join('<br>');
+}
+
+export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => Promise<void>, opcions: OpcionsRedaccio = {}, guardarEsborrany?: AccioGuardarEsborrany, enviarEsborrany?: AccioEnviarEsborrany): HTMLFormElement {
   const formulari = crearElement('form', 'd-flex flex-column gap-3');
 
   const destinataris = crearCampDestinataris('redaccio-destinataris', 'Per a', true, 'col-12');
@@ -23,6 +33,10 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
 
   if (opcions.copia) {
     copia.establirDestinataris(opcions.copia);
+  }
+
+  if (opcions.copiaOculta) {
+    copiaOculta.establirDestinataris(opcions.copiaOculta);
   }
 
   const assumpteContenidor = crearElement('div', 'mb-0');
@@ -40,6 +54,14 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
   assumpteContenidor.append(assumpteLabel, assumpte);
 
   const editor = crearEditorRedaccio('redaccio-contingut');
+
+  const contingutInicial = opcions.contingutInicialHtml ?? (opcions.contingutInicialText ? convertirTextAHtml(opcions.contingutInicialText) : '');
+
+  if (contingutInicial !== '') {
+    requestAnimationFrame(() => {
+      editor.establirContingut(contingutInicial);
+    });
+  }
 
   const estat = crearElement('div', 'small');
   estat.setAttribute('role', 'status');
@@ -71,18 +93,15 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
 
   formulari.append(filaDestinataris, assumpteContenidor, editor.contenidor, estat, accions);
 
-  let identificadorEsborrany: IdentificadorMissatgeCorreu | undefined;
+  // Conservamos el identificador cuando estamos editando un borrador.
+  let identificadorEsborrany: IdentificadorMissatgeCorreu | undefined = opcions.idEsborrany;
 
   const teContingutCitat = Boolean(opcions.contingutCitatText?.trim() || opcions.contingutCitatHtml?.trim());
 
-  async function executarGuardatEsborrany(): Promise<void> {
-    if (!guardarEsborrany || !botoGuardar) {
-      return;
-    }
-
+  function obtenirDadesEsborrany(): EsborranyPerGuardar {
     const contingutHtml = editor.obtenirContingut();
 
-    const esborrany: EsborranyPerGuardar = {
+    return {
       ...(identificadorEsborrany ? { id: identificadorEsborrany } : {}),
       destinataris: destinataris.obtenirDestinataris(),
       copia: copia.obtenirDestinataris(),
@@ -91,6 +110,12 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
       contingut_text: null,
       contingut_html: contingutHtml.trim() !== '' ? contingutHtml : null,
     };
+  }
+
+  async function executarGuardatEsborrany(): Promise<void> {
+    if (!guardarEsborrany || !botoGuardar) {
+      return;
+    }
 
     botoGuardar.disabled = true;
     botoEnviar.disabled = true;
@@ -99,7 +124,7 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
     estat.textContent = 'Guardant l’esborrany...';
 
     try {
-      identificadorEsborrany = await guardarEsborrany(esborrany);
+      identificadorEsborrany = await guardarEsborrany(obtenirDadesEsborrany());
 
       estat.className = 'small text-success';
       estat.textContent = 'Esborrany guardat correctament.';
@@ -136,19 +161,6 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
       return;
     }
 
-    const missatge: MissatgePerEnviar = {
-      destinataris: destinataris.obtenirDestinataris(),
-      copia: copia.obtenirDestinataris(),
-      copia_oculta: copiaOculta.obtenirDestinataris(),
-      assumpte: assumpte.value.trim(),
-      contingut_text: null,
-      contingut_html: contingutHtml,
-      in_reply_to: opcions.inReplyTo ?? null,
-      referencies: opcions.referencies ?? [],
-      contingut_citat_text: opcions.contingutCitatText ?? null,
-      contingut_citat_html: opcions.contingutCitatHtml ?? null,
-    };
-
     botoEnviar.disabled = true;
 
     if (botoGuardar) {
@@ -159,7 +171,33 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
     estat.textContent = 'Enviant el missatge...';
 
     try {
-      await enviar(missatge);
+      if (identificadorEsborrany) {
+        if (!guardarEsborrany || !enviarEsborrany) {
+          throw new Error('No se ha podido configurar el envío del borrador.');
+        }
+
+        // Guardamos primero los últimos cambios.
+        identificadorEsborrany = await guardarEsborrany(obtenirDadesEsborrany());
+
+        // Enviamos exactamente la versión que acabamos de guardar.
+        await enviarEsborrany(identificadorEsborrany);
+      } else {
+        // Correo nuevo, respuesta o reenvío.
+        const missatge: MissatgePerEnviar = {
+          destinataris: destinataris.obtenirDestinataris(),
+          copia: copia.obtenirDestinataris(),
+          copia_oculta: copiaOculta.obtenirDestinataris(),
+          assumpte: assumpte.value.trim(),
+          contingut_text: null,
+          contingut_html: contingutHtml,
+          in_reply_to: opcions.inReplyTo ?? null,
+          referencies: opcions.referencies ?? [],
+          contingut_citat_text: opcions.contingutCitatText ?? null,
+          contingut_citat_html: opcions.contingutCitatHtml ?? null,
+        };
+
+        await enviar(missatge);
+      }
 
       formulari.reset();
 
@@ -168,6 +206,8 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
       copiaOculta.netejar();
 
       editor.netejar();
+
+      identificadorEsborrany = undefined;
 
       estat.className = 'small text-success';
       estat.textContent = 'Missatge enviat correctament.';
