@@ -1,10 +1,14 @@
-import type { MissatgePerEnviar } from '../../types/Correu';
+import type { IdentificadorMissatgeCorreu, EsborranyPerGuardar, MissatgePerEnviar } from '../../types/Correu';
+
 import type { OpcionsRedaccio } from '../../types/Redaccio';
+
 import { crearElement } from '../../utils/dom';
 import { crearEditorRedaccio } from './editorRedaccio';
 import { crearCampDestinataris } from './campDestinataris';
 
-export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => Promise<void>, opcions: OpcionsRedaccio = {}): HTMLFormElement {
+export type AccioGuardarEsborrany = (esborrany: EsborranyPerGuardar) => Promise<IdentificadorMissatgeCorreu>;
+
+export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => Promise<void>, opcions: OpcionsRedaccio = {}, guardarEsborrany?: AccioGuardarEsborrany): HTMLFormElement {
   const formulari = crearElement('form', 'd-flex flex-column gap-3');
 
   const destinataris = crearCampDestinataris('redaccio-destinataris', 'Per a', true, 'col-12');
@@ -45,7 +49,19 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
 
   botoEnviar.type = 'submit';
 
-  const accions = crearElement('div', 'd-flex justify-content-end');
+  const accions = crearElement('div', 'd-flex justify-content-between align-items-center gap-2');
+
+  const botoGuardar = guardarEsborrany ? crearElement('button', 'btn btn-outline-secondary', 'Guardar borrador') : null;
+
+  if (botoGuardar) {
+    botoGuardar.type = 'button';
+
+    botoGuardar.addEventListener('click', () => {
+      void executarGuardatEsborrany();
+    });
+
+    accions.appendChild(botoGuardar);
+  }
 
   accions.appendChild(botoEnviar);
 
@@ -55,7 +71,46 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
 
   formulari.append(filaDestinataris, assumpteContenidor, editor.contenidor, estat, accions);
 
+  let identificadorEsborrany: IdentificadorMissatgeCorreu | undefined;
+
   const teContingutCitat = Boolean(opcions.contingutCitatText?.trim() || opcions.contingutCitatHtml?.trim());
+
+  async function executarGuardatEsborrany(): Promise<void> {
+    if (!guardarEsborrany || !botoGuardar) {
+      return;
+    }
+
+    const contingutHtml = editor.obtenirContingut();
+
+    const esborrany: EsborranyPerGuardar = {
+      ...(identificadorEsborrany ? { id: identificadorEsborrany } : {}),
+      destinataris: destinataris.obtenirDestinataris(),
+      copia: copia.obtenirDestinataris(),
+      copia_oculta: copiaOculta.obtenirDestinataris(),
+      assumpte: assumpte.value.trim(),
+      contingut_text: null,
+      contingut_html: contingutHtml.trim() !== '' ? contingutHtml : null,
+    };
+
+    botoGuardar.disabled = true;
+    botoEnviar.disabled = true;
+
+    estat.className = 'small text-body-secondary';
+    estat.textContent = 'Guardant l’esborrany...';
+
+    try {
+      identificadorEsborrany = await guardarEsborrany(esborrany);
+
+      estat.className = 'small text-success';
+      estat.textContent = 'Esborrany guardat correctament.';
+    } catch (error: unknown) {
+      estat.className = 'small text-danger';
+      estat.textContent = error instanceof Error ? error.message : 'No s’ha pogut guardar l’esborrany.';
+    } finally {
+      botoGuardar.disabled = false;
+      botoEnviar.disabled = false;
+    }
+  }
 
   formulari.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -95,6 +150,11 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
     };
 
     botoEnviar.disabled = true;
+
+    if (botoGuardar) {
+      botoGuardar.disabled = true;
+    }
+
     estat.className = 'small text-body-secondary';
     estat.textContent = 'Enviant el missatge...';
 
@@ -113,10 +173,13 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar) => 
       estat.textContent = 'Missatge enviat correctament.';
     } catch (error: unknown) {
       estat.className = 'small text-danger';
-
       estat.textContent = error instanceof Error ? error.message : "No s'ha pogut enviar el missatge.";
     } finally {
       botoEnviar.disabled = false;
+
+      if (botoGuardar) {
+        botoGuardar.disabled = false;
+      }
     }
   });
 

@@ -77,3 +77,36 @@ export interface Contacte {
   empresa: string | null;
   email: string | null;
 }
+
+export interface IdentificadorMissatgeCorreu {
+  uid: number;
+  uid_validity: number;
+}
+
+export interface Esborrany {
+  id: IdentificadorMissatgeCorreu;
+  destinataris: ContacteCorreu[];
+  copia: ContacteCorreu[];
+  copia_oculta: ContacteCorreu[];
+  assumpte: string;
+  contingut_text: string | null;
+  contingut_html: string | null;
+}
+
+export interface EsborranyPerGuardar {
+  id?: IdentificadorMissatgeCorreu;
+  destinataris: ContacteCorreu[];
+  copia: ContacteCorreu[];
+  copia_oculta: ContacteCorreu[];
+  assumpte: string;
+  contingut_text: string | null;
+  contingut_html: string | null;
+}
+
+export interface RespostaLlistarEsborranys {
+  esborranys: Esborrany[];
+}
+
+export interface RespostaGuardarEsborrany {
+  id: IdentificadorMissatgeCorreu;
+}

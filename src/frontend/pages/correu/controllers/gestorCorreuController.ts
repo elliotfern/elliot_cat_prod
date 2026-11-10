@@ -1,18 +1,13 @@
-import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, marcarMissatgeLlegit, enviarMissatge } from '../services/correuApi';
+import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany } from '../services/correuApi';
 
 import { crearOpcionsResposta, crearOpcionsRespostaTots, crearOpcionsReenviament } from '../services/conversacioCorreu';
-
 import { renderitzarCarpetes } from '../components/carpetes/carpetes';
 import { renderitzarMissatges } from '../components/missatges/llistaMissatges';
 import { renderitzarLectura } from '../components/missatges/lecturaMissatge';
 import { crearFormulariRedaccio } from '../components/redaccio/formulariRedaccio';
-
 import type { ElementsGestorCorreu } from '../components/layout/interficieCorreu';
-
 import type { CarpetaCorreu, MissatgeDetall, MissatgeLlista } from '../types/Correu';
-
 import type { OpcionsRedaccio } from '../types/Redaccio';
-
 import { mostrarEstat } from '../utils/dom';
 
 export async function inicialitzarGestorCorreuController(elements: ElementsGestorCorreu): Promise<void> {
@@ -37,7 +32,7 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
     redaccioActiva = true;
     actualitzarBotoRedaccio();
 
-    elements.contenidorLectura.replaceChildren(crearFormulariRedaccio(enviarMissatge, opcions));
+    elements.contenidorLectura.replaceChildren(crearFormulariRedaccio(enviarMissatge, opcions, guardarEsborrany));
   }
 
   function iniciarResposta(missatge: MissatgeDetall): void {
