@@ -9,4 +9,6 @@ export const ENDPOINT_LLISTAR_ESBORRANYS = 'correu/esborranys';
 export const ENDPOINT_ESBORRANY = 'correu/esborrany';
 export const ENDPOINT_ENVIAR_ESBORRANY = 'correu/esborrany/enviar';
 
+export const ENDPOINT_ELIMINAR_MISSATGE = 'correu/missatge';
+
 export const ENDPOINT_CERCAR_CONTACTES = 'contactes/get/cercaContactes';

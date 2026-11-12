@@ -1,4 +1,4 @@
-import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany } from '../services/correuApi';
+import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany, eliminarMissatge } from '../services/correuApi';
 
 import { crearOpcionsResposta, crearOpcionsRespostaTots, crearOpcionsReenviament } from '../services/conversacioCorreu';
 
@@ -113,6 +113,31 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
     }
   }
 
+  async function esborrarMissatge(missatge: MissatgeDetall): Promise<void> {
+    const confirmacio = window.confirm('¿Seguro que quieres mover este mensaje a la papelera?');
+
+    if (!confirmacio) {
+      return;
+    }
+
+    try {
+      await eliminarMissatge(carpetaActual, {
+        uid: missatge.id.uid,
+        uid_validity: missatge.id.uid_validity,
+      });
+
+      missatgeSeleccionat = null;
+
+      await actualitzarLlistaSenseTancarLectura();
+
+      mostrarEstat(elements.contenidorLectura, 'Mensaje movido a la papelera correctamente.');
+    } catch (error: unknown) {
+      const missatgeError = error instanceof Error ? error.message : 'No se ha podido mover el mensaje a la papelera.';
+
+      mostrarEstat(elements.contenidorLectura, missatgeError);
+    }
+  }
+
   function tancarRedaccio(): void {
     redaccioActiva = false;
     actualitzarBotoRedaccio();
@@ -175,6 +200,9 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
           respondre: iniciarResposta,
           respondreTots: iniciarRespostaTots,
           reenviar: iniciarReenviament,
+          eliminarMissatge: (missatge) => {
+            void esborrarMissatge(missatge);
+          },
         });
       }
 

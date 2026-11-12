@@ -11,6 +11,7 @@ export interface AccionsLectura {
   reenviar?: (missatge: MissatgeDetall) => void;
   editarEsborrany?: (missatge: MissatgeDetall) => void;
   eliminarEsborrany?: (missatge: MissatgeDetall) => void;
+  eliminarMissatge?: (missatge: MissatgeDetall) => void;
 }
 
 export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDetall, accions?: AccionsLectura): void {
@@ -72,6 +73,18 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
 
       botoEliminar.addEventListener('click', () => {
         accions.eliminarEsborrany?.(missatge);
+      });
+
+      barraAccions.appendChild(botoEliminar);
+    }
+
+    if (accions.eliminarMissatge) {
+      const botoEliminar = crearElement('button', 'btn btn-outline-danger btn-sm', 'Eliminar');
+
+      botoEliminar.type = 'button';
+
+      botoEliminar.addEventListener('click', () => {
+        accions.eliminarMissatge?.(missatge);
       });
 
       barraAccions.appendChild(botoEliminar);

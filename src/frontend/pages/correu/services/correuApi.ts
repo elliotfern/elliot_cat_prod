@@ -1,5 +1,5 @@
 import { api, apiSymfony } from '../../../Infrastructure/Api/Client/ApiClient';
-import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES, ENDPOINT_GUARDAR_ESBORRANY, ENDPOINT_LLISTAR_ESBORRANYS, ENDPOINT_ESBORRANY, ENDPOINT_ENVIAR_ESBORRANY } from '../constants/endpoints';
+import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES, ENDPOINT_GUARDAR_ESBORRANY, ENDPOINT_LLISTAR_ESBORRANYS, ENDPOINT_ESBORRANY, ENDPOINT_ENVIAR_ESBORRANY, ENDPOINT_ELIMINAR_MISSATGE } from '../constants/endpoints';
 import type { CarpetaCorreu, Contacte, Esborrany, EsborranyPerGuardar, IdentificadorMissatgeCorreu, MissatgeDetall, MissatgeLlista, MissatgePerEnviar, RespostaCarpetes, RespostaGuardarEsborrany, RespostaLlistarEsborranys } from '../types/Correu';
 
 interface RespostaMissatges {
@@ -92,4 +92,15 @@ export async function eliminarEsborrany(id: IdentificadorMissatgeCorreu): Promis
  */
 export async function enviarEsborrany(id: IdentificadorMissatgeCorreu): Promise<void> {
   await apiSymfony.post<void>(ENDPOINT_ENVIAR_ESBORRANY, { id });
+}
+
+/**
+ * Mueve un mensaje a la papelera.
+ */
+export async function eliminarMissatge(carpeta: string, id: IdentificadorMissatgeCorreu): Promise<void> {
+  await apiSymfony.delete<void>(ENDPOINT_ELIMINAR_MISSATGE, {
+    carpeta,
+    uid: id.uid,
+    uidValidity: id.uid_validity,
+  });
 }
