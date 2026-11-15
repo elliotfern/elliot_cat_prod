@@ -35,8 +35,21 @@ export async function marcarMissatgeLlegit(carpeta: string, missatge: MissatgeLl
   });
 }
 
-export async function enviarMissatge(missatge: MissatgePerEnviar): Promise<void> {
-  await apiSymfony.post(ENDPOINT_ENVIAR, missatge);
+export async function enviarMissatge(missatge: MissatgePerEnviar, adjunts: File[] = []): Promise<void> {
+  if (adjunts.length === 0) {
+    await apiSymfony.post(ENDPOINT_ENVIAR, missatge);
+    return;
+  }
+
+  const formData = new FormData();
+
+  formData.append('missatge', JSON.stringify(missatge));
+
+  for (const adjunt of adjunts) {
+    formData.append('adjunts[]', adjunt, adjunt.name);
+  }
+
+  await apiSymfony.post(ENDPOINT_ENVIAR, formData);
 }
 
 export async function cercarContactes(terme: string): Promise<Contacte[]> {

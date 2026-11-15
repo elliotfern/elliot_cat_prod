@@ -4,17 +4,56 @@ import { buildQueryParams } from './utils';
 
 type QueryParams = Record<string, unknown>;
 
+function prepararBody(body?: unknown): BodyInit | undefined {
+  if (body instanceof FormData) {
+    return body;
+  }
+
+  if (body === undefined) {
+    return undefined;
+  }
+
+  return JSON.stringify(body);
+}
+
 function createApi(baseUrl: string) {
   return {
     get: async <T>(endpoint: string, queryParams?: QueryParams): Promise<T> => request<T>(baseUrl, endpoint, { method: 'GET' }, queryParams),
 
     getResponse: async <T>(endpoint: string, queryParams?: QueryParams): Promise<ApiResponse<T>> => requestResponse<T>(baseUrl, endpoint, { method: 'GET' }, queryParams),
 
-    post: async <T>(endpoint: string, body?: unknown, queryParams?: QueryParams): Promise<T> => request<T>(baseUrl, endpoint, { method: 'POST', body: JSON.stringify(body) }, queryParams),
+    post: async <T>(endpoint: string, body?: unknown, queryParams?: QueryParams): Promise<T> =>
+      request<T>(
+        baseUrl,
+        endpoint,
+        {
+          method: 'POST',
+          body: prepararBody(body),
+        },
+        queryParams
+      ),
 
-    put: async <T>(endpoint: string, body?: unknown, queryParams?: QueryParams): Promise<T> => request<T>(baseUrl, endpoint, { method: 'PUT', body: JSON.stringify(body) }, queryParams),
+    put: async <T>(endpoint: string, body?: unknown, queryParams?: QueryParams): Promise<T> =>
+      request<T>(
+        baseUrl,
+        endpoint,
+        {
+          method: 'PUT',
+          body: prepararBody(body),
+        },
+        queryParams
+      ),
 
-    patch: async <T>(endpoint: string, body?: unknown, queryParams?: QueryParams): Promise<T> => request<T>(baseUrl, endpoint, { method: 'PATCH', body: JSON.stringify(body) }, queryParams),
+    patch: async <T>(endpoint: string, body?: unknown, queryParams?: QueryParams): Promise<T> =>
+      request<T>(
+        baseUrl,
+        endpoint,
+        {
+          method: 'PATCH',
+          body: prepararBody(body),
+        },
+        queryParams
+      ),
 
     delete: async <T>(endpoint: string, queryParams?: QueryParams): Promise<T> => request<T>(baseUrl, endpoint, { method: 'DELETE' }, queryParams),
   };
@@ -42,6 +81,12 @@ async function requestResponse<T>(baseUrl: string, endpoint: string, options: Re
   new Headers(options.headers).forEach((value, key) => {
     headers.set(key, value);
   });
+
+  // FormData necesita que el navegador genere el Content-Type
+  // con su correspondiente boundary.
+  if (options.body instanceof FormData) {
+    headers.delete('Content-Type');
+  }
 
   let response: Response;
 
