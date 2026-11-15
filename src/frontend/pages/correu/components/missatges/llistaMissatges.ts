@@ -74,7 +74,16 @@ export function renderitzarMissatges(contenidor: HTMLElement, missatges: Missatg
     const icones = crearElement('div', 'd-flex gap-2 mt-1');
 
     if (missatge.te_adjunts) {
-      icones.appendChild(crearElement('i', 'bi bi-paperclip'));
+      const iconaAdjunt = document.createElement('img');
+
+      iconaAdjunt.src = 'https://media.elliot.cat/img/web-icones/attachment.svg';
+      iconaAdjunt.alt = '';
+      iconaAdjunt.title = 'Conté fitxers adjunts';
+      iconaAdjunt.width = 16;
+      iconaAdjunt.height = 16;
+      iconaAdjunt.className = 'align-text-bottom';
+
+      icones.appendChild(iconaAdjunt);
     }
 
     if (missatge.destacat) {

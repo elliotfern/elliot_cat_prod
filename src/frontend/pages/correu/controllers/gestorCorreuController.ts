@@ -23,6 +23,10 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
   let missatgeSeleccionat: number | null = null;
   let redaccioActiva = false;
 
+  const limitPaginacio = 50;
+  let offsetActual = 0;
+  let teMes = false;
+
   function actualitzarBotoRedaccio(): void {
     elements.botoRedactar.textContent = redaccioActiva ? 'Tancar redacció' : 'Redactar';
 
@@ -36,8 +40,29 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
   }
 
   async function actualitzarLlistaSenseTancarLectura(): Promise<void> {
-    missatgesActuals = await obtenirMissatges(carpetaActual);
+    let resultat = await obtenirMissatges(carpetaActual, limitPaginacio, offsetActual);
+
+    // Si la página queda vacía, retrocedemos a la página anterior.
+    if (resultat.missatges.length === 0 && offsetActual > 0) {
+      offsetActual -= limitPaginacio;
+
+      resultat = await obtenirMissatges(carpetaActual, limitPaginacio, offsetActual);
+    }
+
+    missatgesActuals = resultat.missatges;
+    teMes = resultat.meta.te_mes;
+
     actualitzarLlistaMissatges();
+    actualitzarPaginacio();
+  }
+
+  function actualitzarPaginacio(): void {
+    const inici = missatgesActuals.length > 0 ? offsetActual + 1 : 0;
+    const final = offsetActual + missatgesActuals.length;
+
+    elements.indicadorPaginacio.textContent = `Mensajes ${inici}–${final}`;
+    elements.botoPaginaAnterior.disabled = offsetActual === 0;
+    elements.botoPaginaSeguent.disabled = !teMes;
   }
 
   async function guardarEsborranyDesDeForm(esborrany: EsborranyPerGuardar): Promise<IdentificadorMissatgeCorreu> {
@@ -204,9 +229,13 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
     mostrarEstat(elements.contenidorLectura, 'Selecciona un missatge per llegir-lo.');
 
     try {
-      missatgesActuals = await obtenirMissatges(carpeta);
+      const resultat = await obtenirMissatges(carpeta, limitPaginacio, offsetActual);
+
+      missatgesActuals = resultat.missatges;
+      teMes = resultat.meta.te_mes;
 
       actualitzarLlistaMissatges();
+      actualitzarPaginacio();
     } catch (error: unknown) {
       const missatge = error instanceof Error ? error.message : 'No s’han pogut carregar els missatges.';
 
@@ -273,6 +302,7 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
         carpetes,
         (carpeta) => {
           tipusCarpetaActual = carpeta.tipus;
+          offsetActual = 0;
           void carregarMissatges(carpeta.ruta);
         },
         carpetaActual
@@ -289,7 +319,7 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
 
     try {
       await carregarCarpetes();
-      await carregarMissatges(carpetaActual);
+      await actualitzarLlistaSenseTancarLectura();
     } finally {
       elements.botoActualitzar.disabled = false;
     }
@@ -309,6 +339,20 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
         tancarRedaccio();
       } else {
         obrirRedaccio();
+      }
+    });
+
+    elements.botoPaginaAnterior.addEventListener('click', () => {
+      if (offsetActual >= limitPaginacio) {
+        offsetActual -= limitPaginacio;
+        void carregarMissatges(carpetaActual);
+      }
+    });
+
+    elements.botoPaginaSeguent.addEventListener('click', () => {
+      if (teMes) {
+        offsetActual += limitPaginacio;
+        void carregarMissatges(carpetaActual);
       }
     });
   }

@@ -8,6 +8,9 @@ export interface ElementsGestorCorreu {
   campCerca: HTMLInputElement;
   botoActualitzar: HTMLButtonElement;
   botoRedactar: HTMLButtonElement;
+  botoPaginaAnterior: HTMLButtonElement;
+  botoPaginaSeguent: HTMLButtonElement;
+  indicadorPaginacio: HTMLElement;
 }
 
 export function crearInterficie(contenidor: HTMLElement): ElementsGestorCorreu {
@@ -22,11 +25,9 @@ export function crearInterficie(contenidor: HTMLElement): ElementsGestorCorreu {
   const accions = crearElement('div', 'd-flex gap-2');
 
   const botoRedactar = crearElement('button', 'btn btn-outline-primary btn-sm', 'Redactar');
-
   botoRedactar.type = 'button';
 
   const botoActualitzar = crearElement('button', 'btn btn-outline-secondary btn-sm', 'Actualitzar');
-
   botoActualitzar.type = 'button';
 
   accions.append(botoRedactar, botoActualitzar);
@@ -69,7 +70,26 @@ export function crearInterficie(contenidor: HTMLElement): ElementsGestorCorreu {
 
   const contenidorMissatges = crearElement('div', 'correu-llista-missatges');
 
-  cosMissatges.append(capcaleraMissatges, cerca, contenidorMissatges);
+  // Navegació de paginació
+  const navegacioPaginacio = crearElement('div', 'd-flex justify-content-between align-items-center mt-3');
+
+  const botoPaginaAnterior = crearElement('button', 'btn btn-outline-secondary btn-sm', 'Anterior');
+
+  botoPaginaAnterior.type = 'button';
+  botoPaginaAnterior.disabled = true;
+
+  const indicadorPaginacio = crearElement('span', 'small text-muted text-center');
+
+  indicadorPaginacio.textContent = 'Mensajes 0–0';
+
+  const botoPaginaSeguent = crearElement('button', 'btn btn-outline-secondary btn-sm', 'Siguiente');
+
+  botoPaginaSeguent.type = 'button';
+  botoPaginaSeguent.disabled = true;
+
+  navegacioPaginacio.append(botoPaginaAnterior, indicadorPaginacio, botoPaginaSeguent);
+
+  cosMissatges.append(capcaleraMissatges, cerca, contenidorMissatges, navegacioPaginacio);
 
   panellMissatges.appendChild(cosMissatges);
   columnaMissatges.appendChild(panellMissatges);
@@ -99,5 +119,8 @@ export function crearInterficie(contenidor: HTMLElement): ElementsGestorCorreu {
     campCerca,
     botoActualitzar,
     botoRedactar,
+    botoPaginaAnterior,
+    botoPaginaSeguent,
+    indicadorPaginacio,
   };
 }

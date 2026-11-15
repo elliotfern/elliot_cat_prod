@@ -119,3 +119,16 @@ export interface RespostaLlistarEsborranys {
 export interface RespostaGuardarEsborrany {
   id: IdentificadorMissatgeCorreu;
 }
+
+export interface MetaPaginacioMissatges {
+  carpeta: string;
+  limit: number;
+  offset: number;
+  resultats: number;
+  te_mes: boolean;
+}
+
+export interface ResultatMissatgesPaginats {
+  missatges: MissatgeLlista[];
+  meta: MetaPaginacioMissatges;
+}

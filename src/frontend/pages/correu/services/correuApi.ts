@@ -1,10 +1,6 @@
 import { api, apiSymfony } from '../../../Infrastructure/Api/Client/ApiClient';
 import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES, ENDPOINT_GUARDAR_ESBORRANY, ENDPOINT_LLISTAR_ESBORRANYS, ENDPOINT_ESBORRANY, ENDPOINT_ENVIAR_ESBORRANY, ENDPOINT_ELIMINAR_MISSATGE, ENDPOINT_ADJUNT } from '../constants/endpoints';
-import type { CarpetaCorreu, Contacte, Esborrany, EsborranyPerGuardar, IdentificadorMissatgeCorreu, MissatgeDetall, MissatgeLlista, MissatgePerEnviar, RespostaCarpetes, RespostaGuardarEsborrany, RespostaLlistarEsborranys } from '../types/Correu';
-
-interface RespostaMissatges {
-  missatges: MissatgeLlista[];
-}
+import type { CarpetaCorreu, Contacte, Esborrany, EsborranyPerGuardar, IdentificadorMissatgeCorreu, MissatgeDetall, MissatgeLlista, MissatgePerEnviar, RespostaCarpetes, RespostaGuardarEsborrany, RespostaLlistarEsborranys, ResultatMissatgesPaginats } from '../types/Correu';
 
 export async function obtenirCarpetes(): Promise<CarpetaCorreu[]> {
   const resposta = await apiSymfony.get<RespostaCarpetes>(ENDPOINT_CARPETES);
@@ -12,10 +8,15 @@ export async function obtenirCarpetes(): Promise<CarpetaCorreu[]> {
   return resposta.carpetes;
 }
 
-export async function obtenirMissatges(carpeta: string, limit = 50, offset = 0): Promise<MissatgeLlista[]> {
-  const resposta = await apiSymfony.get<RespostaMissatges>(ENDPOINT_MISSATGES, { carpeta, limit, offset });
+export async function obtenirMissatges(carpeta: string, limit = 50, offset = 0): Promise<ResultatMissatgesPaginats> {
+  const resposta = await apiSymfony.getResponse<{
+    missatges: MissatgeLlista[];
+  }>(ENDPOINT_MISSATGES, { carpeta, limit, offset });
 
-  return resposta.missatges;
+  return {
+    missatges: resposta.data.missatges,
+    meta: resposta.meta as unknown as ResultatMissatgesPaginats['meta'],
+  };
 }
 
 export async function obtenirMissatge(carpeta: string, missatge: MissatgeLlista): Promise<MissatgeDetall> {
