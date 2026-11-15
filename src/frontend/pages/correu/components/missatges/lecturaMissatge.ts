@@ -42,7 +42,7 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
     const iframe = document.createElement('iframe');
 
     iframe.title = 'Contingut del correu electrònic';
-    iframe.setAttribute('sandbox', 'allow-same-origin');
+    iframe.setAttribute('sandbox', 'allow-same-origin allow-popups');
     iframe.setAttribute('referrerpolicy', 'no-referrer');
 
     iframe.className = 'w-100 border-0';
@@ -97,6 +97,12 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
       if (!documentIframe) {
         return;
       }
+
+      documentIframe.querySelectorAll('a[href]').forEach((enlace) => {
+        enlace.setAttribute('target', '_blank');
+        enlace.setAttribute('rel', 'noopener noreferrer');
+        enlace.setAttribute('referrerpolicy', 'no-referrer');
+      });
 
       const ajustarAlcada = (): void => {
         const alcada = documentIframe.documentElement.scrollHeight;
