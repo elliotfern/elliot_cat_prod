@@ -38,11 +38,100 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
     });
 
     const contingut = crearElement('div', 'correu-contingut-html');
-    contingut.innerHTML = html;
 
+    const iframe = document.createElement('iframe');
+
+    iframe.title = 'Contingut del correu electrònic';
+    iframe.setAttribute('sandbox', 'allow-same-origin');
+    iframe.setAttribute('referrerpolicy', 'no-referrer');
+
+    iframe.className = 'w-100 border-0';
+    iframe.style.display = 'block';
+    iframe.style.height = '300px';
+
+    const estilsAdaptatius = `
+      html,
+      body {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      body {
+        margin: 0 !important;
+        overflow-wrap: anywhere;
+      }
+
+      img {
+        max-width: 100% !important;
+        height: auto !important;
+      }
+
+      table {
+        max-width: 100% !important;
+      }
+
+      td,
+      th {
+        overflow-wrap: anywhere;
+      }
+    `;
+
+    iframe.srcdoc = `
+      <!DOCTYPE html>
+      <html lang="und">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <body>
+          ${html}
+          <style>${estilsAdaptatius}</style>
+        </body>
+      </html>
+    `;
+
+    iframe.addEventListener('load', () => {
+      const documentIframe = iframe.contentDocument;
+
+      if (!documentIframe) {
+        return;
+      }
+
+      const ajustarAlcada = (): void => {
+        const alcada = documentIframe.documentElement.scrollHeight;
+
+        iframe.style.height = `${Math.max(150, alcada)}px`;
+      };
+
+      ajustarAlcada();
+
+      const observador = new ResizeObserver(ajustarAlcada);
+
+      observador.observe(documentIframe.documentElement);
+
+      if (documentIframe.body) {
+        observador.observe(documentIframe.body);
+      }
+
+      documentIframe.querySelectorAll('img').forEach((imatge) => {
+        imatge.addEventListener('load', ajustarAlcada);
+      });
+
+      iframe.addEventListener(
+        'DOMNodeRemoved',
+        () => {
+          observador.disconnect();
+        },
+        { once: true }
+      );
+    });
+
+    contingut.appendChild(iframe);
     cos.appendChild(contingut);
   } else if (missatge.contingut_text) {
     const text = crearElement('pre', 'text-wrap mb-0');
+
     text.textContent = missatge.contingut_text;
 
     cos.appendChild(text);
