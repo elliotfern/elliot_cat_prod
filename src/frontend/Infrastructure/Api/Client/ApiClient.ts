@@ -22,6 +22,8 @@ function createApi(baseUrl: string) {
 
     getResponse: async <T>(endpoint: string, queryParams?: QueryParams): Promise<ApiResponse<T>> => requestResponse<T>(baseUrl, endpoint, { method: 'GET' }, queryParams),
 
+    getBlob: async (endpoint: string, queryParams?: QueryParams): Promise<Blob> => requestBlob(baseUrl, endpoint, { method: 'GET' }, queryParams),
+
     post: async <T>(endpoint: string, body?: unknown, queryParams?: QueryParams): Promise<T> =>
       request<T>(
         baseUrl,
@@ -113,4 +115,35 @@ async function requestResponse<T>(baseUrl: string, endpoint: string, options: Re
   }
 
   return json;
+}
+
+async function requestBlob(baseUrl: string, endpoint: string, options: RequestInit = {}, queryParams?: QueryParams): Promise<Blob> {
+  const query = buildQueryParams(queryParams);
+
+  const url = `${baseUrl.replace(/\/+$/, '')}/${endpoint.replace(/^\/+/, '')}${query}`;
+
+  let response: Response;
+
+  try {
+    response = await fetch(url, {
+      ...options,
+      credentials: 'include',
+    });
+  } catch {
+    throw new ApiError('Error de connexió amb el servidor');
+  }
+
+  if (!response.ok) {
+    let json: ApiResponse<unknown> | null = null;
+
+    try {
+      json = (await response.json()) as ApiResponse<unknown>;
+    } catch {
+      // La respuesta de error no contiene JSON válido.
+    }
+
+    throw new ApiError(json?.message || 'Error API', json?.errors || [], response.status, json);
+  }
+
+  return response.blob();
 }

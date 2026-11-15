@@ -12,6 +12,7 @@ export interface AccionsLectura {
   editarEsborrany?: (missatge: MissatgeDetall) => void;
   eliminarEsborrany?: (missatge: MissatgeDetall) => void;
   eliminarMissatge?: (missatge: MissatgeDetall) => void;
+  descarregarAdjunt?: (missatge: MissatgeDetall, identificadorAdjunt: string) => void;
 }
 
 export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDetall, accions?: AccionsLectura): void {
@@ -132,4 +133,42 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
   }
 
   contenidor.appendChild(cos);
+
+  if (missatge.adjunts.length > 0) {
+    const seccioAdjunts = crearElement('div', 'border-top mt-4 pt-3');
+
+    const titol = crearElement('h6', 'mb-3', `Archivos adjuntos (${missatge.adjunts.length})`);
+
+    const llista = crearElement('div', 'd-flex flex-column gap-2');
+
+    for (const adjunt of missatge.adjunts) {
+      const fila = crearElement('div', 'd-flex align-items-center justify-content-between flex-wrap gap-2 border rounded p-2');
+
+      const informacio = crearElement('div', 'd-flex flex-column');
+
+      const nom = crearElement('span', 'fw-semibold', adjunt.nom_fitxer);
+
+      const mida = crearElement('small', 'text-body-secondary', adjunt.mida !== null ? `${(adjunt.mida / 1024).toFixed(1)} KB` : 'Tamaño desconocido');
+
+      informacio.append(nom, mida);
+      fila.appendChild(informacio);
+
+      if (accions?.descarregarAdjunt) {
+        const boto = crearElement('button', 'btn btn-outline-primary btn-sm', 'Descargar');
+
+        boto.type = 'button';
+
+        boto.addEventListener('click', () => {
+          accions.descarregarAdjunt?.(missatge, adjunt.identificador);
+        });
+
+        fila.appendChild(boto);
+      }
+
+      llista.appendChild(fila);
+    }
+
+    seccioAdjunts.append(titol, llista);
+    contenidor.appendChild(seccioAdjunts);
+  }
 }

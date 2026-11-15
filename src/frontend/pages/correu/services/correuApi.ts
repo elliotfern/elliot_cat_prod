@@ -1,5 +1,5 @@
 import { api, apiSymfony } from '../../../Infrastructure/Api/Client/ApiClient';
-import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES, ENDPOINT_GUARDAR_ESBORRANY, ENDPOINT_LLISTAR_ESBORRANYS, ENDPOINT_ESBORRANY, ENDPOINT_ENVIAR_ESBORRANY, ENDPOINT_ELIMINAR_MISSATGE } from '../constants/endpoints';
+import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES, ENDPOINT_GUARDAR_ESBORRANY, ENDPOINT_LLISTAR_ESBORRANYS, ENDPOINT_ESBORRANY, ENDPOINT_ENVIAR_ESBORRANY, ENDPOINT_ELIMINAR_MISSATGE, ENDPOINT_ADJUNT } from '../constants/endpoints';
 import type { CarpetaCorreu, Contacte, Esborrany, EsborranyPerGuardar, IdentificadorMissatgeCorreu, MissatgeDetall, MissatgeLlista, MissatgePerEnviar, RespostaCarpetes, RespostaGuardarEsborrany, RespostaLlistarEsborranys } from '../types/Correu';
 
 interface RespostaMissatges {
@@ -23,6 +23,15 @@ export async function obtenirMissatge(carpeta: string, missatge: MissatgeLlista)
     carpeta,
     uid: missatge.id,
     uidValidity: missatge.uid_validity,
+  });
+}
+
+export async function descarregarAdjunt(carpeta: string, id: IdentificadorMissatgeCorreu, identificadorAdjunt: string): Promise<Blob> {
+  return apiSymfony.getBlob(ENDPOINT_ADJUNT, {
+    carpeta,
+    uid: id.uid,
+    uidValidity: id.uid_validity,
+    part: identificadorAdjunt,
   });
 }
 

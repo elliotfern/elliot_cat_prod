@@ -17,6 +17,14 @@ export interface ContacteCorreu {
   email: string;
 }
 
+export interface AdjuntMissatge {
+  identificador: string;
+  nom_fitxer: string;
+  tipus_mime: string;
+  mida: number | null;
+  content_id: string | null;
+}
+
 export interface MissatgeLlista {
   id: number;
   uid_validity: number;
@@ -50,6 +58,7 @@ export interface MissatgeDetall {
   message_id: string | null;
   in_reply_to: string | null;
   referencies: string[];
+  adjunts: AdjuntMissatge[];
 }
 
 export interface MissatgePerEnviar {

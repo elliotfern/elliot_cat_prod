@@ -1,4 +1,4 @@
-import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany, eliminarMissatge } from '../services/correuApi';
+import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, descarregarAdjunt, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany, eliminarMissatge } from '../services/correuApi';
 
 import { crearOpcionsResposta, crearOpcionsRespostaTots, crearOpcionsReenviament } from '../services/conversacioCorreu';
 
@@ -68,6 +68,43 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
 
   function iniciarReenviament(missatge: MissatgeDetall): void {
     obrirRedaccio(crearOpcionsReenviament(missatge));
+  }
+
+  async function descarregarFitxerAdjunt(missatge: MissatgeDetall, identificadorAdjunt: string): Promise<void> {
+    try {
+      const adjunt = missatge.adjunts.find((item) => item.identificador === identificadorAdjunt);
+
+      if (!adjunt) {
+        throw new Error('No se ha encontrado el archivo adjunto.');
+      }
+
+      const blob = await descarregarAdjunt(
+        missatge.carpeta,
+        {
+          uid: missatge.id.uid,
+          uid_validity: missatge.id.uid_validity,
+        },
+        identificadorAdjunt
+      );
+
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement('a');
+
+      enlace.href = url;
+      enlace.download = adjunt.nom_fitxer;
+
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    } catch (error: unknown) {
+      const mensaje = error instanceof Error ? error.message : 'No se ha podido descargar el archivo adjunto.';
+
+      mostrarEstat(elements.contenidorLectura, mensaje);
+    }
   }
 
   function editarEsborrany(missatge: MissatgeDetall): void {
@@ -194,6 +231,9 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
           eliminarEsborrany: (missatge) => {
             void esborrarEsborrany(missatge);
           },
+          descarregarAdjunt: (missatge, identificador) => {
+            void descarregarFitxerAdjunt(missatge, identificador);
+          },
         });
       } else {
         renderitzarLectura(elements.contenidorLectura, detall, {
@@ -202,6 +242,9 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
           reenviar: iniciarReenviament,
           eliminarMissatge: (missatge) => {
             void esborrarMissatge(missatge);
+          },
+          descarregarAdjunt: (missatge, identificador) => {
+            void descarregarFitxerAdjunt(missatge, identificador);
           },
         });
       }
