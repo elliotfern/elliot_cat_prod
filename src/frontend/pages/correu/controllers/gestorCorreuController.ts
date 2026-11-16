@@ -15,6 +15,8 @@ import type { OpcionsRedaccio } from '../types/Redaccio';
 
 import { mostrarEstat } from '../utils/dom';
 
+type VistaMobil = 'carpetes' | 'missatges' | 'lectura';
+
 export async function inicialitzarGestorCorreuController(elements: ElementsGestorCorreu): Promise<void> {
   let carpetaActual = 'INBOX';
   let tipusCarpetaActual = 'inbox';
@@ -26,6 +28,20 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
   const limitPaginacio = 50;
   let offsetActual = 0;
   let teMes = false;
+
+  let vistaMobilActual: VistaMobil = 'missatges';
+
+  /**
+   * Canvia la vista visible en mòbil.
+   * En escriptori les tres columnes continuen visibles.
+   */
+  function canviarVistaMobil(vista: VistaMobil): void {
+    vistaMobilActual = vista;
+
+    elements.gestor.classList.remove('vista-carpetes', 'vista-missatges', 'vista-lectura');
+
+    elements.gestor.classList.add(`vista-${vista}`);
+  }
 
   function actualitzarBotoRedaccio(): void {
     elements.botoRedactar.textContent = redaccioActiva ? 'Tancar redacció' : 'Redactar';
@@ -42,7 +58,7 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
   async function actualitzarLlistaSenseTancarLectura(): Promise<void> {
     let resultat = await obtenirMissatges(carpetaActual, limitPaginacio, offsetActual);
 
-    // Si la página queda vacía, retrocedemos a la página anterior.
+    // Si la pàgina queda buida, retrocedim a la pàgina anterior.
     if (resultat.missatges.length === 0 && offsetActual > 0) {
       offsetActual -= limitPaginacio;
 
@@ -58,9 +74,11 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
 
   function actualitzarPaginacio(): void {
     const inici = missatgesActuals.length > 0 ? offsetActual + 1 : 0;
+
     const final = offsetActual + missatgesActuals.length;
 
     elements.indicadorPaginacio.textContent = `Mensajes ${inici}–${final}`;
+
     elements.botoPaginaAnterior.disabled = offsetActual === 0;
     elements.botoPaginaSeguent.disabled = !teMes;
   }
@@ -81,6 +99,8 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
     actualitzarBotoRedaccio();
 
     elements.contenidorLectura.replaceChildren(crearFormulariRedaccio(enviarMissatge, opcions, guardarEsborranyDesDeForm, enviarEsborrany));
+
+    canviarVistaMobil('lectura');
   }
 
   function iniciarResposta(missatge: MissatgeDetall): void {
@@ -168,6 +188,8 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
       await actualitzarLlistaSenseTancarLectura();
 
       mostrarEstat(elements.contenidorLectura, 'Borrador eliminado correctamente.');
+
+      canviarVistaMobil('missatges');
     } catch (error: unknown) {
       const missatgeError = error instanceof Error ? error.message : 'No se ha podido eliminar el borrador.';
 
@@ -193,6 +215,8 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
       await actualitzarLlistaSenseTancarLectura();
 
       mostrarEstat(elements.contenidorLectura, 'Mensaje movido a la papelera correctamente.');
+
+      canviarVistaMobil('missatges');
     } catch (error: unknown) {
       const missatgeError = error instanceof Error ? error.message : 'No se ha podido mover el mensaje a la papelera.';
 
@@ -212,6 +236,8 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
     }
 
     mostrarEstat(elements.contenidorLectura, 'Selecciona un missatge per llegir-lo.');
+
+    canviarVistaMobil('missatges');
   }
 
   async function carregarMissatges(carpeta: string): Promise<void> {
@@ -248,6 +274,8 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
     actualitzarBotoRedaccio();
 
     missatgeSeleccionat = missatge.id;
+
+    canviarVistaMobil('lectura');
 
     mostrarEstat(elements.contenidorLectura, 'Carregant missatge...');
 
@@ -303,6 +331,9 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
         (carpeta) => {
           tipusCarpetaActual = carpeta.tipus;
           offsetActual = 0;
+
+          canviarVistaMobil('missatges');
+
           void carregarMissatges(carpeta.ruta);
         },
         carpetaActual
@@ -342,6 +373,21 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
       }
     });
 
+    // Navegació mòbil: obrir carpetes.
+    elements.botoCarpetes.addEventListener('click', () => {
+      canviarVistaMobil('carpetes');
+    });
+
+    // Navegació mòbil: tornar de carpetes al llistat.
+    elements.botoTornarDesDeCarpetes.addEventListener('click', () => {
+      canviarVistaMobil('missatges');
+    });
+
+    // Navegació mòbil: tornar del correu obert al llistat.
+    elements.botoTornarMissatges.addEventListener('click', () => {
+      canviarVistaMobil('missatges');
+    });
+
     elements.botoPaginaAnterior.addEventListener('click', () => {
       if (offsetActual >= limitPaginacio) {
         offsetActual -= limitPaginacio;
@@ -358,6 +404,8 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
   }
 
   registrarEsdeveniments();
+
+  canviarVistaMobil(vistaMobilActual);
 
   await carregarCarpetes();
   await carregarMissatges(carpetaActual);
