@@ -22,6 +22,35 @@ function convertirTextAHtml(text: string): string {
   return text.split(/\r?\n/).map(escaparHtml).join('<br>');
 }
 
+function aplicarTipografiaEmail(html: string): string {
+  if (html.trim() === '') {
+    return html;
+  }
+
+  const contenidor = document.createElement('div');
+  contenidor.innerHTML = html;
+
+  const primerElement = contenidor.firstElementChild;
+
+  // Si ya existe un único elemento raíz, reutilizamos su estilo.
+  // Esto evita añadir envoltorios repetidos al editar borradores.
+  if (contenidor.childElementCount === 1 && primerElement instanceof HTMLElement) {
+    primerElement.style.fontFamily = 'Arial, Helvetica, sans-serif';
+
+    return contenidor.innerHTML;
+  }
+
+  // Si hay varios elementos, los agrupamos sin alterar su contenido.
+  const envoltori = document.createElement('div');
+  envoltori.style.fontFamily = 'Arial, Helvetica, sans-serif';
+
+  while (contenidor.firstChild) {
+    envoltori.appendChild(contenidor.firstChild);
+  }
+
+  return envoltori.outerHTML;
+}
+
 function formatarMida(mida: number): string {
   if (mida < 1024 * 1024) {
     return `${(mida / 1024).toFixed(1)} KB`;
@@ -208,7 +237,7 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar, adj
   });
 
   function obtenirDadesEsborrany(): EsborranyPerGuardar {
-    const contingutHtml = editor.obtenirContingut();
+    const contingutHtml = aplicarTipografiaEmail(editor.obtenirContingut());
 
     return {
       ...(identificadorEsborrany ? { id: identificadorEsborrany } : {}),
@@ -266,7 +295,7 @@ export function crearFormulariRedaccio(enviar: (missatge: MissatgePerEnviar, adj
       return;
     }
 
-    const contingutHtml = editor.obtenirContingut();
+    const contingutHtml = aplicarTipografiaEmail(editor.obtenirContingut());
 
     const comprovacioContingut = document.createElement('div');
     comprovacioContingut.innerHTML = contingutHtml;
