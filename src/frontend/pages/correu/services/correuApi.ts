@@ -1,5 +1,5 @@
 import { api, apiSymfony } from '../../../Infrastructure/Api/Client/ApiClient';
-import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES, ENDPOINT_GUARDAR_ESBORRANY, ENDPOINT_LLISTAR_ESBORRANYS, ENDPOINT_ESBORRANY, ENDPOINT_ENVIAR_ESBORRANY, ENDPOINT_ELIMINAR_MISSATGE, ENDPOINT_ADJUNT } from '../constants/endpoints';
+import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES, ENDPOINT_GUARDAR_ESBORRANY, ENDPOINT_LLISTAR_ESBORRANYS, ENDPOINT_ESBORRANY, ENDPOINT_ENVIAR_ESBORRANY, ENDPOINT_ELIMINAR_MISSATGE, ENDPOINT_ADJUNT, ENDPOINT_MOURE_MISSATGE } from '../constants/endpoints';
 import type { CarpetaCorreu, Contacte, Esborrany, EsborranyPerGuardar, IdentificadorMissatgeCorreu, MissatgeDetall, MissatgeLlista, MissatgePerEnviar, RespostaCarpetes, RespostaGuardarEsborrany, RespostaLlistarEsborranys, ResultatMissatgesPaginats } from '../types/Correu';
 
 export async function obtenirCarpetes(): Promise<CarpetaCorreu[]> {
@@ -125,5 +125,17 @@ export async function eliminarMissatge(carpeta: string, id: IdentificadorMissatg
     carpeta,
     uid: id.uid,
     uidValidity: id.uid_validity,
+  });
+}
+
+/**
+ * Mueve un mensaje de una carpeta IMAP a otra.
+ */
+export async function moureMissatge(carpetaOrigen: string, carpetaDesti: string, id: IdentificadorMissatgeCorreu): Promise<void> {
+  await apiSymfony.patch(ENDPOINT_MOURE_MISSATGE, {
+    carpeta_origen: carpetaOrigen,
+    carpeta_desti: carpetaDesti,
+    uid: id.uid,
+    uid_validity: id.uid_validity,
   });
 }

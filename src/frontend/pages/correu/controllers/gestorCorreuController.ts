@@ -1,18 +1,13 @@
-import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, descarregarAdjunt, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany, eliminarMissatge } from '../services/correuApi';
-
+import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, descarregarAdjunt, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany, eliminarMissatge, moureMissatge } from '../services/correuApi';
 import { crearOpcionsResposta, crearOpcionsRespostaTots, crearOpcionsReenviament } from '../services/conversacioCorreu';
-
 import { renderitzarCarpetes } from '../components/carpetes/carpetes';
 import { renderitzarMissatges } from '../components/missatges/llistaMissatges';
 import { renderitzarLectura } from '../components/missatges/lecturaMissatge';
 import { crearFormulariRedaccio } from '../components/redaccio/formulariRedaccio';
 
 import type { ElementsGestorCorreu } from '../components/layout/interficieCorreu';
-
 import type { CarpetaCorreu, EsborranyPerGuardar, IdentificadorMissatgeCorreu, MissatgeDetall, MissatgeLlista } from '../types/Correu';
-
 import type { OpcionsRedaccio } from '../types/Redaccio';
-
 import { mostrarEstat } from '../utils/dom';
 
 type VistaMobil = 'carpetes' | 'missatges' | 'lectura';
@@ -30,6 +25,7 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
   let teMes = false;
 
   let vistaMobilActual: VistaMobil = 'missatges';
+  let carpetesActuals: CarpetaCorreu[] = [];
 
   /**
    * Canvia la vista visible en mòbil.
@@ -224,6 +220,45 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
     }
   }
 
+  async function moureMissatgeACarpeta(missatge: MissatgeDetall, carpetaDesti: string): Promise<void> {
+    const carpeta = carpetesActuals.find((item) => item.ruta === carpetaDesti);
+
+    if (!carpeta) {
+      mostrarEstat(elements.contenidorLectura, 'No se ha encontrado la carpeta de destino.');
+
+      return;
+    }
+
+    const confirmacio = window.confirm(`¿Quieres mover este mensaje a "${carpeta.nom_visual}"?`);
+
+    if (!confirmacio) {
+      return;
+    }
+
+    try {
+      await moureMissatge(missatge.carpeta, carpetaDesti, {
+        uid: missatge.id.uid,
+        uid_validity: missatge.id.uid_validity,
+      });
+
+      missatgeSeleccionat = null;
+
+      // Actualizamos los contadores de las carpetas.
+      await carregarCarpetes();
+
+      // Actualizamos el listado de la carpeta de origen.
+      await actualitzarLlistaSenseTancarLectura();
+
+      mostrarEstat(elements.contenidorLectura, `Mensaje movido a "${carpeta.nom_visual}" correctamente.`);
+
+      canviarVistaMobil('missatges');
+    } catch (error: unknown) {
+      const missatgeError = error instanceof Error ? error.message : 'No se ha podido mover el mensaje.';
+
+      mostrarEstat(elements.contenidorLectura, missatgeError);
+    }
+  }
+
   function tancarRedaccio(): void {
     redaccioActiva = false;
     actualitzarBotoRedaccio();
@@ -297,9 +332,17 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
           respondre: iniciarResposta,
           respondreTots: iniciarRespostaTots,
           reenviar: iniciarReenviament,
+
           eliminarMissatge: (missatge) => {
             void esborrarMissatge(missatge);
           },
+
+          moureMissatge: (missatge, carpetaDesti) => {
+            void moureMissatgeACarpeta(missatge, carpetaDesti);
+          },
+
+          carpetes: carpetesActuals,
+
           descarregarAdjunt: (missatge, identificador) => {
             void descarregarFitxerAdjunt(missatge, identificador);
           },
@@ -324,6 +367,8 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
 
     try {
       const carpetes: CarpetaCorreu[] = await obtenirCarpetes();
+
+      carpetesActuals = carpetes;
 
       renderitzarCarpetes(
         elements.contenidorCarpetes,

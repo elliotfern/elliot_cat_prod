@@ -3,7 +3,7 @@ import DOMPurify from 'dompurify';
 import { crearElement } from '../../utils/dom';
 import { formatarData } from '../../utils/formatData';
 
-import type { MissatgeDetall } from '../../types/Correu';
+import type { CarpetaCorreu, MissatgeDetall } from '../../types/Correu';
 
 export interface AccionsLectura {
   respondre?: (missatge: MissatgeDetall) => void;
@@ -12,7 +12,9 @@ export interface AccionsLectura {
   editarEsborrany?: (missatge: MissatgeDetall) => void;
   eliminarEsborrany?: (missatge: MissatgeDetall) => void;
   eliminarMissatge?: (missatge: MissatgeDetall) => void;
+  moureMissatge?: (missatge: MissatgeDetall, carpetaDesti: string) => void;
   descarregarAdjunt?: (missatge: MissatgeDetall, identificadorAdjunt: string) => void;
+  carpetes?: CarpetaCorreu[];
 }
 
 export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDetall, accions?: AccionsLectura): void {
@@ -184,6 +186,55 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
       });
 
       barraAccions.appendChild(botoEliminar);
+    }
+
+    if (accions.moureMissatge && accions.carpetes) {
+      const carpetesDesti = accions.carpetes.filter((carpeta) => carpeta.ruta !== missatge.carpeta && carpeta.tipus !== 'drafts');
+
+      if (carpetesDesti.length > 0) {
+        const selector = crearElement('select', 'form-select form-select-sm');
+
+        selector.setAttribute('aria-label', 'Carpeta de destino');
+        selector.style.width = 'auto';
+        selector.style.maxWidth = '220px';
+
+        const opcioInicial = document.createElement('option');
+
+        opcioInicial.value = '';
+        opcioInicial.textContent = 'Mover a carpeta...';
+
+        selector.appendChild(opcioInicial);
+
+        for (const carpeta of carpetesDesti) {
+          const opcio = document.createElement('option');
+
+          opcio.value = carpeta.ruta;
+          opcio.textContent = carpeta.nom_visual;
+
+          selector.appendChild(opcio);
+        }
+
+        const botoMoure = crearElement('button', 'btn btn-outline-secondary btn-sm', 'Mover');
+
+        botoMoure.type = 'button';
+        botoMoure.disabled = true;
+
+        selector.addEventListener('change', () => {
+          botoMoure.disabled = selector.value === '';
+        });
+
+        botoMoure.addEventListener('click', () => {
+          const carpetaDesti = selector.value;
+
+          if (!carpetaDesti) {
+            return;
+          }
+
+          accions.moureMissatge?.(missatge, carpetaDesti);
+        });
+
+        barraAccions.append(selector, botoMoure);
+      }
     }
 
     if (accions.respondre) {
