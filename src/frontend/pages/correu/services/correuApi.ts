@@ -1,5 +1,5 @@
 import { api, apiSymfony } from '../../../Infrastructure/Api/Client/ApiClient';
-import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES, ENDPOINT_GUARDAR_ESBORRANY, ENDPOINT_LLISTAR_ESBORRANYS, ENDPOINT_ESBORRANY, ENDPOINT_ENVIAR_ESBORRANY, ENDPOINT_ELIMINAR_MISSATGE, ENDPOINT_ADJUNT, ENDPOINT_MOURE_MISSATGE } from '../constants/endpoints';
+import { ENDPOINT_CARPETES, ENDPOINT_CERCAR_CONTACTES, ENDPOINT_ENVIAR, ENDPOINT_LLEGIT, ENDPOINT_MISSATGE, ENDPOINT_MISSATGES, ENDPOINT_GUARDAR_ESBORRANY, ENDPOINT_LLISTAR_ESBORRANYS, ENDPOINT_ESBORRANY, ENDPOINT_ENVIAR_ESBORRANY, ENDPOINT_ELIMINAR_MISSATGE, ENDPOINT_ADJUNT, ENDPOINT_MOURE_MISSATGE, ENDPOINT_ELIMINAR_MISSATGE_DEFINITIVAMENT } from '../constants/endpoints';
 import type { CarpetaCorreu, Contacte, Esborrany, EsborranyPerGuardar, IdentificadorMissatgeCorreu, MissatgeDetall, MissatgeLlista, MissatgePerEnviar, RespostaCarpetes, RespostaGuardarEsborrany, RespostaLlistarEsborranys, ResultatMissatgesPaginats } from '../types/Correu';
 
 export async function obtenirCarpetes(): Promise<CarpetaCorreu[]> {
@@ -132,6 +132,14 @@ export async function enviarEsborrany(id: IdentificadorMissatgeCorreu): Promise<
  */
 export async function eliminarMissatge(carpeta: string, id: IdentificadorMissatgeCorreu): Promise<void> {
   await apiSymfony.delete<void>(ENDPOINT_ELIMINAR_MISSATGE, {
+    carpeta,
+    uid: id.uid,
+    uidValidity: id.uid_validity,
+  });
+}
+
+export async function eliminarMissatgeDefinitivament(carpeta: string, id: IdentificadorMissatgeCorreu): Promise<void> {
+  await apiSymfony.delete<void>(ENDPOINT_ELIMINAR_MISSATGE_DEFINITIVAMENT, {
     carpeta,
     uid: id.uid,
     uidValidity: id.uid_validity,

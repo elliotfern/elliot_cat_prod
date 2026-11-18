@@ -1,4 +1,4 @@
-import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, descarregarAdjunt, obtenirRecursInline, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany, eliminarMissatge, moureMissatge } from '../services/correuApi';
+import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, descarregarAdjunt, obtenirRecursInline, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany, eliminarMissatge, eliminarMissatgeDefinitivament, moureMissatge } from '../services/correuApi';
 import { crearOpcionsResposta, crearOpcionsRespostaTots, crearOpcionsReenviament } from '../services/conversacioCorreu';
 import { renderitzarCarpetes } from '../components/carpetes/carpetes';
 import { renderitzarMissatges } from '../components/missatges/llistaMissatges';
@@ -261,6 +261,36 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
     }
   }
 
+  /**
+   * Elimina definitivamente un mensaje de la papelera.
+   */
+  async function esborrarMissatgeDefinitivament(missatge: MissatgeDetall): Promise<void> {
+    const confirmacio = window.confirm('¿Seguro que quieres eliminar definitivamente este mensaje? Esta acción no se puede deshacer.');
+
+    if (!confirmacio) {
+      return;
+    }
+
+    try {
+      await eliminarMissatgeDefinitivament(carpetaActual, {
+        uid: missatge.id.uid,
+        uid_validity: missatge.id.uid_validity,
+      });
+
+      missatgeSeleccionat = null;
+
+      await actualitzarLlistaSenseTancarLectura();
+
+      mostrarEstat(elements.contenidorLectura, 'Mensaje eliminado definitivamente.');
+
+      canviarVistaMobil('missatges');
+    } catch (error: unknown) {
+      const missatgeError = error instanceof Error ? error.message : 'No se ha podido eliminar definitivamente el mensaje.';
+
+      mostrarEstat(elements.contenidorLectura, missatgeError);
+    }
+  }
+
   async function moureMissatgeACarpeta(missatge: MissatgeDetall, carpetaDesti: string): Promise<void> {
     const carpeta = carpetesActuals.find((item) => item.ruta === carpetaDesti);
 
@@ -387,6 +417,13 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
             eliminarMissatge: (missatge) => {
               void esborrarMissatge(missatge);
             },
+
+            eliminarMissatgeDefinitivament:
+              tipusCarpetaActual === 'trash'
+                ? (missatge) => {
+                    void esborrarMissatgeDefinitivament(missatge);
+                  }
+                : undefined,
 
             moureMissatge: (missatge, carpetaDesti) => {
               void moureMissatgeACarpeta(missatge, carpetaDesti);

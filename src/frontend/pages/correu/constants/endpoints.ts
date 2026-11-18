@@ -11,6 +11,7 @@ export const ENDPOINT_ESBORRANY = 'correu/esborrany';
 export const ENDPOINT_ENVIAR_ESBORRANY = 'correu/esborrany/enviar';
 
 export const ENDPOINT_ELIMINAR_MISSATGE = 'correu/missatge';
+export const ENDPOINT_ELIMINAR_MISSATGE_DEFINITIVAMENT = '/correu/missatge/definitiu';
 export const ENDPOINT_MOURE_MISSATGE = 'correu/missatge/moure';
 
 export const ENDPOINT_CERCAR_CONTACTES = 'contactes/get/cercaContactes';

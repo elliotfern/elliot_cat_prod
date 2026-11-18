@@ -12,6 +12,7 @@ export interface AccionsLectura {
   editarEsborrany?: (missatge: MissatgeDetall) => void;
   eliminarEsborrany?: (missatge: MissatgeDetall) => void;
   eliminarMissatge?: (missatge: MissatgeDetall) => void;
+  eliminarMissatgeDefinitivament?: (missatge: MissatgeDetall) => void;
   moureMissatge?: (missatge: MissatgeDetall, carpetaDesti: string) => void;
   descarregarAdjunt?: (missatge: MissatgeDetall, identificadorAdjunt: string) => void;
   carpetes?: CarpetaCorreu[];
@@ -206,6 +207,18 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
       });
 
       barraAccions.appendChild(botoEliminar);
+    }
+
+    if (accions.eliminarMissatgeDefinitivament) {
+      const botoEliminarDefinitivament = crearElement('button', 'btn btn-danger btn-sm', 'Eliminar definitivamente');
+
+      botoEliminarDefinitivament.type = 'button';
+
+      botoEliminarDefinitivament.addEventListener('click', () => {
+        accions.eliminarMissatgeDefinitivament?.(missatge);
+      });
+
+      barraAccions.appendChild(botoEliminarDefinitivament);
     }
 
     if (accions.moureMissatge && accions.carpetes) {
