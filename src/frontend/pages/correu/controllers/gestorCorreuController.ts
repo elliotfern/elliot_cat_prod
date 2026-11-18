@@ -1,4 +1,4 @@
-import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, descarregarAdjunt, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany, eliminarMissatge, moureMissatge } from '../services/correuApi';
+import { obtenirCarpetes, obtenirMissatges, obtenirMissatge, descarregarAdjunt, obtenirRecursInline, marcarMissatgeLlegit, enviarMissatge, guardarEsborrany, enviarEsborrany, eliminarEsborrany, eliminarMissatge, moureMissatge } from '../services/correuApi';
 import { crearOpcionsResposta, crearOpcionsRespostaTots, crearOpcionsReenviament } from '../services/conversacioCorreu';
 import { renderitzarCarpetes } from '../components/carpetes/carpetes';
 import { renderitzarMissatges } from '../components/missatges/llistaMissatges';
@@ -26,6 +26,46 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
 
   let vistaMobilActual: VistaMobil = 'missatges';
   let carpetesActuals: CarpetaCorreu[] = [];
+  let urlsRecursosInline: string[] = [];
+
+  function alliberarRecursosInline(): void {
+    for (const url of urlsRecursosInline) {
+      URL.revokeObjectURL(url);
+    }
+
+    urlsRecursosInline = [];
+  }
+
+  async function carregarRecursosInline(missatge: MissatgeDetall): Promise<Map<string, string>> {
+    const recursos = new Map<string, string>();
+
+    alliberarRecursosInline();
+
+    for (const recurs of missatge.recursos_inline) {
+      if (!recurs.content_id) {
+        continue;
+      }
+
+      const blob = await obtenirRecursInline(
+        missatge.carpeta,
+        {
+          uid: missatge.id.uid,
+          uid_validity: missatge.id.uid_validity,
+        },
+        recurs.identificador
+      );
+
+      const url = URL.createObjectURL(blob);
+
+      urlsRecursosInline.push(url);
+
+      const contentId = recurs.content_id.replace(/^<|>$/g, '').trim().toLowerCase();
+
+      recursos.set(contentId, url);
+    }
+
+    return recursos;
+  }
 
   /**
    * Canvia la vista visible en mòbil.
@@ -91,6 +131,7 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
   }
 
   function obrirRedaccio(opcions: OpcionsRedaccio = {}): void {
+    alliberarRecursosInline();
     redaccioActiva = true;
     actualitzarBotoRedaccio();
 
@@ -278,6 +319,7 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
   async function carregarMissatges(carpeta: string): Promise<void> {
     redaccioActiva = false;
     actualitzarBotoRedaccio();
+    alliberarRecursosInline();
 
     carpetaActual = carpeta;
     missatgesActuals = [];
@@ -316,37 +358,48 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
 
     try {
       const detall: MissatgeDetall = await obtenirMissatge(carpetaActual, missatge);
+      const recursosInline = await carregarRecursosInline(detall);
 
       if (tipusCarpetaActual === 'drafts') {
-        renderitzarLectura(elements.contenidorLectura, detall, {
-          editarEsborrany,
-          eliminarEsborrany: (missatge) => {
-            void esborrarEsborrany(missatge);
+        renderitzarLectura(
+          elements.contenidorLectura,
+          detall,
+          {
+            editarEsborrany,
+            eliminarEsborrany: (missatge) => {
+              void esborrarEsborrany(missatge);
+            },
+            descarregarAdjunt: (missatge, identificador) => {
+              void descarregarFitxerAdjunt(missatge, identificador);
+            },
           },
-          descarregarAdjunt: (missatge, identificador) => {
-            void descarregarFitxerAdjunt(missatge, identificador);
-          },
-        });
+          recursosInline
+        );
       } else {
-        renderitzarLectura(elements.contenidorLectura, detall, {
-          respondre: iniciarResposta,
-          respondreTots: iniciarRespostaTots,
-          reenviar: iniciarReenviament,
+        renderitzarLectura(
+          elements.contenidorLectura,
+          detall,
+          {
+            respondre: iniciarResposta,
+            respondreTots: iniciarRespostaTots,
+            reenviar: iniciarReenviament,
 
-          eliminarMissatge: (missatge) => {
-            void esborrarMissatge(missatge);
+            eliminarMissatge: (missatge) => {
+              void esborrarMissatge(missatge);
+            },
+
+            moureMissatge: (missatge, carpetaDesti) => {
+              void moureMissatgeACarpeta(missatge, carpetaDesti);
+            },
+
+            carpetes: carpetesActuals,
+
+            descarregarAdjunt: (missatge, identificador) => {
+              void descarregarFitxerAdjunt(missatge, identificador);
+            },
           },
-
-          moureMissatge: (missatge, carpetaDesti) => {
-            void moureMissatgeACarpeta(missatge, carpetaDesti);
-          },
-
-          carpetes: carpetesActuals,
-
-          descarregarAdjunt: (missatge, identificador) => {
-            void descarregarFitxerAdjunt(missatge, identificador);
-          },
-        });
+          recursosInline
+        );
       }
 
       if (!missatge.llegit) {

@@ -59,6 +59,7 @@ export interface MissatgeDetall {
   in_reply_to: string | null;
   referencies: string[];
   adjunts: AdjuntMissatge[];
+  recursos_inline: AdjuntMissatge[];
 }
 
 export interface MissatgePerEnviar {

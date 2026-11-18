@@ -17,7 +17,7 @@ export interface AccionsLectura {
   carpetes?: CarpetaCorreu[];
 }
 
-export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDetall, accions?: AccionsLectura): void {
+export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDetall, accions?: AccionsLectura, recursosInline: ReadonlyMap<string, string> = new Map()): void {
   contenidor.replaceChildren();
 
   const capcalera = crearElement('div', 'border-bottom pb-3 mb-3');
@@ -35,8 +35,28 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
   const cos = crearElement('div', 'correu-contingut');
 
   if (missatge.contingut_html) {
-    const html = DOMPurify.sanitize(missatge.contingut_html, {
+    const htmlSegur = DOMPurify.sanitize(missatge.contingut_html, {
       USE_PROFILES: { html: true },
+    });
+
+    const documentHtml = new DOMParser().parseFromString(htmlSegur, 'text/html');
+
+    documentHtml.querySelectorAll('img[src]').forEach((imatge) => {
+      const src = imatge.getAttribute('src');
+
+      if (!src || !src.toLowerCase().startsWith('cid:')) {
+        return;
+      }
+
+      const contentId = src.slice(4).replace(/^<|>$/g, '').trim();
+
+      const urlInline = recursosInline.get(contentId.toLowerCase());
+
+      if (urlInline) {
+        imatge.setAttribute('src', urlInline);
+      } else {
+        imatge.removeAttribute('src');
+      }
     });
 
     const contingut = crearElement('div', 'correu-contingut-html');
@@ -87,7 +107,7 @@ export function renderitzarLectura(contenidor: HTMLElement, missatge: MissatgeDe
           <meta name="viewport" content="width=device-width, initial-scale=1">
         </head>
         <body>
-          ${html}
+          ${documentHtml.body.innerHTML}
           <style>${estilsAdaptatius}</style>
         </body>
       </html>

@@ -36,6 +36,16 @@ export async function descarregarAdjunt(carpeta: string, id: IdentificadorMissat
   });
 }
 
+export async function obtenirRecursInline(carpeta: string, id: IdentificadorMissatgeCorreu, identificadorRecurs: string): Promise<Blob> {
+  return apiSymfony.getBlob(ENDPOINT_ADJUNT, {
+    carpeta,
+    uid: id.uid,
+    uidValidity: id.uid_validity,
+    part: identificadorRecurs,
+    inline: 1,
+  });
+}
+
 export async function marcarMissatgeLlegit(carpeta: string, missatge: MissatgeLlista): Promise<void> {
   await apiSymfony.patch(ENDPOINT_LLEGIT, {
     carpeta,
