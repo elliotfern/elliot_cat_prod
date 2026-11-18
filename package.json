@@ -52,7 +52,7 @@
   },
   "homepage": "https://github.com/elliotfern/elliotfern-intranet#readme",
   "dependencies": {
-    "bootstrap": "^5.3.8",
+    "bootstrap": "^5.3.9",
     "chart.js": "^4.6.1",
     "choices.js": "^11.2.3",
     "hls.js": "^1.7.3",
