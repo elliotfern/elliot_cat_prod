@@ -414,9 +414,12 @@ export async function inicialitzarGestorCorreuController(elements: ElementsGesto
             respondreTots: iniciarRespostaTots,
             reenviar: iniciarReenviament,
 
-            eliminarMissatge: (missatge) => {
-              void esborrarMissatge(missatge);
-            },
+            eliminarMissatge:
+              tipusCarpetaActual !== 'trash'
+                ? (missatge) => {
+                    void esborrarMissatge(missatge);
+                  }
+                : undefined,
 
             eliminarMissatgeDefinitivament:
               tipusCarpetaActual === 'trash'
