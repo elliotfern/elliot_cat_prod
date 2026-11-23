@@ -4,7 +4,6 @@ use App\Config\Database;
 use App\Utils\Tables;
 use App\Utils\Response;
 use App\Utils\MissatgesAPI;
-use Ramsey\Uuid\Uuid as ramsey;
 use App\Utils\Uuid;
 
 /** @var array $routeParams */

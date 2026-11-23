@@ -168,7 +168,7 @@ function insertPersonCharges(PDO $pdo, string $personaIdBin, array $carrecs): vo
 // POST crear persona/autor
 // ruta: ?persona
 // -------------------------
-if (isset($_GET['persona'])) {
+if ($slug === 'persona') {
 
     $isMultipart = !empty($_FILES) || strpos($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/form-data') !== false;
 
@@ -207,13 +207,22 @@ if (isset($_GET['persona'])) {
 
 
     // UUIDs (string) opcionales -> se convierten con UNHEX(REPLACE()) en SQL
+
     $pais_autor_id        = optionalField($data, 'pais_autor_id');
     $ciutat_naixement_id  = optionalField($data, 'ciutat_naixement_id');
     $ciutat_defuncio_id   = optionalField($data, 'ciutat_defuncio_id');
 
-    if ($pais_autor_id !== null && !isUuid($pais_autor_id)) $errors['pais_autor_id'] = 'invalid_uuid';
-    if ($ciutat_naixement_id !== null && !isUuid($ciutat_naixement_id)) $errors['ciutat_naixement_id'] = 'invalid_uuid';
-    if ($ciutat_defuncio_id !== null && !isUuid($ciutat_defuncio_id)) $errors['ciutat_defuncio_id'] = 'invalid_uuid';
+    $pais_autor_bin = $pais_autor_id !== null
+        ? Uuid::toBinary($pais_autor_id)
+        : null;
+
+    $ciutat_naixement_bin = $ciutat_naixement_id !== null
+        ? Uuid::toBinary($ciutat_naixement_id)
+        : null;
+
+    $ciutat_defuncio_bin = $ciutat_defuncio_id !== null
+        ? Uuid::toBinary($ciutat_defuncio_id)
+        : null;
 
     // IMATGE
     $img_id_bin = null;
@@ -385,10 +394,6 @@ if (isset($_GET['persona'])) {
             exit;
         }
 
-        $pais_autor_bin = Uuid::toBinary($pais_autor_id);
-        $ciutat_naixement_bin = Uuid::toBinary($ciutat_naixement_id);
-        $ciutat_defuncio_bin = Uuid::toBinary($ciutat_defuncio_id);
-
         // Insert persona
         $sql = "
             INSERT INTO " . Tables::PERSONES . " (
@@ -416,9 +421,24 @@ if (isset($_GET['persona'])) {
         $stmt = $pdo->prepare($sql);
 
         $stmt->bindValue(':id', $uuid_bin, PDO::PARAM_LOB);
-        $stmt->bindValue(':pais_autor_id', $pais_autor_bin, PDO::PARAM_LOB);
-        $stmt->bindValue(':ciutat_naixement_id', $ciutat_naixement_bin, PDO::PARAM_LOB);
-        $stmt->bindValue(':ciutat_defuncio_id', $ciutat_defuncio_bin, PDO::PARAM_LOB);
+        if ($pais_autor_bin === null) {
+            $stmt->bindValue(':pais_autor_id', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':pais_autor_id', $pais_autor_bin, PDO::PARAM_LOB);
+        }
+
+        if ($ciutat_naixement_bin === null) {
+            $stmt->bindValue(':ciutat_naixement_id', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':ciutat_naixement_id', $ciutat_naixement_bin, PDO::PARAM_LOB);
+        }
+
+        if ($ciutat_defuncio_bin === null) {
+            $stmt->bindValue(':ciutat_defuncio_id', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':ciutat_defuncio_id', $ciutat_defuncio_bin, PDO::PARAM_LOB);
+        }
+
         $stmt->bindValue(':img_id', $img_id_bin, PDO::PARAM_LOB);
         $stmt->bindValue(':nom', $nom, PDO::PARAM_STR);
 
@@ -497,7 +517,7 @@ if (isset($_GET['persona'])) {
         );
         exit;
     }
+} else {
+    Response::error(MissatgesAPI::error('bad_request'), ['route' => 'invalid'], 400);
+    exit;
 }
-
-Response::error(MissatgesAPI::error('bad_request'), ['route' => 'invalid'], 400);
-exit;

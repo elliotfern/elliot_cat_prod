@@ -389,7 +389,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/persones/post' => [
+    '/api/persones/post/{slug}' => [
         'view' => '../src/backend/api/04_persones/post-persones.php',
         'needs_session' => false,
         'header_footer' => false,
@@ -397,7 +397,7 @@ $routes = [
         'apiSenseHTML' => true
     ],
 
-    '/api/persones/put' => [
+    '/api/persones/put/{slug}' => [
         'view' => '../src/backend/api/04_persones/put-persones.php',
         'needs_session' => false,
         'header_footer' => false,

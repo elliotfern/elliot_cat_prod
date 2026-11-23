@@ -656,7 +656,7 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
 
     form.addEventListener('submit', function (event) {
       //transmissioDadesDB(event, 'PUT', 'formPersona', API_URLS.PUT.PERSONA(id));
-      transmissioDadesDB(event, 'POST', 'formPersona', `${API_BASE}/persones/put/?persona=${id}`);
+      transmissioDadesDB(event, 'POST', 'formPersona', `${API_BASE}/persones/put/persona=${id}`);
     });
   } else {
     divTitol.innerHTML = `<h2>Creació de nova Persona</h2>`;
@@ -664,7 +664,7 @@ export async function formPersona(isUpdate: boolean, slug?: string) {
 
     form.addEventListener('submit', function (event) {
       //transmissioDadesDB(event, 'POST', 'formPersona', API_URLS.POST.PERSONA, true);
-      transmissioDadesDB(event, 'POST', 'formPersona', `${API_BASE}/persones/post/?persona`, true);
+      transmissioDadesDB(event, 'POST', 'formPersona', `${API_BASE}/persones/post/persona`, true);
     });
   }
 

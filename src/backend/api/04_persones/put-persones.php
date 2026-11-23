@@ -247,7 +247,7 @@ function syncPersonCharges(PDO $pdo, string $personaIdBin, array $carrecs): void
 // -------------------------
 // PUT PERSONA
 // -------------------------
-if (isset($_GET['persona'])) {
+if ($slug === 'persona') {
 
     $id = $_GET['persona'] ?? '';
 
@@ -293,15 +293,17 @@ if (isset($_GET['persona'])) {
     $ciutat_naixement_id = optionalField($data, 'ciutat_naixement_id');
     $ciutat_defuncio_id = optionalField($data, 'ciutat_defuncio_id');
 
-    if ($pais_autor_id !== '__MISSING__' && $pais_autor_id !== null && !isUuid($pais_autor_id)) {
-        $errors['pais_autor_id'] = 'invalid_uuid';
-    }
-    if ($ciutat_naixement_id !== '__MISSING__' && $ciutat_naixement_id !== null && !isUuid($ciutat_naixement_id)) {
-        $errors['ciutat_naixement_id'] = 'invalid_uuid';
-    }
-    if ($ciutat_defuncio_id !== '__MISSING__' && $ciutat_defuncio_id !== null && !isUuid($ciutat_defuncio_id)) {
-        $errors['ciutat_defuncio_id'] = 'invalid_uuid';
-    }
+    $pais_autor_bin = $pais_autor_id !== null
+        ? Uuid::toBinary($pais_autor_id)
+        : null;
+
+    $ciutat_naixement_bin = $ciutat_naixement_id !== null
+        ? Uuid::toBinary($ciutat_naixement_id)
+        : null;
+
+    $ciutat_defuncio_bin = $ciutat_defuncio_id !== null
+        ? Uuid::toBinary($ciutat_defuncio_id)
+        : null;
 
     $img_id_bin = '__MISSING__';
 
@@ -658,7 +660,7 @@ if (isset($_GET['persona'])) {
         );
         exit;
     }
+} else {
+    Response::error(MissatgesAPI::error('bad_request'), ['route' => 'invalid'], 400);
+    exit;
 }
-
-Response::error(MissatgesAPI::error('bad_request'), ['route' => 'invalid'], 400);
-exit;
