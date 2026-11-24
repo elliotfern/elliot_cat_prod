@@ -17,7 +17,7 @@ export type ApiUrls = {
     PERSONA_DETALL_SLUG: (slug: string) => string;
     CIUTAT_ID: string;
     CIUTATS: string;
-    PAIS_ID: string;
+    PAIS_ID: (id: string) => string;
     CLIENTS: string;
     CLIENT_ID: string;
     FACTURACIO_CLIENTS: string;
@@ -97,7 +97,7 @@ export type ApiUrls = {
     EDUCACIO_CV_POST: string;
     PERSONA: (id: string) => string;
     CIUTAT: string;
-    PAIS: string;
+    PAIS: (id: string) => string;
     CLIENT: string;
     FACTURA_CLIENT: string;
     FACTURA_CLIENT_PRODUCTE: string;
@@ -122,7 +122,7 @@ export type ApiUrls = {
     CARREC_HISTORIA: string;
   };
   DELETE: {
-    PAIS: string;
+    PAIS: (id: string) => string;
     CIUTAT: string;
   };
 };
