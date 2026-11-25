@@ -15,8 +15,8 @@ export type ApiUrls = {
     EDUCACIO_I18N_ID: string;
     EDUCACIO_I18N_DETALL_ID: string;
     PERSONA_DETALL_SLUG: (slug: string) => string;
-    CIUTAT_ID: string;
-    CIUTATS: string;
+    CIUTAT_ID: (slug: string) => string;
+    CIUTAT: string;
     PAIS_ID: (id: string) => string;
     CLIENTS: string;
     CLIENT_ID: string;
@@ -96,7 +96,7 @@ export type ApiUrls = {
     EDUCACIO_I18N: string;
     EDUCACIO_CV_POST: string;
     PERSONA: (id: string) => string;
-    CIUTAT: string;
+    CIUTAT: (id: string) => string;
     PAIS: (id: string) => string;
     CLIENT: string;
     FACTURA_CLIENT: string;
@@ -123,6 +123,6 @@ export type ApiUrls = {
   };
   DELETE: {
     PAIS: (id: string) => string;
-    CIUTAT: string;
+    CIUTAT: (id: string) => string;
   };
 };

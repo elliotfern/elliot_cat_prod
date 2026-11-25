@@ -26,7 +26,7 @@ export const ENDPOINTS = {
   EDUCACIO_I18N: 'educacioI18',
   EDUCACIO_I18N_DETALL_ID: 'educacioI18nDetallId',
   PERSONA_DETALL_SLUG: 'persona',
-  CIUTAT_ID: 'ciutatId',
+  CIUTAT_ID: 'ciutat',
   PAIS_ID: 'paisId',
   CIUTAT: 'ciutat',
   PAISOS: 'paisos',
@@ -90,7 +90,7 @@ export const ENDPOINTS = {
 const RESOURCES = {
   CURRICULUM: 'curriculum',
   AUXILIARS: 'auxiliars',
-  CIUTATS: 'ciutats',
+  CIUTATS: 'ciutat',
   COMPTABILITAT: 'comptabilitat',
   ADRECES: 'adreces',
   AGENDA: 'agenda',
@@ -157,8 +157,8 @@ export const API_URLS: ApiUrls = {
 
     PAISOS: `${RESOURCES.PAIS}`,
     PAIS_ID: (id: string) => `${RESOURCES.PAIS}/${encodeURIComponent(id)}`,
-    CIUTATS: `${RESOURCES.CIUTATS}/${TIPUS.GET}`,
-    CIUTAT_ID: `${RESOURCES.CIUTATS}/${TIPUS.GET}/${ENDPOINTS.CIUTAT_ID}`,
+    CIUTAT: `${RESOURCES.CIUTATS}`,
+    CIUTAT_ID: (id: string) => `${RESOURCES.CIUTATS}/${encodeURIComponent(id)}`,
 
     // Historia
     HISTORIA_CURS_ARTICLE_ID: `${RESOURCES.HISTORIA}/${TIPUS.GET}/${ENDPOINTS.HISTORIA_CURS_ARTICLE_ID}`,
@@ -178,7 +178,7 @@ export const API_URLS: ApiUrls = {
     EDUCACIO_CV_POST: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.POST}/${ENDPOINTS.EDUCACIO_CV_POST}`,
     EDUCACIO_I18N: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.POST}/${ENDPOINTS.EDUCACIO_I18N}`,
     PERSONA: `${API_WEB}/${ENDPOINTS.PERSONA_DETALL_SLUG}`,
-    CIUTAT: `${RESOURCES.CIUTATS}/${TIPUS.POST}`,
+    CIUTAT: `${RESOURCES.CIUTATS}`,
     PAIS: `${RESOURCES.PAIS}`,
     CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.CLIENTS}`,
     FACTURA_CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.POST}/${ENDPOINTS.FACTURA_CLIENT}`,
@@ -215,7 +215,7 @@ export const API_URLS: ApiUrls = {
     EDUCACIO_CV_POST: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.PUT}/${ENDPOINTS.EDUCACIO_CV_POST}`,
     EDUCACIO_I18N: `${API_BASE}/${RESOURCES.CURRICULUM}/${TIPUS.PUT}/${ENDPOINTS.EDUCACIO_I18N}`,
     PERSONA: (id: string) => `${API_WEB}${ENDPOINTS.PERSONA_DETALL_SLUG}/${encodeURIComponent(id)}`,
-    CIUTAT: `${RESOURCES.CIUTATS}/${TIPUS.PUT}`,
+    CIUTAT: (id: string) => `${RESOURCES.CIUTATS}/${encodeURIComponent(id)}`,
     PAIS: (id: string) => `${RESOURCES.PAIS}/${encodeURIComponent(id)}`,
     CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PUT}/${ENDPOINTS.CLIENTS}`,
     FACTURA_CLIENT: `${API_BASE}/${RESOURCES.COMPTABILITAT}/${TIPUS.PUT}/${ENDPOINTS.FACTURA_CLIENT}`,
@@ -243,6 +243,6 @@ export const API_URLS: ApiUrls = {
 
   DELETE: {
     PAIS: (id: string) => `${RESOURCES.PAIS}/${encodeURIComponent(id)}`,
-    CIUTAT: `${RESOURCES.CIUTATS}/${TIPUS.DELETE}`,
+    CIUTAT: (id: string) => `${RESOURCES.CIUTATS}/${encodeURIComponent(id)}`,
   },
 };
