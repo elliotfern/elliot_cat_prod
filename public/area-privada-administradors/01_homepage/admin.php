@@ -56,10 +56,8 @@ use App\Utils\Url;
 
         <h5>Sistemes i equips:</h5>
         <ul>
-            <li><a href="<?php echo Url::intranet('documentacio-tecnica'); ?>/equip/dades-basiques">0. Dades bàsiques: Fedora 45 — ASUS N551JK</a></li>
-            <li><a href="<?php echo Url::intranet('documentacio-tecnica'); ?>/equip/inventari-sistema">1. Inventari del sistema i configuració de Fedora 45</a></li>
+            <li><a href="<?php echo Url::intranet('documentacio-tecnica'); ?>">Índex continguts</a></li>
         </ul>
-
 
         <ul>
             <li><a href="<?php echo Url::intranet('documentacio-tecnica'); ?>/documents-disc-dur">Organització directores i documents disc dur</a></li>

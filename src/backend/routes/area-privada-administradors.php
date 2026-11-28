@@ -331,8 +331,10 @@ $routes = [
     APP_GESTIO . $url['documentacio_tecnica'] => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . 'index.php'),
 
     // 1. Sistema i fedora
-    APP_GESTIO . $url['documentacio_tecnica'] . "/equip/dades-basiques" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . 'equip/dades-basiques.php'),
-    APP_GESTIO . $url['documentacio_tecnica'] . "/equip/inventari-sistema" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . 'equip/inventari-sistema.php'),
+    APP_GESTIO . $url['documentacio_tecnica'] . "/sistema-operatiu" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . '01_sistema_operatiu/index.php'),
+    APP_GESTIO . $url['documentacio_tecnica'] . "/entorn-grafic" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . '02_entorn_grafic/index.php'),
+       APP_GESTIO . $url['documentacio_tecnica'] . "/terminal" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . '03_terminal/index.php'),
+        APP_GESTIO . $url['documentacio_tecnica'] . "/xarxa-seguretat" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . '04_xarxa_seguretat/index.php'),
 
     // 2. Directoris i dades
     APP_GESTIO . $url['documentacio_tecnica'] . "/documents-disc-dur" => route(APP_INTRANET_DIR . APP_DOCUMENTACIO_TECNICA . 'documents_disc_disc.php'),
